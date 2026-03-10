@@ -753,6 +753,21 @@ const COMP_DATA = {
           ["7th","16d6","30 ft","200 ft"],["8th","18d6","30 ft","200 ft"],
           ["9th","20d6","40 ft","250 ft"],
         ]
+      },
+      "Infusion": {
+        columns: ["Slot","Weapon Die","Duration"],
+        notes: "Channel the spell into a held weapon. The weapon delivers the Cognition's energy on each strike for the duration. The Verum Effect triggers on every hit.\n\nComplement Damage Rule: If a Complement Cognition's effect would normally add damage, it adds 1 extra damage die of that type regardless of what the Complement's standard entry states. Complement damage is never recalculated or upcast — always 1 die at the current Weapon Die size.",
+        rows: [
+          ["1st","1d6","1 attack"],
+          ["2nd","1d6","3 attacks"],
+          ["3rd","1d8","1 minute"],
+          ["4th","1d8","1 minute"],
+          ["5th","1d10","10 minutes"],
+          ["6th","1d10","10 minutes"],
+          ["7th","1d12","1 hour"],
+          ["8th","1d12","1 hour"],
+          ["9th","1d12","8 hours"],
+        ]
       }
     }
   },
@@ -761,35 +776,47 @@ const COMP_DATA = {
     subtypes: {
       "Self": {
         columns: ["Slot","Healing","Buff Duration"],
-        notes: "Affects only the caster. No roll required. All Verum Effects apply at full potency — including those tied to the caster's own body, mind, or soul.",
+        notes: "Affects only the caster. No roll required. Resolves immediately on cast. All Verum Effects apply at full potency — including those tied to the caster's own body, mind, or soul. The only subtype capable of internal Verum Effects and the only one whose buff duration can reach Until Dispelled.",
         rows: [
-          ["1st","2d8 + Mod","1 minute"],["2nd","3d8 + Mod","10 minutes"],
-          ["3rd","4d8 + Mod","10 minutes"],["4th","5d8 + Mod","1 hour"],
-          ["5th","6d8 + Mod","1 hour"],["6th","8d8 + Mod","8 hours"],
-          ["7th","10d8 + Mod","8 hours"],["8th","12d8 + Mod","24 hours"],
-          ["9th","14d8 + Mod","Until dispelled"],
+          ["1st","1d8 + Mod","1 minute"],
+          ["2nd","2d8 + Mod","10 minutes"],
+          ["3rd","3d8 + Mod","10 minutes"],
+          ["4th","4d8 + Mod","1 hour"],
+          ["5th","5d8 + Mod","1 hour"],
+          ["6th","6d8 + Mod","8 hours"],
+          ["7th","8d8 + Mod","8 hours"],
+          ["8th","10d8 + Mod","24 hours"],
+          ["9th","12d8 + Mod","Until dispelled"],
         ]
       },
       "Ally": {
         columns: ["Slot","Healing / Target","Range","Targets","Buff Duration"],
-        notes: "Affects willing creatures within range. No roll required. Full healing to each target. Verum Effects apply only if they can logically affect an external recipient — effects tied to the caster's own internal state do not transfer.",
+        notes: "Delivers the spell to one or more willing creatures. No roll required. Full healing and Verum Effect to each named target. Verum Effects that reference internal states do not transfer — only effects that can logically affect an external recipient apply.",
         rows: [
-          ["1st","1d8 + Mod","30 ft","1","1 round"],["2nd","2d8 + Mod","30 ft","1","1 round"],
-          ["3rd","3d8 + Mod","60 ft","2","1 minute"],["4th","4d8 + Mod","60 ft","2","1 minute"],
-          ["5th","5d8 + Mod","90 ft","3","10 minutes"],["6th","6d8 + Mod","90 ft","3","10 minutes"],
-          ["7th","8d8 + Mod","120 ft","4","1 hour"],["8th","10d8 + Mod","120 ft","4","1 hour"],
+          ["1st","1d8 + Mod","30 ft","1","1 round"],
+          ["2nd","2d8 + Mod","30 ft","1","3 rounds"],
+          ["3rd","3d8 + Mod","60 ft","2","1 minute"],
+          ["4th","4d8 + Mod","60 ft","2","10 minutes"],
+          ["5th","5d8 + Mod","90 ft","3","10 minutes"],
+          ["6th","6d8 + Mod","90 ft","3","1 hour"],
+          ["7th","8d8 + Mod","120 ft","4","1 hour"],
+          ["8th","10d8 + Mod","120 ft","4","8 hours"],
           ["9th","12d8 + Mod","150 ft","5","8 hours"],
         ]
       },
       "Aura": {
-        columns: ["Slot","Healing / Ally","Radius","Buff Duration"],
-        notes: "Affects all allies within radius, centered on the caster.",
+        columns: ["Slot","Radius","Duration"],
+        notes: "Projects a field of magical presence centered on the caster. Any creature within the radius is under its effect for as long as they remain inside. When the duration ends, all effects end immediately. If the Verum Effect involves a quantity, use the value specified by the Cognition's Aura entry.",
         rows: [
-          ["1st","1d4","10 ft","1 round"],["2nd","1d4 + Mod","10 ft","1 minute"],
-          ["3rd","2d4","15 ft","1 minute"],["4th","2d4 + Mod","15 ft","10 minutes"],
-          ["5th","3d4","20 ft","10 minutes"],["6th","3d4 + Mod","20 ft","1 hour"],
-          ["7th","4d4","25 ft","1 hour"],["8th","4d4 + Mod","25 ft","8 hours"],
-          ["9th","5d4 + Mod","30 ft","8 hours"],
+          ["1st","10 ft","1 round"],
+          ["2nd","10 ft","3 rounds"],
+          ["3rd","15 ft","1 minute"],
+          ["4th","15 ft","10 minutes"],
+          ["5th","20 ft","10 minutes"],
+          ["6th","20 ft","1 hour"],
+          ["7th","25 ft","1 hour"],
+          ["8th","25 ft","8 hours"],
+          ["9th","30 ft","Until dispelled"],
         ]
       }
     }
