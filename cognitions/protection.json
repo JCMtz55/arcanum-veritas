@@ -1,0 +1,99 @@
+{
+  "id": "protection",
+  "name": "Protection",
+  "icon": "🛡️",
+  "opposing": "vulnerability",
+  "description": "Defense, Guardianship, Shielding, Safety, Endurance.",
+  "savingThrow": "Constitution",
+  "damageType": "Force",
+
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Guardian's Shell",
+        "description": "Create an arcane barrier to absorb damage — granting scaling temporary HP, damage resistance, and eventually reflecting resisted damage back at attackers as force.",
+        "tiers": [
+          "You or one ally within 30 feet gains temporary hit points equal to 10 × the spell slot level used.",
+          "The target instead gains temp HP equal to 20 × the spell slot level, and resistance to one damage type of your choice for 1 round.",
+          "Resistance extends to two damage types, and the temp HP increases to 30 × the spell slot level.",
+          "The shell reflects incoming damage of the resisted type back at the attacker — the attacker takes 1d6 force damage per spell slot level used (Constitution save halves)."
+        ]
+      },
+      {
+        "name": "Impenetrable Will",
+        "description": "Your protection weaves into the mind and soul — granting condition advantage, then immunity, and eventually a once-per-rest Legendary Resistance for one chosen ally.",
+        "tiers": [
+          "Choose one condition (Frightened, Charmed, or Stunned) — the target gains advantage on saving throws against it for 1 minute.",
+          "The target is immune to the chosen condition for 1 minute.",
+          "You may target two conditions — immunity applies to both for 1 minute.",
+          "Once per long rest, you may grant one affected ally Legendary Resistance — they may choose to automatically succeed on one saving throw before the effect ends."
+        ]
+      },
+      {
+        "name": "Ward of the Guardian",
+        "description": "Mark an ally for divine protection — imposing disadvantage on attackers, halving damage on hits, and eventually granting critical hit immunity and automatic save successes each round.",
+        "tiers": [
+          "Designate one ally within 30 feet — attack rolls against them are made at disadvantage until the start of your next turn.",
+          "If an attacker hits despite the ward, the target takes half damage and cannot suffer Wounds from that hit.",
+          "You may mark two allies simultaneously, and each gains +2 AC for the duration.",
+          "Allies under your ward are immune to critical hits and may automatically succeed on one saving throw per round — you choose which save when it occurs."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Protective Pulse",
+        "description": "Repel harm from all nearby — boosting AC, granting half cover, pushing enemies prone, and eventually dispelling magical effects targeting your allies within the radius.",
+        "tiers": [
+          "When cast, allies within 10 feet gain +1 AC and cannot suffer Wounds until the start of your next turn.",
+          "Radius increases to 20 feet, the AC bonus increases to +2, and allies gain half cover against ranged attacks.",
+          "Enemies in the area must succeed on a Strength save or be pushed 15 feet and knocked prone.",
+          "The pulse additionally dispels magical effects of 5th level or lower targeting your allies within the radius."
+        ]
+      },
+      {
+        "name": "Bulwark of Faith",
+        "description": "Your belief creates an implacable wall — scaling HP per slot level, granting resistance behind it, and eventually shaping into a dome that grants immunity to magic missiles, disintegration, and death effects.",
+        "tiers": [
+          "Create a 10-foot × 10-foot magical wall with 50 HP per spell slot level used, providing total cover until broken or until the end of your next turn.",
+          "Wall HP increases to 75 HP per spell slot level, and creatures behind it gain resistance to all damage.",
+          "The wall moves with you or a chosen ally, and reflects psychic, necrotic, or force damage back at the source if it is destroyed.",
+          "Wall HP increases to 100 HP per spell slot level and may be shaped into a 30-foot radius dome or 10-foot radius sphere, granting creatures inside immunity to magic missiles, disintegration, and death effects."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Retribution Ward",
+      "type": "Offensive",
+      "description": "Strike the protected and the protection strikes back — a ward discharging force damage at every attacker who dares hit the warded creature.",
+      "effect": "When the primary effect resolves, place a Retribution Ward on one creature within 30 feet for 1 minute. The next time that creature is hit by a melee or ranged attack, the attacker takes force damage equal to your spellcasting modifier + your proficiency bonus as the ward discharges.",
+      "upgrades": [
+        "The ward discharges on the first two attacks that hit rather than just the first, and the force damage increases to twice your spellcasting modifier + your proficiency bonus.",
+        "The ward discharges on every attack that hits for 1 minute, dealing force damage equal to your spellcasting modifier + your proficiency bonus each time — protection becoming a persistent deterrent against striking the warded creature."
+      ]
+    },
+    {
+      "name": "Fortify",
+      "type": "Supportive",
+      "description": "A moment of protection hardens those nearby — granting temporary HP, Constitution save advantage, and eventually immunity to the Frightened condition.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus and advantage on their next Constitution saving throw before the start of your next turn.",
+      "upgrades": [
+        "The temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the advantage extends to all Constitution saving throws until the start of your next turn.",
+        "You may choose two allies to receive this benefit, and each is also immune to the Frightened condition until the start of your next turn — protection fortifying not just the body but the nerve."
+      ]
+    },
+    {
+      "name": "Repel",
+      "type": "Control",
+      "description": "Protection does not just hold — it pushes back, forcing the nearest enemy away from the protected target and eventually making approach feel actively impossible.",
+      "effect": "When the primary effect resolves, the nearest enemy within 30 feet of the primary target must succeed on a Strength saving throw against your Verum DC or be pushed 15 feet directly away from the target.",
+      "upgrades": [
+        "On a failed save, the enemy is also knocked prone after being pushed — the force of repulsion taking their footing with it.",
+        "You may choose up to two enemies within 30 feet to be affected, and creatures that fail are also unable to move toward the protected target until the end of their next turn — the ward making approach feel actively painful."
+      ]
+    }
+  ]
+}

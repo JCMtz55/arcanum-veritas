@@ -1,0 +1,97 @@
+{
+  "id": "silence",
+  "name": "Silence",
+  "icon": "🤫",
+  "opposing": "sound",
+  "description": "Stillness, Suppression, Nullification, Erasure, Prohibition.",
+  "savingThrow": "Intelligence",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "control": [
+      {
+        "name": "Null Voice",
+        "description": "You do not stop the words — you remove the space where words are allowed to exist, escalating from one-round silence to the permanent Devoiced condition where the target cannot be heard or remembered when they speak.",
+        "tiers": [
+          "On a failed save, the target is Silenced until the end of their next turn — they cannot speak, shout, or cast spells with verbal components.",
+          "The Silenced condition persists for 1 minute. The target may repeat the Constitution saving throw at the end of each of their turns, ending the effect on a success.",
+          "On a failed initial save, the target also cannot communicate telepathically and cannot benefit from any spell or ability that requires sound to function — including Command, Dissonant Whispers, bardic performance, and spoken prayer.",
+          "The target becomes Devoiced — they cannot be heard regardless of volume, cannot be remembered when they speak (listeners retain the impression that someone said something but cannot recall content or source), and automatically fail all Charisma-based checks that involve speech. Only Greater Restoration or divine intervention removes the Devoiced condition."
+        ]
+      },
+      {
+        "name": "Zone of Unmaking",
+        "description": "In this space the permission to be heard has been revoked — suppressing verbal spells, auras, and commands before expanding into a Dome of Silence that severs all audible presence from planar detection.",
+        "tiers": [
+          "A 10-foot radius zone of silence appears centered on a point within range. All creatures inside have disadvantage on Perception checks involving hearing and cannot cast spells with verbal components while within the zone.",
+          "The zone expands to 20 feet and additionally suppresses bardic inspiration, aura-based abilities, and spoken commands — these features cannot be activated or received while inside the area.",
+          "Creatures that begin their turn inside the zone must succeed on a Constitution saving throw against your Verum DC or be Silenced for 1 round, even if they were not previously affected.",
+          "Once per long rest, expand the zone into a Dome of Silence — a 30-foot radius hemisphere lasting 1 minute. Within it: all sound is completely negated; all verbal magic automatically fails with no saving throw; and creatures inside are invisible to magical detection across planar boundaries, as they cannot be named or heard from beyond the Dome's edge."
+        ]
+      },
+      {
+        "name": "Muzzle the Mind",
+        "description": "The silence finds the thought before it becomes the word — blocking telepathy, dissolving spell access at random, and eventually permanently severing one psychic or mental bond the target possesses.",
+        "tiers": [
+          "On a failed save, the target cannot speak or communicate telepathically for 1 minute — the suppression reaching past the voice into the mechanism that generates speech.",
+          "The target also cannot cast any spell with a verbal or mental focus and cannot use legendary actions that involve speech or spellcasting for the duration.",
+          "While affected, the target loses access to one randomly determined spell or feature at the start of each of their turns for the duration, regaining it when the effect ends.",
+          "You may permanently sever one psychic, telepathic, or mental link the target possesses — a familiar bond, a warlock's pact link, a shared hive-mind consciousness, or a similar connection. The severed link cannot be restored by any means short of divine magic or Wish. The target is aware the link is gone but cannot determine how or by whom it was severed."
+        ]
+      },
+      {
+        "name": "Censor Reality",
+        "description": "You erase the sound of what happened — making spoken events difficult to recall, impossible to repeat, and eventually wiping a full moment from all non-divine observers before invoking Perfect Silence across an entire mile.",
+        "tiers": [
+          "All sound produced by the triggering event is retroactively silenced — creatures present must succeed on a Wisdom saving throw against your Verum DC or be unable to clearly recall what was said or heard, retaining only a vague impression.",
+          "Any creature that attempts to describe, repeat, or record the censored event verbally finds themselves tongue-tied — the words fail to form, and Charisma checks made to communicate the information automatically fail until the end of the scene.",
+          "You may designate one full round of events (6 seconds) to be forgotten by all non-divine observers in the area who fail an Intelligence saving throw against your Verum DC. They retain a gap in their memory but cannot identify what filled it.",
+          "Once per long rest, invoke Perfect Silence — all sound within a 1-mile radius ceases for 1 minute. Spells of 6th level or lower with audible components automatically fail; all creatures in the radius are Deafened and Silenced; and they must succeed on a Constitution saving throw at the end of each of their turns or remain so for the full duration."
+        ]
+      },
+      {
+        "name": "Still the World",
+        "description": "The universe heeds the silence — interrupting verbal spells as a reaction, nullifying casting ambientally, and eventually activating Absolute Silence where three creatures are locked out of speech and spellcasting each turn.",
+        "tiers": [
+          "As a reaction to a creature casting a spell or taking a verbal action within 30 feet, you may interrupt it — the creature must succeed on a Constitution saving throw against your Verum DC or the action is lost, the spell slot expended without effect.",
+          "You may nullify one spell per round that has a verbal component and is cast within 60 feet, without expending your reaction — the suppression becoming ambient rather than reactive.",
+          "When you cast a spell using this effect, choose one creature within range. For 1 round, they cannot cast spells, speak, or use any Charisma-based feature — even through magic items or innate abilities — unless they succeed on a Constitution saving throw against your Verum DC.",
+          "Once per long rest, activate Absolute Silence for 1 minute. While active: you may suppress one ongoing spell per round as a free action; you designate up to three creatures who cannot cast, speak, or use Charisma-based features unless they succeed on a Constitution saving throw at the start of each of their turns; and you are immune to being targeted by any spell or ability with a verbal component."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Muted Impact",
+      "type": "Offensive",
+      "description": "The strike lands without a sound — the target opening their mouth as nothing useful comes out, unable to call for help, signal allies, or activate command words.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target is silenced until the start of your next turn — they cannot call for help, signal allies, activate command words, or cast spells with verbal components.",
+      "upgrades": [
+        "The silence persists for 1 minute, and the target must succeed on a Constitution saving throw against your Verum DC at the end of each of their turns to end it early. While silenced this way, they also cannot activate magic items that require a spoken command or activation word.",
+        "The silence also suppresses the target's aura-based features for the duration — passive effects that radiate from their presence (such as auras of courage, devotion, or hatred) are suspended while they cannot speak, as the Cognition treats the voice as the mechanism of that radiation."
+      ]
+    },
+    {
+      "name": "Still Presence",
+      "type": "Supportive",
+      "description": "The Cognition folds silence around you like a second skin — granting Stealth advantage, soundless movement, and eventually letting you cast verbal spells without any audible trace.",
+      "effect": "When the primary effect resolves, you gain advantage on Stealth checks until the start of your next turn, your movement produces no sound, and you are immune to effects that require hearing the caster (such as Dissonant Whispers or auditory fear effects) for the same duration.",
+      "upgrades": [
+        "The personal silence persists for 1 minute and additionally makes you immune to being detected by hearing-based features — tremorsense that relies on sound, echolocation, and similar senses cannot locate you while the effect is active.",
+        "While the silence is active, you may cast spells with verbal components silently — the Cognition handling the verbal requirement internally, leaving no audible trace that a spell was cast. Observers with no other means of detecting spellcasting cannot identify that you are the source of any magical effect."
+      ]
+    },
+    {
+      "name": "Dead Air",
+      "type": "Control",
+      "description": "The point of impact becomes a place where sound goes to stop — verbal components failing within the area and eventually the zone becoming self-sustaining and resistant to verbal magic from any direction.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a 15-foot radius of suppressed sound appears centered on the point of impact, lasting until the end of your next turn. Within this area, verbal components automatically fail and audible communication is impossible.",
+      "upgrades": [
+        "The Dead Air persists for 1 minute and its radius expands to 30 feet. Creatures that attempt to cast a spell with a verbal component inside the area must succeed on an Intelligence saving throw against your Verum DC or the spell fails.",
+        "The Dead Air becomes self-sustaining — it does not require Concentration and persists for the full minute regardless. Any spell cast into the Dead Air from outside that has a verbal component must pass the same Intelligence saving throw to take effect — the zone actively resisting verbal magic from any direction."
+      ]
+    }
+  ]
+}

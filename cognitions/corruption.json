@@ -1,0 +1,100 @@
+{
+  "id": "corruption",
+  "name": "Corruption",
+  "icon": "🦠",
+  "opposing": "soul",
+  "description": "Decay, Greed, Soul Unraveling, Spiritual Erosion, Temptation.",
+  "savingThrow": "Charisma",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Curse Catalyst",
+        "description": "Your corruption ignites curses like kindling.",
+        "tiers": [
+          "If the spell deals damage and the target is cursed, it deals additional necrotic damage equal to your Proficiency Bonus × 1d6.",
+          "If the target is affected by 2 or more curses, they must succeed on a Charisma save or be Staggered — losing their reaction until the start of their next turn.",
+          "A cursed creature that fails a save against this effect automatically suffers 1 Wound.",
+          "If a cursed target dies from your effect, there is a 50% chance they rise as a Wretched Shade under your control (CR = half their level), lasting until your next long rest."
+        ]
+      }
+    ],
+    "supportive": [],
+    "control": [
+      {
+        "name": "Soul Spoil",
+        "description": "You infect the spirit, not just the flesh.",
+        "tiers": [
+          "On a failed Corruption Saving Throw, the creature gains +1 Corruption Point.",
+          "Additionally, the target's Honor and Morality modifiers are reduced by 1d4 until their next long rest.",
+          "On a failed Corruption Save, you may also apply a Wicked Curse you know without expending a spell slot or components.",
+          "If the target has 5 or more Corruption Points, they lose immunity to mind-affecting and curse effects, and their soul becomes visible to scrying as a burning fracture of light."
+        ]
+      },
+      {
+        "name": "Vile Resonance",
+        "description": "You awaken forbidden echoes in the soul.",
+        "tiers": [
+          "If the target is already cursed or has 1 or more Corruption Points, they suffer disadvantage on Wisdom saving throws for the spell's duration.",
+          "If the target is currently affected by a Vile Emotion, their Corruption Save DC increases by 2 for the next 10 minutes.",
+          "Creatures with 3 or more Corruption Points automatically suffer 1 level of Dream Exhaustion when affected by this effect.",
+          "When a creature fails a save against this effect, apply a Rebound Curse of their Dominant Vile Emotion — even if they do not have one yet."
+        ]
+      },
+      {
+        "name": "Whispering Sin",
+        "description": "You sow the temptation of corruption through whispers.",
+        "tiers": [
+          "On a failed save, the target is haunted by whispers — until their next long rest, they must subtract their current Corruption Point total from each d20 roll they make.",
+          "Choose a Vice (envy, ambition, wrath, etc.) — the target must succeed on a Wisdom save or act according to that Vice when next presented with a moral choice.",
+          "The effect's area becomes Corruption-linked — any divine healing cast within the area is halved, and the caster of that healing takes psychic damage equal to half the healing prevented.",
+          "Holy effects are reversed within the area for 1 minute — Aura of Courage becomes Aura of Fear, Sanctuary causes vulnerability instead of protection, and similar inversions apply at DM's discretion."
+        ]
+      },
+      {
+        "name": "Dark Soul",
+        "description": "You make the soul choose defilement or death.",
+        "tiers": [
+          "On a failed Wisdom save, the target suffers disadvantage on Morality checks for 24 hours.",
+          "If they already have 1 or more Corruption Points, they automatically fail their next Honor Check triggered by a curse or soul-based effect.",
+          "The effect causes a spiritual severance — the target rolls 1d6. On a 1 or 2, their alignment shifts one step toward Neutral Evil until reversed through Atonement or confession to Null.",
+          "Once per long rest, if the target has 3 or more Corruption Points on a failed save: they gain +1 Corruption Point, are bound to your Dominant Vile Emotion aura, and if they die under this effect their soul cannot be resurrected without Wish or True Resurrection granted by a deity."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Taint",
+      "type": "Offensive",
+      "description": "The spell leaves more than a wound — it leaves a stain.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target must succeed on a Corruption Saving Throw against your Verum DC or gain +1 Corruption Point, and they have disadvantage on their next Corruption Save before the end of your next turn.",
+      "upgrades": [
+        "Level 5+: The Corruption Point is applied automatically on a failed save with no secondary save required, and the disadvantage extends to all Corruption Saves until the end of your next turn.",
+        "Level 11+: The target gains +1 Corruption Point regardless of the save result, and if they already have 3 or more Corruption Points, they also suffer 1 level of Dream Exhaustion."
+      ]
+    },
+    {
+      "name": "Vile Sympathy",
+      "type": "Supportive",
+      "description": "Corruption feeds those who understand it.",
+      "effect": "When the primary effect resolves, for each corrupted creature (1 or more Corruption Points) within 30 feet, you gain temporary hit points equal to your Charisma modifier and advantage on your next Charisma saving throw before the start of your next turn.",
+      "upgrades": [
+        "Level 5+: The temporary HP per corrupted creature increases to your Charisma modifier + your proficiency bonus, and the advantage extends to all Charisma saving throws until the start of your next turn.",
+        "Level 11+: You may also reduce one corrupted creature's Corruption Point total by 1 to immediately regain a spell slot of 3rd level or lower — absorbing their spiritual decay as raw magical fuel."
+      ]
+    },
+    {
+      "name": "Corrupt Ground",
+      "type": "Control",
+      "description": "The soul of the place is poisoned.",
+      "effect": "When the primary effect hits or a target fails their saving throw, the ground in a 15-foot radius around them becomes spiritually tainted for 1 minute. Within this area, divine healing is halved, and the DC of all Corruption Saving Throws increases by 2.",
+      "upgrades": [
+        "Level 5+: Creatures that start their turn within the tainted ground must succeed on a Charisma saving throw or have disadvantage on their next Wisdom saving throw.",
+        "Level 11+: The radius increases to 30 feet, and removing the corruption requires a successful DC 20 Divine Intervention check or the casting of Hallow at 5th level or higher."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "speed",
+  "name": "Speed",
+  "icon": "⚡",
+  "opposing": "stagnation",
+  "description": "Velocity, Acceleration, Momentum, Reaction, Tempo.",
+  "savingThrow": "Dexterity",
+  "damageType": "Bludgeoning",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Momentum Surge",
+        "description": "Every casting is a launch — generating free movement, bonus damage with a push, and eventually a full additional action as the momentum of the cast carries directly into the follow-through.",
+        "tiers": [
+          "After casting the effect, you may immediately move up to 15 feet without provoking opportunity attacks from any creature.",
+          "Your next melee or spell attack before the end of your turn deals +5d8 bonus damage and forces the target to succeed on a Strength saving throw against your Verum DC or be pushed 10 feet in a direction of your choice.",
+          "The free movement increases to 30 feet, and the next action or spell you take can be made as a bonus action if it is 1st level or lower.",
+          "You gain one additional action on this turn, which may be used to Dash, Disengage, make one weapon attack, or cast a spell of 3rd level or lower. This additional action cannot itself generate another additional action."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Velocity Field",
+        "description": "Reality stretches to match your speed and invites allies to match it too — boosting movement, AC, and eventually letting everyone in range Dash as a bonus action and ignore cover on their ranged attacks.",
+        "tiers": [
+          "You and all allies within 10 feet gain +10 feet of movement speed until the end of the round.",
+          "Allies within the zone also gain +1 to AC and Dexterity saving throws as the accelerated tempo makes them fractionally harder to pin down.",
+          "The zone expands to 30 feet, and hostile ranged attacks made against creatures inside it are made at disadvantage — the defenders moving through their own accelerated time.",
+          "All creatures inside the field may Dash as a bonus action on their turn and take no damage from falling while within the field's radius. Additionally, ranged attacks made from inside the field ignore cover and may curve around obstacles of 5 feet or less."
+        ]
+      },
+      {
+        "name": "Reflex Twist",
+        "description": "You move between the ticks of the clock — rerolling saves, seizing the top of initiative, gaining Evasion, and eventually intercepting single-target spells aimed at allies within 30 feet.",
+        "tiers": [
+          "You may reroll one Dexterity saving throw or initiative roll made this round, taking the new result.",
+          "You may choose to act at the top of the initiative order until the end of your next turn — the Cognition briefly rewriting your position in the sequence of events.",
+          "You gain Evasion (on a successful Dex save against a damaging effect, you take no damage; on a failure, you take half). Once per round you may react before a creature's action resolves if you are within 10 feet of them — repositioning, readying a block, or making one melee attack before their action takes effect.",
+          "Once per round, you may intercept a single-target spell or ability directed at an ally within 30 feet. Choose one: redirect it to another valid target, take its effects yourself, or attempt to nullify it entirely with a contested Dexterity check against the attacker's spellcasting ability check."
+        ]
+      },
+      {
+        "name": "Blinding Acceleration",
+        "description": "You are not where they are looking — blurring your form, ignoring opportunity attacks, passing through hazard zones untriggered, and eventually moving as a light echo where all attacks against you are made at disadvantage.",
+        "tiers": [
+          "You gain blurred movement for 1 round — attackers that rely on sight make attack rolls against you at disadvantage.",
+          "Your movement becomes untraceable for 1 minute — you may move through enemy spaces without provoking opportunity attacks, and creatures do not have the opportunity to ready actions triggered by your movement.",
+          "While moving, you are immune to effects that trigger on movement — hazard zones such as Spike Growth, Booming Blade, magical tripwires, and terrain-based traps do not trigger as you pass through them.",
+          "For 1 minute, you move as a light echo: all attacks against you are made at disadvantage; you may move up to half your speed as a reaction to any spell or attack targeting you; and you leave afterimages in each space you vacate — attackers have a 15% chance to miss outright (roll a d20; on a 1–3, the attack hits an afterimage instead)."
+        ]
+      },
+      {
+        "name": "Fast Steps",
+        "description": "You steal moments from the timeline — gaining an extra bonus action, an extra reaction, a condition delay, and eventually Speed-Flicker where you take a Haste action every turn and cannot be surprised.",
+        "tiers": [
+          "After casting the effect, you may immediately take one additional bonus action — any bonus action available to you, used before anyone else reacts to what you just did.",
+          "Once per round, you may take one additional reaction, even if you have already used your reaction this round.",
+          "You may delay the onset of one condition by 1 round — the Speed Cognition buying you a brief window before blindness, paralysis, or even the first failed death saving throw takes hold.",
+          "Once per long rest, enter a Speed-Flicker for 1 minute. While active: you take one additional Haste action per turn (attack, Dash, Disengage, or Hide only); you automatically succeed on Dexterity saving throws; and you cannot be surprised, flanked, or caught flat-footed by any means."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Kinetic Impact",
+      "type": "Offensive",
+      "description": "The spell arrives with everything the caster's velocity has been building — pushing the target back and eventually stripping their reaction as the speed of impact disrupts everything that follows.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target is pushed 10 feet in a direction of your choice and must succeed on a Strength saving throw against your Verum DC or be knocked prone.",
+      "upgrades": [
+        "The push increases to 20 feet, and if the target collides with a solid surface they take 2d6 bludgeoning damage. Creatures that succeed the Strength save still move 5 feet — the momentum partial even on a success.",
+        "The push increases to 30 feet and the target must succeed on a Dexterity saving throw against your Verum DC or also lose their reaction until the start of their next turn — the speed of impact disrupting their ability to respond to anything that follows."
+      ]
+    },
+    {
+      "name": "Slipstream Blessing",
+      "type": "Supportive",
+      "description": "A fraction of your speed detaches and finds someone who needs it more — granting bonus movement and a free Disengage to one or two allies.",
+      "effect": "When the primary effect resolves, one ally within 30 feet gains bonus movement equal to your proficiency bonus × 5 feet until the start of your next turn. For the same duration, that ally may Disengage as a free action once.",
+      "upgrades": [
+        "You may apply this benefit to two allies simultaneously, and the bonus movement increases to your proficiency bonus × 10 feet.",
+        "Each ally receiving the blessing also gains advantage on the next Dexterity saving throw they make before the effect ends — the borrowed speed making them briefly as elusive as the caster."
+      ]
+    },
+    {
+      "name": "Lag Field",
+      "type": "Control",
+      "description": "Speed withdrawn from an area leaves something worse than stillness — enemy movement halved, Dash wasted on a failed save, and eventually ranged attacks from within the field made at disadvantage.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a 20-foot radius around the point of impact becomes a Lag Field until the end of your next turn. Enemy movement speeds are halved, and enemies that attempt to Dash must first succeed on a Dexterity saving throw against your Verum DC or the action is wasted.",
+      "upgrades": [
+        "The Lag Field persists for 1 minute and its radius increases to 30 feet. Enemies within it cannot take reactions while inside the field, the lag removing their capacity to respond to events they are moving too slowly to anticipate.",
+        "The Lag Field inverts ranged attacks from within — creatures inside the field firing outward have their ranged attack rolls made at disadvantage, the lag affecting not just their movement but the velocity of everything they launch. Allies are immune to all Lag Field effects."
+      ]
+    }
+  ]
+}

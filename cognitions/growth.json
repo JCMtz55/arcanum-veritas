@@ -1,0 +1,98 @@
+{
+  "id": "growth",
+  "name": "Growth",
+  "icon": "🌱",
+  "opposing": "decay",
+  "description": "Evolution, Maturation, Prosperity, Vitality, Expansion.",
+  "savingThrow": "Constitution",
+
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Accelerate",
+        "description": "You fast-forward nature's rhythm — granting short rest benefits, additional features, and eventually an Evolved State that pushes the body past its natural ceiling.",
+        "tiers": [
+          "Choose a creature or plant — it immediately gains the benefit of a short rest for one feature (one ability recharge, or regains one Hit Die).",
+          "The target gains one additional Hit Die, one additional attack, or a temporary feature (climb speed, resistance to one damage type, or enhanced reach +5 ft) for 1 minute.",
+          "You may accelerate magical growth — spells like Plant Growth, Regenerate, or Create Homunculus function in one-tenth their normal cast time and double their duration.",
+          "The target enters an Evolved State for 1 minute — gaining +2 to one ability score, +1 AC, and one chosen mutation: climbing limbs, hardened skin (resistance to one physical damage type), one extra attack, or darkvision 60 feet."
+        ]
+      },
+      {
+        "name": "Proliferate",
+        "description": "What thrives expands — spreading effects to additional targets and eventually chaining vital force to every ally within range.",
+        "tiers": [
+          "The spell or effect may affect one additional target within 10 feet.",
+          "Choose two additional targets within 30 feet, or have the effect repeat on the original target at the start of their next turn at half potency.",
+          "The effect spreads — up to four secondary creatures within 30 feet may benefit from a diluted version (half potency).",
+          "Trigger a Chain of Growth — the effect spreads to every ally within 60 feet with diminishing potency (−1 tier per jump). The chain lasts 1 minute."
+        ]
+      },
+      {
+        "name": "Reinforce",
+        "description": "You strengthen what already exists — layering temporary HP and AC until the target becomes something that does not move, does not yield, and does not fall.",
+        "tiers": [
+          "The target gains temporary hit points equal to your proficiency bonus × 2.",
+          "The target also gains +2 AC for 1 round and is immune to being shoved or grappled.",
+          "While Reinforced, the target has advantage on Constitution saving throws and their weapons count as magical.",
+          "The target becomes Fortified for 1 minute — immune to forced movement effects and critical hits, and automatically ends one negative condition of their choice at the start of each of their turns."
+        ]
+      },
+      {
+        "name": "Adaptive Bloom",
+        "description": "You trigger latent evolution to meet the threat — granting resistance, condition immunity, and environment-based features as the body adapts faster than the danger can keep up.",
+        "tiers": [
+          "The target gains resistance to the last damage type they took for 1 round.",
+          "Choose one condition (Frightened, Blinded, Poisoned, etc.) — the target gains immunity to it for 1 minute as their body adapts.",
+          "The target gains a feature based on their current environment — in water: swim speed and water breathing; in darkness: darkvision and blindsight 30 ft; in extreme heat or desert: exhaustion resistance and fire resistance.",
+          "The target undergoes a Mythic Bloom — choose two environmental features from above and additionally grant a Cognition-level mutation for 1 hour: an extra limb, temporary immunity to one spell school, or regeneration 5."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Multiply",
+        "description": "Life overcomes by quantity as well as quality — summoning vine creatures, duplicating effects, and eventually manifesting an independent clone that acts on its own.",
+        "tiers": [
+          "Summon 1d4 vine tendrils or CR 1/4 plant creatures that assist with non-combat tasks, distractions, or simple grappling for 1 minute.",
+          "Summon a Growth Clone — a simplified biological copy of a creature within 30 feet that mirrors its form, can take the Help action, and may mimic one cantrip the creature knows.",
+          "Duplicate an effect cast within the last round, targeting a different creature. The copy has half potency.",
+          "Manifest a clone of yourself or one ally for 1 minute — the clone uses bonus actions and reactions independently, shares HP with the original, and may cast one spell or make one attack per round as a free action."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Overgrowth Strike",
+      "type": "Offensive",
+      "description": "Growth seizes the moment of impact — vines erupting from the point of contact to Restrain the target before they can recover from the primary effect.",
+      "effect": "On a hit or failed saving throw against the primary effect, vines, roots, or biological tendrils erupt from the point of contact — the target must succeed on a Strength saving throw against your Verum DC or be Restrained until the end of their next turn.",
+      "upgrades": [
+        "On a failed save, the Restrained condition requires two consecutive Strength checks on separate turns to escape, and the vines spread — one creature of your choice within 5 feet of the target must also save or be Restrained.",
+        "The growth becomes semi-permanent — the Restrained condition persists until the target or an ally spends an action to tear the vines away (Strength check against your Verum DC), and while Restrained the target takes 1d6 piercing damage at the start of each of their turns as the growth tightens."
+      ]
+    },
+    {
+      "name": "Verdant Surge",
+      "type": "Supportive",
+      "description": "Growth spills where it is needed — vital energy touching an ally and briefly accelerating their recovery beyond what the moment would otherwise allow.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as the growth momentarily accelerates their recovery.",
+      "upgrades": [
+        "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains advantage on their next Constitution saving throw before the start of your next turn.",
+        "You may choose two allies to receive this benefit, and each also gains temporary hit points equal to your proficiency bonus on top of the healing — growth leaving behind more than it found."
+      ]
+    },
+    {
+      "name": "Entangle",
+      "type": "Control",
+      "description": "The ground answers the call — vegetation erupting in a radius around the target to Restrain those caught within it and slow everything that follows.",
+      "effect": "When the primary effect hits or a target fails their saving throw, vegetation, roots, or biological matter erupts in a 10-foot radius around the target — the area becomes difficult terrain for 1 minute. Each creature in the area must succeed on a Strength saving throw against your Verum DC or be Restrained until they succeed on a Strength check against your Verum DC at the start of their turn.",
+      "upgrades": [
+        "The radius increases to 20 feet, and creatures that escape the Restrained condition still treat the area as difficult terrain for the full duration.",
+        "The entanglement is self-sustaining — the difficult terrain and Restrained condition persist for the full minute without requiring your Concentration, as the growth continues on its own momentum."
+      ]
+    }
+  ]
+}

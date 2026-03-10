@@ -1,0 +1,99 @@
+{
+  "id": "toxin",
+  "name": "Toxin",
+  "icon": "🧪",
+  "opposing": "life",
+  "description": "Contamination, Venom, Debilitation, Corruption, Attrition.",
+  "savingThrow": "Constitution",
+  "damageType": "Poison",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Lingering Contagion",
+        "description": "The poison does not finish — it continues, repeating each turn with scaling damage and save penalties until Exhaustion and Injuries accumulate in those who cannot shake it.",
+        "tiers": [
+          "If the primary effect deals damage, the target takes an additional 6d6 poison damage at the start of their next turn as the toxin settles into the wound.",
+          "The lingering effect persists for 1 minute, repeating at the start of each of the target's turns. The target may repeat the Constitution saving throw at the end of each of their turns to end the effect early.",
+          "The ongoing poison damage increases to 8d10, and the target suffers a penalty equal to 1d4 to all saving throws and attack rolls while the contagion persists — the toxin degrading their capacity to resist anything.",
+          "Targets that fail their initial save also immediately gain one level of Exhaustion, and must make a Constitution saving throw at the start of each affected turn or take an Injury as the contagion reaches deeper tissue."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Virulent Spread",
+        "description": "The toxin finds the next host before the first one falls — chaining to nearby creatures, turning them into viral echoes, and eventually blooming into a persistent 20-foot hazard zone.",
+        "tiers": [
+          "If the target fails their saving throw, one creature within 5 feet of them must also make a Constitution saving throw or suffer the same Poisoned condition and any ongoing effects.",
+          "The spread range increases to 15 feet, and up to two additional creatures may be affected. Each creature that fails becomes a new potential vector.",
+          "Each creature that fails their save becomes a viral echo — at the start of their next turn, they involuntarily transmit half the poison damage they took to one creature within 10 feet of them, with no saving throw.",
+          "The original target becomes the center of a Toxic Bloom — a 20-foot radius hazard zone that persists for 1 minute. Any creature that enters the zone or starts their turn within it must succeed on a Constitution saving throw against your Verum DC or take 12d10 poison damage and gain the Poisoned condition."
+        ]
+      },
+      {
+        "name": "Systemic Collapse",
+        "description": "The body was on your side — it has changed its position, losing movement, concentration, and the ability to heal until wounds accumulate automatically with every action taken.",
+        "tiers": [
+          "On a failed save, the target has disadvantage on Constitution saving throws for 1 round — the toxin having compromised the very system responsible for resisting it.",
+          "The target also suffers −10 feet of movement speed and disadvantage on Strength-based checks and attack rolls as the toxin degrades muscular function alongside endurance.",
+          "While affected, the target cannot maintain Concentration on spells — any attempt to cast or sustain a concentration spell automatically fails. Additionally, they take 6d6 poison damage whenever they take an action.",
+          "For the duration (1 minute, Constitution save to end each turn), the creature cannot regain hit points by any means, cannot maintain Concentration, and automatically gains 1 Wound whenever they take 15 or more damage in a single turn. If they reach 0 HP while this effect is active, they immediately suffer an Injury."
+        ]
+      },
+      {
+        "name": "Rotting Vitality",
+        "description": "The medicine is the poison now — first blocking healing, then reversing it into damage, then weaponizing the very act of care against anyone who attempts to restore the marked target.",
+        "tiers": [
+          "Whenever the affected creature would be targeted by a healing effect, they must first succeed on a Constitution saving throw against your Verum DC or regain no hit points from that effect.",
+          "On a failed save against a healing effect, the healing is reversed — the creature takes poison damage equal to half the hit points the healing would have restored instead of gaining them.",
+          "The creature becomes toxin-marked for 1 minute. While marked, they cannot receive magical healing unless the caster of that healing succeeds on a spellcasting ability check against your Verum DC.",
+          "Healing is completely nullified for the duration. Any creature that attempts to magically heal the target takes 10d10 necrotic damage and must make a Constitution saving throw against your Verum DC or immediately roll on the Injury table — the toxin weaponizing the act of care itself."
+        ]
+      },
+      {
+        "name": "Neurotoxic Lock",
+        "description": "It begins with the feet and ends with everything — escalating from halved speed to Partial Paralysis, Staggered spellcasting, and eventually Total Lock that bypasses magical resistance to the Paralyzed condition.",
+        "tiers": [
+          "On a failed save, the target is Slowed — their movement speed is halved and they lose their reaction until the end of their next turn.",
+          "The Slowed condition escalates to Partial Paralysis — the target loses their reaction and may take only one action or bonus action per turn, not both.",
+          "At the start of each of their turns, the target must succeed on a Constitution saving throw against your Verum DC or be Staggered — unable to cast spells or use legendary actions for that turn.",
+          "The neurotoxin achieves Total Lock — on a failed Constitution saving throw, the target becomes Paralyzed. If they are already suffering a Wound or Injury when this triggers, they instead fall Unconscious for 1 round. Magical resistance to the Paralyzed condition does not apply while under the Neurotoxic Lock."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Venomous Residue",
+      "type": "Offensive",
+      "description": "The poison follows the spell in and does not follow it out — clinging to the wound and dealing recurring damage that rolls with advantage against already-Poisoned targets.",
+      "effect": "On a hit or failed saving throw against the primary effect, venom clings to the target — at the start of their next turn they take poison damage equal to your spellcasting modifier + your proficiency bonus. If the target is already Poisoned, this damage is rolled with advantage.",
+      "upgrades": [
+        "The residue persists for 1 minute, dealing damage at the start of each of the target's turns. The target may spend their action and succeed on a Constitution saving throw against your Verum DC to purge it early.",
+        "The residue also applies the Poisoned condition for the duration. While Poisoned this way, the target has disadvantage on Constitution saving throws, compounding with any existing penalties from other Toxin effects."
+      ]
+    },
+    {
+      "name": "Toxic Resilience",
+      "type": "Supportive",
+      "description": "You have been carrying this long enough that it cannot hurt you anymore — briefly metabolizing your own poison to grant immunity to the Poisoned condition and Constitution save advantage.",
+      "effect": "When the primary effect resolves, you gain immunity to the Poisoned condition and advantage on Constitution saving throws until the start of your next turn. If you are already Poisoned, the condition is instead suppressed for the same duration.",
+      "upgrades": [
+        "The immunity and advantage extend for 1 minute, and one ally within 30 feet who can see you gains the same benefit — the resilience spreading through proximity to the caster.",
+        "While the effect is active, any creature that attempts to Poison you or the affected ally must first succeed on a Constitution saving throw against your Verum DC or the attempt fails entirely — the toxin in your system recognizing and neutralizing the incoming one."
+      ]
+    },
+    {
+      "name": "Contaminated Ground",
+      "type": "Control",
+      "description": "The ground holds the poison after the spell forgets it — a self-sustaining contaminated zone where nonmagical antitoxins fail and the Poisoned condition cannot be removed until the target leaves.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a 15-foot radius around the point of impact becomes contaminated terrain for 1 minute. Creatures that end their turn within the area must succeed on a Constitution saving throw against your Verum DC or take 1d6 poison damage and gain the Poisoned condition until the end of their next turn.",
+      "upgrades": [
+        "The radius increases to 30 feet and the poison damage increases to 2d6. Creatures that are already Poisoned when they fail this save cannot remove the Poisoned condition by any means until they leave the contaminated area and succeed on a saving throw.",
+        "The contaminated terrain becomes self-sustaining — it does not require Concentration and persists for the full minute regardless. Additionally, nonmagical antitoxins and healing potions consumed within the area have no effect — the ambient contamination overwhelming them before they can act."
+      ]
+    }
+  ]
+}

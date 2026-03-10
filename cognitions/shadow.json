@@ -1,0 +1,101 @@
+{
+  "id": "shadow",
+  "name": "Shadow",
+  "icon": "🌑",
+  "opposing": "light",
+  "description": "Obscurity, Concealment, Mystery, Misdirection, Erasure.",
+  "savingThrow": "Wisdom",
+  "damageType": "Necrotic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Unseen Strike",
+        "description": "The blow arrives before your form does — dealing bonus necrotic damage from concealment, blinding the target, and eventually erasing your presence from their memory entirely.",
+        "tiers": [
+          "If you are hidden, invisible, or obscured when the attack is made, it deals an additional 1d6 necrotic damage, and the target has disadvantage on Perception checks until the end of their next turn.",
+          "The bonus damage increases to 2d6 necrotic. On a failed Wisdom saving throw, the target is also blinded until the end of their next turn — their mind's model of where you are proving fundamentally unreliable.",
+          "A successful hit also renders the target unable to speak or shout for 1 round — the strike suppressing not just their perception of you but their capacity to alert anyone to your presence.",
+          "On a hit, you may choose to erase your presence from the target's memory — they forget you were ever in the area until someone informs them otherwise or they succeed on a DC 18 Intelligence (Investigation) check. The memory does not return on its own."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Cloak of Veils",
+        "description": "You do not hide — you revise the answer to whether you were there, becoming lightly obscured, then heavily obscured, then invisible, then utterly undetectable by any magical or mundane means.",
+        "tiers": [
+          "When casting an effect, you become lightly obscured until the start of your next turn. If you are already in dim light or darkness, you also gain advantage on Stealth checks for the same duration.",
+          "While in dim light or darkness, you become heavily obscured — attackers effectively treat you as invisible — and you cannot be targeted by opportunity attacks while obscured this way.",
+          "You may become fully invisible until the end of your next turn, until you take damage, or until you cast another spell — whichever occurs first.",
+          "You enter Perfect Obscurity for 1 minute. While active: you leave no trace of passage; you cannot be detected by divination magic or magical sensors; and you are immune to Scrying, Truesight, and Faerie Fire — the Shadow Cognition contesting even the most thorough attempts to confirm your existence."
+        ]
+      },
+      {
+        "name": "Shadow Step",
+        "description": "The space between shadows is not distance — teleporting silently between dark places and eventually dragging an unwilling creature through the dark alongside you.",
+        "tiers": [
+          "As a bonus action, you may teleport up to 15 feet to an unoccupied space in dim light or darkness. This movement does not provoke opportunity attacks.",
+          "The teleport range increases to 30 feet. The departure and arrival are both silent, leaving no visual disturbance — no shimmer, no displaced air, no indication of which shadow you entered or exited.",
+          "If both origin and destination points are in shadow or dim light, the teleport leaves no trace whatsoever — Truesight and other magical detection methods cannot determine where you went or where you came from.",
+          "You may drag one unwilling creature with you into the teleport. They must succeed on a Wisdom saving throw against your Verum DC or be pulled through the shadow — arriving at your destination blinded and restrained until they escape (Strength DC equal to your Verum DC) or take damage."
+        ]
+      },
+      {
+        "name": "Flicker Illusion",
+        "description": "Your shadow has always been slightly ahead of you — a duplicate mimicking your silhouette that intercepts attacks, gains autonomy, and eventually becomes indistinguishable from you by anything short of Truesight.",
+        "tiers": [
+          "A shadow duplicate appears within 10 feet of you, mimicking your silhouette. All attack rolls against you are made at disadvantage until the start of your next turn.",
+          "The duplicate becomes semi-solid — once per round, when you would take damage from an attack, the duplicate may intercept it, halving the damage dealt to you before dissolving. It reforms at the start of your next turn.",
+          "The duplicate gains limited autonomy — on your turn, it may take the Help action, distract a creature (imposing disadvantage on their next attack or save), or trigger pressure-sensitive traps and mechanisms at a distance.",
+          "The duplicate becomes indistinguishable from you by mundane or magical observation short of Truesight. Once per round, you may swap places with it as a free action. Spells and abilities that target you have a 50% chance (roll a d6; on a 4–6) to strike the duplicate instead, which absorbs the effect entirely before dissolving."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Consuming Darkness",
+        "description": "You do not bring the darkness — you remind it that it was always there, expanding magical shadow into grasping limbs and eventually a Horizon of Black that negates all light and communication.",
+        "tiers": [
+          "When casting an effect, you may shroud a 10-foot radius in magical darkness that lasts until the start of your next turn. You can see normally within it.",
+          "The darkness muffles all sound — all creatures inside are deafened, and creatures without magical sight or echolocation are treated as blinded. The radius increases to 20 feet.",
+          "You animate the darkness into grasping shadow limbs — creatures inside must succeed on a Strength saving throw against your Verum DC at the start of each of their turns or become Restrained until the start of their next turn.",
+          "Once per long rest, cast a Horizon of Black — a 60-foot radius of absolute magical darkness lasting 1 minute. Within it: all light sources are negated; all nonmagical ranged attacks automatically miss; and creatures without the Shadow Cognition cannot teleport, cast light-based spells, or communicate verbally — their words absorbed by the dark before they reach anyone."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Veil of Passing",
+      "type": "Offensive",
+      "description": "The primary effect arrives wrapped in doubt — the target's awareness of the caster dimming and eventually losing track of their position entirely even in plain sight.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target has disadvantage on Perception checks to locate or identify the caster until the start of your next turn, as the Shadow Cognition softens the edges of the attack's point of origin in their memory.",
+      "upgrades": [
+        "The disadvantage extends to all Perception and Insight checks targeting the caster for 1 minute. If the caster moves more than 10 feet before the target's next turn, the target must succeed on a Wisdom saving throw against your Verum DC or lose track of their position entirely — treating the caster as hidden even if they are in plain sight.",
+        "On a failed Wisdom saving throw, the target additionally has disadvantage on saving throws against the caster's next effect — the shadow having already compromised their confidence in what they are perceiving, making the next threat harder to brace for."
+      ]
+    },
+    {
+      "name": "Shadow Mantle",
+      "type": "Supportive",
+      "description": "The casting pulls shadow around you like a held breath — granting Stealth advantage and light obscurement, and eventually letting you Hide as a bonus action regardless of cover.",
+      "effect": "When the primary effect resolves, you gain advantage on the next Stealth check you make before the start of your next turn, and you become lightly obscured until you are hit by an attack or until the start of your next turn, whichever comes first.",
+      "upgrades": [
+        "The mantle persists for 1 minute. While lightly obscured this way, ranged attacks against you are made at disadvantage — the shadow blurring your outline enough to make precise targeting unreliable.",
+        "While the mantle is active, you may Hide as a bonus action even in conditions where you would not normally have sufficient cover — the Shadow Cognition providing the concealment directly."
+      ]
+    },
+    {
+      "name": "Darkened Ground",
+      "type": "Control",
+      "description": "The impact leaves a bruise on the light — reducing the area to dim light, hindering Perception, and eventually becoming full magical darkness that does not respond to lesser spells.",
+      "effect": "When the primary effect hits or a target fails their saving throw, the 15-foot radius around the point of impact is immediately reduced to dim light regardless of ambient conditions for 1 minute. Creatures within the area have disadvantage on Perception checks.",
+      "upgrades": [
+        "The radius increases to 30 feet, and any creature that enters the darkened area for the first time on a turn must succeed on a Wisdom saving throw against your Verum DC or be unable to take the Search action until the start of their next turn.",
+        "The darkened area becomes fully magical darkness rather than dim light, and you can see through it normally. Creatures without magical sight or Truesight are treated as blinded while inside — and the darkness does not respond to Daylight or similar spells unless cast at a higher level than the spell that created this effect."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "id": "hate",
+  "name": "Hate",
+  "icon": "🔥",
+  "opposing": "love",
+  "description": "Anger, Malice, Destruction, Hostility, Vengeance.",
+  "savingThrow": "Charisma",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Wrath Unbound",
+        "description": "The more you suffer, the harder you strike — Wounds becoming fuel for bonus damage, ignored resistances, and a Hateful Frenzy that burns toward one chosen target.",
+        "tiers": [
+          "When casting while Wounded, you deal +2d6 fire or psychic damage (your choice) to one target affected.",
+          "If you have at least 1 Wound, your next damaging effect ignores resistance.",
+          "When you take damage, you may use your reaction to mark the attacker — until the end of your next turn, your attacks and spells deal bonus damage equal to your Proficiency Bonus × 1d6 against that target.",
+          "Once per long rest, enter a Hateful Frenzy for 1 minute — you gain advantage on all attack rolls against one chosen target, and your attacks against that creature deal +4 damage dice of the same type."
+        ]
+      },
+      {
+        "name": "Seethe into Power",
+        "description": "Hatred fuels magic — raising your DC as you bleed, sacrificing Hit Dice for damage, and eventually twinning spells through the burning currency of your own Wounds.",
+        "tiers": [
+          "While below half HP, your effect DC increases by +1.",
+          "You may sacrifice 1 Hit Die as part of casting to deal +1d10 necrotic or fire damage on the effect.",
+          "You may burn 1 Wound to twin a single-target spell fueled by Hate — both copies must target enemies you have damaged this encounter.",
+          "Whenever you score a critical hit, you may immediately take a bonus action (this bonus action cannot trigger this ability again)."
+        ]
+      },
+      {
+        "name": "Consumed by Rage",
+        "description": "Hate stops being internal — it becomes a force in the world, overwhelming targets with projected contempt and leaving them Frightened and reeling.",
+        "tiers": [
+          "On a failed save the target is Frightened of you until the end of their next turn and has disadvantage on their next attack roll.",
+          "On a failed save the target is Frightened for 1 minute and must succeed on a Charisma save at the start of each turn or use their movement to move away from you. They may repeat the save at the end of each turn.",
+          "While Frightened by this effect, the target also takes 1d10 psychic damage at the start of each of their turns as the projected hatred continues to press against them.",
+          "Once per long rest, project a wave of absolute contempt in a 30-foot cone — all creatures in range must succeed on a Charisma save or be Stunned for 1 round and Frightened for 1 minute as the full weight of your hatred lands on them simultaneously."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Apex of Loathing",
+        "description": "Hatred becomes shield and sword — converting fear into power, feeding you temporary HP from dealt damage, and eventually entering Absolute Hatred that stuns and silences those who wronged you.",
+        "tiers": [
+          "If you are Frightened, the condition immediately ends — and you may cast this effect as a bonus action instead of an action.",
+          "Once per turn, gain temporary HP equal to the damage you dealt to the target of your hatred.",
+          "Once per long rest, for 1 turn you may convert fire, necrotic, or psychic damage you take into HP restoration — up to a maximum of your level × your proficiency bonus.",
+          "Once per day, enter a state of Absolute Hatred for 1 minute — enemies within 30 feet who have harmed you or your allies this combat must succeed on a Charisma save or be Stunned for 1 round, you gain +2 to all saving throws and immunity to fear, charm, and mind-reading, and enemies who die during this time cannot be resurrected except by True Resurrection or higher."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Mark of Animosity",
+        "description": "Your hatred leaves a psychic wound — forcing hostility toward you, punishing attacks on others, and eventually becoming a permanent mark that the world itself reads as a declaration.",
+        "tiers": [
+          "Choose a target you have damaged this turn — on a failed Wisdom save they have disadvantage on attack rolls against anyone except you until the end of their next turn.",
+          "The marked creature takes 3d6 psychic damage each time it damages a creature other than you.",
+          "The Mark becomes invisible to all but cursed beings, and the target suffers −1 to saving throws against emotion effects for 1 minute.",
+          "Once per day, make this Mark permanent until removed by Remove Curse or Wish. While marked, the target cannot gain advantage on ability checks or attacks, and is always considered hostile to your presence by creatures and effects that detect alignment or intent."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Spite",
+      "type": "Offensive",
+      "description": "Every wound you leave becomes a warning — a barb of pure hatred that punishes the target the moment they turn their attention to anyone but you.",
+      "effect": "On a hit or failed saving throw against the primary effect, the next time the target deals damage to any creature other than you before the end of your next turn, they take psychic damage equal to your Charisma modifier + your proficiency bonus.",
+      "upgrades": [
+        "The spite triggers on the first two times they deal damage to others rather than once, and the psychic damage increases to twice your Charisma modifier + your proficiency bonus.",
+        "The spite persists for 1 minute rather than until your next turn, and creatures that trigger it must also succeed on a Charisma saving throw against your Verum DC or be Frightened of you until the start of their next turn — the hate making itself felt every time they try to look away."
+      ]
+    },
+    {
+      "name": "Hateful Resolve",
+      "type": "Supportive",
+      "description": "Striking the thing you hate sustains you — directing hatred outward briefly feeding rather than consuming, returning temporary HP for every blow landed.",
+      "effect": "When the primary effect deals damage, you gain temporary hit points equal to your Charisma modifier (minimum 1) — the act of directing your hatred outward briefly feeding rather than draining you.",
+      "upgrades": [
+        "The temporary HP increases to your Charisma modifier + your proficiency bonus, and if the target is a creature you have damaged before in this encounter, the amount doubles — familiar hatred running deeper.",
+        "You also remove one level of Exhaustion if you have any, and gain advantage on your next saving throw — the surge of focused hatred burning through fatigue and hesitation alike."
+      ]
+    },
+    {
+      "name": "Hostile Aura",
+      "type": "Control",
+      "description": "Your hatred bleeds into the air around you — making the space itself feel hostile to calm resolve and imposing disadvantage on fear saves within range.",
+      "effect": "When the primary effect resolves, a Hostile Aura radiates from you for 1 minute in a 15-foot radius. Enemies within the aura have disadvantage on saving throws against fear and emotion effects.",
+      "upgrades": [
+        "The radius increases to 30 feet, and enemies that enter the aura for the first time on a turn must succeed on a Charisma saving throw against your Verum DC or be Shaken (disadvantage on their next attack roll).",
+        "Enemies within the aura also have disadvantage on Concentration checks, and any creature that fails a fear or emotion save while within the aura cannot benefit from effects that remove those conditions until they leave the aura's range."
+      ]
+    }
+  ]
+}

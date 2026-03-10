@@ -1,0 +1,100 @@
+{
+  "id": "balance",
+  "name": "Balance",
+  "icon": "⚖️",
+  "opposing": "chaos",
+  "description": "Equilibrium, Symmetry, Reflection, Redistribution, Harmony.",
+  "savingThrow": "Wisdom",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Symmetry Break",
+        "description": "The scale tips too far in one direction — Balance corrects it, inverting the target's greatest advantages into equal and opposite liabilities.",
+        "tiers": [
+          "On a failed save, the target loses advantage on all rolls until the end of their next turn. If they had no advantage, they instead gain disadvantage on their next roll.",
+          "On a failed save, choose one active buff on the target (a bonus to AC, attack rolls, saving throws, or damage). That buff is inverted — it becomes the equivalent penalty for 1 minute.",
+          "On a failed save, the target's two highest active bonuses are both inverted simultaneously. If the target has no active buffs, they take 4d10 psychic damage as the Cognition finds the imbalance in their biology and corrects it.",
+          "On a failed save, the target's entire buff suite is stripped and redistributed — each active bonus is transferred to a creature of your choice within 60 feet for 1 minute. The target then rolls their next d20 with no modifiers of any kind — no proficiency, no ability score bonus, nothing."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Scales of Reckoning",
+        "description": "Someone must carry it — Balance simply decides who, tethering conditions between creatures and shifting suffering where the math demands.",
+        "tiers": [
+          "Choose two willing creatures within 30 feet. The next condition that would affect one of them is tethered — it affects the other creature instead. The recipient may attempt a Wisdom saving throw against your Verum DC to resist at the end of each of their turns.",
+          "You may tether up to three creatures. When a condition is tethered, the creature who receives it has disadvantage on saves to resist it, as if Balance has decided the mathematics of their suffering were always going to land here.",
+          "The tether becomes bidirectional — conditions may be shifted in either direction between tethered creatures once per round as a bonus action, allowing you to move suffering away from a creature that can no longer bear it.",
+          "The tether persists for 1 hour. When a tethered creature dies, their remaining HP — even if 0 — is redistributed across all surviving tethered creatures as if through Equalize, and the dead creature's next death saving throw is made by the creature with the highest current HP in the tether instead."
+        ]
+      },
+      {
+        "name": "The Fulcrum",
+        "description": "Stand at the center and let everything flow through you — damage, healing, and fate itself distributed evenly among those you hold in tether.",
+        "tiers": [
+          "For 1 minute, you become a tether point for up to two creatures within 30 feet. Whenever any tethered creature (including you) takes damage, it is split equally among all tethered creatures, rounded up to the nearest whole number.",
+          "The tether expands to four creatures and also applies to healing — any healing received by a tethered creature is distributed evenly among all tethered creatures.",
+          "Tethered creatures share saving throw results against effects that target multiple of them — all tethered creatures use the highest roll among them for saves triggered by the same source effect.",
+          "The Fulcrum cannot be disrupted by damage or conditions — even if you are Incapacitated, Stunned, or reduced to 0 HP, the tether persists for the duration. No single creature in the tether can be brought below 1 HP by a single instance of tethered damage unless all tethered creatures would simultaneously reach 0."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Equalize",
+        "description": "The wound does not disappear — it finds a new address, pulling every creature in range toward a shared median whether they consent or not.",
+        "tiers": [
+          "Choose up to two creatures within range. Calculate the average of both creatures' current HP. The higher HP creature loses the difference, and the lower gains it. Neither creature's HP may exceed its maximum through this effect.",
+          "You may include up to four creatures in the redistribution. All are pulled toward the group's average HP simultaneously.",
+          "Creatures that fail the saving throw cannot be healed or damaged beyond the group average for 1 round — any excess healing or damage above the threshold is voided.",
+          "The equalization persists for 1 minute on a failed save. Whenever any tethered creature takes damage or receives healing, all tethered creatures adjust toward the new average at the start of each of their turns."
+        ]
+      },
+      {
+        "name": "Mirror Law",
+        "description": "You gave it freely — Balance asks that you receive it in kind, returning offensive force to its source with the same indifference it was sent.",
+        "tiers": [
+          "One creature gains reflection until the start of your next turn — the next offensive effect that targets them and fails is reflected back at its source, dealing the same damage type and amount.",
+          "The reflection persists for 1 minute. While active, any offensive effect that passes through the protected creature's space may also be reflected.",
+          "On a failed save by the reflected attacker, they must also succeed on a Wisdom saving throw against your Verum DC or be Stunned for 1 round by the disorientation of receiving their own force.",
+          "The reflected effect is returned at full power without requiring a save from the protected creature. If the attacker is killed by their own reflected effect, they cannot be resurrected by mundane means for 24 hours — Balance has returned them as completely as it returned their spell."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Even the Scales",
+      "type": "Offensive",
+      "description": "What was given is taken back — one active buff is stripped from the target and corrected out of existence, because the math was never in their favor.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target loses one active buff of your choice (a bonus to AC, attack rolls, saving throws, or damage). The stripped bonus vanishes for 1 round — neither transferred nor stored, simply corrected.",
+      "upgrades": [
+        "The stripped bonus is transferred to one creature of your choice within 30 feet rather than voided — Balance moves it rather than erasing it, and the recipient holds it for 1 minute.",
+        "You may strip two active buffs simultaneously. Each is transferred to a different ally of your choice."
+      ]
+    },
+    {
+      "name": "Shared Burden",
+      "type": "Supportive",
+      "description": "The harm does not leave the world — it simply agrees to be useful, converting damage into healing for an ally as nothing is created, only moved.",
+      "effect": "When the primary effect deals damage, one ally within 30 feet regains hit points equal to half the damage dealt (rounded down, minimum equal to your spellcasting modifier).",
+      "upgrades": [
+        "You may split this healing between two allies, dividing the total as you choose.",
+        "The healing increases to equal the full damage dealt, and each healed ally also gains temporary hit points equal to your proficiency bonus as the redistributed force settles into them."
+      ]
+    },
+    {
+      "name": "Nulling Field",
+      "type": "Control",
+      "description": "In this space, certainty does not exist — advantage and disadvantage cancel each other entirely, leaving only the bare probability of the roll.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a 15-foot radius zone of equilibrium appears centered on the point of impact, lasting until the end of your next turn. Within this zone, advantage and disadvantage cancel each other entirely — creatures roll all d20s flat, with no advantage or disadvantage from any source.",
+      "upgrades": [
+        "The zone persists for 1 minute and its radius increases to 30 feet. Creatures that enter the zone for the first time on a turn must succeed on a Wisdom saving throw against your Verum DC or lose any active advantage on their next roll.",
+        "The zone also nullifies the first critical hit or critical failure that occurs within it each round — the roll is treated as a normal success or failure instead, Balance refusing to allow extremes even at the margins."
+      ]
+    }
+  ]
+}

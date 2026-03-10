@@ -1,0 +1,110 @@
+{
+  "id": "civilization",
+  "name": "Civilization",
+  "icon": "🏛️",
+  "opposing": "beast",
+  "description": "Society, Structure, Progress, Culture, Legacy.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+
+  "verumEffects": {
+    "offensive": [],
+    "supportive": [
+      {
+        "name": "Communal Resonance",
+        "description": "You bind effects into the lattice of a society's presence.",
+        "tiers": [
+          "When an effect targets multiple creatures, designate one focal creature. Allies within 10 feet of that creature gain the spell's benefits if they weren't originally targeted.",
+          "Allies that begin their turn within 30 feet of the focal creature gain a lesser version of the effect — half healing, partial buff, or temporary resistance.",
+          "Allies that enter the range mid-effect automatically receive the full benefit, and may transfer it onward if they move within range of another ally.",
+          "Create a Civic Aura — for 1 minute, all allies within 60 feet of the focal creature are treated as if under the original spell's full effect, even if they leave and return. If the focal creature dies, the aura transfers to the nearest ally automatically."
+        ]
+      },
+      {
+        "name": "Structured Weave",
+        "description": "Law gives the spell its spine — and law does not expire. (Complement effect used as Core)",
+        "tiers": [
+          "The primary effect's duration is extended by 50%. If the effect requires Concentration, you may reroll one failed Concentration check before it ends.",
+          "The duration is instead doubled, and your Concentration on this effect cannot be broken by damage from opportunity attacks.",
+          "If the primary effect has a duration of 10 minutes or longer, it becomes semi-permanent — lasting until you dismiss it, it is countered, or disrupted by a Cognition directly opposing Civilization.",
+          "The spell becomes encoded law. If cast again in the same settlement it is automatically upcast by 1 spell level and cannot be counterspelled by creatures without the Civilization Cognition."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Edict",
+        "description": "Law does not ask. It declares. (Save: Charisma)",
+        "tiers": [
+          "Declare a single restriction of one sentence or less. A creature that fails the save cannot willingly violate it until the end of their next turn.",
+          "The restriction lasts 1 minute on a failed save, with a repeat Charisma save at the end of each of their turns. It may now cover one action type (attack, cast a spell, use a reaction).",
+          "Declare two restrictions simultaneously. Creatures that fail cannot violate either. On a success they are still unable to act against you directly until the end of their next turn.",
+          "The Edict becomes absolute law for 1 minute. Creatures that fail cannot violate the restriction by any means — magical or otherwise — and attempting to do so causes psychic damage equal to your Verum Modifier each time they try."
+        ]
+      },
+      {
+        "name": "Infrastructure",
+        "description": "Civilization does not conquer land — it claims it. (Save: Charisma)",
+        "tiers": [
+          "Conjure a 10-foot section of solid wall, floor, or barrier (your choice) in an unoccupied space within 60 feet. AC 15, 30 HP, lasts until end of your next turn, provides full cover.",
+          "Structure's HP increases to 80, AC to 17, duration extends to 1 minute. Conjure up to two connected sections. Creatures that fail the save cannot willingly move through or over it for 1 round.",
+          "The structure becomes semi-permanent — lasting until destroyed or dismissed. HP 200, resistance to all non-siege damage. Conjure up to four sections and designate one gate only named creatures may pass through freely.",
+          "Raise a Civic Fortification — up to ten connected sections, 400 HP, immunity to non-magical damage, permanent duration. Creatures with Intelligence 8+ instinctively recognize it as sovereign territory. Hostile creatures entering must succeed on a Charisma save or be Frightened for 1 minute."
+        ]
+      },
+      {
+        "name": "Eternal Monument",
+        "description": "Your creation is remembered by stone, voice, or pact.",
+        "tiers": [
+          "If the effect creates a structure, object, or inscription, its duration becomes indefinite unless magically destroyed.",
+          "The structure gains resistance to all damage except force and siege-based effects, and cannot be targeted by decay, erosion, or time-based Cognitions.",
+          "The creation becomes culturally significant — spells and abilities used within or near it gain +1 to spell save DCs or attack rolls if aligned with its purpose.",
+          "Establish a Legacy Construct — the effect records your name, intention, and power into collective memory. Any creature interacting with it for more than 1 minute gains a piece of lore (as Legend Lore), advantage on saves against being Charmed or Frightened while defending it, and the ability to invoke a minor version of the spell once."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Iron Law",
+      "type": "Offensive",
+      "description": "Resistance to the spell is resistance to order itself — and order does not forgive.",
+      "effect": "When a target fails their saving throw or is hit by the primary effect, they take bonus force damage equal to one damage die of the primary effect's type (min 1d6), as the weight of civilization's authority bears down on them.",
+      "upgrades": [
+        "Level 5+: Bonus damage increases to two dice, and the target has disadvantage on Charisma checks and saves until the end of their next turn.",
+        "Level 11+: Bonus damage increases to three dice, and creatures that fail are also unable to issue commands, rally allies, or use Intimidation until the end of their next turn."
+      ]
+    },
+    {
+      "name": "Civic Ward",
+      "type": "Supportive",
+      "description": "The structure of civilization shields those who uphold it.",
+      "effect": "When the primary effect resolves, one ally within 30 feet gains a +2 bonus to AC until the start of your next turn.",
+      "upgrades": [
+        "Level 5+: The ally also gains advantage on the next saving throw they make before the start of your next turn.",
+        "Level 11+: Choose two allies to receive this benefit, and the AC bonus increases to +3."
+      ]
+    },
+    {
+      "name": "Order's Weight",
+      "type": "Control",
+      "description": "Civilization imposes structure even on those who resist it.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Charisma saving throw vs your Verum DC or be unable to take more than one action on their next turn.",
+      "upgrades": [
+        "Level 5+: On a failed save, the target is also unable to use bonus actions on their next turn.",
+        "Level 11+: Creatures that fail cannot take reactions either until the end of their next turn."
+      ]
+    },
+    {
+      "name": "Structured Weave",
+      "type": "Supportive",
+      "description": "Law gives the spell its spine — and law does not expire.",
+      "effect": "The primary effect's duration is extended by 50%. If the effect requires Concentration, you may reroll one failed Concentration check before the effect ends.",
+      "upgrades": [
+        "Level 5+: The duration is instead doubled, and Concentration cannot be broken by damage from opportunity attacks.",
+        "Level 11+: If the primary effect has a duration of 10 minutes or longer, it becomes semi-permanent — lasting until dismissed or disrupted by an opposing Cognition."
+      ]
+    }
+  ]
+}

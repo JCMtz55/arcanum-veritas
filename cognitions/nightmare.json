@@ -1,0 +1,99 @@
+{
+  "id": "nightmare",
+  "name": "Nightmare",
+  "icon": "🕳️",
+  "opposing": "dream",
+  "description": "Fear, Terror, Illusion, The Subconscious, Void.",
+  "savingThrow": "Dream",
+  "damageType": "Void",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Void-Bleed",
+        "description": "You tear open the fragile membrane between sanity and oblivion — dealing unresistable Void damage that strikes soul, dream-form, and body alike before eventually destabilizing the target's essence entirely.",
+        "tiers": [
+          "On a hit, the target takes Void damage and cannot regain hit points until the end of their next turn.",
+          "If the effect deals damage, the target must succeed on a Constitution saving throw or have their maximum HP reduced by the Void damage dealt. This reduction lasts until a long rest.",
+          "Creatures that take Void damage must succeed on a Dream saving throw or gain 1 level of Dream Exhaustion.",
+          "On a failed Charisma saving throw, the target loses access to one feature (trait, spell, or legendary action) of your choice for 1 minute, and their soul becomes unstable — leaving them vulnerable to banishment, soul theft, or full dream severance at the DM's discretion."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Corrupt the Familiar",
+        "description": "You force the familiar into the grotesque — turning Denizens Feral, rewriting them as Nightlings, and eventually overwriting sentient dreamforms as Primal Nightmares bound to your Node.",
+        "tiers": [
+          "Choose a Denizen within 60 feet — on a failed Dream save it becomes Feral for 1 round, attacking the nearest creature regardless of allegiance.",
+          "On failure, the Denizen is transformed into a Demi Nightmare (CR equal to its original +1) for 1 minute, becoming hostile to all creatures.",
+          "The transformation becomes permanent unless purified by divine Cognition — the target becomes a Nightling bound to no master.",
+          "You may target any sentient Denizen or Dreamer. On a failed save they are fully overwritten, becoming a Primal Nightmare with corruption auras and a tether to your Node. You may summon or banish it at will once per day."
+        ]
+      },
+      {
+        "name": "Nightmare Seed",
+        "description": "You spawn a horror forged from the raw marrow of Insomnia — summoning Demi Nightmares, Nightlings shaped from a target's fears, and eventually a Primal Nightmare of your own design.",
+        "tiers": [
+          "Summon a Demi Nightmare (CR 1) that acts on your initiative and lasts 1 minute.",
+          "Summon a Nightling (CR = half your level) designed from the fears of a chosen target — it gains advantage on attacks against that creature.",
+          "Create a Hollowborn — a sentient, psychic duplicate of a creature's worst memory that lasts 10 minutes and can cast one of that creature's known spells or features.",
+          "Manifest a Primal Nightmare forged from your Node and bound to your will. Choose 3 traits: Unnerving Presence, Phase Body, Voidflame, Dreamleech, or Paradox Form. It remains until destroyed or banished — you may have only one at a time."
+        ]
+      },
+      {
+        "name": "Truth of Terror",
+        "description": "You plunge into a creature's soul and open the cellar door they locked shut — extracting fears, warping the battlefield around them, and eventually crystallizing terror into a Vil Memory Shard.",
+        "tiers": [
+          "On a failed save the creature reveals one fear (phobia, trauma, or target) and is Frightened until the end of their next turn.",
+          "You may alter the battlefield to match their fear — visual illusions and environmental mimicry. While within the altered zone, the creature has disadvantage on all Dream saving throws.",
+          "Mark the creature with its own fear — all allies gain advantage to attack it, and it must succeed on a Dream saving throw at the start of each turn or become Incapacitated by hallucinations for that turn.",
+          "Extract the creature's fear as a crystallized concept — a Vil Memory Shard that can be used as a free component for future Nightmare effects, implanted to anchor a Nightmare Node, or consumed to deal 15d10 Void damage and inflict 1 level of Madness."
+        ]
+      },
+      {
+        "name": "Waking Horror",
+        "description": "The boundary between nightmare and waking collapses — trapping the target's mind inside their own unraveling until hallucinations overwhelm them and the self begins to break.",
+        "tiers": [
+          "On a failed save the target cannot distinguish illusions from reality until the end of their next turn — they must treat all creatures as potentially hostile and cannot benefit from the Help action or flanking.",
+          "The target is trapped in a waking nightmare for 1 minute — at the start of each of their turns they must succeed on a Dream saving throw against your Verum DC or be Stunned for that turn. A successful save ends the effect.",
+          "The waking nightmare becomes self-sustaining — even on a successful save the target is only Frightened rather than Stunned, and the effect persists until they succeed on two consecutive Dream saves. While under this effect they cannot benefit from magical healing above half their maximum HP.",
+          "Once per long rest, collapse a creature's sense of self entirely — on a failed Charisma saving throw they are Incapacitated and Frightened for 1 minute, believe they are trapped in Insomnia, and at the end of each of their turns must succeed on a Dream saving throw or gain 1 level of Dream Exhaustion. This effect ends early only if they receive Greater Restoration or divine intervention."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Void Touch",
+      "type": "Offensive",
+      "description": "The spell carries a trace of what lives beneath the world — converting a portion of its damage to Void, unresistable and unable to be immunized against.",
+      "effect": "On a hit or failed saving throw against the primary effect, half of the damage dealt becomes Void damage — unresistable and unable to be immunized against. Creatures that were resistant or immune to the original damage type still take full damage from the Void portion.",
+      "upgrades": [
+        "The Void damage portion increases to two-thirds of the total damage, and the target cannot regain hit points until the start of your next turn — Void briefly closing the wound that healing would open.",
+        "The entire damage of the primary effect becomes Void damage, and the target must succeed on a Dream saving throw against your Verum DC or gain 1 level of Dream Exhaustion as the Void briefly touches their mind."
+      ]
+    },
+    {
+      "name": "Dread Mantle",
+      "type": "Supportive",
+      "description": "Nightmare's presence becomes a shield for those who walk inside it — inoculating allies against fear and psychic damage while the ambient dread finds purchase in unprepared minds nearby.",
+      "effect": "When the primary effect resolves, a Dread Mantle settles over you for 1 minute — allies within 15 feet cannot be Frightened and gain advantage on Dream saving throws while within range.",
+      "upgrades": [
+        "The radius increases to 30 feet, and allies within the mantle also gain resistance to psychic damage — the nightmare having already shown them worse than what any psychic attack can conjure.",
+        "Enemies that start their turn within the mantle's radius must succeed on a Dream saving throw against your Verum DC or be Frightened of you until the start of their next turn — the ambient dread finding purchase in minds that were not prepared for it."
+      ]
+    },
+    {
+      "name": "Haunt",
+      "type": "Control",
+      "description": "The spell leaves something behind — a psychic echo lodging in the target's mind that imposes disadvantage on Dream saves and steals verbal components from spells until removed by magic.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a psychic echo lodges in the target's mind — they are Haunted for 1 minute. While Haunted, they have disadvantage on Dream saving throws and cannot willingly move toward you without first succeeding on a Dream saving throw against your Verum DC.",
+      "upgrades": [
+        "While Haunted, the target also hears whispers that interfere with Concentration — they have disadvantage on Concentration checks, and any spell they cast with a verbal component requires a successful Dream saving throw against your Verum DC or the verbal component is stolen by the echo and the spell fails.",
+        "The Haunt becomes persistent — it does not end after 1 minute but instead requires Remove Curse or Greater Restoration to dispel. While active, once per round the DM may have the Haunt surface a fear from the target's subconscious, imposing the Frightened condition for 1 turn with no save."
+      ]
+    }
+  ]
+}

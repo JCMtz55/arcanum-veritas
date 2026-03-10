@@ -1,0 +1,101 @@
+{
+  "id": "pain",
+  "name": "Pain",
+  "icon": "🩹",
+  "opposing": "healing",
+  "description": "Suffering, Endurance, Injury, Torment, Clarity.",
+  "savingThrow": "Constitution",
+  "damageType": "Sanguine",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Blood Price",
+        "description": "Trade your suffering for overwhelming force — spending hit dice while Wounded to maximize damage and eventually entering Pain Ascendance where nothing can reduce you to zero.",
+        "tiers": [
+          "When you cast an effect while Wounded, you may expend hit dice equal to your proficiency bonus — add the total rolled as Sanguine damage to one damage roll.",
+          "While you have 1 or more Injuries, you gain a bonus to one spell save DC of your choice equal to half your proficiency bonus.",
+          "You may voluntarily gain 1d4 Wounds as part of casting. If you do, your next attack or effect deals maximum damage to one target.",
+          "Once per long rest, if you have at least 1 Injury, enter Pain Ascendance for 1 minute — you gain resistance to all damage, cast spells without material components, reroll 1s on all damage dice, and cannot be reduced to 0 HP by anything other than a critical hit."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Agony Echo",
+        "description": "The more they hurt you, the more dangerous you become — reflecting damage taken back at attackers and eventually triggering a Chain Reaction that Wounds, Exhausts, and Staggers everything around you.",
+        "tiers": [
+          "When you take damage, you may use your reaction to target one creature within 30 feet — it must succeed on a Constitution saving throw against your Verum DC or take half the damage you took as Sanguine damage.",
+          "Target up to two creatures within 60 feet. Creatures that fail their save take the full damage you took as Sanguine damage.",
+          "Once per round you may use Agony Echo without expending your reaction. Creatures that fail their save also gain 1 level of Exhaustion.",
+          "Agony Echo becomes a Chain Reaction — when you take damage, choose up to three creatures within 90 feet. On a failed save each takes the full damage (Sanguine), gains 1 Wound, suffers 1 level of Exhaustion, and becomes Staggered (disadvantage on attacks and saves until the end of their next turn)."
+        ]
+      },
+      {
+        "name": "Suffering Sustains",
+        "description": "You become sharpest while bleeding — gaining AC bonuses and damage while Wounded, regenerating while near death, and eventually triggering a Legendary Pain Response that grants an extra action at 1 HP.",
+        "tiers": [
+          "While you have 1 or more Wounds, gain advantage on Constitution saving throws and +1 to AC.",
+          "While Wounded or Injured, you deal +2 damage on all attacks and spells and cannot be Frightened.",
+          "While at half HP or below and Wounded, gain regeneration 5 at the start of your turn. This regeneration is suppressed for 1 round if you take radiant damage.",
+          "Gain a Legendary Pain Response — when you would drop to 0 HP, remain conscious at 1 HP. While in this state you may take 1 extra action per turn, are immune to pain-induced Exhaustion, Fear, and Charm, and the state lasts 1 minute or until you are healed above half HP."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Torturer's Focus",
+        "description": "Your pain clarifies — your enemy's blinds, stripping their resistances, stacking save penalties with every Wound, and eventually making Injuries permanent unless healed by the strongest magic.",
+        "tiers": [
+          "Targets damaged by the effect must succeed on a Wisdom saving throw or suffer disadvantage on their next attack roll.",
+          "Creatures that fail also lose resistance to psychic, Sanguine, and necrotic damage until the end of your next turn.",
+          "If the effect causes a Wound, the target suffers a stacking −1 penalty to saving throws for the rest of the encounter. This stacks with each Wound inflicted.",
+          "Designate one target — until the end of your next turn it automatically fails death saving throws if unconscious, cannot recover from Wounds, and must succeed on a Constitution saving throw against your Verum DC or have any Injury suffered become permanent unless healed by Greater Restoration or stronger."
+        ]
+      },
+      {
+        "name": "Crippling Wound",
+        "description": "Your spell rends more than flesh — inflicting Wounds that cripple movement or grip, stacking into Injuries, and eventually destroying named body parts with permanent consequences.",
+        "tiers": [
+          "If a creature fails its save, it suffers 1 Wound in addition to any damage dealt. Choose one limb or organ affected by the wound.",
+          "The Wound becomes crippling — if physical, the target suffers −10 feet of movement, disadvantage on Dexterity checks, or drops one held item (your choice).",
+          "If a creature takes 2 or more Wounds from the same effect, they must succeed on a Constitution save or gain 1 Injury from the appropriate table.",
+          "Declare a named body part when casting (heart, lungs, eyes, spine, etc.). If the creature fails the save, it suffers a thematic permanent Injury in that location unless restored by 7th level vitaemancy or divine intervention."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Nerve Strike",
+      "type": "Offensive",
+      "description": "The spell finds the places that hurt most — the nerve response briefly overriding the target's ability to attack cleanly or hold Concentration.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target must succeed on a Constitution saving throw against your Verum DC or have disadvantage on their next attack roll and their next Constitution saving throw.",
+      "upgrades": [
+        "On a failed save, the disadvantage extends to all attack rolls and Constitution saves until the end of their next turn rather than just the first.",
+        "Creatures that fail also cannot maintain Concentration — they must immediately make a Concentration check against your Verum DC or lose whatever they were concentrating on, the nerve strike scattering their focus completely."
+      ]
+    },
+    {
+      "name": "Martyr's Guard",
+      "type": "Supportive",
+      "description": "Wounds become walls — an ally's experience of pain sharpening their instincts into a bonus to AC and saving throws equal to their current Wound count.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains a bonus to AC and saving throws equal to their current Wound count (minimum +1) until the start of your next turn.",
+      "upgrades": [
+        "The bonus persists for 1 minute rather than until your next turn, and the ally also gains advantage on death saving throws while the effect is active.",
+        "You may choose two allies to receive this benefit, and each also gains resistance to the damage type that last wounded them — their body having adapted to the pain of that specific harm."
+      ]
+    },
+    {
+      "name": "Stagger",
+      "type": "Control",
+      "description": "Too much at once — the pain signal flooding the target's nervous system strips their reaction and halves their speed until they can think past the noise.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Constitution saving throw against your Verum DC or be Staggered — they lose their reaction and their movement speed is halved until the end of their next turn.",
+      "upgrades": [
+        "On a failed save, the target also has disadvantage on the first saving throw they make before the end of their next turn — the stagger leaving them slow to respond to the next threat.",
+        "Creatures that fail also cannot take bonus actions until the end of their next turn, the stagger consuming every spare moment of their attention."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "id": "life",
+  "name": "Life",
+  "icon": "🌿",
+  "opposing": "death",
+  "description": "Vitality, Creation, Growth, Renewal, Existence.",
+  "savingThrow": "Constitution",
+  "damageType": "Necrotic",
+
+  "verumEffects": {
+    "offensive": [],
+    "supportive": [
+      {
+        "name": "Healing",
+        "description": "Your touch accelerates the very rhythm of cellular regeneration.",
+        "tiers": [
+          "When a healing effect is used, it gains +1 additional die of the same type.",
+          "Healing gains +2 dice, and the target also gains 1d4 temporary HP at the start of their next turn.",
+          "Healing gains +3 dice, and removes one condition or disease of your choice from the target.",
+          "Healing becomes absolute — once per long rest you may restore a creature to full HP. Additionally, if a creature died within the last round and their body is intact, you may revive them to 1 HP without expending a spell slot."
+        ]
+      },
+      {
+        "name": "Restorative",
+        "description": "You do not mend flesh — you return identity.",
+        "tiers": [
+          "You can restore one minor physical defect — a missing finger, damaged eye, or scarred voice.",
+          "You may regrow lost limbs, restore damaged senses, and cleanse any mundane poison or disease.",
+          "You can rebuild internal organs, erase magical corruption, and reverse up to 6 months of physical trauma from the target's body.",
+          "You may rebuild a being from a handful of remains, returning them to prime health. May undo aging, deformity, or cursed mutations. You may additionally choose to evolve the creature toward its ideal physical form — at DM discretion."
+        ]
+      },
+      {
+        "name": "Sentience",
+        "description": "Life demands more than form — it seeks purpose.",
+        "tiers": [
+          "You may animate a plant or small construct for 1 minute. It gains limited awareness and follows basic commands.",
+          "You may infuse sentience into a newborn creature, seed, homunculus, or egg. The being begins learning immediately and recognizes you as its creator.",
+          "The created creature is fully sapient — it develops a unique soul with emotions, memory, and ambition. Unstable environments may produce feral or corrupted variants at DM discretion.",
+          "You may create true life — a fully realized soul with a unique Cognition Seed. This creation draws cosmic attention and may disrupt prophecy, fate, or planar balance. You do not choose what it ultimately becomes."
+        ]
+      },
+      {
+        "name": "Overflowing Vitality",
+        "description": "You surge with living force, overflowing into the world.",
+        "tiers": [
+          "Allies within 10 feet gain 1d4 temporary hit points at the start of their turns for 1 minute.",
+          "Whenever you heal a creature, one additional creature within 30 feet gains half that amount as overflow healing.",
+          "For 1 minute, all allies within a 60-foot radius regain 1d6 hit points at the start of each of their turns.",
+          "You become a Font of Life for 1 minute — you heal 20 HP at the start of every turn, allies in range automatically succeed on death saving throws, and allies that died this round rise to 1 HP unless their body was disintegrated."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Biogenesis",
+        "description": "You guide the world to remake itself. (Save: Constitution)",
+        "tiers": [
+          "Target terrain within 15 feet sprouts moss, plants, or fungi — granting light cover and softening falls. Creatures that fail their save have their movement speed reduced by 5 feet as growth clutches at their feet.",
+          "Create a localized ecosystem — vines, pollen, small creatures — within a 30-foot radius. The area becomes difficult terrain for enemies, and you gain advantage on Nature checks while within it.",
+          "You may awaken a forest section or spawn a living grove that obeys your will — moving to block paths or attacking intruders for up to 10 minutes. Creatures that fail their save are Restrained by vines until they use an action to break free (Strength check vs your Verum DC).",
+          "Generate a Living Domain — every surface within a 120-foot radius is alive and responsive for 1 hour. You may use it to trap, heal, or overgrow structures, creatures, and spells within the area."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Life Drain",
+      "type": "Offensive",
+      "description": "Life taken from one vessel feeds another.",
+      "effect": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), as living energy is siphoned from them. You regain HP equal to half the bonus damage dealt.",
+      "upgrades": [
+        "Level 5+: Bonus damage increases to two dice, and you may redirect the healing to one ally within 30 feet instead of yourself.",
+        "Level 11+: Bonus damage increases to three dice, and the target must succeed on a Constitution saving throw vs your Verum DC or have their maximum HP reduced by the bonus damage dealt until they finish a long rest."
+      ]
+    },
+    {
+      "name": "Vital Surge",
+      "type": "Supportive",
+      "description": "A pulse of living energy fortifies those nearby.",
+      "effect": "When the primary effect resolves, one ally within 30 feet gains temporary HP equal to your spellcasting modifier and advantage on their next Constitution saving throw before the start of your next turn.",
+      "upgrades": [
+        "Level 5+: Temporary HP increases to your spellcasting modifier + proficiency bonus, and advantage extends to all Constitution saving throws until the start of your next turn.",
+        "Level 11+: Choose two allies to receive this benefit. Each also removes one condition of your choice affecting them as the surge of life pushes the ailment out."
+      ]
+    },
+    {
+      "name": "Overgrowth",
+      "type": "Control",
+      "description": "Where the spell lands, life erupts uninvited.",
+      "effect": "After the primary effect resolves, the point of impact erupts in a 10-foot radius of rapid growth — becoming difficult terrain until the end of your next turn. Creatures must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 10 feet until the end of their next turn.",
+      "upgrades": [
+        "Level 5+: Growth persists for 1 minute, and creatures that fail the save are Restrained until the end of their next turn rather than merely slowed.",
+        "Level 11+: Radius increases to 20 feet, and Restrained creatures must use their full action to escape rather than a bonus action."
+      ]
+    }
+  ]
+}

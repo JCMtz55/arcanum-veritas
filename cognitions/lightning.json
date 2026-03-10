@@ -1,0 +1,101 @@
+{
+  "id": "lightning",
+  "name": "Lightning",
+  "icon": "⚡",
+  "opposing": "earth",
+  "description": "Speed, Energy, Precision, Destruction, Momentum.",
+  "savingThrow": "Dexterity",
+  "damageType": "Lightning",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Chain Spark",
+        "description": "Your lightning leaps from one victim to the next.",
+        "tiers": [
+          "When the effect deals lightning damage, choose 1 additional creature within 10 feet of the original target — it takes half damage.",
+          "Chain to 2 additional targets within 15 feet. Creatures that fail their Dexterity save take full damage.",
+          "Chain to 4 creatures within 20 feet. Each failed save creates a secondary arc that deals 1d10 extra lightning damage to one creature adjacent to the failed target.",
+          "Trigger a Chainstorm — lightning arcs to all creatures within 30 feet of the original target. Each must make a Dexterity save or take full damage and be Stunned until the end of their next turn."
+        ]
+      },
+      {
+        "name": "Thunderbreak",
+        "description": "Your lightning doesn't just shock — it shatters.",
+        "tiers": [
+          "Targets hit by this effect must succeed on a Strength save or be knocked back 10 feet.",
+          "The knockback increases to 20 feet, and failed saves also impose disadvantage on Concentration checks until the end of their next turn.",
+          "Targets take +1d10 thunder damage, and nearby objects or barriers within 5 feet must make a Dexterity save or shatter.",
+          "Thunderbreak becomes a concussive burst — all creatures within 20 feet of the original target must succeed on a Strength save or be knocked prone, pushed 30 feet, and Deafened for 1 minute."
+        ]
+      },
+      {
+        "name": "Flash Precision",
+        "description": "Lightning always hits first. It doesn't miss — it decides.",
+        "tiers": [
+          "You may reroll one attack roll or saving throw associated with this effect, taking the new result.",
+          "Your lightning effects ignore cover and cannot have disadvantage imposed on their attack rolls.",
+          "Once per effect, you may automatically hit with one lightning-based attack or spell — no roll required.",
+          "Designate one creature within 120 feet — it is struck by a Sky Bolt with no attack roll or saving throw. It takes 12d12 lightning damage, cannot use reactions until the end of its next turn, and immediately drops Concentration if applicable."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Voltstride",
+        "description": "You move as fast as thought.",
+        "tiers": [
+          "When casting the effect, you may teleport up to 10 feet as part of the same action.",
+          "The teleport range increases to 30 feet, and you gain advantage on the next Dexterity saving throw you make before the start of your next turn.",
+          "You may teleport before or after the effect resolves, and you ignore opportunity attacks during this movement.",
+          "For 1 minute, you may divide yourself into afterimages — gaining +5 AC against one attack per turn, and teleporting up to 60 feet as a reaction whenever you are targeted by an attack or spell."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Conductive Charge",
+        "description": "You leave behind a charge that's waiting to explode.",
+        "tiers": [
+          "If a creature takes lightning damage, it becomes Charged. The next time it takes damage before the end of your next turn, it takes +1d6 lightning damage.",
+          "Charged creatures glow faintly, cannot benefit from invisibility, and have disadvantage on Dexterity saving throws.",
+          "The charge jumps — if the Charged creature is within 10 feet of another creature when it takes damage, the second creature also takes the bonus lightning damage.",
+          "Charged targets become highly unstable — if they die while Charged, they explode, dealing 4d10 lightning damage in a 20-foot radius (Dexterity save halves)."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Overclock",
+      "type": "Offensive",
+      "description": "The voltage doesn't just hurt — it scrambles.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target's nervous system is briefly overloaded — they must succeed on a Dexterity saving throw against your Verum DC or act last in the initiative order on their next turn, regardless of their initiative roll.",
+      "upgrades": [
+        "Level 5+: On a failed save, the target also cannot take reactions until the start of their next turn.",
+        "Level 11+: Creatures that fail also have disadvantage on the first attack roll or saving throw they make on their next turn."
+      ]
+    },
+    {
+      "name": "Static Field",
+      "type": "Supportive",
+      "description": "Your charge bleeds outward, sharpening everything around you.",
+      "effect": "When the primary effect resolves, you generate a Static Field for 1 minute — allies within 15 feet of you gain a +2 bonus to initiative rolls and cannot be surprised while within range.",
+      "upgrades": [
+        "Level 5+: Allies within the field also gain advantage on Dexterity saving throws while the field is active.",
+        "Level 11+: The radius increases to 30 feet, and allies within it may use their reaction to move up to 10 feet when they would otherwise be hit by an attack."
+      ]
+    },
+    {
+      "name": "Groundstrike",
+      "type": "Control",
+      "description": "The bolt pins them to the earth.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Dexterity saving throw against your Verum DC or be unable to teleport, use movement-based abilities, or take the Dash action until the end of their next turn.",
+      "upgrades": [
+        "Level 5+: On a failed save, the target also cannot take reactions and has their movement speed reduced by 15 feet.",
+        "Level 11+: Creatures that fail are additionally knocked prone, and standing up costs them their full movement rather than half."
+      ]
+    }
+  ]
+}

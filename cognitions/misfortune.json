@@ -1,0 +1,89 @@
+{
+  "id": "misfortune",
+  "name": "Misfortune",
+  "icon": "🩸",
+  "opposing": "fortune",
+  "description": "Bad Luck, Calamity, Accidents, Failure, Ruin.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "offensive": [],
+    "supportive": [],
+    "control": [
+      {
+        "name": "Destined to Fail",
+        "description": "The target's fate turns sour.",
+        "tiers": [
+          "Choose one target — they subtract 1d4 from their next attack roll, ability check, or saving throw before the end of your next turn.",
+          "On a failed Wisdom save, the target must reroll their next successful saving throw and take the lower result. This triggers once before the effect ends.",
+          "Once per round as a reaction, when a creature within 60 feet succeeds on a saving throw, you may force them to reroll it — they must take the new result.",
+          "For 1 minute on a failed save, the target rolls all saving throws with disadvantage. They may repeat the Wisdom saving throw at the end of each of their turns to end the effect early."
+        ]
+      },
+      {
+        "name": "Chain of Calamity",
+        "description": "Bad luck cascades into greater disaster.",
+        "tiers": [
+          "If a creature fails a saving throw against your effect, the nearest creature within 10 feet must make a Dexterity save or suffer 1d6 damage of the same type.",
+          "Chain to up to 2 creatures within 30 feet. If the first creature fails their save, each chained creature rolls their next saving throw with disadvantage.",
+          "When a creature affected by this effect fails a saving throw, one creature of your choice within 15 feet must make the same saving throw against a DC of 10 or suffer the same condition (not damage) as a ripple of misfortune.",
+          "When a creature within 60 feet rolls a critical failure (natural 1 on a save or attack), trigger a Calamity — they are immediately subjected to one additional effect of your choice: Stunned until end of next turn, knocked Prone, or Cursed with disadvantage on their next saving throw."
+        ]
+      },
+      {
+        "name": "Cursed Timing",
+        "description": "The wrong action at the worst time.",
+        "tiers": [
+          "A creature affected has disadvantage on opportunity attacks and reaction-based effects until the end of your next turn.",
+          "Their initiative score drops by 5 for the remainder of the encounter, as misfortune robs them of their sense of timing.",
+          "On a failed save, the target expends one use of Legendary Resistance if they have any remaining. If they have none, they instead have disadvantage on their next saving throw.",
+          "Once per long rest, designate one creature — until the end of their next turn they cannot use bonus actions or reactions, as every opportunity they reach for slips away at the last moment."
+        ]
+      },
+      {
+        "name": "False Fortune",
+        "description": "What seems lucky turns vile.",
+        "tiers": [
+          "If a creature rolls a natural 20 on an attack roll, they must reroll it — if the reroll is 10 or lower, the attack misses and backfires in a minor way at DM discretion.",
+          "The target's next critical hit becomes a normal hit, and they take psychic damage equal to your spellcasting modifier as their fortune inverts.",
+          "Once per long rest as a reaction, you may convert one instance of advantage a creature within 60 feet has into disadvantage before they roll.",
+          "Mark a creature with Cursed Glory for 1 minute — if they roll a natural 20 on any roll, they immediately take psychic damage equal to twice your spellcasting modifier, and the natural 20 is treated as a natural 1 instead."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Hex Touch",
+      "type": "Offensive",
+      "description": "The spell leaves a lingering curse where it lands.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target is hexed — they suffer a −1d4 penalty to one type of roll of your choice (attack rolls, saving throws, or ability checks) until the end of their next turn.",
+      "upgrades": [
+        "Level 5+: The penalty increases to −1d6, and you may apply it to two types of rolls simultaneously.",
+        "Level 11+: The hex persists for 1 minute, and once per turn when the hexed creature rolls the affected roll type, they must reroll one die and take the lower result."
+      ]
+    },
+    {
+      "name": "Deflect Ill Omen",
+      "type": "Supportive",
+      "description": "The curse finds someone else to land on.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains the Deflection benefit — the next time they would fail a saving throw or ability check before the start of your next turn, they may reroll it once and take the higher result.",
+      "upgrades": [
+        "Level 5+: The ally may apply this reroll to attack rolls as well, and the benefit persists until the start of your next turn.",
+        "Level 11+: You may choose two allies to receive this benefit, and each reroll gains a +2 bonus."
+      ]
+    },
+    {
+      "name": "Stumble",
+      "type": "Control",
+      "description": "Bad luck finds their feet.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Dexterity saving throw against your Verum DC or fall prone as misfortune finds the one uneven stone, the one slick patch, the one moment their balance was not quite right.",
+      "upgrades": [
+        "Level 5+: On a failed save, the target also has their movement speed halved until the end of their next turn.",
+        "Level 11+: Creatures that fail also have disadvantage on the first attack roll they make after standing up."
+      ]
+    }
+  ]
+}

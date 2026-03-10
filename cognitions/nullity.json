@@ -1,0 +1,97 @@
+{
+  "id": "nullity",
+  "name": "Nullity",
+  "icon": "⬛",
+  "opposing": "creation",
+  "description": "Anti-Magic, Negation, Void, Severance, Erasure.",
+  "savingThrow": "Intelligence",
+  "damageType": "Void",
+
+  "verumEffects": {
+    "control": [
+      {
+        "name": "Spellshatter",
+        "description": "Spellcasting is nothing to you but a whisper to be silenced — suppressing active effects, locking out casting, and leaving a Nullity Echo that erases spells from memory.",
+        "tiers": [
+          "When casting a spell that targets a creature, you may also suppress one active spell or magical effect on them — as if by Dispel Magic of a level equal to half your level, rounded up.",
+          "The target must succeed on a Constitution saving throw or lose the ability to cast spells or use Cognition features until the end of their next turn.",
+          "If the creature fails their save, all their attuned magical items become mundane until the start of your next turn.",
+          "Cast the spell through a Nullity Echo that remains in place for 1 minute. Any creature that casts a spell within 10 feet of the Echo must succeed on an Intelligence saving throw against your Verum DC or the spell fails and is erased from their memory until they complete a long rest."
+        ]
+      },
+      {
+        "name": "Severance Field",
+        "description": "Your spell rejects presence, connection, and interaction — creating a Dead Magic zone where Cognitions diminish, Concentration breaks, and eventually all spells below 7th level simply cease to function.",
+        "tiers": [
+          "Create a 10-foot radius zone where teleportation and dream-travel automatically fail, and summoned creatures vanish upon entering.",
+          "All Cognition-based effects within the zone are treated as one tier lower, and effects requiring Concentration immediately force a Concentration check when their caster enters or starts a turn in the zone.",
+          "The zone becomes a Dead Magic Sphere — spells cannot be cast, maintained, or take effect within the area unless they are 7th level or higher.",
+          "Anchor the Severance Field to a creature — it follows them for 1 minute, and while anchored they automatically fail saving throws against your Nullity effects."
+        ]
+      },
+      {
+        "name": "Anti-Glyph Disruption",
+        "description": "Your presence corrupts the flow of structured magic — intercepting spells mid-cast, suppressing artifacts, and eventually declaring a single ability that cannot exist within 60 feet of you.",
+        "tiers": [
+          "When a spell is cast within 30 feet, you may use your reaction to force the caster to make an Intelligence saving throw against your Verum DC — on a failure, the spell fails to cast and the slot is consumed.",
+          "Once per short rest, when a spell fails due to your effect, you may cause the caster to gain 1 level of Dream Exhaustion or immediately lose Concentration on another active effect.",
+          "With a touch or as part of a spell, you may attempt to suppress Aeon Crystals, Dreamlike Items, and Grimm effects — rendering them inert for 1 round.",
+          "Declare a single named spell, Glyph of Power, or Cognition — that ability cannot be used within 60 feet of you for 1 minute, unless the user succeeds on a DC 22 Intelligence or Dream saving throw."
+        ]
+      },
+      {
+        "name": "Soul Erasure",
+        "description": "Not even the spirit can hide from nothingness — blocking revival, dealing True Soul Damage, and eventually severing a creature's link to their Grimm, Node, or bound Cognition entirely.",
+        "tiers": [
+          "On a failed save, the target cannot be revived if they die during the next minute unless this effect is first dispelled.",
+          "If the target has a Grimm, Dream, or Soul-linked item, it is suppressed for 1 round — stunned and unable to act or provide benefits.",
+          "The target suffers 1 point of True Soul Damage — permanently reducing their soul integrity at DM's discretion (death save penalties, Dream penalties, or their Grimm becoming shaken).",
+          "Once per long rest, sever the creature's link to one of the following: their Grimm, their Dominant Emotion, their Dream Node, or a bound Cognition. The link cannot be restored until the target completes a Wish-level restoration, or is forgiven by a deity."
+        ]
+      },
+      {
+        "name": "Conceptual Denial",
+        "description": "You do not block the power — you erase the idea that they ever had it, stripping features, attunements, and eventually every magical capability they possess down to bare flesh.",
+        "tiers": [
+          "On a failed save, the target loses access to one named feature, spell, or ability of your choice until the end of their next turn — not suppressed, not locked, simply not there.",
+          "The denial extends for 1 minute, targeting one class feature, racial trait, or attunement benefit — while denied, the creature has no memory of how to use it and cannot attempt to work around it.",
+          "You may deny up to two features simultaneously, and the affected creature must succeed on an Intelligence save at the start of each of their turns to end the effect early — each successful save ends one denied feature.",
+          "Once per long rest, perform Total Conceptual Erasure — on a failed save the target loses access to all spell slots, Cognition features, class features, and magical abilities for 1 minute. They retain only mundane physical capability. Even Legendary Resistances are included. A successful Intelligence save at the end of each turn ends the effect."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Null Strike",
+      "type": "Offensive",
+      "description": "Resistance is a concept — Nullity rejects concepts, with a portion of the damage bypassing all resistance, immunity, and damage reduction the target has constructed.",
+      "effect": "On a hit or failed saving throw against the primary effect, half of the damage dealt bypasses all resistance, immunity, and damage reduction — the null-energy component refusing to acknowledge the defensive frameworks the target has built.",
+      "upgrades": [
+        "The bypassing portion increases to two-thirds of the total damage, and the target cannot use reactions that reduce or redirect damage until the start of your next turn — Nullity briefly denying even reactive defense.",
+        "The entire damage of the primary effect bypasses resistance, immunity, and damage reduction, and the target must succeed on an Intelligence saving throw against your Verum DC or have one active magical effect suppressed on them as the null energy disperses across their defenses."
+      ]
+    },
+    {
+      "name": "Dispel Shroud",
+      "type": "Supportive",
+      "description": "Nullity wraps around you and magic finds nothing to grip — the next spell that targets you is automatically suppressed as the null-field recognizes and rejects it.",
+      "effect": "When the primary effect resolves, null-energy briefly coalesces around you — the next spell or magical effect that targets you before the start of your next turn is automatically suppressed, failing as if Counterspelled at a level equal to half your level rounded up.",
+      "upgrades": [
+        "The Dispel Shroud absorbs the first two spells or magical effects that target you rather than just one, the null-field recognizing and rejecting each in sequence.",
+        "The shroud becomes persistent for 1 minute rather than expiring after one trigger — you automatically suppress one incoming magical effect per round, and the caster of any suppressed spell must succeed on an Intelligence saving throw against your Verum DC or lose that spell slot entirely."
+      ]
+    },
+    {
+      "name": "Antimagic Anchor",
+      "type": "Control",
+      "description": "Nullity pins them to the non-magical world — collapsing access to teleportation, magical movement, and bonus action spells before eventually denying all magical buffs cast by others.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on an Intelligence saving throw against your Verum DC or be anchored until the end of their next turn — they cannot teleport, use magical movement abilities, cast bonus action spells, or activate magical item properties while anchored.",
+      "upgrades": [
+        "On a failed save, the target also cannot cast spells as reactions and has disadvantage on Concentration checks until the end of their next turn — the anchor disrupting their ability to maintain magical multitasking.",
+        "The anchor persists for 1 minute and expands — the target also cannot benefit from magical buffs cast by others while anchored, and any attempt to remove the anchor through magical means requires a successful spellcasting ability check against your Verum DC first."
+      ]
+    }
+  ]
+}

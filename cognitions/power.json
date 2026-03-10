@@ -1,0 +1,101 @@
+{
+  "id": "power",
+  "name": "Power",
+  "icon": "👊",
+  "opposing": "control",
+  "description": "Strength, Dominance, Influence, Authority, Force.",
+  "savingThrow": "Strength",
+  "damageType": "Force",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Overwhelming Force",
+        "description": "Some things do not ask to be resisted — converting damage to pure force that ignores resistance, then immunity, then every form of mitigation until it simply arrives and cannot be stopped.",
+        "tiers": [
+          "The effect deals its damage as pure force damage regardless of its original type. It ignores resistance to the original damage type.",
+          "The effect now ignores immunity to the original damage type, dealing half damage to otherwise immune creatures. Add +2 dice to the total damage.",
+          "Add +4 dice. The force cannot be reduced by any means — damage reduction features, Shield spell, and similar effects do not apply.",
+          "Once per long rest, double all damage dice. The effect cannot be counterspelled, absorbed, or redirected by any means. It simply arrives."
+        ]
+      },
+      {
+        "name": "Rampage",
+        "description": "Power does not peak — it escalates, each hit stacking bonus force damage until Rampage State maximizes every die and your momentum becomes physically impossible to withstand.",
+        "tiers": [
+          "Each time this effect deals damage to a creature during this combat, the next instance of damage from this effect gains +1d8 bonus force damage, stacking up to 3 times. The stack resets if you do not deal damage with this effect for 2 consecutive rounds.",
+          "The stack limit increases to 5 times, and at maximum stacks you ignore resistance to the effect's damage type. The bonus die increases to +1d10.",
+          "The stack limit increases to 7 times, and at maximum stacks you additionally ignore immunity, dealing half damage to otherwise immune creatures. Stacks no longer reset between rounds — only between combats.",
+          "At maximum stacks the effect reaches Rampage State — for 1 minute your damage with this effect is maximized, you cannot be reduced below 1 HP by damage from creatures you have already hit this combat, and each hit pushes the target 10 feet as the momentum of your strikes becomes physically overwhelming."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Sovereign Aura",
+        "description": "Power does not ask to be felt — it radiates outward as a Declaration of Sovereignty, bolstering allies and pressing enemies into difficult terrain and fear.",
+        "tiers": [
+          "For 1 minute, allies within 15 feet gain +1 to attack rolls, and enemies that start their turn within 15 feet must succeed on a Strength save or have disadvantage on their first attack roll that turn.",
+          "The radius increases to 30 feet. The bonus to allies increases to +2, and enemies that fail their save also have their movement speed reduced by 10 feet for that turn.",
+          "Allies within range additionally gain +2 to saving throws, and enemies that fail are also unable to take reactions until the start of their next turn.",
+          "The aura becomes a Declaration of Sovereignty for 1 minute. Allies within range gain advantage on all attack rolls and saving throws. Enemies that fail their save are Frightened for 1 round and treat the entire aura radius as difficult terrain."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Commanding Presence",
+        "description": "Your authority alone reshapes action — stripping reactions, imposing fear, and eventually issuing a Battle Mandate that forces compliance or punishes defiance with psychic devastation.",
+        "tiers": [
+          "Force one creature to make a Strength save or be unable to take reactions until the start of their next turn.",
+          "The affected creature also suffers disadvantage on attack rolls against any creature other than you for 1 round.",
+          "Creatures that fail are Frightened of you for 1 minute and must include you as a valid target if they choose to attack on their next turn.",
+          "Issue a Battle Mandate — one word of command (\"Kneel\", \"Flee\", \"Stop\"). A creature that fails the save must comply on their next turn or suffer 6d10 psychic damage and lose their action. On a success they resist the mandate but are still Frightened for 1 round."
+        ]
+      },
+      {
+        "name": "Crushing Weight",
+        "description": "The pressure of true power does not strike — it presses down, halving speed, stacking attack and save penalties, and eventually Restraining and Stunning the target as the weight becomes overwhelming.",
+        "tiers": [
+          "On a failed save, the target's movement speed is halved and they have disadvantage on Strength checks until the end of their next turn.",
+          "The target also suffers −2 to all attack rolls and saving throws for 1 minute. Repeat Strength save at end of each turn to end early.",
+          "The penalty increases to −4, their speed is reduced to 0 until the end of their first turn, and they cannot benefit from features that increase their movement speed for the duration.",
+          "The target is Restrained and Stunned until the end of their next turn as the weight becomes overwhelming. After that, the −4 penalty and speed reduction persist for 1 minute with no repeat save."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Unyielding Might",
+      "type": "Offensive",
+      "description": "The primary effect lands with the weight of inevitability — dealing bonus force damage that ignores resistance and eventually knocks the target prone from sheer impact.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target takes bonus force damage equal to one damage die of the primary effect's type (minimum 1d6). This bonus damage ignores resistance.",
+      "upgrades": [
+        "The bonus damage increases to two dice and also ignores damage reduction features such as Stoneskin or similar effects.",
+        "The bonus damage increases to three dice, and the target must succeed on a Strength saving throw against your Verum DC or be knocked prone by the sheer force of impact."
+      ]
+    },
+    {
+      "name": "Unstoppable",
+      "type": "Supportive",
+      "description": "A surge of power briefly makes an ally more than they are — granting speed, save bonuses, and eventually immunity to being Restrained or knocked prone.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains +10 feet of movement speed and +1 to Strength and Constitution saving throws until the start of your next turn.",
+      "upgrades": [
+        "The ally also gains advantage on Strength checks and may add your spellcasting modifier to one damage roll before the start of your next turn.",
+        "The ally additionally becomes immune to being Restrained or Knocked Prone until the start of your next turn — nothing can slow them down."
+      ]
+    },
+    {
+      "name": "Domineer",
+      "type": "Control",
+      "description": "The sheer weight of authority disrupts their next move — stripping their reaction and eventually preventing them from moving toward you at all.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Strength saving throw against your Verum DC or lose their reaction until the end of their next turn.",
+      "upgrades": [
+        "On a failed save, the target also has disadvantage on the first attack roll they make on their next turn.",
+        "Creatures that fail also cannot move toward you voluntarily until the end of their next turn — the dominance of the effect pressing them back."
+      ]
+    }
+  ]
+}

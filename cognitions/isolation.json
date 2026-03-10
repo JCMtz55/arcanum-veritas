@@ -1,0 +1,89 @@
+{
+  "id": "isolation",
+  "name": "Isolation",
+  "icon": "🫧",
+  "opposing": "civilization",
+  "description": "Solitude, Detachment, Withdrawal, Loneliness, Self-Sufficiency.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Withdraw",
+        "description": "You retreat fully from the reach of the world — gaining cover, invisibility, and eventually Total Withdrawal where damage and targeting simply cannot find you.",
+        "tiers": [
+          "As a reaction when targeted by an attack or effect, gain half cover and become immune to opportunity attacks until the end of the turn.",
+          "Once per short rest, as a bonus action you may teleport up to 30 feet to an unoccupied space and become invisible until the start of your next turn or until you attack or cast a spell.",
+          "While no allies are within 30 feet of you, you gain advantage on all saving throws and resistance to one damage type of your choice — declared at the start of each of your turns. This ends immediately if an ally moves within 30 feet.",
+          "Once per long rest, for 1 minute you may enter a state of Total Withdrawal — you gain resistance to all damage, cannot be targeted by spells or effects that require you to be seen or sensed, and leave no magical trace. This state ends early if you deal damage or cast an offensive spell."
+        ]
+      },
+      {
+        "name": "Quiet Mind",
+        "description": "You silence the noise of emotion, expectation, and memory — sealing a creature's mind against enchantment, psychic damage, and eventually any divination short of divine will.",
+        "tiers": [
+          "You or one creature within 30 feet gains immunity to being Charmed or Frightened until the end of their next turn.",
+          "The target cannot be affected by enchantment magic for 1 minute — including Suggestion, Dominate, Command, and similar effects.",
+          "The target becomes immune to psychic damage and telepathic intrusion for 1 minute, and has advantage on all Intelligence and Wisdom saving throws for the same duration.",
+          "For 1 hour the target's mind becomes a sealed vault — their thoughts cannot be read or modified, they cannot be targeted by Dream, Geas, or Detect Thoughts, and they have advantage on saves against any divination or mind-affecting effect of 8th level or lower."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Sever Link",
+        "description": "You cut the threads between others — stripping healing, shared features, and ally buffs until the target stands in a pocket of magic that simply cannot reach them.",
+        "tiers": [
+          "A creature that fails cannot benefit from spells or features granted by allies (healing, buffs, Help actions) until the end of their next turn.",
+          "The target also cannot communicate telepathically or magically, and loses access to shared reactions or bonded features (e.g., Pack Tactics, Link Bonds) for 1 minute. Repeat Wisdom save at end of each turn to end early.",
+          "The target is isolated from all group effects — auras, zones, summoner links, and shared resistances are suppressed for 1 minute. No repeat save.",
+          "For 1 minute the target is functionally invisible to their allies' magic — ally spells and features that require line of sight or targeting cannot reach them, and they cannot receive buffs, healing, or protective effects from any source other than themselves."
+        ]
+      },
+      {
+        "name": "Null Space",
+        "description": "You manifest a personal void — a sanctuary of silence where telepathy fails, verbal spells stutter, and magic cast across the boundary finds nothing to hold onto.",
+        "tiers": [
+          "Choose a 10-foot radius area within 60 feet. Within it, telepathy, empathy, and magical tracking do not function until the end of your next turn.",
+          "Within the Null Space, spells with verbal components have a 50% chance of failing, and creatures are considered deafened and have disadvantage on Charisma checks for as long as they remain inside. Duration extends to 1 minute.",
+          "The area becomes disconnected from magical auras. Spells cast into or out of the space must succeed on a spellcasting ability check (DC equals your Verum DC) or fail completely. Duration extends to 10 minutes.",
+          "Null Space becomes a Zone of Total Severance for 1 minute. Creatures inside are immune to divination and cannot be targeted by effects originating outside the zone. Creatures that leave the zone have their memories of what occurred inside suppressed until they finish a long rest or receive a Greater Restoration."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Fracture Bond",
+      "type": "Offensive",
+      "description": "The primary effect severs the invisible threads that connect a creature to those who would protect it — dealing bonus psychic damage as ally magic finds no thread to follow.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target takes bonus psychic damage equal to one damage die of the primary effect's type (minimum 1d6). Additionally the target's allies cannot perceive them through magical means until the end of their next turn — healing spells, buffs, and targeted effects aimed at them by allies automatically fail.",
+      "upgrades": [
+        "The bonus damage increases to two dice, and the ally perception severance extends to physical senses enhanced by magic — effects like Guidance, Bless, or Bardic Inspiration already applied to the target are suppressed for the same duration.",
+        "The bonus damage increases to three dice, and the severance lasts until the end of the target's next turn rather than yours — giving them one agonizing round where they must act completely alone before the connection snaps back."
+      ]
+    },
+    {
+      "name": "Island",
+      "type": "Supportive",
+      "description": "Distance becomes defense — isolation briefly insulating you or an ally from harm with a bonus to AC and saving throws.",
+      "effect": "When the primary effect resolves, you or one ally within 30 feet gains a +2 bonus to AC and advantage on the next saving throw they make before the start of your next turn.",
+      "upgrades": [
+        "The bonus extends to all saving throws until the start of your next turn, not just the first.",
+        "You may choose two creatures to receive this benefit, and the AC bonus increases to +3."
+      ]
+    },
+    {
+      "name": "Cut Off",
+      "type": "Control",
+      "description": "For a moment they stand completely alone — unable to receive the Help action, ally auras, or any buff applied by another creature.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Wisdom saving throw against your Verum DC or be unable to benefit from the Help action, ally auras, or any buff applied by another creature until the end of their next turn.",
+      "upgrades": [
+        "On a failed save, the target also cannot use the Help action themselves — isolation severing their ability to connect outward as well as inward.",
+        "Creatures that fail also have all currently active ally-granted buffs suppressed until the end of their next turn — existing Bless, Bardic Inspiration, and similar effects are temporarily inert."
+      ]
+    }
+  ]
+}

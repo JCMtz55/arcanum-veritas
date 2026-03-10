@@ -1,0 +1,111 @@
+{
+  "id": "fire",
+  "name": "Fire",
+  "icon": "🔥",
+  "opposing": "ice",
+  "description": "Destruction, Passion, Purification, Rebirth, Warmth.",
+  "savingThrow": "Dexterity",
+  "damageType": "Cognitive Fire",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Fierce",
+        "description": "Your fire burns hotter with every drop of fury.",
+        "tiers": [
+          "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice.",
+          "The fire damage increases by 4 additional dice.",
+          "Fire damage increases by 6 additional dice. Creatures that fail the save or are hit directly take fire damage equal to Five Times your Verum Modifier at the start of their next turn.",
+          "Fire damage increases by 8 additional dice. Creatures that fail or are hit directly are Ablaze — taking Five Times your Verum Modifier at the start of each of their turns for 1 minute, unless extinguished by cognitive means that counter this effect."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Life-Bringer",
+        "description": "Fire is not only death. It is the light that holds back the dark.",
+        "tiers": [
+          "When this effect damages a creature, you or one ally within 30 feet may regain 1d4 hit points.",
+          "You may split the healing between two allies for a combined total of 2d6 hit points.",
+          "If a creature died within the last round and was within range of the effect, you may restore them to 1 HP in a burst of reviving flame.",
+          "Choose up to 5 allies touched by the flame. Each regains 6d10 hit points, removes one condition (except Petrified or Unconscious), and is wreathed in fire for 1 minute, dealing 1d8 fire damage on melee hits."
+        ]
+      },
+      {
+        "name": "Unrelenting Heat",
+        "description": "Your flame cannot be denied by resistance or resilience.",
+        "tiers": [
+          "This effect's fire damage ignores resistance.",
+          "The fire bypasses immunity, dealing half damage to normally immune creatures.",
+          "Fire damage dealt to flammable objects or creatures vulnerable to fire is always treated as maximum.",
+          "The fire bypasses all resistance and immunity, prevents invisibility or hiding via a persistent heat signature, and dissolves magical barriers of 5th level or lower on contact."
+        ]
+      },
+      {
+        "name": "Infernal Passion",
+        "description": "You do not merely cast fire — you become it. (Save: Wisdom)",
+        "tiers": [
+          "Gain advantage on your next Charisma check or saving throw before the end of your next turn.",
+          "For 1 minute, you and allies within 30 feet gain +2 to attack rolls while the fire persists.",
+          "Enemies within 60 feet who fail a Wisdom saving throw are Frightened of you for 1 round.",
+          "You radiate burning presence. Hostile creatures beginning their turn within 30 feet must succeed on a Charisma saving throw or become Charmed, Frightened, or Enraged (your choice) for 1 minute. Allies within range gain immunity to fear and +1 to all damage rolls."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Wildflame Wake",
+        "description": "Fire leaves behind more than ashes — it reshapes the ground itself. (Save: Dexterity)",
+        "tiers": [
+          "Terrain scorched by the effect becomes difficult terrain for enemies until the end of your next turn.",
+          "The area becomes blazing terrain — any creature starting its turn there takes 2d6 fire damage.",
+          "Creatures entering or starting their turn in scorched terrain must succeed on a Dexterity saving throw or be Ignited.",
+          "The terrain erupts into a Living Flame Storm for 1 minute. Hostile creatures treat it as impassable solid terrain unless immune to fire. Any creature that enters or starts its turn there takes 5d10 fire damage."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Ember's Bite",
+      "type": "Offensive",
+      "description": "The primary effect carries a burning edge.",
+      "effect": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6). On a failed Dexterity save vs your Verum DC, they are also Ignited — taking 1d6 fire damage at the start of their next turn.",
+      "upgrades": [
+        "Level 5+: Bonus damage increases to two dice.",
+        "Level 11+: Bonus damage increases to three dice, and the Ignited condition lasts 1 minute instead of one turn."
+      ]
+    },
+    {
+      "name": "Hearthglow",
+      "type": "Supportive",
+      "description": "A flicker of warmth accompanies the spell.",
+      "effect": "When the primary effect resolves, one creature within 30 feet regains HP equal to your spellcasting modifier. If the primary effect heals, this is added on top.",
+      "upgrades": [
+        "Level 5+: Choose up to two creatures to receive this healing.",
+        "Level 11+: Each healed creature also gains temporary HP equal to your spellcasting modifier until the start of your next turn."
+      ]
+    },
+    {
+      "name": "Cinder March",
+      "type": "Control",
+      "description": "Wherever the spell lands, fire claims the ground.",
+      "effect": "The point of impact becomes scorched terrain in a 10-foot radius until the end of your next turn. Creatures must succeed on a Dexterity save vs your Verum DC or be pushed 5 feet away from the center.",
+      "upgrades": [
+        "Level 5+: Scorched terrain persists 1 minute. Creatures entering take 1d6 fire damage per 5 feet traveled through it.",
+        "Level 11+: Creatures that fail cannot willingly move toward the center for 1 round."
+      ]
+    },
+    {
+      "name": "Smoldering Haze",
+      "type": "Control",
+      "description": "The heat rattles the mind as much as the body.",
+      "effect": "Creatures hit by or failing their save must succeed on a Dexterity save vs your Verum DC or suffer disadvantage on their next attack roll.",
+      "upgrades": [
+        "Level 5+: Penalty extends to all attack rolls until the end of their next turn.",
+        "Level 11+: Creatures that fail also have their movement speed reduced by 10 feet until the end of their next turn."
+      ]
+    }
+  ]
+}

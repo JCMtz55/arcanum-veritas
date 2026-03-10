@@ -1,0 +1,101 @@
+{
+  "id": "blood",
+  "name": "Blood",
+  "icon": "🩸",
+  "opposing": "spirit",
+  "description": "Vitality, Kinship, Sacrifice, Lineage, Power.",
+  "savingThrow": "Constitution",
+  "damageType": "Sanguine",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Blood-Surge",
+        "description": "Sacrifice your flesh and your magic drinks the price — spending hit points to fuel automatic crits and Sanguine devastation at its peak.",
+        "tiers": [
+          "You may lose HP up to your Constitution modifier × your Hit Dice. Your effect gains +1 damage die of the same type per point of HP sacrificed.",
+          "For every 10 HP sacrificed, the effect's critical hit range increases by 1 (maximum +3).",
+          "Damage from the effect is multiplied by 1.5 and becomes Sanguine damage type, bypassing resistances that apply to the original type.",
+          "You may reduce your maximum HP by 50% for 1 minute. During this time, all your damaging effects automatically critically hit and are treated as effects from a Cognition Tier artifact. When this ends, the lost maximum HP cannot be recovered until a Greater Restoration or Cognition-based healing is applied."
+        ]
+      },
+      {
+        "name": "Blood Curse",
+        "description": "Your blood is both weapon and vector — punishing those who strike you, hexing those who touch it, and etching catastrophe into the land itself.",
+        "tiers": [
+          "When you take damage, you may use your reaction to deal equal Sanguine damage to the attacker. Constitution save halves.",
+          "Any creature that drinks your blood or is struck by a weapon coated in it must succeed on a Constitution save or become hexed for 1 hour — suffering disadvantage on saving throws against your effects.",
+          "Once per round, every creature struck by your effect becomes vulnerable to your next spell or attack before the start of your next turn.",
+          "As an action, offer your blood to the land in a 100-foot radius. All allies inside are revived to 1 HP if downed. All enemies take 6d10 Sanguine damage (Constitution save halves). A Blood Curse is etched into the area for 24 hours — all healing is halved and all death saves are made with disadvantage unless cleansed by divine means."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Blood-Healing",
+        "description": "Blood remembers the shape the body was before it broke — and given the right direction, given a sample, it will return there.",
+        "tiers": [
+          "If you possess a creature's blood sample, your healing effect is doubled when used on them.",
+          "You may use a blood sample to target that creature at any range, even without line of sight. If they are dead and their body is intact, you may revive them to 1 HP as part of this effect.",
+          "Healing through this effect ignores all healing penalties, removes one curse, and heals one level of exhaustion.",
+          "You may store blood from up to three creatures. As long as you retain each sample, you may resurrect that creature at any distance as a reaction to the moment of their death — once per day per creature. Missing body parts are restored instantly as part of the resurrection."
+        ]
+      },
+      {
+        "name": "Blood-Bond",
+        "description": "The red thread of lineage cuts across realms and mortality — reaching any relative regardless of distance, death, or the planes between.",
+        "tiers": [
+          "Your effect can target a blood relative (parent, sibling, child) regardless of distance, even across planes.",
+          "If the bonded creature is dead but their body remains, you can speak with them or grant them one action expressed as a ghost acting through your body.",
+          "Blood Bonds extend to ancestors and descendants. You may learn one memory, flaw, or trait from any related bloodline member — living or dead.",
+          "Choose one bloodline member, living or dead, and absorb their power for 1 hour — gaining one feature they possessed in life (racial trait, class feature, magic, or Cognition affinity). Your effect may target every member of that bloodline simultaneously, regardless of their status, realm, or physical condition."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Blood Oath",
+        "description": "Magic that is bound in blood cannot be undone — sealing promises in the body itself until the oath is kept or the oathbreaker is marked before every god.",
+        "tiers": [
+          "Link yourself to a willing creature. While bonded, you may transfer half of any damage taken to each other, and you share languages and senses.",
+          "When a creature swears an oath in blood (a drop on skin), they are bound to it for 7 days. Breaking it causes 5d10 psychic damage and costs them one Hit Die.",
+          "Forge a binding pact lasting 24 hours. If the bonded creature dies during this time, you may die in their place or pull them back to life, taking on their wounds as your own.",
+          "Forge a Perpetual Blood Oath lasting one year and one day. The target cannot attack you, betray you, or speak falsehoods against you. If they do, they immediately suffer a Cognition-tier curse and are marked as Oathbreakers — visible to all gods and creatures with divine sight."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Sanguine Wound",
+      "type": "Offensive",
+      "description": "The spell doesn't just damage — it opens something that keeps opening, bleeding the target at the start of each turn until staunched or healed.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target begins bleeding — losing 1d6 Sanguine damage at the start of each of their turns. The bleeding persists until they or an ally uses an action to staunch it (Medicine check DC equals your Verum DC), or until they receive magical healing.",
+      "upgrades": [
+        "The bleeding damage increases to 2d6, and the DC to staunch it increases to your Verum DC + 2.",
+        "The bleeding damage increases to 3d6, and the wound cannot be staunched by mundane means — only magical healing or a successful Constitution saving throw at the start of their turn (DC equals your Verum DC) ends it."
+      ]
+    },
+    {
+      "name": "Transfusion",
+      "type": "Supportive",
+      "description": "You give of yourself so another might endure — sacrificing your own hit points to send vitality directly into an ally.",
+      "effect": "When the primary effect resolves, you may voluntarily lose hit points up to your proficiency bonus. One ally within 30 feet gains twice that amount as healing.",
+      "upgrades": [
+        "You may sacrifice up to your proficiency bonus + your Constitution modifier HP, and the healing ratio increases to three times the amount sacrificed.",
+        "The healing now also removes one condition of your choice from the ally, and you do not suffer any negative effects from being reduced to low HP by this sacrifice — the act of giving stabilizes rather than diminishes you."
+      ]
+    },
+    {
+      "name": "Bloodline Mark",
+      "type": "Control",
+      "description": "Once your blood touches them, they are known — tracked, visible through illusion, and easier to strike for as long as the mark endures.",
+      "effect": "When the primary effect hits or a target fails their saving throw, they are marked by blood for 1 hour — you always know their exact location and distance, they cannot benefit from invisibility or illusions against you, and your spell attacks against them gain +1 to hit.",
+      "upgrades": [
+        "All allies who can see the marked creature also gain advantage on attack rolls against them on the first attack each turn, as the blood mark pulses visibly to those attuned to it.",
+        "The mark persists for 24 hours and becomes permanent until removed by Remove Curse or Greater Restoration. Additionally, any spell you cast that deals damage to the marked creature deals +1d8 Sanguine bonus damage."
+      ]
+    }
+  ]
+}

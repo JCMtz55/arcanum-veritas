@@ -1,0 +1,107 @@
+{
+  "id": "apathy",
+  "name": "Apathy",
+  "icon": "🌫️",
+  "opposing": "passion",
+  "description": "Indifference, Emotional Detachment, Numbness, Passivity, The Hollow.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "control": [
+      {
+        "name": "Will Suppression",
+        "description": "You drain the will to act — stripping action economy through existential detachment until the body simply stops.",
+        "tiers": [
+          "The target has disadvantage on attack rolls for any attack after the first they make this turn.",
+          "The target cannot take reactions, and must succeed on a Wisdom save to use their bonus action each turn.",
+          "The target may take only one action per turn, even if they have Legendary Actions, Extra Attack, or similar features — all additional action economy becomes inaccessible.",
+          "The target must succeed on a Wisdom save at the start of each of their turns or be Stunned until the end of that turn. On a failed save, they do not make the saving throw to remove this effect that turn."
+        ]
+      },
+      {
+        "name": "Emotion Fade",
+        "description": "You numb passion and purpose — hollowing the emotional spectrum until even the instinct to feel becomes inaccessible.",
+        "tiers": [
+          "Choose one emotion (fear, love, hatred, grief, etc.) — the target becomes immune to effects involving that emotion for 1 round. They cannot access it themselves either.",
+          "The target becomes emotionally numb — they lose all morale-based bonuses, cannot benefit from Inspiration, and have disadvantage on Charisma checks for 1 minute.",
+          "The effect expands to all creatures within 20 feet of the target — rendering them unable to be Frightened, Charmed, or Inspired for 1 minute.",
+          "The target becomes Emotionless for 1 minute — they cannot gain or grant bonuses through morale, emotion-based features, or bonds. All bonded or sympathetic magical effects are suppressed. If reduced to 0 HP while Emotionless, no ally may use a reaction to stabilize or save them."
+        ]
+      },
+      {
+        "name": "Null Conviction",
+        "description": "You sever cause from action — cutting the thread between intent and execution until purpose itself dissolves.",
+        "tiers": [
+          "If the target is concentrating on a spell, they must make the Concentration check at disadvantage or lose Concentration immediately.",
+          "The target loses access to one class feature of your choice for 1 minute — that feature simply does not exist for them.",
+          "The target forgets their goal for 1 round — they take no hostile action unless directly provoked, and cannot maintain tactical intent.",
+          "The target becomes Unmotivated for 1 minute — their initiative is reduced to 0, they cannot take Legendary Actions, and cannot cast spells or use features that require motivation, belief, or emotion (such as Divine Smite, Rage, or Vow of Enmity)."
+        ]
+      },
+      {
+        "name": "Draining Presence",
+        "description": "Your aura inspires indifference — projecting a field of hollow stillness that erodes action, emotion, and response alike.",
+        "tiers": [
+          "Creatures within 10 feet have disadvantage on Insight and Persuasion checks — your presence making emotional reading and connection feel pointless.",
+          "Hostile creatures that start their turn within 10 feet must succeed on a Wisdom save against your Verum DC or lose their bonus action that turn.",
+          "Allies within 10 feet are immune to Charm and Fear, but also cannot be affected by Inspiration or Bardic effects — the apathetic field protecting and numbing in equal measure.",
+          "For 1 minute, project Total Apathy in a 30-foot aura — all creatures within lose advantage granted by external emotion-based effects, cannot take reactions or Legendary Actions, and allies cannot receive or benefit from emotion-based healing or buffs for the duration."
+        ]
+      },
+      {
+        "name": "Collapse of Meaning",
+        "description": "You rob the world of purpose — draining magic of its color and conviction until even the act of casting inspires nothing.",
+        "tiers": [
+          "Suppress the visual and verbal expression of a target's spell or ability — its manifestation becomes silent, grey, and bleak. It still functions, but inspires nothing.",
+          "A target spell, object, or summoned entity loses its appearance, sound, and aura. Creatures have disadvantage to recall it later, and it cannot serve as the source of morale or inspiration effects.",
+          "Create a Zone of Emptiness in a 20-foot radius — Inspiration cannot be granted, and Bardic and morale-based features automatically fail within the zone for 1 minute.",
+          "Once per long rest, invoke Meaningless Doom — one creature loses access to all emotion-linked magic, cannot cast or be affected by spells involving feelings, belief, or empathy, and must succeed on a Charisma save or be erased from collective memory until they take damage — not invisible, simply unregistered."
+        ]
+      },
+      {
+        "name": "Void of Purpose",
+        "description": "You strip away the reason to continue — halving momentum, then motion, then the will to inhabit a body at all.",
+        "tiers": [
+          "The target has disadvantage on saving throws against effects that would cause them to stop acting — paralysis, stun, sleep, and similar conditions.",
+          "The target's movement speed is halved and they cannot take the Dash action — forward momentum becoming an effort they cannot justify.",
+          "The target is Incapacitated for 1 round as overwhelming indifference washes over them — the body still standing, the will entirely absent.",
+          "The target must succeed on a Charisma saving throw or become catatonic for 1 minute — unconscious but fully aware, unable to act, react, or be roused except by taking damage. Even after waking, they have disadvantage on all rolls for 1 minute."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Grey Touch",
+      "type": "Offensive",
+      "description": "The nothing lands with weight — the target takes psychic damage not from pain but from the sudden absence of the thing making them feel capable of continuing.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target takes psychic damage equal to your Wisdom modifier + your proficiency bonus.",
+      "upgrades": [
+        "The psychic damage increases to twice your Wisdom modifier + your proficiency bonus, and the target has disadvantage on their next Wisdom saving throw before the end of your next turn.",
+        "The target also loses one use of Legendary Resistance if they have any remaining. If they have none, they instead have disadvantage on all Wisdom saving throws until the end of your next turn."
+      ]
+    },
+    {
+      "name": "Hollow Veil",
+      "type": "Supportive",
+      "description": "Emptiness insulates — you are briefly wrapped in the same detachment you project outward, leaving nothing for fear or charm to find.",
+      "effect": "When the primary effect resolves, you gain advantage on saving throws against emotion-based effects (Frightened, Charmed, morale penalties) and immunity to the Frightened condition until the start of your next turn.",
+      "upgrades": [
+        "The veil persists for 1 minute, and you also gain advantage on Wisdom saving throws for the duration — the hollow clarity of apathy making your mind harder to reach.",
+        "While the veil is active, you are also immune to psychic damage and cannot be detected by Detect Thoughts or similar divination — the absence of emotional signal leaving nothing for such magic to find."
+      ]
+    },
+    {
+      "name": "Suppress",
+      "type": "Control",
+      "description": "One thing, simply gone — not blocked, not locked, simply inaccessible, as though the conviction required to use it is momentarily absent.",
+      "effect": "When the primary effect hits or the target fails their saving throw, that target must succeed on a Wisdom saving throw against your Verum DC or lose access to one named ability, spell, class feature, or trait of your choice until the end of their next turn.",
+      "upgrades": [
+        "The suppression extends for 1 minute, and the target must succeed on a Wisdom save at the start of each of their turns to end the effect early.",
+        "You may suppress two features simultaneously, and the target has disadvantage on saving throws to end the effect — the doubled absence making the will to recover even harder to locate."
+      ]
+    }
+  ]
+}

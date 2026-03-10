@@ -1,0 +1,99 @@
+{
+  "id": "control",
+  "name": "Control",
+  "icon": "👑",
+  "opposing": "power",
+  "description": "Domination, Authority, Regulation, Influence, Order.",
+  "savingThrow": "Intelligence",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Chain of Authority",
+        "description": "You do not command them to obey — you make obedience feel like a choice they are making, linking allies into a command chain that amplifies their every response.",
+        "tiers": [
+          "One willing creature becomes Linked to you. You may issue mental instructions to them as a bonus action. While Linked, they add your proficiency bonus to Initiative rolls.",
+          "Up to three creatures may be Linked simultaneously. Once per short rest, you may grant one Linked creature an extra bonus action on their turn.",
+          "Linked allies gain advantage on saving throws against being Charmed, Frightened, or Dominated. Once per turn, as a reaction, you may cause one Linked creature to automatically succeed on a failed saving throw.",
+          "You forge a Control Chain Nexus for 1 hour — up to six creatures are Linked within 120 feet. Any spell you cast that targets only yourself may simultaneously affect all Linked allies (once per long rest). If a Linked creature would be reduced to 0 HP by a single blow, you may use your reaction to redirect that blow to yourself or another Linked creature — the original target is reduced to 1 HP instead."
+        ]
+      },
+      {
+        "name": "Monarch's Immunity",
+        "description": "The world must obey your rules — starting with you, made exempt from compulsion, displacement, and the kind of damage that breaks lesser minds mid-cast.",
+        "tiers": [
+          "Once per long rest, you may ignore one source of forced movement or one condition that would be applied to you — the effect simply does not take hold.",
+          "You are unaffected by effects that alter time, gravity, or compulsion unless you choose to be. This includes magical aging, slow effects, and enchantment-school compulsions.",
+          "Your Concentration cannot be broken by taking damage unless you are Incapacitated.",
+          "As a reaction, once per long rest, you may nullify a single condition or effect on yourself or one ally within 30 feet — this functions as Greater Restoration without requiring components. The effect is immediate and does not require an action."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Command Directive",
+        "description": "You do not ask — you legislate, issuing a directive the target's body obeys before their mind finishes refusing.",
+        "tiers": [
+          "On a failed save, the target is forced to perform or forfeit a stated single-word directive on their next turn (e.g., halt, drop, flee, kneel). The action must be physically possible for them.",
+          "The command becomes sustained — for 1 minute, if the creature defies your directive, they take 2d10 psychic damage and must repeat the saving throw. A new success ends the effect.",
+          "Commands now override Charmed immunity, and the creature is treated as Charmed by you for the duration. Legendary Resistance does not apply unless the creature has mythic resistance.",
+          "Once per use of this effect, you may issue a Cognitonic Law — a single behavioral prohibition. For 24 hours, breaking this law Stuns the creature and deals 5d12 psychic damage with no saving throw. Only a Wish or divine purification removes the Law entirely."
+        ]
+      },
+      {
+        "name": "Domain Regulation",
+        "description": "In this space, your word is the only rule that applies — restricting movement, voiding healing, and eventually making entire action categories structurally unavailable.",
+        "tiers": [
+          "Creatures of your choice within a 30-foot radius zone have disadvantage on saving throws against your spells and abilities for 1 minute.",
+          "You may negate one category of movement within the zone for 1 minute — all creatures are subject to the restriction regardless of source (no teleportation, no flight, no forced movement, etc.).",
+          "You may declare one environmental rule (e.g., 'No fire may exist here,' 'No creature may be healed'). Any attempt to violate it automatically fails unless the creature succeeds on a Charisma saving throw against your Verum DC.",
+          "You establish a World Law within the zone. Choose one action category (attack, cast a spell, move, heal, teleport). Enemies cannot perform that action while inside the zone, with no saving throw. Only divine authority or a Cognition of equal or greater power can override this law."
+        ]
+      },
+      {
+        "name": "Leash of Will",
+        "description": "You reach into the space between intention and execution and close your hand — seizing actions mid-air, suspending them, reversing them, or banking them for your own use.",
+        "tiers": [
+          "On a failed save, the creature's action is delayed — it resolves at the end of their next turn instead of now. They may not take that same action type again in the interim.",
+          "On a failed save, the action is suspended indefinitely — the creature cannot repeat it until you release the hold or 1 minute passes.",
+          "On a failed save, you may choose to reverse the stored action — a targeted spell or ability now affects the creature that initiated it instead. They make an Intelligence saving throw to resist this reversal.",
+          "You store the action in a Control Bank. Once per long rest, you may release that stored action yourself, using the original creature's statistics, spell slots, or ability parameters as if you were them. The original creature has no awareness that their capacity was held."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Suspended Action",
+      "type": "Offensive",
+      "description": "The target intended to act — that intention is now yours to schedule, seized and held one full beat behind where it was meant to land.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target's next action is seized — they may not spend it until the start of your following turn. The action is not lost; it is held. They may still use bonus actions, reactions, and movement in the interim.",
+      "upgrades": [
+        "The suspension extends to their next two actions — both are delayed by one turn, creating a gap in their action economy that allies can exploit.",
+        "The suspended actions may be redirected — on a failed Intelligence saving throw against your Verum DC, the target's first suspended action instead resolves against themselves or a creature of your choice within their range."
+      ]
+    },
+    {
+      "name": "Commanding Presence",
+      "type": "Supportive",
+      "description": "Your authority over the moment extends to those you fight beside — one ally rerolls a failed save on the strength of your presence alone.",
+      "effect": "When the primary effect resolves, one ally within 30 feet who can see or hear you may immediately reroll one failed saving throw they made since the start of your last turn, using the new result.",
+      "upgrades": [
+        "You may apply this benefit to two allies simultaneously, and the reroll gains a bonus equal to your proficiency bonus.",
+        "The chosen ally may also end one condition of your choice currently affecting them (Frightened, Charmed, or Stunned only) as the clarity of your authority cuts through the effect."
+      ]
+    },
+    {
+      "name": "Jurisdiction",
+      "type": "Control",
+      "description": "Impact declares the rules — the area understands, and one category of enemy action is suppressed within it until you decide otherwise.",
+      "effect": "When the primary effect hits or a target fails their saving throw, a 15-foot radius zone appears at the point of impact in which one action type of your choice (attack, cast a spell, move more than half speed, or use a bonus action) is suppressed for all enemies until the start of your next turn.",
+      "upgrades": [
+        "The zone persists for 1 minute and its radius increases to 30 feet. Enemies that attempt the suppressed action must first succeed on an Intelligence saving throw against your Verum DC or the action is wasted.",
+        "You may suppress two action types simultaneously within the zone, and allies within the area are immune to the restriction — the jurisdiction recognizes who is welcome."
+      ]
+    }
+  ]
+}

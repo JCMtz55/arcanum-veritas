@@ -1,0 +1,242 @@
+{
+  "cognitions": [
+    {
+      "id": "acid",
+      "name": "Acid",
+      "icon": "💨",
+      "opposing": "metal",
+      "ready": false
+    },
+    {
+      "id": "air",
+      "name": "Air",
+      "icon": "💨",
+      "opposing": "earth",
+      "ready": false
+    },
+    {
+      "id": "apathy",
+      "name": "Apathy",
+      "icon": "🌫️",
+      "opposing": "passion",
+      "ready": true
+    },
+    {
+      "id": "balance",
+      "name": "Balance",
+      "icon": "⚖️",
+      "opposing": "chaos",
+      "ready": false
+    },
+    {
+      "id": "beast",
+      "name": "Beast",
+      "icon": "🐺",
+      "opposing": "civilization",
+      "ready": true
+    },
+    {
+      "id": "blood",
+      "name": "Blood",
+      "icon": "🩸",
+      "opposing": "spirit",
+      "ready": true
+    },
+    {
+      "id": "bones",
+      "name": "Bones",
+      "icon": "🦴",
+      "opposing": "flesh",
+      "ready": true
+    },
+    {
+      "id": "civilization",
+      "name": "Civilization",
+      "icon": "🏛️",
+      "opposing": "beast",
+      "ready": true
+    },
+    {
+      "id": "control",
+      "name": "Control",
+      "icon": "👑",
+      "opposing": "power",
+      "ready": false
+    },
+    {
+      "id": "corruption",
+      "name": "Corruption",
+      "icon": "🦠",
+      "opposing": "soul",
+      "ready": true
+    },
+    {
+      "id": "death",
+      "name": "Death",
+      "icon": "💀",
+      "opposing": "life",
+      "ready": true
+    },
+    {
+      "id": "disaster",
+      "name": "Disaster",
+      "icon": "🌪️",
+      "opposing": "protection",
+      "ready": false
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "icon": "🔥",
+      "opposing": "ice",
+      "ready": true
+    },
+    {
+      "id": "flesh",
+      "name": "Flesh",
+      "icon": "🫀",
+      "opposing": "bones",
+      "ready": true
+    },
+    {
+      "id": "fortune",
+      "name": "Fortune",
+      "icon": "🎲",
+      "opposing": "misfortune",
+      "ready": true
+    },
+    {
+      "id": "growth",
+      "name": "Growth",
+      "icon": "🌱",
+      "opposing": "decay",
+      "ready": true
+    },
+    {
+      "id": "hate",
+      "name": "Hate",
+      "icon": "🔥",
+      "opposing": "love",
+      "ready": true
+    },
+    {
+      "id": "heroism",
+      "name": "Heroism",
+      "icon": "⚔️",
+      "opposing": "vileness",
+      "ready": true
+    },
+    {
+      "id": "ice",
+      "name": "Ice",
+      "icon": "❄️",
+      "opposing": "fire",
+      "ready": true
+    },
+    {
+      "id": "isolation",
+      "name": "Isolation",
+      "icon": "🫧",
+      "opposing": "civilization",
+      "ready": true
+    },
+    {
+      "id": "life",
+      "name": "Life",
+      "icon": "🌿",
+      "opposing": "death",
+      "ready": true
+    },
+    {
+      "id": "lightning",
+      "name": "Lightning",
+      "icon": "⚡",
+      "opposing": "earth",
+      "ready": true
+    },
+    {
+      "id": "metal",
+      "name": "Metal",
+      "icon": "⚙️",
+      "opposing": "lightning",
+      "ready": true
+    },
+    {
+      "id": "misfortune",
+      "name": "Misfortune",
+      "icon": "🩸",
+      "opposing": "fortune",
+      "ready": true
+    },
+    {
+      "id": "nightmare",
+      "name": "Nightmare",
+      "icon": "🕳️",
+      "opposing": "dream",
+      "ready": false
+    },
+    {
+      "id": "nullity",
+      "name": "Nullity",
+      "icon": "⬛",
+      "opposing": "creation",
+      "ready": true
+    },
+    {
+      "id": "pain",
+      "name": "Pain",
+      "icon": "🩹",
+      "opposing": "healing",
+      "ready": true
+    },
+    {
+      "id": "power",
+      "name": "Power",
+      "icon": "👊",
+      "opposing": "control",
+      "ready": true
+    },
+    {
+      "id": "protection",
+      "name": "Protection",
+      "icon": "🛡️",
+      "opposing": "vulnerability",
+      "ready": true
+    },
+    {
+      "id": "shadow",
+      "name": "Shadow",
+      "icon": "🌑",
+      "opposing": "light",
+      "ready": false
+    },
+    {
+      "id": "silence",
+      "name": "Silence",
+      "icon": "🤫",
+      "opposing": "sound",
+      "ready": false
+    },
+    {
+      "id": "soul",
+      "name": "Soul",
+      "icon": "🕊️",
+      "opposing": "corruption",
+      "ready": false
+    },
+    {
+      "id": "speed",
+      "name": "Speed",
+      "icon": "⚡",
+      "opposing": "stagnation",
+      "ready": false
+    },
+    {
+      "id": "toxin",
+      "name": "Toxin",
+      "icon": "🧪",
+      "opposing": "life",
+      "ready": false
+    }
+  ]
+}

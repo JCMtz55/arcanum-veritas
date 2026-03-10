@@ -1,0 +1,101 @@
+{
+  "id": "death",
+  "name": "Death",
+  "icon": "💀",
+  "opposing": "life",
+  "description": "Finality, Transition, Necromancy, Loss, Inevitability.",
+  "savingThrow": "Constitution",
+  "damageType": "Necrotic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Long-Lasting Pain",
+        "description": "Pain is not an instant — it is a sentence.",
+        "tiers": [
+          "Half the damage from this effect is delayed, repeating at the start of the creature's next turn.",
+          "Delayed damage is now necrotic and the creature is incapacitated for the first action it takes on its next turn if it fails a Constitution save.",
+          "The pain leaves a curse — the target suffers disadvantage on Concentration checks and saving throws against fear for 1 minute.",
+          "Delayed pain echoes across time. The creature takes the full damage again after 1 minute unless it passes a Constitution save or is already dead."
+        ]
+      },
+      {
+        "name": "Soul-Shear",
+        "description": "You do not simply harm the body — you unravel the soul's cohesion. (Save: Constitution)",
+        "tiers": [
+          "Targets damaged by this effect cannot benefit from temporary HP for 1 minute.",
+          "They suffer disadvantage on death saving throws and any Concentration check.",
+          "They gain a Lingering Fracture — for the next hour, they suffer −1 to all saving throws and cannot be revived without a Greater Restoration to patch their spirit.",
+          "The soul is split. If the creature dies, it cannot pass on — it becomes either a Wraith, a Bound Ghost, or is trapped in a Cognition-infused object. The caster chooses the fate."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Undying",
+        "description": "You commune with Death, and Death answers.",
+        "tiers": [
+          "You can speak with the soul of a creature that died within the last hour, even if the body is destroyed.",
+          "You may see invisible spirits and undead within 120 feet and command them to stand still for 1 round (no save unless CR ≥ your level).",
+          "Undead summoned or controlled by you under this effect gain advantage on all attacks and saves, and ignore radiant vulnerability.",
+          "Your presence forces spirits to manifest. Undead within 1 mile reveal themselves, and you may bind one ghost or soul into a weapon, object, or ally to grant it spectral power for 24 hours."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Anti-Healing",
+        "description": "You rot hope before it forms. Wounds do not close — only deepen. (Save: Constitution)",
+        "tiers": [
+          "The target cannot regain hit points until the end of their next turn.",
+          "The target cannot regain hit points or temporary hit points for 1 minute. They may repeat the Constitution saving throw at the end of each of their turns to end the effect early.",
+          "Any healing the target receives is reduced by half for 1 hour, and they lose resistance to necrotic damage for the same duration.",
+          "For 1 minute, any healing the target receives is instead dealt as necrotic damage. All healing within 10 feet of them is halved for every creature."
+        ]
+      },
+      {
+        "name": "Destined Death",
+        "description": "Death is not just probable — it is prophesied. The thread tightens. It was always going to. (Save: Constitution)",
+        "tiers": [
+          "The target is Marked. If reduced to 0 HP before the mark fades (1 minute), they cannot be stabilized by nonmagical means and begin dying with disadvantage on all death saving throws.",
+          "The Mark deepens. If the target dies while Marked, no spell of 5th level or lower can revive them — Revivify, Raise Dead, and similar effects fail automatically.",
+          "The Mark reaches the soul's root. If the target dies while Marked, no magic may detect, contact, or interact with their soul until the Mark is dispelled — requiring Wish, True Resurrection, or divine intervention. Even then, success may require a contested roll vs your Verum DC.",
+          "Once per long rest, invoke True Destined Death. On a failed save, the Mark becomes absolute — if the target dies, their soul dissolves into the Loom of Creation. No magic, divine authority, dreamwalking, or intervention of any kind can retrieve it. Not Wish. Not True Resurrection. Not a Forerunner. Additionally: The Executioner notices. The DM determines the consequences."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Necrotic Edge",
+      "type": "Offensive",
+      "description": "The primary effect carries the cold touch of death.",
+      "effect": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6). The target also cannot regain hit points until the end of their next turn.",
+      "upgrades": [
+        "Level 5+: Bonus damage increases to two dice, and the healing prevention lasts for 1 minute.",
+        "Level 11+: Bonus damage increases to three dice. If the target is brought to half HP or below by the combined effect, they also have disadvantage on death saving throws until they finish a short rest."
+      ]
+    },
+    {
+      "name": "Death's Reprieve",
+      "type": "Supportive",
+      "description": "Standing close to death's threshold grants a strange protection.",
+      "effect": "When the primary effect deals damage, one ally within 30 feet gains temporary HP equal to your spellcasting modifier + your proficiency bonus.",
+      "upgrades": [
+        "Level 5+: Choose up to two allies to receive this benefit.",
+        "Level 11+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and each ally also gains advantage on their next death saving throw if they make one within the next hour."
+      ]
+    },
+    {
+      "name": "Grave Anchor",
+      "type": "Control",
+      "description": "The weight of finality pins the target in place.",
+      "effect": "On a hit or failed saving throw, the target must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 15 feet until the end of their next turn.",
+      "upgrades": [
+        "Level 5+: On a failed save, the target also has disadvantage on their next Constitution saving throw.",
+        "Level 11+: Creatures that fail cannot take the Dash action and suffer −2 to all saving throws until the end of their next turn."
+      ]
+    }
+  ]
+}

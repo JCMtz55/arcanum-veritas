@@ -1,0 +1,91 @@
+{
+  "id": "fortune",
+  "name": "Fortune",
+  "icon": "🎲",
+  "opposing": "misfortune",
+  "description": "Luck, Chance, Opportunity, Unpredictability, Serendipity.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Gambler's Luck",
+        "description": "The dice decide — but you hold the table.",
+        "tiers": [
+          "When casting a single-target effect, roll a d20 after it resolves. On 1–10 gain a minor benefit (heal 1d4 HP or gain advantage on your next roll). On 11–20 the effect's duration increases by 1 round.",
+          "Expand the table — on 1–5 gain a second minor benefit (temp HP or reaction recharge). On 6–15 the spell rerolls ones or its duration increases. On 16–20 redirect the spell to a second target with the same effect.",
+          "Gambler's Luck now applies to multi-target and AoE effects — roll once per target or zone and apply individually.",
+          "Once per long rest, roll a Fortune Die (d100) after the effect resolves. On 1–20: Legendary Surge — you fully heal and restore one expended spell slot. On 21–90: the spell is maximized. On 91–100: the primary target suffers a Luck Implosion — they lose all reactions, take double damage from the next hit, and gain one level of Misfortune for 1 minute."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Fated Outcome",
+        "description": "You rewrite the moment fate would have failed.",
+        "tiers": [
+          "When making an attack roll, ability check, or saving throw, add +1d4 to the roll.",
+          "Whenever you roll with advantage, roll three times and take the best result.",
+          "After failing a roll you may choose to reroll it entirely. This can only be used once per effect.",
+          "Once per long rest, declare a critical hit or automatic success on any roll made by you or a creature within 60 feet. Must be declared before the roll is made."
+        ]
+      },
+      {
+        "name": "Serendipitous Casting",
+        "description": "Chaos still dances — but it dances toward you.",
+        "tiers": [
+          "When your effect involves random damage, targets, or table outcomes, roll twice and choose the better result.",
+          "Roll three times and choose the best. You may also replace one d6 with a d8, or grant yourself advantage on one d20 roll tied to the effect.",
+          "Roll four times, and convert one randomized outcome into a fixed result of your choice (e.g. select a Wild Magic Surge result rather than rolling).",
+          "Roll five times, and trigger a Fortunate Chaos Surge — a random beneficial effect (such as Bless, Mirror Image, or Expeditious Retreat) activates in addition to the spell, centered on you or one ally of your choice."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Fortune's Edge",
+        "description": "The odds favor those who act boldly. (Save: Wisdom)",
+        "tiers": [
+          "When your effect targets multiple creatures, roll a d6. On a 5 or 6, one target of your choice automatically fails or succeeds their saving throw.",
+          "Trigger on a 4–6, and you may now choose two creatures to apply this to rather than one.",
+          "You no longer roll — simply choose one creature per effect to automatically succeed or fail their save.",
+          "Once per long rest, declare a Fate Twist — up to three targets automatically experience the result you dictate (fail, succeed, ignore the effect, or repeat it). Recharges on a natural 20."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Lucky Strike",
+      "type": "Offensive",
+      "description": "Fortune tips the scales at the last moment.",
+      "effect": "When the primary effect hits or a target fails their saving throw, roll a d6. On a 4 or higher, the target takes bonus damage equal to one damage die of the primary effect's type (min 1d6).",
+      "upgrades": [
+        "Level 5+: Triggers on a 3 or higher, and on a 6 the effect may jump to a second target within 15 feet for the same bonus damage.",
+        "Level 11+: Bonus damage increases to two dice, and a roll of 5 or 6 also causes the target to have disadvantage on their next attack roll."
+      ]
+    },
+    {
+      "name": "Windfall",
+      "type": "Supportive",
+      "description": "A brush with fortune leaves something behind.",
+      "effect": "When the primary effect resolves, one ally within 30 feet may reroll one die of their choice on the next roll they make before the start of your next turn, taking the new result.",
+      "upgrades": [
+        "Level 5+: The ally also regains HP equal to your spellcasting modifier.",
+        "Level 11+: Choose two allies to receive this benefit. Each may reroll two dice instead of one on their next roll."
+      ]
+    },
+    {
+      "name": "Twist of Fate",
+      "type": "Control",
+      "description": "What fortune gives, it can just as easily take away.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Wisdom saving throw vs your Verum DC or have disadvantage on the next roll they make before the end of their next turn.",
+      "upgrades": [
+        "Level 5+: Disadvantage extends to all rolls the target makes until the end of their next turn.",
+        "Level 11+: Creatures that fail also cannot benefit from advantage on any roll until the end of their next turn."
+      ]
+    }
+  ]
+}

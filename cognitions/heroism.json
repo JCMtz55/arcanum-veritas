@@ -1,0 +1,99 @@
+{
+  "id": "heroism",
+  "name": "Heroism",
+  "icon": "⚔️",
+  "opposing": "vileness",
+  "description": "Bravery, Sacrifice, Leadership, Courage, Defiance.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Valiant Stand",
+        "description": "You rise against fate and refuse to fall — surviving at 1 HP, resisting critical hits, and entering a Heroic Surge when death itself would claim you.",
+        "tiers": [
+          "When reduced to 0 HP, you may instead remain conscious at 1 HP until the end of your next turn. This can occur once per effect.",
+          "When this triggers, you also gain temporary HP equal to 10 × your Character Level and may immediately make one attack or cast a cantrip as a free action.",
+          "While below half your maximum HP, you may resist critical hits — treating them as normal hits unless you are Incapacitated.",
+          "Once per long rest, if you would die, you may instead enter a Heroic Surge for 1 minute — all damage you take is halved, your movement speed is doubled, and you are considered under the effects of Heroism, Freedom of Movement, and Death Ward simultaneously."
+        ]
+      },
+      {
+        "name": "Inspiring Aura",
+        "description": "Your presence commands hope — radiating save bonuses and condition immunity until allies within range fight with the certainty that this moment will be remembered.",
+        "tiers": [
+          "Allies within 10 feet gain +1 to saving throws for 1 round.",
+          "Range increases to 30 feet and the bonus increases to +2. Once per effect, one ally within range may reroll a failed saving throw.",
+          "Allies within 30 feet are immune to the Frightened condition and gain 2d8 temporary HP at the start of each of their turns for 1 minute.",
+          "Allies within 60 feet gain advantage on saving throws against spells and fear, deal +2d10 radiant damage on their first attack each turn, and may once per effect choose to succeed on a failed saving throw against a magical effect."
+        ]
+      },
+      {
+        "name": "Shield of Sacrifice",
+        "description": "You take the blow meant for another — redirecting damage, gaining resistance, and eventually standing between multiple allies and everything that would end them.",
+        "tiers": [
+          "As a reaction, redirect half the damage dealt to an ally within 10 feet to yourself instead.",
+          "You may redirect all of the damage and gain resistance to it as you absorb the blow.",
+          "If your intervention prevents the ally from suffering a Wound or Injury, you restore one expended spell slot of the same level used for this effect.",
+          "While this effect is active, you may absorb damage for up to three allies within 30 feet simultaneously, taking half from each. Any attack that would reduce you to 0 HP instead drops you to 1 HP — once per round for 1 minute."
+        ]
+      },
+      {
+        "name": "Hero's Command",
+        "description": "Your words become the will of the battlefield — granting bonus actions, commanding reactions, and eventually declaring a Heroic Formation that moves the entire party at once.",
+        "tiers": [
+          "Give one ally within 30 feet a bonus action immediately — usable to Dash, Help, or make one attack.",
+          "Once per turn, command two allies to each take a reaction to attack or move up to half their speed.",
+          "Allies under your effect may take one additional action on your turn — once per long rest per creature.",
+          "Once per minute, declare a Heroic Formation — all allies within 60 feet immediately take one free movement, attack, or cantrip action. You and your chosen allies gain advantage on all attacks and saving throws until the end of your next turn."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Beacon of Defiance",
+        "description": "Your defiance alone breaks despair — rewarding every successful save with mounting bonuses, nullifying fear, and eventually shattering mind effects across the entire battlefield.",
+        "tiers": [
+          "When you or an ally succeeds on a saving throw, all allies within 10 feet gain +1 to their next save or attack roll.",
+          "The bonus increases to +2, and once per round you may cause one enemy within 30 feet to roll their next attack with disadvantage.",
+          "Once per round, you may nullify one fear, charm, or compulsion effect targeting an ally within 30 feet — the effect ends instantly.",
+          "Once per long rest, when any creature within 60 feet would fall under a mind-affecting effect, you may shatter it — ending the effect on all allies simultaneously and forcing all enemies within range to make a Charisma saving throw or become Frightened for 1 minute."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Righteous Strike",
+      "type": "Offensive",
+      "description": "Courage made manifest punishes those who stand against it — the target's own resistance to heroism rebounds as radiant damage proportional to their defiance.",
+      "effect": "When the primary effect hits or a target fails their saving throw, they must succeed on a Charisma saving throw against your Verum DC or take radiant damage equal to their own saving throw bonus (minimum 1d6). Creatures without a meaningful Charisma modifier take 1d6 radiant damage on a failed save.",
+      "upgrades": [
+        "On a failed save, the target also has disadvantage on saving throws against Charisma-based effects until the end of their next turn — the crack in their resolve widening.",
+        "The radiant damage increases to twice their saving throw bonus (minimum 2d6), and creatures that fail are also unable to make opportunity attacks until the end of their next turn — heroism's presence making aggression feel futile."
+      ]
+    },
+    {
+      "name": "Rally",
+      "type": "Supportive",
+      "description": "The act of heroism itself becomes a lifeline — one ally gaining temporary HP buoyed by the visible force of your conviction.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your Charisma modifier + your proficiency bonus.",
+      "upgrades": [
+        "The ally also gains advantage on their next saving throw before the start of your next turn.",
+        "You may choose two allies to receive this benefit, and each also removes one instance of the Frightened or Charmed condition if they are currently affected by one."
+      ]
+    },
+    {
+      "name": "Stand Firm",
+      "type": "Control",
+      "description": "Heroism roots those it touches — nothing moves them against their will, anchoring allies in place as protection and enemies in place as punishment.",
+      "effect": "When the primary effect resolves, one creature of your choice within 30 feet cannot be forcibly moved, pushed, pulled, or knocked prone until the end of their next turn. For allies this is pure protection. For enemies, it pins them in place regardless of their intent.",
+      "upgrades": [
+        "The effect extends to immunity from teleportation as well — the creature is anchored to their current position until the end of their next turn.",
+        "You may apply this to two creatures simultaneously, and allies affected also gain advantage on all saving throws until the end of their next turn as heroism's certainty reinforces their every defense."
+      ]
+    }
+  ]
+}

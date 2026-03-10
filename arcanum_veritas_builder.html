@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcanum Veritas — Spell Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #F7F5F0;
+  --bg2:          #EEEAE2;
+  --bg3:          #E0DAD0;
+  --border:       #C8C0B0;
+  --border2:      #A89880;
+  --text:         #1C1A16;
+  --text2:        #4A4438;
+  --text3:        #7A7060;
+  --accent:       #3B2A6E;
+  --accent3:      #7B5CC7;
+  --gold:         #7A5A08;
+  --gold2:        #C9A84C;
+  --gold-bg:      #FDF6E3;
+  --gold-border:  rgba(201,168,76,0.4);
+  --core-bg:      #EBF4EC;
+  --core-b:       #2E6B38;
+  --core-t:       #1A4A24;
+  --comp-bg:      #EBF0FB;
+  --comp-b:       #2A4A8A;
+  --comp-t:       #1A2E5C;
+  --off-accent:   #7A2020;
+  --sup-accent:   #1A5C3A;
+  --con-accent:   #3A3A8A;
+  --radius:       6px;
+  --shadow:       0 2px 10px rgba(0,0,0,0.09);
+  --shadow-lg:    0 4px 22px rgba(0,0,0,0.14);
+  --sb-w:         280px;
+}
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ═══ HEADER ═══════════════════════════════════════════════ */
+header {
+  background: var(--accent);
+  border-bottom: 3px solid var(--gold2);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.h-left { display: flex; align-items: baseline; gap: 12px; }
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+header .sub {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  color: var(--gold2);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.h-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+}
+.status.ok  { border-color: #4CAF50; color: #81C784; }
+.status.err { border-color: #f44336; color: #EF9A9A; }
+
+/* ═══ LAYOUT ════════════════════════════════════════════════ */
+.layout {
+  display: flex;
+  height: calc(100vh - 59px);
+  overflow: hidden;
+}
+
+/* ═══ SIDEBAR ═══════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sb-w);
+  min-width: var(--sb-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sb-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sb-scroll::-webkit-scrollbar { width: 4px; }
+.sb-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sb-foot { padding: 9px 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+
+.slabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Sliders */
+.slider-block { display: flex; flex-direction: column; gap: 4px; }
+.lvl-display { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.lvl-num {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  min-width: 28px;
+}
+.lvl-label-stack { display: flex; flex-direction: column; }
+.lvl-name { font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: 600; color: var(--text); }
+.lvl-sub  { font-size: 0.68rem; color: var(--text3); font-style: italic; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct,0%), var(--border) var(--pct,0%), var(--border) 100%);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.lvl-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.54rem;
+  color: var(--text3);
+  padding: 0 2px;
+}
+
+/* Char level slider (green) */
+.char-slider input[type=range] {
+  background: linear-gradient(to right, var(--core-b) 0%, var(--core-b) var(--pct,0%), var(--border) var(--pct,0%), var(--border) 100%);
+}
+.char-slider input[type=range]::-webkit-slider-thumb { background: var(--core-b); }
+.char-num { color: var(--core-b) !important; }
+
+/* Cap bar */
+.cap-row { display: flex; gap: 3px; margin-top: 6px; }
+.cap-pip {
+  flex: 1; height: 5px; border-radius: 2px;
+  background: var(--bg3); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.cap-pip.core { background: var(--core-b); border-color: var(--core-b); }
+.cap-pip.comp { background: var(--comp-b); border-color: var(--comp-b); }
+
+/* Divider */
+.sb-divider { height: 1px; background: var(--border); margin: 0 -12px; }
+
+/* Cognition items */
+.cog-list { display: flex; flex-direction: column; gap: 3px; }
+.cog-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.12s;
+  user-select: none;
+}
+.cog-item:hover:not(.dim):not(.stub) { border-color: var(--accent3); background: #fafafa; }
+.cog-item.is-core { border-color: var(--core-b); background: var(--core-bg); }
+.cog-item.is-comp { border-color: var(--comp-b); background: var(--comp-bg); }
+.cog-item.dim  { opacity: 0.28; cursor: not-allowed; }
+.cog-item.stub { opacity: 0.38; cursor: default; }
+
+.cog-icon { font-size: 0.9rem; width: 18px; text-align: center; flex-shrink: 0; }
+.cog-info { flex: 1; min-width: 0; }
+.cog-name {
+  font-family: 'Crimson Pro', serif; font-size: 0.88rem; font-weight: 600;
+  color: var(--text); display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cog-item.is-core .cog-name { color: var(--core-t); }
+.cog-item.is-comp .cog-name { color: var(--comp-t); }
+.cog-item.stub    .cog-name { color: var(--text3); }
+.cog-opp { font-size: 0.58rem; color: var(--text3); font-style: italic; }
+
+.rtag {
+  font-family: 'Cinzel', serif; font-size: 0.48rem; font-weight: 700;
+  letter-spacing: 0.1em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
+}
+.rtag-core { background: var(--core-b); color: #fff; }
+.rtag-comp { background: var(--comp-b); color: #fff; }
+.rtag-soon { background: #bbb; color: #fff; }
+
+/* Hint */
+.hint {
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  font-size: 0.73rem;
+  color: var(--gold);
+  line-height: 1.5;
+}
+
+.clear-btn {
+  width: 100%; padding: 7px;
+  background: transparent;
+  border: 1px solid var(--border2); border-radius: var(--radius);
+  font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.1em;
+  color: var(--text2); cursor: pointer; transition: all 0.14s;
+}
+.clear-btn:hover { background: #fef0ec; border-color: #8A3A2A; color: #5C1A0A; }
+
+/* ═══ MAIN ══════════════════════════════════════════════════ */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.main::-webkit-scrollbar { width: 5px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.state-panel {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--text3); text-align: center; padding: 60px 20px;
+}
+.state-glyph { font-size: 2.8rem; opacity: 0.18; }
+.state-panel h2 {
+  font-family: 'Cinzel', serif; font-size: 0.9rem;
+  letter-spacing: 0.06em; color: var(--text3);
+}
+.state-panel p { font-size: 0.84rem; font-style: italic; max-width: 280px; }
+
+/* ─── FLOW STEPS ─────────────────────────────────────────── */
+.flow-steps {
+  display: flex;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+}
+.flow-steps::-webkit-scrollbar { height: 3px; }
+.flow-steps::-webkit-scrollbar-thumb { background: var(--border); }
+.flow-step {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 9px 5px 8px;
+  border-right: 1px solid var(--border);
+  cursor: default;
+}
+.flow-step:last-child { border-right: none; }
+.flow-step.done   { background: #EBF4EC; }
+.flow-step.active { background: var(--gold-bg); }
+
+.fstep-num   { font-family: 'Cinzel', serif; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text3); margin-bottom: 1px; }
+.fstep-label { font-family: 'Cinzel', serif; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text3); text-align: center; }
+.fstep-val   { font-size: 0.68rem; color: var(--accent); font-weight: 600; text-align: center; margin-top: 2px; font-family: 'Cinzel', serif; min-height: 14px; }
+.flow-step.done  .fstep-num   { color: var(--core-b); }
+.flow-step.done  .fstep-label { color: var(--core-t); }
+.flow-step.active .fstep-num  { color: var(--gold); }
+.flow-step.active .fstep-label{ color: var(--gold); }
+
+/* ─── COMPOSITION PICKER ────────────────────────────────── */
+.comp-picker {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+.comp-picker-head {
+  background: var(--bg2);
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.picker-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  font-weight: 700;
+}
+.picker-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.comp-type-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.comp-type-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 9px 7px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+  font-family: 'Cinzel', serif;
+}
+.comp-type-btn .ct-icon { font-size: 1.15rem; display: block; margin-bottom: 3px; }
+.comp-type-btn .ct-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; display: block; color: var(--text2); }
+.comp-type-btn .ct-desc { font-size: 0.58rem; font-family: 'Crimson Pro', serif; color: var(--text3); margin-top: 1px; display: block; }
+
+.comp-type-btn:hover { border-color: var(--accent3); }
+.comp-type-btn.sel-off  { border-color: var(--off-accent); background: #FFF0F0; }
+.comp-type-btn.sel-sup  { border-color: var(--sup-accent); background: #F0FFF5; }
+.comp-type-btn.sel-con  { border-color: var(--con-accent); background: #F0F0FF; }
+.comp-type-btn.sel-off  .ct-name { color: var(--off-accent); }
+.comp-type-btn.sel-sup  .ct-name { color: var(--sup-accent); }
+.comp-type-btn.sel-con  .ct-name { color: var(--con-accent); }
+
+.sub-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.sub-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg2);
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.12s;
+}
+.sub-btn:hover  { border-color: var(--accent3); background: #fff; }
+.sub-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Verum Effect picker inside composition */
+.effect-pick-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.effect-pick-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg2);
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.12s;
+}
+.effect-pick-btn:hover { border-color: var(--accent3); background: #fff; }
+.effect-pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.picker-section-lbl {
+  font-family: 'Cinzel', serif; font-size: 0.56rem; font-weight: 700;
+  letter-spacing: 0.16em; color: var(--text3); margin-bottom: 5px; display: block;
+}
+.no-effects-note {
+  font-size: 0.78rem; color: var(--text3); font-style: italic; padding: 2px 0;
+}
+
+/* ─── SCALING TABLE ─────────────────────────────────────── */
+.scale-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+.scale-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.scale-title { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.15em; color: var(--text3); font-weight: 700; }
+.scale-type-tag {
+  font-family: 'Cinzel', serif; font-size: 0.55rem; font-weight: 700;
+  letter-spacing: 0.12em; padding: 2px 8px; border-radius: 3px; color: #fff;
+}
+.tag-off { background: var(--off-accent); }
+.tag-sup { background: var(--sup-accent); }
+.tag-con { background: var(--con-accent); }
+
+.scale-table-wrap { overflow-x: auto; }
+.scale-table-wrap::-webkit-scrollbar { height: 4px; }
+.scale-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.scale-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 340px; }
+.scale-table th {
+  background: var(--bg3);
+  font-family: 'Cinzel', serif; font-size: 0.56rem; letter-spacing: 0.12em;
+  font-weight: 700; color: var(--text3);
+  padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.scale-table td { padding: 6px 12px; border-bottom: 1px solid var(--bg2); color: var(--text2); white-space: nowrap; }
+.scale-table tr:last-child td { border-bottom: none; }
+.scale-table tr.now-row { background: #EEEAFF; }
+.scale-table tr.now-row td { color: var(--text); font-weight: 600; }
+.scale-table td.slot-col { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text3); }
+.scale-table tr.now-row td.slot-col { color: var(--accent); }
+.now-mark {
+  display: inline-block;
+  font-family: 'Cinzel', serif; font-size: 0.46rem; font-weight: 700;
+  background: var(--accent); color: #fff;
+  padding: 1px 5px; border-radius: 3px; margin-left: 5px;
+  letter-spacing: 0.06em; vertical-align: middle;
+}
+
+/* ─── SPELL CARD ────────────────────────────────────────── */
+.spell-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  flex-shrink: 0;
+}
+.sc-head {
+  background: var(--accent);
+  padding: 12px 18px 10px;
+  border-bottom: 3px solid var(--gold2);
+}
+.sc-head h2 {
+  font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
+  color: #fff; letter-spacing: 0.03em; margin-bottom: 6px;
+}
+.pill-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  padding: 2px 7px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.78); letter-spacing: 0.04em;
+}
+.pill.gold { border-color: var(--gold2); color: var(--gold2); }
+
+.sc-section { border-bottom: 1px solid var(--bg2); padding: 14px 18px; }
+.sc-section:last-child { border-bottom: none; }
+
+.sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.sec-badge {
+  font-family: 'Cinzel', serif; font-size: 0.52rem; font-weight: 700;
+  letter-spacing: 0.14em; padding: 2px 7px; border-radius: 3px; flex-shrink: 0;
+}
+.badge-core { background: var(--core-b); color: #fff; }
+.badge-comp { background: var(--comp-b); color: #fff; }
+.sec-title { font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700; color: var(--text); }
+
+/* Verum tabs */
+.verum-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.v-tab {
+  padding: 3px 10px;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: var(--bg2);
+  font-family: 'Crimson Pro', serif; font-size: 0.8rem;
+  cursor: pointer; color: var(--text2); transition: all 0.12s;
+}
+.v-tab:hover  { border-color: var(--accent3); background: #fff; }
+.v-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Tier block */
+.tier-block { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.tier-row {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 8px 12px; border-bottom: 1px solid var(--bg2);
+}
+.tier-row:last-child { border-bottom: none; }
+.tier-row.now { background: #EEEAFF; }
+.t-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: var(--text3); min-width: 66px; flex-shrink: 0;
+  padding-top: 2px; letter-spacing: 0.02em;
+}
+.tier-row.now .t-lbl { color: var(--accent); font-weight: 700; }
+.t-txt { font-size: 0.85rem; color: var(--text2); line-height: 1.5; flex: 1; min-width: 0; }
+.tier-row.now .t-txt { color: var(--text); }
+.now-badge {
+  font-family: 'Cinzel', serif; font-size: 0.5rem;
+  background: var(--accent); color: #fff;
+  padding: 1px 5px; border-radius: 3px;
+  letter-spacing: 0.08em; flex-shrink: 0; margin-top: 2px;
+}
+
+/* Complement contrib */
+.contrib {
+  background: var(--comp-bg); border: 1px solid var(--comp-b);
+  border-radius: var(--radius); padding: 10px 13px;
+}
+.contrib-lbl {
+  font-family: 'Cinzel', serif; font-size: 0.54rem; font-weight: 700;
+  letter-spacing: 0.14em; color: var(--comp-b); margin-bottom: 4px;
+}
+.contrib-txt { font-size: 0.84rem; color: var(--comp-t); line-height: 1.5; }
+.contrib-upg {
+  font-size: 0.8rem; color: var(--comp-t); line-height: 1.45;
+  margin-top: 5px; padding-top: 5px;
+  border-top: 1px solid rgba(42,74,138,0.2);
+  opacity: 0.82;
+}
+
+/* Stats row */
+.stats-row {
+  display: flex; border-top: 1px solid var(--border); background: var(--bg);
+  overflow-x: auto;
+}
+.stats-row::-webkit-scrollbar { height: 3px; }
+.stat-cell {
+  flex: 1; min-width: 80px; padding: 8px 10px; text-align: center;
+  border-right: 1px solid var(--border); flex-shrink: 0;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-k { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); margin-bottom: 2px; white-space: nowrap; }
+.stat-v { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; color: var(--accent); }
+
+/* ─── SUMMARY ───────────────────────────────────────────── */
+.summary-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+.sum-head {
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 7px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.sum-title { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.15em; color: var(--text3); font-weight: 700; }
+.btn-row { display: flex; gap: 5px; }
+.act-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border2); border-radius: var(--radius);
+  background: #fff;
+  font-family: 'Cinzel', serif; font-size: 0.56rem; letter-spacing: 0.08em;
+  cursor: pointer; color: var(--text2); transition: all 0.13s; font-weight: 600;
+}
+.act-btn:hover   { border-color: var(--accent); color: var(--accent); background: #f5f0ff; }
+.act-btn.g:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+.sum-body {
+  padding: 12px 14px;
+  font-size: 0.8rem; line-height: 1.65; color: var(--text);
+  white-space: pre-wrap; font-family: 'Crimson Pro', serif;
+  overflow-x: auto;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 16px; right: 16px;
+  background: var(--accent); color: #fff;
+  padding: 7px 14px; border-radius: var(--radius);
+  font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.07em;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.22s; pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ─── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 700px) {
+  :root { --sb-w: 100%; }
+  .layout { flex-direction: column; height: auto; overflow: visible; }
+  .sidebar { width: 100%; min-width: unset; max-height: 48vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .main { height: auto; overflow-y: visible; padding: 14px 14px 24px; }
+  body { overflow-y: auto; }
+}
+
+@media print {
+  .sidebar, .sc-head, .flow-steps, .comp-picker, .verum-tabs,
+  .act-btn, .sum-head, header { display: none !important; }
+  .layout { display: block; }
+  .main { padding: 0; overflow: visible; }
+  .spell-card, .summary-card, .scale-card { box-shadow: none; page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <h1>Arcanum Veritas</h1>
+    <span class="sub">— Spell Builder</span>
+  </div>
+  <div class="h-right">
+    <span class="status" id="statusEl">Loading…</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-scroll">
+
+      <!-- Spell Slot Level slider -->
+      <div class="slider-block">
+        <span class="slabel">Spell Slot Level</span>
+        <div class="lvl-display">
+          <div class="lvl-num" id="lvlNum">1</div>
+          <div class="lvl-label-stack">
+            <span class="lvl-name" id="lvlName">1st Level</span>
+            <span class="lvl-sub"  id="lvlSub">1 Cognition</span>
+          </div>
+        </div>
+        <input type="range" id="lvlSlider" min="1" max="9" value="1">
+        <div class="lvl-ticks">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+          <span>6</span><span>7</span><span>8</span><span>9</span>
+        </div>
+        <div class="cap-row" id="capRow"></div>
+      </div>
+
+      <!-- Character Level slider -->
+      <div class="slider-block char-slider">
+        <span class="slabel">Character Level</span>
+        <div class="lvl-display">
+          <div class="lvl-num char-num" id="charNum">1</div>
+          <div class="lvl-label-stack">
+            <span class="lvl-name" id="charName">Level 1</span>
+            <span class="lvl-sub"  id="charTier">Tier: Lv 1–4</span>
+          </div>
+        </div>
+        <input type="range" id="charSlider" min="1" max="20" value="1">
+        <div class="lvl-ticks">
+          <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span>
+        </div>
+      </div>
+
+      <div class="sb-divider"></div>
+
+      <!-- Hint -->
+      <div class="hint">
+        <strong>How to build:</strong><br>
+        1. Set Spell Slot &amp; Character Level.<br>
+        2. Click a Cognition → Core.<br>
+        3. Pick Composition, Subtype &amp; Effect.<br>
+        4. Add Complement Cognitions if slot &gt; 1.<br>
+        5. Review the spell card below.
+      </div>
+
+      <!-- Cognition list -->
+      <div>
+        <span class="slabel">Cognitions</span>
+        <input
+          type="text"
+          id="cogSearch"
+          placeholder="Search cognitions…"
+          oninput="renderCogList()"
+          style="
+            width: 100%;
+            box-sizing: border-box;
+            margin: 6px 0 8px;
+            padding: 6px 10px;
+            background: var(--bg2);
+            border: 1px solid var(--brd);
+            border-radius: 6px;
+            color: var(--txt);
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            outline: none;
+          "
+        >
+        <div class="cog-list" id="cogList"></div>
+      </div>
+
+    </div>
+    <div class="sb-foot">
+      <button class="clear-btn" onclick="clearAll()">✕ Clear Selection</button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ════════════════════════════════════════════════ -->
+  <main class="main" id="mainPanel">
+    <div class="state-panel">
+      <div class="state-glyph">✦</div>
+      <h2>No Core Cognition Selected</h2>
+      <p>Set your slot level, then click a Cognition to set it as your Core.</p>
+    </div>
+  </main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  COMPOSITION TABLES
+// ═══════════════════════════════════════════════════════════
+const COMP_DATA = {
+  offensive: {
+    label: "Offensive", icon: "⚔️", desc: "Damage & harm", color: "off",
+    subtypes: {
+      "Direct Attack": {
+        columns: ["Slot","Damage","Range","Targets"],
+        notes: "Spell attack roll. On hit: full damage + Core Verum Effect. Split damage dice evenly among multiple targets (rounded down); Core Verum Effect applies only to the primary target.",
+        rows: [
+          ["1st","2d8 + Mod","90 ft","1"],["2nd","3d8 + Mod","90 ft","1"],
+          ["3rd","4d8 + Mod","120 ft","1"],["4th","5d8 + Mod","120 ft","1"],
+          ["5th","5d8 + Mod","150 ft","2"],["6th","6d8 + Mod","150 ft","2"],
+          ["7th","6d8 + Mod","180 ft","3"],["8th","7d8 + Mod","180 ft","3"],
+          ["9th","8d8 + Mod","200 ft","4"],
+        ]
+      },
+      "Area of Effect": {
+        columns: ["Slot","Damage","Radius","Range"],
+        notes: "Core Cognition's saving throw. Fail = full damage + Verum Effect. Success = half damage, no Verum Effect.",
+        rows: [
+          ["1st","4d6","15 ft","90 ft"],["2nd","6d6","15 ft","90 ft"],
+          ["3rd","8d6","20 ft","150 ft"],["4th","10d6","20 ft","150 ft"],
+          ["5th","12d6","25 ft","180 ft"],["6th","14d6","25 ft","180 ft"],
+          ["7th","16d6","30 ft","200 ft"],["8th","18d6","30 ft","200 ft"],
+          ["9th","20d6","40 ft","250 ft"],
+        ]
+      }
+    }
+  },
+  supportive: {
+    label: "Supportive", icon: "🌟", desc: "Healing & buffs", color: "sup",
+    subtypes: {
+      "Self": {
+        columns: ["Slot","Healing","Buff Duration"],
+        notes: "Affects only the caster. No roll required. All Verum Effects apply at full potency — including those tied to the caster's own body, mind, or soul.",
+        rows: [
+          ["1st","2d8 + Mod","1 minute"],["2nd","3d8 + Mod","10 minutes"],
+          ["3rd","4d8 + Mod","10 minutes"],["4th","5d8 + Mod","1 hour"],
+          ["5th","6d8 + Mod","1 hour"],["6th","8d8 + Mod","8 hours"],
+          ["7th","10d8 + Mod","8 hours"],["8th","12d8 + Mod","24 hours"],
+          ["9th","14d8 + Mod","Until dispelled"],
+        ]
+      },
+      "Ally": {
+        columns: ["Slot","Healing / Target","Range","Targets","Buff Duration"],
+        notes: "Affects willing creatures within range. No roll required. Full healing to each target. Verum Effects apply only if they can logically affect an external recipient — effects tied to the caster's own internal state do not transfer.",
+        rows: [
+          ["1st","1d8 + Mod","30 ft","1","1 round"],["2nd","2d8 + Mod","30 ft","1","1 round"],
+          ["3rd","3d8 + Mod","60 ft","2","1 minute"],["4th","4d8 + Mod","60 ft","2","1 minute"],
+          ["5th","5d8 + Mod","90 ft","3","10 minutes"],["6th","6d8 + Mod","90 ft","3","10 minutes"],
+          ["7th","8d8 + Mod","120 ft","4","1 hour"],["8th","10d8 + Mod","120 ft","4","1 hour"],
+          ["9th","12d8 + Mod","150 ft","5","8 hours"],
+        ]
+      },
+      "Aura": {
+        columns: ["Slot","Healing / Ally","Radius","Buff Duration"],
+        notes: "Affects all allies within radius, centered on the caster.",
+        rows: [
+          ["1st","1d4","10 ft","1 round"],["2nd","1d4 + Mod","10 ft","1 minute"],
+          ["3rd","2d4","15 ft","1 minute"],["4th","2d4 + Mod","15 ft","10 minutes"],
+          ["5th","3d4","20 ft","10 minutes"],["6th","3d4 + Mod","20 ft","1 hour"],
+          ["7th","4d4","25 ft","1 hour"],["8th","4d4 + Mod","25 ft","8 hours"],
+          ["9th","5d4 + Mod","30 ft","8 hours"],
+        ]
+      }
+    }
+  },
+  control: {
+    label: "Control", icon: "🔗", desc: "Conditions & zones", color: "con",
+    subtypes: {
+      "Targeted": {
+        columns: ["Slot","Targets","Range","Duration (Fail)","Duration (Save)"],
+        notes: "Each target saves independently. Save DC = 8 + Proficiency Bonus + Verum Modifier.",
+        rows: [
+          ["1st","1","60 ft","End of next turn","—"],["2nd","1","60 ft","1 min (repeat save)","End of next turn"],
+          ["3rd","2","90 ft","1 min (no repeat)","1 min (repeat save)"],["4th","2","90 ft","1 min (no repeat)","1 min (repeat save)"],
+          ["5th","3","120 ft","10 min (1/min)","1 min (no repeat)"],["6th","3","120 ft","10 min (1/min)","1 min (no repeat)"],
+          ["7th","4","150 ft","1 hr (1/min)","10 min (1/min)"],["8th","4","150 ft","1 hr (1/min)","10 min (1/min)"],
+          ["9th","5","180 ft","8 hrs (1/hr)","1 hr (1/min)"],
+        ]
+      },
+      "Area": {
+        columns: ["Slot","Radius","Range","Zone Duration","Condition (Fail)","Condition (Save)"],
+        notes: "Zone persists for the full duration. Each creature saves independently.",
+        rows: [
+          ["1st","15 ft","90 ft","1 round","End of next turn","—"],
+          ["2nd","15 ft","90 ft","1 minute","1 min (repeat)","End of next turn"],
+          ["3rd","20 ft","150 ft","1 minute","1 min (no repeat)","1 min (repeat)"],
+          ["4th","20 ft","150 ft","10 minutes","1 min (no repeat)","1 min (repeat)"],
+          ["5th","25 ft","180 ft","10 minutes","10 min (1/min)","1 min (no repeat)"],
+          ["6th","25 ft","180 ft","1 hour","10 min (1/min)","1 min (no repeat)"],
+          ["7th","30 ft","200 ft","1 hour","1 hr (1/min)","10 min (1/min)"],
+          ["8th","35 ft","200 ft","8 hours","1 hr (1/min)","10 min (1/min)"],
+          ["9th","40 ft","250 ft","8 hours","8 hrs (1/hr)","1 hr (1/min)"],
+        ]
+      }
+    }
+  }
+};
+
+const ORDINALS = ["","1st","2nd","3rd","4th","5th","6th","7th","8th","9th"];
+
+const TIERS = [
+  { label:"Lv 1–4",   min:1,  max:4  },
+  { label:"Lv 5–10",  min:5,  max:10 },
+  { label:"Lv 11–16", min:11, max:16 },
+  { label:"Lv 17+",   min:17, max:20 },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let INDEX  = [];
+let LOADED = {};
+
+const state = {
+  slotLevel:   1,   // spell slot (1–9) — controls cognition count
+  charLevel:   1,   // character level (1–20) — controls tier
+  core:        null,
+  coreVerum:   null,
+  compType:    null,
+  compSub:     null,
+  complements: [],  // [{id, compEffect}]
+};
+
+function getTier(charLvl) {
+  const idx = TIERS.findIndex(t => charLvl >= t.min && charLvl <= t.max);
+  return idx < 0 ? 3 : idx;
+}
+
+
+// Safe onclick helper — avoids quote-in-attribute issues
+function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+async function boot() {
+  try {
+    const r = await fetch("cognitions/index.json");
+    if (!r.ok) throw new Error(r.status);
+    INDEX = (await r.json()).cognitions;
+    const ready = INDEX.filter(c => c.ready).length;
+    setStatus("ok", `✓ ${ready} cognitions ready`);
+    renderCogList();
+    updateSlotUI();
+    updateCharUI();
+    renderMain();
+  } catch(e) {
+    setStatus("err", "✗ cognitions/index.json not found");
+    document.getElementById("mainPanel").innerHTML = `
+      <div class="state-panel">
+        <div class="state-glyph">⚠</div>
+        <h2>Folder Not Found</h2>
+        <p>Place this file alongside a <strong>cognitions/</strong> folder with <strong>index.json</strong>.</p>
+      </div>`;
+  }
+}
+
+async function loadCognition(id) {
+  if (LOADED[id]) return LOADED[id];
+  try {
+    const r = await fetch(`cognitions/${id}.json`);
+    if (!r.ok) throw new Error(r.status);
+    LOADED[id] = await r.json();
+    return LOADED[id];
+  } catch(e) {
+    console.warn("Failed to load", id, e);
+    return null;
+  }
+}
+
+function setStatus(cls, msg) {
+  const el = document.getElementById("statusEl");
+  el.textContent = msg;
+  el.className = "status " + cls;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LEVEL UI
+// ═══════════════════════════════════════════════════════════
+function updateSlotUI() {
+  const l = state.slotLevel;
+  document.getElementById("lvlNum").textContent  = l;
+  document.getElementById("lvlName").textContent = ORDINALS[l] + " Level Slot";
+  const mc = l - 1; // complements = slot - 1
+  document.getElementById("lvlSub").textContent  =
+    l === 1 ? "Core only (1 Cognition)"
+            : `Core + ${mc} Complement${mc > 1 ? "s" : ""} (${l} Cognitions)`;
+  document.getElementById("lvlSlider").style.setProperty("--pct", ((l-1)/8*100)+"%");
+  renderCapBar();
+}
+
+function updateCharUI() {
+  const c = state.charLevel;
+  document.getElementById("charNum").textContent  = c;
+  document.getElementById("charName").textContent = `Level ${c}`;
+  const tier = getTier(c);
+  document.getElementById("charTier").textContent = `Tier: ${TIERS[tier].label}`;
+  document.getElementById("charSlider").style.setProperty("--pct", ((c-1)/19*100)+"%");
+}
+
+function renderCapBar() {
+  const bar = document.getElementById("capRow");
+  bar.innerHTML = "";
+  const total = state.slotLevel; // 1 core + (slot-1) complements
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement("div");
+    d.className = "cap-pip"
+      + (i === 0 && state.core ? " core" : "")
+      + (i > 0 && state.complements[i-1] ? " comp" : "");
+    bar.appendChild(d);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COGNITION LIST
+// ═══════════════════════════════════════════════════════════
+function renderCogList() {
+  const list      = document.getElementById("cogList");
+  const maxComps  = state.slotLevel - 1;
+  const atCap     = state.complements.length >= maxComps && state.core !== null;
+  const coreEntry = INDEX.find(c => c.id === state.core);
+  const query     = (document.getElementById("cogSearch")?.value || "").toLowerCase().trim();
+
+  list.innerHTML = "";
+  const filtered = query ? INDEX.filter(e => e.name.toLowerCase().includes(query)) : INDEX;
+  filtered.forEach(entry => {
+    const isCore = state.core === entry.id;
+    const isComp = state.complements.some(x => x.id === entry.id);
+    // Dim if: not selected, not ready, OR (at cap and not already selected)
+    const isDim  = !isCore && !isComp && (!entry.ready || atCap);
+
+    const el = document.createElement("div");
+    el.className = "cog-item"
+      + (isCore       ? " is-core" : "")
+      + (isComp       ? " is-comp" : "")
+      + (!entry.ready ? " stub"    : "")
+      + (isDim        ? " dim"     : "");
+
+    if (entry.ready && !isDim) el.onclick = () => toggleCog(entry.id);
+    // Allow deselect even when at cap
+    if (entry.ready && (isCore || isComp)) el.onclick = () => toggleCog(entry.id);
+
+    el.innerHTML = `
+      <span class="cog-icon">${entry.icon}</span>
+      <span class="cog-info">
+        <span class="cog-name">${entry.name}</span>
+      </span>
+      ${isCore         ? `<span class="rtag rtag-core">CORE</span>` : ""}
+      ${isComp         ? `<span class="rtag rtag-comp">COMP</span>` : ""}
+      ${!entry.ready   ? `<span class="rtag rtag-soon">SOON</span>` : ""}
+    `;
+    list.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOGGLE COGNITION
+// ═══════════════════════════════════════════════════════════
+async function toggleCog(id) {
+  const entry = INDEX.find(c => c.id === id);
+  if (!entry || !entry.ready) return;
+
+  if (state.core === id) {
+    // Deselect core → reset everything
+    state.core = null; state.coreVerum = null;
+    state.compType = null; state.compSub = null; state.complements = [];
+  } else if (state.complements.some(x => x.id === id)) {
+    // Remove complement
+    state.complements = state.complements.filter(x => x.id !== id);
+  } else if (!state.core) {
+    // Set as core — always allowed
+    await loadCognition(id);
+    state.core = id;
+    state.coreVerum = null;
+    state.compType = null; state.compSub = null; state.complements = [];
+  } else {
+    // Add complement if slot allows
+    const maxComps = state.slotLevel - 1;
+    if (state.complements.length >= maxComps) return;
+    await loadCognition(id);
+    state.complements.push({ id, compEffect: null });
+  }
+
+  renderCogList();
+  renderCapBar();
+  renderMain();
+}
+
+function clearAll() {
+  state.core = null; state.coreVerum = null;
+  state.compType = null; state.compSub = null; state.complements = [];
+  renderCogList(); renderCapBar(); renderMain();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMPOSITION SELECTION
+// ═══════════════════════════════════════════════════════════
+function selectCompType(type) {
+  state.compType = type;
+  state.compSub  = Object.keys(COMP_DATA[type].subtypes)[0];
+  state.complements = state.complements.map(c => ({ ...c, compEffect: null }));
+  // Auto-select first verum effect for this composition type (pure state, not in render)
+  const coreCog = LOADED[state.core];
+  const effects = coreCog?.verumEffects?.[type] || [];
+  state.coreVerum = effects.length > 0 ? effects[0].name : null;
+  renderMain();
+}
+
+function selectCompSub(sub) {
+  state.compSub = sub;
+  renderMain();
+}
+
+function selectCoreVerum(name) {
+  state.coreVerum = name;
+  renderMain();
+}
+
+function selectCompEffect(idx, name) {
+  state.complements[idx].compEffect = name;
+  renderMain();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN RENDER
+// ═══════════════════════════════════════════════════════════
+function renderMain() {
+  const panel = document.getElementById("mainPanel");
+
+  if (!state.core) {
+    panel.innerHTML = `<div class="state-panel">
+      <div class="state-glyph">✦</div>
+      <h2>No Core Cognition Selected</h2>
+      <p>Set your spell slot level, then click a Cognition in the sidebar to begin.</p>
+    </div>`;
+    return;
+  }
+
+  const coreCog  = LOADED[state.core];
+  const tier     = getTier(state.charLevel);
+
+  let html = "";
+  html += buildFlowSteps();
+  html += buildCompPicker(coreCog);
+  if (state.compType && state.compSub) {
+    html += buildScaleTable();
+    html += buildSpellCard(coreCog, tier);
+    html += buildSummary(coreCog, tier);
+  }
+
+  panel.innerHTML = html;
+}
+
+// ─── Flow step ribbon ────────────────────────────────────
+function buildFlowSteps() {
+  const coreEntry = INDEX.find(c => c.id === state.core);
+  const tier = getTier(state.charLevel);
+  const steps = [
+    { n:"01", label:"Slot Level",     val: ORDINALS[state.slotLevel],                                  done: true },
+    { n:"02", label:"Char Level",     val: `Lv ${state.charLevel} (${TIERS[tier].label})`,             done: true },
+    { n:"03", label:"Core",           val: coreEntry ? `${coreEntry.icon} ${coreEntry.name}` : "",     done: !!state.core },
+    { n:"04", label:"Composition",    val: state.compType ? `${COMP_DATA[state.compType].label} · ${state.compSub}` : "", done: !!state.compType },
+    { n:"05", label:"Verum Effect",   val: state.coreVerum || "",                                      done: !!state.coreVerum },
+    { n:"06", label:"Complements",    val: state.slotLevel === 1 ? "N/A" : state.complements.length > 0
+        ? state.complements.map(x => INDEX.find(c=>c.id===x.id)?.icon || "◈").join(" ") : "None",
+      done: state.slotLevel === 1 || state.complements.length > 0 },
+  ];
+
+  let h = `<div class="flow-steps">`;
+  steps.forEach(s => {
+    const cls = s.done ? "done" : "";
+    h += `<div class="flow-step ${cls}">
+      <span class="fstep-num">STEP ${s.n}</span>
+      <span class="fstep-label">${s.label}</span>
+      <span class="fstep-val">${s.val}</span>
+    </div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+// ─── Composition picker ───────────────────────────────────
+function buildCompPicker(coreCog) {
+  let h = `<div class="comp-picker">
+    <div class="comp-picker-head">
+      <span class="picker-title">STEP 04 — COMPOSITION, SUBTYPE &amp; VERUM EFFECT</span>
+    </div>
+    <div class="picker-body">`;
+
+  // Type buttons
+  h += `<div>
+    <span class="picker-section-lbl">COMPOSITION TYPE</span>
+    <div class="comp-type-row">`;
+  Object.entries(COMP_DATA).forEach(([key, cd]) => {
+    const sel = state.compType === key;
+    h += `<button class="comp-type-btn${sel ? ` sel-${cd.color}` : ""}" onclick="selectCompType('${key}')">
+      <span class="ct-icon">${cd.icon}</span>
+      <span class="ct-name">${cd.label}</span>
+      <span class="ct-desc">${cd.desc}</span>
+    </button>`;
+  });
+  h += `</div></div>`;
+
+  if (state.compType) {
+    const subtypes = Object.keys(COMP_DATA[state.compType].subtypes);
+
+    // Subtype tabs
+    h += `<div>
+      <span class="picker-section-lbl">SUBTYPE</span>
+      <div class="sub-row">`;
+    subtypes.forEach(sub => {
+      h += `<button class="sub-btn${state.compSub === sub ? " active" : ""}" onclick="selectCompSub('${esc(sub)}')">` + sub + `</button>`;
+    });
+    h += `</div></div>`;
+
+    // Verum Effect picker — effects matching the composition type
+    if (coreCog) {
+      const coreVerums = (coreCog.verumEffects?.[state.compType] || []);
+      h += `<div>
+        <span class="picker-section-lbl">VERUM EFFECT (Core — ${COMP_DATA[state.compType].label})</span>`;
+      if (coreVerums.length === 0) {
+        h += `<p class="no-effects-note">No ${COMP_DATA[state.compType].label} Verum Effects for ${coreCog.name}.</p>`;
+      } else {
+        h += `<div class="effect-pick-row">`;
+        coreVerums.forEach(v => {
+          const sel = state.coreVerum === v.name;
+          h += `<button class="effect-pick-btn${sel ? " active" : ""}" onclick="selectCoreVerum('${esc(v.name)}')">` + v.name + `</button>`;
+        });
+        h += `</div>`;
+      }
+      h += `</div>`;
+    }
+  }
+
+  h += `</div></div>`;
+  return h;
+}
+
+// ─── Scaling table ─────────────────────────────────────────
+function buildScaleTable() {
+  const cd  = COMP_DATA[state.compType];
+  const sub = cd.subtypes[state.compSub];
+  const l   = state.slotLevel;
+
+  let h = `<div class="scale-card">
+    <div class="scale-head">
+      <span class="scale-title">${cd.label.toUpperCase()} · ${state.compSub.toUpperCase()} — SCALING</span>
+      <span class="scale-type-tag tag-${cd.color}">${cd.label}</span>
+    </div>`;
+
+  if (sub.notes) {
+    h += `<div style="padding:7px 16px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font-size:0.78rem;color:var(--gold);font-style:italic;">${sub.notes}</div>`;
+  }
+
+  h += `<div class="scale-table-wrap"><table class="scale-table"><thead><tr>`;
+  sub.columns.forEach(c => h += `<th>${c}</th>`);
+  h += `</tr></thead><tbody>`;
+
+  sub.rows.forEach(row => {
+    const isNow = row[0] === ORDINALS[l];
+    h += `<tr class="${isNow ? "now-row" : ""}">`;
+    row.forEach((cell, ci) => {
+      h += `<td class="${ci===0?"slot-col":""}">${cell}${isNow && ci===0 ? `<span class="now-mark">NOW</span>` : ""}</td>`;
+    });
+    h += `</tr>`;
+  });
+
+  h += `</tbody></table></div></div>`;
+  return h;
+}
+
+// ─── Spell card ─────────────────────────────────────────────
+function buildSpellCard(coreCog, tier) {
+  const cd        = COMP_DATA[state.compType];
+  const coreEntry = INDEX.find(c => c.id === state.core);
+
+  // Core verum effects for current composition type — never mutate state here
+  const coreVerums  = coreCog?.verumEffects?.[state.compType] || [];
+  const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0] || null;
+
+  let h = `<div class="spell-card">
+    <div class="sc-head">
+      <h2>${coreEntry?.icon || ""} ${coreEntry?.name || ""} — ${cd.label} · ${state.compSub}</h2>
+      <div class="pill-row">
+        <span class="pill">${ORDINALS[state.slotLevel]} Slot</span>
+        <span class="pill">Char Lv ${state.charLevel}</span>
+        <span class="pill">${TIERS[tier].label}</span>
+        ${coreCog?.savingThrow ? `<span class="pill gold">${coreCog.savingThrow} Save</span>` : ""}
+        ${coreCog?.damageType  ? `<span class="pill gold">${coreCog.damageType}</span>` : ""}
+      </div>
+    </div>`;
+
+  // ── Core section ──
+  h += `<div class="sc-section">
+    <div class="sec-head">
+      <span class="sec-badge badge-core">CORE</span>
+      <span class="sec-title">${coreEntry?.icon || ""} ${coreEntry?.name || ""}</span>
+    </div>`;
+
+  if (coreVerums.length > 1) {
+    h += `<div class="verum-tabs">`;
+    coreVerums.forEach(v => {
+      h += `<button class="v-tab${v.name === state.coreVerum ? " active" : ""}" onclick="selectCoreVerum('${esc(v.name)}')">` + v.name + `</button>`;
+    });
+    h += `</div>`;
+  }
+
+  if (activeVerum) {
+    h += `<div class="tier-block">`;
+    activeVerum.tiers.forEach((txt, i) => {
+      if (i > tier) return; // only show tiers up to current
+      const now = i === tier;
+      h += `<div class="tier-row${now ? " now" : ""}">
+        <span class="t-lbl${now ? " now" : ""}">${TIERS[i].label}</span>
+        <span class="t-txt${now ? " now" : ""}">${txt}</span>
+        ${now ? `<span class="now-badge">NOW</span>` : ""}
+      </div>`;
+    });
+    h += `</div>`;
+  } else {
+    h += `<p style="font-size:0.82rem;color:var(--text3);font-style:italic;">No ${cd.label} Verum Effects for ${coreCog?.name || "this Cognition"}.</p>`;
+  }
+  h += `</div>`;
+
+  // ── Complement sections ──
+  state.complements.forEach((compState, idx) => {
+    const cog   = LOADED[compState.id];
+    const entry = INDEX.find(c => c.id === compState.id);
+    if (!cog || !entry) return;
+
+    const compTypeLabel = cd.label;
+    const available = (cog.complementEffects || []).filter(fx =>
+      fx.type.toLowerCase() === compTypeLabel.toLowerCase()
+    );
+
+    // Auto-select first valid option
+    if (available.length > 0 && !available.find(fx => fx.name === compState.compEffect)) {
+      compState.compEffect = available[0].name;
+    }
+    const activeFx = available.find(fx => fx.name === compState.compEffect) || available[0] || null;
+
+    h += `<div class="sc-section">
+      <div class="sec-head">
+        <span class="sec-badge badge-comp">COMPLEMENT ${idx+1}</span>
+        <span class="sec-title">${entry.icon} ${entry.name}</span>
+      </div>`;
+
+    if (available.length === 0) {
+      h += `<div class="contrib">
+        <div class="contrib-lbl">COMPLEMENT — ${compTypeLabel.toUpperCase()}</div>
+        <div class="contrib-txt" style="font-style:italic;color:var(--text3);">No ${compTypeLabel} complement effect for ${entry.name} yet.</div>
+      </div>`;
+    } else {
+      // Tab picker if multiple
+      if (available.length > 1) {
+        h += `<div class="verum-tabs">`;
+        available.forEach(fx => {
+          h += `<button class="v-tab${fx.name === compState.compEffect ? " active" : ""}" onclick="selectCompEffect(${idx}, '${esc(fx.name)}')">` + fx.name + `</button>`;
+        });
+        h += `</div>`;
+      }
+      if (activeFx) {
+        h += `<div class="contrib">
+          <div class="contrib-lbl">${activeFx.name.toUpperCase()} — ${compTypeLabel.toUpperCase()} COMPLEMENT</div>
+          <div class="contrib-txt">${activeFx.effect}</div>`;
+        if (activeFx.upgrades?.length) {
+          activeFx.upgrades.forEach(u => {
+            h += `<div class="contrib-upg">↑ ${u}</div>`;
+          });
+        }
+        h += `</div>`;
+      }
+    }
+    h += `</div>`;
+  });
+
+  // ── Stats row ──
+  h += `<div class="stats-row">
+    <div class="stat-cell"><div class="stat-k">SAVE</div><div class="stat-v">${coreCog?.savingThrow||"—"}</div></div>
+    <div class="stat-cell"><div class="stat-k">DAMAGE</div><div class="stat-v">${coreCog?.damageType||"—"}</div></div>
+    <div class="stat-cell"><div class="stat-k">COMPOSITION</div><div class="stat-v" style="font-size:0.62rem">${cd.label}</div></div>
+    <div class="stat-cell"><div class="stat-k">SUBTYPE</div><div class="stat-v" style="font-size:0.62rem">${state.compSub}</div></div>
+    <div class="stat-cell"><div class="stat-k">SLOT</div><div class="stat-v">${ORDINALS[state.slotLevel]}</div></div>
+    <div class="stat-cell"><div class="stat-k">CHAR LV</div><div class="stat-v">${state.charLevel}</div></div>
+  </div>`;
+
+  h += `</div>`;
+  return h;
+}
+
+// ─── Summary card ─────────────────────────────────────────
+function buildSummary(coreCog, tier) {
+  const coreEntry = INDEX.find(c => c.id === state.core);
+  const cd        = COMP_DATA[state.compType];
+  const sub       = cd.subtypes[state.compSub];
+
+  const coreVerums  = coreCog?.verumEffects?.[state.compType] || [];
+  const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
+
+  const scaleRow = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  const scaleStr = scaleRow
+    ? sub.columns.map((col, i) => `${col}: ${scaleRow[i]}`).join("  |  ")
+    : "";
+
+  const lines = [
+    `ARCANUM VERITAS — ${ORDINALS[state.slotLevel].toUpperCase()} LEVEL SLOT · Char Lv ${state.charLevel}`,
+    "═".repeat(52),
+    `Composition  : ${cd.label} · ${state.compSub}`,
+    `Core         : ${coreEntry?.name}${state.complements.length
+      ? `   |   Complements: ${state.complements.map(x=>INDEX.find(c=>c.id===x.id)?.name||x.id).join(", ")}`
+      : ""}`,
+    `Saving Throw : ${coreCog?.savingThrow || "—"}`,
+    `Damage Type  : ${coreCog?.damageType  || "—"}`,
+    `Tier         : ${TIERS[tier].label}`,
+    ``,
+    `── SCALING (${ORDINALS[state.slotLevel]}) ──`,
+    scaleStr,
+    ``,
+  ];
+
+  if (activeVerum) {
+    lines.push(`── CORE VERUM: ${(state.coreVerum || activeVerum.name).toUpperCase()} ──`);
+    for (let i = 0; i <= tier; i++) {
+      lines.push(`[${TIERS[i].label}] ${activeVerum.tiers[i] || ""}`);
+    }
+    lines.push(``);
+  }
+
+  if (state.complements.length) {
+    lines.push("── COMPLEMENT EFFECTS ──");
+    state.complements.forEach(cs => {
+      const cog   = LOADED[cs.id];
+      const name  = INDEX.find(c => c.id === cs.id)?.name || cs.id;
+      const avail = (cog?.complementEffects || []).filter(fx =>
+        fx.type.toLowerCase() === cd.label.toLowerCase()
+      );
+      const activeFx = avail.find(fx => fx.name === cs.compEffect) || avail[0];
+      if (activeFx) {
+        lines.push(`${name} — ${activeFx.name}:`);
+        lines.push(activeFx.effect);
+        if (activeFx.upgrades?.length) activeFx.upgrades.forEach(u => lines.push(`  ↑ ${u}`));
+      } else {
+        lines.push(`${name}: No ${cd.label} complement defined.`);
+      }
+    });
+  }
+
+  if (sub.notes) {
+    lines.push("");
+    lines.push(`── RULES NOTE ──`);
+    lines.push(sub.notes);
+  }
+
+  return `<div class="summary-card">
+    <div class="sum-head">
+      <span class="sum-title">SUMMARY CARD</span>
+      <div class="btn-row">
+        <button class="act-btn" onclick="copySum()">Copy Text</button>
+        <button class="act-btn g" onclick="window.print()">Print</button>
+      </div>
+    </div>
+    <div class="sum-body" id="sumBody">${lines.join("\n")}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function copySum() {
+  const el = document.getElementById("sumBody");
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => toast("Copied to clipboard"));
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════════════════════════
+document.getElementById("lvlSlider").addEventListener("input", e => {
+  state.slotLevel = +e.target.value;
+  // Trim complements if slot reduced
+  state.complements = state.complements.slice(0, state.slotLevel - 1);
+  updateSlotUI();
+  renderCogList();
+  renderMain();
+});
+
+document.getElementById("charSlider").addEventListener("input", e => {
+  state.charLevel = +e.target.value;
+  updateCharUI();
+  renderMain();
+});
+
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+boot();
+</script>
+</body>
+</html>

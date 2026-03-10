@@ -1,0 +1,101 @@
+{
+  "id": "flesh",
+  "name": "Flesh",
+  "icon": "🫀",
+  "opposing": "bones",
+  "description": "Mortality, Sensation, Growth, Vulnerability, Embodiment.",
+  "savingThrow": "Constitution",
+  "damageType": "Sinew",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Living Weaponry",
+        "description": "Turn body into blades, tendrils, and horrors — hardening sinew into weapons until the caster themselves becomes something biology never intended.",
+        "tiers": [
+          "Create biological weapons — hardened bone spikes, veins twisted into whips. Your unarmed strikes now deal 1d8 sinew damage.",
+          "Gain multiattack (2) with unarmed strikes or body weapons. Targets struck must succeed on a Constitution save or be grappled by muscle fibers extending from the strike.",
+          "Grow a temporary monstrous feature — tentacle limb, quilled back, or acid gland. Gain one biological trait (breath weapon, defensive spine, or burrowing movement) for 1 hour.",
+          "Enter the Flesh Ascendant state for 1 minute — you count as an aberration, gain temporary HP equal to your level × 20, and your natural weapons count as magical +5."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Regenerative Twist",
+        "description": "Accelerate or hijack the body's repair process — closing wounds and regrowing limbs with the same motion that, pointed differently, turns regeneration cancerous.",
+        "tiers": [
+          "A target you touch heals 1d6 HP or takes 1d6 sinew damage (your choice). This healing cannot affect undead or constructs.",
+          "Reattach limbs, close deep wounds, or spur cellular regeneration — removing 1 Wound per round or regrowing a minor body part over 1 hour.",
+          "As part of casting, mutate a creature's organ — the target must make a Constitution save or gain 1 Injury as their own biology works against them.",
+          "Redirect regeneration violently — a regenerating creature instead bloats, grows tumors, or collapses, taking necrotic + sinew damage equal to your level as their immortality turns cancerous."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Meatshaper's Grasp",
+        "description": "Reshape the living flesh — twisting limbs and dislocating joints before eventually replacing entire body parts with something better or worse.",
+        "tiers": [
+          "The target's muscles or limbs twist unnaturally — they have disadvantage on Strength or Dexterity checks (your choice) for 1 round.",
+          "Alter a limb's function — dislocate a knee, reduce grip, or hyperextend a joint. The target suffers −1 AC, drops one held item, or takes sinew damage equal to half your level.",
+          "Reshape flesh into armor or weapons on a willing creature — granting temporary natural armor (AC = 20 + Constitution modifier) or a meaty weapon dealing 4d8 sinew damage (versatile) for 1 hour.",
+          "Create or replace entire body parts — granting natural weapons, extra limbs, tentacles, or organic mutations at DM discretion. Each replacement costs HP or Cognition fatigue equal to the complexity of the change."
+        ]
+      },
+      {
+        "name": "Flesh Memory",
+        "description": "Scar the body with truths that last — embedding trauma into tissue until wounds trigger hallucinations and living organs carry spells indefinitely.",
+        "tiers": [
+          "Mark a creature's flesh with a symbolic wound or memory rune. They have disadvantage on Deception checks against the truth you etched for 24 hours.",
+          "Embed a memory in flesh — when the creature is next wounded, they suffer hallucinations of past trauma and must succeed on a Wisdom save or be Stunned for 1 round.",
+          "Mark yourself with Resonant Flesh — while concentrating, you can see through the eyes or feel the pain of any creature whose flesh you have marked.",
+          "Create a Flesh Anchor — a living organ made of your own tissue that can store a spell, memory, or emotional Cognition. It may be grafted into another willing creature, persisting indefinitely until removed."
+        ]
+      },
+      {
+        "name": "Organic Dominion",
+        "description": "Command flesh as a sovereign force — stripping reactions, causing nerve pain, and eventually puppeting the paralyzed or the dead as extensions of your own body.",
+        "tiers": [
+          "Command or repulse one creature with a natural body (not constructs or oozes) — on a failed Charisma save they lose their next reaction.",
+          "Cause phantom nerve pain in an unused part of the body — the target takes 1d8 sinew damage and must succeed on a Constitution save or drop Concentration.",
+          "Dominate the body — forcibly bend limbs or lock muscles. On a failed save, the target cannot move or use one specific limb for 1 round.",
+          "Puppet a corpse or paralyzed creature for 1 minute — using its body as an extension of your own. You act through it with its physical stats and your mental actions, sharing its senses while the puppeting lasts."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Exposed Nerve",
+      "type": "Offensive",
+      "description": "The primary effect leaves something raw and open — the next source of damage fires every nerve in the affected area at once for amplified sinew pain.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target's pain receptors are left hypersensitive — the next time they take damage before the end of your next turn, that damage deals +1d8 sinew bonus damage.",
+      "upgrades": [
+        "The hypersensitivity lingers for 1 minute, the bonus damage increases to +2d8, and each time the bonus triggers the target must succeed on a Constitution saving throw against your Verum DC or have disadvantage on their next attack roll.",
+        "The bonus damage increases to +3d8, and while the hypersensitivity persists the target has disadvantage on Concentration checks — every incidental impact sending a cascade of amplified sensation through them."
+      ]
+    },
+    {
+      "name": "Flesh Knit",
+      "type": "Supportive",
+      "description": "Biology accelerates where it is needed most — minor wounds closing of their own accord as the body's repair process is briefly redirected toward an ally.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as minor wounds close of their own accord.",
+      "upgrades": [
+        "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also removes one condition affecting them as the biological surge pushes the ailment out.",
+        "You may choose two allies to receive this benefit, and each also removes one Wound — the flesh knitting past surface damage into deeper repair."
+      ]
+    },
+    {
+      "name": "Muscle Lock",
+      "type": "Control",
+      "description": "The body betrays itself — muscles seizing involuntarily, stripping speed and coordination before the target can understand what their own flesh is doing.",
+      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Constitution saving throw against your Verum DC or have their muscles seize involuntarily — their movement speed is reduced by 15 feet and they have disadvantage on Strength and Dexterity checks until the end of their next turn.",
+      "upgrades": [
+        "On a failed save, the target also cannot take the Dash action and has disadvantage on attack rolls until the end of their next turn — their body fighting every deliberate movement.",
+        "Creatures that fail are also unable to use reactions until the end of their next turn, and any attempt to cast a spell with somatic components requires a successful Constitution saving throw against your Verum DC first — their hands too locked to gesture cleanly."
+      ]
+    }
+  ]
+}

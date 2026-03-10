@@ -1,0 +1,111 @@
+{
+  "id": "beast",
+  "name": "Beast",
+  "icon": "🐺",
+  "opposing": "civilization",
+  "description": "Ferocity, Strength, Savagery, Predation, Survival.",
+  "savingThrow": "Strength",
+  "damageType": "Physical",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Predatory Surge",
+        "description": "The hunt demands speed; the kill rewards momentum.",
+        "tiers": [
+          "Your movement speed increases by 10 feet, and when you hit with a melee attack you may move up to 10 feet once per turn without provoking opportunity attacks.",
+          "Your movement speed increases by 20 feet, and after hitting with a melee attack you may make one additional melee weapon attack against a different creature within reach.",
+          "Your movement speed increases by 30 feet, you may move through enemy spaces as difficult terrain, and when you move at least 20 feet before attacking you deal extra damage equal to your level on hit.",
+          "For 1 minute, gain Relentless Pursuit — your movement speed doubles, you ignore difficult terrain, and each time you hit with a melee attack you may immediately move up to your speed and make another attack. This does not provoke opportunity attacks and may occur once per turn."
+        ]
+      },
+      {
+        "name": "Apex Rend",
+        "description": "You do not wound — you dismantle.",
+        "tiers": [
+          "Your attack or spell deals +1 die of the same damage type and reduces the target's speed by 10 feet on hit.",
+          "If the target is below half HP, this effect deals maximum damage. The target must also succeed on a Constitution save or lose their reaction.",
+          "If the target is Frightened or Prone, your attack automatically scores a critical hit if it hits.",
+          "Designate one target as Prey — until it dies or combat ends, you deal double damage to it, you may track it across any distance, and it cannot benefit from invisibility, healing, or damage resistance against you."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Instinctive Resilience",
+        "description": "You do not dodge — you survive.",
+        "tiers": [
+          "Gain advantage on saving throws against being Grappled, Restrained, or Frightened for 1 round.",
+          "When you take damage, you may use your reaction to gain resistance to that damage type until the start of your next turn.",
+          "Gain temporary HP equal to your level when you activate this effect, and automatically succeed on the next Strength saving throw you make before the end of your next turn.",
+          "For 1 minute, enter the Primal State — you are immune to all movement-restricting conditions, gain resistance to bludgeoning, piercing, and slashing damage, and cannot be Charmed, Stunned, or Frightened."
+        ]
+      },
+      {
+        "name": "Pack Instinct",
+        "description": "You are not alone — you are the leader of the wild.",
+        "tiers": [
+          "When an ally is within 5 feet of a creature you target with an attack or spell, you gain advantage on the attack roll.",
+          "You may allow one ally within 10 feet to use their reaction to make one attack when you hit a target.",
+          "Grant Pack Tactics to up to 3 allies for 1 minute — they roll attacks with advantage when adjacent to at least one ally.",
+          "Forge a Pack Bond with up to 5 allies within 60 feet — all gain +2 AC, advantage on Strength saving throws, and +1d8 damage on their first hit each round if an ally is within 5 feet of the target. If you drop to 0 HP, one bonded ally may take a full turn immediately as a reaction."
+        ]
+      },
+      {
+        "name": "Feral Hunger",
+        "description": "The hunt sustains. The kill restores.",
+        "tiers": [
+          "When you reduce a creature to 0 HP, regain HP equal to your proficiency bonus.",
+          "After reducing a creature to 0 HP, you regain HP equal to half the damage dealt by your next attack.",
+          "When you reduce a creature to 0 HP, you may end one condition affecting you (Frightened, Poisoned, Charmed, or 1 level of Exhaustion).",
+          "For 1 minute, enter Bloodthirst — each time you hit a creature you regain 1d8 HP, and each time you reduce a creature to 0 HP you gain +1 to attack rolls (stacks up to +5) until combat ends."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Alpha Dominance",
+        "description": "The beast rules by presence, not permission.",
+        "tiers": [
+          "The target is Frightened of you until the end of your next turn.",
+          "The target is Frightened for 1 minute and must flee or Disengage on their turn rather than engage.",
+          "The target also cannot willingly move closer to any of your allies and has disadvantage on attacks against anyone other than you.",
+          "You exude an Aura of Domination in a 30-foot radius for 1 minute — all enemies within range have disadvantage on saving throws against fear, charm, and knockdown and cannot maintain Concentration while Frightened by you."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Savage Blow",
+      "type": "Offensive",
+      "description": "Feral force follows every strike.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target must succeed on a Strength saving throw against your Verum DC or be pushed 10 feet directly away from you as the primal force of the impact carries through.",
+      "upgrades": [
+        "Level 5+: On a failed save the target is also knocked prone after being pushed, and the distance increases to 15 feet.",
+        "Level 11+: The push distance increases to 20 feet, and creatures that fail cannot stand up until the start of their next turn."
+      ]
+    },
+    {
+      "name": "Wild Surge",
+      "type": "Supportive",
+      "description": "The predator's body rises to meet the moment.",
+      "effect": "When the primary effect resolves, you gain temporary hit points equal to your Strength modifier + your proficiency bonus and advantage on your next Strength check or Strength saving throw before the start of your next turn.",
+      "upgrades": [
+        "Level 5+: The temporary HP increases to twice your Strength modifier + your proficiency bonus, and the advantage extends to all Strength checks and saving throws until the start of your next turn.",
+        "Level 11+: You also gain +10 feet of movement speed until the start of your next turn, and your next melee attack before that point deals +1d10 damage."
+      ]
+    },
+    {
+      "name": "Territorial Mark",
+      "type": "Control",
+      "description": "Once marked, there is no disengaging from the hunt.",
+      "effect": "When the primary effect hits or a target fails their saving throw, they are Marked as Prey for 1 minute — all allies who can see the target gain advantage on attack rolls against it on the first attack each turn, and the target cannot use the Disengage action without first succeeding on a Strength saving throw against your Verum DC.",
+      "upgrades": [
+        "Level 5+: While Marked, the target also cannot benefit from invisibility or illusions against you or your allies.",
+        "Level 11+: The Mark becomes contagious — if the Marked target dies, the Mark immediately transfers to the nearest hostile creature within 30 feet."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "id": "ice",
+  "name": "Ice",
+  "icon": "❄️",
+  "opposing": "fire",
+  "description": "Cold, Stillness, Preservation, Endurance, Restraint.",
+  "savingThrow": "Constitution",
+  "damageType": "Cold",
+
+  "verumEffects": {
+    "offensive": [],
+    "supportive": [
+      {
+        "name": "Frozen Moment",
+        "description": "Stillness can defy time.",
+        "tiers": [
+          "Suspend a dying creature (at 0 HP but not dead) in magical ice. They do not make death saving throws until the ice thaws at the end of your next turn.",
+          "Use this effect as a reaction when a creature drops to 0 HP — encasing them for up to 1 minute. They are stable and cannot be targeted while frozen.",
+          "A willing creature may be frozen in time for up to 1 hour. While encased they are immune to all effects but also cannot act, speak, or be detected by magical means.",
+          "Once per long rest, cast this effect on yourself — while frozen you are invulnerable and regain 1d4 hit dice per hour spent in stasis. You may set a condition to thaw automatically (a specific sound, time elapsed, or touch from a named creature)."
+        ]
+      },
+      {
+        "name": "Iceheart",
+        "description": "Let the chill protect you.",
+        "tiers": [
+          "Gain resistance to cold damage for 1 minute. While active, your Concentration cannot be broken by cold damage.",
+          "Once per long rest, when you are hit by cold damage, you may instead gain temporary HP equal to the damage that would have been dealt.",
+          "You gain immunity to the Frightened condition and cannot be Charmed while standing on ice or frozen terrain.",
+          "When reduced to 0 HP, you may instead shatter into ice — becoming a frozen statue immune to all damage for 1 minute, then reforming at half HP as the frost around you reconstitutes your body."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Glacial Grasp",
+        "description": "Your frost clings with oppressive force.",
+        "tiers": [
+          "When you deal cold damage, the target's movement speed is reduced by 10 feet until the end of your next turn.",
+          "On a failed Constitution save, the target becomes Restrained by ice until the end of their next turn.",
+          "The target must succeed on a Strength saving throw to break free, or the Restraint persists until the end of your next turn (maximum 1 minute of Concentration).",
+          "The ice spreads — one additional creature of your choice within 10 feet of the original target must also save or be Restrained by the same creeping frost."
+        ]
+      },
+      {
+        "name": "Permafrost Curse",
+        "description": "Chill the soul as well as the body.",
+        "tiers": [
+          "If a creature fails a saving throw against your effect, they cannot regain hit points until the end of your next turn.",
+          "The cursed creature also suffers disadvantage on Dexterity saving throws and Constitution saving throws for 1 minute.",
+          "Creatures that fail are vulnerable to cold damage for 1 minute. Repeat Constitution save at end of each turn to end early.",
+          "Mark a creature with Cursed Ice — if they die while marked, they shatter into frozen fragments and cannot be revived by any means short of Wish or divine intervention."
+        ]
+      },
+      {
+        "name": "Glacial Creation",
+        "description": "Your ice takes form beyond elements.",
+        "tiers": [
+          "Create a small frozen object or structure (up to a 5-foot cube) that lasts 1 minute. It provides half cover and is slippery — creatures that walk on it must succeed on a Dexterity save or fall prone.",
+          "Shape ice into walls, bridges, or defensive barriers up to 20 feet long — AC 15, 20 HP per 5-foot segment. Structures last 10 minutes or until destroyed.",
+          "Craft a Frozen Construct — an animated ice elemental servant (CR 2) that follows your commands. Once per day, lasts 1 hour or until destroyed.",
+          "Create a Glacial Golem (CR 5) that acts on your initiative and obeys your commands, or — if cast within a region of perpetual cold — summon an Icebound Denizen, a native elemental of that region."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Deep Freeze",
+      "type": "Offensive",
+      "description": "Cold doesn't kill in an instant — it builds.",
+      "effect": "On a hit or failed saving throw against the primary effect, the target gains 1 Frost Stack. At 2 Frost Stacks their movement speed is reduced by 15 feet. At 3 Frost Stacks they are Restrained until they succeed on a Constitution saving throw (DC equals your Verum DC) or receive fire damage. Frost Stacks fade after 1 minute without additional cold exposure.",
+      "upgrades": [
+        "Level 5+: Each application of Deep Freeze now applies 2 Frost Stacks instead of 1.",
+        "Level 11+: At 3 Frost Stacks the target is Paralyzed rather than Restrained, and stacks persist for the full duration of the encounter."
+      ]
+    },
+    {
+      "name": "Frost Veil",
+      "type": "Supportive",
+      "description": "A thin shell of ice forms between you and the world's heat.",
+      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus. While these temporary HP remain, the ally has resistance to fire damage.",
+      "upgrades": [
+        "Level 5+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains resistance to cold damage.",
+        "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to being set on fire or affected by environmental heat while the temporary HP persists."
+      ]
+    },
+    {
+      "name": "Flash Freeze",
+      "type": "Control",
+      "description": "The ground betrays them.",
+      "effect": "When the primary effect hits or a target fails their saving throw, the ground in a 10-foot radius around them flash-freezes — becoming difficult terrain until the end of your next turn. Creatures in the area must succeed on a Dexterity saving throw against your Verum DC or be knocked prone.",
+      "upgrades": [
+        "Level 5+: The frozen terrain persists for 1 minute, and creatures that enter it for the first time on a turn must make the Dexterity save or be knocked prone.",
+        "Level 11+: The radius increases to 20 feet, and creatures that are knocked prone are also Restrained until they succeed on a Strength check against your Verum DC."
+      ]
+    }
+  ]
+}

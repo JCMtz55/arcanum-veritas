@@ -1,0 +1,101 @@
+{
+  "id": "disaster",
+  "name": "Disaster",
+  "icon": "🌪️",
+  "opposing": "protection",
+  "description": "Catastrophe, Ruin, Calamity, Collapse, Inevitability.",
+  "savingThrow": "Constitution",
+  "damageType": "Bludgeoning",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Cataclysmic Surge",
+        "description": "More — it costs more, it always costs more, but the disaster expands its reach and maximizes its ruin for those willing to pay the price in flesh.",
+        "tiers": [
+          "When casting a spell with an area of effect, you may increase its radius by 5 feet — but you immediately suffer 1 Wound as the surge draws from your own stability.",
+          "You may reroll all 1s and 2s on the spell's damage dice — but the spell also affects every creature in the area, including allies, without exception.",
+          "Once per long rest, when casting a destructive spell, you may maximize half the damage dice (rounded up). The spell also ignores damage immunity for this cast and affects constructs and nonliving terrain as if they were vulnerable.",
+          "You may cast a disaster-aligned spell twice in a single turn, targeting separate zones or creatures. After doing so, you must succeed on a Constitution saving throw against your own Verum DC or suffer a Curse Echo and one level of Exhaustion — the disaster having briefly mistaken you for its target."
+        ]
+      },
+      {
+        "name": "Crashing Wound",
+        "description": "The body was not designed for this — stacking wounds into injuries and eventually breaking the mind under the accumulated weight of what it has endured.",
+        "tiers": [
+          "On a hit or failed save, the target suffers a Wound — they lose their reaction until the Wound is healed or treated.",
+          "If the Wound is not treated, the creature must make a Constitution saving throw at the start of their next turn or be knocked prone and have their movement reduced by 10 feet for 1 minute.",
+          "Targets suffering two or more simultaneous Wounds must make a Constitution saving throw or gain an Injury determined by the damage type — the accumulation of trauma becoming something the body cannot simply absorb.",
+          "Targets who suffer an Injury from this effect must make a Wisdom saving throw against your Verum DC or suffer one level of Dream Exhaustion — the magnitude of destruction inflicted exceeding what the mind can integrate without consequence."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Herald of Collapse",
+        "description": "You do not cause the disaster — you are the announcement that it has arrived, radiating ruin outward until the ground itself becomes hostile to everything around you.",
+        "tiers": [
+          "Gain advantage on Intimidation checks and resistance to environmental damage (nonmagical fire, cold, lightning, and thunder) for 1 minute.",
+          "Whenever you score a critical hit, the terrain within 10 feet of the target immediately becomes unstable — creatures in the area must make a Dexterity saving throw or be knocked prone.",
+          "When you cast a spell that causes destruction, you may infuse it with a Denizen of Ruin — a CR 1 manifestation of collapse that appears at the point of impact, persists for 1 round, and makes one attack using your Verum modifier before dissolving.",
+          "Once per long rest, become the Epicenter of Disaster for 1 minute — the area within 30 feet becomes Chaotic Terrain, all hostile creatures have disadvantage on Dexterity saving throws, and when you cast a spell of 5th level or higher, you may apply it to a second target or zone simultaneously at no additional cost."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Ruin's Echo",
+        "description": "The disaster does not leave when the spell ends — it leaves when it is finished, cursing the ground and making restoration itself an act of resistance.",
+        "tiers": [
+          "On a failed save, the target gains a minor environmental curse — causing disadvantage on one type of ability check of your choice for 1 minute.",
+          "The spell's area becomes a Disaster Field for 1 minute — difficult terrain throughout, with environmental echoes that deal 1d4 damage of the triggering type to creatures that end their turn within it.",
+          "If the effect damages terrain, all nonmagical structures in the area collapse unless they succeed on a DC 15 Strength check or are magically reinforced. Creatures inside collapsing structures must make a Dexterity saving throw against your Verum DC or take 4d6 bludgeoning damage and be Restrained beneath the rubble.",
+          "The area becomes Cursed Ground for 24 hours. Any creature that casts a healing or protective spell within it must succeed on a Wisdom saving throw against your Verum DC or suffer one level of Exhaustion as the ruin actively resists restoration. The Cursed Ground cannot be removed by means of less than a 6th-level spell."
+        ]
+      },
+      {
+        "name": "Fractured Fate",
+        "description": "The world was always going to take that from you — undoing recent successes, stripping resistances, and making the next disaster find the cracks that were already there.",
+        "tiers": [
+          "On a failed save, the target must reroll one successful roll they made this round — an attack, a saving throw, or a skill check — and take the new result, even if it is lower.",
+          "Targets affected by this effect gain disadvantage on their next saving throw against any other spell cast before the end of your next turn — the fracture in their fortune spreading.",
+          "On a failed save, the creature loses resistance to one damage type of your choice for 1 minute — the disaster having dissolved the integrity of whatever protected them from it.",
+          "If the target is currently suffering a Wound or Injury, they automatically fail their next saving throw against any effect with the fire, thunder, lightning, cold, or acid damage type — the disaster finding the cracks that were already there and deciding the outcome in advance."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Aftershock",
+      "type": "Offensive",
+      "description": "The first impact was the warning — the second one wasn't, arriving at the start of the target's next turn as the force of the disaster compounds in the body.",
+      "effect": "On a hit or failed saving throw against the primary effect, at the start of the target's next turn they take additional damage equal to your spellcasting modifier + your proficiency bonus of the same damage type as the primary effect.",
+      "upgrades": [
+        "The aftershock damage increases to two damage dice of the primary effect's type (minimum 2d6), and the target must succeed on a Constitution saving throw against your Verum DC or be unable to take the Dodge action on that turn.",
+        "The aftershock persists for 1 minute — the target takes the damage at the start of each of their turns until they succeed on a Constitution saving throw at the end of their turn, or until they receive magical healing of 10 hit points or more in a single instance."
+      ]
+    },
+    {
+      "name": "Survivor's Edge",
+      "type": "Supportive",
+      "description": "The disaster knows you — it passes over you on its way to somewhere worse, granting temporary HP and resistance to the damage type you just unleashed.",
+      "effect": "When the primary effect resolves, you gain temporary hit points equal to your spellcasting modifier + your proficiency bonus and resistance to the damage type most recently dealt by your spell until the start of your next turn.",
+      "upgrades": [
+        "The temporary hit points increase to twice your spellcasting modifier + your proficiency bonus, and the resistance persists for 1 minute rather than one turn.",
+        "While the resistance is active, any creature that deals the resisted damage type to you takes your proficiency bonus in damage of that same type in return — the disaster redirecting a fraction of what was sent against you."
+      ]
+    },
+    {
+      "name": "Unstable Ground",
+      "type": "Control",
+      "description": "The ground remembers the impact and expresses this memory continuously — fracturing into difficult terrain and knocking prone those who trusted it to hold.",
+      "effect": "When the primary effect hits or a target fails their saving throw, the ground in a 15-foot radius around the point of impact fractures and shifts — becoming difficult terrain for 1 minute. Creatures in the area when it forms must succeed on a Dexterity saving throw against your Verum DC or be knocked prone.",
+      "upgrades": [
+        "The radius increases to 30 feet, and creatures that attempt to stand up from prone within the area must succeed on a Dexterity saving throw or fall prone again immediately — the ground refusing to cooperate.",
+        "The unstable ground becomes actively hostile — at the start of each of their turns, creatures in the area take 1d6 bludgeoning damage from shifting stone and fracturing earth, and any structure or object resting on the ground in the area takes double damage from all sources."
+      ]
+    }
+  ]
+}
