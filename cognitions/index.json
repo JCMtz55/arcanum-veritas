@@ -61,7 +61,7 @@
       "name": "Control",
       "icon": "👑",
       "opposing": "power",
-      "ready": false
+      "ready": true
     },
     {
       "id": "corruption",
@@ -222,7 +222,7 @@
       "name": "Soul",
       "icon": "🕊️",
       "opposing": "corruption",
-      "ready": false
+      "ready": true
     },
     {
       "id": "speed",
