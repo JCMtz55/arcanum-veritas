@@ -1,8 +1,8 @@
 {
   "id": "soul",
   "name": "Soul",
-  "icon": "🕊️",
-  "opposing": "corruption",
+  "icon": "👻",
+  "opposing": "flesh",
   "description": "Essence, Vitality, Transcendence, Memory, Spirit, Identity.",
   "savingThrow": "Charisma",
   "damageType": "Necrotic",
@@ -11,66 +11,66 @@
     "offensive": [
       {
         "name": "Soul Severance",
-        "description": "Reach through the veil and cut the essence itself.",
+        "description": "Reach through the veil and cut the essence itself, unmaking the target from the inside out.",
         "tiers": [
-          "On a hit or failed save, the target cannot regain hit points for 1 minute, and if reduced to 0 HP before the effect ends they cannot be stabilized by nonmagical means.",
+          "On a hit or failed Charisma save, the target cannot regain hit points for 1 minute, and if reduced to 0 HP before the effect ends they cannot be stabilized by nonmagical means.",
           "On a failed save the target becomes Soul Displaced for 1 minute — disadvantage on all Wisdom and Charisma checks and saves, cannot benefit from healing, and takes +1d8 necrotic damage from all sources.",
-          "On a failed save the target is also Soul Bound — unable to teleport, plane shift, or enter dreamspaces. If they die while Soul Bound, their soul is trapped in a vessel of your choice for 24 hours.",
-          "Once per long rest, attempt a True Soul Severance — on a failure: the soul is cut loose. The creature instantly falls to 0 HP and cannot be revived by Revivify, Raise Dead, or Resurrection. Only Wish, Arcanum Veritas, or Divine Intervention may restore it."
+          "On a failed save the target is also Soul Bound — unable to teleport, plane shift, or enter dreamspaces, their soul tethered to a point you choose within 60 feet (visible only to you and denizens of Insomnia). If they die while Soul Bound, their soul is trapped in a gemstone, vessel, or mirror of your choice for 24 hours.",
+          "Once per long rest, attempt a True Soul Severance — the target makes a Charisma save against your Verum DC + your Corruption Score. On a failure the soul is cut loose: the creature instantly falls to 0 HP and cannot be revived by Revivify, Raise Dead, or Resurrection — only Wish, Arcanum Veritas, or Divine Intervention may restore it. If the soul was dream-bound, it ruptures, triggering a chaotic backlash at DM's discretion."
         ]
       }
     ],
     "supportive": [
       {
         "name": "Soul Transcendence",
-        "description": "Allow yourself or another to temporarily transcend physical boundaries.",
+        "description": "Allow yourself or another to shed the weight of the flesh and drift beyond its boundaries.",
         "tiers": [
           "The target gains resistance to non-magical damage for 1 minute as their soul briefly reinforces the flesh.",
-          "The target becomes incorporeal for 30 seconds — able to move through walls once per round, immune to grapples and restraints, and unable to be targeted by non-magical attacks.",
+          "The target becomes incorporeal for 30 seconds — moving through walls once per round, immune to grapples and restraints, and unable to be targeted by non-magical attacks.",
           "Enter or grant Soulform for 1 minute — immunity to poison, disease, exhaustion, and the Charmed condition; the target floats, leaves no physical trace, and cannot be detected by mundane senses.",
-          "Possess a willing creature or haunt an item for 1 hour — while possessing, you may cast spells through the host using your own spell slots. If haunting an item, it gains sentience, your voice, and one magical property based on your soul's Cognition Affinity."
+          "Possess a willing creature or haunt an item for 1 hour — while possessing, cast spells through the host using your own spell slots; if haunting an item it gains sentience, your voice, and one magical property based on your soul's Cognition Affinity. The host or item cannot be targeted by effects that require line of sight to you."
         ]
       },
       {
         "name": "Soulchain",
-        "description": "Bind souls together across time, distance, or fate.",
+        "description": "Bind souls together across time, distance, or fate, until their fortunes rise and fall as one.",
         "tiers": [
           "Two creatures you touch become soulbound — while within 30 feet they may freely transfer up to 5 damage per round between them.",
-          "Bind up to 3 creatures — while adjacent they gain +1 AC and +1 to all saving throws.",
-          "If one soulbound creature dies, the others may make a Charisma saving throw to absorb their soul — gaining temporary hit points equal to half the fallen creature's maximum HP and the knowledge of one of their known spells or abilities for 1 hour.",
-          "Perform a Soul Merge — fuse two creatures (willing or unconscious) into a single being for 1 minute. The merged creature uses the higher stat of each pair. After separation, both targets gain 1 level of Exhaustion."
+          "Bind up to 3 creatures — while adjacent they gain +1 AC and +1 to all saving throws, the interlocked souls steadying each other.",
+          "If one soulbound creature dies, the others may make a Charisma save to absorb their soul — gaining temporary hit points equal to half the fallen creature's maximum HP and knowledge of one of their known spells or abilities for 1 hour.",
+          "Perform a Soul Merge — fuse two creatures (willing or unconscious) into a single being for 1 minute, using the higher stat of each pair (HP, AC, spell slots, attacks, saving throws). After separation both gain 1 level of Exhaustion and cannot merge again until a long rest."
         ]
       }
     ],
     "control": [
       {
         "name": "Soulbrand",
-        "description": "Burn your essence into a creature, object, or location.",
+        "description": "Burn your essence into a creature, object, or location, and let no distance or death sever the mark.",
         "tiers": [
-          "Mark a creature with your soul signature — you always know their direction and HP status for 1 day.",
-          "While within 1 mile, you may cast Message, Detect Thoughts, or Command once per long rest on the branded target.",
-          "You may cast Dominate Person on the soulbranded target once per long rest, regardless of distance.",
-          "Permanently brand a soul — the target cannot be resurrected unless you willingly remove the mark. You always know if the branded soul enters a different plane, and may choose to pull it back once per long rest."
+          "Mark a creature with your soul signature (Charisma save) — you always know their direction and HP status for 1 day.",
+          "While within 1 mile, cast Message, Detect Thoughts, or Command once per long rest on the branded target, the soul brand serving as the connection.",
+          "Cast Dominate Person on the soulbranded target once per long rest, regardless of distance — the brand creating a channel that bypasses proximity.",
+          "Permanently brand a soul — the target cannot be resurrected unless you willingly remove the mark. You always know if the branded soul enters a different plane, and may pull it back once per long rest, forcing the soul to return to the Material Plane without a body unless anchored."
         ]
       },
       {
         "name": "Essence Echo",
-        "description": "Call forth the residual spirit of a dead being.",
+        "description": "Call forth the residual spirit of a dead being and coax it back toward the shape it wore in life.",
         "tiers": [
-          "Touching a corpse allows you to ask a single yes/no or memory-based question — the residual soul answering from whatever remains.",
+          "Touching a corpse lets you ask a single yes/no or memory-based question — the residual soul answering from whatever remains.",
           "Summon an Echo of the Soul — a semi-corporeal illusion that can deliver messages, answer questions about the deceased's knowledge, or enact one simple command.",
-          "Recreate a complete ghostly simulacrum for 10 minutes — capable of full speech, emotional expression, and minor physical action. It possesses all memories the creature had in life.",
-          "Summon an Ancestral Projection — a fully sentient ghostly avatar of the soul that fights beside you as a CR 7 creature under your command for 1 hour. It retains the original's personality, abilities, and Cognition affinities."
+          "Recreate a complete ghostly simulacrum for 10 minutes — capable of full speech, emotional expression, and minor physical action, possessing all memories the creature had in life.",
+          "Summon an Ancestral Projection — a fully sentient ghostly avatar that fights beside you as a CR 7 creature under your command for 1 hour, retaining the original's personality, abilities, and Cognition affinities. If the original still lives, they feel the second spiritual presence."
         ]
       },
       {
         "name": "Soul Mask",
-        "description": "Alter, veil, or rewrite the visible imprint of a soul.",
+        "description": "Alter, veil, or rewrite the visible imprint of a soul until even the gods read it wrong.",
         "tiers": [
           "Mask your alignment and essence for 10 minutes — you do not register as celestial, fiend, or undead to detection effects.",
           "Project another soul's echo onto yours — you register as that creature to divination, dream-reading, and soul-detection spells for 1 hour.",
           "Rewrite a creature's soul signature for 1 hour — they appear as a different species or divine origin, fooling Cognition-scanners, Grimm detectors, and Dreamcrafters entirely.",
-          "Once per week, perform a Soul Rewrite — permanently change one subclass, Cognition affinity, or Grimm bond (GM approval required). The change is permanent unless reversed by Arcanum Veritas or a deity."
+          "Once per week, perform a Soul Rewrite — reconstruct a creature's spiritual core, permanently changing one subclass, Cognition affinity, or Grimm bond (GM approval). The change is permanent unless reversed by Arcanum Veritas or a deity; the target is aware of what was changed and may or may not remember what came before."
         ]
       }
     ]
@@ -80,31 +80,31 @@
     {
       "name": "Soul Wound",
       "type": "Offensive",
-      "description": "The spell tears something deeper than flesh.",
-      "effect": "On a hit or failed saving throw against the primary effect, the target cannot regain hit points until the end of your next turn, and must succeed on a Charisma saving throw or have disadvantage on all Soul saving throws (Death, Curse, Possession, Dream Collapse) for 1 minute.",
+      "description": "The spell tears something deeper than flesh, leaving a wound the body cannot close.",
+      "effect": "On a hit or failed save against the primary effect, the target cannot regain hit points until the end of your next turn, and must succeed on a Charisma save against your Verum DC or have disadvantage on all Soul saving throws (Death, Curse, Possession, Dream Collapse) for 1 minute.",
       "upgrades": [
-        "Level 5+: The HP recovery block extends for 1 minute, and the target also loses resistance to necrotic and psychic damage for the same duration.",
-        "Level 11+: The Soul Wound becomes a Soul Fracture — the target loses 1 attunement slot until they complete a long rest, cannot benefit from soulbound items, and divine or dream-sourced healing on them is halved."
+        "Level 5+: The HP-recovery block extends to 1 minute, and the target also loses resistance to necrotic and psychic damage for the same duration — the spiritual wound making them porous to the damage types that most closely touch soul and mind.",
+        "Level 11+: The Soul Wound becomes a Soul Fracture — the target loses 1 attunement slot until a long rest, cannot benefit from soulbound items, and divine or dream-sourced healing on them is halved."
       ]
     },
     {
       "name": "Spiritual Anchor",
       "type": "Supportive",
-      "description": "The soul is briefly made unassailable.",
-      "effect": "When the primary effect resolves, one ally of your choice within 30 feet has their soul briefly reinforced — they gain advantage on death saving throws and cannot be Soul Displaced, soul-branded by hostile effects, or possessed until the start of your next turn.",
+      "description": "The soul is briefly made unassailable, set just beyond the reach of grasping hands.",
+      "effect": "When the primary effect resolves, one ally within 30 feet has their soul reinforced — they gain advantage on death saving throws and cannot be Soul Displaced, soul-branded by hostile effects, or possessed until the start of your next turn.",
       "upgrades": [
         "Level 5+: The protection persists for 1 minute, and the ally also gains advantage on Charisma saving throws while the anchor holds.",
-        "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to the effects of Soul Severance and Soul Fracture for the duration."
+        "Level 11+: You may choose two allies, and each is additionally immune to the effects of Soul Severance and Soul Fracture for the duration — placed just far enough outside reach that even dedicated soul magic cannot find purchase."
       ]
     },
     {
       "name": "Cursed Soul",
       "type": "Control",
-      "description": "The spell marks the target's spiritual core.",
-      "effect": "On a hit or failed saving throw against the primary effect, the target's soul is marked with a spiritual stigma — they are treated as Cursed for all magical effects, cannot benefit from Inspiration or Guidance, and are permanently detectable to divine and dream sensors.",
+      "description": "The spell marks the target's spiritual core with a stigma the divine can never stop reading.",
+      "effect": "On a hit or failed save against the primary effect, the target is marked with a spiritual stigma — treated as Cursed for all magical effects, unable to benefit from Inspiration, Bardic Inspiration, or Guidance, and permanently detectable to divine and dream sensors.",
       "upgrades": [
-        "Level 5+: The target also becomes Unanchored — disadvantage on saving throws against possession, curse effects, and soul-severing for 1 minute.",
-        "Level 11+: Any effect that would heal the target heals for the minimum possible value, and if they attempt to attune to a holy object or cast a divine spell, a Rebound Curse activates dealing psychic damage equal to your spellcasting modifier + proficiency bonus."
+        "Level 5+: The target also becomes Unanchored — disadvantage on saving throws against possession, curse effects, and soul-severing for 1 minute, their soul made easier to reach.",
+        "Level 11+: The mark deepens into the Cursed Soul condition — any healing on the target restores the minimum possible value, and attuning to a holy object or casting a divine spell triggers a Rebound Curse dealing psychic damage equal to your spellcasting modifier + proficiency bonus and breaking their Concentration."
       ]
     }
   ]
