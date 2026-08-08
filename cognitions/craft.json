@@ -1,0 +1,101 @@
+{
+  "id": "craft",
+  "name": "Craft",
+  "icon": "🔨",
+  "opposing": "destruction",
+  "description": "Making, Artifice, Inscription, Reinforcement, Ingenuity.",
+  "savingThrow": "Intelligence",
+  "damageType": "Force",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Conjured Armament",
+        "description": "You do not carry your tools — you call them into being the instant before they are needed.",
+        "tiers": [
+          "The effect deals +1d8 force damage, manifesting a weapon of pure make. At the start of each of your turns you may reshape it (bludgeoning, piercing, slashing, or force), letting the effect bypass one resistance of that type.",
+          "The bonus damage increases to +2d8 force. The armament gains the reach or thrown (60 ft.) property, and on a failed save a shard lodges in the target, dealing 1d6 force at the start of its next turn.",
+          "The bonus damage increases to +3d8 force. You conjure a matched set — once per turn you may make one additional attack with a duplicate implement as a bonus action, and your crafted weapons ignore nonmagical armor bonuses to AC.",
+          "Forge a Masterwork Engine of War — a siege-grade fabrication striking one target within 60 feet for 12d8 force damage (Intelligence save halves). On a failed save the target is Sundered: one weapon, shield, or worn item breaks, or it loses its armor's AC bonus, until repaired. The Engine then collapses into inert fragments."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Master's Reinforcement",
+        "description": "A thing made well does not fail when it is asked to matter — and you make things well.",
+        "tiers": [
+          "Touch a creature or object. A creature gains temporary hit points equal to twice your Verum Modifier; an object is instantly repaired of any nonmagical damage or breakage.",
+          "Augment a creature's gear for 1 minute — granting +1 AC or +1 to attack and damage rolls with one weapon, as the make of their equipment is temporarily perfected.",
+          "Reforge — restore one broken magic item to function for 1 hour, or restore one expended charge, use, or slot of an item or ability the target possesses (once per target per long rest).",
+          "Perfect the Work on one willing creature for 1 minute: they gain temporary hit points equal to your Verum DC, their weapons and armor count as magical and +2, and they cannot be Disarmed, nor can their gear be Sundered or broken by any effect below the level of Wish or Destruction."
+        ]
+      },
+      {
+        "name": "Animate Construct",
+        "description": "You give the make a purpose, and the purpose gives it motion — it does not tire, and it does not ask why.",
+        "tiers": [
+          "Assemble a Tiny construct helper for 10 minutes. It obeys simple commands, can carry, fetch, or manipulate objects, and can take the Help action on your turn. It has 5 HP and AC 10 + your Verum Modifier.",
+          "Build a Small or Medium guardian construct for 1 minute that acts on your initiative as a CR 1 creature under your command. It can make one attack for 1d10 + your Verum Modifier force damage and can take the Dodge, Disengage, or Help action.",
+          "The construct scales to a CR 4 creature and gains a chosen function: a ranged assembly attack (60 ft.), a Reactive Guard (impose disadvantage on one attack against an adjacent ally), or Self-Repair (regain HP equal to your Verum Modifier at the start of its turns).",
+          "Forge a Masterwork Automaton — a fully sentient construct fighting beside you as a CR 8 creature for 1 hour, retaining your instructions even out of sight. It is immune to poison, psychic damage, and the Charmed, Frightened, and Exhaustion conditions, and when destroyed it detonates for 6d10 force damage in a 15-foot radius (Intelligence save halves)."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Runework Sigil",
+        "description": "A rule written into the floor is more patient than any guard, and far less merciful.",
+        "tiers": [
+          "Inscribe a 5-foot sigil on a surface within range. The first creature to enter its space must succeed on an Intelligence save or be Restrained until the end of its next turn as the runework seizes it.",
+          "The sigil becomes a stored glyph — choose one condition when you inscribe it (Slowed, Frightened, Silenced, or Blinded). A creature that triggers it suffers that condition for 1 minute on a failed save. The glyph stays dormant and invisible until triggered.",
+          "Lay a network of up to 3 linked sigils within range. When any one triggers, all detonate — each creature within 5 feet of any sigil makes the save. You may set the trigger (a creature enters, casts a spell, or speaks).",
+          "Inscribe a Grand Ward across a 30-foot area for 1 hour. Declare one prohibition (\"None may cast here uninvited,\" \"None may cross armed,\" \"None may lie\"). A violator takes 8d10 force damage and is Restrained until the start of your next turn (Intelligence save halves damage and negates the restraint). Only Destruction or divine authority can unmake it early."
+        ]
+      },
+      {
+        "name": "Bulwark Fabrication",
+        "description": "The battlefield was a suggestion — you are here to make corrections.",
+        "tiers": [
+          "Raise a wall of crafted make up to 15 feet long and 10 feet high (or a 10-foot cube of cover) within range. It has AC 15, 30 HP, and lasts 1 minute or until destroyed.",
+          "The structure gains hazardous fittings — a creature that ends its turn adjacent to it, or strikes it in melee, takes 2d6 force damage from lashing components (Intelligence save negates). The wall's HP increases to 50.",
+          "Reconfigure the structure as a bonus action each turn — reshaping it into a bridge, ramp, enclosure, or grasping arms that force a creature within 5 feet to make an Intelligence save or be Restrained until the start of its next turn.",
+          "Erect a Reconfiguring Fortress for 1 minute — a 30-foot structure you reshape each turn. Allies inside gain half cover and +2 AC; enemies entering treat the interior as difficult terrain and must succeed on an Intelligence save or be Restrained until they escape (Strength or Intelligence check vs your Verum DC). The fortress has AC 18 and 120 HP."
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Exploit Seam",
+      "type": "Offensive",
+      "description": "You do not hit harder — you find where the work was done poorly, and you put your spell there.",
+      "effect": "On a hit or failed save against the primary effect, the maker's eye finds the target's structural flaw. Rather than adding damage, the target loses 2 AC and one damage resistance of your choice until the start of your next turn — the exposed seam refusing to hold, so the first attack to land while it is open strikes against the reduced AC in full.",
+      "upgrades": [
+        "Level 5+: The AC reduction increases to 3 and the seam lasts 1 minute. While it is open, the first attack each round that hits the target treats its damage dice as maximum, as every strike finds the same widening flaw.",
+        "Level 11+: On a failed Intelligence save the flaw becomes catastrophic — the target's worn armor or a wielded weapon is Sundered (broken until repaired) and it loses all resistances for the duration. A creature with no equipment or resistances instead takes 3d8 force damage as the seam runs through its body."
+      ]
+    },
+    {
+      "name": "Field Repair",
+      "type": "Supportive",
+      "description": "While one hand strikes, the other is already mending.",
+      "effect": "When the primary effect resolves, one ally within 30 feet (or yourself) is tended by your make — they gain temporary hit points equal to your Verum Modifier, and one broken or expended item they carry is restored (a snapped weapon, a spent single-use item, or a depleted charge).",
+      "upgrades": [
+        "Level 5+: The temporary hit points increase to twice your Verum Modifier, and the ally also repairs their armor — regaining any AC lost to Sundering, corrosion, or breakage for the rest of the encounter.",
+        "Level 11+: You may tend two allies, and each additionally ends one of the following on themselves: Disarmed, the effect of a Sunder, or a single gear-based penalty — their equipment restored faster than the enemy can degrade it."
+      ]
+    },
+    {
+      "name": "Deployed Contraption",
+      "type": "Control",
+      "description": "You leave a little something behind — it is not friendly.",
+      "effect": "When the primary effect hits or a target fails their save, a small crafted device assembles at the point of impact, turning a 10-foot radius into difficult terrain for 1 minute. The first creature to enter or end its turn in the area must succeed on an Intelligence save against your Verum DC or be Restrained until the end of its next turn as the contraption snares it.",
+      "upgrades": [
+        "Level 5+: The radius increases to 15 feet, and the contraption re-arms — it can snare a creature once per round rather than only once, and a Restrained creature takes 1d8 force damage when the mechanism cinches.",
+        "Level 11+: The device becomes a Sentry — at the start of each of your turns it makes a ranged assembly attack against one creature in or adjacent to the area, dealing 2d8 force damage on a hit (using your Verum DC as its attack, adding your Verum Modifier), until it is destroyed (AC 14, 15 HP) or the duration ends."
+      ]
+    }
+  ]
+}
