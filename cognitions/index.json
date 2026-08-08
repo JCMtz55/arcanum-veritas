@@ -71,6 +71,13 @@
       "ready": true
     },
     {
+      "id": "craft",
+      "name": "Craft",
+      "icon": "🔨",
+      "opposing": "destruction",
+      "ready": true
+    },
+    {
       "id": "death",
       "name": "Death",
       "icon": "💀",
@@ -208,7 +215,7 @@
       "name": "Shadow",
       "icon": "🌑",
       "opposing": "light",
-      "ready": false
+      "ready": true
     },
     {
       "id": "silence",
