@@ -6,9 +6,7 @@
   "description": "Society, Structure, Progress, Culture, Legacy.",
   "savingThrow": "Charisma",
   "damageType": "Force",
-
   "verumEffects": {
-    "offensive": [],
     "supportive": [
       {
         "name": "Communal Resonance",
@@ -41,30 +39,33 @@
           "Declare two restrictions simultaneously. Creatures that fail cannot violate either. On a success they are still unable to act against you directly until the end of their next turn.",
           "The Edict becomes absolute law for 1 minute. Creatures that fail cannot violate the restriction by any means — magical or otherwise — and attempting to do so causes psychic damage equal to your Verum Modifier each time they try."
         ]
-      },
+      }
+    ],
+    "creation": [
       {
         "name": "Infrastructure",
-        "description": "Civilization does not conquer land — it claims it. (Save: Charisma)",
+        "description": "Civilization does not conquer land — it claims it.",
         "tiers": [
-          "Conjure a 10-foot section of solid wall, floor, or barrier (your choice) in an unoccupied space within 60 feet. AC 15, 30 HP, lasts until end of your next turn, provides full cover.",
-          "Structure's HP increases to 80, AC to 17, duration extends to 1 minute. Conjure up to two connected sections. Creatures that fail the save cannot willingly move through or over it for 1 round.",
-          "The structure becomes semi-permanent — lasting until destroyed or dismissed. HP 200, resistance to all non-siege damage. Conjure up to four sections and designate one gate only named creatures may pass through freely.",
-          "Raise a Civic Fortification — up to ten connected sections, 400 HP, immunity to non-magical damage, permanent duration. Creatures with Intelligence 8+ instinctively recognize it as sovereign territory. Hostile creatures entering must succeed on a Charisma save or be Frightened for 1 minute."
+          "Your creations are dressed stone and fitted timber. Structures gain +2 AC and may include a gate or passage that only creatures you name may use freely.",
+          "Your Structures have resistance to all damage except force and siege damage and are immune to decay, erosion, and time-based Cognitions. Constructs are civic wardens — they may take the Help action as a bonus action.",
+          "Your creations are culturally significant — allies within 30 feet of a Structure gain +1 to spell save DCs and attack rolls while defending it. A Structure made with a 6th-level slot or higher is permanent until destroyed or dismissed.",
+          "A Civic Fortification — the Structure is recognized as sovereign territory. Creatures of Intelligence 8 or higher instinctively understand this. Hostile creatures that enter must succeed on a Charisma saving throw against your Verum DC or be Frightened for 1 minute, and any creature that spends a minute within it learns a piece of its lore as Legend Lore."
         ]
-      },
+      }
+    ],
+    "utility": [
       {
-        "name": "Eternal Monument",
-        "description": "Your creation is remembered by stone, voice, or pact.",
+        "name": "Common Tongue",
+        "description": "The most powerful thing in the world is a precedent.",
         "tiers": [
-          "If the effect creates a structure, object, or inscription, its duration becomes indefinite unless magically destroyed.",
-          "The structure gains resistance to all damage except force and siege-based effects, and cannot be targeted by decay, erosion, or time-based Cognitions.",
-          "The creation becomes culturally significant — spells and abilities used within or near it gain +1 to spell save DCs or attack rolls if aligned with its purpose.",
-          "Establish a Legacy Construct — the effect records your name, intention, and power into collective memory. Any creature interacting with it for more than 1 minute gains a piece of lore (as Legend Lore), advantage on saves against being Charmed or Frightened while defending it, and the ability to invoke a minor version of the spell once."
+          "Speak, read, and write any language of a settled people for 1 hour. Know the laws and customs of the place you stand in. Produce a document, seal, or writ indistinguishable from an authentic one.",
+          "Be understood by every creature within 300 feet that can hear you, each in its own tongue. Learn the true history and ownership of a building, road, or border you touch.",
+          "Send your voice to every creature in a settlement you have entered. Record a statement into stone or parchment so that it cannot be altered, forged, or destroyed by nonmagical means.",
+          "Declare a law over a settlement for 24 hours — every inhabitant knows it, and those who break it are known to you. Or read the full civic record of a ruin: who lived, who ruled, and how it fell."
         ]
       }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Iron Law",

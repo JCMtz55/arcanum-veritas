@@ -6,10 +6,7 @@
   "description": "Bad Luck, Calamity, Accidents, Failure, Ruin.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
-
   "verumEffects": {
-    "offensive": [],
-    "supportive": [],
     "control": [
       {
         "name": "Destined to Fail",
@@ -51,9 +48,20 @@
           "Mark a creature with Cursed Glory for 1 minute — if they roll a natural 20 on any roll, they immediately take psychic damage equal to twice your spellcasting modifier, and the natural 20 is treated as a natural 1 instead."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Small Ruin",
+        "description": "It arrives as a slightly wet cobblestone at exactly the wrong moment.",
+        "tiers": [
+          "A nonmagical object you touch fails the next time it is relied on — a strap, a bowstring, a hinge, a lock. Lose a pursuer to ordinary coincidence. Know the one thing most likely to go wrong here.",
+          "For 8 hours, a creature you name has a bad day — wrong turns, spoiled food, missed meetings, misheard orders. Nothing provable, and nothing a saving throw can answer.",
+          "Ruin a plan rather than a person — a shipment goes astray, a message is delivered to the wrong hand, a ceremony is interrupted by something mundane and humiliating.",
+          "Curse an endeavor — a voyage, a siege, a marriage, a harvest — for a season. It does not fail dramatically. It simply never quite works, and no one can say why."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Hex Touch",

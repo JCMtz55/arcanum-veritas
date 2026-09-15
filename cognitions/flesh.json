@@ -6,7 +6,6 @@
   "description": "Mortality, Sensation, Growth, Vulnerability, Embodiment.",
   "savingThrow": "Constitution",
   "damageType": "Sinew",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,32 @@
           "Puppet a corpse or paralyzed creature for 1 minute — using its body as an extension of your own. You act through it with its physical stats and your mental actions, sharing its senses while the puppeting lasts."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Grafted Work",
+        "description": "A body is a system, and a system can be built.",
+        "tiers": [
+          "Your creations are living tissue. Structures regain 5 hit points per segment at the start of each of your turns and are unnervingly warm. Objects are living sinew — they deal +1d4 sinew damage and cannot be disarmed.",
+          "Your creations have resistance to piercing and slashing damage and immunity to poison damage. A creature that touches or strikes a Structure must succeed on a Constitution saving throw against your Verum DC or be grappled by muscle fibers until it escapes.",
+          "Constructs may reshape themselves — once per turn, changing one natural weapon, gaining a climb or swim speed, or squeezing through any gap a limb can fit. A destroyed Object regrows at the start of your next turn.",
+          "Your creations are Ascendant flesh — they count as aberrations, are immune to critical hits, and a Construct may graft a willing ally, granting them the Construct's natural weapon and speed for the duration."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Surgeon's Hand",
+        "description": "Medicine and violence are the same gesture at different intensities.",
+        "tiers": [
+          "Learn a creature's injuries, ailments, age, and recent trauma by touch. Set a bone, close a wound, or stop a bleed without a check. Alter your own features — face, build, voice — for 1 hour.",
+          "Alter a willing creature's appearance for 8 hours, convincingly enough to pass. Grant a willing creature a minor useful adaptation — gills, padded feet, a climbing grip.",
+          "Read a corpse's flesh for the last hour of its life. Graft a nonmagical organ, limb, or feature onto a willing creature, permanently.",
+          "Rebuild a willing creature's body into the form they have always believed was theirs — permanently, without pain, and without cost to their health."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Exposed Nerve",

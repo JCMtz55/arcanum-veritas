@@ -6,7 +6,6 @@
   "description": "Suffering, Endurance, Injury, Torment, Clarity.",
   "savingThrow": "Constitution",
   "damageType": "Sanguine",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,20 @@
           "Declare a named body part when casting (heart, lungs, eyes, spine, etc.). If the creature fails the save, it suffers a thematic permanent Injury in that location unless restored by 7th level vitaemancy or divine intervention."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Read the Hurt",
+        "description": "Pain is the body's most honest signal.",
+        "tiers": [
+          "Learn every injury, illness, and old wound a creature carries by touch, and how each was earned. With consent, deaden or restore a creature's sense of pain for 1 hour.",
+          "Know when a creature within 60 feet is lying about how it feels — pain, fear, or exhaustion it is hiding. Ease a willing creature's chronic pain for 24 hours.",
+          "Take a willing creature's pain into yourself for up to 1 hour — you feel it, they do not, and neither of you takes damage from the transfer.",
+          "Read a body's entire history of suffering — every wound and every hand that dealt it, in order. Or grant a willing creature a full day without pain, however they came by it."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Nerve Strike",

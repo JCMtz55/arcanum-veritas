@@ -6,7 +6,6 @@
   "description": "Ferocity, Strength, Savagery, Predation, Survival.",
   "savingThrow": "Strength",
   "damageType": "Physical",
-
   "verumEffects": {
     "offensive": [
       {
@@ -73,9 +72,20 @@
           "You exude an Aura of Domination in a 30-foot radius for 1 minute — all enemies within range have disadvantage on saving throws against fear, charm, and knockdown and cannot maintain Concentration while Frightened by you."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Wild Sense",
+        "description": "You are still an animal. You just have better tools.",
+        "tiers": [
+          "Speak with beasts for 1 hour. Track by scent, gaining advantage on Survival checks to follow a trail. Know the nearest source of water, shelter, and danger.",
+          "Gain a climb and swim speed equal to your walking speed for 1 hour, and darkvision 60 feet. Beasts of CR 1 or lower will not attack you or your companions unprovoked.",
+          "See through the eyes of any beast within 1 mile. You and up to three companions leave no trail and cannot be tracked by scent or sight for 8 hours.",
+          "Call the wild — every beast within 5 miles knows what you want, and those willing come. Or take the form of any beast you have hunted for up to 8 hours, keeping your own mind."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Savage Blow",

@@ -5,7 +5,7 @@
 
 ## Overview
 
-The **Arcanum Veritas Builder** is a single-file HTML tool for constructing and referencing spells cast through the Arcanum Veritas system. It calculates damage, healing, and control values based on slot level and character level, then displays the full Verum Effect chain for the selected Core Cognition.
+The **Arcanum Veritas Builder** is a single-file HTML tool for drawing seals — spells composed in the moment through the Arcanum Veritas system. A seal is a **Core Cognition** (what it is), a **Composition / Ring** (what shape it takes), and **Complement Cognitions** (how it's modified). The tool calculates every Ring's numbers from slot level, shows the Core's Verum Effect tiers from character level, and produces a copyable summary.
 
 The tool runs entirely in the browser — no server, no install, no internet required.
 
@@ -32,8 +32,8 @@ The HTML file and the `cognitions/` folder must stay in the same directory.
 
 ### Step 1 — Set Slot Level
 Use the **Slot Level** slider (1–9). This determines:
-- How many cognitions you can select (1 Core + Slot−1 Complements)
-- The damage, healing, and duration values shown on the spell card
+- How many cognitions you can select (1 Core + Slot−1 Complements; **Coven Drawing** adds up to 3 more)
+- Every Ring's numbers — damage, healing, absorb, size, CR, duration
 
 ### Step 2 — Set Character Level
 Use the **Character Level** slider (1–20). This determines your **Tier**:
@@ -45,20 +45,22 @@ Use the **Character Level** slider (1–20). This determines your **Tier**:
 | Tier 3 | Lv 11–16 |
 | Tier 4 | Lv 17+ |
 
-The Core Cognition's Verum Effect will display **all tiers up to and including your current tier**, so you can see the full power progression your character has access to. The current tier is highlighted.
+The Core Cognition's Verum Effect will display **all tiers up to and including your current tier**. Verum Effects scale by **character level, never by slot** — the slot sets the Ring, your level sets the Core.
 
 ### Step 3 — Select a Core Cognition
 Click any ready cognition from the sidebar list. This becomes the spell's **Core** — it defines the damage type, saving throw, and the Verum Effect pool.
 
 Use the **search bar** to filter cognitions by name.
 
-### Step 4 — Choose Composition, Subtype & Verum Effect
-- **Composition** (Offensive / Supportive / Control) — the spell's intent
-- **Subtype** — delivery method (e.g. Direct Attack, Area of Effect, Aura)
-- **Verum Effect** — the Core Cognition's special effect applied on hit/fail
+### Step 4 — Choose Composition, Subtype, Shape, Manner & Verum Effect
+- **Composition** (Offensive / Supportive / Control / Creation / Utility) — the Ring's family
+- **Subtype** — the Ring itself (Direct Attack, Area, Field, Infusion, Self, Ally, Aura, Ward, Targeted, Control Area, Structure, Construct, Object, Utility)
+- **Shape** — for any Ring with a radius: Sphere (at a point in range), Cone (2× radius, from your hand), Line (4× radius, 5 ft wide, from your hand)
+- **Manner of Drawing** — Standard, Rite (10 min; double duration or size), Inscribed (1 min; fires on a trigger later), Coven (up to 3 allies each add a Sigil)
+- **Verum Effect** — the Core's effect from the Ring's pool. If the Cognition defines a `creation` / `utility` pool it is used; until then Structures and Objects fall back to the Core's **Control** pool, Constructs to **Offensive**, Utility to **Supportive**
 
-### Step 5 — Add Complement Cognitions
-If your slot level is 2 or higher, you may add Complement Cognitions (one per slot level above 1). Each complement contributes a **Complement Effect** chosen by composition type.
+### Step 5 — Add Complement Cognitions (Sigils)
+If your slot level is 2 or higher, you may add Complement Cognitions (one per slot level above 1). Each contributes a **Complement Effect** from the Ring's pool. With **Coven** selected, up to three extra slots open and are labelled **COVEN SIGIL**.
 
 ### Step 6 — Review the Spell Card
 The card shows:
@@ -131,9 +133,10 @@ Place a new `.json` file in `cognitions/` following this structure:
 ```
 
 **Rules:**
-- Only include `verumEffects` categories that have at least one effect
+- Only include `verumEffects` categories that have at least one effect. Optional `creation` and `utility` arrays are supported: when present, Creation and Utility Rings use them; when absent, they fall back to the mapping in Step 4
+- `complementEffects` `type` may also be `"Creation"` or `"Utility"`; those win for their Ring, otherwise the fallback pool's complements are offered
 - `tiers` must always be an array of exactly 4 strings
-- `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, or `"Control"`
+- `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`
 
 ### 2. Register it in index.json
 Add an entry to the `cognitions` array in `index.json`:
@@ -162,33 +165,76 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 
 ---
 
+## Rules of the Seal
+
+**Global numbers**
+
+| | |
+|---|---|
+| Verum Modifier | your highest ability score modifier |
+| Seal attack bonus | Proficiency Bonus + Verum Modifier |
+| Verum DC | 8 + Proficiency Bonus + Verum Modifier + Dream Score modifier |
+| Saving throw type | set by the Core (its Main Saving Throw) |
+
+**The Premium Rule.** A seal of slot *N* should perform like the best spell of slot *N+1* — before its Verum Effect and Sigils. It costs a slot **and** a use; you get Proficiency Bonus uses per long rest; there are no cantrips.
+
+**Limits.** One Core + (slot − 1) Complements (Coven adds up to 3). Your action, once per turn, never a bonus action — Ward is a reaction. Aura, Field, Control zones, and Constructs concentrate. A seal is immune to *Counterspell* and *Dispel Magic*, suppressed by *Antimagic Field*, and unmade early only by an opposing seal.
+
+**Countering.** Core to Core only (see the Cognition's Opposed entry); the countering slot must be equal or higher; a reaction counter spends a use and a slot; casting as an action and a reaction in the same round costs one level of exhaustion (Dual Use).
+
+---
+
 ## Composition Reference
 
 ### Offensive
-| Subtype | Delivery |
-|---------|----------|
-| Direct Attack | Spell attack roll · hit = full damage + Verum Effect |
-| Area of Effect | Save · fail = full damage + Verum Effect · success = half, no Verum |
+| Ring | Delivery |
+|------|----------|
+| Direct Attack | One target · seal attack roll · hit = full damage + Verum · crits · Touch variant (5 ft, +1 die) |
+| Area | Save · fail = full + Verum · success = half, no Verum · Shape: sphere / cone / line |
+| Field | Lingering zone · save on appearance and start of each turn inside · concentration |
+| Infusion | Weapon Die on every hit · Core & Complement bonus dice on first hit per turn · riders every hit, one save per rider per turn · Bestowed on an ally's weapon |
 
 ### Supportive
-| Subtype | Delivery |
-|---------|----------|
-| Self | No roll · caster only |
-| Targeted | Willing creatures in range · full healing each |
-| Aura | All allies within radius centered on caster |
+| Ring | Delivery |
+|------|----------|
+| Self | No roll · caster only · the only Ring for internal effects |
+| Ally | Willing creatures in range · full healing each |
+| Aura | Creatures of your choice within radius · concentration |
+| Ward | **Reaction** · absorb damage · Verum on the attacker (or the protected creature) · never both absorb and Verum temp HP |
 
 ### Control
-| Subtype | Delivery |
-|---------|----------|
-| Targeted | Each target saves independently · DC = 8 + Prof + Mod |
-| Area | Persistent zone · creatures save on entry and start of turn |
+| Ring | Delivery |
+|------|----------|
+| Targeted | Each target saves vs Verum DC · **success = no effect** |
+| Area | Zone · save on appearance and start of turn inside · **success = nothing this turn** · concentration · Shape |
+
+### Creation
+| Ring | Delivery |
+|------|----------|
+| Structure | Wall / bridge / barrier · HP per 10-ft segment · total cover · Verum on touch |
+| Construct | Servant of CR = slot · Core's damage type + Verum on attacks · concentration |
+| Object | Tool / weapon / vessel · mundane; +1 at 5th, +2 at 8th · never a magic item |
+
+### Utility
+| Tier | Slots | Scope |
+|------|-------|-------|
+| Minor | 1st–3rd | up to a 3rd-level utility effect |
+| Moderate | 4th–6th | up to a 6th-level utility effect |
+| Major | 7th–9th | up to a 9th-level utility effect |
+
+### Manners of Drawing
+| Manner | Effect |
+|--------|--------|
+| Rite | 10-minute drawing · double duration **or** double radius/size · not Ward or Direct Attack |
+| Inscribed | 1-minute drawing on a surface/object/skin · fires on a trigger within (slot) hours · hold Prof Bonus inscriptions · not Ward |
+| Coven | Up to 3 allies who know a Cognition spend a reaction to add a Sigil beyond your budget |
 
 ---
 
 ## Notes
 
 - The tool has no save state — selections reset on page refresh
-- Complement Effects filter to match the chosen Composition type automatically
+- Complement Effects filter to match the Ring's Verum pool automatically (Creation → Control / Offensive for Constructs; Utility → Supportive)
 - The **Clear Selection** button at the bottom of the sidebar resets everything
 - Print layout is supported — use browser print to export a spell card
 

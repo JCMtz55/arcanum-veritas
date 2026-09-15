@@ -6,7 +6,6 @@
   "description": "Decay, Greed, Soul Unraveling, Spiritual Erosion, Temptation.",
   "savingThrow": "Charisma",
   "damageType": "Psychic",
-
   "verumEffects": {
     "offensive": [
       {
@@ -20,7 +19,6 @@
         ]
       }
     ],
-    "supportive": [],
     "control": [
       {
         "name": "Soul Spoil",
@@ -62,9 +60,20 @@
           "Once per long rest, if the target has 3 or more Corruption Points on a failed save: they gain +1 Corruption Point, are bound to your Dominant Vile Emotion aura, and if they die under this effect their soul cannot be resurrected without Wish or True Resurrection granted by a deity."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Rot Beneath",
+        "description": "It does not introduce the evil. It finds the evil already there and gives it permission.",
+        "tiers": [
+          "See a creature's Corruption Points and Dominant Vile Emotion by looking at it. Spoil food, wine, or a stored good by touch. Know the most shameful thing a creature within 30 feet has done this week.",
+          "Age or decay a nonmagical object by a century. Plant a single idea in a sleeping creature's mind — it wakes believing the idea was its own.",
+          "Read the moral history of a place: every oath broken, every betrayal, every crime committed within its walls. Forge a document, seal, or memory that survives any mundane scrutiny.",
+          "Name an institution, family, or order you have touched — learn its weakest member and the precise pressure that would break them. Or sour a region's harvest, luck, and trust for a season."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Taint",

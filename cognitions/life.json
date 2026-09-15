@@ -6,9 +6,7 @@
   "description": "Vitality, Creation, Growth, Renewal, Existence.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
-
   "verumEffects": {
-    "offensive": [],
     "supportive": [
       {
         "name": "Healing",
@@ -51,20 +49,31 @@
         ]
       }
     ],
-    "control": [
+    "creation": [
       {
         "name": "Biogenesis",
-        "description": "You guide the world to remake itself. (Save: Constitution)",
+        "description": "You guide the world to remake itself.",
         "tiers": [
-          "Target terrain within 15 feet sprouts moss, plants, or fungi — granting light cover and softening falls. Creatures that fail their save have their movement speed reduced by 5 feet as growth clutches at their feet.",
-          "Create a localized ecosystem — vines, pollen, small creatures — within a 30-foot radius. The area becomes difficult terrain for enemies, and you gain advantage on Nature checks while within it.",
-          "You may awaken a forest section or spawn a living grove that obeys your will — moving to block paths or attacking intruders for up to 10 minutes. Creatures that fail their save are Restrained by vines until they use an action to break free (Strength check vs your Verum DC).",
-          "Generate a Living Domain — every surface within a 120-foot radius is alive and responsive for 1 hour. You may use it to trap, heal, or overgrow structures, creatures, and spells within the area."
+          "Your creations are living matter — moss, vine, bark, chitin. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant or beast creatures of the listed CR.",
+          "Your creations are immune to poison damage and disease. A Structure supports an ecosystem — allies who rest within 10 feet of one regain 1 additional Hit Die on a short rest.",
+          "Structures are awakened — once per turn, one may make an opportunity attack against a creature that leaves its reach, dealing 2d8 bludgeoning damage on a failed Dexterity saving throw against your Verum DC. Constructs regenerate 5 hit points at the start of each of their turns.",
+          "A Living Domain — within 30 feet of a Structure made with a 7th-level slot or higher, allies regain 1d6 hit points at the start of each of their turns, and the ground is difficult terrain for your enemies."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Quickening",
+        "description": "Life does not ask permission. It only asks for room.",
+        "tiers": [
+          "Purify food and water for ten creatures. Cure a mundane disease or poison by touch. Know whether a creature within 60 feet is alive, dead, or undead — and how long it has been so.",
+          "Speak with any living plant or beast for 1 hour. Close a wound so that it leaves no scar. Sense every living creature within 300 feet.",
+          "Grant a willing creature the benefit of a full night's rest in 1 hour. Restore fertility to a barren field, animal, or person.",
+          "Seed life where there was none — an island, a wasteland, a dead god's body — and it sustains itself thereafter. Or extend a willing creature's natural lifespan by a decade."
         ]
       }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Life Drain",

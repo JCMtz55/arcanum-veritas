@@ -6,7 +6,6 @@
   "description": "Finality, Transition, Necromancy, Loss, Inevitability.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,32 @@
           "Once per long rest, invoke True Destined Death. On a failed save, the Mark becomes absolute — if the target dies, their soul dissolves into the Loom of Creation. No magic, divine authority, dreamwalking, or intervention of any kind can retrieve it. Not Wish. Not True Resurrection. Not a Forerunner. Additionally: The Executioner notices. The DM determines the consequences."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Grave-Raising",
+        "description": "Death makes its own materials.",
+        "tiers": [
+          "Constructs are undead, raised from a corpse or remains within range. Structures are grave-cold — a creature that touches or strikes one takes 1d6 necrotic damage. Objects are grave-relics, dealing +1d4 necrotic damage on a hit.",
+          "Your creations are immune to necrotic and poison damage and to exhaustion. A creature that starts its turn touching a Structure cannot regain hit points until the end of its next turn.",
+          "Your undead Constructs ignore radiant vulnerability and have advantage on saving throws against Turn Undead. A Structure shaped as a tomb hides what lies inside from divination.",
+          "Once per seal, a destroyed Construct rises again at half its hit points at the start of your next turn. While a Structure stands, a creature killed within 10 feet of it cannot be revived by spells of 5th level or lower."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Passage of the Threshold",
+        "description": "You do not fear the door. You have keys.",
+        "tiers": [
+          "Know how, and roughly when, any creature within 60 feet died. Preserve a corpse from decay for a week. Sense undead within 120 feet.",
+          "For 1 hour, undead of a CR below your level ignore you and up to three companions unless you act against them. Perform last rites that allow a willing restless spirit to pass on.",
+          "For 1 minute, see and speak with any spirit within 300 feet, and once during that time step through a wall as the dead do — up to 10 feet into an adjacent space.",
+          "Name a creature that died within the year and learn where its soul went — passed on, bound, trapped, or dissolved — and who last touched it. Or grant a dying willing creature a peaceful death that nothing can turn to undeath."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Necrotic Edge",

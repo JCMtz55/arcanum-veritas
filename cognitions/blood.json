@@ -6,7 +6,6 @@
   "description": "Vitality, Kinship, Sacrifice, Lineage, Power.",
   "savingThrow": "Constitution",
   "damageType": "Sanguine",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,20 @@
           "Forge a Perpetual Blood Oath lasting one year and one day. The target cannot attack you, betray you, or speak falsehoods against you. If they do, they immediately suffer a Cognition-tier curse and are marked as Oathbreakers — visible to all gods and creatures with divine sight."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Red Thread",
+        "description": "Every drop carries the full record of a life.",
+        "tiers": [
+          "Learn a creature's species, approximate age, and state of health from a drop of its blood. Know whether two creatures are blood kin. Preserve a blood sample indefinitely.",
+          "Track a creature whose blood you hold, unerringly, within 1 mile. Read the last hour of a creature's life from blood spilled within the last day.",
+          "Witness one scene from the life of any ancestor of the blood you hold. Send a wordless call along a blood-bond that the kin feels at any distance.",
+          "Trace a bloodline in full — every living descendant of a drop you hold, where they are and what they are. Or seal an oath in blood that both parties feel broken the instant it is broken, anywhere in the world."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Sanguine Wound",

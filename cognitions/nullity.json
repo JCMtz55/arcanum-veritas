@@ -6,7 +6,6 @@
   "description": "Anti-Magic, Negation, Void, Severance, Erasure.",
   "savingThrow": "Intelligence",
   "damageType": "Void",
-
   "verumEffects": {
     "control": [
       {
@@ -59,9 +58,20 @@
           "Once per long rest, perform Total Conceptual Erasure — on a failed save the target loses access to all spell slots, Cognition features, class features, and magical abilities for 1 minute. They retain only mundane physical capability. Even Legendary Resistances are included. A successful Intelligence save at the end of each turn ends the effect."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Unmaking",
+        "description": "Wreckage implies that something was once present.",
+        "tiers": [
+          "End one magical effect of 3rd level or lower by touch. Open any nonmagical lock, seal, or binding. Know whether a thing is magical, and roughly how strongly.",
+          "Suppress a magic item's properties for 1 hour. Erase writing, glyphs, marks, or inscriptions permanently — magical or not, up to 5th level.",
+          "Unmake a nonmagical object up to 10 feet in any dimension; nothing remains. Walk through a magical barrier, ward, or seal of 6th level or lower as though it were not there.",
+          "End a permanent magical effect — a curse, a ward, an enchanted place, a binding — of 8th level or lower, leaving no trace it was ever cast. What you unmake this way cannot simply be recast; someone must begin again."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Null Strike",

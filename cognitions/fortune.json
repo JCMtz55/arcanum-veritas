@@ -6,7 +6,6 @@
   "description": "Luck, Chance, Opportunity, Unpredictability, Serendipity.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
-
   "verumEffects": {
     "offensive": [
       {
@@ -53,9 +52,20 @@
           "Once per long rest, declare a Fate Twist — up to three targets automatically experience the result you dictate (fail, succeed, ignore the effect, or repeat it). Recharges on a natural 20."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Long Odds",
+        "description": "Lucky because, on some level, the world decided they deserved to be.",
+        "tiers": [
+          "Find something lost or hidden nearby by wandering into it. Win any game of pure chance. Arrive exactly when you are needed, having left at the ordinary time.",
+          "For 8 hours, small things go your way — a door unlocked, a guard looking elsewhere, a seat at a full table, a name remembered. The weather favors your journey.",
+          "Once in a day, a mundane disaster simply misses you and your companions — the bridge holds, the ambush chooses another road, the ship makes port.",
+          "Name something you need — a person, an object, a passage, an answer. Within a day, chance brings you to it, or it to you. How is never up to you."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Lucky Strike",

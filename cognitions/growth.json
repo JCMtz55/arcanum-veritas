@@ -5,7 +5,6 @@
   "opposing": "decay",
   "description": "Evolution, Maturation, Prosperity, Vitality, Expansion.",
   "savingThrow": "Constitution",
-
   "verumEffects": {
     "supportive": [
       {
@@ -60,9 +59,32 @@
           "Manifest a clone of yourself or one ally for 1 minute — the clone uses bonus actions and reactions independently, shares HP with the original, and may cast one spell or make one attack per round as a free action."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Verdant Making",
+        "description": "What you grow keeps growing.",
+        "tiers": [
+          "Your creations are living plant matter. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant creatures. Objects are living wood — they float, and neither rust nor rot.",
+          "Structures bear fruit — once per seal, an ally who eats from one regains hit points equal to your Verum Modifier. Constructs regenerate 5 hit points at the start of each of their turns.",
+          "Your Structures are rooted — immune to forced movement — and a creature Restrained within one cannot escape without leaving the structure. Once per seal, a Construct may split into two Constructs of half its size.",
+          "A Structure made with a 7th-level slot or higher that is still standing when the seal ends becomes real, permanent plant life. Constructs have regeneration 10, and when destroyed they seed 1d4 CR 1/4 plant creatures that serve you for 1 minute."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Cultivate",
+        "description": "You are not making it grow. You are getting out of its way.",
+        "tiers": [
+          "Bring a plant to maturity in a minute. Feed ten people from a patch of bare ground. Clear a path 60 feet through any vegetation. Mend a broken bough.",
+          "Enrich an acre so that it yields double for a season. Grow a hedge or canopy that shelters a group for a night. Regrow a creature's lost hair, nails, or scars.",
+          "Once per day, one willing creature's short rest counts as a long rest. Grow a living bridge or staircase up to 100 feet — for passage, not for cover.",
+          "Bloom a mile of barren land into fertile ground for a year. Or hurry a willing creature's growth by up to a decade — or, once a year, turn a decade back."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Overgrowth Strike",

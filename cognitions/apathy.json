@@ -6,7 +6,6 @@
   "description": "Indifference, Emotional Detachment, Numbness, Passivity, The Hollow.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
-
   "verumEffects": {
     "control": [
       {
@@ -69,9 +68,20 @@
           "The target must succeed on a Charisma saving throw or become catatonic for 1 minute — unconscious but fully aware, unable to act, react, or be roused except by taking damage. Even after waking, they have disadvantage on all rolls for 1 minute."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "The Grey",
+        "description": "You cannot parry indifference.",
+        "tiers": [
+          "For 1 hour, nothing you do provokes emotional reaction — you are dismissed, overlooked, and not worth mentioning. Know what a creature within 30 feet cares about most. Calm a panicking crowd or animal.",
+          "Strip a place of atmosphere for 1 hour — no fear, no awe, no reverence, and no inspiration can take hold within it. Numb yourself to grief, terror, or longing for 8 hours.",
+          "Remove one memory's emotional weight from a willing creature — they recall the event perfectly and feel nothing about it. Make an object, banner, or relic uninspiring: it grants no morale and is difficult to remember.",
+          "For a day, a place, an office, or a cause inspires no one — no oath sworn there binds, no speech given there moves. Or grant a willing creature one full day of perfect, unfeeling clarity."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Grey Touch",

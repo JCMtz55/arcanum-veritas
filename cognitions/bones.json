@@ -6,7 +6,6 @@
   "description": "Structure, Death, Durability, Foundation, Memory.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,32 @@
           "Dominate up to three bone-possessing creatures simultaneously. Once per long rest, you may fully puppet an unconscious or paralyzed creature as if using Dominate Monster, bypassing immunities."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Ossuary Craft",
+        "description": "Structure is what remains — so build with what remains.",
+        "tiers": [
+          "Your creations are bone. A Structure shaped as a cage Restrains a creature inside it until it escapes with a Strength check against your Verum DC. Constructs are undead — immune to poison damage and exhaustion. Objects deal +1d4 necrotic damage on a hit.",
+          "Your creations are immune to necrotic and poison damage. Structures grow spurs — a creature that touches or strikes one takes 1d8 piercing damage. A Construct raised from a corpse or bone pile keeps that creature's size and Strength score.",
+          "Constructs are immune to Turn Undead. Once per seal, you may raise a Structure as a bonus action if you stand on ground that holds the dead — a battlefield, a crypt, a grave. An Object may be a memory-bone that answers one question as Speak with Dead.",
+          "A Structure made with a 7th-level slot or higher is a consecrated ossuary: undead you control within 30 feet gain resistance to radiant damage. Once per seal, a destroyed Construct reassembles at 1 hit point at the start of your next turn."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Reliquary Sense",
+        "description": "Bones keep the record long after the ink has faded.",
+        "tiers": [
+          "Sense skeletons, living or dead, within 60 feet. Learn a bone's owner, age, and cause of death by touch. Set and splint a fracture, removing its penalty.",
+          "Lighten your skeleton for 1 hour — jump three times as far and halve falling damage. Find a specific person's remains within 1 mile if you hold something that was theirs.",
+          "You and up to three companions gain a climb speed equal to your walking speed for 1 hour as bone hooks grow from your hands. Reconstruct a creature's full form as an image from a single fragment.",
+          "The Long Record — touch a bone at least a century old and witness one scene from its owner's life. Or knit a shattered skeleton whole, curing structural Injuries and restoring the bone of a lost limb for Regenerate to finish."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Splinter",

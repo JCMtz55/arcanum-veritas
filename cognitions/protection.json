@@ -6,7 +6,6 @@
   "description": "Defense, Guardianship, Shielding, Safety, Endurance.",
   "savingThrow": "Constitution",
   "damageType": "Force",
-
   "verumEffects": {
     "supportive": [
       {
@@ -50,20 +49,33 @@
           "Enemies in the area must succeed on a Strength save or be pushed 15 feet and knocked prone.",
           "The pulse additionally dispels magical effects of 5th level or lower targeting your allies within the radius."
         ]
-      },
+      }
+    ],
+    "creation": [
       {
         "name": "Bulwark of Faith",
-        "description": "Your belief creates an implacable wall — scaling HP per slot level, granting resistance behind it, and eventually shaping into a dome that grants immunity to magic missiles, disintegration, and death effects.",
+        "description": "To make a shield is to promise it will hold.",
         "tiers": [
-          "Create a 10-foot × 10-foot magical wall with 50 HP per spell slot level used, providing total cover until broken or until the end of your next turn.",
-          "Wall HP increases to 75 HP per spell slot level, and creatures behind it gain resistance to all damage.",
-          "The wall moves with you or a chosen ally, and reflects psychic, necrotic, or force damage back at the source if it is destroyed.",
-          "Wall HP increases to 100 HP per spell slot level and may be shaped into a 30-foot radius dome or 10-foot radius sphere, granting creatures inside immunity to magic missiles, disintegration, and death effects."
+          "Allies behind a Structure gain +1 AC beyond its cover. A Construct may use its reaction to grant half cover to an ally within 5 feet. Objects made as shields or armor grant +1 AC.",
+          "Your Structures are immune to nonmagical damage. A Construct adjacent to an ally may take a hit meant for them.",
+          "Once per seal, you may raise the Structure as a reaction when an ally within range is targeted. Constructs have resistance to all damage while protecting someone.",
+          "Sanctum: allies within 5 feet of a Structure are immune to forced movement and death effects, and a Structure that would be destroyed instead stands at 1 hit point until the start of your next turn."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Warding Rite",
+        "description": "A door does not need a guard if the guard is the door.",
+        "tiers": [
+          "Ward a door, chest, or 10-foot area: it locks (opened with a check against your Verum DC) and alerts you when crossed.",
+          "Ward a room for 8 hours against scrying and against teleportation into it.",
+          "Ward a place against a named creature type; they cannot willingly enter without succeeding on a Charisma save against your Verum DC.",
+          "Sanctify a region up to 100 feet across: no hostile Arcanum Veritas of a lower slot than yours can be drawn inside it."
         ]
       }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Retribution Ward",

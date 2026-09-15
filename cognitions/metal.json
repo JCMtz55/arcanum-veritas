@@ -6,7 +6,6 @@
   "description": "Strength, Resilience, Craftsmanship, Durability, Precision.",
   "savingThrow": "Strength",
   "damageType": "Force",
-
   "verumEffects": {
     "offensive": [
       {
@@ -53,9 +52,32 @@
           "Once per long rest, become a Metal Anchor for 1 minute — no creature within 30 feet can teleport, be forcibly moved, or be disarmed unless they succeed on a Strength saving throw at the start of each of their turns."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Forgeborn",
+        "description": "Every blade remembers the forge.",
+        "tiers": [
+          "Your creations are true steel. Structures gain +2 AC. Objects are masterwork — +1 to attack rolls or AC beyond the Ring's listed quality (to a maximum of +3).",
+          "Your creations have resistance to nonmagical bludgeoning, piercing, and slashing damage, a Construct's attacks count as adamantine, and Structures gain +10 HP per segment.",
+          "Weapons you make have the returning property and cannot be disarmed. Structures may include doors, arrow slits, or murder holes that only creatures you choose may use.",
+          "Your creations are adamantine — immune to nonmagical damage, and critical hits against them become normal hits. A Construct made with a 7th-level slot or higher may instead be a Forgemind construct: sentient, able to smith, and loyal for the duration."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Smith's Knowing",
+        "description": "Metal does not lie about what it is.",
+        "tiers": [
+          "Sense the kind and amount of metal within 60 feet. Mend a broken metal object by touch. Reshape up to a cubic foot of nonmagical metal. Open a nonmagical lock.",
+          "Fully repair a damaged metal weapon or suit of armor in 1 minute. Learn a metal object's forge, maker, and last owner by touch. Silence the metal a group carries for 8 hours.",
+          "Transmute up to 10 cubic feet of one common metal into another for 8 hours. Pass through metal doors, bars, or walls up to 5 feet thick.",
+          "The Origin Forge — forge a masterwork nonmagical item of any size from raw ore in 10 minutes, or permanently reshape a metal structure such as a gate, a bridge, or a vault door."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Deadlock",

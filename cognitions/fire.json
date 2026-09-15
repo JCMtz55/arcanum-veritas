@@ -6,7 +6,6 @@
   "description": "Destruction, Passion, Purification, Rebirth, Warmth.",
   "savingThrow": "Dexterity",
   "damageType": "Cognitive Fire",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,32 @@
           "The terrain erupts into a Living Flame Storm for 1 minute. Hostile creatures treat it as impassable solid terrain unless immune to fire. Any creature that enters or starts its turn there takes 5d10 fire damage."
         ]
       }
+    ],
+    "creation": [
+      {
+        "name": "Kiln-Forged",
+        "description": "What fire makes, fire keeps.",
+        "tiers": [
+          "Your creations are of living flame. They shed bright light in a 20-foot radius, and a creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 fire damage.",
+          "That fire damage becomes 2d6. Your creations are immune to fire and cannot be extinguished by nonmagical means.",
+          "A creature that ends its turn within 5 feet of one of your Structures takes 2d6 fire damage. A Construct's attacks Ignite on a hit.",
+          "Your creations are eternal flame — unaffected by cold or water effects of 5th level or lower. When a Structure or Construct is destroyed, it erupts for 6d10 fire damage in a 20-foot radius (Dexterity save for half)."
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Hearthlight",
+        "description": "Fire was the first gift, and it was never only for burning.",
+        "tiers": [
+          "Kindle bright light in a 30-foot radius, keep a group warm through any cold, light mundane fires at a distance, and sense sources of heat within 60 feet.",
+          "See clearly through smoke and heat haze; heat a nonmagical object until it glows; purify food and water by flame.",
+          "Step into one fire and out of another you can see within 300 feet. Burn or melt through a 5-foot cube of nonmagical material each turn.",
+          "The pyre of renewal: burn away one curse or magical effect of 6th level or lower from a willing creature, or reforge a broken nonmagical object whole."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Ember's Bite",

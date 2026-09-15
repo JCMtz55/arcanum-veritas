@@ -6,7 +6,6 @@
   "description": "Bravery, Sacrifice, Leadership, Courage, Defiance.",
   "savingThrow": "Charisma",
   "damageType": "Radiant",
-
   "verumEffects": {
     "supportive": [
       {
@@ -61,9 +60,20 @@
           "Once per long rest, when any creature within 60 feet would fall under a mind-affecting effect, you may shatter it — ending the effect on all allies simultaneously and forcing all enemies within range to make a Charisma saving throw or become Frightened for 1 minute."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Stand Told",
+        "description": "Borrowed courage lasts a moment. The Cognition knows the difference.",
+        "tiers": [
+          "Be heard and believed by everyone within 300 feet when you speak plainly and truly. Steady a frightened crowd, mount, or child. Endure a full day of hardship without exhaustion.",
+          "You and up to six companions march, climb, or hold a watch for 24 hours without rest or fear. Your presence ends a panic, a rout, or a riot.",
+          "Make a promise that all who hear it know you will keep. Enter a place bound by fear — a haunted hall, a tyrant's court — and those with you are immune to that fear while you stand.",
+          "What you do here is remembered — the deed passes into story, spreads without a teller, and cannot be erased, forged, or claimed by another. Those who hear it take heart, for as long as it is told."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Righteous Strike",

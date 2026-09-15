@@ -6,7 +6,6 @@
   "description": "Strength, Dominance, Influence, Authority, Force.",
   "savingThrow": "Strength",
   "damageType": "Force",
-
   "verumEffects": {
     "offensive": [
       {
@@ -63,9 +62,20 @@
           "The target is Restrained and Stunned until the end of their next turn as the weight becomes overwhelming. After that, the −4 penalty and speed reduction persist for 1 minute with no repeat save."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "Sheer Force",
+        "description": "It did not find the clever path around the mountain. It decided the mountain was in the way.",
+        "tiers": [
+          "Lift, drag, or hold what ten strong people could. Break a nonmagical door, chain, lock, or wall by touch. Be heard clearly by everyone within 300 feet.",
+          "Carry, push, or haul any load for 8 hours without tiring. Your word carries weight — advantage on Intimidation checks, and on Persuasion checks when you are making a demand rather than a request.",
+          "Move something that should not be movable: a fallen pillar, a ship aground, a portcullis, a boulder blocking a pass. Shatter a nonmagical structure up to 20 feet across.",
+          "Reshape a landscape by will — divert a river, split a hill, raise or level ground across a mile. Or make one declaration that every creature who hears it knows, beyond doubt, you can enforce."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Unyielding Might",

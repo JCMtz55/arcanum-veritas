@@ -6,7 +6,6 @@
   "description": "Solitude, Detachment, Withdrawal, Loneliness, Self-Sufficiency.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
-
   "verumEffects": {
     "supportive": [
       {
@@ -51,9 +50,20 @@
           "Null Space becomes a Zone of Total Severance for 1 minute. Creatures inside are immune to divination and cannot be targeted by effects originating outside the zone. Creatures that leave the zone have their memories of what occurred inside suppressed until they finish a long rest or receive a Greater Restoration."
         ]
       }
+    ],
+    "utility": [
+      {
+        "name": "The Quiet",
+        "description": "Comfortable distance, over time, becomes permanent.",
+        "tiers": [
+          "Go unseen and unheard by anyone not actively searching for you, for 1 hour. Silence a 20-foot area. Know whether you are being watched, scried, or followed.",
+          "You and up to three companions leave no trail, scent, or trace for 8 hours and cannot be found by divination. Make a room's conversation unhearable from outside.",
+          "Make a place unfindable for 24 hours — those who do not already know where it is cannot locate it by any means, magical or mundane. Sever a creature's link to a scrying sensor, familiar, or bond for 1 hour.",
+          "Remove a place, an object, or a willing creature from the notice of the world for a month — they are not hidden, they are simply not thought of. Those who knew of them remember only the shape of an absence."
+        ]
+      }
     ]
   },
-
   "complementEffects": [
     {
       "name": "Fracture Bond",
