@@ -263,6 +263,19 @@ input[type=range]::-webkit-slider-thumb {
   gap: 16px;
   min-width: 0;
 }
+/* ─── TWO-COLUMN WORKSPACE ───────────────────────────────── */
+.work { display: flex; flex-direction: column; gap: 16px; }
+.work-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; width: 100%; }
+@media (min-width: 1180px) {
+  .work { flex-direction: row; align-items: flex-start; gap: 18px; }
+  .work-col { flex: 1 1 0; width: auto; }
+  .work-col.left  { flex-grow: 1.02; }
+  /* the card you read while you build stays put */
+  .work-col.right { position: sticky; top: 0; max-height: calc(100vh - 36px); overflow-y: auto; padding-right: 2px; }
+  .work-col.right::-webkit-scrollbar { width: 5px; }
+  .work-col.right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .scale-card table { font-size: 0.74rem; }
+}
 .main::-webkit-scrollbar { width: 5px; }
 .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
@@ -619,6 +632,7 @@ input[type=range]::-webkit-slider-thumb {
 .stat.hit  { border-color:#b9a887; background:var(--gold-bg); }
 .stat.dmg  { border-color:var(--off-accent); background:#FFF0F0; }
 .stat.dc   { border-color:var(--con-accent); background:#F0F0FF; }
+.stat-sub { margin-left:6px; opacity:.62; font-size:.55rem !important; letter-spacing:.04em !important; }
 .pc-tags { margin-top:2px; }
 .tg { display:inline-block; font-size:.58rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
   padding:3px 7px; margin:0 4px 4px 0; border-radius:999px; background:var(--bg2); color:var(--text2); border:1px solid var(--border2); }
@@ -1396,17 +1410,20 @@ function renderMain() {
   const coreCog  = LOADED[state.core];
   const tier     = getTier(state.charLevel);
 
-  let html = "";
-  html += buildFlowSteps();
-  html += buildRulesCard(false);
-  html += buildCompPicker(coreCog);
+  // Full-width band, then a two-column workspace: build on the left, read on the right
+  let head = buildFlowSteps() + buildRulesCard(false);
+  let left  = buildCompPicker(coreCog);
+  let right = "";
   if (state.compType && state.compSub) {
-    html += buildScaleTable();
-    html += buildSpellCard(coreCog, tier);
-    html += buildSummary(coreCog, tier);
+    left  += buildScaleTable();
+    right += buildSummary(coreCog, tier);
+    right += buildSpellCard(coreCog, tier);
   }
 
-  panel.innerHTML = html;
+  panel.innerHTML = head +
+    `<div class="work"><div class="work-col left">${left}</div>` +
+    (right ? `<div class="work-col right">${right}</div>` : "") +
+    `</div>`;
 }
 
 // ─── Flow step ribbon ────────────────────────────────────
@@ -1603,7 +1620,7 @@ function buildSpellCard(coreCog, tier) {
       const now = i === tier;
       h += `<div class="tier-row${now ? " now" : ""}">
         <span class="t-lbl${now ? " now" : ""}">${TIERS[i].label}</span>
-        <span class="t-txt${now ? " now" : ""}">${txt}</span>
+        <span class="t-txt${now ? " now" : ""}">${resolve(partText(txt))}</span>
         ${now ? `<span class="now-badge">NOW</span>` : ""}
       </div>`;
     });
@@ -1655,7 +1672,7 @@ function buildSpellCard(coreCog, tier) {
           <div class="contrib-txt">${partText(activeFx.effect)}</div>`;
         if (activeFx.upgrades?.length) {
           activeFx.upgrades.forEach(u => {
-            h += `<div class="contrib-upg">↑ ${u}</div>`;
+            h += `<div class="contrib-upg">↑ ${resolve(partText(u))}</div>`;
           });
         }
         h += `</div>`;
@@ -1870,6 +1887,23 @@ function collectTags(coreCog, tier) {
   return { conds: [...conds], denies: [...denies], resource };
 }
 
+// A Core tier that adds dice adds them to the Ring's damage — show the resulting total
+function totalDamage(baseCell, coreCog, tier) {
+  if (!baseCell) return null;
+  const m = String(baseCell).match(/^(\d+)d(\d+)(.*)$/);
+  if (!m) return baseCell;
+  let n = +m[1]; const die = m[2], rest = m[3] || "";
+  const cv = coreCog?.verumEffects?.[verumKey()] || [];
+  const av = cv.find(v => v.name === state.coreVerum) || cv[0];
+  let bonus = 0;
+  if (av) for (let i = 0; i <= tier; i++) {
+    const b = (partMech(av.tiers[i]) || {}).damage?.bonusDice;
+    if (typeof b === "number") bonus = b;   // tiers restate the total, they don't stack
+  }
+  if (!bonus) return baseCell;
+  return { total: `${n + bonus}d${die}${rest}`, base: `${n}d${die}`, bonus: `+${bonus}d${die}` };
+}
+
 function buildPlayCardHTML(coreCog, tier) {
   const coreEntry = INDEX.find(c => c.id === state.core);
   const cd  = COMP_DATA[state.compType];
@@ -1882,11 +1916,17 @@ function buildPlayCardHTML(coreCog, tier) {
   // ── Hero: the numbers you actually roll
   let stats = "";
   if (isAttack) stats += `<span class="stat hit"><b>${sgn(sealAttack())}</b><span>to hit</span></span>`;
-  else if (coreCog?.savingThrow) stats += `<span class="stat dc"><b>${verumDC()}</b><span>${coreCog.savingThrow.slice(0,3)} save</span></span>`;
-  const dmg = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
-  if (dmg) {
+  // The Verum DC is always live — Sigils and escape clauses hang off it even on a Direct Attack
+  if (coreCog?.savingThrow)
+    stats += `<span class="stat dc"><b>${verumDC()}</b><span>${esc(coreCog.savingThrow)} save</span></span>`;
+  const dmgCell = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
+  if (dmgCell) {
     const kind = cell("Healing") || cell("Healing / Target") ? "heal" : cell("Absorb") ? "absorb" : (coreCog?.damageType || "damage").toLowerCase();
-    stats += `<span class="stat dmg"><b>${esc(dmg)}</b><span>${esc(kind)}</span></span>`;
+    const t = totalDamage(dmgCell, coreCog, tier);
+    if (t && typeof t === "object")
+      stats += `<span class="stat dmg"><b>${esc(t.total)}</b><span>${esc(kind)}</span><span class="stat-sub">${esc(t.base)} ${esc(t.bonus)}</span></span>`;
+    else
+      stats += `<span class="stat dmg"><b>${esc(t || dmgCell)}</b><span>${esc(kind)}</span></span>`;
   }
   [["Range","range"],["Radius","radius"],["Targets","targets"],["Weapon Die","weapon die"],
    ["CR cap","cr"],["Size","size"],["HP / segment","hp/seg"],["Max size","size"],["Tier","tier"],

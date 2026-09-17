@@ -168,6 +168,10 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 
 ---
 
+## Layout
+
+On screens wider than 1180px the workspace splits into two columns — the picker and scaling table on the left, the summary and spell card on the right, with the right column sticky so the card stays visible while you change Sigils. Below that width everything stacks into one column.
+
 ## The Summary Card
 
 The card at the bottom of the build has two modes:
