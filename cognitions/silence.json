@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target is Silenced until the end of their next turn — they cannot speak, shout, or cast spells with verbal components.",
+            "card": "Fail: Silenced until end of their next turn — no speech, no shouts, no verbal components",
             "mech": {
               "conditions": [
                 {
@@ -27,6 +28,7 @@
           },
           {
             "text": "The Silenced condition persists for 1 minute. The target may repeat the Constitution saving throw at the end of each of their turns, ending the effect on a success.",
+            "card": "Silenced 1 min · Con save at end of each turn to end it",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -40,10 +42,12 @@
             }
           },
           {
-            "text": "On a failed initial save, the target also cannot communicate telepathically and cannot benefit from any spell or ability that requires sound to function — including Command, Dissonant Whispers, bardic performance, and spoken prayer."
+            "text": "On a failed initial save, the target also cannot communicate telepathically and cannot benefit from any spell or ability that requires sound to function — including Command, Dissonant Whispers, bardic performance, and spoken prayer.",
+            "card": "Also no telepathy and no benefit from anything requiring sound — Command, Whispers, inspiration"
           },
           {
             "text": "The target becomes Devoiced — they cannot be heard regardless of volume, cannot be remembered when they speak (listeners retain the impression that someone said something but cannot recall content or source), and automatically fail all Charisma-based checks that involve speech. Only Greater Restoration or divine intervention removes the Devoiced condition.",
+            "card": "Devoiced — unheard at any volume, and unremembered: listeners know someone spoke but not what",
             "mech": {
               "conditions": [
                 {
@@ -63,6 +67,7 @@
         "tiers": [
           {
             "text": "A 10-foot radius zone of silence appears centered on a point within range. All creatures inside have disadvantage on Perception checks involving hearing and cannot cast spells with verbal components while within the zone.",
+            "card": "10-ft zone — disadvantage on hearing Perception, no verbal components inside",
             "mech": {
               "terrain": {
                 "radius": 10
@@ -76,10 +81,12 @@
             }
           },
           {
-            "text": "The zone expands to 20 feet and additionally suppresses bardic inspiration, aura-based abilities, and spoken commands — these features cannot be activated or received while inside the area."
+            "text": "The zone expands to 20 feet and additionally suppresses bardic inspiration, aura-based abilities, and spoken commands — these features cannot be activated or received while inside the area.",
+            "card": "20 ft · suppresses bardic inspiration, auras and spoken commands"
           },
           {
             "text": "Creatures that begin their turn inside the zone must succeed on a Constitution saving throw against your Verum DC or be Silenced for 1 round, even if they were not previously affected.",
+            "card": "Starting a turn inside: Con save {DC} or Silenced 1 round",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -94,6 +101,7 @@
           },
           {
             "text": "Once per long rest, expand the zone into a Dome of Silence — a 30-foot radius hemisphere lasting 1 minute. Within it: all sound is completely negated; all verbal magic automatically fails with no saving throw; and creatures inside are invisible to magical detection across planar boundaries, as they cannot be named or heard from beyond the Dome's edge.",
+            "card": "1/long rest Dome of Silence 30 ft, 1 min — all sound negated, all verbal magic fails with no save",
             "mech": {
               "conditions": [
                 {
@@ -113,6 +121,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target cannot speak or communicate telepathically for 1 minute — the suppression reaching past the voice into the mechanism that generates speech.",
+            "card": "Fail: no speech or telepathy 1 min — the suppression reaches past the voice",
             "mech": {
               "deny": [
                 "speech"
@@ -121,6 +130,7 @@
           },
           {
             "text": "The target also cannot cast any spell with a verbal or mental focus and cannot use legendary actions that involve speech or spellcasting for the duration.",
+            "card": "Also no verbal or mental-focus casting, and no speech-based legendary actions",
             "mech": {
               "deny": [
                 "legendaryActions",
@@ -129,10 +139,12 @@
             }
           },
           {
-            "text": "While affected, the target loses access to one randomly determined spell or feature at the start of each of their turns for the duration, regaining it when the effect ends."
+            "text": "While affected, the target loses access to one randomly determined spell or feature at the start of each of their turns for the duration, regaining it when the effect ends.",
+            "card": "They lose a random spell or feature at the start of each turn, returned when it ends"
           },
           {
             "text": "You may permanently sever one psychic, telepathic, or mental link the target possesses — a familiar bond, a warlock's pact link, a shared hive-mind consciousness, or a similar connection. The severed link cannot be restored by any means short of divine magic or Wish. The target is aware the link is gone but cannot determine how or by whom it was severed.",
+            "card": "Permanently sever one psychic link — a familiar bond, a pact link, a hive-mind connection",
             "mech": {
               "conditions": [
                 {
@@ -149,6 +161,7 @@
         "tiers": [
           {
             "text": "All sound produced by the triggering event is retroactively silenced — creatures present must succeed on a Wisdom saving throw against your Verum DC or be unable to clearly recall what was said or heard, retaining only a vague impression.",
+            "card": "The event's sound is retroactively silenced — Wis save {DC} or they can't recall what was said",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -161,10 +174,12 @@
             }
           },
           {
-            "text": "Any creature that attempts to describe, repeat, or record the censored event verbally finds themselves tongue-tied — the words fail to form, and Charisma checks made to communicate the information automatically fail until the end of the scene."
+            "text": "Any creature that attempts to describe, repeat, or record the censored event verbally finds themselves tongue-tied — the words fail to form, and Charisma checks made to communicate the information automatically fail until the end of the scene.",
+            "card": "Anyone trying to repeat or record it is tongue-tied — the words won't form"
           },
           {
             "text": "You may designate one full round of events (6 seconds) to be forgotten by all non-divine observers in the area who fail an Intelligence saving throw against your Verum DC. They retain a gap in their memory but cannot identify what filled it.",
+            "card": "One full round is forgotten by all non-divine observers who fail an Int save {DC}",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -173,6 +188,7 @@
           },
           {
             "text": "Once per long rest, invoke Perfect Silence — all sound within a 1-mile radius ceases for 1 minute. Spells of 6th level or lower with audible components automatically fail; all creatures in the radius are Deafened and Silenced; and they must succeed on a Constitution saving throw at the end of each of their turns or remain so for the full duration.",
+            "card": "1/long rest Perfect Silence — one mile, one minute, no sound; audible spells ≤6th just fail",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -195,6 +211,7 @@
         "tiers": [
           {
             "text": "As a reaction to a creature casting a spell or taking a verbal action within 30 feet, you may interrupt it — the creature must succeed on a Constitution saving throw against your Verum DC or the action is lost, the spell slot expended without effect.",
+            "card": "React to a spell or verbal action within 30 ft — Con save {DC} or it's lost",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -202,10 +219,12 @@
             }
           },
           {
-            "text": "You may nullify one spell per round that has a verbal component and is cast within 60 feet, without expending your reaction — the suppression becoming ambient rather than reactive."
+            "text": "You may nullify one spell per round that has a verbal component and is cast within 60 feet, without expending your reaction — the suppression becoming ambient rather than reactive.",
+            "card": "Nullify one verbal spell per round within 60 ft without spending your reaction"
           },
           {
             "text": "When you cast a spell using this effect, choose one creature within range. For 1 round, they cannot cast spells, speak, or use any Charisma-based feature — even through magic items or innate abilities — unless they succeed on a Constitution saving throw against your Verum DC.",
+            "card": "One creature can't cast, speak or use Charisma features for 1 round — items and innate included",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -217,6 +236,7 @@
           },
           {
             "text": "Once per long rest, activate Absolute Silence for 1 minute. While active: you may suppress one ongoing spell per round as a free action; you designate up to three creatures who cannot cast, speak, or use Charisma-based features unless they succeed on a Constitution saving throw at the start of each of their turns; and you are immune to being targeted by any spell or ability with a verbal component.",
+            "card": "1/long rest Absolute Silence 1 min — suppress an ongoing spell per round free, three creatures muted",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -237,6 +257,7 @@
       "description": "The strike lands without a sound — the target opening their mouth as nothing useful comes out, unable to call for help, signal allies, or activate command words.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target is silenced until the start of your next turn — they cannot call for help, signal allies, activate command words, or cast spells with verbal components.",
+        "card": "Silenced until your next turn — no calls for help, no signals",
         "mech": {
           "conditions": [
             {
@@ -248,6 +269,7 @@
       "upgrades": [
         {
           "text": "The silence persists for 1 minute, and the target must succeed on a Constitution saving throw against your Verum DC at the end of each of their turns to end it early. While silenced this way, they also cannot activate magic items that require a spoken command or activation word.",
+          "card": "Lasts 1 min · Con save {DC} at end of each turn to end it",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -261,6 +283,7 @@
         },
         {
           "text": "The silence also suppresses the target's aura-based features for the duration — passive effects that radiate from their presence (such as auras of courage, devotion, or hatred) are suspended while they cannot speak, as the Cognition treats the voice as the mechanism of that radiation.",
+          "card": "Also suppresses their aura-based features",
           "mech": {
             "deny": [
               "speech"
@@ -275,6 +298,7 @@
       "description": "The Cognition folds silence around you like a second skin — granting Stealth advantage, soundless movement, and eventually letting you cast verbal spells without any audible trace.",
       "effect": {
         "text": "When the primary effect resolves, you gain advantage on Stealth checks until the start of your next turn, your movement produces no sound, and you are immune to effects that require hearing the caster (such as Dissonant Whispers or auditory fear effects) for the same duration.",
+        "card": "Advantage on Stealth · your movement makes no sound",
         "mech": {
           "buff": {
             "advantage": "Stealth checks until the start of your next turn"
@@ -283,10 +307,12 @@
       },
       "upgrades": [
         {
-          "text": "The personal silence persists for 1 minute and additionally makes you immune to being detected by hearing-based features — tremorsense that relies on sound, echolocation, and similar senses cannot locate you while the effect is active."
+          "text": "The personal silence persists for 1 minute and additionally makes you immune to being detected by hearing-based features — tremorsense that relies on sound, echolocation, and similar senses cannot locate you while the effect is active.",
+          "card": "Lasts 1 min · undetectable by hearing-based senses"
         },
         {
-          "text": "While the silence is active, you may cast spells with verbal components silently — the Cognition handling the verbal requirement internally, leaving no audible trace that a spell was cast. Observers with no other means of detecting spellcasting cannot identify that you are the source of any magical effect."
+          "text": "While the silence is active, you may cast spells with verbal components silently — the Cognition handling the verbal requirement internally, leaving no audible trace that a spell was cast. Observers with no other means of detecting spellcasting cannot identify that you are the source of any magical effect.",
+          "card": "Cast verbal spells silently while it holds"
         }
       ]
     },
@@ -295,11 +321,13 @@
       "type": "Control",
       "description": "The point of impact becomes a place where sound goes to stop — verbal components failing within the area and eventually the zone becoming self-sustaining and resistant to verbal magic from any direction.",
       "effect": {
-        "text": "When the primary effect hits or a target fails their saving throw, a 15-foot radius of suppressed sound appears centered on the point of impact, lasting until the end of your next turn. Within this area, verbal components automatically fail and audible communication is impossible."
+        "text": "When the primary effect hits or a target fails their saving throw, a 15-foot radius of suppressed sound appears centered on the point of impact, lasting until the end of your next turn. Within this area, verbal components automatically fail and audible communication is impossible.",
+        "card": "15 ft of suppressed sound at the impact point"
       },
       "upgrades": [
         {
           "text": "The Dead Air persists for 1 minute and its radius expands to 30 feet. Creatures that attempt to cast a spell with a verbal component inside the area must succeed on an Intelligence saving throw against your Verum DC or the spell fails.",
+          "card": "Lasts 1 min · radius 30 ft · verbal casting inside is punished",
           "mech": {
             "save": {
               "ability": "Intelligence"
@@ -308,6 +336,7 @@
         },
         {
           "text": "The Dead Air becomes self-sustaining — it does not require Concentration and persists for the full minute regardless. Any spell cast into the Dead Air from outside that has a verbal component must pass the same Intelligence saving throw to take effect — the zone actively resisting verbal magic from any direction.",
+          "card": "Self-sustaining, no Concentration",
           "mech": {
             "save": {
               "ability": "Intelligence"

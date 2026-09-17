@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "The damage becomes psychic and gains +2 dice. One additional die if no ally of the target is within 10 feet of it.",
+            "card": "+2 dice psychic · +1 more if no ally is within 10 ft of them",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -22,6 +23,7 @@
           },
           {
             "text": "+4 dice. The target cannot regain hit points from any source other than itself until the end of its next turn.",
+            "card": "+4 dice · they can only heal themselves until end of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -33,6 +35,7 @@
           },
           {
             "text": "+6 dice, plus one further die for every 30 feet between the target and its nearest ally (maximum 3).",
+            "card": "+6 dice · +1 more per 30 ft to their nearest ally (max 3)",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -41,6 +44,7 @@
           },
           {
             "text": "+8 dice. The target is Severed for 1 minute: it cannot receive healing, buffs, or the Help action from any creature, and this effect deals half again as much damage to it while it is alone.",
+            "card": "+8 dice · Severed 1 min — no healing, buffs or Help from anyone, and half again damage while alone",
             "mech": {
               "damage": {
                 "bonusDice": 8
@@ -62,10 +66,12 @@
         "description": "You retreat fully from the reach of the world — gaining cover, invisibility, and eventually Total Withdrawal where damage and targeting simply cannot find you.",
         "tiers": [
           {
-            "text": "As a reaction when targeted by an attack or effect, gain half cover and become immune to opportunity attacks until the end of the turn."
+            "text": "As a reaction when targeted by an attack or effect, gain half cover and become immune to opportunity attacks until the end of the turn.",
+            "card": "React when targeted: half cover and immune to opportunity attacks this turn"
           },
           {
             "text": "Once per short rest, as a bonus action you may teleport up to 30 feet to an unoccupied space and become invisible until the start of your next turn or until you attack or cast a spell.",
+            "card": "1/short rest bonus-action teleport 30 ft and turn invisible until you act",
             "mech": {
               "conditions": [
                 {
@@ -79,6 +85,7 @@
           },
           {
             "text": "While no allies are within 30 feet of you, you gain advantage on all saving throws and resistance to one damage type of your choice — declared at the start of each of your turns. This ends immediately if an ally moves within 30 feet.",
+            "card": "With no allies within 30 ft: advantage on all saves and resistance to a type you pick each turn",
             "mech": {
               "buff": {
                 "advantage": "all saving throws and resistance to one damage typ"
@@ -86,7 +93,8 @@
             }
           },
           {
-            "text": "Once per long rest, for 1 minute you may enter a state of Total Withdrawal — you gain resistance to all damage, cannot be targeted by spells or effects that require you to be seen or sensed, and leave no magical trace. This state ends early if you deal damage or cast an offensive spell."
+            "text": "Once per long rest, for 1 minute you may enter a state of Total Withdrawal — you gain resistance to all damage, cannot be targeted by spells or effects that require you to be seen or sensed, and leave no magical trace. This state ends early if you deal damage or cast an offensive spell.",
+            "card": "1/long rest Total Withdrawal 1 min — resist all damage, untargetable by anything needing to sense you"
           }
         ]
       },
@@ -96,6 +104,7 @@
         "tiers": [
           {
             "text": "You or one creature within 30 feet gains immunity to being Charmed or Frightened until the end of their next turn.",
+            "card": "You or a creature within 30 ft: immune to Charmed and Frightened until end of their next turn",
             "mech": {
               "conditions": [
                 {
@@ -108,10 +117,12 @@
             }
           },
           {
-            "text": "The target cannot be affected by enchantment magic for 1 minute — including Suggestion, Dominate, Command, and similar effects."
+            "text": "The target cannot be affected by enchantment magic for 1 minute — including Suggestion, Dominate, Command, and similar effects.",
+            "card": "Immune to enchantment for 1 min — Suggestion, Dominate, Command, all of it"
           },
           {
             "text": "The target becomes immune to psychic damage and telepathic intrusion for 1 minute, and has advantage on all Intelligence and Wisdom saving throws for the same duration.",
+            "card": "Immune to psychic damage and telepathy 1 min · advantage on Int and Wis saves",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -126,6 +137,7 @@
           },
           {
             "text": "For 1 hour the target's mind becomes a sealed vault — their thoughts cannot be read or modified, they cannot be targeted by Dream, Geas, or Detect Thoughts, and they have advantage on saves against any divination or mind-affecting effect of 8th level or lower.",
+            "card": "1 hr sealed vault — thoughts unreadable and unmodifiable, untouchable by Dream, Geas or Detect Thoughts",
             "mech": {
               "buff": {
                 "advantage": "saves against any divination or mind-affecting eff"
@@ -141,10 +153,12 @@
         "description": "You cut the threads between others — stripping healing, shared features, and ally buffs until the target stands in a pocket of magic that simply cannot reach them.",
         "tiers": [
           {
-            "text": "A creature that fails cannot benefit from spells or features granted by allies (healing, buffs, Help actions) until the end of their next turn."
+            "text": "A creature that fails cannot benefit from spells or features granted by allies (healing, buffs, Help actions) until the end of their next turn.",
+            "card": "Fail: no healing, buffs or Help from allies until end of their next turn"
           },
           {
             "text": "The target also cannot communicate telepathically or magically, and loses access to shared reactions or bonded features (e.g., Pack Tactics, Link Bonds) for 1 minute. Repeat Wisdom save at end of each turn to end early.",
+            "card": "Also no telepathy and no shared features like Pack Tactics, 1 min (Wis save each turn)",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -152,10 +166,12 @@
             }
           },
           {
-            "text": "The target is isolated from all group effects — auras, zones, summoner links, and shared resistances are suppressed for 1 minute. No repeat save."
+            "text": "The target is isolated from all group effects — auras, zones, summoner links, and shared resistances are suppressed for 1 minute. No repeat save.",
+            "card": "Cut off from all group effects — auras, zones, summoner links, shared resistances. No repeat save"
           },
           {
             "text": "For 1 minute the target is functionally invisible to their allies' magic — ally spells and features that require line of sight or targeting cannot reach them, and they cannot receive buffs, healing, or protective effects from any source other than themselves.",
+            "card": "1 min invisible to their allies' magic — nothing targeted can reach them at all",
             "mech": {
               "conditions": [
                 {
@@ -171,10 +187,12 @@
         "description": "You manifest a personal void — a sanctuary of silence where telepathy fails, verbal spells stutter, and magic cast across the boundary finds nothing to hold onto.",
         "tiers": [
           {
-            "text": "Choose a 10-foot radius area within 60 feet. Within it, telepathy, empathy, and magical tracking do not function until the end of your next turn."
+            "text": "Choose a 10-foot radius area within 60 feet. Within it, telepathy, empathy, and magical tracking do not function until the end of your next turn.",
+            "card": "10-ft area — no telepathy, empathy or magical tracking until your next turn"
           },
           {
             "text": "Within the Null Space, spells with verbal components have a 50% chance of failing, and creatures are considered deafened and have disadvantage on Charisma checks for as long as they remain inside. Duration extends to 1 minute.",
+            "card": "Verbal spells inside fail half the time · everyone inside counts as deafened",
             "mech": {
               "conditions": [
                 {
@@ -187,10 +205,12 @@
             }
           },
           {
-            "text": "The area becomes disconnected from magical auras. Spells cast into or out of the space must succeed on a spellcasting ability check (DC equals your Verum DC) or fail completely. Duration extends to 10 minutes."
+            "text": "The area becomes disconnected from magical auras. Spells cast into or out of the space must succeed on a spellcasting ability check (DC equals your Verum DC) or fail completely. Duration extends to 10 minutes.",
+            "card": "Spells cast into or out of it need a casting check {DC} or fail · lasts 10 min"
           },
           {
-            "text": "Null Space becomes a Zone of Total Severance for 1 minute. Creatures inside are immune to divination and cannot be targeted by effects originating outside the zone. Creatures that leave the zone have their memories of what occurred inside suppressed until they finish a long rest or receive a Greater Restoration."
+            "text": "Null Space becomes a Zone of Total Severance for 1 minute. Creatures inside are immune to divination and cannot be targeted by effects originating outside the zone. Creatures that leave the zone have their memories of what occurred inside suppressed until they finish a long rest or receive a Greater Restoration.",
+            "card": "Zone of Total Severance 1 min — immune to divination, untouchable from outside"
           }
         ]
       }
@@ -202,24 +222,28 @@
         "tiers": [
           {
             "text": "Go unseen and unheard by anyone not actively searching for you, for 1 hour. Silence a 20-foot area. Know whether you are being watched, scried, or followed.",
+            "card": "Unseen and unheard by anyone not actively searching, 1 hr · silence 20 ft · know if you're watched",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "You and up to three companions leave no trail, scent, or trace for 8 hours and cannot be found by divination. Make a room's conversation unhearable from outside.",
+            "card": "You and 3 others leave no trail for 8 hrs and can't be found by divination",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Make a place unfindable for 24 hours — those who do not already know where it is cannot locate it by any means, magical or mundane. Sever a creature's link to a scrying sensor, familiar, or bond for 1 hour.",
+            "card": "Make a place unfindable 24 hrs · sever a scrying sensor, familiar or bond for 1 hr",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Remove a place, an object, or a willing creature from the notice of the world for a month — they are not hidden, they are simply not thought of. Those who knew of them remember only the shape of an absence.",
+            "card": "Remove a place, object or willing creature from the world's notice for a month — not hidden, just unthought-of",
             "mech": {
               "utility": true
             }
@@ -235,6 +259,7 @@
       "description": "The primary effect severs the invisible threads that connect a creature to those who would protect it — dealing bonus psychic damage as ally magic finds no thread to follow.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target takes bonus psychic damage equal to one damage die of the primary effect's type (minimum 1d6). Additionally the target's allies cannot perceive them through magical means until the end of their next turn — healing spells, buffs, and targeted effects aimed at them by allies automatically fail.",
+        "card": "+1 die psychic · allies can't reach them with magic until end of their next turn",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -244,10 +269,12 @@
       },
       "upgrades": [
         {
-          "text": "The bonus damage increases to two dice, and the ally perception severance extends to physical senses enhanced by magic — effects like Guidance, Bless, or Bardic Inspiration already applied to the target are suppressed for the same duration."
+          "text": "The bonus damage increases to two dice, and the ally perception severance extends to physical senses enhanced by magic — effects like Guidance, Bless, or Bardic Inspiration already applied to the target are suppressed for the same duration.",
+          "card": "+2 dice · already-active Guidance, Bless and Inspiration are suppressed too"
         },
         {
-          "text": "The bonus damage increases to three dice, and the severance lasts until the end of the target's next turn rather than yours — giving them one agonizing round where they must act completely alone before the connection snaps back."
+          "text": "The bonus damage increases to three dice, and the severance lasts until the end of the target's next turn rather than yours — giving them one agonizing round where they must act completely alone before the connection snaps back.",
+          "card": "+3 dice · severance lasts through their whole next turn"
         }
       ]
     },
@@ -257,6 +284,7 @@
       "description": "Distance becomes defense — isolation briefly insulating you or an ally from harm with a bonus to AC and saving throws.",
       "effect": {
         "text": "When the primary effect resolves, you or one ally within 30 feet gains a +2 bonus to AC and advantage on the next saving throw they make before the start of your next turn.",
+        "card": "You or an ally within 30 ft: +2 AC and advantage on their next save",
         "mech": {
           "buff": {
             "advantage": "the next saving throw they make before the start o"
@@ -265,10 +293,12 @@
       },
       "upgrades": [
         {
-          "text": "The bonus extends to all saving throws until the start of your next turn, not just the first."
+          "text": "The bonus extends to all saving throws until the start of your next turn, not just the first.",
+          "card": "Advantage on all saves until your next turn"
         },
         {
-          "text": "You may choose two creatures to receive this benefit, and the AC bonus increases to +3."
+          "text": "You may choose two creatures to receive this benefit, and the AC bonus increases to +3.",
+          "card": "Two creatures · +3 AC"
         }
       ]
     },
@@ -278,6 +308,7 @@
       "description": "For a moment they stand completely alone — unable to receive the Help action, ally auras, or any buff applied by another creature.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Wisdom saving throw against your Verum DC or be unable to benefit from the Help action, ally auras, or any buff applied by another creature until the end of their next turn.",
+        "card": "Wis save {DC} or no benefit from the Help action",
         "mech": {
           "save": {
             "ability": "Wisdom"
@@ -286,10 +317,12 @@
       },
       "upgrades": [
         {
-          "text": "On a failed save, the target also cannot use the Help action themselves — isolation severing their ability to connect outward as well as inward."
+          "text": "On a failed save, the target also cannot use the Help action themselves — isolation severing their ability to connect outward as well as inward.",
+          "card": "Also can't use Help themselves"
         },
         {
-          "text": "Creatures that fail also have all currently active ally-granted buffs suppressed until the end of their next turn — existing Bless, Bardic Inspiration, and similar effects are temporarily inert."
+          "text": "Creatures that fail also have all currently active ally-granted buffs suppressed until the end of their next turn — existing Bless, Bardic Inspiration, and similar effects are temporarily inert.",
+          "card": "Also suppresses every ally-granted buff they're carrying"
         }
       ]
     }

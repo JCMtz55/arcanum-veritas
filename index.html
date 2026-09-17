@@ -606,6 +606,39 @@ input[type=range]::-webkit-slider-thumb {
 }
 .act-btn:hover   { border-color: var(--accent); color: var(--accent); background: #f5f0ff; }
 .act-btn.g:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+/* ── Designed play card ─────────────────────────── */
+.sum-body.pc { padding:0; font-family:Georgia,'Times New Roman',serif; font-size:1rem; line-height:1.4; white-space:normal; }
+.pc-hero { padding: 13px 16px 10px; background: linear-gradient(180deg,#fbf8f2 0%,#fff 100%); border-bottom:1px solid var(--border); }
+.pc-core { font-family:'Cinzel',serif; font-size:1.18rem; font-weight:700; color:var(--text1); letter-spacing:.01em; line-height:1.15; }
+.pc-ring { font-size:.72rem; color:var(--text3); letter-spacing:.06em; text-transform:uppercase; margin-top:3px; }
+.pc-stats { margin-top:9px; }
+.stat { display:inline-flex; align-items:baseline; padding:4px 9px; border-radius:6px; margin:0 6px 6px 0;
+  background:#fff; border:1px solid var(--border2); font-size:.78rem; }
+.stat b { font-family:'Cinzel',serif; font-size:.95rem; font-weight:700; color:var(--text1); }
+.stat span { font-size:.6rem; letter-spacing:.09em; text-transform:uppercase; color:var(--text3); font-weight:700; margin-left:5px; }
+.stat.hit  { border-color:#b9a887; background:var(--gold-bg); }
+.stat.dmg  { border-color:var(--off-accent); background:#FFF0F0; }
+.stat.dc   { border-color:var(--con-accent); background:#F0F0FF; }
+.pc-tags { margin-top:2px; }
+.tg { display:inline-block; font-size:.58rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  padding:3px 7px; margin:0 4px 4px 0; border-radius:999px; background:var(--bg2); color:var(--text2); border:1px solid var(--border2); }
+.tg.warn { background:#FFF0F0; color:var(--off-accent); border-color:var(--off-accent); }
+.pc-sec { padding:11px 16px; border-bottom:1px solid var(--border); }
+.pc-sec:last-child { border-bottom:none; }
+.pc-lbl { font-family:'Cinzel',serif; font-size:.56rem; letter-spacing:.14em; font-weight:700;
+  color:var(--text3); display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+.pc-lbl::after { content:""; flex:1; height:1px; background:var(--border); }
+.pc-core-line { font-size:.88rem; line-height:1.45; color:var(--text1); }
+.pc-core-name { font-family:'Cinzel',serif; font-weight:700; color:var(--gold); margin-right:6px; }
+.pc-rider { display:flex; padding:7px 0; border-top:1px dashed var(--border); font-size:.84rem; line-height:1.45; }
+.pc-rider:first-of-type { border-top:none; }
+.pc-src { flex:0 0 102px; font-size:.56rem; letter-spacing:.03em; text-transform:uppercase; font-weight:700;
+  color:var(--text3); padding-top:3px; padding-right:8px; word-break:normal; overflow-wrap:normal; }
+.pc-txt { flex:1; color:var(--text1); }
+.pc-up { display:block; color:var(--text2); font-size:.79rem; margin-top:2px; }
+.pc-up::before { content:"↑ "; color:var(--gold); }
+.pc-foot { padding:8px 16px; font-size:.68rem; color:var(--text3); font-style:italic; background:var(--bg2); }
+@media (max-width:640px){ .pc-rider{flex-direction:column;gap:2px} .pc-src{flex:none} }
 .sum-body {
   padding: 12px 14px;
   font-size: 0.8rem; line-height: 1.65; color: var(--text);
@@ -1065,6 +1098,13 @@ function resolve(str) {
   if (!str) return str;
   const vm = state.verumMod, pb = profBonus(), dc = verumDC();
   return String(str)
+    .replace(/2\s*×\s*\{VM\}\s*\+\s*\{PB\}/g, `${2*vm + pb}`)
+    .replace(/\{VM\}\s*\+\s*\{PB\}/g, `${vm + pb}`)
+    .replace(/\{PB\}\s*\+\s*\{VM\}/g, `${vm + pb}`)
+    .replace(/\{DC\}/g, `DC ${dc}`)
+    .replace(/\{ATK\}/g, sgn(pb + vm))
+    .replace(/\{VM\}/g, `${vm}`)
+    .replace(/\{PB\}/g, `${pb}`)
     // multipliers of the Verum Modifier resolve to a real number
     .replace(/(\d+)\s*[×x]\s*VM\b/g, (m, n) => `${(+n) * vm}`)
     .replace(/\b(two|three|four|five|six|seven|eight|nine|ten)\s+times\s+your\s+Verum\s+Modifier/gi,
@@ -1073,8 +1113,13 @@ function resolve(str) {
     .replace(/\(DC equals your Verum DC\)/gi, `(DC ${dc})`)
     .replace(/against your Verum DC/gi, `vs DC ${dc}`)
     .replace(/your Verum DC/gi, `DC ${dc}`)
-    .replace(/twice your ([A-Z][a-z]+) modifier \+ your proficiency bonus/gi, (m,a)=>`2×${a.slice(0,3)}+${pb}`)
-    .replace(/your ([A-Z][a-z]+) modifier \+ your proficiency bonus/gi, (m,a)=>`${a.slice(0,3)}+${pb}`)
+    // the spellcasting modifier is the Verum Modifier in this system — resolve it outright
+    .replace(/twice your spellcasting modifier \+ your proficiency bonus/gi, `${2*vm + pb}`)
+    .replace(/your spellcasting modifier \+ your proficiency bonus/gi, `${vm + pb}`)
+    .replace(/twice your spellcasting modifier/gi, `${2*vm}`)
+    .replace(/your spellcasting modifier/gi, `${vm}`)
+    .replace(/twice your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier \+ your proficiency bonus/gi, (m,a)=>`2×${a.slice(0,3)}+${pb}`)
+    .replace(/your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier \+ your proficiency bonus/gi, (m,a)=>`${a.slice(0,3)}+${pb}`)
     .replace(/twice your proficiency bonus/gi, `${pb*2}`)
     .replace(/\+\s*your proficiency bonus/gi, `+${pb}`)
     .replace(/your proficiency bonus/gi, `${pb}`)
@@ -1638,6 +1683,9 @@ function buildSummary(coreCog, tier) {
   const lines = state.sumMode === "play"
     ? buildPlayCard(coreCog, tier)
     : buildFullRef(coreCog, tier);
+  const bodyHTML = state.sumMode === "play"
+    ? buildPlayCardHTML(coreCog, tier)
+    : null;
 
   const modeBtn = (id, label) =>
     `<button class="mode-btn${state.sumMode === id ? " active" : ""}" onclick="setSumMode('${id}')">${label}</button>`;
@@ -1651,7 +1699,7 @@ function buildSummary(coreCog, tier) {
         <button class="act-btn g" onclick="window.print()">Print</button>
       </div>
     </div>
-    <div class="sum-body" id="sumBody">${lines.join("\n")}</div>
+    <div class="sum-body${bodyHTML ? " pc" : ""}" id="sumBody" data-text="${lines.join("\n").replace(/"/g,"&quot;")}">${bodyHTML || lines.join("\n")}</div>
   </div>`;
 }
 
@@ -1803,6 +1851,95 @@ function buildPlayCard(coreCog, tier) {
   return L;
 }
 
+function esc(t){ return String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+// Chips derived from the mech layer of everything in play
+function collectTags(coreCog, tier) {
+  const conds = new Set(), denies = new Set();
+  let resource = null;
+  const push = (p) => {
+    const m = partMech(p); if (!m) return;
+    (m.conditions || []).forEach(c => c.name && conds.add(c.name));
+    (m.deny || []).forEach(d => denies.add(d));
+    if (m.resource?.name) resource = m.resource.name;
+  };
+  const cv = coreCog?.verumEffects?.[verumKey()] || [];
+  const av = cv.find(v => v.name === state.coreVerum) || cv[0];
+  if (av) for (let i = 0; i <= tier; i++) push(av.tiers[i]);
+  gatherRiders(tier).riders.forEach(e => e.parts.forEach(push));
+  return { conds: [...conds], denies: [...denies], resource };
+}
+
+function buildPlayCardHTML(coreCog, tier) {
+  const coreEntry = INDEX.find(c => c.id === state.core);
+  const cd  = COMP_DATA[state.compType];
+  const sub = cd.subtypes[state.compSub];
+  const isAttack = state.compSub === "Direct Attack";
+
+  const row = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  const cell = (c) => { const i = sub.columns.indexOf(c); return i >= 0 && row ? resolve(row[i]) : null; };
+
+  // ── Hero: the numbers you actually roll
+  let stats = "";
+  if (isAttack) stats += `<span class="stat hit"><b>${sgn(sealAttack())}</b><span>to hit</span></span>`;
+  else if (coreCog?.savingThrow) stats += `<span class="stat dc"><b>${verumDC()}</b><span>${coreCog.savingThrow.slice(0,3)} save</span></span>`;
+  const dmg = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
+  if (dmg) {
+    const kind = cell("Healing") || cell("Healing / Target") ? "heal" : cell("Absorb") ? "absorb" : (coreCog?.damageType || "damage").toLowerCase();
+    stats += `<span class="stat dmg"><b>${esc(dmg)}</b><span>${esc(kind)}</span></span>`;
+  }
+  [["Range","range"],["Radius","radius"],["Targets","targets"],["Weapon Die","weapon die"],
+   ["CR cap","cr"],["Size","size"],["HP / segment","hp/seg"],["Max size","size"],["Tier","tier"],
+   ["Duration","duration"],["Buff Duration","duration"],["Zone Duration","zone"]].forEach(([c,lab]) => {
+    const v = cell(c); if (v) stats += `<span class="stat"><b>${esc(v)}</b><span>${lab}</span></span>`;
+  });
+
+  const { conds, denies, resource } = collectTags(coreCog, tier);
+  let tags = "";
+  if (sub.reaction)      tags += `<span class="tg warn">Reaction</span>`;
+  if (sub.concentration) tags += `<span class="tg warn">Concentration</span>`;
+  if (sub.shape && state.shape !== "sphere") tags += `<span class="tg">${SHAPES[state.shape].label}</span>`;
+  if (state.manner !== "standard")           tags += `<span class="tg">${MANNERS[state.manner].label}</span>`;
+  if (resource) tags += `<span class="tg">${esc(resource)}</span>`;
+  conds.forEach(c  => tags += `<span class="tg warn">${esc(c)}</span>`);
+  denies.forEach(d => tags += `<span class="tg">no ${esc(d)}</span>`);
+
+  let h = `<div class="pc-hero">
+    <div class="pc-core">${esc(coreEntry?.name || "—")}</div>
+    <div class="pc-ring">${esc(cd.label)} · ${esc(state.compSub)} — ${ORDINALS[state.slotLevel]} slot · Lv ${state.charLevel}</div>
+    <div class="pc-stats">${stats}</div>
+    ${tags ? `<div class="pc-tags">${tags}</div>` : ""}
+  </div>`;
+
+  // ── Core Verum at the live tier
+  const cv = coreCog?.verumEffects?.[verumKey()] || [];
+  const av = cv.find(v => v.name === state.coreVerum) || cv[0];
+  if (av) {
+    h += `<div class="pc-sec"><div class="pc-lbl">CORE VERUM</div>
+      <div class="pc-core-line"><span class="pc-core-name">${esc(av.name)}</span>${esc(cardLine(av.tiers[tier] || av.tiers[av.tiers.length-1]))}</div></div>`;
+  }
+
+  // ── Riders, off the single roll
+  const { riders, missing } = gatherRiders(tier);
+  if (riders.length) {
+    const lbl = isAttack ? "ON HIT — the attack roll is the only d20"
+                         : `ON A FAILED ${(coreCog?.savingThrow || "").toUpperCase()} SAVE — the only d20`;
+    h += `<div class="pc-sec"><div class="pc-lbl">${esc(lbl)}</div>`;
+    riders.forEach(e => {
+      h += `<div class="pc-rider"><div class="pc-src">${esc(e.name)}</div><div class="pc-txt">${esc(cardLine(e.parts[0]))}` +
+           e.parts.slice(1).map(p => `<span class="pc-up">${esc(cardLine(p))}</span>`).join("") + `</div></div>`;
+    });
+    h += `</div>`;
+  }
+  if (missing.length) h += `<div class="pc-sec"><div class="pc-txt">No ${esc(verumLabel())} complement defined: ${esc(missing.join(", "))}</div></div>`;
+
+  const foot = [];
+  if (riders.length) foot.push("Sigil conditions last until the end of the target's next turn");
+  if (tier > 0) foot.push("earlier Core tiers also apply — see FULL");
+  if (foot.length) h += `<div class="pc-foot">${esc(foot.join(" · "))}</div>`;
+  return h;
+}
+
 function buildFullRef(coreCog, tier) {
   const coreEntry = INDEX.find(c => c.id === state.core);
   const cd  = COMP_DATA[state.compType];
@@ -1873,7 +2010,8 @@ function buildFullRef(coreCog, tier) {
 function copySum() {
   const el = document.getElementById("sumBody");
   if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => toast("Copied to clipboard"));
+  const txt = el.dataset.text ? el.dataset.text.replace(/&quot;/g, '"') : el.textContent;
+  navigator.clipboard.writeText(txt).then(() => toast("Copied to clipboard"));
 }
 
 function toast(msg) {

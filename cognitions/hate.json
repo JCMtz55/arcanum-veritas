@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "When casting while Wounded, you deal +2d6 fire or psychic damage (your choice) to one target affected.",
+            "card": "Casting while Wounded: +2d6 fire or psychic to one target",
             "mech": {
               "damage": {
                 "dice": "2d6",
@@ -23,12 +24,14 @@
           },
           {
             "text": "If you have at least 1 Wound, your next damaging effect ignores resistance.",
+            "card": "With 1+ Wound your next damaging effect ignores resistance",
             "mech": {
               "pierce": "resistance"
             }
           },
           {
             "text": "When you take damage, you may use your reaction to mark the attacker — until the end of your next turn, your attacks and spells deal bonus damage equal to your Proficiency Bonus × 1d6 against that target.",
+            "card": "React to damage taken to mark the attacker — +{PB}×1d6 against them until your next turn",
             "mech": {
               "damage": {
                 "dice": "1d6"
@@ -37,6 +40,7 @@
           },
           {
             "text": "Once per long rest, enter a Hateful Frenzy for 1 minute — you gain advantage on all attack rolls against one chosen target, and your attacks against that creature deal +4 damage dice of the same type.",
+            "card": "1/long rest Hateful Frenzy 1 min — advantage on all attacks against one target, +4 damage dice",
             "mech": {
               "buff": {
                 "advantage": "all attack rolls against one chosen target"
@@ -50,10 +54,12 @@
         "description": "Hatred fuels magic — raising your DC as you bleed, sacrificing Hit Dice for damage, and eventually twinning spells through the burning currency of your own Wounds.",
         "tiers": [
           {
-            "text": "While below half HP, your effect DC increases by +1."
+            "text": "While below half HP, your effect DC increases by +1.",
+            "card": "Below half HP your effect DC rises by 1"
           },
           {
             "text": "You may sacrifice 1 Hit Die as part of casting to deal +1d10 necrotic or fire damage on the effect.",
+            "card": "Burn a Hit Die when casting for +1d10 necrotic or fire",
             "mech": {
               "damage": {
                 "dice": "1d10",
@@ -62,10 +68,12 @@
             }
           },
           {
-            "text": "You may burn 1 Wound to twin a single-target spell fueled by Hate — both copies must target enemies you have damaged this encounter."
+            "text": "You may burn 1 Wound to twin a single-target spell fueled by Hate — both copies must target enemies you have damaged this encounter.",
+            "card": "Burn a Wound to twin a single-target Hate spell — both must hit enemies you've already damaged"
           },
           {
-            "text": "Whenever you score a critical hit, you may immediately take a bonus action (this bonus action cannot trigger this ability again)."
+            "text": "Whenever you score a critical hit, you may immediately take a bonus action (this bonus action cannot trigger this ability again).",
+            "card": "Every critical hit grants you an immediate bonus action"
           }
         ]
       },
@@ -75,6 +83,7 @@
         "tiers": [
           {
             "text": "On a failed save the target is Frightened of you until the end of their next turn and has disadvantage on their next attack roll.",
+            "card": "Fail: Frightened of you until end of their next turn, disadvantage on their next attack",
             "mech": {
               "conditions": [
                 {
@@ -88,6 +97,7 @@
           },
           {
             "text": "On a failed save the target is Frightened for 1 minute and must succeed on a Charisma save at the start of each turn or use their movement to move away from you. They may repeat the save at the end of each turn.",
+            "card": "Frightened 1 min · Cha save each turn or they must move away from you",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -102,6 +112,7 @@
           },
           {
             "text": "While Frightened by this effect, the target also takes 1d10 psychic damage at the start of each of their turns as the projected hatred continues to press against them.",
+            "card": "While Frightened by this they also take 1d10 psychic each turn as the hatred keeps pressing",
             "mech": {
               "damage": {
                 "dice": "1d10",
@@ -116,6 +127,7 @@
           },
           {
             "text": "Once per long rest, project a wave of absolute contempt in a 30-foot cone — all creatures in range must succeed on a Charisma save or be Stunned for 1 round and Frightened for 1 minute as the full weight of your hatred lands on them simultaneously.",
+            "card": "1/long rest a 30-ft cone of contempt — Cha save or Stunned 1 round and Frightened 1 min",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -142,6 +154,7 @@
         "tiers": [
           {
             "text": "If you are Frightened, the condition immediately ends — and you may cast this effect as a bonus action instead of an action.",
+            "card": "If you're Frightened it ends now · and this casts as a bonus action",
             "mech": {
               "conditions": [
                 {
@@ -151,10 +164,12 @@
             }
           },
           {
-            "text": "Once per turn, gain temporary HP equal to the damage you dealt to the target of your hatred."
+            "text": "Once per turn, gain temporary HP equal to the damage you dealt to the target of your hatred.",
+            "card": "1/turn gain temp HP equal to the damage you dealt the object of your hatred"
           },
           {
             "text": "Once per long rest, for 1 turn you may convert fire, necrotic, or psychic damage you take into HP restoration — up to a maximum of your level × your proficiency bonus.",
+            "card": "1/long rest turn fire, necrotic and psychic damage you take into healing, up to level × {PB}",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -163,6 +178,7 @@
           },
           {
             "text": "Once per day, enter a state of Absolute Hatred for 1 minute — enemies within 30 feet who have harmed you or your allies this combat must succeed on a Charisma save or be Stunned for 1 round, you gain +2 to all saving throws and immunity to fear, charm, and mind-reading, and enemies who die during this time cannot be resurrected except by True Resurrection or higher.",
+            "card": "1/day Absolute Hatred 1 min — enemies who hurt you save or are Stunned · +2 saves · immune to fear and charm",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -188,6 +204,7 @@
         "tiers": [
           {
             "text": "Choose a target you have damaged this turn — on a failed Wisdom save they have disadvantage on attack rolls against anyone except you until the end of their next turn.",
+            "card": "Fail: disadvantage attacking anyone but you until end of their next turn",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -199,6 +216,7 @@
           },
           {
             "text": "The marked creature takes 3d6 psychic damage each time it damages a creature other than you.",
+            "card": "The marked creature takes 3d6 psychic every time it damages someone other than you",
             "mech": {
               "damage": {
                 "dice": "3d6",
@@ -208,6 +226,7 @@
           },
           {
             "text": "The Mark becomes invisible to all but cursed beings, and the target suffers −1 to saving throws against emotion effects for 1 minute.",
+            "card": "The Mark turns invisible to all but the cursed · −1 to their saves against emotion effects",
             "mech": {
               "conditions": [
                 {
@@ -224,6 +243,7 @@
           },
           {
             "text": "Once per day, make this Mark permanent until removed by Remove Curse or Wish. While marked, the target cannot gain advantage on ability checks or attacks, and is always considered hostile to your presence by creatures and effects that detect alignment or intent.",
+            "card": "1/day make it permanent until Remove Curse or Wish — no advantage on checks or attacks, ever",
             "mech": {
               "buff": {
                 "advantage": "ability checks or attacks"
@@ -241,6 +261,7 @@
       "description": "Every wound you leave becomes a warning — a barb of pure hatred that punishes the target the moment they turn their attention to anyone but you.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the next time the target deals damage to any creature other than you before the end of your next turn, they take psychic damage equal to your Charisma modifier + your proficiency bonus.",
+        "card": "Next time they damage anyone but you: {VM}+{PB} psychic",
         "mech": {
           "damage": {
             "type": "psychic"
@@ -250,6 +271,7 @@
       "upgrades": [
         {
           "text": "The spite triggers on the first two times they deal damage to others rather than once, and the psychic damage increases to twice your Charisma modifier + your proficiency bonus.",
+          "card": "Triggers on the first two times · damage doubles",
           "mech": {
             "damage": {
               "type": "psychic"
@@ -258,6 +280,7 @@
         },
         {
           "text": "The spite persists for 1 minute rather than until your next turn, and creatures that trigger it must also succeed on a Charisma saving throw against your Verum DC or be Frightened of you until the start of their next turn — the hate making itself felt every time they try to look away.",
+          "card": "Lasts 1 min · Cha save {DC} or Frightened of you each time it fires",
           "mech": {
             "save": {
               "ability": "Charisma"
@@ -277,6 +300,7 @@
       "description": "Striking the thing you hate sustains you — directing hatred outward briefly feeding rather than consuming, returning temporary HP for every blow landed.",
       "effect": {
         "text": "When the primary effect deals damage, you gain temporary hit points equal to your Charisma modifier (minimum 1) — the act of directing your hatred outward briefly feeding rather than draining you.",
+        "card": "{VM} temp HP when the effect deals damage (min 1)",
         "mech": {
           "heal": {
             "tempHP": true
@@ -285,10 +309,12 @@
       },
       "upgrades": [
         {
-          "text": "The temporary HP increases to your Charisma modifier + your proficiency bonus, and if the target is a creature you have damaged before in this encounter, the amount doubles — familiar hatred running deeper."
+          "text": "The temporary HP increases to your Charisma modifier + your proficiency bonus, and if the target is a creature you have damaged before in this encounter, the amount doubles — familiar hatred running deeper.",
+          "card": "{VM}+{PB} · doubled against a creature you've hurt before this encounter"
         },
         {
           "text": "You also remove one level of Exhaustion if you have any, and gain advantage on your next saving throw — the surge of focused hatred burning through fatigue and hesitation alike.",
+          "card": "Also sheds a level of Exhaustion and grants advantage on your next save",
           "mech": {
             "conditions": [
               {
@@ -308,6 +334,7 @@
       "description": "Your hatred bleeds into the air around you — making the space itself feel hostile to calm resolve and imposing disadvantage on fear saves within range.",
       "effect": {
         "text": "When the primary effect resolves, a Hostile Aura radiates from you for 1 minute in a 15-foot radius. Enemies within the aura have disadvantage on saving throws against fear and emotion effects.",
+        "card": "A 15-ft Hostile Aura 1 min — enemies inside save against fear and emotion at disadvantage",
         "mech": {
           "penalty": {
             "disadvantage": "saving throws against fear and emotion effects"
@@ -317,6 +344,7 @@
       "upgrades": [
         {
           "text": "The radius increases to 30 feet, and enemies that enter the aura for the first time on a turn must succeed on a Charisma saving throw against your Verum DC or be Shaken (disadvantage on their next attack roll).",
+          "card": "Radius 30 ft · first entry each turn: Cha save {DC} or Shaken",
           "mech": {
             "save": {
               "ability": "Charisma"
@@ -333,6 +361,7 @@
         },
         {
           "text": "Enemies within the aura also have disadvantage on Concentration checks, and any creature that fails a fear or emotion save while within the aura cannot benefit from effects that remove those conditions until they leave the aura's range.",
+          "card": "Also disadvantage on Concentration · failed fear saves can't be cured inside the aura",
           "mech": {
             "penalty": {
               "disadvantage": "Concentration checks"

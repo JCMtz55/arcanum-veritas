@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a hit, the target takes Void damage and cannot regain hit points until the end of their next turn.",
+            "card": "Void damage · no healing until end of their next turn",
             "mech": {
               "damage": {
                 "type": "void"
@@ -25,6 +26,7 @@
           },
           {
             "text": "If the effect deals damage, the target must succeed on a Constitution saving throw or have their maximum HP reduced by the Void damage dealt. This reduction lasts until a long rest.",
+            "card": "Con save or their max HP drops by the Void damage until a long rest",
             "mech": {
               "damage": {
                 "type": "void"
@@ -36,6 +38,7 @@
           },
           {
             "text": "Creatures that take Void damage must succeed on a Dream saving throw or gain 1 level of Dream Exhaustion.",
+            "card": "Dream save or a level of Dream Exhaustion",
             "mech": {
               "damage": {
                 "type": "void"
@@ -52,6 +55,7 @@
           },
           {
             "text": "On a failed Charisma saving throw, the target loses access to one feature (trait, spell, or legendary action) of your choice for 1 minute, and their soul becomes unstable — leaving them vulnerable to banishment, soul theft, or full dream severance at the DM's discretion.",
+            "card": "Cha save or lose a feature for 1 min, soul left unstable",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -68,6 +72,7 @@
         "tiers": [
           {
             "text": "Choose a Denizen within 60 feet — on a failed Dream save it becomes Feral for 1 round, attacking the nearest creature regardless of allegiance.",
+            "card": "A Denizen within 60 ft: Dream save or Feral 1 round, attacking whoever is nearest",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -75,13 +80,16 @@
             }
           },
           {
-            "text": "On failure, the Denizen is transformed into a Demi Nightmare (CR equal to its original +1) for 1 minute, becoming hostile to all creatures."
+            "text": "On failure, the Denizen is transformed into a Demi Nightmare (CR equal to its original +1) for 1 minute, becoming hostile to all creatures.",
+            "card": "Fail: it becomes a Demi Nightmare (CR +1) hostile to everyone, 1 min"
           },
           {
-            "text": "The transformation becomes permanent unless purified by divine Cognition — the target becomes a Nightling bound to no master."
+            "text": "The transformation becomes permanent unless purified by divine Cognition — the target becomes a Nightling bound to no master.",
+            "card": "The change is permanent without divine purification — a masterless Nightling"
           },
           {
-            "text": "You may target any sentient Denizen or Dreamer. On a failed save they are fully overwritten, becoming a Primal Nightmare with corruption auras and a tether to your Node. You may summon or banish it at will once per day."
+            "text": "You may target any sentient Denizen or Dreamer. On a failed save they are fully overwritten, becoming a Primal Nightmare with corruption auras and a tether to your Node. You may summon or banish it at will once per day.",
+            "card": "Overwrite any Denizen or Dreamer into a Primal Nightmare tethered to your Node"
           }
         ]
       },
@@ -91,6 +99,7 @@
         "tiers": [
           {
             "text": "Summon a Demi Nightmare (CR 1) that acts on your initiative and lasts 1 minute.",
+            "card": "Summon a Demi Nightmare (CR 1) on your initiative, 1 min",
             "mech": {
               "summon": {
                 "cr": "1"
@@ -99,6 +108,7 @@
           },
           {
             "text": "Summon a Nightling (CR = half your level) designed from the fears of a chosen target — it gains advantage on attacks against that creature.",
+            "card": "Summon a Nightling (CR = half your level) built from a target's fears — advantage against them",
             "mech": {
               "buff": {
                 "advantage": "attacks against that creature"
@@ -106,10 +116,12 @@
             }
           },
           {
-            "text": "Create a Hollowborn — a sentient, psychic duplicate of a creature's worst memory that lasts 10 minutes and can cast one of that creature's known spells or features."
+            "text": "Create a Hollowborn — a sentient, psychic duplicate of a creature's worst memory that lasts 10 minutes and can cast one of that creature's known spells or features.",
+            "card": "A Hollowborn — a psychic copy of a creature's worst memory, 10 min, casting one of their spells"
           },
           {
-            "text": "Manifest a Primal Nightmare forged from your Node and bound to your will. Choose 3 traits: Unnerving Presence, Phase Body, Voidflame, Dreamleech, or Paradox Form. It remains until destroyed or banished — you may have only one at a time."
+            "text": "Manifest a Primal Nightmare forged from your Node and bound to your will. Choose 3 traits: Unnerving Presence, Phase Body, Voidflame, Dreamleech, or Paradox Form. It remains until destroyed or banished — you may have only one at a time.",
+            "card": "A Primal Nightmare from your Node — pick 3 traits, it stays until destroyed or banished"
           }
         ]
       },
@@ -119,6 +131,7 @@
         "tiers": [
           {
             "text": "On a failed save the creature reveals one fear (phobia, trauma, or target) and is Frightened until the end of their next turn.",
+            "card": "Fail: they reveal a fear and are Frightened until end of their next turn",
             "mech": {
               "conditions": [
                 {
@@ -129,6 +142,7 @@
           },
           {
             "text": "You may alter the battlefield to match their fear — visual illusions and environmental mimicry. While within the altered zone, the creature has disadvantage on all Dream saving throws.",
+            "card": "Reshape the battlefield into that fear — disadvantage on all their Dream saves inside it",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -140,6 +154,7 @@
           },
           {
             "text": "Mark the creature with its own fear — all allies gain advantage to attack it, and it must succeed on a Dream saving throw at the start of each turn or become Incapacitated by hallucinations for that turn.",
+            "card": "Marked by their own fear — allies attack with advantage, Dream save each turn or Incapacitated",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -153,6 +168,7 @@
           },
           {
             "text": "Extract the creature's fear as a crystallized concept — a Vil Memory Shard that can be used as a free component for future Nightmare effects, implanted to anchor a Nightmare Node, or consumed to deal 15d10 Void damage and inflict 1 level of Madness.",
+            "card": "Crystallise the fear into a Vil Memory Shard — a free component, a Node anchor, or fuel",
             "mech": {
               "damage": {
                 "dice": "15d10",
@@ -167,10 +183,12 @@
         "description": "The boundary between nightmare and waking collapses — trapping the target's mind inside their own unraveling until hallucinations overwhelm them and the self begins to break.",
         "tiers": [
           {
-            "text": "On a failed save the target cannot distinguish illusions from reality until the end of their next turn — they must treat all creatures as potentially hostile and cannot benefit from the Help action or flanking."
+            "text": "On a failed save the target cannot distinguish illusions from reality until the end of their next turn — they must treat all creatures as potentially hostile and cannot benefit from the Help action or flanking.",
+            "card": "Fail: can't tell illusion from real until end of their next turn — everyone reads as hostile, no Help"
           },
           {
             "text": "The target is trapped in a waking nightmare for 1 minute — at the start of each of their turns they must succeed on a Dream saving throw against your Verum DC or be Stunned for that turn. A successful save ends the effect.",
+            "card": "Waking nightmare 1 min — Dream save {DC} each turn or Stunned for it",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -184,6 +202,7 @@
           },
           {
             "text": "The waking nightmare becomes self-sustaining — even on a successful save the target is only Frightened rather than Stunned, and the effect persists until they succeed on two consecutive Dream saves. While under this effect they cannot benefit from magical healing above half their maximum HP.",
+            "card": "Self-sustaining — success only downgrades it to Frightened, and it takes two saves to end",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -200,6 +219,7 @@
           },
           {
             "text": "Once per long rest, collapse a creature's sense of self entirely — on a failed Charisma saving throw they are Incapacitated and Frightened for 1 minute, believe they are trapped in Insomnia, and at the end of each of their turns must succeed on a Dream saving throw or gain 1 level of Dream Exhaustion. This effect ends early only if they receive Greater Restoration or divine intervention.",
+            "card": "1/long rest collapse their sense of self — Cha save or Incapacitated and Frightened 1 min, believing they are in Insomnia",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -230,6 +250,7 @@
       "description": "The spell carries a trace of what lives beneath the world — converting a portion of its damage to Void, unresistable and unable to be immunized against.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, half of the damage dealt becomes Void damage — unresistable and unable to be immunized against. Creatures that were resistant or immune to the original damage type still take full damage from the Void portion.",
+        "card": "Half the damage becomes Void — unresistable, unimmunisable",
         "mech": {
           "damage": {
             "type": "void"
@@ -239,6 +260,7 @@
       "upgrades": [
         {
           "text": "The Void damage portion increases to two-thirds of the total damage, and the target cannot regain hit points until the start of your next turn — Void briefly closing the wound that healing would open.",
+          "card": "Two-thirds Void · no healing until your next turn",
           "mech": {
             "damage": {
               "type": "void"
@@ -250,6 +272,7 @@
         },
         {
           "text": "The entire damage of the primary effect becomes Void damage, and the target must succeed on a Dream saving throw against your Verum DC or gain 1 level of Dream Exhaustion as the Void briefly touches their mind.",
+          "card": "All of it Void · Dream save {DC} or Dream Exhaustion",
           "mech": {
             "damage": {
               "type": "void"
@@ -272,6 +295,7 @@
       "description": "Nightmare's presence becomes a shield for those who walk inside it — inoculating allies against fear and psychic damage while the ambient dread finds purchase in unprepared minds nearby.",
       "effect": {
         "text": "When the primary effect resolves, a Dread Mantle settles over you for 1 minute — allies within 15 feet cannot be Frightened and gain advantage on Dream saving throws while within range.",
+        "card": "A Dread Mantle 1 min — allies within 15 ft can't be Frightened, advantage on Dream saves",
         "mech": {
           "save": {
             "ability": "Dream"
@@ -289,6 +313,7 @@
       "upgrades": [
         {
           "text": "The radius increases to 30 feet, and allies within the mantle also gain resistance to psychic damage — the nightmare having already shown them worse than what any psychic attack can conjure.",
+          "card": "Radius 30 ft · allies also resist psychic",
           "mech": {
             "damage": {
               "type": "psychic"
@@ -297,6 +322,7 @@
         },
         {
           "text": "Enemies that start their turn within the mantle's radius must succeed on a Dream saving throw against your Verum DC or be Frightened of you until the start of their next turn — the ambient dread finding purchase in minds that were not prepared for it.",
+          "card": "Enemies starting a turn inside: Dream save {DC} or Frightened of you",
           "mech": {
             "save": {
               "ability": "Dream"
@@ -316,6 +342,7 @@
       "description": "The spell leaves something behind — a psychic echo lodging in the target's mind that imposes disadvantage on Dream saves and steals verbal components from spells until removed by magic.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, a psychic echo lodges in the target's mind — they are Haunted for 1 minute. While Haunted, they have disadvantage on Dream saving throws and cannot willingly move toward you without first succeeding on a Dream saving throw against your Verum DC.",
+        "card": "Haunted 1 min — a psychic echo lodges in their mind",
         "mech": {
           "save": {
             "ability": "Dream"
@@ -328,6 +355,7 @@
       "upgrades": [
         {
           "text": "While Haunted, the target also hears whispers that interfere with Concentration — they have disadvantage on Concentration checks, and any spell they cast with a verbal component requires a successful Dream saving throw against your Verum DC or the verbal component is stolen by the echo and the spell fails.",
+          "card": "Also disadvantage on Concentration from the whispers",
           "mech": {
             "save": {
               "ability": "Dream"
@@ -339,6 +367,7 @@
         },
         {
           "text": "The Haunt becomes persistent — it does not end after 1 minute but instead requires Remove Curse or Greater Restoration to dispel. While active, once per round the DM may have the Haunt surface a fear from the target's subconscious, imposing the Frightened condition for 1 turn with no save.",
+          "card": "Persistent — needs Remove Curse or Greater Restoration to end",
           "mech": {
             "conditions": [
               {

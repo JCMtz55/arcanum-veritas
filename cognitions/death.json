@@ -13,10 +13,12 @@
         "description": "Pain is not an instant — it is a sentence.",
         "tiers": [
           {
-            "text": "Half the damage from this effect is delayed, repeating at the start of the creature's next turn."
+            "text": "Half the damage from this effect is delayed, repeating at the start of the creature's next turn.",
+            "card": "Half the damage is delayed to the start of their next turn"
           },
           {
             "text": "Delayed damage is now necrotic and the creature is incapacitated for the first action it takes on its next turn if it fails a Constitution save.",
+            "card": "Delayed damage is necrotic · Con save or their first action next turn is lost",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -30,6 +32,7 @@
           },
           {
             "text": "The pain leaves a curse — the target suffers disadvantage on Concentration checks and saving throws against fear for 1 minute.",
+            "card": "Also disadvantage on Concentration and fear saves, 1 min",
             "mech": {
               "penalty": {
                 "disadvantage": "Concentration checks and saving throws against fea"
@@ -38,6 +41,7 @@
           },
           {
             "text": "Delayed pain echoes across time. The creature takes the full damage again after 1 minute unless it passes a Constitution save or is already dead.",
+            "card": "The full damage lands again after 1 min unless they pass a Con save or are already dead",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -51,10 +55,12 @@
         "description": "You do not simply harm the body — you unravel the soul's cohesion. (Save: Constitution)",
         "tiers": [
           {
-            "text": "Targets damaged by this effect cannot benefit from temporary HP for 1 minute."
+            "text": "Targets damaged by this effect cannot benefit from temporary HP for 1 minute.",
+            "card": "No benefit from temp HP for 1 min"
           },
           {
             "text": "They suffer disadvantage on death saving throws and any Concentration check.",
+            "card": "Disadvantage on death saves and Concentration",
             "mech": {
               "penalty": {
                 "disadvantage": "death saving throws and any Concentration check"
@@ -63,6 +69,7 @@
           },
           {
             "text": "They gain a Lingering Fracture — for the next hour, they suffer −1 to all saving throws and cannot be revived without a Greater Restoration to patch their spirit.",
+            "card": "Lingering Fracture 1 hr — −1 all saves, no revival without Greater Restoration first",
             "mech": {
               "penalty": {
                 "saves": -1
@@ -73,7 +80,8 @@
             }
           },
           {
-            "text": "The soul is split. If the creature dies, it cannot pass on — it becomes either a Wraith, a Bound Ghost, or is trapped in a Cognition-infused object. The caster chooses the fate."
+            "text": "The soul is split. If the creature dies, it cannot pass on — it becomes either a Wraith, a Bound Ghost, or is trapped in a Cognition-infused object. The caster chooses the fate.",
+            "card": "The soul splits — die and they become a Wraith, Bound Ghost, or object-trapped. You choose"
           }
         ]
       }
@@ -84,10 +92,12 @@
         "description": "You commune with Death, and Death answers.",
         "tiers": [
           {
-            "text": "You can speak with the soul of a creature that died within the last hour, even if the body is destroyed."
+            "text": "You can speak with the soul of a creature that died within the last hour, even if the body is destroyed.",
+            "card": "Speak with a soul dead within the hour, body or no body"
           },
           {
             "text": "You may see invisible spirits and undead within 120 feet and command them to stand still for 1 round (no save unless CR ≥ your level).",
+            "card": "See spirits and undead 120 ft · hold them still 1 round (no save under your level)",
             "mech": {
               "conditions": [
                 {
@@ -98,6 +108,7 @@
           },
           {
             "text": "Undead summoned or controlled by you under this effect gain advantage on all attacks and saves, and ignore radiant vulnerability.",
+            "card": "Your undead get advantage on attacks and saves and ignore radiant vulnerability",
             "mech": {
               "buff": {
                 "advantage": "all attacks and saves"
@@ -105,7 +116,8 @@
             }
           },
           {
-            "text": "Your presence forces spirits to manifest. Undead within 1 mile reveal themselves, and you may bind one ghost or soul into a weapon, object, or ally to grant it spectral power for 24 hours."
+            "text": "Your presence forces spirits to manifest. Undead within 1 mile reveal themselves, and you may bind one ghost or soul into a weapon, object, or ally to grant it spectral power for 24 hours.",
+            "card": "Undead within 1 mile reveal themselves · bind one ghost into a weapon, object or ally for 24 hrs"
           }
         ]
       }
@@ -117,6 +129,7 @@
         "tiers": [
           {
             "text": "The target cannot regain hit points until the end of their next turn.",
+            "card": "No healing until end of their next turn",
             "mech": {
               "deny": [
                 "healing"
@@ -125,6 +138,7 @@
           },
           {
             "text": "The target cannot regain hit points or temporary hit points for 1 minute. They may repeat the Constitution saving throw at the end of each of their turns to end the effect early.",
+            "card": "No healing or temp HP 1 min · Con save at end of each turn to end it",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -139,6 +153,7 @@
           },
           {
             "text": "Any healing the target receives is reduced by half for 1 hour, and they lose resistance to necrotic damage for the same duration.",
+            "card": "Healing halved for 1 hr · loses necrotic resistance",
             "mech": {
               "damage": {
                 "type": "necrotic"
@@ -147,6 +162,7 @@
           },
           {
             "text": "For 1 minute, any healing the target receives is instead dealt as necrotic damage. All healing within 10 feet of them is halved for every creature.",
+            "card": "1 min: healing they receive becomes necrotic damage · all healing within 10 ft of them is halved",
             "mech": {
               "damage": {
                 "type": "necrotic"
@@ -161,6 +177,7 @@
         "tiers": [
           {
             "text": "The target is Marked. If reduced to 0 HP before the mark fades (1 minute), they cannot be stabilized by nonmagical means and begin dying with disadvantage on all death saving throws.",
+            "card": "Marked 1 min — at 0 HP no nonmagical stabilising, death saves at disadvantage",
             "mech": {
               "penalty": {
                 "disadvantage": "all death saving throws"
@@ -168,13 +185,16 @@
             }
           },
           {
-            "text": "The Mark deepens. If the target dies while Marked, no spell of 5th level or lower can revive them — Revivify, Raise Dead, and similar effects fail automatically."
+            "text": "The Mark deepens. If the target dies while Marked, no spell of 5th level or lower can revive them — Revivify, Raise Dead, and similar effects fail automatically.",
+            "card": "Die while Marked and nothing of 5th or lower revives them"
           },
           {
-            "text": "The Mark reaches the soul's root. If the target dies while Marked, no magic may detect, contact, or interact with their soul until the Mark is dispelled — requiring Wish, True Resurrection, or divine intervention. Even then, success may require a contested roll vs your Verum DC."
+            "text": "The Mark reaches the soul's root. If the target dies while Marked, no magic may detect, contact, or interact with their soul until the Mark is dispelled — requiring Wish, True Resurrection, or divine intervention. Even then, success may require a contested roll vs your Verum DC.",
+            "card": "Die while Marked and no magic can reach their soul until the Mark is dispelled"
           },
           {
-            "text": "Once per long rest, invoke True Destined Death. On a failed save, the Mark becomes absolute — if the target dies, their soul dissolves into the Loom of Creation. No magic, divine authority, dreamwalking, or intervention of any kind can retrieve it. Not Wish. Not True Resurrection. Not a Forerunner. Additionally: The Executioner notices. The DM determines the consequences."
+            "text": "Once per long rest, invoke True Destined Death. On a failed save, the Mark becomes absolute — if the target dies, their soul dissolves into the Loom of Creation. No magic, divine authority, dreamwalking, or intervention of any kind can retrieve it. Not Wish. Not True Resurrection. Not a Forerunner. Additionally: The Executioner notices. The DM determines the consequences.",
+            "card": "1/long rest True Destined Death — fail and the soul dissolves into the Loom. Nothing returns them"
           }
         ]
       }
@@ -186,6 +206,7 @@
         "tiers": [
           {
             "text": "Constructs are undead, raised from a corpse or remains within range. Structures are grave-cold — a creature that touches or strikes one takes 1d6 necrotic damage. Objects are grave-relics, dealing +1d4 necrotic damage on a hit.",
+            "card": "Constructs are undead from a corpse · Structures grave-cold, 1d6 necrotic to touch · Objects +1d4 necrotic",
             "mech": {
               "damage": {
                 "dice": [
@@ -198,6 +219,7 @@
           },
           {
             "text": "Your creations are immune to necrotic and poison damage and to exhaustion. A creature that starts its turn touching a Structure cannot regain hit points until the end of its next turn.",
+            "card": "Immune to necrotic, poison and exhaustion · touching a Structure blocks healing until end of their next turn",
             "mech": {
               "damage": {
                 "type": "poison"
@@ -214,6 +236,7 @@
           },
           {
             "text": "Your undead Constructs ignore radiant vulnerability and have advantage on saving throws against Turn Undead. A Structure shaped as a tomb hides what lies inside from divination.",
+            "card": "Undead Constructs ignore radiant vulnerability, advantage vs Turn Undead · tomb Structures hide from divination",
             "mech": {
               "buff": {
                 "advantage": "saving throws against Turn Undead"
@@ -222,6 +245,7 @@
           },
           {
             "text": "Once per seal, a destroyed Construct rises again at half its hit points at the start of your next turn. While a Structure stands, a creature killed within 10 feet of it cannot be revived by spells of 5th level or lower.",
+            "card": "1/seal a destroyed Construct rises at half HP · killed within 10 ft of a Structure = no revival ≤5th",
             "mech": {
               "deny": [
                 "revival"
@@ -238,24 +262,28 @@
         "tiers": [
           {
             "text": "Know how, and roughly when, any creature within 60 feet died. Preserve a corpse from decay for a week. Sense undead within 120 feet.",
+            "card": "Know how and when anyone within 60 ft died · preserve a corpse a week · sense undead 120 ft",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "For 1 hour, undead of a CR below your level ignore you and up to three companions unless you act against them. Perform last rites that allow a willing restless spirit to pass on.",
+            "card": "1 hr: undead below your level ignore you and 3 companions · last rites let a willing spirit pass on",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "For 1 minute, see and speak with any spirit within 300 feet, and once during that time step through a wall as the dead do — up to 10 feet into an adjacent space.",
+            "card": "1 min: see and speak with any spirit within 300 ft · once, step 10 ft through a wall as the dead do",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Name a creature that died within the year and learn where its soul went — passed on, bound, trapped, or dissolved — and who last touched it. Or grant a dying willing creature a peaceful death that nothing can turn to undeath.",
+            "card": "Name someone dead within the year and learn where their soul went and who last touched it",
             "mech": {
               "utility": true
             }
@@ -271,6 +299,7 @@
       "description": "The primary effect carries the cold touch of death.",
       "effect": {
         "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6). The target also cannot regain hit points until the end of their next turn.",
+        "card": "+1 die necrotic · no healing until end of their next turn",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -283,10 +312,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: Bonus damage increases to two dice, and the healing prevention lasts for 1 minute."
+          "text": "Level 5+: Bonus damage increases to two dice, and the healing prevention lasts for 1 minute.",
+          "card": "+2 dice · healing blocked for 1 min"
         },
         {
           "text": "Level 11+: Bonus damage increases to three dice. If the target is brought to half HP or below by the combined effect, they also have disadvantage on death saving throws until they finish a short rest.",
+          "card": "+3 dice · at half HP or below they also have disadvantage on death saves",
           "mech": {
             "penalty": {
               "disadvantage": "death saving throws until they finish a short rest"
@@ -300,14 +331,17 @@
       "type": "Supportive",
       "description": "Standing close to death's threshold grants a strange protection.",
       "effect": {
-        "text": "When the primary effect deals damage, one ally within 30 feet gains temporary HP equal to your spellcasting modifier + your proficiency bonus."
+        "text": "When the primary effect deals damage, one ally within 30 feet gains temporary HP equal to your spellcasting modifier + your proficiency bonus.",
+        "card": "An ally within 30 ft gains {VM}+{PB} temp HP"
       },
       "upgrades": [
         {
-          "text": "Level 5+: Choose up to two allies to receive this benefit."
+          "text": "Level 5+: Choose up to two allies to receive this benefit.",
+          "card": "Up to two allies"
         },
         {
           "text": "Level 11+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and each ally also gains advantage on their next death saving throw if they make one within the next hour.",
+          "card": "Temp HP doubles · each also gets advantage on their next death save",
           "mech": {
             "buff": {
               "advantage": "their next death saving throw if they make one wit"
@@ -322,6 +356,7 @@
       "description": "The weight of finality pins the target in place.",
       "effect": {
         "text": "On a hit or failed saving throw, the target must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 15 feet until the end of their next turn.",
+        "card": "Con save {DC} or −15 ft speed until end of their next turn",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -337,6 +372,7 @@
       "upgrades": [
         {
           "text": "Level 5+: On a failed save, the target also has disadvantage on their next Constitution saving throw.",
+          "card": "Fail also gives disadvantage on their next Con save",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -348,6 +384,7 @@
         },
         {
           "text": "Level 11+: Creatures that fail cannot take the Dash action and suffer −2 to all saving throws until the end of their next turn.",
+          "card": "Those who fail can't Dash and take −2 to all saves",
           "mech": {
             "penalty": {
               "saves": -2

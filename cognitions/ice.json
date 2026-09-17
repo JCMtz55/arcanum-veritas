@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "The damage becomes Cognitive Cold and gains +2 dice. A creature carrying any Frost Stack takes one additional die.",
+            "card": "+2 dice cold · +1 more die vs anything holding a Frost Stack",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -22,6 +23,7 @@
           },
           {
             "text": "+4 dice. A creature with 2 or more Frost Stacks has vulnerability to this damage.",
+            "card": "+4 dice · vulnerability to this damage at 2+ Frost Stacks",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -30,6 +32,7 @@
           },
           {
             "text": "+6 dice. Against a creature that is Restrained, Frozen, or Paralyzed, this effect deals maximum damage.",
+            "card": "+6 dice · max damage vs Restrained, Frozen or Paralyzed",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -46,6 +49,7 @@
           },
           {
             "text": "+8 dice. A creature reduced to 0 hit points shatters — it cannot be revived by anything short of Greater Restoration, and every creature within 10 feet takes 4d10 cold damage from the burst.",
+            "card": "+8 dice · drops to 0 = shatters (no revival short of Greater Restoration) + 4d10 cold in 10 ft",
             "mech": {
               "damage": {
                 "bonusDice": 8,
@@ -66,16 +70,20 @@
         "description": "Stillness can defy time.",
         "tiers": [
           {
-            "text": "Suspend a dying creature (at 0 HP but not dead) in magical ice. They do not make death saving throws until the ice thaws at the end of your next turn."
+            "text": "Suspend a dying creature (at 0 HP but not dead) in magical ice. They do not make death saving throws until the ice thaws at the end of your next turn.",
+            "card": "Suspend a dying creature in ice — no death saves until it thaws end of your next turn"
           },
           {
-            "text": "Use this effect as a reaction when a creature drops to 0 HP — encasing them for up to 1 minute. They are stable and cannot be targeted while frozen."
+            "text": "Use this effect as a reaction when a creature drops to 0 HP — encasing them for up to 1 minute. They are stable and cannot be targeted while frozen.",
+            "card": "Reaction when a creature hits 0 HP: encase 1 min, stable and untargetable"
           },
           {
-            "text": "A willing creature may be frozen in time for up to 1 hour. While encased they are immune to all effects but also cannot act, speak, or be detected by magical means."
+            "text": "A willing creature may be frozen in time for up to 1 hour. While encased they are immune to all effects but also cannot act, speak, or be detected by magical means.",
+            "card": "Willing creature in stasis up to 1 hr — immune to everything, can't act or be found"
           },
           {
             "text": "Once per long rest, cast this effect on yourself — while frozen you are invulnerable and regain 1d4 hit dice per hour spent in stasis. You may set a condition to thaw automatically (a specific sound, time elapsed, or touch from a named creature).",
+            "card": "1/long rest on yourself: invulnerable, regain 1d4 hit dice per hour, set your own thaw trigger",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -93,6 +101,7 @@
         "tiers": [
           {
             "text": "Gain resistance to cold damage for 1 minute. While active, your Concentration cannot be broken by cold damage.",
+            "card": "Cold resistance 1 min · cold can't break your Concentration",
             "mech": {
               "damage": {
                 "type": "cold"
@@ -101,6 +110,7 @@
           },
           {
             "text": "Once per long rest, when you are hit by cold damage, you may instead gain temporary HP equal to the damage that would have been dealt.",
+            "card": "1/long rest: turn incoming cold damage into that much temp HP",
             "mech": {
               "damage": {
                 "type": "cold"
@@ -109,6 +119,7 @@
           },
           {
             "text": "You gain immunity to the Frightened condition and cannot be Charmed while standing on ice or frozen terrain.",
+            "card": "Immune to Frightened · can't be Charmed while on ice or frozen ground",
             "mech": {
               "conditions": [
                 {
@@ -121,7 +132,8 @@
             }
           },
           {
-            "text": "When reduced to 0 HP, you may instead shatter into ice — becoming a frozen statue immune to all damage for 1 minute, then reforming at half HP as the frost around you reconstitutes your body."
+            "text": "When reduced to 0 HP, you may instead shatter into ice — becoming a frozen statue immune to all damage for 1 minute, then reforming at half HP as the frost around you reconstitutes your body.",
+            "card": "At 0 HP shatter instead — immune to all damage 1 min, reform at half HP"
           }
         ]
       }
@@ -133,6 +145,7 @@
         "tiers": [
           {
             "text": "When you deal cold damage, the target's movement speed is reduced by 10 feet until the end of your next turn.",
+            "card": "Your cold damage cuts speed by 10 ft until end of your next turn",
             "mech": {
               "damage": {
                 "type": "cold"
@@ -147,6 +160,7 @@
           },
           {
             "text": "On a failed Constitution save, the target becomes Restrained by ice until the end of their next turn.",
+            "card": "Fail: Restrained by ice until end of their next turn",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -160,6 +174,7 @@
           },
           {
             "text": "The target must succeed on a Strength saving throw to break free, or the Restraint persists until the end of your next turn (maximum 1 minute of Concentration).",
+            "card": "Str save {DC} to break out, or Restrained holds until end of your next turn (conc., max 1 min)",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -168,6 +183,7 @@
           },
           {
             "text": "The ice spreads — one additional creature of your choice within 10 feet of the original target must also save or be Restrained by the same creeping frost.",
+            "card": "Ice spreads — one more creature within 10 ft saves or is Restrained too",
             "mech": {
               "conditions": [
                 {
@@ -184,6 +200,7 @@
         "tiers": [
           {
             "text": "If a creature fails a saving throw against your effect, they cannot regain hit points until the end of your next turn.",
+            "card": "Fail: no healing until end of your next turn",
             "mech": {
               "deny": [
                 "healing"
@@ -192,6 +209,7 @@
           },
           {
             "text": "The cursed creature also suffers disadvantage on Dexterity saving throws and Constitution saving throws for 1 minute.",
+            "card": "Also disadvantage on Dex and Con saves for 1 min",
             "mech": {
               "save": {
                 "ability": "Dexterity"
@@ -208,6 +226,7 @@
           },
           {
             "text": "Creatures that fail are vulnerable to cold damage for 1 minute. Repeat Constitution save at end of each turn to end early.",
+            "card": "Vulnerable to cold 1 min · Con save {DC} at end of each turn to end it",
             "mech": {
               "damage": {
                 "type": "cold"
@@ -219,6 +238,7 @@
           },
           {
             "text": "Mark a creature with Cursed Ice — if they die while marked, they shatter into frozen fragments and cannot be revived by any means short of Wish or divine intervention.",
+            "card": "Cursed Ice: die while marked and they shatter — no revival short of Wish or divine",
             "mech": {
               "conditions": [
                 {
@@ -240,6 +260,7 @@
         "tiers": [
           {
             "text": "Your creations are slick ice. Creatures crossing a Structure treat it as difficult terrain; a creature that touches or strikes one takes 1d6 cold damage. Objects deal +1d6 cold on a hit.",
+            "card": "Creations are slick ice · difficult terrain to cross · 1d6 cold to touch or strike · Objects +1d6 cold",
             "mech": {
               "damage": {
                 "dice": [
@@ -255,6 +276,7 @@
           },
           {
             "text": "Your creations are immune to cold and resistant to bludgeoning damage. A creature that starts its turn touching a Structure gains 1 Frost Stack.",
+            "card": "Immune to cold, resistant to bludgeoning · 1 Frost Stack to start a turn touching a Structure",
             "mech": {
               "damage": {
                 "type": "bludgeoning"
@@ -267,6 +289,7 @@
           },
           {
             "text": "Structures grant three-quarters cover. A Construct's attacks apply 2 Frost Stacks, and it may Freeze a creature it grapples.",
+            "card": "Structures give ¾ cover · Construct attacks apply 2 Frost Stacks and can Freeze what it grapples",
             "mech": {
               "resource": {
                 "name": "Frost Stack",
@@ -276,6 +299,7 @@
           },
           {
             "text": "Glacial permanence: your creations ignore fire effects of 5th level or lower, and a destroyed Structure or Construct shatters for 6d10 cold damage in a 20-foot radius (Constitution save for half), leaving Frozen Ground for 1 minute. In a region of perpetual cold, a Construct may instead be an Icebound Denizen, a native elemental of that region.",
+            "card": "Ignores fire ≤5th · destroyed creation shatters 6d10 cold in 20 ft (Con half) + Frozen Ground 1 min",
             "mech": {
               "damage": {
                 "dice": "6d10",
@@ -300,24 +324,28 @@
         "tiers": [
           {
             "text": "Freeze up to a 10-foot cube of water; chill or preserve food for a day; raise steps or handholds of ice on a surface you touch.",
+            "card": "Freeze a 10-ft cube of water · preserve food a day · raise ice steps or handholds",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Walk on water by freezing it beneath your feet; shape a lens of clear ice that lets you see 300 feet as if 30.",
+            "card": "Walk on water by freezing it · shape an ice lens to see 300 ft as if 30",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Place a willing creature in cryo-stasis for up to 8 hours — no aging, no bleeding, no progress of poison or disease.",
+            "card": "Cryo-stasis a willing creature up to 8 hrs — no aging, bleeding, poison or disease",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Freeze a moment: capture a scene you can see in a pane of ice that replays it once when broken, or entomb a nonmagical object so that it cannot decay, rust, or be opened without countering.",
+            "card": "Capture a scene in ice that replays once when broken · entomb an object against all decay",
             "mech": {
               "utility": true
             }
@@ -333,6 +361,7 @@
       "description": "Cold doesn't kill in an instant — it builds.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target gains 1 Frost Stack. At 2 Frost Stacks their movement speed is reduced by 15 feet. At 3 Frost Stacks they are Restrained until they succeed on a Constitution saving throw (DC equals your Verum DC) or receive fire damage. Frost Stacks fade after 1 minute without additional cold exposure.",
+        "card": "1 Frost Stack · 2 = −15 ft speed · 3 = Restrained (Con save {DC} or fire to end)",
         "mech": {
           "damage": {
             "type": "fire"
@@ -360,6 +389,7 @@
       "upgrades": [
         {
           "text": "Level 5+: Each application of Deep Freeze now applies 2 Frost Stacks instead of 1.",
+          "card": "Applies 2 Frost Stacks instead of 1",
           "mech": {
             "resource": {
               "name": "Frost Stack",
@@ -369,6 +399,7 @@
         },
         {
           "text": "Level 11+: At 3 Frost Stacks the target is Paralyzed rather than Restrained, and stacks persist for the full duration of the encounter.",
+          "card": "At 3 Stacks: Paralyzed instead of Restrained · stacks last all encounter",
           "mech": {
             "conditions": [
               {
@@ -388,6 +419,7 @@
       "description": "A thin shell of ice forms between you and the world's heat.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus. While these temporary HP remain, the ally has resistance to fire damage.",
+        "card": "An ally within 30 ft gains VM+prof temp HP and fire resistance while it lasts",
         "mech": {
           "damage": {
             "type": "fire"
@@ -400,6 +432,7 @@
       "upgrades": [
         {
           "text": "Level 5+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains resistance to cold damage.",
+          "card": "Temp HP doubles · also cold resistance",
           "mech": {
             "damage": {
               "type": "cold"
@@ -407,7 +440,8 @@
           }
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to being set on fire or affected by environmental heat while the temporary HP persists."
+          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to being set on fire or affected by environmental heat while the temporary HP persists.",
+          "card": "Two allies · each also immune to catching fire or environmental heat"
         }
       ]
     },
@@ -417,6 +451,7 @@
       "description": "The ground betrays them.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, the ground in a 10-foot radius around them flash-freezes — becoming difficult terrain until the end of your next turn. Creatures in the area must succeed on a Dexterity saving throw against your Verum DC or be knocked prone.",
+        "card": "Ground freezes 10 ft — difficult terrain · Dex save or knocked prone",
         "mech": {
           "save": {
             "ability": "Dexterity"
@@ -435,6 +470,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The frozen terrain persists for 1 minute, and creatures that enter it for the first time on a turn must make the Dexterity save or be knocked prone.",
+          "card": "Terrain lasts 1 min · first entry each turn repeats the save",
           "mech": {
             "save": {
               "ability": "Dexterity"
@@ -448,6 +484,7 @@
         },
         {
           "text": "Level 11+: The radius increases to 20 feet, and creatures that are knocked prone are also Restrained until they succeed on a Strength check against your Verum DC.",
+          "card": "Radius 20 ft · those knocked prone are also Restrained (Str check to free)",
           "mech": {
             "conditions": [
               {

@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a hit or failed save, the target suffers disadvantage on Dexterity checks and is Deafened until the start of your next turn.",
+            "card": "Fail: disadvantage on Dex checks and Deafened until your next turn",
             "mech": {
               "conditions": [
                 {
@@ -27,6 +28,7 @@
           },
           {
             "text": "The effect deals 4d8 thunder damage and automatically interrupts any spellcasting or Concentration unless the target is immune to the Deafened condition.",
+            "card": "4d8 thunder · interrupts casting and Concentration outright unless Deafen-immune",
             "mech": {
               "damage": {
                 "dice": "4d8",
@@ -41,6 +43,7 @@
           },
           {
             "text": "A shockwave erupts in a 10-foot radius from the point of impact — all creatures within must succeed on a Constitution saving throw or be knocked prone and take 6d10 thunder damage.",
+            "card": "Shockwave 10 ft — Con save or prone and 6d10 thunder",
             "mech": {
               "damage": {
                 "dice": "6d10",
@@ -58,6 +61,7 @@
           },
           {
             "text": "The air detonates across a 60-foot radius. All affected creatures must succeed on a Constitution saving throw or be Stunned until the end of your next turn and Deafened for 1 hour. Creatures that succeed still take half the thunder damage and are knocked prone.",
+            "card": "60-ft detonation — Con save or Stunned until end of your next turn and Deafened 1 hr",
             "mech": {
               "damage": {
                 "type": "thunder"
@@ -90,6 +94,7 @@
         "tiers": [
           {
             "text": "Gain immunity to fall damage and may walk across air as if it were difficult terrain for 1 minute.",
+            "card": "Immune to fall damage · walk on air as difficult terrain, 1 min",
             "mech": {
               "terrain": {
                 "effect": "difficult"
@@ -97,10 +102,12 @@
             }
           },
           {
-            "text": "Gain a hover speed equal to twice your movement speed for 1 minute. You do not provoke opportunity attacks while airborne."
+            "text": "Gain a hover speed equal to twice your movement speed for 1 minute. You do not provoke opportunity attacks while airborne.",
+            "card": "Hover at double your speed 1 min · no opportunity attacks while airborne"
           },
           {
             "text": "Gain full flight for 10 minutes and cannot be knocked prone by physical or magical means while aloft.",
+            "card": "Full flight 10 min · cannot be knocked prone while aloft",
             "mech": {
               "conditions": [
                 {
@@ -111,6 +118,7 @@
           },
           {
             "text": "For 1 hour, gain omnidirectional flight, hover as a free action, and become immune to the Restrained and Grappled conditions unless the source also commands the Cognition of Air.",
+            "card": "1 hr of omnidirectional flight · hover free · immune to Restrained and Grappled unless the source also wields Air",
             "mech": {
               "conditions": [
                 {
@@ -129,16 +137,20 @@
         "description": "The wind does not ask the wall for permission.",
         "tiers": [
           {
-            "text": "Ranged effects using this Cognition ignore half cover and their range increases by 100%."
+            "text": "Ranged effects using this Cognition ignore half cover and their range increases by 100%.",
+            "card": "Ranged Air effects ignore half cover and double their range"
           },
           {
-            "text": "Ignore three-quarters cover, and effects curve around corners — they may travel around one obstacle per 30 feet of range."
+            "text": "Ignore three-quarters cover, and effects curve around corners — they may travel around one obstacle per 30 feet of range.",
+            "card": "Ignore three-quarters cover · curve around one obstacle per 30 ft"
           },
           {
-            "text": "All ranged effects become auto-hit against creatures not behind total cover — they instead roll saving throws, and rolling a 1 on the save counts as a critical failure."
+            "text": "All ranged effects become auto-hit against creatures not behind total cover — they instead roll saving throws, and rolling a 1 on the save counts as a critical failure.",
+            "card": "Ranged effects auto-hit anything not in total cover — they save instead, a 1 is a critical failure"
           },
           {
-            "text": "The effect ignores line of sight, passes through magical barriers of 5th level or lower, and cannot be blocked or countered by mundane obstacles. Only an opposing Air Cognition or higher-tier magical interference can redirect it."
+            "text": "The effect ignores line of sight, passes through magical barriers of 5th level or lower, and cannot be blocked or countered by mundane obstacles. Only an opposing Air Cognition or higher-tier magical interference can redirect it.",
+            "card": "Ignores line of sight and barriers of 5th or lower · only opposing Air can block it"
           }
         ]
       },
@@ -147,16 +159,20 @@
         "description": "Every breath the world has ever taken — you offer it all at once.",
         "tiers": [
           {
-            "text": "The target gains universal respiration for 10 minutes — they may breathe freely in water, smoke, magical fog, or similar hostile atmospheres."
+            "text": "The target gains universal respiration for 10 minutes — they may breathe freely in water, smoke, magical fog, or similar hostile atmospheres.",
+            "card": "Universal respiration 10 min — water, smoke, magical fog, anything"
           },
           {
-            "text": "The target gains immunity to suffocation, inhaled poisons, and vacuum for 1 hour. They may speak and cast spells even within magical silence."
+            "text": "The target gains immunity to suffocation, inhaled poisons, and vacuum for 1 hour. They may speak and cast spells even within magical silence.",
+            "card": "1 hr immune to suffocation, inhaled poison and vacuum · speak and cast inside magical silence"
           },
           {
-            "text": "As a bonus action, you may extend this effect to one additional creature within 30 feet — repeatable, with no upper limit on recipients. The duration extends to 8 hours."
+            "text": "As a bonus action, you may extend this effect to one additional creature within 30 feet — repeatable, with no upper limit on recipients. The duration extends to 8 hours.",
+            "card": "Bonus action to add another creature within 30 ft, no limit · duration becomes 8 hrs"
           },
           {
-            "text": "The target becomes a living font of wind for 24 hours. They auto-succeed on saves against inhaled effects and silence; as an action they may exhale a Gust that disperses any spell of 5th level or lower; and allies within 60 feet may breathe freely regardless of plane or environment."
+            "text": "The target becomes a living font of wind for 24 hours. They auto-succeed on saves against inhaled effects and silence; as an action they may exhale a Gust that disperses any spell of 5th level or lower; and allies within 60 feet may breathe freely regardless of plane or environment.",
+            "card": "A living font of wind 24 hrs — auto-succeed vs inhaled effects and silence · exhale to disperse any spell ≤5th"
           }
         ]
       }
@@ -168,6 +184,7 @@
         "tiers": [
           {
             "text": "On a failed Strength save, the target is pushed 30 feet in a direction of your choice.",
+            "card": "Fail: pushed 30 ft wherever you choose",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -179,6 +196,7 @@
           },
           {
             "text": "The target is pushed 60 feet and knocked prone. If they collide with a solid surface, they take 3d6 bludgeoning damage.",
+            "card": "Pushed 60 ft and prone · 3d6 bludgeoning if they hit a surface",
             "mech": {
               "damage": {
                 "dice": "3d6",
@@ -196,6 +214,7 @@
           },
           {
             "text": "The target is pushed 120 feet and knocked prone. They have disadvantage on their next Strength check or saving throw.",
+            "card": "Pushed 120 ft and prone · disadvantage on their next Str check or save",
             "mech": {
               "conditions": [
                 {
@@ -212,6 +231,7 @@
           },
           {
             "text": "The target is pushed 300 feet, knocked prone, and takes 10d6 bludgeoning damage if they strike any surface. Creatures of Huge size or smaller cannot succeed on the initial save with a roll lower than 20.",
+            "card": "Pushed 300 ft, prone, 10d6 if they strike anything · Huge and smaller need a natural 20 to resist",
             "mech": {
               "damage": {
                 "dice": "10d6",
@@ -235,6 +255,7 @@
         "tiers": [
           {
             "text": "Creatures in the area cannot speak or cast verbal components and must hold their breath until the end of their next turn.",
+            "card": "No speech or verbal components · they hold their breath until end of their next turn",
             "mech": {
               "deny": [
                 "speech"
@@ -243,6 +264,7 @@
           },
           {
             "text": "On a failed save, targets are Silenced for 1 minute, have disadvantage on Concentration checks, and begin gagging — unable to consume potions or food.",
+            "card": "Fail: Silenced 1 min, disadvantage on Concentration, gagging — no potions or food",
             "mech": {
               "conditions": [
                 {
@@ -257,6 +279,7 @@
           },
           {
             "text": "Targets begin suffocating, are Incapacitated for 1 round, and lose one active concentration spell or buff of your choice.",
+            "card": "Suffocating · Incapacitated 1 round · loses one concentration effect of your choice",
             "mech": {
               "conditions": [
                 {
@@ -268,6 +291,7 @@
           },
           {
             "text": "Targets begin dying unless immune to vacuum or sustained by divine air — taking 10d10 thunder damage on a failed save and suffering one level of Exhaustion for each subsequent failed save at end of their turn.",
+            "card": "Dying unless vacuum-immune — 10d10 thunder and a level of Exhaustion per failed save",
             "mech": {
               "damage": {
                 "dice": "10d10",
@@ -291,6 +315,7 @@
       "description": "The wind doesn't just carry the spell — it sharpens it.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, a blade of compressed air lashes the target — dealing bonus slashing damage equal to your spellcasting modifier (minimum 1d6) and pushing them 5 feet in a direction of your choice without provoking opportunity attacks.",
+        "card": "Bonus slashing equal to {VM} · pushed a short way",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -300,10 +325,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: The bonus damage increases to your spellcasting modifier + your proficiency bonus, and the push increases to 15 feet."
+          "text": "Level 5+: The bonus damage increases to your spellcasting modifier + your proficiency bonus, and the push increases to 15 feet.",
+          "card": "{VM}+{PB} damage · push 15 ft"
         },
         {
           "text": "Level 11+: The push increases to 30 feet, and if the target collides with a solid surface, they take an additional 2d6 bludgeoning damage.",
+          "card": "Push 30 ft · 2d6 more if they hit a surface",
           "mech": {
             "damage": {
               "dice": "2d6",
@@ -319,6 +346,7 @@
       "description": "The air moves with you — not because you commanded it, but because it agrees.",
       "effect": {
         "text": "When the primary effect resolves, one creature of your choice within 30 feet gains a bonus to their movement speed equal to 10 feet until the end of their next turn, and may ignore difficult terrain caused by natural or magical weather effects.",
+        "card": "A creature within 30 ft gets +10 ft speed and ignores difficult terrain briefly",
         "mech": {
           "terrain": {
             "effect": "difficult"
@@ -327,10 +355,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: The movement bonus increases to 20 feet, and you may apply this effect to up to two creatures."
+          "text": "Level 5+: The movement bonus increases to 20 feet, and you may apply this effect to up to two creatures.",
+          "card": "+20 ft · up to two creatures"
         },
         {
-          "text": "Level 11+: The movement bonus increases to 30 feet, the creatures may also Disengage as a bonus action once before the effect ends, and they take no falling damage during the effect's duration."
+          "text": "Level 11+: The movement bonus increases to 30 feet, the creatures may also Disengage as a bonus action once before the effect ends, and they take no falling damage during the effect's duration.",
+          "card": "+30 ft · Disengage as a bonus action once · no falling damage"
         }
       ]
     },
@@ -340,6 +370,7 @@
       "description": "The impact breathes outward — everything in the area remembers it has somewhere else to be.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, a burst of wind radiates from the point of impact in a 10-foot radius — each creature must succeed on a Strength saving throw or be pushed 10 feet away from the origin point.",
+        "card": "10-ft burst — Str save or pushed back",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -351,10 +382,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: The radius increases to 20 feet and the push increases to 20 feet. Loose objects, fog, and gas effects in the area are immediately dispersed."
+          "text": "Level 5+: The radius increases to 20 feet and the push increases to 20 feet. Loose objects, fog, and gas effects in the area are immediately dispersed.",
+          "card": "Radius and push 20 ft · scatters fog, gas and loose objects"
         },
         {
-          "text": "Level 11+: The gust is strong enough to suspend any creature pushed by it — they are briefly airborne and treated as if affected by Feather Fall until the start of your next turn."
+          "text": "Level 11+: The gust is strong enough to suspend any creature pushed by it — they are briefly airborne and treated as if affected by Feather Fall until the start of your next turn.",
+          "card": "Those pushed are left airborne, as if under Feather Fall"
         }
       ]
     }

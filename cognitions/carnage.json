@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "The damage is turned into Sanguine damage. When this effect deals damage, you gain 1 Frenzy (maximum stacks equal to your Verum Modifier, minimum 1). This effect deals +1 damage die of its type for each Frenzy stack you hold. If you deal no damage on your turn, you lose 1 Frenzy stack.",
+            "card": "Damage becomes Sanguine · gain 1 Frenzy per hit (max {VM}) · +1 die per Frenzy held",
             "mech": {
               "damage": {
                 "type": "sanguine"
@@ -25,13 +26,16 @@
             }
           },
           {
-            "text": "Your maximum Frenzy increases by your Proficiency Bonus. Whenever a creature you have damaged this turn drops to 0 hit points, you gain 1 additional Frenzy immediately (this may exceed the per-turn limit)."
+            "text": "Your maximum Frenzy increases by your Proficiency Bonus. Whenever a creature you have damaged this turn drops to 0 hit points, you gain 1 additional Frenzy immediately (this may exceed the per-turn limit).",
+            "card": "Max Frenzy rises by {PB} · a kill this turn grants 1 more Frenzy immediately"
           },
           {
-            "text": "While you hold 3 or more Frenzy, this effect's damage scores a critical hit on a roll of 19–20, and its critical hits deal one additional die on top of the doubled dice."
+            "text": "While you hold 3 or more Frenzy, this effect's damage scores a critical hit on a roll of 19–20, and its critical hits deal one additional die on top of the doubled dice.",
+            "card": "At 3+ Frenzy: crits on 19–20, and crits add a die on top of the doubled dice"
           },
           {
-            "text": "While you hold maximum Frenzy, every instance of damage this effect deals is automatically a critical hit, and each kill refreshes your Frenzy to maximum rather than adding to it. The slaughter no longer builds — it sustains, and will not stop while anything remains alive to feed it."
+            "text": "While you hold maximum Frenzy, every instance of damage this effect deals is automatically a critical hit, and each kill refreshes your Frenzy to maximum rather than adding to it. The slaughter no longer builds — it sustains, and will not stop while anything remains alive to feed it.",
+            "card": "At max Frenzy: every instance of damage auto-crits, and kills refresh Frenzy to full"
           }
         ]
       },
@@ -40,16 +44,20 @@
         "description": "Every corpse is a stair. Climb.",
         "tiers": [
           {
-            "text": "When a creature drops to 0 hit points from this effect, you may immediately move up to half your speed without provoking opportunity attacks."
+            "text": "When a creature drops to 0 hit points from this effect, you may immediately move up to half your speed without provoking opportunity attacks.",
+            "card": "A kill lets you move half your speed free"
           },
           {
-            "text": "When a creature drops to 0 hit points from this effect, you also regain your reaction if it was spent, and may make one weapon attack or cantrip as part of the same turn."
+            "text": "When a creature drops to 0 hit points from this effect, you also regain your reaction if it was spent, and may make one weapon attack or cantrip as part of the same turn.",
+            "card": "A kill also refunds your reaction and grants one attack or cantrip"
           },
           {
-            "text": "The effect cleaves — when it reduces a creature to 0 hit points, it strikes again at one other creature within 5 feet of the slain for the same damage. This can chain up to your Verum Modifier times in a single casting, provided each strike drops its target."
+            "text": "The effect cleaves — when it reduces a creature to 0 hit points, it strikes again at one other creature within 5 feet of the slain for the same damage. This can chain up to your Verum Modifier times in a single casting, provided each strike drops its target.",
+            "card": "It cleaves — a kill strikes another creature within 5 ft, chaining up to {VM} times"
           },
           {
             "text": "Killing is no longer the end of your turn — it extends it. Each time a creature dies from your Carnage effects, you gain one additional action that may only be used to attack or to cast an offensive Arcanum Veritas. There is no limit to how many times this may chain in a turn, so long as the dying does not stop.",
+            "card": "Every kill grants an extra action to attack or cast. No limit while the dying continues",
             "mech": {
               "actionEconomy": {
                 "action": 1
@@ -66,6 +74,7 @@
         "tiers": [
           {
             "text": "Whenever a creature within 30 feet of you dies, you gain temporary hit points equal to your Verum Modifier.",
+            "card": "Any death within 30 ft gives you {VM} temp HP",
             "mech": {
               "heal": {
                 "tempHP": true
@@ -74,6 +83,7 @@
           },
           {
             "text": "The temporary hit points increase to twice your Verum Modifier, and while you hold any of them you gain +1 to melee damage rolls.",
+            "card": "Temp HP doubles · +1 melee damage while you hold any",
             "mech": {
               "heal": {
                 "tempHP": true
@@ -82,6 +92,7 @@
           },
           {
             "text": "When a creature dies within range, you may instead regain hit points equal to 1d10 + your Verum Modifier, and you shed one level of exhaustion the first time each turn a creature dies near you.",
+            "card": "A death may instead heal you 1d10+{VM} · shed a level of exhaustion once each turn",
             "mech": {
               "damage": {
                 "dice": "1d10"
@@ -97,7 +108,8 @@
             }
           },
           {
-            "text": "So long as a creature has died within 30 feet of you in the last round, you are immune to fear and cannot be reduced below 1 hit point by any single instance of damage. You do not tire, you do not falter, and you do not fall — not while the killing continues."
+            "text": "So long as a creature has died within 30 feet of you in the last round, you are immune to fear and cannot be reduced below 1 hit point by any single instance of damage. You do not tire, you do not falter, and you do not fall — not while the killing continues.",
+            "card": "While anything died near you last round: immune to fear, and no single hit drops you below 1 HP"
           }
         ]
       }
@@ -109,6 +121,7 @@
         "tiers": [
           {
             "text": "Charisma save. Choose a point you can see. Each hostile creature within 20 feet that fails must spend its next turn moving toward and attacking the nearest creature, friend or foe.",
+            "card": "Cha save · hostiles within 20 ft that fail must move to and attack whoever is nearest, friend or foe",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -116,10 +129,12 @@
             }
           },
           {
-            "text": "The radius increases to 40 feet, and creatures that fail cannot Disengage or willingly move away from the nearest creature until the start of their next turn."
+            "text": "The radius increases to 40 feet, and creatures that fail cannot Disengage or willingly move away from the nearest creature until the start of their next turn.",
+            "card": "Radius 40 ft · they can't Disengage or move away from the nearest creature"
           },
           {
             "text": "Creatures that fail are gripped for 1 minute, repeating the save at the end of each of their turns. While gripped they have advantage on attacks but cannot distinguish ally from enemy.",
+            "card": "Gripped 1 min — advantage on attacks, but they cannot tell ally from enemy",
             "mech": {
               "buff": {
                 "advantage": "attacks but cannot distinguish ally from enemy"
@@ -127,7 +142,8 @@
             }
           },
           {
-            "text": "Every creature of your choice within 60 feet that fails is locked in the Rapture for 1 minute — attacking the nearest creature, unable to flee, unable to tell friend from foe. Each time one slays another, you gain Frenzy as though you struck the blow."
+            "text": "Every creature of your choice within 60 feet that fails is locked in the Rapture for 1 minute — attacking the nearest creature, unable to flee, unable to tell friend from foe. Each time one slays another, you gain Frenzy as though you struck the blow.",
+            "card": "Everyone you choose within 60 ft is locked in the Rapture 1 min · their kills feed your Frenzy"
           }
         ]
       },
@@ -137,6 +153,7 @@
         "tiers": [
           {
             "text": "Create a 15-foot-radius zone of carnage centered on a point you can see, lasting 1 minute. Enemies that start their turn inside take 1d10 Sanguine damage.",
+            "card": "15-ft zone, 1 min — 1d10 Sanguine to enemies starting their turn inside",
             "mech": {
               "damage": {
                 "dice": "1d10",
@@ -146,6 +163,7 @@
           },
           {
             "text": "Each creature that dies inside the zone permanently increases its damage by 1d10 (no cap) for the zone's duration.",
+            "card": "Every death inside raises its damage by 1d10, permanently, no cap",
             "mech": {
               "damage": {
                 "dice": "1d10"
@@ -154,6 +172,7 @@
           },
           {
             "text": "Creatures that start their turn in the zone must succeed on a Strength save or be unable to leave it until the start of their next turn — the slaughter will not release what it has claimed.",
+            "card": "Str save to leave — the slaughter will not release what it has claimed",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -161,7 +180,8 @@
             }
           },
           {
-            "text": "The Monument becomes self-sustaining. Each death inside it raises its damage, extends its duration by one round, and widens its radius by 5 feet. A Monument fed enough lives does not end — it spreads, and must be starved of the dying to be brought down."
+            "text": "The Monument becomes self-sustaining. Each death inside it raises its damage, extends its duration by one round, and widens its radius by 5 feet. A Monument fed enough lives does not end — it spreads, and must be starved of the dying to be brought down.",
+            "card": "Self-sustaining: each death raises damage, extends it a round and widens it 5 ft. Starve it or it spreads"
           }
         ]
       }
@@ -174,6 +194,7 @@
       "description": "The first blow is nothing. It is the tenth that ends worlds.",
       "effect": {
         "text": "The primary effect gains no bonus the first time it damages a creature. Each subsequent turn on which it damages any creature, it deals +1d6 Sanguine damage, and this bonus stacks for as long as you damage something every turn. Miss a turn without dealing damage and the bonus resets to zero.",
+        "card": "No bonus on the first turn · +1d6 Sanguine each turn you keep dealing damage, resets if you don't",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -184,6 +205,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The stacking bonus increases to +1d8 per turn, and is not lost if you skip a single turn — only a second consecutive turn without a hit resets it.",
+          "card": "+1d8 per turn · only two consecutive quiet turns reset it",
           "mech": {
             "damage": {
               "dice": "1d8"
@@ -192,6 +214,7 @@
         },
         {
           "text": "Level 11+: The stacking bonus increases to +2d8 per turn and has no cap.",
+          "card": "+2d8 per turn, no cap",
           "mech": {
             "damage": {
               "dice": "2d8"
@@ -206,6 +229,7 @@
       "description": "Something has to be gained from all this. Let it be you.",
       "effect": {
         "text": "When a creature dies within 20 feet of a target of the primary effect before the start of your next turn, you or one ally within 30 feet gains temporary hit points equal to your spellcasting modifier.",
+        "card": "A death within 20 ft of the target gives you or an ally temp HP",
         "mech": {
           "heal": {
             "tempHP": true
@@ -215,6 +239,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The temporary hit points are granted for each creature that dies in range, up to your Verum Modifier's worth of deaths.",
+          "card": "Granted per death, up to {VM} deaths",
           "mech": {
             "heal": {
               "tempHP": true
@@ -223,6 +248,7 @@
         },
         {
           "text": "Level 11+: Allies who receive these temporary hit points also gain +1 to attack rolls while any of them remain.",
+          "card": "Allies holding it also gain +1 to attack rolls",
           "mech": {
             "heal": {
               "tempHP": true
@@ -240,6 +266,7 @@
       "description": "The slaughter calls, and the weak of will answer.",
       "effect": {
         "text": "When the primary effect reduces a creature below half its hit points, that creature gives off a Bloodscent until the end of your next turn. Each enemy within 15 feet of it must succeed on a Charisma saving throw against your Verum DC or be pulled 10 feet toward it.",
+        "card": "Dropping a creature below half marks it — enemies nearby are pulled toward it",
         "mech": {
           "save": {
             "ability": "Charisma"
@@ -251,10 +278,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: Creatures that fail are also unable to willingly move away from the bloodied target until the end of their next turn."
+          "text": "Level 5+: Creatures that fail are also unable to willingly move away from the bloodied target until the end of their next turn.",
+          "card": "Those who fail also can't willingly move away from the bloodied target"
         },
         {
-          "text": "Level 11+: If the bloodied creature dies while a Bloodscent is active, the scent jumps to the nearest wounded enemy and the pull repeats."
+          "text": "Level 11+: If the bloodied creature dies while a Bloodscent is active, the scent jumps to the nearest wounded enemy and the pull repeats.",
+          "card": "If it dies, the scent jumps to the nearest wounded enemy"
         }
       ]
     }

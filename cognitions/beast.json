@@ -13,13 +13,16 @@
         "description": "The hunt demands speed; the kill rewards momentum.",
         "tiers": [
           {
-            "text": "Your movement speed increases by 10 feet, and when you hit with a melee attack you may move up to 10 feet once per turn without provoking opportunity attacks."
+            "text": "Your movement speed increases by 10 feet, and when you hit with a melee attack you may move up to 10 feet once per turn without provoking opportunity attacks.",
+            "card": "+10 ft speed · after a melee hit, move 10 ft free once per turn"
           },
           {
-            "text": "Your movement speed increases by 20 feet, and after hitting with a melee attack you may make one additional melee weapon attack against a different creature within reach."
+            "text": "Your movement speed increases by 20 feet, and after hitting with a melee attack you may make one additional melee weapon attack against a different creature within reach.",
+            "card": "+20 ft speed · after a melee hit, one more attack on a different creature in reach"
           },
           {
             "text": "Your movement speed increases by 30 feet, you may move through enemy spaces as difficult terrain, and when you move at least 20 feet before attacking you deal extra damage equal to your level on hit.",
+            "card": "+30 ft · move through enemy spaces · 20 ft of movement before attacking adds your level in damage",
             "mech": {
               "terrain": {
                 "effect": "difficult"
@@ -28,6 +31,7 @@
           },
           {
             "text": "For 1 minute, gain Relentless Pursuit — your movement speed doubles, you ignore difficult terrain, and each time you hit with a melee attack you may immediately move up to your speed and make another attack. This does not provoke opportunity attacks and may occur once per turn.",
+            "card": "Relentless Pursuit 1 min — speed doubled, ignore difficult terrain, every hit lets you move and attack again",
             "mech": {
               "terrain": {
                 "effect": "difficult"
@@ -41,10 +45,12 @@
         "description": "You do not wound — you dismantle.",
         "tiers": [
           {
-            "text": "Your attack or spell deals +1 die of the same damage type and reduces the target's speed by 10 feet on hit."
+            "text": "Your attack or spell deals +1 die of the same damage type and reduces the target's speed by 10 feet on hit.",
+            "card": "+1 die same type · −10 ft speed on hit"
           },
           {
             "text": "If the target is below half HP, this effect deals maximum damage. The target must also succeed on a Constitution save or lose their reaction.",
+            "card": "Below half HP: maximum damage · Con save or they lose their reaction",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -56,6 +62,7 @@
           },
           {
             "text": "If the target is Frightened or Prone, your attack automatically scores a critical hit if it hits.",
+            "card": "Frightened or Prone targets: a hit is automatically a critical",
             "mech": {
               "conditions": [
                 {
@@ -68,7 +75,8 @@
             }
           },
           {
-            "text": "Designate one target as Prey — until it dies or combat ends, you deal double damage to it, you may track it across any distance, and it cannot benefit from invisibility, healing, or damage resistance against you."
+            "text": "Designate one target as Prey — until it dies or combat ends, you deal double damage to it, you may track it across any distance, and it cannot benefit from invisibility, healing, or damage resistance against you.",
+            "card": "Name one Prey — double damage, track it anywhere, no invisibility, healing or resistance against you"
           }
         ]
       }
@@ -80,6 +88,7 @@
         "tiers": [
           {
             "text": "Gain advantage on saving throws against being Grappled, Restrained, or Frightened for 1 round.",
+            "card": "Advantage against Grappled, Restrained and Frightened, 1 round",
             "mech": {
               "conditions": [
                 {
@@ -101,10 +110,12 @@
             }
           },
           {
-            "text": "When you take damage, you may use your reaction to gain resistance to that damage type until the start of your next turn."
+            "text": "When you take damage, you may use your reaction to gain resistance to that damage type until the start of your next turn.",
+            "card": "React to incoming damage for resistance to that type until your next turn"
           },
           {
             "text": "Gain temporary HP equal to your level when you activate this effect, and automatically succeed on the next Strength saving throw you make before the end of your next turn.",
+            "card": "Temp HP equal to your level · auto-succeed your next Str save",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -113,6 +124,7 @@
           },
           {
             "text": "For 1 minute, enter the Primal State — you are immune to all movement-restricting conditions, gain resistance to bludgeoning, piercing, and slashing damage, and cannot be Charmed, Stunned, or Frightened.",
+            "card": "Primal State 1 min — immune to movement conditions, resist b/p/s, no Charm, Stun or Fear",
             "mech": {
               "damage": {
                 "type": "slashing"
@@ -138,6 +150,7 @@
         "tiers": [
           {
             "text": "When an ally is within 5 feet of a creature you target with an attack or spell, you gain advantage on the attack roll.",
+            "card": "Advantage when an ally is within 5 ft of your target",
             "mech": {
               "buff": {
                 "advantage": "the attack roll"
@@ -145,13 +158,16 @@
             }
           },
           {
-            "text": "You may allow one ally within 10 feet to use their reaction to make one attack when you hit a target."
+            "text": "You may allow one ally within 10 feet to use their reaction to make one attack when you hit a target.",
+            "card": "An ally within 10 ft may react to attack when you hit"
           },
           {
-            "text": "Grant Pack Tactics to up to 3 allies for 1 minute — they roll attacks with advantage when adjacent to at least one ally."
+            "text": "Grant Pack Tactics to up to 3 allies for 1 minute — they roll attacks with advantage when adjacent to at least one ally.",
+            "card": "Pack Tactics for up to 3 allies, 1 min"
           },
           {
             "text": "Forge a Pack Bond with up to 5 allies within 60 feet — all gain +2 AC, advantage on Strength saving throws, and +1d8 damage on their first hit each round if an ally is within 5 feet of the target. If you drop to 0 HP, one bonded ally may take a full turn immediately as a reaction.",
+            "card": "Pack Bond with 5 allies — +2 AC, advantage on Str saves, +1d8 on their first hit each round",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -172,13 +188,16 @@
         "description": "The hunt sustains. The kill restores.",
         "tiers": [
           {
-            "text": "When you reduce a creature to 0 HP, regain HP equal to your proficiency bonus."
+            "text": "When you reduce a creature to 0 HP, regain HP equal to your proficiency bonus.",
+            "card": "Drop a creature to 0 and regain {PB}"
           },
           {
-            "text": "After reducing a creature to 0 HP, you regain HP equal to half the damage dealt by your next attack."
+            "text": "After reducing a creature to 0 HP, you regain HP equal to half the damage dealt by your next attack.",
+            "card": "After a kill, your next attack heals you half its damage"
           },
           {
             "text": "When you reduce a creature to 0 HP, you may end one condition affecting you (Frightened, Poisoned, Charmed, or 1 level of Exhaustion).",
+            "card": "A kill sheds one condition — Frightened, Poisoned, Charmed, or a level of Exhaustion",
             "mech": {
               "conditions": [
                 {
@@ -198,6 +217,7 @@
           },
           {
             "text": "For 1 minute, enter Bloodthirst — each time you hit a creature you regain 1d8 HP, and each time you reduce a creature to 0 HP you gain +1 to attack rolls (stacks up to +5) until combat ends.",
+            "card": "Bloodthirst 1 min — 1d8 HP per hit, +1 attack per kill stacking to +5 until combat ends",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -220,6 +240,7 @@
         "tiers": [
           {
             "text": "The target is Frightened of you until the end of your next turn.",
+            "card": "Frightened of you until the end of your next turn",
             "mech": {
               "conditions": [
                 {
@@ -230,6 +251,7 @@
           },
           {
             "text": "The target is Frightened for 1 minute and must flee or Disengage on their turn rather than engage.",
+            "card": "Frightened 1 min · must flee or Disengage rather than engage",
             "mech": {
               "conditions": [
                 {
@@ -241,6 +263,7 @@
           },
           {
             "text": "The target also cannot willingly move closer to any of your allies and has disadvantage on attacks against anyone other than you.",
+            "card": "Also can't approach your allies and attacks anyone but you at disadvantage",
             "mech": {
               "penalty": {
                 "disadvantage": "attacks against anyone other than you"
@@ -249,6 +272,7 @@
           },
           {
             "text": "You exude an Aura of Domination in a 30-foot radius for 1 minute — all enemies within range have disadvantage on saving throws against fear, charm, and knockdown and cannot maintain Concentration while Frightened by you.",
+            "card": "Aura of Domination 30 ft, 1 min — disadvantage on fear, charm and knockdown, no Concentration while Frightened",
             "mech": {
               "conditions": [
                 {
@@ -273,6 +297,7 @@
         "tiers": [
           {
             "text": "Speak with beasts for 1 hour. Track by scent, gaining advantage on Survival checks to follow a trail. Know the nearest source of water, shelter, and danger.",
+            "card": "Speak with beasts 1 hr · track by scent with advantage · find water, shelter and danger",
             "mech": {
               "buff": {
                 "advantage": "Survival checks to follow a trail"
@@ -281,6 +306,7 @@
           },
           {
             "text": "Gain a climb and swim speed equal to your walking speed for 1 hour, and darkvision 60 feet. Beasts of CR 1 or lower will not attack you or your companions unprovoked.",
+            "card": "Climb and swim speed 1 hr · darkvision 60 ft · beasts CR 1 and below leave you be",
             "mech": {
               "summon": {
                 "cr": "1"
@@ -289,12 +315,14 @@
           },
           {
             "text": "See through the eyes of any beast within 1 mile. You and up to three companions leave no trail and cannot be tracked by scent or sight for 8 hours.",
+            "card": "See through any beast's eyes within 1 mile · you and 3 others leave no trail for 8 hrs",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Call the wild — every beast within 5 miles knows what you want, and those willing come. Or take the form of any beast you have hunted for up to 8 hours, keeping your own mind.",
+            "card": "Call the wild — every beast within 5 miles knows what you want · or wear a hunted beast's shape 8 hrs",
             "mech": {
               "utility": true
             }
@@ -310,6 +338,7 @@
       "description": "Feral force follows every strike.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target must succeed on a Strength saving throw against your Verum DC or be pushed 10 feet directly away from you as the primal force of the impact carries through.",
+        "card": "Str save {DC} or pushed 10 ft away",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -322,6 +351,7 @@
       "upgrades": [
         {
           "text": "Level 5+: On a failed save the target is also knocked prone after being pushed, and the distance increases to 15 feet.",
+          "card": "Fail also knocks prone · push becomes 15 ft",
           "mech": {
             "conditions": [
               {
@@ -331,7 +361,8 @@
           }
         },
         {
-          "text": "Level 11+: The push distance increases to 20 feet, and creatures that fail cannot stand up until the start of their next turn."
+          "text": "Level 11+: The push distance increases to 20 feet, and creatures that fail cannot stand up until the start of their next turn.",
+          "card": "Push 20 ft · they can't stand until their next turn"
         }
       ]
     },
@@ -341,6 +372,7 @@
       "description": "The predator's body rises to meet the moment.",
       "effect": {
         "text": "When the primary effect resolves, you gain temporary hit points equal to your Strength modifier + your proficiency bonus and advantage on your next Strength check or Strength saving throw before the start of your next turn.",
+        "card": "{VM}+{PB} temp HP and advantage on your next Str check or save",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -355,10 +387,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: The temporary HP increases to twice your Strength modifier + your proficiency bonus, and the advantage extends to all Strength checks and saving throws until the start of your next turn."
+          "text": "Level 5+: The temporary HP increases to twice your Strength modifier + your proficiency bonus, and the advantage extends to all Strength checks and saving throws until the start of your next turn.",
+          "card": "Temp HP doubles · advantage on all Str checks and saves"
         },
         {
           "text": "Level 11+: You also gain +10 feet of movement speed until the start of your next turn, and your next melee attack before that point deals +1d10 damage.",
+          "card": "Also +10 ft speed and +1d10 on your next melee hit",
           "mech": {
             "damage": {
               "dice": "1d10"
@@ -373,6 +407,7 @@
       "description": "Once marked, there is no disengaging from the hunt.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, they are Marked as Prey for 1 minute — all allies who can see the target gain advantage on attack rolls against it on the first attack each turn, and the target cannot use the Disengage action without first succeeding on a Strength saving throw against your Verum DC.",
+        "card": "Marked as Prey 1 min — allies who can see it attack with advantage",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -384,10 +419,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: While Marked, the target also cannot benefit from invisibility or illusions against you or your allies."
+          "text": "Level 5+: While Marked, the target also cannot benefit from invisibility or illusions against you or your allies.",
+          "card": "Also no invisibility or illusions against you or your allies"
         },
         {
-          "text": "Level 11+: The Mark becomes contagious — if the Marked target dies, the Mark immediately transfers to the nearest hostile creature within 30 feet."
+          "text": "Level 11+: The Mark becomes contagious — if the Marked target dies, the Mark immediately transfers to the nearest hostile creature within 30 feet.",
+          "card": "The Mark is contagious — on death it jumps to the nearest enemy within 30 ft"
         }
       ]
     }

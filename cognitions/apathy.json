@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "+2 dice. The target subtracts 1d4 from its next attack roll.",
+            "card": "+2 dice · −1d4 on their next attack",
             "mech": {
               "damage": {
                 "bonusDice": 2,
@@ -23,6 +24,7 @@
           },
           {
             "text": "+4 dice. The target has no bonus action on its next turn.",
+            "card": "+4 dice · no bonus action on their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -31,6 +33,7 @@
           },
           {
             "text": "+6 dice. The target cannot use reactions or legendary actions until the end of its next turn.",
+            "card": "+6 dice · no reactions or legendary actions until end of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -39,6 +42,7 @@
           },
           {
             "text": "+8 dice. On a failed save, the target takes no action on its next turn at all.",
+            "card": "+8 dice · on a fail they take no action at all next turn",
             "mech": {
               "damage": {
                 "bonusDice": 8
@@ -55,6 +59,7 @@
         "tiers": [
           {
             "text": "The target gains resistance to psychic damage and immunity to Frightened for 1 minute.",
+            "card": "Resist psychic and immune to Frightened, 1 min",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -69,6 +74,7 @@
           },
           {
             "text": "Also immunity to Charmed and advantage on Wisdom saving throws — but the creature gains no benefit from inspiration, morale, or rallying effects.",
+            "card": "Also immune to Charmed, advantage on Wis saves — but no inspiration, morale or rallying benefits",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -85,6 +91,7 @@
           },
           {
             "text": "The creature ignores the penalties of Injuries and of exhaustion levels 1–2.",
+            "card": "Ignores Injury penalties and exhaustion levels 1–2",
             "mech": {
               "conditions": [
                 {
@@ -94,7 +101,8 @@
             }
           },
           {
-            "text": "Immune to every emotion-based effect, and on dropping to 0 hit points it remains conscious and stable — it simply does not find dying urgent."
+            "text": "Immune to every emotion-based effect, and on dropping to 0 hit points it remains conscious and stable — it simply does not find dying urgent.",
+            "card": "Immune to every emotion effect · at 0 HP stays conscious and stable, finding dying unurgent"
           }
         ]
       }
@@ -106,6 +114,7 @@
         "tiers": [
           {
             "text": "The target has disadvantage on attack rolls for any attack after the first they make this turn.",
+            "card": "Disadvantage on every attack after their first this turn",
             "mech": {
               "penalty": {
                 "disadvantage": "attack rolls for any attack after the first they m"
@@ -114,6 +123,7 @@
           },
           {
             "text": "The target cannot take reactions, and must succeed on a Wisdom save to use their bonus action each turn.",
+            "card": "No reactions · Wis save each turn to use their bonus action",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -125,6 +135,7 @@
           },
           {
             "text": "The target may take only one action per turn, even if they have Legendary Actions, Extra Attack, or similar features — all additional action economy becomes inaccessible.",
+            "card": "One action per turn only — Extra Attack, Legendary Actions, all of it inaccessible",
             "mech": {
               "actionEconomy": {
                 "action": 1
@@ -133,6 +144,7 @@
           },
           {
             "text": "The target must succeed on a Wisdom save at the start of each of their turns or be Stunned until the end of that turn. On a failed save, they do not make the saving throw to remove this effect that turn.",
+            "card": "Wis save at the start of each turn or Stunned through it — and a fail forfeits that turn's escape",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -151,10 +163,12 @@
         "description": "You numb passion and purpose — hollowing the emotional spectrum until even the instinct to feel becomes inaccessible.",
         "tiers": [
           {
-            "text": "Choose one emotion (fear, love, hatred, grief, etc.) — the target becomes immune to effects involving that emotion for 1 round. They cannot access it themselves either."
+            "text": "Choose one emotion (fear, love, hatred, grief, etc.) — the target becomes immune to effects involving that emotion for 1 round. They cannot access it themselves either.",
+            "card": "Name an emotion — they're immune to it and can't access it, 1 round"
           },
           {
             "text": "The target becomes emotionally numb — they lose all morale-based bonuses, cannot benefit from Inspiration, and have disadvantage on Charisma checks for 1 minute.",
+            "card": "Emotionally numb 1 min — no morale bonuses, no Inspiration, disadvantage on Cha checks",
             "mech": {
               "penalty": {
                 "disadvantage": "Charisma checks for 1 minute"
@@ -163,6 +177,7 @@
           },
           {
             "text": "The effect expands to all creatures within 20 feet of the target — rendering them unable to be Frightened, Charmed, or Inspired for 1 minute.",
+            "card": "Spreads 20 ft — nobody there can be Frightened, Charmed or Inspired for 1 min",
             "mech": {
               "conditions": [
                 {
@@ -177,7 +192,8 @@
             }
           },
           {
-            "text": "The target becomes Emotionless for 1 minute — they cannot gain or grant bonuses through morale, emotion-based features, or bonds. All bonded or sympathetic magical effects are suppressed. If reduced to 0 HP while Emotionless, no ally may use a reaction to stabilize or save them."
+            "text": "The target becomes Emotionless for 1 minute — they cannot gain or grant bonuses through morale, emotion-based features, or bonds. All bonded or sympathetic magical effects are suppressed. If reduced to 0 HP while Emotionless, no ally may use a reaction to stabilize or save them.",
+            "card": "Emotionless 1 min — no emotional bonuses given or received, all bonded effects suppressed"
           }
         ]
       },
@@ -186,16 +202,20 @@
         "description": "You sever cause from action — cutting the thread between intent and execution until purpose itself dissolves.",
         "tiers": [
           {
-            "text": "If the target is concentrating on a spell, they must make the Concentration check at disadvantage or lose Concentration immediately."
+            "text": "If the target is concentrating on a spell, they must make the Concentration check at disadvantage or lose Concentration immediately.",
+            "card": "Concentration checks at disadvantage, or it drops outright"
           },
           {
-            "text": "The target loses access to one class feature of your choice for 1 minute — that feature simply does not exist for them."
+            "text": "The target loses access to one class feature of your choice for 1 minute — that feature simply does not exist for them.",
+            "card": "One class feature of your choice stops existing for them, 1 min"
           },
           {
-            "text": "The target forgets their goal for 1 round — they take no hostile action unless directly provoked, and cannot maintain tactical intent."
+            "text": "The target forgets their goal for 1 round — they take no hostile action unless directly provoked, and cannot maintain tactical intent.",
+            "card": "They forget their goal for 1 round — no hostile action unless provoked"
           },
           {
             "text": "The target becomes Unmotivated for 1 minute — their initiative is reduced to 0, they cannot take Legendary Actions, and cannot cast spells or use features that require motivation, belief, or emotion (such as Divine Smite, Rage, or Vow of Enmity).",
+            "card": "Unmotivated 1 min — initiative to 0, no Legendary Actions, nothing requiring belief or will",
             "mech": {
               "deny": [
                 "spellcasting"
@@ -210,6 +230,7 @@
         "tiers": [
           {
             "text": "Creatures within 10 feet have disadvantage on Insight and Persuasion checks — your presence making emotional reading and connection feel pointless.",
+            "card": "Within 10 ft: disadvantage on Insight and Persuasion",
             "mech": {
               "penalty": {
                 "disadvantage": "Insight and Persuasion checks — your presence maki"
@@ -218,6 +239,7 @@
           },
           {
             "text": "Hostile creatures that start their turn within 10 feet must succeed on a Wisdom save against your Verum DC or lose their bonus action that turn.",
+            "card": "Hostiles starting their turn within 10 ft: Wis save {DC} or lose their bonus action",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -225,10 +247,12 @@
             }
           },
           {
-            "text": "Allies within 10 feet are immune to Charm and Fear, but also cannot be affected by Inspiration or Bardic effects — the apathetic field protecting and numbing in equal measure."
+            "text": "Allies within 10 feet are immune to Charm and Fear, but also cannot be affected by Inspiration or Bardic effects — the apathetic field protecting and numbing in equal measure.",
+            "card": "Allies within 10 ft are immune to Charm and Fear — and to Inspiration and Bardic effects"
           },
           {
             "text": "For 1 minute, project Total Apathy in a 30-foot aura — all creatures within lose advantage granted by external emotion-based effects, cannot take reactions or Legendary Actions, and allies cannot receive or benefit from emotion-based healing or buffs for the duration.",
+            "card": "Total Apathy 30 ft, 1 min — no external emotional advantage, no reactions, no Legendary Actions",
             "mech": {
               "deny": [
                 "reactions"
@@ -242,13 +266,16 @@
         "description": "You rob the world of purpose — draining magic of its color and conviction until even the act of casting inspires nothing.",
         "tiers": [
           {
-            "text": "Suppress the visual and verbal expression of a target's spell or ability — its manifestation becomes silent, grey, and bleak. It still functions, but inspires nothing."
+            "text": "Suppress the visual and verbal expression of a target's spell or ability — its manifestation becomes silent, grey, and bleak. It still functions, but inspires nothing.",
+            "card": "Their effect still works but manifests silent, grey and bleak — it inspires nothing"
           },
           {
-            "text": "A target spell, object, or summoned entity loses its appearance, sound, and aura. Creatures have disadvantage to recall it later, and it cannot serve as the source of morale or inspiration effects."
+            "text": "A target spell, object, or summoned entity loses its appearance, sound, and aura. Creatures have disadvantage to recall it later, and it cannot serve as the source of morale or inspiration effects.",
+            "card": "A spell, object or summon loses its look, sound and aura · hard to recall, useless for morale"
           },
           {
             "text": "Create a Zone of Emptiness in a 20-foot radius — Inspiration cannot be granted, and Bardic and morale-based features automatically fail within the zone for 1 minute.",
+            "card": "Zone of Emptiness 20 ft, 1 min — Inspiration can't be granted, Bardic features just fail",
             "mech": {
               "terrain": {
                 "radius": 20
@@ -257,6 +284,7 @@
           },
           {
             "text": "Once per long rest, invoke Meaningless Doom — one creature loses access to all emotion-linked magic, cannot cast or be affected by spells involving feelings, belief, or empathy, and must succeed on a Charisma save or be erased from collective memory until they take damage — not invisible, simply unregistered.",
+            "card": "1/long rest Meaningless Doom — no emotion-linked magic cast or received at all",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -279,6 +307,7 @@
         "tiers": [
           {
             "text": "The target has disadvantage on saving throws against effects that would cause them to stop acting — paralysis, stun, sleep, and similar conditions.",
+            "card": "Disadvantage on saves against paralysis, stun, sleep and the like",
             "mech": {
               "penalty": {
                 "disadvantage": "saving throws against effects that would cause the"
@@ -286,10 +315,12 @@
             }
           },
           {
-            "text": "The target's movement speed is halved and they cannot take the Dash action — forward momentum becoming an effort they cannot justify."
+            "text": "The target's movement speed is halved and they cannot take the Dash action — forward momentum becoming an effort they cannot justify.",
+            "card": "Speed halved · can't Dash — momentum no longer worth justifying"
           },
           {
             "text": "The target is Incapacitated for 1 round as overwhelming indifference washes over them — the body still standing, the will entirely absent.",
+            "card": "Incapacitated 1 round — body standing, will entirely absent",
             "mech": {
               "conditions": [
                 {
@@ -301,6 +332,7 @@
           },
           {
             "text": "The target must succeed on a Charisma saving throw or become catatonic for 1 minute — unconscious but fully aware, unable to act, react, or be roused except by taking damage. Even after waking, they have disadvantage on all rolls for 1 minute.",
+            "card": "Cha save or catatonic 1 min — aware but unable to act or be roused except by damage",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -325,24 +357,28 @@
         "tiers": [
           {
             "text": "For 1 hour, nothing you do provokes emotional reaction — you are dismissed, overlooked, and not worth mentioning. Know what a creature within 30 feet cares about most. Calm a panicking crowd or animal.",
+            "card": "1 hr unremarkable — dismissed and overlooked · know what anyone within 30 ft cares about most",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Strip a place of atmosphere for 1 hour — no fear, no awe, no reverence, and no inspiration can take hold within it. Numb yourself to grief, terror, or longing for 8 hours.",
+            "card": "Strip a place of atmosphere 1 hr — no fear, awe or inspiration takes hold · numb yourself 8 hrs",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Remove one memory's emotional weight from a willing creature — they recall the event perfectly and feel nothing about it. Make an object, banner, or relic uninspiring: it grants no morale and is difficult to remember.",
+            "card": "Take the emotional weight off a memory — perfectly recalled, entirely unfelt",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "For a day, a place, an office, or a cause inspires no one — no oath sworn there binds, no speech given there moves. Or grant a willing creature one full day of perfect, unfeeling clarity.",
+            "card": "A day where a place, office or cause inspires no one — no oath binds, no speech moves",
             "mech": {
               "utility": true
             }
@@ -358,6 +394,7 @@
       "description": "The nothing lands with weight — the target takes psychic damage not from pain but from the sudden absence of the thing making them feel capable of continuing.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target takes psychic damage equal to your Wisdom modifier + your proficiency bonus.",
+        "card": "{VM}+{PB} psychic",
         "mech": {
           "damage": {
             "type": "psychic"
@@ -367,6 +404,7 @@
       "upgrades": [
         {
           "text": "The psychic damage increases to twice your Wisdom modifier + your proficiency bonus, and the target has disadvantage on their next Wisdom saving throw before the end of your next turn.",
+          "card": "Damage doubles · disadvantage on their next Wis save",
           "mech": {
             "damage": {
               "type": "psychic"
@@ -381,6 +419,7 @@
         },
         {
           "text": "The target also loses one use of Legendary Resistance if they have any remaining. If they have none, they instead have disadvantage on all Wisdom saving throws until the end of your next turn.",
+          "card": "Also burns a Legendary Resistance, or disadvantage on all Wis saves",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -398,6 +437,7 @@
       "description": "Emptiness insulates — you are briefly wrapped in the same detachment you project outward, leaving nothing for fear or charm to find.",
       "effect": {
         "text": "When the primary effect resolves, you gain advantage on saving throws against emotion-based effects (Frightened, Charmed, morale penalties) and immunity to the Frightened condition until the start of your next turn.",
+        "card": "Advantage against emotion effects and immunity to Frightened",
         "mech": {
           "conditions": [
             {
@@ -415,6 +455,7 @@
       "upgrades": [
         {
           "text": "The veil persists for 1 minute, and you also gain advantage on Wisdom saving throws for the duration — the hollow clarity of apathy making your mind harder to reach.",
+          "card": "Lasts 1 min · advantage on Wis saves too",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -426,6 +467,7 @@
         },
         {
           "text": "While the veil is active, you are also immune to psychic damage and cannot be detected by Detect Thoughts or similar divination — the absence of emotional signal leaving nothing for such magic to find.",
+          "card": "Also immune to psychic damage and undetectable by Detect Thoughts",
           "mech": {
             "damage": {
               "type": "psychic"
@@ -440,6 +482,7 @@
       "description": "One thing, simply gone — not blocked, not locked, simply inaccessible, as though the conviction required to use it is momentarily absent.",
       "effect": {
         "text": "When the primary effect hits or the target fails their saving throw, that target must succeed on a Wisdom saving throw against your Verum DC or lose access to one named ability, spell, class feature, or trait of your choice until the end of their next turn.",
+        "card": "Wis save {DC} or lose access to one named feature",
         "mech": {
           "save": {
             "ability": "Wisdom"
@@ -449,6 +492,7 @@
       "upgrades": [
         {
           "text": "The suppression extends for 1 minute, and the target must succeed on a Wisdom save at the start of each of their turns to end the effect early.",
+          "card": "Lasts 1 min · Wis save at the start of each turn to end it",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -457,6 +501,7 @@
         },
         {
           "text": "You may suppress two features simultaneously, and the target has disadvantage on saving throws to end the effect — the doubled absence making the will to recover even harder to locate.",
+          "card": "Two features at once · disadvantage on the saves to end it",
           "mech": {
             "penalty": {
               "disadvantage": "saving throws to end the effect — the doubled abse"

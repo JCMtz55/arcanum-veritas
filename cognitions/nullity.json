@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "+2 dice. Ignores resistance.",
+            "card": "+2 dice · ignores resistance",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -23,6 +24,7 @@
           },
           {
             "text": "+4 dice. Ignores immunity, and erases the target's temporary hit points.",
+            "card": "+4 dice · ignores immunity · erases their temp HP",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -35,6 +37,7 @@
           },
           {
             "text": "+6 dice. This damage cannot be reduced, prevented, or healed until the end of the target's next turn.",
+            "card": "+6 dice · this damage can't be reduced, prevented or healed until end of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -43,6 +46,7 @@
           },
           {
             "text": "+8 dice. A creature reduced to 0 hit points is erased — no body, no remains, and no revival short of Wish or a god.",
+            "card": "+8 dice · dropped to 0 = erased. No body, no remains, no revival short of Wish or a god",
             "mech": {
               "damage": {
                 "bonusDice": 8
@@ -58,16 +62,20 @@
         "description": "The cleanest cure is for the affliction to never have been.",
         "tiers": [
           {
-            "text": "End one condition or magical effect of 3rd level or lower on a creature you touch."
+            "text": "End one condition or magical effect of 3rd level or lower on a creature you touch.",
+            "card": "End one condition or effect of 3rd or lower by touch"
           },
           {
-            "text": "Up to 5th level, and end one source of ongoing damage."
+            "text": "Up to 5th level, and end one source of ongoing damage.",
+            "card": "Up to 5th · also ends one source of ongoing damage"
           },
           {
-            "text": "Up to 7th level, and the creature is immune to that specific effect for 1 minute."
+            "text": "Up to 7th level, and the creature is immune to that specific effect for 1 minute.",
+            "card": "Up to 7th · immune to that specific effect for 1 min"
           },
           {
-            "text": "Erase a curse, disease, or possession entirely. The creature is then immune to all magic of 5th level or lower for 1 minute — including yours."
+            "text": "Erase a curse, disease, or possession entirely. The creature is then immune to all magic of 5th level or lower for 1 minute — including yours.",
+            "card": "Erase a curse, disease or possession outright · then immune to all magic ≤5th for 1 min, yours included"
           }
         ]
       }
@@ -78,10 +86,12 @@
         "description": "Spellcasting is nothing to you but a whisper to be silenced — suppressing active effects, locking out casting, and leaving a Nullity Echo that erases spells from memory.",
         "tiers": [
           {
-            "text": "When casting a spell that targets a creature, you may also suppress one active spell or magical effect on them — as if by Dispel Magic of a level equal to half your level, rounded up."
+            "text": "When casting a spell that targets a creature, you may also suppress one active spell or magical effect on them — as if by Dispel Magic of a level equal to half your level, rounded up.",
+            "card": "Also suppress one active effect on them, as Dispel Magic at half your level"
           },
           {
             "text": "The target must succeed on a Constitution saving throw or lose the ability to cast spells or use Cognition features until the end of their next turn.",
+            "card": "Con save or no spells and no Cognition features until end of their next turn",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -89,10 +99,12 @@
             }
           },
           {
-            "text": "If the creature fails their save, all their attuned magical items become mundane until the start of your next turn."
+            "text": "If the creature fails their save, all their attuned magical items become mundane until the start of your next turn.",
+            "card": "Fail and their attuned items go mundane until your next turn"
           },
           {
             "text": "Cast the spell through a Nullity Echo that remains in place for 1 minute. Any creature that casts a spell within 10 feet of the Echo must succeed on an Intelligence saving throw against your Verum DC or the spell fails and is erased from their memory until they complete a long rest.",
+            "card": "A Nullity Echo stands 1 min — anyone casting within 10 ft of it saves or loses the spell",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -107,6 +119,7 @@
         "tiers": [
           {
             "text": "Create a 10-foot radius zone where teleportation and dream-travel automatically fail, and summoned creatures vanish upon entering.",
+            "card": "10-ft zone — teleport and dream-travel fail, summons vanish on entry",
             "mech": {
               "terrain": {
                 "radius": 10
@@ -114,13 +127,16 @@
             }
           },
           {
-            "text": "All Cognition-based effects within the zone are treated as one tier lower, and effects requiring Concentration immediately force a Concentration check when their caster enters or starts a turn in the zone."
+            "text": "All Cognition-based effects within the zone are treated as one tier lower, and effects requiring Concentration immediately force a Concentration check when their caster enters or starts a turn in the zone.",
+            "card": "Cognition effects inside drop one tier · entering forces a Concentration check"
           },
           {
-            "text": "The zone becomes a Dead Magic Sphere — spells cannot be cast, maintained, or take effect within the area unless they are 7th level or higher."
+            "text": "The zone becomes a Dead Magic Sphere — spells cannot be cast, maintained, or take effect within the area unless they are 7th level or higher.",
+            "card": "Dead Magic Sphere — nothing below 7th can be cast, held, or take effect inside"
           },
           {
-            "text": "Anchor the Severance Field to a creature — it follows them for 1 minute, and while anchored they automatically fail saving throws against your Nullity effects."
+            "text": "Anchor the Severance Field to a creature — it follows them for 1 minute, and while anchored they automatically fail saving throws against your Nullity effects.",
+            "card": "Anchor the field to a creature 1 min — while anchored they auto-fail against your Nullity"
           }
         ]
       },
@@ -130,6 +146,7 @@
         "tiers": [
           {
             "text": "When a spell is cast within 30 feet, you may use your reaction to force the caster to make an Intelligence saving throw against your Verum DC — on a failure, the spell fails to cast and the slot is consumed.",
+            "card": "React to a spell within 30 ft — Int save {DC} or it fails and the slot is spent",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -138,6 +155,7 @@
           },
           {
             "text": "Once per short rest, when a spell fails due to your effect, you may cause the caster to gain 1 level of Dream Exhaustion or immediately lose Concentration on another active effect.",
+            "card": "1/short rest a failed spell also costs Dream Exhaustion or another Concentration",
             "mech": {
               "conditions": [
                 {
@@ -147,10 +165,12 @@
             }
           },
           {
-            "text": "With a touch or as part of a spell, you may attempt to suppress Aeon Crystals, Dreamlike Items, and Grimm effects — rendering them inert for 1 round."
+            "text": "With a touch or as part of a spell, you may attempt to suppress Aeon Crystals, Dreamlike Items, and Grimm effects — rendering them inert for 1 round.",
+            "card": "Suppress Aeon Crystals, Dreamlike Items and Grimm effects for 1 round by touch"
           },
           {
             "text": "Declare a single named spell, Glyph of Power, or Cognition — that ability cannot be used within 60 feet of you for 1 minute, unless the user succeeds on a DC 22 Intelligence or Dream saving throw.",
+            "card": "Name a spell, Glyph or Cognition — it can't be used within 60 ft for 1 min without a DC 22 save",
             "mech": {
               "save": {
                 "ability": "Dream"
@@ -165,6 +185,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target cannot be revived if they die during the next minute unless this effect is first dispelled.",
+            "card": "Fail: they can't be revived for 1 min unless this is dispelled first",
             "mech": {
               "deny": [
                 "revival"
@@ -173,6 +194,7 @@
           },
           {
             "text": "If the target has a Grimm, Dream, or Soul-linked item, it is suppressed for 1 round — stunned and unable to act or provide benefits.",
+            "card": "Their Grimm, Dream or soul-linked item is stunned and useless for 1 round",
             "mech": {
               "conditions": [
                 {
@@ -183,6 +205,7 @@
           },
           {
             "text": "The target suffers 1 point of True Soul Damage — permanently reducing their soul integrity at DM's discretion (death save penalties, Dream penalties, or their Grimm becoming shaken).",
+            "card": "1 point of True Soul Damage — permanent soul integrity loss, DM's call",
             "mech": {
               "conditions": [
                 {
@@ -192,7 +215,8 @@
             }
           },
           {
-            "text": "Once per long rest, sever the creature's link to one of the following: their Grimm, their Dominant Emotion, their Dream Node, or a bound Cognition. The link cannot be restored until the target completes a Wish-level restoration, or is forgiven by a deity."
+            "text": "Once per long rest, sever the creature's link to one of the following: their Grimm, their Dominant Emotion, their Dream Node, or a bound Cognition. The link cannot be restored until the target completes a Wish-level restoration, or is forgiven by a deity.",
+            "card": "1/long rest sever their link to a Grimm, Dominant Emotion, Dream Node or bound Cognition"
           }
         ]
       },
@@ -201,13 +225,16 @@
         "description": "You do not block the power — you erase the idea that they ever had it, stripping features, attunements, and eventually every magical capability they possess down to bare flesh.",
         "tiers": [
           {
-            "text": "On a failed save, the target loses access to one named feature, spell, or ability of your choice until the end of their next turn — not suppressed, not locked, simply not there."
+            "text": "On a failed save, the target loses access to one named feature, spell, or ability of your choice until the end of their next turn — not suppressed, not locked, simply not there.",
+            "card": "Fail: one named feature, spell or ability is simply not there until end of their next turn"
           },
           {
-            "text": "The denial extends for 1 minute, targeting one class feature, racial trait, or attunement benefit — while denied, the creature has no memory of how to use it and cannot attempt to work around it."
+            "text": "The denial extends for 1 minute, targeting one class feature, racial trait, or attunement benefit — while denied, the creature has no memory of how to use it and cannot attempt to work around it.",
+            "card": "1 min — they have no memory of how to use it and can't work around it"
           },
           {
             "text": "You may deny up to two features simultaneously, and the affected creature must succeed on an Intelligence save at the start of each of their turns to end the effect early — each successful save ends one denied feature.",
+            "card": "Deny two features · Int save at the start of each turn ends one",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -216,6 +243,7 @@
           },
           {
             "text": "Once per long rest, perform Total Conceptual Erasure — on a failed save the target loses access to all spell slots, Cognition features, class features, and magical abilities for 1 minute. They retain only mundane physical capability. Even Legendary Resistances are included. A successful Intelligence save at the end of each turn ends the effect.",
+            "card": "1/long rest Total Conceptual Erasure — all slots, Cognitions and class features gone for 1 min",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -232,24 +260,28 @@
         "tiers": [
           {
             "text": "End one magical effect of 3rd level or lower by touch. Open any nonmagical lock, seal, or binding. Know whether a thing is magical, and roughly how strongly.",
+            "card": "End an effect of 3rd or lower by touch · open any nonmagical lock · sense magic and its strength",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Suppress a magic item's properties for 1 hour. Erase writing, glyphs, marks, or inscriptions permanently — magical or not, up to 5th level.",
+            "card": "Suppress a magic item 1 hr · erase writing, glyphs or inscriptions permanently, up to 5th",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Unmake a nonmagical object up to 10 feet in any dimension; nothing remains. Walk through a magical barrier, ward, or seal of 6th level or lower as though it were not there.",
+            "card": "Unmake a nonmagical object up to 10 ft — nothing remains · walk through wards of 6th or lower",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "End a permanent magical effect — a curse, a ward, an enchanted place, a binding — of 8th level or lower, leaving no trace it was ever cast. What you unmake this way cannot simply be recast; someone must begin again.",
+            "card": "End a permanent effect ≤8th with no trace it was cast. It cannot simply be recast",
             "mech": {
               "utility": true
             }
@@ -265,16 +297,19 @@
       "description": "Resistance is a concept — Nullity rejects concepts, with a portion of the damage bypassing all resistance, immunity, and damage reduction the target has constructed.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, half of the damage dealt bypasses all resistance, immunity, and damage reduction — the null-energy component refusing to acknowledge the defensive frameworks the target has built.",
+        "card": "Half the damage bypasses all resistance, immunity and reduction",
         "mech": {
           "pierce": "all"
         }
       },
       "upgrades": [
         {
-          "text": "The bypassing portion increases to two-thirds of the total damage, and the target cannot use reactions that reduce or redirect damage until the start of your next turn — Nullity briefly denying even reactive defense."
+          "text": "The bypassing portion increases to two-thirds of the total damage, and the target cannot use reactions that reduce or redirect damage until the start of your next turn — Nullity briefly denying even reactive defense.",
+          "card": "Two-thirds bypasses · no damage-reducing reactions until your next turn"
         },
         {
           "text": "The entire damage of the primary effect bypasses resistance, immunity, and damage reduction, and the target must succeed on an Intelligence saving throw against your Verum DC or have one active magical effect suppressed on them as the null energy disperses across their defenses.",
+          "card": "All of it bypasses · Int save {DC} or worse",
           "mech": {
             "save": {
               "ability": "Intelligence"
@@ -288,14 +323,17 @@
       "type": "Supportive",
       "description": "Nullity wraps around you and magic finds nothing to grip — the next spell that targets you is automatically suppressed as the null-field recognizes and rejects it.",
       "effect": {
-        "text": "When the primary effect resolves, null-energy briefly coalesces around you — the next spell or magical effect that targets you before the start of your next turn is automatically suppressed, failing as if Counterspelled at a level equal to half your level rounded up."
+        "text": "When the primary effect resolves, null-energy briefly coalesces around you — the next spell or magical effect that targets you before the start of your next turn is automatically suppressed, failing as if Counterspelled at a level equal to half your level rounded up.",
+        "card": "The next spell or effect targeting you before your next turn is suppressed"
       },
       "upgrades": [
         {
-          "text": "The Dispel Shroud absorbs the first two spells or magical effects that target you rather than just one, the null-field recognizing and rejecting each in sequence."
+          "text": "The Dispel Shroud absorbs the first two spells or magical effects that target you rather than just one, the null-field recognizing and rejecting each in sequence.",
+          "card": "Absorbs the first two instead of one"
         },
         {
           "text": "The shroud becomes persistent for 1 minute rather than expiring after one trigger — you automatically suppress one incoming magical effect per round, and the caster of any suppressed spell must succeed on an Intelligence saving throw against your Verum DC or lose that spell slot entirely.",
+          "card": "Persistent 1 min — one incoming effect suppressed per round",
           "mech": {
             "save": {
               "ability": "Intelligence"
@@ -310,6 +348,7 @@
       "description": "Nullity pins them to the non-magical world — collapsing access to teleportation, magical movement, and bonus action spells before eventually denying all magical buffs cast by others.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on an Intelligence saving throw against your Verum DC or be anchored until the end of their next turn — they cannot teleport, use magical movement abilities, cast bonus action spells, or activate magical item properties while anchored.",
+        "card": "Int save {DC} or anchored — no teleport, no planar movement",
         "mech": {
           "save": {
             "ability": "Intelligence"
@@ -322,6 +361,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the target also cannot cast spells as reactions and has disadvantage on Concentration checks until the end of their next turn — the anchor disrupting their ability to maintain magical multitasking.",
+          "card": "Also no reaction spells and disadvantage on Concentration",
           "mech": {
             "penalty": {
               "disadvantage": "Concentration checks until the end of their next t"
@@ -332,7 +372,8 @@
           }
         },
         {
-          "text": "The anchor persists for 1 minute and expands — the target also cannot benefit from magical buffs cast by others while anchored, and any attempt to remove the anchor through magical means requires a successful spellcasting ability check against your Verum DC first."
+          "text": "The anchor persists for 1 minute and expands — the target also cannot benefit from magical buffs cast by others while anchored, and any attempt to remove the anchor through magical means requires a successful spellcasting ability check against your Verum DC first.",
+          "card": "Lasts 1 min · no magical buffs from anyone while anchored"
         }
       ]
     }

@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "+2 dice. The target's next attack roll or ability check has disadvantage.",
+            "card": "+2 dice · disadvantage on their next attack or check",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -22,6 +23,7 @@
           },
           {
             "text": "+4 dice. The target subtracts 1d4 from its next d20 roll of any kind.",
+            "card": "+4 dice · −1d4 on their next d20 of any kind",
             "mech": {
               "damage": {
                 "bonusDice": 4,
@@ -31,6 +33,7 @@
           },
           {
             "text": "+6 dice. The target's critical hits become normal hits for 1 minute, and on a natural 1 it takes this damage again.",
+            "card": "+6 dice · their crits become normal hits 1 min · a natural 1 repeats this damage",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -39,6 +42,7 @@
           },
           {
             "text": "+8 dice. For 1 minute the target rolls every d20 twice and takes the lower result.",
+            "card": "+8 dice · 1 min: every d20 they roll is twice, taking the lower",
             "mech": {
               "damage": {
                 "bonusDice": 8
@@ -55,6 +59,7 @@
         "tiers": [
           {
             "text": "For 1 minute, any creature attacking the target subtracts 1d4 from the roll.",
+            "card": "1 min: anyone attacking them subtracts 1d4",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -63,6 +68,7 @@
           },
           {
             "text": "1d6, and once per turn an attacker's damage roll drops its highest die.",
+            "card": "1d6 · once per turn an attacker drops their highest damage die",
             "mech": {
               "damage": {
                 "dice": "1d6"
@@ -71,6 +77,7 @@
           },
           {
             "text": "1d8, and the first critical hit scored against the creature becomes a miss.",
+            "card": "1d8 · the first crit against them becomes a miss",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -78,7 +85,8 @@
             }
           },
           {
-            "text": "Once per round, an attack against the creature simply misses — the strap breaks, the footing goes, the torch gutters."
+            "text": "Once per round, an attack against the creature simply misses — the strap breaks, the footing goes, the torch gutters.",
+            "card": "1/round an attack on them simply misses — the strap breaks, the footing goes"
           }
         ]
       }
@@ -90,6 +98,7 @@
         "tiers": [
           {
             "text": "Choose one target — they subtract 1d4 from their next attack roll, ability check, or saving throw before the end of your next turn.",
+            "card": "−1d4 on their next attack, check or save",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -98,6 +107,7 @@
           },
           {
             "text": "On a failed Wisdom save, the target must reroll their next successful saving throw and take the lower result. This triggers once before the effect ends.",
+            "card": "Wis save or their next successful save is rerolled at the lower result",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -105,10 +115,12 @@
             }
           },
           {
-            "text": "Once per round as a reaction, when a creature within 60 feet succeeds on a saving throw, you may force them to reroll it — they must take the new result."
+            "text": "Once per round as a reaction, when a creature within 60 feet succeeds on a saving throw, you may force them to reroll it — they must take the new result.",
+            "card": "1/round react to a successful save within 60 ft and force a reroll — new result stands"
           },
           {
             "text": "For 1 minute on a failed save, the target rolls all saving throws with disadvantage. They may repeat the Wisdom saving throw at the end of each of their turns to end the effect early.",
+            "card": "1 min: all their saves at disadvantage (Wis save at end of each turn to end it)",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -123,6 +135,7 @@
         "tiers": [
           {
             "text": "If a creature fails a saving throw against your effect, the nearest creature within 10 feet must make a Dexterity save or suffer 1d6 damage of the same type.",
+            "card": "A failed save splashes — nearest creature within 10 ft: Dex save or 1d6 of the same type",
             "mech": {
               "damage": {
                 "dice": "1d6"
@@ -133,13 +146,16 @@
             }
           },
           {
-            "text": "Chain to up to 2 creatures within 30 feet. If the first creature fails their save, each chained creature rolls their next saving throw with disadvantage."
+            "text": "Chain to up to 2 creatures within 30 feet. If the first creature fails their save, each chained creature rolls their next saving throw with disadvantage.",
+            "card": "Chains to 2 within 30 ft · each chained creature's next save is at disadvantage"
           },
           {
-            "text": "When a creature affected by this effect fails a saving throw, one creature of your choice within 15 feet must make the same saving throw against a DC of 10 or suffer the same condition (not damage) as a ripple of misfortune."
+            "text": "When a creature affected by this effect fails a saving throw, one creature of your choice within 15 feet must make the same saving throw against a DC of 10 or suffer the same condition (not damage) as a ripple of misfortune.",
+            "card": "A failure forces one creature within 15 ft to make the same save at DC 10 or share the condition"
           },
           {
             "text": "When a creature within 60 feet rolls a critical failure (natural 1 on a save or attack), trigger a Calamity — they are immediately subjected to one additional effect of your choice: Stunned until end of next turn, knocked Prone, or Cursed with disadvantage on their next saving throw.",
+            "card": "A natural 1 within 60 ft triggers a Calamity — one extra effect of your choice lands on them",
             "mech": {
               "conditions": [
                 {
@@ -165,6 +181,7 @@
         "tiers": [
           {
             "text": "A creature affected has disadvantage on opportunity attacks and reaction-based effects until the end of your next turn.",
+            "card": "Disadvantage on opportunity attacks and reactions until end of your next turn",
             "mech": {
               "penalty": {
                 "disadvantage": "opportunity attacks and reaction-based effects unt"
@@ -172,10 +189,12 @@
             }
           },
           {
-            "text": "Their initiative score drops by 5 for the remainder of the encounter, as misfortune robs them of their sense of timing."
+            "text": "Their initiative score drops by 5 for the remainder of the encounter, as misfortune robs them of their sense of timing.",
+            "card": "Their initiative drops by 5 for the rest of the encounter"
           },
           {
             "text": "On a failed save, the target expends one use of Legendary Resistance if they have any remaining. If they have none, they instead have disadvantage on their next saving throw.",
+            "card": "Fail: burns one Legendary Resistance · with none left, disadvantage on their next save",
             "mech": {
               "penalty": {
                 "disadvantage": "their next saving throw"
@@ -183,7 +202,8 @@
             }
           },
           {
-            "text": "Once per long rest, designate one creature — until the end of their next turn they cannot use bonus actions or reactions, as every opportunity they reach for slips away at the last moment."
+            "text": "Once per long rest, designate one creature — until the end of their next turn they cannot use bonus actions or reactions, as every opportunity they reach for slips away at the last moment.",
+            "card": "1/long rest: no bonus actions or reactions until end of their next turn"
           }
         ]
       },
@@ -192,10 +212,12 @@
         "description": "What seems lucky turns vile.",
         "tiers": [
           {
-            "text": "If a creature rolls a natural 20 on an attack roll, they must reroll it — if the reroll is 10 or lower, the attack misses and backfires in a minor way at DM discretion."
+            "text": "If a creature rolls a natural 20 on an attack roll, they must reroll it — if the reroll is 10 or lower, the attack misses and backfires in a minor way at DM discretion.",
+            "card": "A natural 20 on an attack must be rerolled — 10 or lower and it misses and backfires"
           },
           {
             "text": "The target's next critical hit becomes a normal hit, and they take psychic damage equal to your spellcasting modifier as their fortune inverts.",
+            "card": "Their next crit becomes a normal hit and deals them {VM} psychic as fortune inverts",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -203,10 +225,12 @@
             }
           },
           {
-            "text": "Once per long rest as a reaction, you may convert one instance of advantage a creature within 60 feet has into disadvantage before they roll."
+            "text": "Once per long rest as a reaction, you may convert one instance of advantage a creature within 60 feet has into disadvantage before they roll.",
+            "card": "1/long rest react to turn one creature's advantage into disadvantage before they roll"
           },
           {
             "text": "Mark a creature with Cursed Glory for 1 minute — if they roll a natural 20 on any roll, they immediately take psychic damage equal to twice your spellcasting modifier, and the natural 20 is treated as a natural 1 instead.",
+            "card": "Cursed Glory 1 min — every natural 20 they roll costs them 2×{VM} psychic and counts as a 1",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -229,24 +253,28 @@
         "tiers": [
           {
             "text": "A nonmagical object you touch fails the next time it is relied on — a strap, a bowstring, a hinge, a lock. Lose a pursuer to ordinary coincidence. Know the one thing most likely to go wrong here.",
+            "card": "An object you touch fails next time it's relied on · lose a pursuer to coincidence",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "For 8 hours, a creature you name has a bad day — wrong turns, spoiled food, missed meetings, misheard orders. Nothing provable, and nothing a saving throw can answer.",
+            "card": "8 hrs of a bad day for a named creature — nothing provable, nothing a save can answer",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Ruin a plan rather than a person — a shipment goes astray, a message is delivered to the wrong hand, a ceremony is interrupted by something mundane and humiliating.",
+            "card": "Ruin a plan instead of a person — a shipment astray, a message misdelivered, a ceremony spoiled",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Curse an endeavor — a voyage, a siege, a marriage, a harvest — for a season. It does not fail dramatically. It simply never quite works, and no one can say why.",
+            "card": "Curse an endeavour for a season. It never quite works, and no one can say why",
             "mech": {
               "utility": true
             }
@@ -262,6 +290,7 @@
       "description": "The spell leaves a lingering curse where it lands.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target is hexed — they suffer a −1d4 penalty to one type of roll of your choice (attack rolls, saving throws, or ability checks) until the end of their next turn.",
+        "card": "Hexed — −1d4 on one roll type of your choice",
         "mech": {
           "damage": {
             "dice": "1d4"
@@ -271,6 +300,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The penalty increases to −1d6, and you may apply it to two types of rolls simultaneously.",
+          "card": "−1d6 · applies to two roll types at once",
           "mech": {
             "damage": {
               "dice": "1d6"
@@ -278,7 +308,8 @@
           }
         },
         {
-          "text": "Level 11+: The hex persists for 1 minute, and once per turn when the hexed creature rolls the affected roll type, they must reroll one die and take the lower result."
+          "text": "Level 11+: The hex persists for 1 minute, and once per turn when the hexed creature rolls the affected roll type, they must reroll one die and take the lower result.",
+          "card": "Lasts 1 min · once per turn they reroll and take the worse"
         }
       ]
     },
@@ -287,14 +318,17 @@
       "type": "Supportive",
       "description": "The curse finds someone else to land on.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains the Deflection benefit — the next time they would fail a saving throw or ability check before the start of your next turn, they may reroll it once and take the higher result."
+        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains the Deflection benefit — the next time they would fail a saving throw or ability check before the start of your next turn, they may reroll it once and take the higher result.",
+        "card": "An ally within 30 ft rerolls their next failed save or check"
       },
       "upgrades": [
         {
-          "text": "Level 5+: The ally may apply this reroll to attack rolls as well, and the benefit persists until the start of your next turn."
+          "text": "Level 5+: The ally may apply this reroll to attack rolls as well, and the benefit persists until the start of your next turn.",
+          "card": "Covers attack rolls too · lasts until your next turn"
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each reroll gains a +2 bonus."
+          "text": "Level 11+: You may choose two allies to receive this benefit, and each reroll gains a +2 bonus.",
+          "card": "Two allies · each reroll gets +2"
         }
       ]
     },
@@ -304,6 +338,7 @@
       "description": "Bad luck finds their feet.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Dexterity saving throw against your Verum DC or fall prone as misfortune finds the one uneven stone, the one slick patch, the one moment their balance was not quite right.",
+        "card": "Dex save {DC} or fall prone",
         "mech": {
           "save": {
             "ability": "Dexterity"
@@ -317,10 +352,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: On a failed save, the target also has their movement speed halved until the end of their next turn."
+          "text": "Level 5+: On a failed save, the target also has their movement speed halved until the end of their next turn.",
+          "card": "Fail also halves their speed until end of their next turn"
         },
         {
           "text": "Level 11+: Creatures that fail also have disadvantage on the first attack roll they make after standing up.",
+          "card": "Also disadvantage on their first attack after standing",
           "mech": {
             "penalty": {
               "disadvantage": "the first attack roll they make after standing up"

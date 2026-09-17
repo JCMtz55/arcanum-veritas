@@ -13,10 +13,12 @@
         "description": "You do not command them to obey — you make obedience feel like a choice they are making, linking allies into a command chain that amplifies their every response.",
         "tiers": [
           {
-            "text": "One willing creature becomes Linked to you. You may issue mental instructions to them as a bonus action. While Linked, they add your proficiency bonus to Initiative rolls."
+            "text": "One willing creature becomes Linked to you. You may issue mental instructions to them as a bonus action. While Linked, they add your proficiency bonus to Initiative rolls.",
+            "card": "Link one willing creature — mental orders as a bonus action, and they add {PB} to initiative"
           },
           {
             "text": "Up to three creatures may be Linked simultaneously. Once per short rest, you may grant one Linked creature an extra bonus action on their turn.",
+            "card": "Link up to three · 1/short rest grant one an extra bonus action",
             "mech": {
               "actionEconomy": {
                 "bonusAction": 1
@@ -25,6 +27,7 @@
           },
           {
             "text": "Linked allies gain advantage on saving throws against being Charmed, Frightened, or Dominated. Once per turn, as a reaction, you may cause one Linked creature to automatically succeed on a failed saving throw.",
+            "card": "Linked allies get advantage against Charm, Fear and Domination · 1/turn react to auto-pass a save",
             "mech": {
               "conditions": [
                 {
@@ -40,7 +43,8 @@
             }
           },
           {
-            "text": "You forge a Control Chain Nexus for 1 hour — up to six creatures are Linked within 120 feet. Any spell you cast that targets only yourself may simultaneously affect all Linked allies (once per long rest). If a Linked creature would be reduced to 0 HP by a single blow, you may use your reaction to redirect that blow to yourself or another Linked creature — the original target is reduced to 1 HP instead."
+            "text": "You forge a Control Chain Nexus for 1 hour — up to six creatures are Linked within 120 feet. Any spell you cast that targets only yourself may simultaneously affect all Linked allies (once per long rest). If a Linked creature would be reduced to 0 HP by a single blow, you may use your reaction to redirect that blow to yourself or another Linked creature — the original target is reduced to 1 HP instead.",
+            "card": "Control Chain Nexus 1 hr — six Linked within 120 ft · self-targeted spells hit them all"
           }
         ]
       },
@@ -49,13 +53,16 @@
         "description": "The world must obey your rules — starting with you, made exempt from compulsion, displacement, and the kind of damage that breaks lesser minds mid-cast.",
         "tiers": [
           {
-            "text": "Once per long rest, you may ignore one source of forced movement or one condition that would be applied to you — the effect simply does not take hold."
+            "text": "Once per long rest, you may ignore one source of forced movement or one condition that would be applied to you — the effect simply does not take hold.",
+            "card": "1/long rest ignore one forced movement or one condition — it simply doesn't take hold"
           },
           {
-            "text": "You are unaffected by effects that alter time, gravity, or compulsion unless you choose to be. This includes magical aging, slow effects, and enchantment-school compulsions."
+            "text": "You are unaffected by effects that alter time, gravity, or compulsion unless you choose to be. This includes magical aging, slow effects, and enchantment-school compulsions.",
+            "card": "Unaffected by time, gravity and compulsion effects unless you allow them"
           },
           {
             "text": "Your Concentration cannot be broken by taking damage unless you are Incapacitated.",
+            "card": "Damage can't break your Concentration unless you're Incapacitated",
             "mech": {
               "conditions": [
                 {
@@ -65,7 +72,8 @@
             }
           },
           {
-            "text": "As a reaction, once per long rest, you may nullify a single condition or effect on yourself or one ally within 30 feet — this functions as Greater Restoration without requiring components. The effect is immediate and does not require an action."
+            "text": "As a reaction, once per long rest, you may nullify a single condition or effect on yourself or one ally within 30 feet — this functions as Greater Restoration without requiring components. The effect is immediate and does not require an action.",
+            "card": "1/long rest react to nullify a condition on you or an ally as Greater Restoration, no components"
           }
         ]
       }
@@ -76,10 +84,12 @@
         "description": "You do not ask — you legislate, issuing a directive the target's body obeys before their mind finishes refusing.",
         "tiers": [
           {
-            "text": "On a failed save, the target is forced to perform or forfeit a stated single-word directive on their next turn (e.g., halt, drop, flee, kneel). The action must be physically possible for them."
+            "text": "On a failed save, the target is forced to perform or forfeit a stated single-word directive on their next turn (e.g., halt, drop, flee, kneel). The action must be physically possible for them.",
+            "card": "Fail: they must obey or forfeit a one-word order next turn — halt, drop, flee, kneel"
           },
           {
             "text": "The command becomes sustained — for 1 minute, if the creature defies your directive, they take 2d10 psychic damage and must repeat the saving throw. A new success ends the effect.",
+            "card": "Sustained 1 min — defying it costs 2d10 psychic and forces the save again",
             "mech": {
               "damage": {
                 "dice": "2d10",
@@ -89,6 +99,7 @@
           },
           {
             "text": "Commands now override Charmed immunity, and the creature is treated as Charmed by you for the duration. Legendary Resistance does not apply unless the creature has mythic resistance.",
+            "card": "Overrides Charm immunity · Legendary Resistance doesn't apply short of mythic",
             "mech": {
               "conditions": [
                 {
@@ -99,6 +110,7 @@
           },
           {
             "text": "Once per use of this effect, you may issue a Cognitonic Law — a single behavioral prohibition. For 24 hours, breaking this law Stuns the creature and deals 5d12 psychic damage with no saving throw. Only a Wish or divine purification removes the Law entirely.",
+            "card": "Cognitonic Law — one prohibition for 24 hrs. Breaking it Stuns and deals 5d12 psychic, no save",
             "mech": {
               "damage": {
                 "dice": "5d12",
@@ -114,6 +126,7 @@
         "tiers": [
           {
             "text": "Creatures of your choice within a 30-foot radius zone have disadvantage on saving throws against your spells and abilities for 1 minute.",
+            "card": "30-ft zone 1 min — creatures you choose save against your effects at disadvantage",
             "mech": {
               "terrain": {
                 "radius": 30
@@ -124,10 +137,12 @@
             }
           },
           {
-            "text": "You may negate one category of movement within the zone for 1 minute — all creatures are subject to the restriction regardless of source (no teleportation, no flight, no forced movement, etc.)."
+            "text": "You may negate one category of movement within the zone for 1 minute — all creatures are subject to the restriction regardless of source (no teleportation, no flight, no forced movement, etc.).",
+            "card": "Negate one category of movement inside for 1 min, whatever its source"
           },
           {
             "text": "You may declare one environmental rule (e.g., 'No fire may exist here,' 'No creature may be healed'). Any attempt to violate it automatically fails unless the creature succeeds on a Charisma saving throw against your Verum DC.",
+            "card": "Declare an environmental rule — violating it fails unless they pass a Cha save",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -135,7 +150,8 @@
             }
           },
           {
-            "text": "You establish a World Law within the zone. Choose one action category (attack, cast a spell, move, heal, teleport). Enemies cannot perform that action while inside the zone, with no saving throw. Only divine authority or a Cognition of equal or greater power can override this law."
+            "text": "You establish a World Law within the zone. Choose one action category (attack, cast a spell, move, heal, teleport). Enemies cannot perform that action while inside the zone, with no saving throw. Only divine authority or a Cognition of equal or greater power can override this law.",
+            "card": "World Law — pick an action category. Enemies simply cannot do it inside the zone. No save"
           }
         ]
       },
@@ -144,13 +160,16 @@
         "description": "You reach into the space between intention and execution and close your hand — seizing actions mid-air, suspending them, reversing them, or banking them for your own use.",
         "tiers": [
           {
-            "text": "On a failed save, the creature's action is delayed — it resolves at the end of their next turn instead of now. They may not take that same action type again in the interim."
+            "text": "On a failed save, the creature's action is delayed — it resolves at the end of their next turn instead of now. They may not take that same action type again in the interim.",
+            "card": "Fail: their action is delayed to the end of their next turn, and can't be repeated meanwhile"
           },
           {
-            "text": "On a failed save, the action is suspended indefinitely — the creature cannot repeat it until you release the hold or 1 minute passes."
+            "text": "On a failed save, the action is suspended indefinitely — the creature cannot repeat it until you release the hold or 1 minute passes.",
+            "card": "Suspended indefinitely — they can't repeat it until you release it or a minute passes"
           },
           {
             "text": "On a failed save, you may choose to reverse the stored action — a targeted spell or ability now affects the creature that initiated it instead. They make an Intelligence saving throw to resist this reversal.",
+            "card": "Reverse the stored action back onto its user (Int save {DC} to resist)",
             "mech": {
               "save": {
                 "ability": "Intelligence"
@@ -158,7 +177,8 @@
             }
           },
           {
-            "text": "You store the action in a Control Bank. Once per long rest, you may release that stored action yourself, using the original creature's statistics, spell slots, or ability parameters as if you were them. The original creature has no awareness that their capacity was held."
+            "text": "You store the action in a Control Bank. Once per long rest, you may release that stored action yourself, using the original creature's statistics, spell slots, or ability parameters as if you were them. The original creature has no awareness that their capacity was held.",
+            "card": "Bank the action — 1/long rest release it yourself, using their statistics and slots"
           }
         ]
       }
@@ -170,14 +190,17 @@
       "type": "Offensive",
       "description": "The target intended to act — that intention is now yours to schedule, seized and held one full beat behind where it was meant to land.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target's next action is seized — they may not spend it until the start of your following turn. The action is not lost; it is held. They may still use bonus actions, reactions, and movement in the interim."
+        "text": "On a hit or failed saving throw against the primary effect, the target's next action is seized — they may not spend it until the start of your following turn. The action is not lost; it is held. They may still use bonus actions, reactions, and movement in the interim.",
+        "card": "Their next action is seized until the start of your following turn"
       },
       "upgrades": [
         {
-          "text": "The suspension extends to their next two actions — both are delayed by one turn, creating a gap in their action economy that allies can exploit."
+          "text": "The suspension extends to their next two actions — both are delayed by one turn, creating a gap in their action economy that allies can exploit.",
+          "card": "Their next two actions are delayed — a hole in their action economy"
         },
         {
           "text": "The suspended actions may be redirected — on a failed Intelligence saving throw against your Verum DC, the target's first suspended action instead resolves against themselves or a creature of your choice within their range.",
+          "card": "Int save {DC} or you redirect the suspended action instead",
           "mech": {
             "save": {
               "ability": "Intelligence"
@@ -191,14 +214,17 @@
       "type": "Supportive",
       "description": "Your authority over the moment extends to those you fight beside — one ally rerolls a failed save on the strength of your presence alone.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet who can see or hear you may immediately reroll one failed saving throw they made since the start of your last turn, using the new result."
+        "text": "When the primary effect resolves, one ally within 30 feet who can see or hear you may immediately reroll one failed saving throw they made since the start of your last turn, using the new result.",
+        "card": "An ally within 30 ft rerolls one failed save from this round"
       },
       "upgrades": [
         {
-          "text": "You may apply this benefit to two allies simultaneously, and the reroll gains a bonus equal to your proficiency bonus."
+          "text": "You may apply this benefit to two allies simultaneously, and the reroll gains a bonus equal to your proficiency bonus.",
+          "card": "Two allies · each reroll gains {PB}"
         },
         {
           "text": "The chosen ally may also end one condition of your choice currently affecting them (Frightened, Charmed, or Stunned only) as the clarity of your authority cuts through the effect.",
+          "card": "They may also shed Frightened, Charmed or Stunned",
           "mech": {
             "conditions": [
               {
@@ -221,6 +247,7 @@
       "description": "Impact declares the rules — the area understands, and one category of enemy action is suppressed within it until you decide otherwise.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, a 15-foot radius zone appears at the point of impact in which one action type of your choice (attack, cast a spell, move more than half speed, or use a bonus action) is suppressed for all enemies until the start of your next turn.",
+        "card": "15-ft zone where one action type of your choice is suppressed",
         "mech": {
           "terrain": {
             "radius": 15
@@ -230,6 +257,7 @@
       "upgrades": [
         {
           "text": "The zone persists for 1 minute and its radius increases to 30 feet. Enemies that attempt the suppressed action must first succeed on an Intelligence saving throw against your Verum DC or the action is wasted.",
+          "card": "Lasts 1 min · radius 30 ft · attempting it requires a save first",
           "mech": {
             "save": {
               "ability": "Intelligence"
@@ -237,7 +265,8 @@
           }
         },
         {
-          "text": "You may suppress two action types simultaneously within the zone, and allies within the area are immune to the restriction — the jurisdiction recognizes who is welcome."
+          "text": "You may suppress two action types simultaneously within the zone, and allies within the area are immune to the restriction — the jurisdiction recognizes who is welcome.",
+          "card": "Two action types · your allies are exempt"
         }
       ]
     }

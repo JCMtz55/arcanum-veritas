@@ -13,6 +13,7 @@
         "tiers": [
           {
             "text": "The damage becomes piercing and gains +2 dice. At the start of the target's next turn it takes 1d6 piercing as the growth continues.",
+            "card": "+2 dice piercing · 1d6 more at the start of their next turn as it keeps growing",
             "mech": {
               "damage": {
                 "bonusDice": 2,
@@ -22,6 +23,7 @@
           },
           {
             "text": "+4 dice. The ongoing damage becomes 2d6 and repeats each turn for 1 minute, increasing by 1d6 each time it triggers. The target may make a Constitution saving throw against your Verum DC at the end of each of its turns to end it.",
+            "card": "+4 dice · ongoing becomes 2d6, climbing 1d6 each turn for 1 min (Con save {DC} to end)",
             "mech": {
               "damage": {
                 "bonusDice": 4,
@@ -37,6 +39,7 @@
           },
           {
             "text": "+6 dice. A creature taking the ongoing damage is also Restrained by roots until it breaks free with a Strength check against your Verum DC.",
+            "card": "+6 dice · anything taking the ongoing damage is Restrained by roots (Str check {DC})",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -50,6 +53,7 @@
           },
           {
             "text": "+8 dice. A creature killed while overgrown is consumed — 1d4 CR 1/4 plant creatures sprout from it and serve you for 1 minute.",
+            "card": "+8 dice · killed while overgrown = consumed, 1d4 CR 1/4 plants sprout and serve you 1 min",
             "mech": {
               "damage": {
                 "bonusDice": 8,
@@ -69,16 +73,20 @@
         "description": "You fast-forward nature's rhythm — granting short rest benefits, additional features, and eventually an Evolved State that pushes the body past its natural ceiling.",
         "tiers": [
           {
-            "text": "Choose a creature or plant — it immediately gains the benefit of a short rest for one feature (one ability recharge, or regains one Hit Die)."
+            "text": "Choose a creature or plant — it immediately gains the benefit of a short rest for one feature (one ability recharge, or regains one Hit Die).",
+            "card": "A creature or plant gets one short-rest benefit — one recharge or one Hit Die"
           },
           {
-            "text": "The target gains one additional Hit Die, one additional attack, or a temporary feature (climb speed, resistance to one damage type, or enhanced reach +5 ft) for 1 minute."
+            "text": "The target gains one additional Hit Die, one additional attack, or a temporary feature (climb speed, resistance to one damage type, or enhanced reach +5 ft) for 1 minute.",
+            "card": "One extra Hit Die, one extra attack, or a temporary feature for 1 min"
           },
           {
-            "text": "You may accelerate magical growth — spells like Plant Growth, Regenerate, or Create Homunculus function in one-tenth their normal cast time and double their duration."
+            "text": "You may accelerate magical growth — spells like Plant Growth, Regenerate, or Create Homunculus function in one-tenth their normal cast time and double their duration.",
+            "card": "Growth magic casts in a tenth the time and lasts twice as long"
           },
           {
             "text": "The target enters an Evolved State for 1 minute — gaining +2 to one ability score, +1 AC, and one chosen mutation: climbing limbs, hardened skin (resistance to one physical damage type), one extra attack, or darkvision 60 feet.",
+            "card": "Evolved State 1 min — +2 to an ability, +1 AC, and one mutation of your choice",
             "mech": {
               "buff": {
                 "ac": 1
@@ -92,16 +100,20 @@
         "description": "What thrives expands — spreading effects to additional targets and eventually chaining vital force to every ally within range.",
         "tiers": [
           {
-            "text": "The spell or effect may affect one additional target within 10 feet."
+            "text": "The spell or effect may affect one additional target within 10 feet.",
+            "card": "One more target within 10 ft"
           },
           {
-            "text": "Choose two additional targets within 30 feet, or have the effect repeat on the original target at the start of their next turn at half potency."
+            "text": "Choose two additional targets within 30 feet, or have the effect repeat on the original target at the start of their next turn at half potency.",
+            "card": "Two more within 30 ft, or it repeats on the original at half potency"
           },
           {
-            "text": "The effect spreads — up to four secondary creatures within 30 feet may benefit from a diluted version (half potency)."
+            "text": "The effect spreads — up to four secondary creatures within 30 feet may benefit from a diluted version (half potency).",
+            "card": "Up to four secondary creatures within 30 ft at half potency"
           },
           {
-            "text": "Trigger a Chain of Growth — the effect spreads to every ally within 60 feet with diminishing potency (−1 tier per jump). The chain lasts 1 minute."
+            "text": "Trigger a Chain of Growth — the effect spreads to every ally within 60 feet with diminishing potency (−1 tier per jump). The chain lasts 1 minute.",
+            "card": "Chain of Growth 1 min — spreads to every ally within 60 ft, one tier weaker per jump"
           }
         ]
       },
@@ -111,6 +123,7 @@
         "tiers": [
           {
             "text": "The target gains temporary hit points equal to your proficiency bonus × 2.",
+            "card": "{PB}×2 temp HP",
             "mech": {
               "heal": {
                 "tempHP": true
@@ -119,6 +132,7 @@
           },
           {
             "text": "The target also gains +2 AC for 1 round and is immune to being shoved or grappled.",
+            "card": "Also +2 AC for 1 round and immune to shove and grapple",
             "mech": {
               "conditions": [
                 {
@@ -132,6 +146,7 @@
           },
           {
             "text": "While Reinforced, the target has advantage on Constitution saving throws and their weapons count as magical.",
+            "card": "Advantage on Con saves · their weapons count as magical",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -142,7 +157,8 @@
             }
           },
           {
-            "text": "The target becomes Fortified for 1 minute — immune to forced movement effects and critical hits, and automatically ends one negative condition of their choice at the start of each of their turns."
+            "text": "The target becomes Fortified for 1 minute — immune to forced movement effects and critical hits, and automatically ends one negative condition of their choice at the start of each of their turns.",
+            "card": "Fortified 1 min — immune to forced movement and crits, sheds one condition each turn"
           }
         ]
       },
@@ -151,10 +167,12 @@
         "description": "You trigger latent evolution to meet the threat — granting resistance, condition immunity, and environment-based features as the body adapts faster than the danger can keep up.",
         "tiers": [
           {
-            "text": "The target gains resistance to the last damage type they took for 1 round."
+            "text": "The target gains resistance to the last damage type they took for 1 round.",
+            "card": "Resistance to the last damage type they took, 1 round"
           },
           {
             "text": "Choose one condition (Frightened, Blinded, Poisoned, etc.) — the target gains immunity to it for 1 minute as their body adapts.",
+            "card": "Immunity to one condition of your choice for 1 min",
             "mech": {
               "conditions": [
                 {
@@ -171,6 +189,7 @@
           },
           {
             "text": "The target gains a feature based on their current environment — in water: swim speed and water breathing; in darkness: darkvision and blindsight 30 ft; in extreme heat or desert: exhaustion resistance and fire resistance.",
+            "card": "A feature drawn from the environment — swim and water breathing, darkvision, heat resistance",
             "mech": {
               "conditions": [
                 {
@@ -180,7 +199,8 @@
             }
           },
           {
-            "text": "The target undergoes a Mythic Bloom — choose two environmental features from above and additionally grant a Cognition-level mutation for 1 hour: an extra limb, temporary immunity to one spell school, or regeneration 5."
+            "text": "The target undergoes a Mythic Bloom — choose two environmental features from above and additionally grant a Cognition-level mutation for 1 hour: an extra limb, temporary immunity to one spell school, or regeneration 5.",
+            "card": "Mythic Bloom 1 hr — two environmental features plus a Cognition-level mutation"
           }
         ]
       }
@@ -192,6 +212,7 @@
         "tiers": [
           {
             "text": "Summon 1d4 vine tendrils or CR 1/4 plant creatures that assist with non-combat tasks, distractions, or simple grappling for 1 minute.",
+            "card": "1d4 vine tendrils or CR 1/4 plants, 1 min — tasks, distraction, simple grappling",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -202,13 +223,16 @@
             }
           },
           {
-            "text": "Summon a Growth Clone — a simplified biological copy of a creature within 30 feet that mirrors its form, can take the Help action, and may mimic one cantrip the creature knows."
+            "text": "Summon a Growth Clone — a simplified biological copy of a creature within 30 feet that mirrors its form, can take the Help action, and may mimic one cantrip the creature knows.",
+            "card": "A Growth Clone of a creature within 30 ft — can Help and mimic one of its cantrips"
           },
           {
-            "text": "Duplicate an effect cast within the last round, targeting a different creature. The copy has half potency."
+            "text": "Duplicate an effect cast within the last round, targeting a different creature. The copy has half potency.",
+            "card": "Duplicate an effect cast in the last round at a new target, half potency"
           },
           {
-            "text": "Manifest a clone of yourself or one ally for 1 minute — the clone uses bonus actions and reactions independently, shares HP with the original, and may cast one spell or make one attack per round as a free action."
+            "text": "Manifest a clone of yourself or one ally for 1 minute — the clone uses bonus actions and reactions independently, shares HP with the original, and may cast one spell or make one attack per round as a free action.",
+            "card": "A clone of you or an ally 1 min — own bonus actions and reactions, shares your HP"
           }
         ]
       }
@@ -219,10 +243,12 @@
         "description": "What you grow keeps growing.",
         "tiers": [
           {
-            "text": "Your creations are living plant matter. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant creatures. Objects are living wood — they float, and neither rust nor rot."
+            "text": "Your creations are living plant matter. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant creatures. Objects are living wood — they float, and neither rust nor rot.",
+            "card": "Creations are living plant · Structures regain 5 HP/segment each of your turns · Objects float and never rot"
           },
           {
             "text": "Structures bear fruit — once per seal, an ally who eats from one regains hit points equal to your Verum Modifier. Constructs regenerate 5 hit points at the start of each of their turns.",
+            "card": "Structures bear fruit — 1/seal an ally eating heals {VM} · Constructs regenerate 5",
             "mech": {
               "heal": {
                 "amount": "your Verum Modifier"
@@ -231,6 +257,7 @@
           },
           {
             "text": "Your Structures are rooted — immune to forced movement — and a creature Restrained within one cannot escape without leaving the structure. Once per seal, a Construct may split into two Constructs of half its size.",
+            "card": "Structures are rooted, immune to forced movement · 1/seal a Construct splits in two at half size",
             "mech": {
               "conditions": [
                 {
@@ -241,6 +268,7 @@
           },
           {
             "text": "A Structure made with a 7th-level slot or higher that is still standing when the seal ends becomes real, permanent plant life. Constructs have regeneration 10, and when destroyed they seed 1d4 CR 1/4 plant creatures that serve you for 1 minute.",
+            "card": "A 7th+ Structure left standing becomes real permanent plant life · Constructs regen 10 and seed 1d4 plants when destroyed",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -260,24 +288,28 @@
         "tiers": [
           {
             "text": "Bring a plant to maturity in a minute. Feed ten people from a patch of bare ground. Clear a path 60 feet through any vegetation. Mend a broken bough.",
+            "card": "Mature a plant in a minute · feed ten from bare ground · clear 60 ft of vegetation",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Enrich an acre so that it yields double for a season. Grow a hedge or canopy that shelters a group for a night. Regrow a creature's lost hair, nails, or scars.",
+            "card": "Double an acre's yield for a season · shelter a group for a night · regrow hair, nails, scars",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Once per day, one willing creature's short rest counts as a long rest. Grow a living bridge or staircase up to 100 feet — for passage, not for cover.",
+            "card": "1/day a willing creature's short rest counts as a long rest · grow a 100-ft living bridge",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Bloom a mile of barren land into fertile ground for a year. Or hurry a willing creature's growth by up to a decade — or, once a year, turn a decade back.",
+            "card": "Bloom a mile of barren land for a year · or move a willing life a decade forward, or once a year back",
             "mech": {
               "utility": true
             }
@@ -293,6 +325,7 @@
       "description": "Growth seizes the moment of impact — vines erupting from the point of contact to Restrain the target before they can recover from the primary effect.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, vines, roots, or biological tendrils erupt from the point of contact — the target must succeed on a Strength saving throw against your Verum DC or be Restrained until the end of their next turn.",
+        "card": "Str save {DC} or Restrained until end of their next turn",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -307,6 +340,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the Restrained condition requires two consecutive Strength checks on separate turns to escape, and the vines spread — one creature of your choice within 5 feet of the target must also save or be Restrained.",
+          "card": "Escape needs two Str checks on separate turns · vines spread to one creature within 5 ft",
           "mech": {
             "conditions": [
               {
@@ -317,6 +351,7 @@
         },
         {
           "text": "The growth becomes semi-permanent — the Restrained condition persists until the target or an ally spends an action to tear the vines away (Strength check against your Verum DC), and while Restrained the target takes 1d6 piercing damage at the start of each of their turns as the growth tightens.",
+          "card": "Restrained holds until someone spends an action to tear it away · 1d6 piercing each turn",
           "mech": {
             "damage": {
               "dice": "1d6",
@@ -337,6 +372,7 @@
       "description": "Growth spills where it is needed — vital energy touching an ally and briefly accelerating their recovery beyond what the moment would otherwise allow.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as the growth momentarily accelerates their recovery.",
+        "card": "An ally within 30 ft regains {VM}+{PB}",
         "mech": {
           "heal": {
             "amount": "your spellcasting modifier"
@@ -346,6 +382,7 @@
       "upgrades": [
         {
           "text": "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains advantage on their next Constitution saving throw before the start of your next turn.",
+          "card": "Healing doubles · also advantage on their next Con save",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -357,6 +394,7 @@
         },
         {
           "text": "You may choose two allies to receive this benefit, and each also gains temporary hit points equal to your proficiency bonus on top of the healing — growth leaving behind more than it found.",
+          "card": "Two allies · each also gets {PB} temp HP",
           "mech": {
             "heal": {
               "tempHP": true
@@ -371,6 +409,7 @@
       "description": "The ground answers the call — vegetation erupting in a radius around the target to Restrain those caught within it and slow everything that follows.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, vegetation, roots, or biological matter erupts in a 10-foot radius around the target — the area becomes difficult terrain for 1 minute. Each creature in the area must succeed on a Strength saving throw against your Verum DC or be Restrained until they succeed on a Strength check against your Verum DC at the start of their turn.",
+        "card": "10-ft radius of growth — difficult terrain, save or Restrained",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -389,6 +428,7 @@
       "upgrades": [
         {
           "text": "The radius increases to 20 feet, and creatures that escape the Restrained condition still treat the area as difficult terrain for the full duration.",
+          "card": "Radius 20 ft · escapees still treat it as difficult terrain",
           "mech": {
             "conditions": [
               {
@@ -402,6 +442,7 @@
         },
         {
           "text": "The entanglement is self-sustaining — the difficult terrain and Restrained condition persist for the full minute without requiring your Concentration, as the growth continues on its own momentum.",
+          "card": "Self-sustaining for the full minute, no Concentration",
           "mech": {
             "conditions": [
               {

@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a failed save, the creature suffers a bone fracture — their Strength or Dexterity checks are reduced by 1d4 for 1 minute.",
+            "card": "Fail: a fracture — −1d4 on Str or Dex checks for 1 min",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -22,6 +23,7 @@
           },
           {
             "text": "If the target already has a Wound, the fracture deals +2d6 additional damage and reduces their movement speed by 10 feet.",
+            "card": "Already Wounded: +2d6 damage and −10 ft speed",
             "mech": {
               "damage": {
                 "dice": "2d6"
@@ -30,6 +32,7 @@
           },
           {
             "text": "When you cause a creature to gain 2 or more Wounds from the same effect, they must succeed on a Constitution save or suffer an Injury — a broken limb, shattered ribs, or similar structural failure.",
+            "card": "2+ Wounds from one effect: Con save or take an Injury",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -37,7 +40,8 @@
             }
           },
           {
-            "text": "Once per long rest, name a specific bone (skull, spine, femur, etc.). If the target fails their save, that bone shatters — rendering the affected body part inoperable unless healed by Regenerate or high-level vitaemancy."
+            "text": "Once per long rest, name a specific bone (skull, spine, femur, etc.). If the target fails their save, that bone shatters — rendering the affected body part inoperable unless healed by Regenerate or high-level vitaemancy.",
+            "card": "1/long rest name a bone — fail and it shatters, that part inoperable until Regenerate"
           }
         ]
       }
@@ -49,6 +53,7 @@
         "tiers": [
           {
             "text": "Gain temporary hit points equal to your proficiency bonus and +1 to AC for 1 round.",
+            "card": "{PB} temp HP and +1 AC for 1 round",
             "mech": {
               "heal": {
                 "tempHP": true
@@ -60,6 +65,7 @@
           },
           {
             "text": "While active, gain resistance to bludgeoning damage, and your melee attacks deal +1d4 piercing or necrotic damage (your choice) as bone fragments extend from your strikes.",
+            "card": "Resist bludgeoning · melee attacks +1d4 piercing or necrotic from bone spurs",
             "mech": {
               "damage": {
                 "dice": "1d4",
@@ -68,10 +74,12 @@
             }
           },
           {
-            "text": "If you have at least 1 Wound, you gain immunity to critical hits and your Wound threshold increases by +1."
+            "text": "If you have at least 1 Wound, you gain immunity to critical hits and your Wound threshold increases by +1.",
+            "card": "With 1+ Wound: immune to crits and your Wound threshold rises by 1"
           },
           {
             "text": "Enter Bone Bastion for 1 minute — you gain immunity to nonmagical weapons, enemies that strike you with melee weapons must succeed on a Dexterity save or take 2d8 slashing damage as bone shards erupt outward, and you may reattach or regenerate broken limbs as a bonus action.",
+            "card": "Bone Bastion 1 min — immune to nonmagical weapons, melee attackers Dex save or 2d8 slashing",
             "mech": {
               "damage": {
                 "dice": "2d8",
@@ -89,13 +97,16 @@
         "description": "You summon the memory of the dead through bone — speaking to what remains, raising skeletal champions, and eventually erupting a cathedral of the dead from the earth itself.",
         "tiers": [
           {
-            "text": "You may touch a bone and cast Speak with Dead without components — the memory held in the bone answers."
+            "text": "You may touch a bone and cast Speak with Dead without components — the memory held in the bone answers.",
+            "card": "Touch a bone and Speak with Dead, no components"
           },
           {
-            "text": "Revive a skeleton with limited autonomy for 10 minutes — useful for scouting, triggering traps, or operating mechanisms."
+            "text": "Revive a skeleton with limited autonomy for 10 minutes — useful for scouting, triggering traps, or operating mechanisms.",
+            "card": "Raise a skeleton with limited autonomy 10 min — scouting, traps, mechanisms"
           },
           {
             "text": "Call forth an ancestral skeleton of a slain warrior or beast — it appears for 1 minute as a CR 10 undead construct under your complete control.",
+            "card": "Call an ancestral skeleton — CR 10 undead under full control, 1 min",
             "mech": {
               "summon": {
                 "cr": "10"
@@ -104,6 +115,7 @@
           },
           {
             "text": "Once per long rest, invoke a Bone Cathedral — within a 30-foot radius, bones erupt from the earth, all necrotic spells are empowered (+1 die), you may resurrect up to three skeletal champions (CR 10 each), and the cathedral persists for 1 hour, granting resistance to radiant damage and immunity to Turn Undead for all creatures you summon within it.",
+            "card": "1/long rest Bone Cathedral 30 ft — necrotic effects +1 die, raise three CR 10 champions",
             "mech": {
               "damage": {
                 "type": "radiant"
@@ -123,6 +135,7 @@
         "tiers": [
           {
             "text": "One limb of your choice is partially ossified — the target has disadvantage on Dexterity checks involving that limb until the end of your next turn.",
+            "card": "One limb ossifies — disadvantage on Dex checks using it until your next turn",
             "mech": {
               "penalty": {
                 "disadvantage": "Dexterity checks involving that limb until the end"
@@ -130,13 +143,16 @@
             }
           },
           {
-            "text": "On a failed save, the limb becomes immobile for 1 round — natural or unarmed attacks made with it fail automatically."
+            "text": "On a failed save, the limb becomes immobile for 1 round — natural or unarmed attacks made with it fail automatically.",
+            "card": "Fail: that limb is dead weight 1 round, attacks with it auto-fail"
           },
           {
-            "text": "You may now target two limbs or a jointed structure. Movement is reduced by 15 feet, and the creature suffers 1 Wound if they attempt to move with ossified parts."
+            "text": "You may now target two limbs or a jointed structure. Movement is reduced by 15 feet, and the creature suffers 1 Wound if they attempt to move with ossified parts.",
+            "card": "Two limbs or a joint · −15 ft speed · 1 Wound if they move anyway"
           },
           {
             "text": "You may ossify vital organs (heart, lungs, throat). On a failed save the creature gains 1 Injury, loses the ability to speak, breathe, or cast spells with verbal components for 1 minute, and takes 4d12 necrotic damage as their internals calcify.",
+            "card": "Ossify organs — fail: 1 Injury, no speech, breath or verbal casting 1 min, 4d12 necrotic",
             "mech": {
               "damage": {
                 "dice": "4d12",
@@ -152,6 +168,7 @@
         "tiers": [
           {
             "text": "Animate one nearby skeleton or bone pile as a minion for 1 minute. It follows simple mental commands (AC 13, HP 15, deals 1d6 damage).",
+            "card": "Animate a skeleton or bone pile 1 min (AC 13, 15 HP, 1d6)",
             "mech": {
               "damage": {
                 "dice": "1d6"
@@ -160,6 +177,7 @@
           },
           {
             "text": "You may control existing skeletons or target a living creature with visible bones. On a failed save they are Restrained as their own skeleton briefly resists them.",
+            "card": "Control existing skeletons · living targets fail = Restrained by their own bones",
             "mech": {
               "conditions": [
                 {
@@ -170,6 +188,7 @@
           },
           {
             "text": "Use bone control to force a creature to move up to 15 feet against their will (as if grappled) or make a single melee attack against another creature of your choice.",
+            "card": "Force a creature to move 15 ft, or make one melee attack on a target you pick",
             "mech": {
               "conditions": [
                 {
@@ -180,6 +199,7 @@
           },
           {
             "text": "Dominate up to three bone-possessing creatures simultaneously. Once per long rest, you may fully puppet an unconscious or paralyzed creature as if using Dominate Monster, bypassing immunities.",
+            "card": "Dominate three bone-bearing creatures · 1/long rest fully puppet an unconscious one, ignoring immunities",
             "mech": {
               "conditions": [
                 {
@@ -201,6 +221,7 @@
         "tiers": [
           {
             "text": "Your creations are bone. A Structure shaped as a cage Restrains a creature inside it until it escapes with a Strength check against your Verum DC. Constructs are undead — immune to poison damage and exhaustion. Objects deal +1d4 necrotic damage on a hit.",
+            "card": "Creations are bone · cage Structures Restrain (Str check {DC}) · Constructs undead · Objects +1d4 necrotic",
             "mech": {
               "damage": {
                 "dice": "1d4",
@@ -215,6 +236,7 @@
           },
           {
             "text": "Your creations are immune to necrotic and poison damage. Structures grow spurs — a creature that touches or strikes one takes 1d8 piercing damage. A Construct raised from a corpse or bone pile keeps that creature's size and Strength score.",
+            "card": "Immune to necrotic and poison · Structures grow spurs, 1d8 piercing to touch · Constructs keep the corpse's size and Str",
             "mech": {
               "damage": {
                 "dice": "1d8",
@@ -223,10 +245,12 @@
             }
           },
           {
-            "text": "Constructs are immune to Turn Undead. Once per seal, you may raise a Structure as a bonus action if you stand on ground that holds the dead — a battlefield, a crypt, a grave. An Object may be a memory-bone that answers one question as Speak with Dead."
+            "text": "Constructs are immune to Turn Undead. Once per seal, you may raise a Structure as a bonus action if you stand on ground that holds the dead — a battlefield, a crypt, a grave. An Object may be a memory-bone that answers one question as Speak with Dead.",
+            "card": "Constructs immune to Turn Undead · 1/seal raise a Structure as a bonus action on ground holding the dead"
           },
           {
             "text": "A Structure made with a 7th-level slot or higher is a consecrated ossuary: undead you control within 30 feet gain resistance to radiant damage. Once per seal, a destroyed Construct reassembles at 1 hit point at the start of your next turn.",
+            "card": "7th+ Structure is a consecrated ossuary — your undead within 30 ft resist radiant · 1/seal a destroyed Construct reassembles at 1 HP",
             "mech": {
               "damage": {
                 "type": "radiant"
@@ -243,24 +267,28 @@
         "tiers": [
           {
             "text": "Sense skeletons, living or dead, within 60 feet. Learn a bone's owner, age, and cause of death by touch. Set and splint a fracture, removing its penalty.",
+            "card": "Sense skeletons 60 ft · read a bone's owner, age and cause of death · set a fracture",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Lighten your skeleton for 1 hour — jump three times as far and halve falling damage. Find a specific person's remains within 1 mile if you hold something that was theirs.",
+            "card": "Lighten your skeleton 1 hr — jump triple, half falling damage · find remains within 1 mile from a keepsake",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "You and up to three companions gain a climb speed equal to your walking speed for 1 hour as bone hooks grow from your hands. Reconstruct a creature's full form as an image from a single fragment.",
+            "card": "You and 3 others get a climb speed for 1 hr · rebuild a creature's image from one fragment",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "The Long Record — touch a bone at least a century old and witness one scene from its owner's life. Or knit a shattered skeleton whole, curing structural Injuries and restoring the bone of a lost limb for Regenerate to finish.",
+            "card": "The Long Record — a century-old bone shows a scene from its owner's life · or knit a skeleton whole, curing Injuries",
             "mech": {
               "utility": true
             }
@@ -276,6 +304,7 @@
       "description": "The impact doesn't just wound — it fragments, sending bone shards tearing outward into every creature nearby.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, bone shards erupt from the point of impact. Each creature within 5 feet of the target (including the target) must succeed on a Dexterity saving throw against your Verum DC or take 1d8 piercing damage.",
+        "card": "Shards erupt — everyone within 5 ft (target included) Dex save {DC} or 1d8 piercing",
         "mech": {
           "damage": {
             "dice": "1d8",
@@ -289,6 +318,7 @@
       "upgrades": [
         {
           "text": "The damage increases to 2d8, the radius increases to 10 feet, and creatures that fail have their movement speed reduced by 5 feet until they receive any healing.",
+          "card": "2d8 · radius 10 ft · those who fail lose 5 ft speed until healed",
           "mech": {
             "damage": {
               "dice": "2d8"
@@ -303,6 +333,7 @@
         },
         {
           "text": "The damage increases to 3d8, and creatures that fail the Dexterity save also have disadvantage on their next attack roll as embedded shards catch on muscle and joint.",
+          "card": "3d8 · those who fail also have disadvantage on their next attack",
           "mech": {
             "damage": {
               "dice": "3d8"
@@ -323,6 +354,7 @@
       "description": "Structure hardens where structure is needed most — a thin layer of calcified bone forming over skin to absorb what follows.",
       "effect": {
         "text": "When the primary effect resolves, you or one ally within 30 feet gains temporary hit points equal to your proficiency bonus + your spellcasting modifier as a thin layer of calcified bone briefly forms over exposed skin.",
+        "card": "You or an ally within 30 ft: {PB}+{VM} temp HP from a bone layer",
         "mech": {
           "heal": {
             "tempHP": true
@@ -332,6 +364,7 @@
       "upgrades": [
         {
           "text": "The temporary HP increases to twice your proficiency bonus + your spellcasting modifier, and the ally also gains +1 to AC until the temporary HP is depleted.",
+          "card": "Temp HP doubles · +1 AC while any remains",
           "mech": {
             "buff": {
               "ac": 1
@@ -340,6 +373,7 @@
         },
         {
           "text": "You may choose two creatures to receive this benefit, and while the temporary HP remains, each is immune to being knocked prone — the bone layer keeping them grounded and stable.",
+          "card": "Two creatures · each immune to prone while the temp HP lasts",
           "mech": {
             "conditions": [
               {
@@ -356,6 +390,7 @@
       "description": "The skeleton turns against its owner — joints seizing mid-motion, stripping speed and reaction before the target can understand what is happening.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Constitution saving throw against your Verum DC or have their movement speed reduced by 15 feet and lose their reaction until the end of their next turn.",
+        "card": "Con save {DC} or −15 ft speed and lose reactions until end of their next turn",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -373,10 +408,12 @@
       },
       "upgrades": [
         {
-          "text": "On a failed save, the target also cannot take the Dash action until the end of their next turn — their locked joints making any burst of speed impossible."
+          "text": "On a failed save, the target also cannot take the Dash action until the end of their next turn — their locked joints making any burst of speed impossible.",
+          "card": "Also can't Dash"
         },
         {
           "text": "Creatures that fail are also unable to make opportunity attacks and suffer disadvantage on Dexterity saving throws until the end of their next turn — every joint in their body working against them.",
+          "card": "Also no opportunity attacks and disadvantage on Dex saves",
           "mech": {
             "save": {
               "ability": "Dexterity"

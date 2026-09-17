@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target takes acid damage equal to your spellcasting modifier at the start of each of their turns for 1 minute.",
+            "card": "Fail: {VM} acid at the start of each of their turns, 1 min",
             "mech": {
               "damage": {
                 "type": "acid"
@@ -22,6 +23,7 @@
           },
           {
             "text": "The ongoing acid damage increases to 2d6, and affected targets are considered flammable until the end of your next turn.",
+            "card": "Ongoing becomes 2d6 · they count as flammable until your next turn",
             "mech": {
               "damage": {
                 "dice": "2d6",
@@ -31,6 +33,7 @@
           },
           {
             "text": "The target gains a Scar Marker — for 1 minute, every attack that hits them deals an additional 1d6 acid damage as the scar reopens under impact.",
+            "card": "Scar Marker 1 min — every hit on them adds 1d6 acid as the scar reopens",
             "mech": {
               "damage": {
                 "dice": "1d6",
@@ -39,7 +42,8 @@
             }
           },
           {
-            "text": "The scar becomes permanent unless removed by Greater Restoration or Regenerate. A creature bearing a permanent scar takes double damage from all Acid Cognition effects."
+            "text": "The scar becomes permanent unless removed by Greater Restoration or Regenerate. A creature bearing a permanent scar takes double damage from all Acid Cognition effects.",
+            "card": "The scar is permanent without Greater Restoration · they take double from all Acid effects"
           }
         ]
       }
@@ -51,6 +55,7 @@
         "tiers": [
           {
             "text": "The target takes −2 AC until the end of your next turn as acid eats into their defenses.",
+            "card": "−2 AC until end of your next turn",
             "mech": {
               "penalty": {
                 "ac": -2
@@ -59,6 +64,7 @@
           },
           {
             "text": "The AC penalty becomes cumulative — each failed save against your Acid effects adds an additional −1 AC (maximum −5 total). Resets after a short rest.",
+            "card": "Penalty stacks −1 per failed save against your Acid, to −5 · resets on a short rest",
             "mech": {
               "penalty": {
                 "ac": -1
@@ -66,10 +72,12 @@
             }
           },
           {
-            "text": "Each time the target fails a save against your Acid effects, they also lose one damage resistance of your choice for 1 hour."
+            "text": "Each time the target fails a save against your Acid effects, they also lose one damage resistance of your choice for 1 hour.",
+            "card": "Each failed save also strips one damage resistance of your choice, 1 hr"
           },
           {
-            "text": "On a failed save, the target's armor or natural armor is temporarily nullified for 1 minute — AC is calculated as if unarmored, and any AC bonus from shields is halved."
+            "text": "On a failed save, the target's armor or natural armor is temporarily nullified for 1 minute — AC is calculated as if unarmored, and any AC bonus from shields is halved.",
+            "card": "Fail: armour nullified 1 min — AC counts as unarmoured, shield bonuses halved"
           }
         ]
       },
@@ -79,6 +87,7 @@
         "tiers": [
           {
             "text": "Targets concentrating on a spell have disadvantage on Constitution saving throws to maintain Concentration when affected by this effect.",
+            "card": "Concentrating targets roll Con saves to hold it at disadvantage",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -90,6 +99,7 @@
           },
           {
             "text": "On a failed save, a concentrating creature must make a second Constitution save or their spell immediately ends.",
+            "card": "Fail: a second Con save or the spell ends outright",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -97,10 +107,12 @@
             }
           },
           {
-            "text": "On a failed save, the creature also forgets the dissolved spell until they finish a long rest."
+            "text": "On a failed save, the creature also forgets the dissolved spell until they finish a long rest.",
+            "card": "Fail: they also forget the dissolved spell until a long rest"
           },
           {
             "text": "On a failed save, the concentration effect is destroyed entirely and triggers arcane backlash — the caster takes 5d6 psychic damage and must succeed on a Wisdom save or be Silenced for 1 minute.",
+            "card": "Fail: the effect is destroyed and backlashes — 5d6 psychic and a Wis save or Silenced 1 min",
             "mech": {
               "damage": {
                 "dice": "5d6",
@@ -124,10 +136,12 @@
         "description": "What once stood strong becomes slop.",
         "tiers": [
           {
-            "text": "The effect deals double damage to nonmagical objects, ignoring object resistance."
+            "text": "The effect deals double damage to nonmagical objects, ignoring object resistance.",
+            "card": "Double damage to nonmagical objects, ignoring their resistance"
           },
           {
             "text": "Magical objects in contact with the effect must make a DC 15 Constitution saving throw or lose one magical property for 1 minute.",
+            "card": "Magic items touched: DC 15 Con save or lose one property 1 min",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -136,6 +150,7 @@
           },
           {
             "text": "Constructs and animated objects are Stunned for 1 round and vulnerable to all damage while affected.",
+            "card": "Constructs and animated objects are Stunned 1 round and vulnerable to everything",
             "mech": {
               "conditions": [
                 {
@@ -146,7 +161,8 @@
             }
           },
           {
-            "text": "Choose one magical or nonmagical item within range — on a failed save, the item is permanently melted or dissolved, losing its function entirely until reforged or purified by divine means. Artifacts are immune."
+            "text": "Choose one magical or nonmagical item within range — on a failed save, the item is permanently melted or dissolved, losing its function entirely until reforged or purified by divine means. Artifacts are immune.",
+            "card": "Fail: one item is permanently melted, useless until reforged or divinely purified (not artifacts)"
           }
         ]
       },
@@ -155,13 +171,16 @@
         "description": "You corrupt not just the surface — but what lies beneath.",
         "tiers": [
           {
-            "text": "The target makes their next saving throw against Poison or Disease at disadvantage."
+            "text": "The target makes their next saving throw against Poison or Disease at disadvantage.",
+            "card": "Their next Poison or Disease save is at disadvantage"
           },
           {
-            "text": "The target loses immunity to Poison and Disease for 1 minute."
+            "text": "The target loses immunity to Poison and Disease for 1 minute.",
+            "card": "They lose immunity to Poison and Disease for 1 min"
           },
           {
             "text": "The target is Contaminated — suffering −2 to all Constitution saving throws and treated as Diseased for the purposes of all spell effects for 1 minute.",
+            "card": "Contaminated 1 min — −2 on Con saves and counts as Diseased for every effect",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -170,6 +189,7 @@
           },
           {
             "text": "The target becomes a walking vector for 1 minute — whenever they fail a Constitution saving throw, all creatures within 10 feet must also save or be afflicted with the same condition.",
+            "card": "A walking vector 1 min — every Con save they fail spreads it to everyone within 10 ft",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -183,16 +203,20 @@
         "description": "You dissolve enchantments like fat in flame.",
         "tiers": [
           {
-            "text": "If the effect hits a creature under a magical defense (such as Mage Armor or Shield of Faith), that defense is suppressed for 1 round."
+            "text": "If the effect hits a creature under a magical defense (such as Mage Armor or Shield of Faith), that defense is suppressed for 1 round.",
+            "card": "Magical defences like Mage Armor or Shield of Faith are suppressed 1 round"
           },
           {
-            "text": "Magical effects of 3rd level or lower are automatically suppressed on a failed save."
+            "text": "Magical effects of 3rd level or lower are automatically suppressed on a failed save.",
+            "card": "Fail: effects of 3rd or lower are suppressed automatically"
           },
           {
-            "text": "Suppressed magical effects are dissolved rather than paused — the caster must re-cast them from scratch."
+            "text": "Suppressed magical effects are dissolved rather than paused — the caster must re-cast them from scratch.",
+            "card": "Suppressed becomes dissolved — they must recast from scratch"
           },
           {
-            "text": "Attempt to erase one ongoing magical effect as if using a 9th-level Dispel Magic. You may also render one magic item inactive for 1 minute — on a second exposure, the item is permanently disabled until repaired by a master artificer or divine restoration."
+            "text": "Attempt to erase one ongoing magical effect as if using a 9th-level Dispel Magic. You may also render one magic item inactive for 1 minute — on a second exposure, the item is permanently disabled until repaired by a master artificer or divine restoration.",
+            "card": "Erase one ongoing effect as a 9th-level Dispel Magic · disable a magic item 1 min, permanently on a second dose"
           }
         ]
       }
@@ -205,6 +229,7 @@
       "description": "The acid doesn't stop when the spell does.",
       "effect": {
         "text": "On a hit or failed saving throw, the target takes acid damage equal to your spellcasting modifier + proficiency bonus at the start of their next turn.",
+        "card": "{VM}+{PB} acid at the start of their next turn",
         "mech": {
           "damage": {
             "type": "acid"
@@ -214,6 +239,7 @@
       "upgrades": [
         {
           "text": "Level 5+: Residue persists for 1 minute. Target may spend their action to wipe it away with a successful Constitution save vs your Verum DC.",
+          "card": "Residue lasts 1 min · action + Con save {DC} to wipe it off",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -221,7 +247,8 @@
           }
         },
         {
-          "text": "Level 11+: Residue also reduces the target's AC by 1 for each turn it remains active, stacking with any existing Corrode penalties."
+          "text": "Level 11+: Residue also reduces the target's AC by 1 for each turn it remains active, stacking with any existing Corrode penalties.",
+          "card": "Also −1 AC per turn it remains, stacking with Corrode"
         }
       ]
     },
@@ -231,6 +258,7 @@
       "description": "Touch the caster, and the acid answers.",
       "effect": {
         "text": "The next creature that hits you with a melee attack before the start of your next turn takes acid damage equal to your spellcasting modifier and has their AC reduced by 1 until the end of their next turn.",
+        "card": "Next melee attacker takes {VM} acid and −1 AC",
         "mech": {
           "damage": {
             "type": "acid"
@@ -239,10 +267,12 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: Damage increases to your spellcasting modifier + proficiency bonus, and the veil persists for 1 minute."
+          "text": "Level 5+: Damage increases to your spellcasting modifier + proficiency bonus, and the veil persists for 1 minute.",
+          "card": "{VM}+{PB} damage · veil lasts 1 min"
         },
         {
           "text": "Level 11+: AC reduction increases to −2, and creatures that take this damage must succeed on a Constitution save or have one piece of worn or carried equipment suppressed for 1 round.",
+          "card": "−2 AC · Con save or a worn item corrodes",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -257,6 +287,7 @@
       "description": "The ground itself begins to corrode.",
       "effect": {
         "text": "Acid spreads in a 10-foot radius around the target — becoming difficult terrain for 1 minute. Any nonmagical object remaining in contact with the ground there takes 1d6 acid damage at the end of each turn.",
+        "card": "Acid spreads 10 ft — difficult terrain 1 min, 1d6 to objects on the ground",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -271,6 +302,7 @@
       "upgrades": [
         {
           "text": "Level 5+: Radius increases to 20 feet. Creatures that start their turn in the field or enter it take 1d4 acid damage.",
+          "card": "Radius 20 ft · 1d4 acid to enter or start a turn there",
           "mech": {
             "damage": {
               "dice": "1d4",
@@ -280,6 +312,7 @@
         },
         {
           "text": "Level 11+: Field becomes self-sustaining (no Concentration). Armor worn by creatures in the field takes −1 AC per minute of contact, resetting after cleaning during a short rest.",
+          "card": "Self-sustaining, no Concentration · armour worn in it loses 1 AC per minute",
           "mech": {
             "penalty": {
               "ac": -1

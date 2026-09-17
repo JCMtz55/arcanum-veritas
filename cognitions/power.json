@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "The effect deals its damage as pure force damage regardless of its original type. It ignores resistance to the original damage type.",
+            "card": "All damage becomes pure force and ignores the original type's resistance",
             "mech": {
               "damage": {
                 "type": "force"
@@ -23,6 +24,7 @@
           },
           {
             "text": "The effect now ignores immunity to the original damage type, dealing half damage to otherwise immune creatures. Add +2 dice to the total damage.",
+            "card": "Ignores immunity too, half damage to the immune · +2 dice",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -32,6 +34,7 @@
           },
           {
             "text": "Add +4 dice. The force cannot be reduced by any means — damage reduction features, Shield spell, and similar effects do not apply.",
+            "card": "+4 dice · the force can't be reduced by anything — no Shield, no damage reduction",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -39,7 +42,8 @@
             }
           },
           {
-            "text": "Once per long rest, double all damage dice. The effect cannot be counterspelled, absorbed, or redirected by any means. It simply arrives."
+            "text": "Once per long rest, double all damage dice. The effect cannot be counterspelled, absorbed, or redirected by any means. It simply arrives.",
+            "card": "1/long rest double all damage dice · cannot be counterspelled, absorbed or redirected. It simply arrives"
           }
         ]
       },
@@ -49,6 +53,7 @@
         "tiers": [
           {
             "text": "Each time this effect deals damage to a creature during this combat, the next instance of damage from this effect gains +1d8 bonus force damage, stacking up to 3 times. The stack resets if you do not deal damage with this effect for 2 consecutive rounds.",
+            "card": "Each hit this combat adds +1d8 force to the next, stacking 3 times · resets if you deal none",
             "mech": {
               "damage": {
                 "dice": "1d8",
@@ -58,6 +63,7 @@
           },
           {
             "text": "The stack limit increases to 5 times, and at maximum stacks you ignore resistance to the effect's damage type. The bonus die increases to +1d10.",
+            "card": "Stacks to 5 · +1d10 · at max you ignore resistance",
             "mech": {
               "damage": {
                 "dice": "1d10"
@@ -67,12 +73,14 @@
           },
           {
             "text": "The stack limit increases to 7 times, and at maximum stacks you additionally ignore immunity, dealing half damage to otherwise immune creatures. Stacks no longer reset between rounds — only between combats.",
+            "card": "Stacks to 7 · at max you ignore immunity too · stacks only reset between combats",
             "mech": {
               "pierce": "immunity"
             }
           },
           {
-            "text": "At maximum stacks the effect reaches Rampage State — for 1 minute your damage with this effect is maximized, you cannot be reduced below 1 HP by damage from creatures you have already hit this combat, and each hit pushes the target 10 feet as the momentum of your strikes becomes physically overwhelming."
+            "text": "At maximum stacks the effect reaches Rampage State — for 1 minute your damage with this effect is maximized, you cannot be reduced below 1 HP by damage from creatures you have already hit this combat, and each hit pushes the target 10 feet as the momentum of your strikes becomes physically overwhelming.",
+            "card": "At max: Rampage State 1 min — maximised damage, and nothing you've already hit can drop you below 1 HP"
           }
         ]
       }
@@ -84,6 +92,7 @@
         "tiers": [
           {
             "text": "For 1 minute, allies within 15 feet gain +1 to attack rolls, and enemies that start their turn within 15 feet must succeed on a Strength save or have disadvantage on their first attack roll that turn.",
+            "card": "1 min: allies within 15 ft +1 attack · enemies starting there Str save or disadvantage on their first attack",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -98,6 +107,7 @@
           },
           {
             "text": "The radius increases to 30 feet. The bonus to allies increases to +2, and enemies that fail their save also have their movement speed reduced by 10 feet for that turn.",
+            "card": "30 ft · allies +2 · failures also lose 10 ft speed that turn",
             "mech": {
               "movement": {
                 "speed": 10
@@ -108,10 +118,12 @@
             }
           },
           {
-            "text": "Allies within range additionally gain +2 to saving throws, and enemies that fail are also unable to take reactions until the start of their next turn."
+            "text": "Allies within range additionally gain +2 to saving throws, and enemies that fail are also unable to take reactions until the start of their next turn.",
+            "card": "Allies also +2 to saves · failures can't take reactions"
           },
           {
             "text": "The aura becomes a Declaration of Sovereignty for 1 minute. Allies within range gain advantage on all attack rolls and saving throws. Enemies that fail their save are Frightened for 1 round and treat the entire aura radius as difficult terrain.",
+            "card": "Declaration of Sovereignty 1 min — allies get advantage on everything, failures are Frightened",
             "mech": {
               "conditions": [
                 {
@@ -137,6 +149,7 @@
         "tiers": [
           {
             "text": "Force one creature to make a Strength save or be unable to take reactions until the start of their next turn.",
+            "card": "Str save or no reactions until the start of their next turn",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -145,6 +158,7 @@
           },
           {
             "text": "The affected creature also suffers disadvantage on attack rolls against any creature other than you for 1 round.",
+            "card": "Also disadvantage attacking anyone but you, 1 round",
             "mech": {
               "penalty": {
                 "disadvantage": "attack rolls against any creature other than you f"
@@ -153,6 +167,7 @@
           },
           {
             "text": "Creatures that fail are Frightened of you for 1 minute and must include you as a valid target if they choose to attack on their next turn.",
+            "card": "Failures are Frightened of you 1 min and must include you as a target if they attack",
             "mech": {
               "conditions": [
                 {
@@ -164,6 +179,7 @@
           },
           {
             "text": "Issue a Battle Mandate — one word of command (\"Kneel\", \"Flee\", \"Stop\"). A creature that fails the save must comply on their next turn or suffer 6d10 psychic damage and lose their action. On a success they resist the mandate but are still Frightened for 1 round.",
+            "card": "Battle Mandate — one word. Fail and they obey or take 6d10 psychic and lose their action",
             "mech": {
               "damage": {
                 "dice": "6d10",
@@ -185,6 +201,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target's movement speed is halved and they have disadvantage on Strength checks until the end of their next turn.",
+            "card": "Fail: speed halved and disadvantage on Str checks until end of their next turn",
             "mech": {
               "penalty": {
                 "disadvantage": "Strength checks until the end of their next turn"
@@ -193,6 +210,7 @@
           },
           {
             "text": "The target also suffers −2 to all attack rolls and saving throws for 1 minute. Repeat Strength save at end of each turn to end early.",
+            "card": "Also −2 to all attacks and saves 1 min (Str save each turn to end)",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -200,10 +218,12 @@
             }
           },
           {
-            "text": "The penalty increases to −4, their speed is reduced to 0 until the end of their first turn, and they cannot benefit from features that increase their movement speed for the duration."
+            "text": "The penalty increases to −4, their speed is reduced to 0 until the end of their first turn, and they cannot benefit from features that increase their movement speed for the duration.",
+            "card": "−4 · speed to 0 through their first turn · no speed-boosting features"
           },
           {
             "text": "The target is Restrained and Stunned until the end of their next turn as the weight becomes overwhelming. After that, the −4 penalty and speed reduction persist for 1 minute with no repeat save.",
+            "card": "Restrained and Stunned until end of their next turn, then −4 and slowed for 1 min with no save",
             "mech": {
               "conditions": [
                 {
@@ -225,12 +245,14 @@
         "tiers": [
           {
             "text": "Lift, drag, or hold what ten strong people could. Break a nonmagical door, chain, lock, or wall by touch. Be heard clearly by everyone within 300 feet.",
+            "card": "Lift what ten strong people could · break a door, chain or lock by touch · be heard 300 ft",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Carry, push, or haul any load for 8 hours without tiring. Your word carries weight — advantage on Intimidation checks, and on Persuasion checks when you are making a demand rather than a request.",
+            "card": "Haul any load 8 hrs untiring · advantage on Intimidation, and on Persuasion when demanding",
             "mech": {
               "buff": {
                 "advantage": "Intimidation checks"
@@ -239,12 +261,14 @@
           },
           {
             "text": "Move something that should not be movable: a fallen pillar, a ship aground, a portcullis, a boulder blocking a pass. Shatter a nonmagical structure up to 20 feet across.",
+            "card": "Move the immovable — a fallen pillar, a grounded ship, a portcullis · shatter 20 ft of structure",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Reshape a landscape by will — divert a river, split a hill, raise or level ground across a mile. Or make one declaration that every creature who hears it knows, beyond doubt, you can enforce.",
+            "card": "Reshape a landscape — divert a river, split a hill · or declare something everyone knows you can enforce",
             "mech": {
               "utility": true
             }
@@ -260,6 +284,7 @@
       "description": "The primary effect lands with the weight of inevitability — dealing bonus force damage that ignores resistance and eventually knocks the target prone from sheer impact.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target takes bonus force damage equal to one damage die of the primary effect's type (minimum 1d6). This bonus damage ignores resistance.",
+        "card": "+1 die force",
         "mech": {
           "damage": {
             "dice": "1d6",
@@ -270,10 +295,12 @@
       },
       "upgrades": [
         {
-          "text": "The bonus damage increases to two dice and also ignores damage reduction features such as Stoneskin or similar effects."
+          "text": "The bonus damage increases to two dice and also ignores damage reduction features such as Stoneskin or similar effects.",
+          "card": "+2 dice · also ignores damage reduction like Stoneskin"
         },
         {
           "text": "The bonus damage increases to three dice, and the target must succeed on a Strength saving throw against your Verum DC or be knocked prone by the sheer force of impact.",
+          "card": "+3 dice · Str save {DC} or knocked prone",
           "mech": {
             "save": {
               "ability": "Strength"
@@ -293,6 +320,7 @@
       "description": "A surge of power briefly makes an ally more than they are — granting speed, save bonuses, and eventually immunity to being Restrained or knocked prone.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet gains +10 feet of movement speed and +1 to Strength and Constitution saving throws until the start of your next turn.",
+        "card": "An ally within 30 ft: +10 ft speed and +1 to Str and Con saves",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -302,6 +330,7 @@
       "upgrades": [
         {
           "text": "The ally also gains advantage on Strength checks and may add your spellcasting modifier to one damage roll before the start of your next turn.",
+          "card": "Also advantage on Str checks and adds {VM} to one damage roll",
           "mech": {
             "buff": {
               "advantage": "Strength checks and may add your spellcasting modi"
@@ -310,6 +339,7 @@
         },
         {
           "text": "The ally additionally becomes immune to being Restrained or Knocked Prone until the start of your next turn — nothing can slow them down.",
+          "card": "Also immune to Restrained and prone — nothing slows them",
           "mech": {
             "conditions": [
               {
@@ -329,6 +359,7 @@
       "description": "The sheer weight of authority disrupts their next move — stripping their reaction and eventually preventing them from moving toward you at all.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Strength saving throw against your Verum DC or lose their reaction until the end of their next turn.",
+        "card": "Str save {DC} or they lose their reaction",
         "mech": {
           "save": {
             "ability": "Strength"
@@ -341,6 +372,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the target also has disadvantage on the first attack roll they make on their next turn.",
+          "card": "Fail also gives disadvantage on their first attack next turn",
           "mech": {
             "penalty": {
               "disadvantage": "the first attack roll they make on their next turn"
@@ -349,6 +381,7 @@
         },
         {
           "text": "Creatures that fail also cannot move toward you voluntarily until the end of their next turn — the dominance of the effect pressing them back.",
+          "card": "They also can't willingly move toward you",
           "mech": {
             "deny": [
               "movement"

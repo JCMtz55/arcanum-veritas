@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "If you are hidden, invisible, or obscured when the attack is made, it deals an additional 1d6 necrotic damage, and the target has disadvantage on Perception checks until the end of their next turn.",
+            "card": "Hidden or obscured: +1d6 necrotic · disadvantage on their Perception until end of their next turn",
             "mech": {
               "damage": {
                 "dice": "1d6",
@@ -31,6 +32,7 @@
           },
           {
             "text": "The bonus damage increases to 2d6 necrotic. On a failed Wisdom saving throw, the target is also blinded until the end of their next turn — their mind's model of where you are proving fundamentally unreliable.",
+            "card": "+2d6 · Wis save or Blinded until end of their next turn",
             "mech": {
               "damage": {
                 "dice": "2d6"
@@ -46,10 +48,12 @@
             }
           },
           {
-            "text": "A successful hit also renders the target unable to speak or shout for 1 round — the strike suppressing not just their perception of you but their capacity to alert anyone to your presence."
+            "text": "A successful hit also renders the target unable to speak or shout for 1 round — the strike suppressing not just their perception of you but their capacity to alert anyone to your presence.",
+            "card": "A hit also stops them speaking or shouting for 1 round — no alarm raised"
           },
           {
-            "text": "On a hit, you may choose to erase your presence from the target's memory — they forget you were ever in the area until someone informs them otherwise or they succeed on a DC 18 Intelligence (Investigation) check. The memory does not return on its own."
+            "text": "On a hit, you may choose to erase your presence from the target's memory — they forget you were ever in the area until someone informs them otherwise or they succeed on a DC 18 Intelligence (Investigation) check. The memory does not return on its own.",
+            "card": "On a hit, erase yourself from their memory until someone tells them or they make a DC 18 Investigation check"
           }
         ]
       }
@@ -61,6 +65,7 @@
         "tiers": [
           {
             "text": "When casting an effect, you become lightly obscured until the start of your next turn. If you are already in dim light or darkness, you also gain advantage on Stealth checks for the same duration.",
+            "card": "Lightly obscured until your next turn · advantage on Stealth if already in dim light",
             "mech": {
               "buff": {
                 "advantage": "Stealth checks for the same duration"
@@ -69,6 +74,7 @@
           },
           {
             "text": "While in dim light or darkness, you become heavily obscured — attackers effectively treat you as invisible — and you cannot be targeted by opportunity attacks while obscured this way.",
+            "card": "In dim light or darkness you are heavily obscured — effectively invisible, no opportunity attacks",
             "mech": {
               "conditions": [
                 {
@@ -79,6 +85,7 @@
           },
           {
             "text": "You may become fully invisible until the end of your next turn, until you take damage, or until you cast another spell — whichever occurs first.",
+            "card": "Fully invisible until your next turn, or until you take damage or cast again",
             "mech": {
               "conditions": [
                 {
@@ -88,7 +95,8 @@
             }
           },
           {
-            "text": "You enter Perfect Obscurity for 1 minute. While active: you leave no trace of passage; you cannot be detected by divination magic or magical sensors; and you are immune to Scrying, Truesight, and Faerie Fire — the Shadow Cognition contesting even the most thorough attempts to confirm your existence."
+            "text": "You enter Perfect Obscurity for 1 minute. While active: you leave no trace of passage; you cannot be detected by divination magic or magical sensors; and you are immune to Scrying, Truesight, and Faerie Fire — the Shadow Cognition contesting even the most thorough attempts to confirm your existence.",
+            "card": "Perfect Obscurity 1 min — no trace, no divination, immune to Scrying, Truesight and Faerie Fire"
           }
         ]
       },
@@ -98,6 +106,7 @@
         "tiers": [
           {
             "text": "As a bonus action, you may teleport up to 15 feet to an unoccupied space in dim light or darkness. This movement does not provoke opportunity attacks.",
+            "card": "Bonus action: teleport 15 ft between shadows, no opportunity attacks",
             "mech": {
               "movement": {
                 "teleport": 15
@@ -105,13 +114,16 @@
             }
           },
           {
-            "text": "The teleport range increases to 30 feet. The departure and arrival are both silent, leaving no visual disturbance — no shimmer, no displaced air, no indication of which shadow you entered or exited."
+            "text": "The teleport range increases to 30 feet. The departure and arrival are both silent, leaving no visual disturbance — no shimmer, no displaced air, no indication of which shadow you entered or exited.",
+            "card": "30 ft · silent at both ends, no shimmer, no sign of which shadow you used"
           },
           {
-            "text": "If both origin and destination points are in shadow or dim light, the teleport leaves no trace whatsoever — Truesight and other magical detection methods cannot determine where you went or where you came from."
+            "text": "If both origin and destination points are in shadow or dim light, the teleport leaves no trace whatsoever — Truesight and other magical detection methods cannot determine where you went or where you came from.",
+            "card": "Shadow to shadow leaves no trace at all — even Truesight can't follow"
           },
           {
             "text": "You may drag one unwilling creature with you into the teleport. They must succeed on a Wisdom saving throw against your Verum DC or be pulled through the shadow — arriving at your destination blinded and restrained until they escape (Strength DC equal to your Verum DC) or take damage.",
+            "card": "Drag an unwilling creature with you — Wis save {DC} or they arrive blinded beside you",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -133,13 +145,16 @@
         "description": "Your shadow has always been slightly ahead of you — a duplicate mimicking your silhouette that intercepts attacks, gains autonomy, and eventually becomes indistinguishable from you by anything short of Truesight.",
         "tiers": [
           {
-            "text": "A shadow duplicate appears within 10 feet of you, mimicking your silhouette. All attack rolls against you are made at disadvantage until the start of your next turn."
+            "text": "A shadow duplicate appears within 10 feet of you, mimicking your silhouette. All attack rolls against you are made at disadvantage until the start of your next turn.",
+            "card": "A shadow double appears within 10 ft — attacks against you at disadvantage until your next turn"
           },
           {
-            "text": "The duplicate becomes semi-solid — once per round, when you would take damage from an attack, the duplicate may intercept it, halving the damage dealt to you before dissolving. It reforms at the start of your next turn."
+            "text": "The duplicate becomes semi-solid — once per round, when you would take damage from an attack, the duplicate may intercept it, halving the damage dealt to you before dissolving. It reforms at the start of your next turn.",
+            "card": "Semi-solid — 1/round it intercepts an attack, halving the damage, and reforms next turn"
           },
           {
             "text": "The duplicate gains limited autonomy — on your turn, it may take the Help action, distract a creature (imposing disadvantage on their next attack or save), or trigger pressure-sensitive traps and mechanisms at a distance.",
+            "card": "It gains autonomy — Help, distract for disadvantage, or trip pressure plates",
             "mech": {
               "penalty": {
                 "disadvantage": "their next attack or save)"
@@ -147,7 +162,8 @@
             }
           },
           {
-            "text": "The duplicate becomes indistinguishable from you by mundane or magical observation short of Truesight. Once per round, you may swap places with it as a free action. Spells and abilities that target you have a 50% chance (roll a d6; on a 4–6) to strike the duplicate instead, which absorbs the effect entirely before dissolving."
+            "text": "The duplicate becomes indistinguishable from you by mundane or magical observation short of Truesight. Once per round, you may swap places with it as a free action. Spells and abilities that target you have a 50% chance (roll a d6; on a 4–6) to strike the duplicate instead, which absorbs the effect entirely before dissolving.",
+            "card": "Indistinguishable from you short of Truesight · swap places with it as a free action"
           }
         ]
       }
@@ -158,10 +174,12 @@
         "description": "You do not bring the darkness — you remind it that it was always there, expanding magical shadow into grasping limbs and eventually a Horizon of Black that negates all light and communication.",
         "tiers": [
           {
-            "text": "When casting an effect, you may shroud a 10-foot radius in magical darkness that lasts until the start of your next turn. You can see normally within it."
+            "text": "When casting an effect, you may shroud a 10-foot radius in magical darkness that lasts until the start of your next turn. You can see normally within it.",
+            "card": "10-ft magical darkness until your next turn — you see through it"
           },
           {
             "text": "The darkness muffles all sound — all creatures inside are deafened, and creatures without magical sight or echolocation are treated as blinded. The radius increases to 20 feet.",
+            "card": "20 ft · muffles sound, everyone inside Deafened and effectively Blinded",
             "mech": {
               "conditions": [
                 {
@@ -175,6 +193,7 @@
           },
           {
             "text": "You animate the darkness into grasping shadow limbs — creatures inside must succeed on a Strength saving throw against your Verum DC at the start of each of their turns or become Restrained until the start of their next turn.",
+            "card": "Shadow limbs — Str save {DC} at the start of each turn inside or Restrained",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -188,6 +207,7 @@
           },
           {
             "text": "Once per long rest, cast a Horizon of Black — a 60-foot radius of absolute magical darkness lasting 1 minute. Within it: all light sources are negated; all nonmagical ranged attacks automatically miss; and creatures without the Shadow Cognition cannot teleport, cast light-based spells, or communicate verbally — their words absorbed by the dark before they reach anyone.",
+            "card": "1/long rest Horizon of Black, 60 ft, 1 min — light negated, nonmagical ranged attacks all miss",
             "mech": {
               "deny": [
                 "teleport"
@@ -205,6 +225,7 @@
       "description": "The primary effect arrives wrapped in doubt — the target's awareness of the caster dimming and eventually losing track of their position entirely even in plain sight.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target has disadvantage on Perception checks to locate or identify the caster until the start of your next turn, as the Shadow Cognition softens the edges of the attack's point of origin in their memory.",
+        "card": "Disadvantage on Perception to find or identify you until your next turn",
         "mech": {
           "penalty": {
             "disadvantage": "Perception checks to locate or identify the caster"
@@ -214,6 +235,7 @@
       "upgrades": [
         {
           "text": "The disadvantage extends to all Perception and Insight checks targeting the caster for 1 minute. If the caster moves more than 10 feet before the target's next turn, the target must succeed on a Wisdom saving throw against your Verum DC or lose track of their position entirely — treating the caster as hidden even if they are in plain sight.",
+          "card": "Extends to all Perception and Insight about you for 1 min",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -222,6 +244,7 @@
         },
         {
           "text": "On a failed Wisdom saving throw, the target additionally has disadvantage on saving throws against the caster's next effect — the shadow having already compromised their confidence in what they are perceiving, making the next threat harder to brace for.",
+          "card": "Wis save or disadvantage on saves against your next effect too",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -239,6 +262,7 @@
       "description": "The casting pulls shadow around you like a held breath — granting Stealth advantage and light obscurement, and eventually letting you Hide as a bonus action regardless of cover.",
       "effect": {
         "text": "When the primary effect resolves, you gain advantage on the next Stealth check you make before the start of your next turn, and you become lightly obscured until you are hit by an attack or until the start of your next turn, whichever comes first.",
+        "card": "Advantage on your next Stealth check · lightly obscured until you are hit",
         "mech": {
           "buff": {
             "advantage": "the next Stealth check you make before the start o"
@@ -247,10 +271,12 @@
       },
       "upgrades": [
         {
-          "text": "The mantle persists for 1 minute. While lightly obscured this way, ranged attacks against you are made at disadvantage — the shadow blurring your outline enough to make precise targeting unreliable."
+          "text": "The mantle persists for 1 minute. While lightly obscured this way, ranged attacks against you are made at disadvantage — the shadow blurring your outline enough to make precise targeting unreliable.",
+          "card": "Lasts 1 min · ranged attacks against you at disadvantage"
         },
         {
-          "text": "While the mantle is active, you may Hide as a bonus action even in conditions where you would not normally have sufficient cover — the Shadow Cognition providing the concealment directly."
+          "text": "While the mantle is active, you may Hide as a bonus action even in conditions where you would not normally have sufficient cover — the Shadow Cognition providing the concealment directly.",
+          "card": "Hide as a bonus action even without cover"
         }
       ]
     },
@@ -260,6 +286,7 @@
       "description": "The impact leaves a bruise on the light — reducing the area to dim light, hindering Perception, and eventually becoming full magical darkness that does not respond to lesser spells.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, the 15-foot radius around the point of impact is immediately reduced to dim light regardless of ambient conditions for 1 minute. Creatures within the area have disadvantage on Perception checks.",
+        "card": "15 ft around the impact drops to dim light regardless of ambient light",
         "mech": {
           "penalty": {
             "disadvantage": "Perception checks"
@@ -269,6 +296,7 @@
       "upgrades": [
         {
           "text": "The radius increases to 30 feet, and any creature that enters the darkened area for the first time on a turn must succeed on a Wisdom saving throw against your Verum DC or be unable to take the Search action until the start of their next turn.",
+          "card": "Radius 30 ft · first entry each turn: Wis save or worse",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -277,6 +305,7 @@
         },
         {
           "text": "The darkened area becomes fully magical darkness rather than dim light, and you can see through it normally. Creatures without magical sight or Truesight are treated as blinded while inside — and the darkness does not respond to Daylight or similar spells unless cast at a higher level than the spell that created this effect.",
+          "card": "Becomes true magical darkness — you see through it, others don't",
           "mech": {
             "conditions": [
               {

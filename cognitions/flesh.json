@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "Create biological weapons — hardened bone spikes, veins twisted into whips. Your unarmed strikes now deal 1d8 sinew damage.",
+            "card": "Unarmed strikes become 1d8 sinew — bone spikes, vein whips",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -22,6 +23,7 @@
           },
           {
             "text": "Gain multiattack (2) with unarmed strikes or body weapons. Targets struck must succeed on a Constitution save or be grappled by muscle fibers extending from the strike.",
+            "card": "Two unarmed attacks · struck targets Con save or grappled by muscle fibre",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -34,10 +36,12 @@
             }
           },
           {
-            "text": "Grow a temporary monstrous feature — tentacle limb, quilled back, or acid gland. Gain one biological trait (breath weapon, defensive spine, or burrowing movement) for 1 hour."
+            "text": "Grow a temporary monstrous feature — tentacle limb, quilled back, or acid gland. Gain one biological trait (breath weapon, defensive spine, or burrowing movement) for 1 hour.",
+            "card": "Grow a monstrous feature 1 hr — breath weapon, defensive spines, or a burrow speed"
           },
           {
-            "text": "Enter the Flesh Ascendant state for 1 minute — you count as an aberration, gain temporary HP equal to your level × 20, and your natural weapons count as magical +5."
+            "text": "Enter the Flesh Ascendant state for 1 minute — you count as an aberration, gain temporary HP equal to your level × 20, and your natural weapons count as magical +5.",
+            "card": "Flesh Ascendant 1 min — count as aberration, temp HP = level × 20, natural weapons magical +5"
           }
         ]
       }
@@ -49,6 +53,7 @@
         "tiers": [
           {
             "text": "A target you touch heals 1d6 HP or takes 1d6 sinew damage (your choice). This healing cannot affect undead or constructs.",
+            "card": "Touch: heal 1d6 or deal 1d6 sinew, your choice (not undead or constructs)",
             "mech": {
               "damage": {
                 "dice": [
@@ -59,10 +64,12 @@
             }
           },
           {
-            "text": "Reattach limbs, close deep wounds, or spur cellular regeneration — removing 1 Wound per round or regrowing a minor body part over 1 hour."
+            "text": "Reattach limbs, close deep wounds, or spur cellular regeneration — removing 1 Wound per round or regrowing a minor body part over 1 hour.",
+            "card": "Reattach limbs, close deep wounds — 1 Wound per round, or a minor part over an hour"
           },
           {
             "text": "As part of casting, mutate a creature's organ — the target must make a Constitution save or gain 1 Injury as their own biology works against them.",
+            "card": "Mutate an organ — Con save or take 1 Injury as their own biology turns",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -70,7 +77,8 @@
             }
           },
           {
-            "text": "Redirect regeneration violently — a regenerating creature instead bloats, grows tumors, or collapses, taking necrotic + sinew damage equal to your level as their immortality turns cancerous."
+            "text": "Redirect regeneration violently — a regenerating creature instead bloats, grows tumors, or collapses, taking necrotic + sinew damage equal to your level as their immortality turns cancerous.",
+            "card": "A regenerating creature bloats instead — necrotic + sinew equal to your level"
           }
         ]
       }
@@ -82,6 +90,7 @@
         "tiers": [
           {
             "text": "The target's muscles or limbs twist unnaturally — they have disadvantage on Strength or Dexterity checks (your choice) for 1 round.",
+            "card": "Muscles twist — disadvantage on Str or Dex checks, your pick, 1 round",
             "mech": {
               "penalty": {
                 "disadvantage": "Strength or Dexterity checks (your choice) for 1 r"
@@ -90,6 +99,7 @@
           },
           {
             "text": "Alter a limb's function — dislocate a knee, reduce grip, or hyperextend a joint. The target suffers −1 AC, drops one held item, or takes sinew damage equal to half your level.",
+            "card": "Dislocate a joint — −1 AC, drop a held item, or half your level in sinew",
             "mech": {
               "penalty": {
                 "ac": -1
@@ -98,6 +108,7 @@
           },
           {
             "text": "Reshape flesh into armor or weapons on a willing creature — granting temporary natural armor (AC = 20 + Constitution modifier) or a meaty weapon dealing 4d8 sinew damage (versatile) for 1 hour.",
+            "card": "Reshape a willing creature — natural armour (AC 20 + Con) or a 4d8 sinew weapon, 1 hr",
             "mech": {
               "damage": {
                 "dice": "4d8"
@@ -105,7 +116,8 @@
             }
           },
           {
-            "text": "Create or replace entire body parts — granting natural weapons, extra limbs, tentacles, or organic mutations at DM discretion. Each replacement costs HP or Cognition fatigue equal to the complexity of the change."
+            "text": "Create or replace entire body parts — granting natural weapons, extra limbs, tentacles, or organic mutations at DM discretion. Each replacement costs HP or Cognition fatigue equal to the complexity of the change.",
+            "card": "Create or replace whole body parts — extra limbs, tentacles, natural weapons. Costs HP or fatigue"
           }
         ]
       },
@@ -115,6 +127,7 @@
         "tiers": [
           {
             "text": "Mark a creature's flesh with a symbolic wound or memory rune. They have disadvantage on Deception checks against the truth you etched for 24 hours.",
+            "card": "Mark flesh with a memory rune — disadvantage on Deception about that truth, 24 hrs",
             "mech": {
               "penalty": {
                 "disadvantage": "Deception checks against the truth you etched for"
@@ -123,6 +136,7 @@
           },
           {
             "text": "Embed a memory in flesh — when the creature is next wounded, they suffer hallucinations of past trauma and must succeed on a Wisdom save or be Stunned for 1 round.",
+            "card": "Next time they're wounded: Wis save or Stunned 1 round by hallucinated trauma",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -136,10 +150,12 @@
             }
           },
           {
-            "text": "Mark yourself with Resonant Flesh — while concentrating, you can see through the eyes or feel the pain of any creature whose flesh you have marked."
+            "text": "Mark yourself with Resonant Flesh — while concentrating, you can see through the eyes or feel the pain of any creature whose flesh you have marked.",
+            "card": "Resonant Flesh — while concentrating, see through or feel any flesh you have marked"
           },
           {
-            "text": "Create a Flesh Anchor — a living organ made of your own tissue that can store a spell, memory, or emotional Cognition. It may be grafted into another willing creature, persisting indefinitely until removed."
+            "text": "Create a Flesh Anchor — a living organ made of your own tissue that can store a spell, memory, or emotional Cognition. It may be grafted into another willing creature, persisting indefinitely until removed.",
+            "card": "Flesh Anchor — a living organ storing a spell, memory or Cognition, graftable and permanent"
           }
         ]
       },
@@ -149,6 +165,7 @@
         "tiers": [
           {
             "text": "Command or repulse one creature with a natural body (not constructs or oozes) — on a failed Charisma save they lose their next reaction.",
+            "card": "Fail: loses its next reaction (natural bodies only, no constructs or oozes)",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -157,6 +174,7 @@
           },
           {
             "text": "Cause phantom nerve pain in an unused part of the body — the target takes 1d8 sinew damage and must succeed on a Constitution save or drop Concentration.",
+            "card": "Phantom nerve pain — 1d8 sinew and a Con save or Concentration drops",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -168,6 +186,7 @@
           },
           {
             "text": "Dominate the body — forcibly bend limbs or lock muscles. On a failed save, the target cannot move or use one specific limb for 1 round.",
+            "card": "Fail: cannot move or use one limb for 1 round",
             "mech": {
               "deny": [
                 "movement"
@@ -176,6 +195,7 @@
           },
           {
             "text": "Puppet a corpse or paralyzed creature for 1 minute — using its body as an extension of your own. You act through it with its physical stats and your mental actions, sharing its senses while the puppeting lasts.",
+            "card": "Puppet a corpse or paralyzed creature 1 min — its body, your mind, its senses",
             "mech": {
               "conditions": [
                 {
@@ -195,6 +215,7 @@
         "tiers": [
           {
             "text": "Your creations are living tissue. Structures regain 5 hit points per segment at the start of each of your turns and are unnervingly warm. Objects are living sinew — they deal +1d4 sinew damage and cannot be disarmed.",
+            "card": "Creations are living tissue, warm · Structures regain 5 HP/segment each of your turns · Objects +1d4 sinew, undisarmable",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -203,6 +224,7 @@
           },
           {
             "text": "Your creations have resistance to piercing and slashing damage and immunity to poison damage. A creature that touches or strikes a Structure must succeed on a Constitution saving throw against your Verum DC or be grappled by muscle fibers until it escapes.",
+            "card": "Resist piercing and slashing, immune to poison · touching a Structure: Con save {DC} or grappled by muscle fibre",
             "mech": {
               "damage": {
                 "type": "slashing"
@@ -218,10 +240,12 @@
             }
           },
           {
-            "text": "Constructs may reshape themselves — once per turn, changing one natural weapon, gaining a climb or swim speed, or squeezing through any gap a limb can fit. A destroyed Object regrows at the start of your next turn."
+            "text": "Constructs may reshape themselves — once per turn, changing one natural weapon, gaining a climb or swim speed, or squeezing through any gap a limb can fit. A destroyed Object regrows at the start of your next turn.",
+            "card": "Constructs reshape 1/turn — new natural weapon, climb or swim speed, squeeze anywhere · destroyed Objects regrow"
           },
           {
-            "text": "Your creations are Ascendant flesh — they count as aberrations, are immune to critical hits, and a Construct may graft a willing ally, granting them the Construct's natural weapon and speed for the duration."
+            "text": "Your creations are Ascendant flesh — they count as aberrations, are immune to critical hits, and a Construct may graft a willing ally, granting them the Construct's natural weapon and speed for the duration.",
+            "card": "Ascendant flesh — aberrations, immune to crits · a Construct may graft an ally its weapon and speed"
           }
         ]
       }
@@ -233,24 +257,28 @@
         "tiers": [
           {
             "text": "Learn a creature's injuries, ailments, age, and recent trauma by touch. Set a bone, close a wound, or stop a bleed without a check. Alter your own features — face, build, voice — for 1 hour.",
+            "card": "Read injuries, ailments, age and trauma by touch · set bones and stop bleeds · reshape your own face 1 hr",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Alter a willing creature's appearance for 8 hours, convincingly enough to pass. Grant a willing creature a minor useful adaptation — gills, padded feet, a climbing grip.",
+            "card": "Alter a willing creature's appearance 8 hrs · grant a minor adaptation — gills, padded feet, a climbing grip",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Read a corpse's flesh for the last hour of its life. Graft a nonmagical organ, limb, or feature onto a willing creature, permanently.",
+            "card": "Read a corpse's last hour · graft an organ, limb or feature permanently",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Rebuild a willing creature's body into the form they have always believed was theirs — permanently, without pain, and without cost to their health.",
+            "card": "Rebuild a willing body into the form they always believed was theirs — permanent, painless, free",
             "mech": {
               "utility": true
             }
@@ -266,6 +294,7 @@
       "description": "The primary effect leaves something raw and open — the next source of damage fires every nerve in the affected area at once for amplified sinew pain.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target's pain receptors are left hypersensitive — the next time they take damage before the end of your next turn, that damage deals +1d8 sinew bonus damage.",
+        "card": "Nerves left raw — their next damage taken before your next turn is +1d8",
         "mech": {
           "damage": {
             "dice": "1d8"
@@ -275,6 +304,7 @@
       "upgrades": [
         {
           "text": "The hypersensitivity lingers for 1 minute, the bonus damage increases to +2d8, and each time the bonus triggers the target must succeed on a Constitution saving throw against your Verum DC or have disadvantage on their next attack roll.",
+          "card": "Lasts 1 min · +2d8 · Con save {DC} each time it triggers",
           "mech": {
             "damage": {
               "dice": "2d8"
@@ -289,6 +319,7 @@
         },
         {
           "text": "The bonus damage increases to +3d8, and while the hypersensitivity persists the target has disadvantage on Concentration checks — every incidental impact sending a cascade of amplified sensation through them.",
+          "card": "+3d8 · disadvantage on Concentration while it persists",
           "mech": {
             "damage": {
               "dice": "3d8"
@@ -306,6 +337,7 @@
       "description": "Biology accelerates where it is needed most — minor wounds closing of their own accord as the body's repair process is briefly redirected toward an ally.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as minor wounds close of their own accord.",
+        "card": "An ally within 30 ft regains {VM}+{PB}",
         "mech": {
           "heal": {
             "amount": "your spellcasting modifier"
@@ -314,10 +346,12 @@
       },
       "upgrades": [
         {
-          "text": "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also removes one condition affecting them as the biological surge pushes the ailment out."
+          "text": "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also removes one condition affecting them as the biological surge pushes the ailment out.",
+          "card": "Healing doubles · also removes one condition"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also removes one Wound — the flesh knitting past surface damage into deeper repair."
+          "text": "You may choose two allies to receive this benefit, and each also removes one Wound — the flesh knitting past surface damage into deeper repair.",
+          "card": "Two allies · each also removes one Wound"
         }
       ]
     },
@@ -327,6 +361,7 @@
       "description": "The body betrays itself — muscles seizing involuntarily, stripping speed and coordination before the target can understand what their own flesh is doing.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Constitution saving throw against your Verum DC or have their muscles seize involuntarily — their movement speed is reduced by 15 feet and they have disadvantage on Strength and Dexterity checks until the end of their next turn.",
+        "card": "Con save {DC} or muscles seize — speed halved, no reactions",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -343,6 +378,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the target also cannot take the Dash action and has disadvantage on attack rolls until the end of their next turn — their body fighting every deliberate movement.",
+          "card": "Also can't Dash and attacks at disadvantage",
           "mech": {
             "penalty": {
               "disadvantage": "attack rolls until the end of their next turn — th"
@@ -351,6 +387,7 @@
         },
         {
           "text": "Creatures that fail are also unable to use reactions until the end of their next turn, and any attempt to cast a spell with somatic components requires a successful Constitution saving throw against your Verum DC first — their hands too locked to gesture cleanly.",
+          "card": "Also no reactions · somatic casting needs a Con check {DC}",
           "mech": {
             "save": {
               "ability": "Constitution"

@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "The damage becomes radiant and gains +2 dice. One additional die if you are below half your hit points, or if an ally is at 0 hit points.",
+            "card": "+2 dice radiant · +1 more if you're below half HP or an ally is at 0",
             "mech": {
               "damage": {
                 "bonusDice": 2
@@ -22,6 +23,7 @@
           },
           {
             "text": "+4 dice. If you moved at least 20 feet toward the target before this effect, it cannot take reactions until the end of its next turn.",
+            "card": "+4 dice · moved 20 ft toward them first: no reactions until end of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 4
@@ -33,6 +35,7 @@
           },
           {
             "text": "+6 dice. Each ally who can see the hit gains temporary hit points equal to your Verum Modifier and ends the Frightened condition.",
+            "card": "+6 dice · every ally who sees the hit gets {VM} temp HP and sheds Frightened",
             "mech": {
               "damage": {
                 "bonusDice": 6
@@ -49,6 +52,7 @@
           },
           {
             "text": "+8 dice. For 1 minute, the first time each round you use this effect against the most dangerous enemy you can see, it automatically hits and scores a critical.",
+            "card": "+8 dice · 1 min: your first use each round on the biggest threat auto-hits and crits",
             "mech": {
               "damage": {
                 "bonusDice": 8
@@ -64,13 +68,16 @@
         "description": "You rise against fate and refuse to fall — surviving at 1 HP, resisting critical hits, and entering a Heroic Surge when death itself would claim you.",
         "tiers": [
           {
-            "text": "When reduced to 0 HP, you may instead remain conscious at 1 HP until the end of your next turn. This can occur once per effect."
+            "text": "When reduced to 0 HP, you may instead remain conscious at 1 HP until the end of your next turn. This can occur once per effect.",
+            "card": "At 0 HP stay conscious at 1 until end of your next turn, once per effect"
           },
           {
-            "text": "When this triggers, you also gain temporary HP equal to 10 × your Character Level and may immediately make one attack or cast a cantrip as a free action."
+            "text": "When this triggers, you also gain temporary HP equal to 10 × your Character Level and may immediately make one attack or cast a cantrip as a free action.",
+            "card": "Also 10 × your level in temp HP and a free attack or cantrip"
           },
           {
             "text": "While below half your maximum HP, you may resist critical hits — treating them as normal hits unless you are Incapacitated.",
+            "card": "Below half HP, crits against you count as normal hits unless Incapacitated",
             "mech": {
               "conditions": [
                 {
@@ -80,7 +87,8 @@
             }
           },
           {
-            "text": "Once per long rest, if you would die, you may instead enter a Heroic Surge for 1 minute — all damage you take is halved, your movement speed is doubled, and you are considered under the effects of Heroism, Freedom of Movement, and Death Ward simultaneously."
+            "text": "Once per long rest, if you would die, you may instead enter a Heroic Surge for 1 minute — all damage you take is halved, your movement speed is doubled, and you are considered under the effects of Heroism, Freedom of Movement, and Death Ward simultaneously.",
+            "card": "1/long rest instead of dying: Heroic Surge 1 min — half damage taken, double speed"
           }
         ]
       },
@@ -89,13 +97,16 @@
         "description": "Your presence commands hope — radiating save bonuses and condition immunity until allies within range fight with the certainty that this moment will be remembered.",
         "tiers": [
           {
-            "text": "Allies within 10 feet gain +1 to saving throws for 1 round."
+            "text": "Allies within 10 feet gain +1 to saving throws for 1 round.",
+            "card": "Allies within 10 ft: +1 to saves, 1 round"
           },
           {
-            "text": "Range increases to 30 feet and the bonus increases to +2. Once per effect, one ally within range may reroll a failed saving throw."
+            "text": "Range increases to 30 feet and the bonus increases to +2. Once per effect, one ally within range may reroll a failed saving throw.",
+            "card": "30 ft · +2 · one ally may reroll a failed save"
           },
           {
             "text": "Allies within 30 feet are immune to the Frightened condition and gain 2d8 temporary HP at the start of each of their turns for 1 minute.",
+            "card": "Allies within 30 ft immune to Frightened and gain 2d8 temp HP each turn, 1 min",
             "mech": {
               "damage": {
                 "dice": "2d8"
@@ -109,6 +120,7 @@
           },
           {
             "text": "Allies within 60 feet gain advantage on saving throws against spells and fear, deal +2d10 radiant damage on their first attack each turn, and may once per effect choose to succeed on a failed saving throw against a magical effect.",
+            "card": "60 ft — advantage on saves vs spells and fear, +2d10 radiant on first attacks, one auto-success",
             "mech": {
               "damage": {
                 "dice": "2d10",
@@ -126,16 +138,20 @@
         "description": "You take the blow meant for another — redirecting damage, gaining resistance, and eventually standing between multiple allies and everything that would end them.",
         "tiers": [
           {
-            "text": "As a reaction, redirect half the damage dealt to an ally within 10 feet to yourself instead."
+            "text": "As a reaction, redirect half the damage dealt to an ally within 10 feet to yourself instead.",
+            "card": "React to take half the damage aimed at an ally within 10 ft"
           },
           {
-            "text": "You may redirect all of the damage and gain resistance to it as you absorb the blow."
+            "text": "You may redirect all of the damage and gain resistance to it as you absorb the blow.",
+            "card": "Take all of it instead, and resist it as you absorb the blow"
           },
           {
-            "text": "If your intervention prevents the ally from suffering a Wound or Injury, you restore one expended spell slot of the same level used for this effect."
+            "text": "If your intervention prevents the ally from suffering a Wound or Injury, you restore one expended spell slot of the same level used for this effect.",
+            "card": "If you stopped a Wound or Injury, regain the slot you spent"
           },
           {
-            "text": "While this effect is active, you may absorb damage for up to three allies within 30 feet simultaneously, taking half from each. Any attack that would reduce you to 0 HP instead drops you to 1 HP — once per round for 1 minute."
+            "text": "While this effect is active, you may absorb damage for up to three allies within 30 feet simultaneously, taking half from each. Any attack that would reduce you to 0 HP instead drops you to 1 HP — once per round for 1 minute.",
+            "card": "Cover three allies within 30 ft at once · a killing blow leaves you at 1 HP instead"
           }
         ]
       },
@@ -144,13 +160,16 @@
         "description": "Your words become the will of the battlefield — granting bonus actions, commanding reactions, and eventually declaring a Heroic Formation that moves the entire party at once.",
         "tiers": [
           {
-            "text": "Give one ally within 30 feet a bonus action immediately — usable to Dash, Help, or make one attack."
+            "text": "Give one ally within 30 feet a bonus action immediately — usable to Dash, Help, or make one attack.",
+            "card": "Give an ally within 30 ft an immediate bonus action — Dash, Help, or one attack"
           },
           {
-            "text": "Once per turn, command two allies to each take a reaction to attack or move up to half their speed."
+            "text": "Once per turn, command two allies to each take a reaction to attack or move up to half their speed.",
+            "card": "1/turn command two allies to each react with an attack or half their movement"
           },
           {
             "text": "Allies under your effect may take one additional action on your turn — once per long rest per creature.",
+            "card": "Allies may take one extra action on your turn, once per long rest each",
             "mech": {
               "actionEconomy": {
                 "action": 1
@@ -159,6 +178,7 @@
           },
           {
             "text": "Once per minute, declare a Heroic Formation — all allies within 60 feet immediately take one free movement, attack, or cantrip action. You and your chosen allies gain advantage on all attacks and saving throws until the end of your next turn.",
+            "card": "1/min Heroic Formation — every ally within 60 ft gets a free move, attack or cantrip",
             "mech": {
               "buff": {
                 "advantage": "all attacks and saving throws until the end of you"
@@ -174,16 +194,20 @@
         "description": "Your defiance alone breaks despair — rewarding every successful save with mounting bonuses, nullifying fear, and eventually shattering mind effects across the entire battlefield.",
         "tiers": [
           {
-            "text": "When you or an ally succeeds on a saving throw, all allies within 10 feet gain +1 to their next save or attack roll."
+            "text": "When you or an ally succeeds on a saving throw, all allies within 10 feet gain +1 to their next save or attack roll.",
+            "card": "A successful save near you gives allies within 10 ft +1 to their next save or attack"
           },
           {
-            "text": "The bonus increases to +2, and once per round you may cause one enemy within 30 feet to roll their next attack with disadvantage."
+            "text": "The bonus increases to +2, and once per round you may cause one enemy within 30 feet to roll their next attack with disadvantage.",
+            "card": "+2 · 1/round force an enemy within 30 ft to attack at disadvantage"
           },
           {
-            "text": "Once per round, you may nullify one fear, charm, or compulsion effect targeting an ally within 30 feet — the effect ends instantly."
+            "text": "Once per round, you may nullify one fear, charm, or compulsion effect targeting an ally within 30 feet — the effect ends instantly.",
+            "card": "1/round end a fear, charm or compulsion on an ally within 30 ft outright"
           },
           {
             "text": "Once per long rest, when any creature within 60 feet would fall under a mind-affecting effect, you may shatter it — ending the effect on all allies simultaneously and forcing all enemies within range to make a Charisma saving throw or become Frightened for 1 minute.",
+            "card": "1/long rest shatter a mind-affecting effect on everyone at once and push it back on your enemies",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -206,6 +230,7 @@
         "tiers": [
           {
             "text": "Be heard and believed by everyone within 300 feet when you speak plainly and truly. Steady a frightened crowd, mount, or child. Endure a full day of hardship without exhaustion.",
+            "card": "Heard and believed within 300 ft when you speak plainly · steady a frightened crowd",
             "mech": {
               "conditions": [
                 {
@@ -219,18 +244,21 @@
           },
           {
             "text": "You and up to six companions march, climb, or hold a watch for 24 hours without rest or fear. Your presence ends a panic, a rout, or a riot.",
+            "card": "You and six companions march or hold watch 24 hrs without rest or fear · end a rout",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Make a promise that all who hear it know you will keep. Enter a place bound by fear — a haunted hall, a tyrant's court — and those with you are immune to that fear while you stand.",
+            "card": "Make a promise all who hear know you'll keep · those with you are immune to a place's fear",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "What you do here is remembered — the deed passes into story, spreads without a teller, and cannot be erased, forged, or claimed by another. Those who hear it take heart, for as long as it is told.",
+            "card": "What you do here is remembered — the deed spreads without a teller and cannot be erased or claimed",
             "mech": {
               "utility": true
             }
@@ -246,6 +274,7 @@
       "description": "Courage made manifest punishes those who stand against it — the target's own resistance to heroism rebounds as radiant damage proportional to their defiance.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, they must succeed on a Charisma saving throw against your Verum DC or take radiant damage equal to their own saving throw bonus (minimum 1d6). Creatures without a meaningful Charisma modifier take 1d6 radiant damage on a failed save.",
+        "card": "Cha save {DC} or radiant equal to their own save bonus (min 1d6)",
         "mech": {
           "damage": {
             "dice": [
@@ -262,6 +291,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the target also has disadvantage on saving throws against Charisma-based effects until the end of their next turn — the crack in their resolve widening.",
+          "card": "Fail also gives disadvantage on Cha-based saves",
           "mech": {
             "penalty": {
               "disadvantage": "saving throws against Charisma-based effects until"
@@ -270,6 +300,7 @@
         },
         {
           "text": "The radiant damage increases to twice their saving throw bonus (minimum 2d6), and creatures that fail are also unable to make opportunity attacks until the end of their next turn — heroism's presence making aggression feel futile.",
+          "card": "Damage doubles (min 2d6) · no opportunity attacks either",
           "mech": {
             "damage": {
               "dice": "2d6",
@@ -285,6 +316,7 @@
       "description": "The act of heroism itself becomes a lifeline — one ally gaining temporary HP buoyed by the visible force of your conviction.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your Charisma modifier + your proficiency bonus.",
+        "card": "An ally within 30 ft gains {VM}+{PB} temp HP",
         "mech": {
           "heal": {
             "tempHP": true
@@ -294,6 +326,7 @@
       "upgrades": [
         {
           "text": "The ally also gains advantage on their next saving throw before the start of your next turn.",
+          "card": "Also advantage on their next save",
           "mech": {
             "buff": {
               "advantage": "their next saving throw before the start of your n"
@@ -302,6 +335,7 @@
         },
         {
           "text": "You may choose two allies to receive this benefit, and each also removes one instance of the Frightened or Charmed condition if they are currently affected by one.",
+          "card": "Two allies · each also sheds Frightened or Charmed",
           "mech": {
             "conditions": [
               {
@@ -321,6 +355,7 @@
       "description": "Heroism roots those it touches — nothing moves them against their will, anchoring allies in place as protection and enemies in place as punishment.",
       "effect": {
         "text": "When the primary effect resolves, one creature of your choice within 30 feet cannot be forcibly moved, pushed, pulled, or knocked prone until the end of their next turn. For allies this is pure protection. For enemies, it pins them in place regardless of their intent.",
+        "card": "A creature within 30 ft can't be moved, pushed, pulled or knocked prone",
         "mech": {
           "conditions": [
             {
@@ -331,10 +366,12 @@
       },
       "upgrades": [
         {
-          "text": "The effect extends to immunity from teleportation as well — the creature is anchored to their current position until the end of their next turn."
+          "text": "The effect extends to immunity from teleportation as well — the creature is anchored to their current position until the end of their next turn.",
+          "card": "Also immune to teleportation — anchored where they stand"
         },
         {
           "text": "You may apply this to two creatures simultaneously, and allies affected also gain advantage on all saving throws until the end of their next turn as heroism's certainty reinforces their every defense.",
+          "card": "Two creatures · allies also get advantage on all saves",
           "mech": {
             "buff": {
               "advantage": "all saving throws until the end of their next turn"

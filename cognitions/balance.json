@@ -13,6 +13,7 @@
         "tiers": [
           {
             "text": "On a failed save, the target loses advantage on all rolls until the end of their next turn. If they had no advantage, they instead gain disadvantage on their next roll.",
+            "card": "Fail: they lose all advantage until end of their next turn, or take disadvantage if they had none",
             "mech": {
               "buff": {
                 "advantage": "all rolls until the end of their next turn"
@@ -23,10 +24,12 @@
             }
           },
           {
-            "text": "On a failed save, choose one active buff on the target (a bonus to AC, attack rolls, saving throws, or damage). That buff is inverted — it becomes the equivalent penalty for 1 minute."
+            "text": "On a failed save, choose one active buff on the target (a bonus to AC, attack rolls, saving throws, or damage). That buff is inverted — it becomes the equivalent penalty for 1 minute.",
+            "card": "Fail: one active buff inverts into the equivalent penalty for 1 min"
           },
           {
             "text": "On a failed save, the target's two highest active bonuses are both inverted simultaneously. If the target has no active buffs, they take 4d10 psychic damage as the Cognition finds the imbalance in their biology and corrects it.",
+            "card": "Their two highest bonuses both invert · no buffs to take and they take 4d10 psychic instead",
             "mech": {
               "damage": {
                 "dice": "4d10",
@@ -35,7 +38,8 @@
             }
           },
           {
-            "text": "On a failed save, the target's entire buff suite is stripped and redistributed — each active bonus is transferred to a creature of your choice within 60 feet for 1 minute. The target then rolls their next d20 with no modifiers of any kind — no proficiency, no ability score bonus, nothing."
+            "text": "On a failed save, the target's entire buff suite is stripped and redistributed — each active bonus is transferred to a creature of your choice within 60 feet for 1 minute. The target then rolls their next d20 with no modifiers of any kind — no proficiency, no ability score bonus, nothing.",
+            "card": "Their whole buff suite is stripped and handed to creatures you choose within 60 ft for 1 min"
           }
         ]
       }
@@ -47,6 +51,7 @@
         "tiers": [
           {
             "text": "Choose two willing creatures within 30 feet. The next condition that would affect one of them is tethered — it affects the other creature instead. The recipient may attempt a Wisdom saving throw against your Verum DC to resist at the end of each of their turns.",
+            "card": "Tether two willing creatures — the next condition on one lands on the other instead",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -55,6 +60,7 @@
           },
           {
             "text": "You may tether up to three creatures. When a condition is tethered, the creature who receives it has disadvantage on saves to resist it, as if Balance has decided the mathematics of their suffering were always going to land here.",
+            "card": "Tether up to three · the receiving creature resists it at disadvantage",
             "mech": {
               "penalty": {
                 "disadvantage": "saves to resist it"
@@ -62,10 +68,12 @@
             }
           },
           {
-            "text": "The tether becomes bidirectional — conditions may be shifted in either direction between tethered creatures once per round as a bonus action, allowing you to move suffering away from a creature that can no longer bear it."
+            "text": "The tether becomes bidirectional — conditions may be shifted in either direction between tethered creatures once per round as a bonus action, allowing you to move suffering away from a creature that can no longer bear it.",
+            "card": "Bidirectional — shift a condition either way once a round as a bonus action"
           },
           {
-            "text": "The tether persists for 1 hour. When a tethered creature dies, their remaining HP — even if 0 — is redistributed across all surviving tethered creatures as if through Equalize, and the dead creature's next death saving throw is made by the creature with the highest current HP in the tether instead."
+            "text": "The tether persists for 1 hour. When a tethered creature dies, their remaining HP — even if 0 — is redistributed across all surviving tethered creatures as if through Equalize, and the dead creature's next death saving throw is made by the creature with the highest current HP in the tether instead.",
+            "card": "Lasts 1 hr · a tethered death redistributes their remaining HP across the survivors"
           }
         ]
       },
@@ -74,16 +82,20 @@
         "description": "Stand at the center and let everything flow through you — damage, healing, and fate itself distributed evenly among those you hold in tether.",
         "tiers": [
           {
-            "text": "For 1 minute, you become a tether point for up to two creatures within 30 feet. Whenever any tethered creature (including you) takes damage, it is split equally among all tethered creatures, rounded up to the nearest whole number."
+            "text": "For 1 minute, you become a tether point for up to two creatures within 30 feet. Whenever any tethered creature (including you) takes damage, it is split equally among all tethered creatures, rounded up to the nearest whole number.",
+            "card": "1 min: damage to any tethered creature (up to two, plus you) splits evenly among all"
           },
           {
-            "text": "The tether expands to four creatures and also applies to healing — any healing received by a tethered creature is distributed evenly among all tethered creatures."
+            "text": "The tether expands to four creatures and also applies to healing — any healing received by a tethered creature is distributed evenly among all tethered creatures.",
+            "card": "Four creatures · healing splits the same way"
           },
           {
-            "text": "Tethered creatures share saving throw results against effects that target multiple of them — all tethered creatures use the highest roll among them for saves triggered by the same source effect."
+            "text": "Tethered creatures share saving throw results against effects that target multiple of them — all tethered creatures use the highest roll among them for saves triggered by the same source effect.",
+            "card": "Tethered creatures all use the highest save roll among them against a shared source"
           },
           {
             "text": "The Fulcrum cannot be disrupted by damage or conditions — even if you are Incapacitated, Stunned, or reduced to 0 HP, the tether persists for the duration. No single creature in the tether can be brought below 1 HP by a single instance of tethered damage unless all tethered creatures would simultaneously reach 0.",
+            "card": "Unbreakable — the tether holds even if you are Stunned, Incapacitated or at 0 HP",
             "mech": {
               "conditions": [
                 {
@@ -104,13 +116,16 @@
         "description": "The wound does not disappear — it finds a new address, pulling every creature in range toward a shared median whether they consent or not.",
         "tiers": [
           {
-            "text": "Choose up to two creatures within range. Calculate the average of both creatures' current HP. The higher HP creature loses the difference, and the lower gains it. Neither creature's HP may exceed its maximum through this effect."
+            "text": "Choose up to two creatures within range. Calculate the average of both creatures' current HP. The higher HP creature loses the difference, and the lower gains it. Neither creature's HP may exceed its maximum through this effect.",
+            "card": "Two creatures average their current HP — the higher loses, the lower gains"
           },
           {
-            "text": "You may include up to four creatures in the redistribution. All are pulled toward the group's average HP simultaneously."
+            "text": "You may include up to four creatures in the redistribution. All are pulled toward the group's average HP simultaneously.",
+            "card": "Up to four creatures, all pulled toward the group average at once"
           },
           {
             "text": "Creatures that fail the saving throw cannot be healed or damaged beyond the group average for 1 round — any excess healing or damage above the threshold is voided.",
+            "card": "Failures can't be healed or damaged past the average for 1 round — the excess is voided",
             "mech": {
               "deny": [
                 "healing"
@@ -118,7 +133,8 @@
             }
           },
           {
-            "text": "The equalization persists for 1 minute on a failed save. Whenever any tethered creature takes damage or receives healing, all tethered creatures adjust toward the new average at the start of each of their turns."
+            "text": "The equalization persists for 1 minute on a failed save. Whenever any tethered creature takes damage or receives healing, all tethered creatures adjust toward the new average at the start of each of their turns.",
+            "card": "Persists 1 min — every hit or heal re-averages the whole group at the start of your turn"
           }
         ]
       },
@@ -127,13 +143,16 @@
         "description": "You gave it freely — Balance asks that you receive it in kind, returning offensive force to its source with the same indifference it was sent.",
         "tiers": [
           {
-            "text": "One creature gains reflection until the start of your next turn — the next offensive effect that targets them and fails is reflected back at its source, dealing the same damage type and amount."
+            "text": "One creature gains reflection until the start of your next turn — the next offensive effect that targets them and fails is reflected back at its source, dealing the same damage type and amount.",
+            "card": "A creature gains reflection — the next offensive effect that fails against them returns to its source"
           },
           {
-            "text": "The reflection persists for 1 minute. While active, any offensive effect that passes through the protected creature's space may also be reflected."
+            "text": "The reflection persists for 1 minute. While active, any offensive effect that passes through the protected creature's space may also be reflected.",
+            "card": "Reflection lasts 1 min · effects passing through their space may reflect too"
           },
           {
             "text": "On a failed save by the reflected attacker, they must also succeed on a Wisdom saving throw against your Verum DC or be Stunned for 1 round by the disorientation of receiving their own force.",
+            "card": "The reflected attacker also makes a Wis save {DC} or is Stunned 1 round by their own force",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -148,6 +167,7 @@
           },
           {
             "text": "The reflected effect is returned at full power without requiring a save from the protected creature. If the attacker is killed by their own reflected effect, they cannot be resurrected by mundane means for 24 hours — Balance has returned them as completely as it returned their spell.",
+            "card": "Reflected at full power with no save · killed by their own effect and mundane revival fails",
             "mech": {
               "deny": [
                 "revival"
@@ -164,14 +184,17 @@
       "type": "Offensive",
       "description": "What was given is taken back — one active buff is stripped from the target and corrected out of existence, because the math was never in their favor.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target loses one active buff of your choice (a bonus to AC, attack rolls, saving throws, or damage). The stripped bonus vanishes for 1 round — neither transferred nor stored, simply corrected."
+        "text": "On a hit or failed saving throw against the primary effect, the target loses one active buff of your choice (a bonus to AC, attack rolls, saving throws, or damage). The stripped bonus vanishes for 1 round — neither transferred nor stored, simply corrected.",
+        "card": "Strips one active buff of your choice"
       },
       "upgrades": [
         {
-          "text": "The stripped bonus is transferred to one creature of your choice within 30 feet rather than voided — Balance moves it rather than erasing it, and the recipient holds it for 1 minute."
+          "text": "The stripped bonus is transferred to one creature of your choice within 30 feet rather than voided — Balance moves it rather than erasing it, and the recipient holds it for 1 minute.",
+          "card": "The stripped bonus moves to an ally within 30 ft instead of vanishing"
         },
         {
-          "text": "You may strip two active buffs simultaneously. Each is transferred to a different ally of your choice."
+          "text": "You may strip two active buffs simultaneously. Each is transferred to a different ally of your choice.",
+          "card": "Strip two buffs · each goes to a different ally"
         }
       ]
     },
@@ -180,14 +203,17 @@
       "type": "Supportive",
       "description": "The harm does not leave the world — it simply agrees to be useful, converting damage into healing for an ally as nothing is created, only moved.",
       "effect": {
-        "text": "When the primary effect deals damage, one ally within 30 feet regains hit points equal to half the damage dealt (rounded down, minimum equal to your spellcasting modifier)."
+        "text": "When the primary effect deals damage, one ally within 30 feet regains hit points equal to half the damage dealt (rounded down, minimum equal to your spellcasting modifier).",
+        "card": "An ally within 30 ft heals half the damage dealt (min {VM})"
       },
       "upgrades": [
         {
-          "text": "You may split this healing between two allies, dividing the total as you choose."
+          "text": "You may split this healing between two allies, dividing the total as you choose.",
+          "card": "Split the healing between two allies as you like"
         },
         {
           "text": "The healing increases to equal the full damage dealt, and each healed ally also gains temporary hit points equal to your proficiency bonus as the redistributed force settles into them.",
+          "card": "Healing equals the full damage · each ally also gets {PB} temp HP",
           "mech": {
             "heal": {
               "tempHP": true
@@ -202,6 +228,7 @@
       "description": "In this space, certainty does not exist — advantage and disadvantage cancel each other entirely, leaving only the bare probability of the roll.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, a 15-foot radius zone of equilibrium appears centered on the point of impact, lasting until the end of your next turn. Within this zone, advantage and disadvantage cancel each other entirely — creatures roll all d20s flat, with no advantage or disadvantage from any source.",
+        "card": "15 ft of equilibrium at the impact point",
         "mech": {
           "terrain": {
             "radius": 15
@@ -211,6 +238,7 @@
       "upgrades": [
         {
           "text": "The zone persists for 1 minute and its radius increases to 30 feet. Creatures that enter the zone for the first time on a turn must succeed on a Wisdom saving throw against your Verum DC or lose any active advantage on their next roll.",
+          "card": "Lasts 1 min · radius 30 ft · first entry each turn is tested",
           "mech": {
             "save": {
               "ability": "Wisdom"
@@ -221,7 +249,8 @@
           }
         },
         {
-          "text": "The zone also nullifies the first critical hit or critical failure that occurs within it each round — the roll is treated as a normal success or failure instead, Balance refusing to allow extremes even at the margins."
+          "text": "The zone also nullifies the first critical hit or critical failure that occurs within it each round — the roll is treated as a normal success or failure instead, Balance refusing to allow extremes even at the margins.",
+          "card": "Also nullifies the first crit or critical failure inside it each round"
         }
       ]
     }

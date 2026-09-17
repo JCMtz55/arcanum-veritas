@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "On a hit or failed save, the target cannot regain hit points for 1 minute, and if reduced to 0 HP before the effect ends they cannot be stabilized by nonmagical means.",
+            "card": "No healing for 1 min · dropped to 0 they can't be stabilised by nonmagical means",
             "mech": {
               "deny": [
                 "healing"
@@ -22,6 +23,7 @@
           },
           {
             "text": "On a failed save the target becomes Soul Displaced for 1 minute — disadvantage on all Wisdom and Charisma checks and saves, cannot benefit from healing, and takes +1d8 necrotic damage from all sources.",
+            "card": "Soul Displaced 1 min — disadvantage on Wis and Cha, no healing, +1d8 necrotic taken",
             "mech": {
               "damage": {
                 "dice": "1d8",
@@ -34,6 +36,7 @@
           },
           {
             "text": "On a failed save the target is also Soul Bound — unable to teleport, plane shift, or enter dreamspaces. If they die while Soul Bound, their soul is trapped in a vessel of your choice for 24 hours.",
+            "card": "Soul Bound — no teleport, plane shift or dreamspace · dying traps their soul in a vessel 24 hrs",
             "mech": {
               "deny": [
                 "teleport"
@@ -42,6 +45,7 @@
           },
           {
             "text": "Once per long rest, attempt a True Soul Severance — on a failure: the soul is cut loose. The creature instantly falls to 0 HP and cannot be revived by Revivify, Raise Dead, or Resurrection. Only Wish, Arcanum Veritas, or Divine Intervention may restore it.",
+            "card": "1/long rest True Soul Severance — fail and they drop to 0, beyond Revivify, Raise Dead or Resurrection",
             "mech": {
               "deny": [
                 "revival"
@@ -57,13 +61,16 @@
         "description": "Allow yourself or another to temporarily transcend physical boundaries.",
         "tiers": [
           {
-            "text": "The target gains resistance to non-magical damage for 1 minute as their soul briefly reinforces the flesh."
+            "text": "The target gains resistance to non-magical damage for 1 minute as their soul briefly reinforces the flesh.",
+            "card": "Resist nonmagical damage 1 min as the soul reinforces the flesh"
           },
           {
-            "text": "The target becomes incorporeal for 30 seconds — able to move through walls once per round, immune to grapples and restraints, and unable to be targeted by non-magical attacks."
+            "text": "The target becomes incorporeal for 30 seconds — able to move through walls once per round, immune to grapples and restraints, and unable to be targeted by non-magical attacks.",
+            "card": "Incorporeal 30 sec — through walls once a round, no grapples, untouchable by nonmagical attacks"
           },
           {
             "text": "Enter or grant Soulform for 1 minute — immunity to poison, disease, exhaustion, and the Charmed condition; the target floats, leaves no physical trace, and cannot be detected by mundane senses.",
+            "card": "Soulform 1 min — immune to poison, disease, exhaustion and Charm · floats, leaves no trace",
             "mech": {
               "conditions": [
                 {
@@ -76,7 +83,8 @@
             }
           },
           {
-            "text": "Possess a willing creature or haunt an item for 1 hour — while possessing, you may cast spells through the host using your own spell slots. If haunting an item, it gains sentience, your voice, and one magical property based on your soul's Cognition Affinity."
+            "text": "Possess a willing creature or haunt an item for 1 hour — while possessing, you may cast spells through the host using your own spell slots. If haunting an item, it gains sentience, your voice, and one magical property based on your soul's Cognition Affinity.",
+            "card": "Possess a willing creature or haunt an item 1 hr — cast through the host with your own slots"
           }
         ]
       },
@@ -85,10 +93,12 @@
         "description": "Bind souls together across time, distance, or fate.",
         "tiers": [
           {
-            "text": "Two creatures you touch become soulbound — while within 30 feet they may freely transfer up to 5 damage per round between them."
+            "text": "Two creatures you touch become soulbound — while within 30 feet they may freely transfer up to 5 damage per round between them.",
+            "card": "Two touched creatures soulbind — transfer up to 5 damage a round while within 30 ft"
           },
           {
             "text": "Bind up to 3 creatures — while adjacent they gain +1 AC and +1 to all saving throws.",
+            "card": "Bind up to 3 · while adjacent they gain +1 AC and +1 to all saves",
             "mech": {
               "buff": {
                 "ac": 1
@@ -97,6 +107,7 @@
           },
           {
             "text": "If one soulbound creature dies, the others may make a Charisma saving throw to absorb their soul — gaining temporary hit points equal to half the fallen creature's maximum HP and the knowledge of one of their known spells or abilities for 1 hour.",
+            "card": "If a bound creature dies, the rest may Cha save to absorb the soul — half its max HP as temp HP",
             "mech": {
               "save": {
                 "ability": "Charisma"
@@ -108,6 +119,7 @@
           },
           {
             "text": "Perform a Soul Merge — fuse two creatures (willing or unconscious) into a single being for 1 minute. The merged creature uses the higher stat of each pair. After separation, both targets gain 1 level of Exhaustion.",
+            "card": "Soul Merge 1 min — fuse two creatures into one that uses the better of every stat",
             "mech": {
               "conditions": [
                 {
@@ -129,16 +141,20 @@
         "description": "Burn your essence into a creature, object, or location.",
         "tiers": [
           {
-            "text": "Mark a creature with your soul signature — you always know their direction and HP status for 1 day."
+            "text": "Mark a creature with your soul signature — you always know their direction and HP status for 1 day.",
+            "card": "Brand a soul — know their direction and HP for a day"
           },
           {
-            "text": "While within 1 mile, you may cast Message, Detect Thoughts, or Command once per long rest on the branded target."
+            "text": "While within 1 mile, you may cast Message, Detect Thoughts, or Command once per long rest on the branded target.",
+            "card": "Within a mile, cast Message, Detect Thoughts or Command on them 1/long rest"
           },
           {
-            "text": "You may cast Dominate Person on the soulbranded target once per long rest, regardless of distance."
+            "text": "You may cast Dominate Person on the soulbranded target once per long rest, regardless of distance.",
+            "card": "Dominate Person on the branded target 1/long rest, at any distance"
           },
           {
             "text": "Permanently brand a soul — the target cannot be resurrected unless you willingly remove the mark. You always know if the branded soul enters a different plane, and may choose to pull it back once per long rest.",
+            "card": "Permanent brand — they can't be resurrected unless you release it, and you feel them cross planes",
             "mech": {
               "deny": [
                 "revival"
@@ -152,16 +168,20 @@
         "description": "Call forth the residual spirit of a dead being.",
         "tiers": [
           {
-            "text": "Touching a corpse allows you to ask a single yes/no or memory-based question — the residual soul answering from whatever remains."
+            "text": "Touching a corpse allows you to ask a single yes/no or memory-based question — the residual soul answering from whatever remains.",
+            "card": "Touch a corpse for one yes/no or memory question"
           },
           {
-            "text": "Summon an Echo of the Soul — a semi-corporeal illusion that can deliver messages, answer questions about the deceased's knowledge, or enact one simple command."
+            "text": "Summon an Echo of the Soul — a semi-corporeal illusion that can deliver messages, answer questions about the deceased's knowledge, or enact one simple command.",
+            "card": "Summon an Echo — semi-corporeal, carries messages, answers, or one simple command"
           },
           {
-            "text": "Recreate a complete ghostly simulacrum for 10 minutes — capable of full speech, emotional expression, and minor physical action. It possesses all memories the creature had in life."
+            "text": "Recreate a complete ghostly simulacrum for 10 minutes — capable of full speech, emotional expression, and minor physical action. It possesses all memories the creature had in life.",
+            "card": "A full ghostly simulacrum 10 min — speech, feeling, all the memories they had in life"
           },
           {
             "text": "Summon an Ancestral Projection — a fully sentient ghostly avatar of the soul that fights beside you as a CR 7 creature under your command for 1 hour. It retains the original's personality, abilities, and Cognition affinities.",
+            "card": "Ancestral Projection 1 hr — a sentient CR 7 ghost fighting beside you, personality intact",
             "mech": {
               "summon": {
                 "cr": "7"
@@ -175,16 +195,20 @@
         "description": "Alter, veil, or rewrite the visible imprint of a soul.",
         "tiers": [
           {
-            "text": "Mask your alignment and essence for 10 minutes — you do not register as celestial, fiend, or undead to detection effects."
+            "text": "Mask your alignment and essence for 10 minutes — you do not register as celestial, fiend, or undead to detection effects.",
+            "card": "Mask your essence 10 min — you don't register as celestial, fiend or undead"
           },
           {
-            "text": "Project another soul's echo onto yours — you register as that creature to divination, dream-reading, and soul-detection spells for 1 hour."
+            "text": "Project another soul's echo onto yours — you register as that creature to divination, dream-reading, and soul-detection spells for 1 hour.",
+            "card": "Wear another soul's echo 1 hr — divination and dream-reading read you as them"
           },
           {
-            "text": "Rewrite a creature's soul signature for 1 hour — they appear as a different species or divine origin, fooling Cognition-scanners, Grimm detectors, and Dreamcrafters entirely."
+            "text": "Rewrite a creature's soul signature for 1 hour — they appear as a different species or divine origin, fooling Cognition-scanners, Grimm detectors, and Dreamcrafters entirely.",
+            "card": "Rewrite a creature's soul signature 1 hr — a different species or divine origin entirely"
           },
           {
-            "text": "Once per week, perform a Soul Rewrite — permanently change one subclass, Cognition affinity, or Grimm bond (GM approval required). The change is permanent unless reversed by Arcanum Veritas or a deity."
+            "text": "Once per week, perform a Soul Rewrite — permanently change one subclass, Cognition affinity, or Grimm bond (GM approval required). The change is permanent unless reversed by Arcanum Veritas or a deity.",
+            "card": "1/week Soul Rewrite — permanently change a subclass, Cognition affinity or Grimm bond"
           }
         ]
       }
@@ -197,6 +221,7 @@
       "description": "The spell tears something deeper than flesh.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target cannot regain hit points until the end of your next turn, and must succeed on a Charisma saving throw or have disadvantage on all Soul saving throws (Death, Curse, Possession, Dream Collapse) for 1 minute.",
+        "card": "No healing until your next turn · Cha save {DC} or worse",
         "mech": {
           "save": {
             "ability": "Charisma"
@@ -212,6 +237,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The HP recovery block extends for 1 minute, and the target also loses resistance to necrotic and psychic damage for the same duration.",
+          "card": "Blocked for 1 min · also loses necrotic and psychic resistance",
           "mech": {
             "damage": {
               "type": "psychic"
@@ -219,7 +245,8 @@
           }
         },
         {
-          "text": "Level 11+: The Soul Wound becomes a Soul Fracture — the target loses 1 attunement slot until they complete a long rest, cannot benefit from soulbound items, and divine or dream-sourced healing on them is halved."
+          "text": "Level 11+: The Soul Wound becomes a Soul Fracture — the target loses 1 attunement slot until they complete a long rest, cannot benefit from soulbound items, and divine or dream-sourced healing on them is halved.",
+          "card": "Soul Fracture — loses an attunement slot until a long rest"
         }
       ]
     },
@@ -229,6 +256,7 @@
       "description": "The soul is briefly made unassailable.",
       "effect": {
         "text": "When the primary effect resolves, one ally of your choice within 30 feet has their soul briefly reinforced — they gain advantage on death saving throws and cannot be Soul Displaced, soul-branded by hostile effects, or possessed until the start of your next turn.",
+        "card": "An ally within 30 ft: advantage on death saves and a soul held in place",
         "mech": {
           "buff": {
             "advantage": "death saving throws and cannot be Soul Displaced"
@@ -238,6 +266,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The protection persists for 1 minute, and the ally also gains advantage on Charisma saving throws while the anchor holds.",
+          "card": "Lasts 1 min · also advantage on Cha saves",
           "mech": {
             "save": {
               "ability": "Charisma"
@@ -248,7 +277,8 @@
           }
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to the effects of Soul Severance and Soul Fracture for the duration."
+          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to the effects of Soul Severance and Soul Fracture for the duration.",
+          "card": "Two allies · each immune to Soul Severance effects"
         }
       ]
     },
@@ -258,6 +288,7 @@
       "description": "The spell marks the target's spiritual core.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target's soul is marked with a spiritual stigma — they are treated as Cursed for all magical effects, cannot benefit from Inspiration or Guidance, and are permanently detectable to divine and dream sensors.",
+        "card": "Spiritual stigma — they count as Cursed for every magical effect",
         "mech": {
           "conditions": [
             {
@@ -269,6 +300,7 @@
       "upgrades": [
         {
           "text": "Level 5+: The target also becomes Unanchored — disadvantage on saving throws against possession, curse effects, and soul-severing for 1 minute.",
+          "card": "Also Unanchored — disadvantage against possession, curses and soul-severing",
           "mech": {
             "penalty": {
               "disadvantage": "saving throws against possession"
@@ -277,6 +309,7 @@
         },
         {
           "text": "Level 11+: Any effect that would heal the target heals for the minimum possible value, and if they attempt to attune to a holy object or cast a divine spell, a Rebound Curse activates dealing psychic damage equal to your spellcasting modifier + proficiency bonus.",
+          "card": "All healing on them is minimum value · holy attunement fails",
           "mech": {
             "damage": {
               "type": "psychic"

@@ -14,6 +14,7 @@
         "tiers": [
           {
             "text": "When you cast an effect while Wounded, you may expend hit dice equal to your proficiency bonus — add the total rolled as Sanguine damage to one damage roll.",
+            "card": "Wounded: spend {PB} Hit Dice, add the total as Sanguine to one damage roll",
             "mech": {
               "damage": {
                 "type": "sanguine"
@@ -21,10 +22,12 @@
             }
           },
           {
-            "text": "While you have 1 or more Injuries, you gain a bonus to one spell save DC of your choice equal to half your proficiency bonus."
+            "text": "While you have 1 or more Injuries, you gain a bonus to one spell save DC of your choice equal to half your proficiency bonus.",
+            "card": "With 1+ Injuries: +half {PB} to one spell save DC of your choice"
           },
           {
             "text": "You may voluntarily gain 1d4 Wounds as part of casting. If you do, your next attack or effect deals maximum damage to one target.",
+            "card": "Take 1d4 Wounds voluntarily — your next attack or effect deals maximum damage",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -32,7 +35,8 @@
             }
           },
           {
-            "text": "Once per long rest, if you have at least 1 Injury, enter Pain Ascendance for 1 minute — you gain resistance to all damage, cast spells without material components, reroll 1s on all damage dice, and cannot be reduced to 0 HP by anything other than a critical hit."
+            "text": "Once per long rest, if you have at least 1 Injury, enter Pain Ascendance for 1 minute — you gain resistance to all damage, cast spells without material components, reroll 1s on all damage dice, and cannot be reduced to 0 HP by anything other than a critical hit.",
+            "card": "1/long rest with an Injury: Pain Ascendance 1 min — resist all damage, no materials, reroll 1s"
           }
         ]
       }
@@ -44,6 +48,7 @@
         "tiers": [
           {
             "text": "When you take damage, you may use your reaction to target one creature within 30 feet — it must succeed on a Constitution saving throw against your Verum DC or take half the damage you took as Sanguine damage.",
+            "card": "React to damage taken — a creature within 30 ft: Con save {DC} or take half of it as Sanguine",
             "mech": {
               "damage": {
                 "type": "sanguine"
@@ -55,6 +60,7 @@
           },
           {
             "text": "Target up to two creatures within 60 feet. Creatures that fail their save take the full damage you took as Sanguine damage.",
+            "card": "Two creatures within 60 ft · failures take the full amount",
             "mech": {
               "damage": {
                 "type": "sanguine"
@@ -63,6 +69,7 @@
           },
           {
             "text": "Once per round you may use Agony Echo without expending your reaction. Creatures that fail their save also gain 1 level of Exhaustion.",
+            "card": "1/round without spending your reaction · failures also gain a level of Exhaustion",
             "mech": {
               "conditions": [
                 {
@@ -73,6 +80,7 @@
           },
           {
             "text": "Agony Echo becomes a Chain Reaction — when you take damage, choose up to three creatures within 90 feet. On a failed save each takes the full damage (Sanguine), gains 1 Wound, suffers 1 level of Exhaustion, and becomes Staggered (disadvantage on attacks and saves until the end of their next turn).",
+            "card": "Chain Reaction — three creatures within 90 ft, full damage, 1 Wound and a level of Exhaustion each",
             "mech": {
               "conditions": [
                 {
@@ -92,6 +100,7 @@
         "tiers": [
           {
             "text": "While you have 1 or more Wounds, gain advantage on Constitution saving throws and +1 to AC.",
+            "card": "While Wounded: advantage on Con saves and +1 AC",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -104,6 +113,7 @@
           },
           {
             "text": "While Wounded or Injured, you deal +2 damage on all attacks and spells and cannot be Frightened.",
+            "card": "While Wounded or Injured: +2 damage on everything, and you can't be Frightened",
             "mech": {
               "conditions": [
                 {
@@ -114,6 +124,7 @@
           },
           {
             "text": "While at half HP or below and Wounded, gain regeneration 5 at the start of your turn. This regeneration is suppressed for 1 round if you take radiant damage.",
+            "card": "At half HP and Wounded: regeneration 5 (suppressed a round by radiant)",
             "mech": {
               "damage": {
                 "type": "radiant"
@@ -122,6 +133,7 @@
           },
           {
             "text": "Gain a Legendary Pain Response — when you would drop to 0 HP, remain conscious at 1 HP. While in this state you may take 1 extra action per turn, are immune to pain-induced Exhaustion, Fear, and Charm, and the state lasts 1 minute or until you are healed above half HP.",
+            "card": "Legendary Pain Response — at 0 HP stay conscious at 1, one extra action per turn, no pain Exhaustion or Fear",
             "mech": {
               "conditions": [
                 {
@@ -143,6 +155,7 @@
         "tiers": [
           {
             "text": "Targets damaged by the effect must succeed on a Wisdom saving throw or suffer disadvantage on their next attack roll.",
+            "card": "Damaged targets: Wis save or disadvantage on their next attack",
             "mech": {
               "save": {
                 "ability": "Wisdom"
@@ -154,6 +167,7 @@
           },
           {
             "text": "Creatures that fail also lose resistance to psychic, Sanguine, and necrotic damage until the end of your next turn.",
+            "card": "Failures also lose resistance to psychic, Sanguine and necrotic until your next turn",
             "mech": {
               "damage": {
                 "type": "necrotic"
@@ -161,10 +175,12 @@
             }
           },
           {
-            "text": "If the effect causes a Wound, the target suffers a stacking −1 penalty to saving throws for the rest of the encounter. This stacks with each Wound inflicted."
+            "text": "If the effect causes a Wound, the target suffers a stacking −1 penalty to saving throws for the rest of the encounter. This stacks with each Wound inflicted.",
+            "card": "Each Wound you inflict stacks −1 to their saves for the rest of the encounter"
           },
           {
             "text": "Designate one target — until the end of your next turn it automatically fails death saving throws if unconscious, cannot recover from Wounds, and must succeed on a Constitution saving throw against your Verum DC or have any Injury suffered become permanent unless healed by Greater Restoration or stronger.",
+            "card": "One target auto-fails death saves, can't recover Wounds, and saves again or worsens",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -183,10 +199,12 @@
         "description": "Your spell rends more than flesh — inflicting Wounds that cripple movement or grip, stacking into Injuries, and eventually destroying named body parts with permanent consequences.",
         "tiers": [
           {
-            "text": "If a creature fails its save, it suffers 1 Wound in addition to any damage dealt. Choose one limb or organ affected by the wound."
+            "text": "If a creature fails its save, it suffers 1 Wound in addition to any damage dealt. Choose one limb or organ affected by the wound.",
+            "card": "Fail: 1 Wound on a limb or organ you name"
           },
           {
             "text": "The Wound becomes crippling — if physical, the target suffers −10 feet of movement, disadvantage on Dexterity checks, or drops one held item (your choice).",
+            "card": "The Wound cripples — −10 ft speed, disadvantage on Dex checks, or drops an item, your choice",
             "mech": {
               "penalty": {
                 "disadvantage": "Dexterity checks"
@@ -195,6 +213,7 @@
           },
           {
             "text": "If a creature takes 2 or more Wounds from the same effect, they must succeed on a Constitution save or gain 1 Injury from the appropriate table.",
+            "card": "2+ Wounds from one effect: Con save or gain an Injury",
             "mech": {
               "save": {
                 "ability": "Constitution"
@@ -202,7 +221,8 @@
             }
           },
           {
-            "text": "Declare a named body part when casting (heart, lungs, eyes, spine, etc.). If the creature fails the save, it suffers a thematic permanent Injury in that location unless restored by 7th level vitaemancy or divine intervention."
+            "text": "Declare a named body part when casting (heart, lungs, eyes, spine, etc.). If the creature fails the save, it suffers a thematic permanent Injury in that location unless restored by 7th level vitaemancy or divine intervention.",
+            "card": "Name a body part when you cast — fail and the Injury there is permanent short of 7th-level vitaemancy"
           }
         ]
       }
@@ -214,12 +234,14 @@
         "tiers": [
           {
             "text": "Learn every injury, illness, and old wound a creature carries by touch, and how each was earned. With consent, deaden or restore a creature's sense of pain for 1 hour.",
+            "card": "Read every injury and old wound by touch, and how each was earned · deaden or restore pain 1 hr",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Know when a creature within 60 feet is lying about how it feels — pain, fear, or exhaustion it is hiding. Ease a willing creature's chronic pain for 24 hours.",
+            "card": "Know when someone within 60 ft hides pain, fear or exhaustion · ease chronic pain 24 hrs",
             "mech": {
               "conditions": [
                 {
@@ -230,12 +252,14 @@
           },
           {
             "text": "Take a willing creature's pain into yourself for up to 1 hour — you feel it, they do not, and neither of you takes damage from the transfer.",
+            "card": "Take a willing creature's pain into yourself up to 1 hr — neither of you takes damage",
             "mech": {
               "utility": true
             }
           },
           {
             "text": "Read a body's entire history of suffering — every wound and every hand that dealt it, in order. Or grant a willing creature a full day without pain, however they came by it.",
+            "card": "Read a body's whole history of suffering, in order · or give someone a full day without pain",
             "mech": {
               "utility": true
             }
@@ -251,6 +275,7 @@
       "description": "The spell finds the places that hurt most — the nerve response briefly overriding the target's ability to attack cleanly or hold Concentration.",
       "effect": {
         "text": "On a hit or failed saving throw against the primary effect, the target must succeed on a Constitution saving throw against your Verum DC or have disadvantage on their next attack roll and their next Constitution saving throw.",
+        "card": "Con save {DC} or disadvantage on their next attack",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -263,6 +288,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the disadvantage extends to all attack rolls and Constitution saves until the end of their next turn rather than just the first.",
+          "card": "Extends to all attacks and Con saves until end of their next turn",
           "mech": {
             "save": {
               "ability": "Constitution"
@@ -271,6 +297,7 @@
         },
         {
           "text": "Creatures that fail also cannot maintain Concentration — they must immediately make a Concentration check against your Verum DC or lose whatever they were concentrating on, the nerve strike scattering their focus completely.",
+          "card": "Failures must make a Concentration check {DC} or lose what they're holding",
           "mech": {
             "deny": [
               "concentration"
@@ -284,11 +311,13 @@
       "type": "Supportive",
       "description": "Wounds become walls — an ally's experience of pain sharpening their instincts into a bonus to AC and saving throws equal to their current Wound count.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains a bonus to AC and saving throws equal to their current Wound count (minimum +1) until the start of your next turn."
+        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains a bonus to AC and saving throws equal to their current Wound count (minimum +1) until the start of your next turn.",
+        "card": "An ally within 30 ft: bonus to AC and saves equal to their Wound count (min +1)"
       },
       "upgrades": [
         {
           "text": "The bonus persists for 1 minute rather than until your next turn, and the ally also gains advantage on death saving throws while the effect is active.",
+          "card": "Lasts 1 min · also advantage on death saves",
           "mech": {
             "buff": {
               "advantage": "death saving throws while the effect is active"
@@ -296,7 +325,8 @@
           }
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also gains resistance to the damage type that last wounded them — their body having adapted to the pain of that specific harm."
+          "text": "You may choose two allies to receive this benefit, and each also gains resistance to the damage type that last wounded them — their body having adapted to the pain of that specific harm.",
+          "card": "Two allies · each resists the damage type that last wounded them"
         }
       ]
     },
@@ -306,6 +336,7 @@
       "description": "Too much at once — the pain signal flooding the target's nervous system strips their reaction and halves their speed until they can think past the noise.",
       "effect": {
         "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Constitution saving throw against your Verum DC or be Staggered — they lose their reaction and their movement speed is halved until the end of their next turn.",
+        "card": "Con save {DC} or Staggered",
         "mech": {
           "save": {
             "ability": "Constitution"
@@ -318,6 +349,7 @@
       "upgrades": [
         {
           "text": "On a failed save, the target also has disadvantage on the first saving throw they make before the end of their next turn — the stagger leaving them slow to respond to the next threat.",
+          "card": "Also disadvantage on their first save before end of their next turn",
           "mech": {
             "penalty": {
               "disadvantage": "the first saving throw they make before the end of"
@@ -325,7 +357,8 @@
           }
         },
         {
-          "text": "Creatures that fail also cannot take bonus actions until the end of their next turn, the stagger consuming every spare moment of their attention."
+          "text": "Creatures that fail also cannot take bonus actions until the end of their next turn, the stagger consuming every spare moment of their attention.",
+          "card": "Also no bonus actions until end of their next turn"
         }
       ]
     }
