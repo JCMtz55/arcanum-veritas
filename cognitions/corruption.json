@@ -19,6 +19,18 @@
         ]
       }
     ],
+    "supportive": [
+      {
+        "name": "The Bargain",
+        "description": "It never takes. It offers, and lets you do the taking.",
+        "tiers": [
+          "A willing creature gains +1d4 to attack rolls and saving throws for 1 minute. When the effect ends it gains 1 Corruption Point.",
+          "+1d6, and once during the duration the creature may reroll any die. 2 Corruption Points.",
+          "+1d8, and resistance to all damage while below half its hit points. 3 Corruption Points, and the creature cannot choose to end the effect early.",
+          "+1d10, advantage on all saving throws, and immunity to Frightened and Charmed. 4 Corruption Points — and you know the instant it crosses a threshold."
+        ]
+      }
+    ],
     "control": [
       {
         "name": "Soul Spoil",

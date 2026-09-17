@@ -7,6 +7,18 @@
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Severance Strike",
+        "description": "The wound is not the point. The distance it opens is.",
+        "tiers": [
+          "The damage becomes psychic and gains +2 dice. One additional die if no ally of the target is within 10 feet of it.",
+          "+4 dice. The target cannot regain hit points from any source other than itself until the end of its next turn.",
+          "+6 dice, plus one further die for every 30 feet between the target and its nearest ally (maximum 3).",
+          "+8 dice. The target is Severed for 1 minute: it cannot receive healing, buffs, or the Help action from any creature, and this effect deals half again as much damage to it while it is alone."
+        ]
+      }
+    ],
     "supportive": [
       {
         "name": "Withdraw",

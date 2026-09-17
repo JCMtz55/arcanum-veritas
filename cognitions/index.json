@@ -50,6 +50,13 @@
       "ready": true
     },
     {
+      "id": "carnage",
+      "name": "Carnage",
+      "icon": "🩸",
+      "opposing": "harmony",
+      "ready": true
+    },
+    {
       "id": "civilization",
       "name": "Civilization",
       "icon": "🏛️",
@@ -61,7 +68,7 @@
       "name": "Control",
       "icon": "👑",
       "opposing": "power",
-      "ready": true
+      "ready": false
     },
     {
       "id": "corruption",
@@ -208,7 +215,7 @@
       "name": "Shadow",
       "icon": "🌑",
       "opposing": "light",
-      "ready": true
+      "ready": false
     },
     {
       "id": "silence",
@@ -222,7 +229,7 @@
       "name": "Soul",
       "icon": "🕊️",
       "opposing": "corruption",
-      "ready": true
+      "ready": false
     },
     {
       "id": "speed",

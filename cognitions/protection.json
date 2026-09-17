@@ -7,6 +7,18 @@
   "savingThrow": "Constitution",
   "damageType": "Force",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Answering Blow",
+        "description": "A shield that only ever holds is half a shield.",
+        "tiers": [
+          "The damage becomes force and gains +2 dice, plus additional damage equal to your Verum Modifier for each ally who has taken damage since your last turn (maximum 3).",
+          "+4 dice. The target has disadvantage on attack rolls against anyone but you until the end of its next turn.",
+          "+6 dice. If the target has damaged an ally this round, this effect ignores its resistances and immunities.",
+          "+8 dice. For 1 minute, whenever an ally within 30 feet is hit by an attack, you may use your reaction to deal this effect's damage to the attacker at half value."
+        ]
+      }
+    ],
     "supportive": [
       {
         "name": "Guardian's Shell",

@@ -7,6 +7,30 @@
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Why Bother",
+        "description": "It does not hurt. It simply stops seeming worth it.",
+        "tiers": [
+          "+2 dice. The target subtracts 1d4 from its next attack roll.",
+          "+4 dice. The target has no bonus action on its next turn.",
+          "+6 dice. The target cannot use reactions or legendary actions until the end of its next turn.",
+          "+8 dice. On a failed save, the target takes no action on its next turn at all."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Nothing Reaches You",
+        "description": "Armor made of not caring.",
+        "tiers": [
+          "The target gains resistance to psychic damage and immunity to Frightened for 1 minute.",
+          "Also immunity to Charmed and advantage on Wisdom saving throws — but the creature gains no benefit from inspiration, morale, or rallying effects.",
+          "The creature ignores the penalties of Injuries and of exhaustion levels 1–2.",
+          "Immune to every emotion-based effect, and on dropping to 0 hit points it remains conscious and stable — it simply does not find dying urgent."
+        ]
+      }
+    ],
     "control": [
       {
         "name": "Will Suppression",

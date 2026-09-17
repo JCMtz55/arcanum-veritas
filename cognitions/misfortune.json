@@ -7,6 +7,30 @@
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Everything Goes Wrong",
+        "description": "The damage is incidental. The timing is the weapon.",
+        "tiers": [
+          "+2 dice. The target's next attack roll or ability check has disadvantage.",
+          "+4 dice. The target subtracts 1d4 from its next d20 roll of any kind.",
+          "+6 dice. The target's critical hits become normal hits for 1 minute, and on a natural 1 it takes this damage again.",
+          "+8 dice. For 1 minute the target rolls every d20 twice and takes the lower result."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Borrowed Luck",
+        "description": "Your bad day, aimed somewhere useful.",
+        "tiers": [
+          "For 1 minute, any creature attacking the target subtracts 1d4 from the roll.",
+          "1d6, and once per turn an attacker's damage roll drops its highest die.",
+          "1d8, and the first critical hit scored against the creature becomes a miss.",
+          "Once per round, an attack against the creature simply misses — the strap breaks, the footing goes, the torch gutters."
+        ]
+      }
+    ],
     "control": [
       {
         "name": "Destined to Fail",

@@ -7,6 +7,30 @@
   "savingThrow": "Intelligence",
   "damageType": "Void",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Erasure",
+        "description": "Not destroyed. Withdrawn.",
+        "tiers": [
+          "+2 dice. Ignores resistance.",
+          "+4 dice. Ignores immunity, and erases the target's temporary hit points.",
+          "+6 dice. This damage cannot be reduced, prevented, or healed until the end of the target's next turn.",
+          "+8 dice. A creature reduced to 0 hit points is erased — no body, no remains, and no revival short of Wish or a god."
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Excision",
+        "description": "The cleanest cure is for the affliction to never have been.",
+        "tiers": [
+          "End one condition or magical effect of 3rd level or lower on a creature you touch.",
+          "Up to 5th level, and end one source of ongoing damage.",
+          "Up to 7th level, and the creature is immune to that specific effect for 1 minute.",
+          "Erase a curse, disease, or possession entirely. The creature is then immune to all magic of 5th level or lower for 1 minute — including yours."
+        ]
+      }
+    ],
     "control": [
       {
         "name": "Spellshatter",

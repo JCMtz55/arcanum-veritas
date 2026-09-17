@@ -7,6 +7,18 @@
   "savingThrow": "Charisma",
   "damageType": "Radiant",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Charge",
+        "description": "Fear is the prerequisite. This is what happens next.",
+        "tiers": [
+          "The damage becomes radiant and gains +2 dice. One additional die if you are below half your hit points, or if an ally is at 0 hit points.",
+          "+4 dice. If you moved at least 20 feet toward the target before this effect, it cannot take reactions until the end of its next turn.",
+          "+6 dice. Each ally who can see the hit gains temporary hit points equal to your Verum Modifier and ends the Frightened condition.",
+          "+8 dice. For 1 minute, the first time each round you use this effect against the most dangerous enemy you can see, it automatically hits and scores a critical."
+        ]
+      }
+    ],
     "supportive": [
       {
         "name": "Valiant Stand",

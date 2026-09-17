@@ -7,6 +7,18 @@
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Vital Theft",
+        "description": "Life is not created here. It is moved.",
+        "tiers": [
+          "+2 dice. You regain hit points equal to half the damage dealt.",
+          "+4 dice. The target's hit point maximum is reduced by the amount you healed until it finishes a long rest.",
+          "+6 dice. Healing beyond your maximum spills to allies within 30 feet.",
+          "+8 dice. If this reduces a creature to 0 hit points, one ally at 0 hit points within 60 feet returns to half their maximum."
+        ]
+      }
+    ],
     "supportive": [
       {
         "name": "Healing",
@@ -46,6 +58,18 @@
           "Whenever you heal a creature, one additional creature within 30 feet gains half that amount as overflow healing.",
           "For 1 minute, all allies within a 60-foot radius regain 1d6 hit points at the start of each of their turns.",
           "You become a Font of Life for 1 minute — you heal 20 HP at the start of every turn, allies in range automatically succeed on death saving throws, and allies that died this round rise to 1 HP unless their body was disintegrated."
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Unbearable Vitality",
+        "description": "Too much life, too fast, in a body that never agreed to it.",
+        "tiers": [
+          "On a failed Constitution save, the target's speed is halved and it cannot take reactions as tissue overgrows.",
+          "The target is Restrained by its own body, repeating the save at the end of each of its turns.",
+          "The target is Incapacitated as its cells riot.",
+          "The target is Paralyzed, and life sustains it against its will — it cannot drop below 1 hit point or die while the effect lasts."
         ]
       }
     ],

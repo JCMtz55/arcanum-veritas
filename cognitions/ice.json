@@ -7,6 +7,18 @@
   "savingThrow": "Constitution",
   "damageType": "Cold",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Shatterpoint",
+        "description": "Cold does not break things. It waits for them to become breakable.",
+        "tiers": [
+          "The damage becomes Cognitive Cold and gains +2 dice. A creature carrying any Frost Stack takes one additional die.",
+          "+4 dice. A creature with 2 or more Frost Stacks has vulnerability to this damage.",
+          "+6 dice. Against a creature that is Restrained, Frozen, or Paralyzed, this effect deals maximum damage.",
+          "+8 dice. A creature reduced to 0 hit points shatters — it cannot be revived by anything short of Greater Restoration, and every creature within 10 feet takes 4d10 cold damage from the burst."
+        ]
+      }
+    ],
     "supportive": [
       {
         "name": "Frozen Moment",
