@@ -170,7 +170,14 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 
 ## Layout
 
-On screens wider than 1180px the workspace splits into two columns — the picker and scaling table on the left, the summary and spell card on the right, with the right column sticky so the card stays visible while you change Sigils. Below that width everything stacks into one column.
+The builder is a three-column workbench, sized for a laptop or tablet.
+
+- **Command bar** (pinned): slot and level steppers, Verum mod and Dream mod, and the live numbers — to-hit, Verum DC, and how many cognitions you've used of your budget. These never scroll away. Arrow keys nudge the slot; shift+arrows nudge the level.
+- **Left rail**: every cognition, searchable. A selected Keystone is marked `core`, complements `sigil`. Entries grey out when you hit your budget or the cognition isn't written yet.
+- **Centre**: the composer — Ring, subtype, shape, manner, Verum effect with its tier ladder, the scaling strip (click any slot to jump to it), and each sigil with its chosen effect.
+- **Right**: the seal card. Play or Full, copy, print.
+
+Below 1100px the three columns stack, rail first.
 
 ## The Summary Card
 

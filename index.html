@@ -1,809 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcanum Veritas — Spell Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcanum Veritas — Seal Composer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root{
+  --slate:#1B1F26; --panel:#232A33; --panel2:#2B333D; --line:#39424E;
+  --bone:#E8E3D7; --bone2:#C2BDB2; --mute:#7E8791;
+  --ember:#C0553F; --verdant:#4E8C6A; --indigo:#6274B8; --brass:#B08842; --steel:#6E8B97;
+  --accent:var(--brass);
+  --sans:'Space Grotesk',system-ui,sans-serif;
+  --serif:'Spectral',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--slate); color:var(--bone);
+  font-family:var(--serif); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brass); outline-offset:2px}
 
-:root {
-  --bg:           #F7F5F0;
-  --bg2:          #EEEAE2;
-  --bg3:          #E0DAD0;
-  --border:       #C8C0B0;
-  --border2:      #A89880;
-  --text:         #1C1A16;
-  --text2:        #4A4438;
-  --text3:        #7A7060;
-  --accent:       #3B2A6E;
-  --accent3:      #7B5CC7;
-  --gold:         #7A5A08;
-  --gold2:        #C9A84C;
-  --gold-bg:      #FDF6E3;
-  --gold-border:  rgba(201,168,76,0.4);
-  --core-bg:      #EBF4EC;
-  --core-b:       #2E6B38;
-  --core-t:       #1A4A24;
-  --comp-bg:      #EBF0FB;
-  --comp-b:       #2A4A8A;
-  --comp-t:       #1A2E5C;
-  --off-accent:   #7A2020;
-  --sup-accent:   #1A5C3A;
-  --con-accent:   #3A3A8A;
-  --cre-accent:   #6B4E16;
-  --uti-accent:   #4A6B6B;
-  --radius:       6px;
-  --shadow:       0 2px 10px rgba(0,0,0,0.09);
-  --shadow-lg:    0 4px 22px rgba(0,0,0,0.14);
-  --sb-w:         280px;
+/* ── Command bar: the numbers never scroll away ───────────── */
+.bar{
+  display:flex; align-items:center; flex-wrap:wrap; row-gap:8px;
+  padding:10px 20px; background:var(--panel);
+  border-bottom:1px solid var(--line); position:sticky; top:0; z-index:40;
 }
+.brand{font-family:var(--sans); font-weight:700; font-size:15px; letter-spacing:-.01em; white-space:nowrap}
+.brand em{font-style:normal;color:var(--mute);font-weight:400;margin-left:8px;font-size:13px}
+.brand{margin-right:30px}
+.dials{display:flex; align-items:center; flex-wrap:wrap}
+.dial{display:flex; align-items:center; margin-right:20px}
+.dial label{margin-right:8px}
+.dial label{font-family:var(--sans); font-size:11px; color:var(--mute); letter-spacing:.02em}
+.step{display:flex; align-items:center; background:var(--slate); border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.step button{background:none;border:0;cursor:pointer;color:var(--mute);width:24px;height:28px;font-size:15px;line-height:1}
+.step button:hover{color:var(--bone);background:var(--panel2)}
+.step span{font-family:var(--sans); font-weight:500; min-width:34px; text-align:center; font-size:13px}
+.num{width:46px;height:28px;background:var(--slate);border:1px solid var(--line);border-radius:7px;
+  text-align:center;font-family:var(--sans);font-size:13px}
+.live{display:flex; margin-left:auto; align-items:center; flex-wrap:wrap}
+.lv{display:flex; align-items:baseline; padding:5px 11px; border-radius:7px; margin-left:9px;
+  background:var(--slate); border:1px solid var(--line)}
+.lv b{margin-right:6px}
+.lv b{font-family:var(--sans); font-weight:700; font-size:17px; letter-spacing:-.02em}
+.lv i{font-style:normal; font-family:var(--sans); font-size:10.5px; color:var(--mute)}
+.lv.atk b{color:var(--brass)} .lv.dc b{color:var(--indigo)}
+.status{font-family:var(--sans);font-size:11px;color:var(--mute);margin-left:14px}
+.status.err{color:var(--ember)}
 
-body {
-  font-family: 'Crimson Pro', Georgia, serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 16px;
-  line-height: 1.6;
-  min-height: 100vh;
+/* ── Board: three columns ─────────────────────────────────── */
+.board{display:flex; align-items:stretch; height:calc(100vh - 49px)}
+.rail{
+  flex:0 0 218px; border-right:1px solid var(--line); background:var(--panel);
+  display:flex; flex-direction:column; min-height:0;
 }
+.rail-top{padding:11px 12px 9px; border-bottom:1px solid var(--line)}
+.search{width:100%;height:30px;padding:0 10px;background:var(--slate);
+  border:1px solid var(--line);border-radius:7px;font-family:var(--sans);font-size:12.5px}
+.search::placeholder{color:var(--mute)}
+.cogs{overflow-y:auto; flex:1; padding:7px 8px; min-height:0}
+.cog{
+  display:flex; align-items:center; width:100%; text-align:left;
+  padding:6px 9px; margin-bottom:2px; background:none; border:1px solid transparent;
+  border-radius:7px; cursor:pointer; font-size:14px;
+}
+.cog:hover:not(.off){background:var(--panel2)}
+.cog .ico{font-size:13px;width:17px;text-align:center;opacity:.85;margin-right:8px}
+.cog .nm{margin-right:8px}
+.cog .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cog .rl{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  padding:2px 5px;border-radius:4px}
+.cog.core{background:rgba(176,136,66,.14);border-color:var(--brass)}
+.cog.core .rl{background:var(--brass);color:#1B1F26}
+.cog.comp{background:rgba(98,116,184,.13);border-color:#46527d}
+.cog.comp .rl{background:var(--indigo);color:#fff}
+.cog.off{opacity:.3;cursor:not-allowed}
+.rail-foot{padding:9px 12px;border-top:1px solid var(--line);display:flex}
+.ghost{flex:1;padding:6px;background:none;border:1px solid var(--line);border-radius:7px;
+  cursor:pointer;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+.ghost:hover{color:var(--bone);border-color:var(--mute)}
 
-/* ═══ HEADER ═══════════════════════════════════════════════ */
-header {
-  background: var(--accent);
-  border-bottom: 3px solid var(--gold2);
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.h-left { display: flex; align-items: baseline; gap: 12px; }
-header h1 {
-  font-family: 'Cinzel', serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-header .sub {
-  font-family: 'Cinzel', serif;
-  font-size: 0.65rem;
-  color: var(--gold2);
-  letter-spacing: 0.14em;
-  white-space: nowrap;
-}
-.h-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.status {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  padding: 3px 9px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6);
-  white-space: nowrap;
-}
-.status.ok  { border-color: #4CAF50; color: #81C784; }
-.status.err { border-color: #f44336; color: #EF9A9A; }
-
-/* ═══ LAYOUT ════════════════════════════════════════════════ */
-.layout {
-  display: flex;
-  height: calc(100vh - 59px);
-  overflow: hidden;
+.composer{flex:1 1 0; overflow-y:auto; padding:18px 22px; min-width:0}
+.seal{flex:0 0 clamp(380px,33%,520px); border-left:1px solid var(--line);
+  background:var(--panel); overflow-y:auto; min-width:0}
+@media (max-width:1100px){
+  .board{flex-direction:column;height:auto}
+  .rail{flex:none;border-right:0;border-bottom:1px solid var(--line)}
+  .cogs{max-height:190px}
+  .seal{flex:none;border-left:0;border-top:1px solid var(--line)}
 }
 
-/* ═══ SIDEBAR ═══════════════════════════════════════════════ */
-.sidebar {
-  width: var(--sb-w);
-  min-width: var(--sb-w);
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  flex-shrink: 0;
+/* ── Composer blocks ──────────────────────────────────────── */
+.blk{margin-bottom:22px}
+.blk-h{display:flex;align-items:center;margin-bottom:9px}
+.blk-h h2{margin-right:10px!important}
+.blk-h h2{margin:0;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--mute);letter-spacing:.01em}
+.blk-h .rule{flex:1;height:1px;background:var(--line)}
+.rings{display:flex;flex-wrap:wrap;margin:-4px}
+.ring{margin:4px}
+.ring{
+  flex:1 1 128px; padding:10px 12px; background:var(--panel); border:1px solid var(--line);
+  border-radius:9px; cursor:pointer; text-align:left; transition:border-color .12s,background .12s;
 }
-.sb-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.sb-scroll::-webkit-scrollbar { width: 4px; }
-.sb-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.sb-foot { padding: 9px 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.ring:hover{border-color:var(--mute)}
+.ring b{display:block;font-family:var(--sans);font-size:13.5px;font-weight:500;margin-bottom:2px}
+.ring span{font-size:12px;color:var(--mute);line-height:1.35;display:block}
+.ring.on{background:var(--panel2)}
+.ring.on.offensive{border-color:var(--ember)}   .ring.on.offensive b{color:var(--ember)}
+.ring.on.supportive{border-color:var(--verdant)} .ring.on.supportive b{color:var(--verdant)}
+.ring.on.control{border-color:var(--indigo)}     .ring.on.control b{color:var(--indigo)}
+.ring.on.creation{border-color:var(--brass)}     .ring.on.creation b{color:var(--brass)}
+.ring.on.utility{border-color:var(--steel)}      .ring.on.utility b{color:var(--steel)}
+.chips{display:flex;flex-wrap:wrap;margin:-3px}
+.chip{margin:3px}
+.chip{padding:5px 12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  cursor:pointer;font-family:var(--sans);font-size:12.5px;color:var(--bone2)}
+.chip:hover{border-color:var(--mute);color:var(--bone)}
+.chip.on{background:var(--bone);color:var(--slate);border-color:var(--bone);font-weight:500}
+.chip.dis{opacity:.32;pointer-events:none}
+.hint{font-size:12.5px;color:var(--mute);margin-top:6px;font-style:italic}
+.vname{font-size:17px;font-weight:600;color:var(--brass);margin-bottom:2px}
+.grid2{display:flex;flex-wrap:wrap;margin:0 -11px}
+.grid2>div{margin:0 11px}
+.grid2>div{flex:1 1 230px;min-width:0}
 
-.slabel {
-  font-family: 'Cinzel', serif;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-  display: block;
-}
+/* tier ladder */
+.ladder{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
+.rung{display:flex;padding:8px 13px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45}
+.rung:last-child{border-bottom:0}
+.rung .lv{flex:0 0 74px;display:block;margin:0;padding:2px 0 0;background:none;border:0;
+  font-family:var(--sans);font-size:11px;color:var(--mute);white-space:nowrap}
+.rung.now{background:var(--panel2)}
+.rung.now .lv{color:var(--brass);font-weight:700}
+.rung.past{opacity:.6}
 
-/* Sliders */
-.slider-block { display: flex; flex-direction: column; gap: 4px; }
-.lvl-display { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.lvl-num {
-  font-family: 'Cinzel', serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
-  line-height: 1;
-  min-width: 28px;
-}
-.lvl-label-stack { display: flex; flex-direction: column; }
-.lvl-name { font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: 600; color: var(--text); }
-.lvl-sub  { font-size: 0.68rem; color: var(--text3); font-style: italic; }
+/* scaling strip */
+.scale{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.sl{flex:1;background:var(--panel);padding:7px 4px;text-align:center;cursor:pointer;min-width:0}
+.sl:hover{background:var(--panel2)}
+.sl{padding:7px 3px}
+.sl b{display:block;font-family:var(--sans);font-size:10.5px;color:var(--mute);font-weight:400}
+.sl span{display:block;font-family:var(--sans);font-size:11.5px;margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl.on{background:var(--bone)}
+.sl.on b,.sl.on span{color:var(--slate)} .sl.on b{font-weight:500}
+.scale-note{font-size:12.5px;color:var(--mute);margin-top:7px;line-height:1.5}
 
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 5px;
-  border-radius: 3px;
-  background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct,0%), var(--border) var(--pct,0%), var(--border) 100%);
-  outline: none;
-  cursor: pointer;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 15px; height: 15px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-}
-.lvl-ticks {
-  display: flex;
-  justify-content: space-between;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.54rem;
-  color: var(--text3);
-  padding: 0 2px;
-}
+/* complement blocks */
+.cmp{border:1px solid var(--line);border-radius:9px;background:var(--panel);margin-bottom:9px;overflow:hidden}
+.cmp-h{display:flex;align-items:center;padding:8px 13px;border-bottom:1px solid var(--line)}
+.cmp-h>*{margin-right:9px}
+.cmp-h b{font-size:14px;font-weight:600}
+.cmp-h .tag{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  color:var(--indigo);border:1px solid #46527d;padding:2px 6px;border-radius:4px}
+.cmp-b{padding:10px 13px;font-size:13.5px;line-height:1.5}
+.cmp-up{margin-top:5px;color:var(--bone2);font-size:13px}
+.cmp-up:before{content:"↑ ";color:var(--brass)}
+.empty{padding:34px 20px;text-align:center;color:var(--mute);font-style:italic;font-size:14px}
 
-/* Char level slider (green) */
-.char-slider input[type=range] {
-  background: linear-gradient(to right, var(--core-b) 0%, var(--core-b) var(--pct,0%), var(--border) var(--pct,0%), var(--border) 100%);
-}
-.char-slider input[type=range]::-webkit-slider-thumb { background: var(--core-b); }
-.char-num { color: var(--core-b) !important; }
+/* ── Seal card ────────────────────────────────────────────── */
+.seal-h{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--panel);z-index:5}
+.seal-h h2{margin:0;font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--mute);flex:1}
+.mini{padding:4px 10px;margin-left:7px;background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;
+  font-family:var(--sans);font-size:11px;color:var(--mute)}
+.mini:hover{color:var(--bone);border-color:var(--mute)}
+.mini.on{background:var(--bone);color:var(--slate);border-color:var(--bone);font-weight:500}
+.card{padding:16px}
+.c-name{font-size:27px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.c-sub{font-family:var(--sans);font-size:12px;color:var(--mute);margin-top:3px}
+.c-nums{margin:13px 0 0}
+.n{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;margin:0 6px 6px 0;
+  border-radius:7px;background:var(--slate);border:1px solid var(--line)}
+.n b{font-family:var(--sans);font-weight:700;font-size:17px;letter-spacing:-.02em}
+.n i{font-style:normal;font-family:var(--sans);font-size:10.5px;color:var(--mute)}
+.n u{text-decoration:none;font-family:var(--sans);font-size:10px;color:var(--mute);opacity:.75}
+.n.atk b{color:var(--brass)} .n.dc b{color:var(--indigo)} .n.dmg b{color:var(--ember)}
+.c-tags{margin-top:3px}
+.t{display:inline-block;font-family:var(--sans);font-size:10.5px;padding:3px 8px;margin:0 5px 5px 0;
+  border-radius:999px;background:var(--slate);border:1px solid var(--line);color:var(--bone2)}
+.t.hot{color:var(--ember);border-color:#6b3229}
+.c-sec{margin-top:16px;padding-top:13px;border-top:1px solid var(--line)}
+.c-lbl{font-family:var(--sans);font-size:10.5px;color:var(--mute);margin-bottom:7px}
+.c-core{font-size:15px;line-height:1.5}
+.c-core b{color:var(--brass);font-weight:600;margin-right:7px}
+.c-row{display:flex;padding:8px 0;border-top:1px dashed var(--line);font-size:14px;line-height:1.5}
+.c-row:first-of-type{border-top:0}
+.c-src{flex:0 0 74px;padding-right:12px;font-family:var(--sans);font-size:10.5px;color:var(--mute);padding-top:3px}
+.c-txt{flex:1;min-width:0}
+.c-up{display:block;color:var(--bone2);font-size:13.5px;margin-top:3px}
+.c-up:before{content:"↑ ";color:var(--brass)}
+.c-foot{margin-top:14px;padding-top:11px;border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--mute);font-style:italic;line-height:1.5}
+.raw{white-space:pre-wrap;font-family:var(--sans);font-size:12px;line-height:1.6;color:var(--bone2);padding:16px}
 
-/* Cap bar */
-.cap-row { display: flex; gap: 3px; margin-top: 6px; }
-.cap-pip {
-  flex: 1; height: 5px; border-radius: 2px;
-  background: var(--bg3); border: 1px solid var(--border);
-  transition: all 0.2s;
-}
-.cap-pip.core { background: var(--core-b); border-color: var(--core-b); }
-.cap-pip.comp { background: var(--comp-b); border-color: var(--comp-b); }
+/* rules drawer */
+.rules{margin-bottom:20px;border:1px solid var(--line);border-radius:9px;background:var(--panel);overflow:hidden}
+.rules summary{cursor:pointer;padding:9px 14px;font-family:var(--sans);font-size:12px;color:var(--bone2);list-style:none}
+.rules summary::-webkit-details-marker{display:none}
+.rules summary:before{content:"▸ ";color:var(--brass)}
+.rules[open] summary:before{content:"▾ "}
+.rules-b{padding:2px 16px 14px;font-size:13.5px;line-height:1.55}
+.rules-b h3{font-family:var(--sans);font-size:11px;font-weight:500;color:var(--mute);margin:12px 0 5px}
+.rules-b ul{margin:0;padding-left:17px} .rules-b li{margin:3px 0}
+.rules-b .prem{font-style:italic;color:var(--bone2);border-left:2px solid var(--brass);padding-left:11px;margin:9px 0}
 
-/* Divider */
-.sb-divider { height: 1px; background: var(--border); margin: 0 -12px; }
-
-/* Cognition items */
-.cog-list { display: flex; flex-direction: column; gap: 3px; }
-.cog-item {
-  display: flex; align-items: center; gap: 7px;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.12s;
-  user-select: none;
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--bone);color:var(--slate);padding:9px 18px;border-radius:8px;
+  font-family:var(--sans);font-size:13px;opacity:0;transition:.22s;pointer-events:none;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .bar,.rail,.composer,.seal-h{display:none!important}
+  .board{display:block;height:auto} .seal{flex:none;border:0;background:#fff}
+  body{background:#fff;color:#000}
+  .n,.t,.card{border-color:#ccc}
 }
-.cog-item:hover:not(.dim):not(.stub) { border-color: var(--accent3); background: #fafafa; }
-.cog-item.is-core { border-color: var(--core-b); background: var(--core-bg); }
-.cog-item.is-comp { border-color: var(--comp-b); background: var(--comp-bg); }
-.cog-item.dim  { opacity: 0.28; cursor: not-allowed; }
-.cog-item.stub { opacity: 0.38; cursor: default; }
-
-.cog-icon { font-size: 0.9rem; width: 18px; text-align: center; flex-shrink: 0; }
-.cog-info { flex: 1; min-width: 0; }
-.cog-name {
-  font-family: 'Crimson Pro', serif; font-size: 0.88rem; font-weight: 600;
-  color: var(--text); display: block;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.cog-item.is-core .cog-name { color: var(--core-t); }
-.cog-item.is-comp .cog-name { color: var(--comp-t); }
-.cog-item.stub    .cog-name { color: var(--text3); }
-.cog-opp { font-size: 0.58rem; color: var(--text3); font-style: italic; }
-
-.rtag {
-  font-family: 'Cinzel', serif; font-size: 0.48rem; font-weight: 700;
-  letter-spacing: 0.1em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
-}
-.rtag-core { background: var(--core-b); color: #fff; }
-.rtag-comp { background: var(--comp-b); color: #fff; }
-.rtag-soon { background: #bbb; color: #fff; }
-
-/* Hint */
-.hint {
-  background: var(--gold-bg);
-  border: 1px solid var(--gold-border);
-  border-radius: var(--radius);
-  padding: 9px 11px;
-  font-size: 0.73rem;
-  color: var(--gold);
-  line-height: 1.5;
-}
-
-.clear-btn {
-  width: 100%; padding: 7px;
-  background: transparent;
-  border: 1px solid var(--border2); border-radius: var(--radius);
-  font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.1em;
-  color: var(--text2); cursor: pointer; transition: all 0.14s;
-}
-.clear-btn:hover { background: #fef0ec; border-color: #8A3A2A; color: #5C1A0A; }
-
-/* ═══ MAIN ══════════════════════════════════════════════════ */
-.main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 18px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-/* ─── TWO-COLUMN WORKSPACE ───────────────────────────────── */
-.work { display: flex; flex-direction: column; gap: 16px; }
-.work-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; width: 100%; }
-@media (min-width: 1180px) {
-  .work { flex-direction: row; align-items: flex-start; gap: 18px; }
-  .work-col { flex: 1 1 0; width: auto; }
-  .work-col.left  { flex-grow: 1.02; }
-  /* the card you read while you build stays put */
-  .work-col.right { position: sticky; top: 0; max-height: calc(100vh - 36px); overflow-y: auto; padding-right: 2px; }
-  .work-col.right::-webkit-scrollbar { width: 5px; }
-  .work-col.right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .scale-card table { font-size: 0.74rem; }
-}
-.main::-webkit-scrollbar { width: 5px; }
-.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-.state-panel {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 10px; color: var(--text3); text-align: center; padding: 60px 20px;
-}
-.state-glyph { font-size: 2.8rem; opacity: 0.18; }
-.state-panel h2 {
-  font-family: 'Cinzel', serif; font-size: 0.9rem;
-  letter-spacing: 0.06em; color: var(--text3);
-}
-.state-panel p { font-size: 0.84rem; font-style: italic; max-width: 280px; }
-
-/* ─── FLOW STEPS ─────────────────────────────────────────── */
-.flow-steps {
-  display: flex;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  flex-shrink: 0;
-}
-.flow-steps::-webkit-scrollbar { height: 3px; }
-.flow-steps::-webkit-scrollbar-thumb { background: var(--border); }
-.flow-step {
-  flex: 1;
-  min-width: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 9px 5px 8px;
-  border-right: 1px solid var(--border);
-  cursor: default;
-}
-.flow-step:last-child { border-right: none; }
-.flow-step.done   { background: #EBF4EC; }
-.flow-step.active { background: var(--gold-bg); }
-
-.fstep-num   { font-family: 'Cinzel', serif; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text3); margin-bottom: 1px; }
-.fstep-label { font-family: 'Cinzel', serif; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text3); text-align: center; }
-.fstep-val   { font-size: 0.68rem; color: var(--accent); font-weight: 600; text-align: center; margin-top: 2px; font-family: 'Cinzel', serif; min-height: 14px; }
-.flow-step.done  .fstep-num   { color: var(--core-b); }
-.flow-step.done  .fstep-label { color: var(--core-t); }
-.flow-step.active .fstep-num  { color: var(--gold); }
-.flow-step.active .fstep-label{ color: var(--gold); }
-
-/* ─── COMPOSITION PICKER ────────────────────────────────── */
-.comp-picker {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  flex-shrink: 0;
-}
-.comp-picker-head {
-  background: var(--bg2);
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.picker-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.15em;
-  color: var(--text3);
-  font-weight: 700;
-}
-.picker-body {
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.comp-type-row { display: flex; gap: 7px; flex-wrap: wrap; }
-.comp-type-btn {
-  flex: 1;
-  min-width: 90px;
-  padding: 9px 7px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.12s;
-  font-family: 'Cinzel', serif;
-}
-.comp-type-btn .ct-icon { font-size: 1.15rem; display: block; margin-bottom: 3px; }
-.comp-type-btn .ct-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; display: block; color: var(--text2); }
-.comp-type-btn .ct-desc { font-size: 0.58rem; font-family: 'Crimson Pro', serif; color: var(--text3); margin-top: 1px; display: block; }
-
-.comp-type-btn:hover { border-color: var(--accent3); }
-.comp-type-btn.sel-off  { border-color: var(--off-accent); background: #FFF0F0; }
-.comp-type-btn.sel-sup  { border-color: var(--sup-accent); background: #F0FFF5; }
-.comp-type-btn.sel-con  { border-color: var(--con-accent); background: #F0F0FF; }
-.comp-type-btn.sel-cre  { border-color: var(--cre-accent); background: #FBF4E6; }
-.comp-type-btn.sel-uti  { border-color: var(--uti-accent); background: #EEF6F6; }
-.comp-type-btn.sel-off  .ct-name { color: var(--off-accent); }
-.comp-type-btn.sel-sup  .ct-name { color: var(--sup-accent); }
-.comp-type-btn.sel-con  .ct-name { color: var(--con-accent); }
-.comp-type-btn.sel-cre  .ct-name { color: var(--cre-accent); }
-.comp-type-btn.sel-uti  .ct-name { color: var(--uti-accent); }
-
-.sub-row { display: flex; gap: 5px; flex-wrap: wrap; }
-.sub-btn {
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--bg2);
-  font-family: 'Crimson Pro', serif;
-  font-size: 0.82rem;
-  cursor: pointer;
-  color: var(--text2);
-  transition: all 0.12s;
-}
-.sub-btn:hover  { border-color: var(--accent3); background: #fff; }
-.sub-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-/* Verum Effect picker inside composition */
-.effect-pick-row { display: flex; gap: 5px; flex-wrap: wrap; }
-.effect-pick-btn {
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--bg2);
-  font-family: 'Crimson Pro', serif;
-  font-size: 0.82rem;
-  cursor: pointer;
-  color: var(--text2);
-  transition: all 0.12s;
-}
-.effect-pick-btn:hover { border-color: var(--accent3); background: #fff; }
-.effect-pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-.picker-section-lbl {
-  font-family: 'Cinzel', serif; font-size: 0.56rem; font-weight: 700;
-  letter-spacing: 0.16em; color: var(--text3); margin-bottom: 5px; display: block;
-}
-.no-effects-note {
-  font-size: 0.78rem; color: var(--text3); font-style: italic; padding: 2px 0;
-}
-
-/* ─── SCALING TABLE ─────────────────────────────────────── */
-.scale-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  flex-shrink: 0;
-}
-.scale-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 16px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-}
-.scale-title { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.15em; color: var(--text3); font-weight: 700; }
-.scale-type-tag {
-  font-family: 'Cinzel', serif; font-size: 0.55rem; font-weight: 700;
-  letter-spacing: 0.12em; padding: 2px 8px; border-radius: 3px; color: #fff;
-}
-.tag-off { background: var(--off-accent); }
-.tag-sup { background: var(--sup-accent); }
-.tag-con { background: var(--con-accent); }
-.tag-cre { background: var(--cre-accent); }
-.tag-uti { background: var(--uti-accent); }
-.rules-card { border:1px solid var(--gold-border); background:var(--gold-bg); border-radius:8px; margin:0 0 14px; font-size:0.8rem; }
-.rules-card summary { cursor:pointer; padding:8px 14px; font-weight:700; letter-spacing:.06em; font-size:0.72rem; color:var(--gold); }
-.rules-card .rules-body { padding:4px 16px 12px; display:grid; gap:10px; }
-.rules-card h4 { margin:6px 0 2px; font-size:0.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); }
-.rules-card ul { margin:0; padding-left:16px; } .rules-card li { margin:2px 0; }
-.rules-card .premium { font-style:italic; }
-.sub-btn.disabled { opacity:.35; pointer-events:none; }
-.pick-desc { font-size:0.72rem; color:var(--text3); font-style:italic; margin:4px 0 0; }
-.mod-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
-.mod-cell { display:flex; flex-direction:column; gap:3px; }
-.mod-k { font-size:0.6rem; letter-spacing:.09em; color:var(--text3); font-weight:700; }
-.mod-cell input { width:100%; padding:5px 7px; border:1px solid var(--gold-border); border-radius:5px;
-  background:var(--paper); color:var(--text1); font-family:inherit; font-size:0.85rem; text-align:center; }
-.mod-out { margin-top:7px; font-size:0.7rem; color:var(--gold); letter-spacing:.03em; text-align:center; }
-.sum-modes { display:flex; gap:5px; margin-right:8px; }
-.mode-btn { font-size:0.62rem; letter-spacing:.07em; font-weight:700; padding:4px 9px; cursor:pointer;
-  border:1px solid var(--gold-border); border-radius:5px; background:transparent; color:var(--text3); }
-.mode-btn.active { background:var(--gold); color:#fff; border-color:var(--gold); }
-
-.scale-table-wrap { overflow-x: auto; }
-.scale-table-wrap::-webkit-scrollbar { height: 4px; }
-.scale-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.scale-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 340px; }
-.scale-table th {
-  background: var(--bg3);
-  font-family: 'Cinzel', serif; font-size: 0.56rem; letter-spacing: 0.12em;
-  font-weight: 700; color: var(--text3);
-  padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-.scale-table td { padding: 6px 12px; border-bottom: 1px solid var(--bg2); color: var(--text2); white-space: nowrap; }
-.scale-table tr:last-child td { border-bottom: none; }
-.scale-table tr.now-row { background: #EEEAFF; }
-.scale-table tr.now-row td { color: var(--text); font-weight: 600; }
-.scale-table td.slot-col { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text3); }
-.scale-table tr.now-row td.slot-col { color: var(--accent); }
-.now-mark {
-  display: inline-block;
-  font-family: 'Cinzel', serif; font-size: 0.46rem; font-weight: 700;
-  background: var(--accent); color: #fff;
-  padding: 1px 5px; border-radius: 3px; margin-left: 5px;
-  letter-spacing: 0.06em; vertical-align: middle;
-}
-
-/* ─── SPELL CARD ────────────────────────────────────────── */
-.spell-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  flex-shrink: 0;
-}
-.sc-head {
-  background: var(--accent);
-  padding: 12px 18px 10px;
-  border-bottom: 3px solid var(--gold2);
-}
-.sc-head h2 {
-  font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
-  color: #fff; letter-spacing: 0.03em; margin-bottom: 6px;
-}
-.pill-row { display: flex; flex-wrap: wrap; gap: 4px; }
-.pill {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
-  padding: 2px 7px; border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.78); letter-spacing: 0.04em;
-}
-.pill.gold { border-color: var(--gold2); color: var(--gold2); }
-
-.sc-section { border-bottom: 1px solid var(--bg2); padding: 14px 18px; }
-.sc-section:last-child { border-bottom: none; }
-
-.sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
-.sec-badge {
-  font-family: 'Cinzel', serif; font-size: 0.52rem; font-weight: 700;
-  letter-spacing: 0.14em; padding: 2px 7px; border-radius: 3px; flex-shrink: 0;
-}
-.badge-core { background: var(--core-b); color: #fff; }
-.badge-comp { background: var(--comp-b); color: #fff; }
-.sec-title { font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700; color: var(--text); }
-
-/* Verum tabs */
-.verum-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-.v-tab {
-  padding: 3px 10px;
-  border: 1px solid var(--border); border-radius: 20px;
-  background: var(--bg2);
-  font-family: 'Crimson Pro', serif; font-size: 0.8rem;
-  cursor: pointer; color: var(--text2); transition: all 0.12s;
-}
-.v-tab:hover  { border-color: var(--accent3); background: #fff; }
-.v-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-/* Tier block */
-.tier-block { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.tier-row {
-  display: flex; align-items: flex-start; gap: 11px;
-  padding: 8px 12px; border-bottom: 1px solid var(--bg2);
-}
-.tier-row:last-child { border-bottom: none; }
-.tier-row.now { background: #EEEAFF; }
-.t-lbl {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
-  color: var(--text3); min-width: 66px; flex-shrink: 0;
-  padding-top: 2px; letter-spacing: 0.02em;
-}
-.tier-row.now .t-lbl { color: var(--accent); font-weight: 700; }
-.t-txt { font-size: 0.85rem; color: var(--text2); line-height: 1.5; flex: 1; min-width: 0; }
-.tier-row.now .t-txt { color: var(--text); }
-.now-badge {
-  font-family: 'Cinzel', serif; font-size: 0.5rem;
-  background: var(--accent); color: #fff;
-  padding: 1px 5px; border-radius: 3px;
-  letter-spacing: 0.08em; flex-shrink: 0; margin-top: 2px;
-}
-
-/* Complement contrib */
-.contrib {
-  background: var(--comp-bg); border: 1px solid var(--comp-b);
-  border-radius: var(--radius); padding: 10px 13px;
-}
-.contrib-lbl {
-  font-family: 'Cinzel', serif; font-size: 0.54rem; font-weight: 700;
-  letter-spacing: 0.14em; color: var(--comp-b); margin-bottom: 4px;
-}
-.contrib-txt { font-size: 0.84rem; color: var(--comp-t); line-height: 1.5; }
-.contrib-upg {
-  font-size: 0.8rem; color: var(--comp-t); line-height: 1.45;
-  margin-top: 5px; padding-top: 5px;
-  border-top: 1px solid rgba(42,74,138,0.2);
-  opacity: 0.82;
-}
-
-/* Stats row */
-.stats-row {
-  display: flex; border-top: 1px solid var(--border); background: var(--bg);
-  overflow-x: auto;
-}
-.stats-row::-webkit-scrollbar { height: 3px; }
-.stat-cell {
-  flex: 1; min-width: 80px; padding: 8px 10px; text-align: center;
-  border-right: 1px solid var(--border); flex-shrink: 0;
-}
-.stat-cell:last-child { border-right: none; }
-.stat-k { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.12em; color: var(--text3); margin-bottom: 2px; white-space: nowrap; }
-.stat-v { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; color: var(--accent); }
-
-/* ─── SUMMARY ───────────────────────────────────────────── */
-.summary-card {
-  background: #fff; border: 1px solid var(--border);
-  border-radius: 8px; overflow: hidden; box-shadow: var(--shadow);
-  flex-shrink: 0;
-}
-.sum-head {
-  background: var(--bg2); border-bottom: 1px solid var(--border);
-  padding: 7px 14px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.sum-title { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.15em; color: var(--text3); font-weight: 700; }
-.btn-row { display: flex; gap: 5px; }
-.act-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--border2); border-radius: var(--radius);
-  background: #fff;
-  font-family: 'Cinzel', serif; font-size: 0.56rem; letter-spacing: 0.08em;
-  cursor: pointer; color: var(--text2); transition: all 0.13s; font-weight: 600;
-}
-.act-btn:hover   { border-color: var(--accent); color: var(--accent); background: #f5f0ff; }
-.act-btn.g:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
-/* ── Designed play card ─────────────────────────── */
-.sum-body.pc { padding:0; font-family:Georgia,'Times New Roman',serif; font-size:1rem; line-height:1.4; white-space:normal; }
-.pc-hero { padding: 13px 16px 10px; background: linear-gradient(180deg,#fbf8f2 0%,#fff 100%); border-bottom:1px solid var(--border); }
-.pc-core { font-family:'Cinzel',serif; font-size:1.18rem; font-weight:700; color:var(--text1); letter-spacing:.01em; line-height:1.15; }
-.pc-ring { font-size:.72rem; color:var(--text3); letter-spacing:.06em; text-transform:uppercase; margin-top:3px; }
-.pc-stats { margin-top:9px; }
-.stat { display:inline-flex; align-items:baseline; padding:4px 9px; border-radius:6px; margin:0 6px 6px 0;
-  background:#fff; border:1px solid var(--border2); font-size:.78rem; }
-.stat b { font-family:'Cinzel',serif; font-size:.95rem; font-weight:700; color:var(--text1); }
-.stat span { font-size:.6rem; letter-spacing:.09em; text-transform:uppercase; color:var(--text3); font-weight:700; margin-left:5px; }
-.stat.hit  { border-color:#b9a887; background:var(--gold-bg); }
-.stat.dmg  { border-color:var(--off-accent); background:#FFF0F0; }
-.stat.dc   { border-color:var(--con-accent); background:#F0F0FF; }
-.stat-sub { margin-left:6px; opacity:.62; font-size:.55rem !important; letter-spacing:.04em !important; }
-.pc-tags { margin-top:2px; }
-.tg { display:inline-block; font-size:.58rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
-  padding:3px 7px; margin:0 4px 4px 0; border-radius:999px; background:var(--bg2); color:var(--text2); border:1px solid var(--border2); }
-.tg.warn { background:#FFF0F0; color:var(--off-accent); border-color:var(--off-accent); }
-.pc-sec { padding:11px 16px; border-bottom:1px solid var(--border); }
-.pc-sec:last-child { border-bottom:none; }
-.pc-lbl { font-family:'Cinzel',serif; font-size:.56rem; letter-spacing:.14em; font-weight:700;
-  color:var(--text3); display:flex; align-items:center; gap:7px; margin-bottom:7px; }
-.pc-lbl::after { content:""; flex:1; height:1px; background:var(--border); }
-.pc-core-line { font-size:.88rem; line-height:1.45; color:var(--text1); }
-.pc-core-name { font-family:'Cinzel',serif; font-weight:700; color:var(--gold); margin-right:6px; }
-.pc-rider { display:flex; padding:7px 0; border-top:1px dashed var(--border); font-size:.84rem; line-height:1.45; }
-.pc-rider:first-of-type { border-top:none; }
-.pc-src { flex:0 0 102px; font-size:.56rem; letter-spacing:.03em; text-transform:uppercase; font-weight:700;
-  color:var(--text3); padding-top:3px; padding-right:8px; word-break:normal; overflow-wrap:normal; }
-.pc-txt { flex:1; color:var(--text1); }
-.pc-up { display:block; color:var(--text2); font-size:.79rem; margin-top:2px; }
-.pc-up::before { content:"↑ "; color:var(--gold); }
-.pc-foot { padding:8px 16px; font-size:.68rem; color:var(--text3); font-style:italic; background:var(--bg2); }
-@media (max-width:640px){ .pc-rider{flex-direction:column;gap:2px} .pc-src{flex:none} }
-.sum-body {
-  padding: 12px 14px;
-  font-size: 0.8rem; line-height: 1.65; color: var(--text);
-  white-space: pre-wrap; font-family: 'Crimson Pro', serif;
-  overflow-x: auto;
-}
-
-/* Toast */
-.toast {
-  position: fixed; bottom: 16px; right: 16px;
-  background: var(--accent); color: #fff;
-  padding: 7px 14px; border-radius: var(--radius);
-  font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.07em;
-  opacity: 0; transform: translateY(8px);
-  transition: all 0.22s; pointer-events: none; z-index: 999;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-
-/* ─── RESPONSIVE ────────────────────────────────────────── */
-@media (max-width: 700px) {
-  :root { --sb-w: 100%; }
-  .layout { flex-direction: column; height: auto; overflow: visible; }
-  .sidebar { width: 100%; min-width: unset; max-height: 48vh; border-right: none; border-bottom: 1px solid var(--border); }
-  .main { height: auto; overflow-y: visible; padding: 14px 14px 24px; }
-  body { overflow-y: auto; }
-}
-
-@media print {
-  .sidebar, .sc-head, .flow-steps, .comp-picker, .verum-tabs,
-  .act-btn, .sum-head, header { display: none !important; }
-  .layout { display: block; }
-  .main { padding: 0; overflow: visible; }
-  .spell-card, .summary-card, .scale-card { box-shadow: none; page-break-inside: avoid; }
-}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="h-left">
-    <h1>Arcanum Veritas</h1>
-    <span class="sub">— Spell Builder</span>
+<div class="bar">
+  <div class="brand">Arcanum Veritas<em>seal composer</em></div>
+  <div class="dials">
+    <div class="dial"><label for="slotDn">Slot</label>
+      <div class="step"><button id="slotDn" onclick="bumpSlot(-1)" aria-label="Lower slot">–</button><span id="slotVal">1st</span><button onclick="bumpSlot(1)" aria-label="Raise slot">+</button></div>
+    </div>
+    <div class="dial"><label for="lvlDn">Level</label>
+      <div class="step"><button id="lvlDn" onclick="bumpLvl(-1)" aria-label="Lower level">–</button><span id="lvlVal">1</span><button onclick="bumpLvl(1)" aria-label="Raise level">+</button></div>
+    </div>
+    <div class="dial"><label for="vmInput">Verum mod</label><input class="num" type="number" id="vmInput" value="4" min="-2" max="12"></div>
+    <div class="dial"><label for="dsInput">Dream mod</label><input class="num" type="number" id="dsInput" value="0" min="-2" max="12"></div>
   </div>
-  <div class="h-right">
+  <div class="live">
+    <span class="lv atk"><b id="atkOut">+3</b><i>to hit</i></span>
+    <span class="lv dc"><b id="dcOut">13</b><i>Verum DC</i></span>
+    <span class="lv"><b id="capOut">1</b><i id="capLbl">cognition</i></span>
     <span class="status" id="statusEl">Loading…</span>
   </div>
-</header>
+</div>
 
-<div class="layout">
-
-  <!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
-  <aside class="sidebar">
-    <div class="sb-scroll">
-
-      <!-- Spell Slot Level slider -->
-      <div class="slider-block">
-        <span class="slabel">Spell Slot Level</span>
-        <div class="lvl-display">
-          <div class="lvl-num" id="lvlNum">1</div>
-          <div class="lvl-label-stack">
-            <span class="lvl-name" id="lvlName">1st Level</span>
-            <span class="lvl-sub"  id="lvlSub">1 Cognition</span>
-          </div>
-        </div>
-        <input type="range" id="lvlSlider" min="1" max="9" value="1">
-        <div class="lvl-ticks">
-          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-          <span>6</span><span>7</span><span>8</span><span>9</span>
-        </div>
-        <div class="cap-row" id="capRow"></div>
-      </div>
-
-      <!-- Character Level slider -->
-      <div class="slider-block char-slider">
-        <span class="slabel">Character Level</span>
-        <div class="lvl-display">
-          <div class="lvl-num char-num" id="charNum">1</div>
-          <div class="lvl-label-stack">
-            <span class="lvl-name" id="charName">Level 1</span>
-            <span class="lvl-sub"  id="charTier">Tier: Lv 1–4</span>
-          </div>
-        </div>
-        <input type="range" id="charSlider" min="1" max="20" value="1">
-        <div class="lvl-ticks">
-          <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span>
-        </div>
-        <div class="mod-row">
-          <label class="mod-cell">
-            <span class="mod-k">VERUM MOD</span>
-            <input type="number" id="vmInput" min="-2" max="12" value="4">
-          </label>
-          <label class="mod-cell">
-            <span class="mod-k">DREAM MOD</span>
-            <input type="number" id="dsInput" min="-2" max="12" value="0">
-          </label>
-        </div>
-        <div class="mod-out" id="modOut"></div>
-      </div>
-
-      <div class="sb-divider"></div>
-
-      <!-- Hint -->
-      <div class="hint">
-        <strong>How to build:</strong><br>
-        1. Set Spell Slot &amp; Character Level.<br>
-        2. Click a Cognition → Core.<br>
-        3. Pick Composition, Subtype &amp; Effect.<br>
-        4. Add Complement Cognitions if slot &gt; 1.<br>
-        5. Review the spell card below.
-      </div>
-
-      <!-- Cognition list -->
-      <div>
-        <span class="slabel">Cognitions</span>
-        <input
-          type="text"
-          id="cogSearch"
-          placeholder="Search cognitions…"
-          oninput="renderCogList()"
-          style="
-            width: 100%;
-            box-sizing: border-box;
-            margin: 6px 0 8px;
-            padding: 6px 10px;
-            background: var(--bg2);
-            border: 1px solid var(--brd);
-            border-radius: 6px;
-            color: var(--txt);
-            font-size: 0.78rem;
-            letter-spacing: 0.04em;
-            outline: none;
-          "
-        >
-        <div class="cog-list" id="cogList"></div>
-      </div>
-
+<div class="board">
+  <aside class="rail">
+    <div class="rail-top">
+      <input class="search" id="cogSearch" type="search" placeholder="Search cognitions" oninput="renderCogList()">
     </div>
-    <div class="sb-foot">
-      <button class="clear-btn" onclick="clearAll()">✕ Clear Selection</button>
-    </div>
+    <div class="cogs" id="cogList"></div>
+    <div class="rail-foot"><button class="ghost" onclick="clearAll()">Clear selection</button></div>
   </aside>
 
-  <!-- ═══ MAIN ════════════════════════════════════════════════ -->
-  <main class="main" id="mainPanel">
-    <div class="state-panel">
-      <div class="state-glyph">✦</div>
-      <h2>No Core Cognition Selected</h2>
-      <p>Set your slot level, then click a Cognition to set it as your Core.</p>
-    </div>
-  </main>
+  <section class="composer" id="composer"></section>
 
+  <section class="seal">
+    <div class="seal-h">
+      <h2>The seal</h2>
+      <button class="mini on" id="mPlay" onclick="setSumMode('play')">Play</button>
+      <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
+      <button class="mini" onclick="copySum()">Copy</button>
+      <button class="mini" onclick="window.print()">Print</button>
+    </div>
+    <div id="sumBody"></div>
+  </section>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1166,7 +630,7 @@ function getTier(charLvl) {
 
 
 // Safe onclick helper — avoids quote-in-attribute issues
-function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function escAttr(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 // ═══════════════════════════════════════════════════════════
 //  BOOT
@@ -1179,24 +643,26 @@ async function boot() {
     const ready = INDEX.filter(c => c.ready).length;
     setStatus("ok", `✓ ${ready} cognitions ready`);
     renderCogList();
-    updateSlotUI();
-    updateCharUI();
+    syncBar();
+    syncBar();
     renderMain();
   } catch(e) {
     console.error("Arcanum Veritas Builder boot error:", e);
     const isFetch = !INDEX.length;
     setStatus("err", isFetch ? "✗ cognitions/index.json not found" : "✗ render error — see console");
-    document.getElementById("mainPanel").innerHTML = isFetch ? `
-      <div class="state-panel">
-        <div class="state-glyph">⚠</div>
-        <h2>Folder Not Found</h2>
-        <p>Place this file alongside a <strong>cognitions/</strong> folder with <strong>index.json</strong>.</p>
-        <p style="font-size:0.8rem;opacity:.75">If the folder is there, your browser may be blocking <code>fetch()</code> on <code>file://</code> — open it through a local server (VS Code Live Server, <code>python -m http.server</code>) or in Firefox.</p>
+    const host = document.getElementById("composer");
+    if (!host) return;
+    host.innerHTML = isFetch ? `
+      <div class="empty">
+        <p><strong>Can't find the cognitions folder.</strong></p>
+        <p>Keep this file next to a <code>cognitions/</code> folder containing <code>index.json</code>.</p>
+        <p>If the folder is there, your browser is blocking <code>fetch()</code> on <code>file://</code> —
+           open it through a local server (VS Code Live Server, or <code>python -m http.server</code>), or use Firefox.</p>
       </div>` : `
-      <div class="state-panel">
-        <div class="state-glyph">⚠</div>
-        <h2>Render Error</h2>
+      <div class="empty">
+        <p><strong>Something failed while drawing the page.</strong></p>
         <p>${String(e.message || e)}</p>
+        <p>The browser console has the details.</p>
       </div>`;
   }
 }
@@ -1214,94 +680,199 @@ async function loadCognition(id) {
   }
 }
 
+
 function setStatus(cls, msg) {
   const el = document.getElementById("statusEl");
-  el.textContent = msg;
-  el.className = "status " + cls;
+  el.textContent = msg; el.className = "status " + cls;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  LEVEL UI
+//  COMMAND BAR
 // ═══════════════════════════════════════════════════════════
-function updateSlotUI() {
-  const l = state.slotLevel;
-  document.getElementById("lvlNum").textContent  = l;
-  document.getElementById("lvlName").textContent = ORDINALS[l] + " Level Slot";
-  const mc = maxComps();
-  document.getElementById("lvlSub").textContent  =
-    mc === 0 ? "Core only (1 Cognition)"
-             : `Core + ${mc} Complement${mc > 1 ? "s" : ""} (${mc+1} Cognitions)${state.manner==="coven" ? " · Coven +3" : ""}`;
-  document.getElementById("lvlSlider").style.setProperty("--pct", ((l-1)/8*100)+"%");
-  renderCapBar();
+function bumpSlot(d) {
+  state.slotLevel = Math.min(9, Math.max(1, state.slotLevel + d));
+  state.complements = state.complements.slice(0, maxComps());
+  syncBar(); renderCogList(); renderMain();
 }
-
-function updateCharUI() {
-  const c = state.charLevel;
-  document.getElementById("charNum").textContent  = c;
-  document.getElementById("charName").textContent = `Level ${c}`;
-  const tier = getTier(c);
-  document.getElementById("charTier").textContent = `Tier: ${TIERS[tier].label}`;
-  document.getElementById("charSlider").style.setProperty("--pct", ((c-1)/19*100)+"%");
-  const mo = document.getElementById("modOut");
-  if (mo) mo.textContent = `Prof ${sgn(profBonus())} · Attack ${sgn(sealAttack())} · Verum DC ${verumDC()}`;
+function bumpLvl(d) {
+  state.charLevel = Math.min(20, Math.max(1, state.charLevel + d));
+  syncBar(); renderMain();
 }
-
-function renderCapBar() {
-  const bar = document.getElementById("capRow");
-  bar.innerHTML = "";
-  const total = maxComps() + 1; // 1 core + complements
-  for (let i = 0; i < total; i++) {
-    const d = document.createElement("div");
-    d.className = "cap-pip"
-      + (i === 0 && state.core ? " core" : "")
-      + (i > 0 && state.complements[i-1] ? " comp" : "");
-    bar.appendChild(d);
-  }
+function syncBar() {
+  document.getElementById("slotVal").textContent = ORDINALS[state.slotLevel];
+  document.getElementById("lvlVal").textContent  = state.charLevel;
+  document.getElementById("atkOut").textContent  = sgn(sealAttack());
+  document.getElementById("dcOut").textContent   = verumDC();
+  const mc = maxComps(), have = state.complements.length + (state.core ? 1 : 0);
+  document.getElementById("capOut").textContent = `${have}/${mc + 1}`;
+  document.getElementById("capLbl").textContent =
+    mc === 0 ? "core only" : (state.manner === "coven" ? "with coven" : "cognitions");
 }
 
 // ═══════════════════════════════════════════════════════════
-//  COGNITION LIST
+//  COGNITION RAIL
 // ═══════════════════════════════════════════════════════════
 function renderCogList() {
-  const list      = document.getElementById("cogList");
-  const atCap     = state.complements.length >= maxComps() && state.core !== null;
-  const coreEntry = INDEX.find(c => c.id === state.core);
-  const query     = (document.getElementById("cogSearch")?.value || "").toLowerCase().trim();
-
-  list.innerHTML = "";
-  const filtered = query ? INDEX.filter(e => e.name.toLowerCase().includes(query)) : INDEX;
-  filtered.forEach(entry => {
-    const isCore = state.core === entry.id;
-    const isComp = state.complements.some(x => x.id === entry.id);
-    // Dim if: not selected, not ready, OR (at cap and not already selected)
-    const isDim  = !isCore && !isComp && (!entry.ready || atCap);
-
-    const el = document.createElement("div");
-    el.className = "cog-item"
-      + (isCore       ? " is-core" : "")
-      + (isComp       ? " is-comp" : "")
-      + (!entry.ready ? " stub"    : "")
-      + (isDim        ? " dim"     : "");
-
-    if (entry.ready && !isDim) el.onclick = () => toggleCog(entry.id);
-    // Allow deselect even when at cap
-    if (entry.ready && (isCore || isComp)) el.onclick = () => toggleCog(entry.id);
-
-    el.innerHTML = `
-      <span class="cog-icon">${entry.icon}</span>
-      <span class="cog-info">
-        <span class="cog-name">${entry.name}</span>
-      </span>
-      ${isCore         ? `<span class="rtag rtag-core">CORE</span>` : ""}
-      ${isComp         ? `<span class="rtag rtag-comp">COMP</span>` : ""}
-      ${!entry.ready   ? `<span class="rtag rtag-soon">SOON</span>` : ""}
-    `;
-    list.appendChild(el);
+  const box = document.getElementById("cogList");
+  const q = (document.getElementById("cogSearch")?.value || "").trim().toLowerCase();
+  const atCap = state.complements.length >= maxComps() && state.core !== null;
+  let shown = 0, h = "";
+  INDEX.forEach(c => {
+    if (q && !c.name.toLowerCase().includes(q)) return;
+    shown++;
+    const isCore = state.core === c.id;
+    const isComp = state.complements.some(x => x.id === c.id);
+    const off = !c.ready || (!isCore && !isComp && atCap);
+    const cls = isCore ? "core" : isComp ? "comp" : off ? "off" : "";
+    const role = isCore ? "core" : isComp ? "sigil" : "";
+    h += `<button class="cog ${cls}" ${off && !isCore && !isComp ? "disabled" : ""}
+      onclick="toggleCog('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
+      <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
+      ${role ? `<span class="rl">${role}</span>` : ""}</button>`;
   });
+  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">No cognition matches “${q}”.</div>`;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  TOGGLE COGNITION
+//  COMPOSER
+// ═══════════════════════════════════════════════════════════
+function block(title, body) {
+  return `<div class="blk"><div class="blk-h"><h2>${title}</h2><div class="rule"></div></div>${body}</div>`;
+}
+
+function renderMain() {
+  const comp = document.getElementById("composer");
+  const seal = document.getElementById("sumBody");
+  syncBar();
+
+  if (!state.core) {
+    comp.innerHTML = rulesDrawer() + `<div class="empty">
+      Pick a cognition from the left to set your Keystone. Everything else follows from it.</div>`;
+    seal.innerHTML = `<div class="empty">No seal drawn yet.</div>`;
+    return;
+  }
+
+  const coreCog = LOADED[state.core];
+  const tier    = getTier(state.charLevel);
+  comp.innerHTML = rulesDrawer() + buildComposer(coreCog, tier);
+
+  if (!state.compType || !state.compSub || !currentSub()) {
+    seal.innerHTML = `<div class="empty">Choose a Ring to draw the seal.</div>`;
+    seal.dataset.text = "";
+  } else {
+    seal.innerHTML = state.sumMode === "play"
+      ? buildPlayCardHTML(coreCog, tier)
+      : `<div class="raw">${buildFullRef(coreCog, tier).join("\n")}</div>`;
+    seal.dataset.text = buildPlayCard(coreCog, tier).join("\n");
+  }
+  document.getElementById("mPlay").className = "mini" + (state.sumMode === "play" ? " on" : "");
+  document.getElementById("mFull").className = "mini" + (state.sumMode === "full" ? " on" : "");
+}
+
+function buildComposer(coreCog, tier) {
+  const cd  = COMP_DATA[state.compType];
+  const sub = currentSub();
+  let h = "";
+
+  // Ring family
+  h += block("Ring — what shape the seal takes", `<div class="rings">` +
+    Object.entries(COMP_DATA).map(([k, d]) =>
+      `<button class="ring ${k}${state.compType === k ? " on" : ""}" onclick="selectCompType('${k}')">
+        <b>${d.label}</b><span>${d.desc}</span></button>`).join("") + `</div>`);
+
+  if (!state.compType) return h;
+
+  // Subtype
+  h += block("Subtype", `<div class="chips">` +
+    Object.keys(cd.subtypes).map(sk =>
+      `<button class="chip${state.compSub === sk ? " on" : ""}" onclick="selectCompSub('${escAttr(sk)}')">${sk}</button>`
+    ).join("") + `</div>`);
+
+  if (!state.compSub) return h;
+
+  // Shape + Manner side by side
+  let opts = "";
+  if (sub.shape) opts += `<div><div class="blk-h"><h2>Shape</h2><div class="rule"></div></div>
+    <div class="chips">${Object.entries(SHAPES).map(([k, sh]) =>
+      `<button class="chip${state.shape === k ? " on" : ""}" onclick="selectShape('${k}')">${sh.label}</button>`).join("")}</div>
+    <p class="hint">${SHAPES[state.shape].desc}</p></div>`;
+  opts += `<div><div class="blk-h"><h2>Manner of drawing</h2><div class="rule"></div></div>
+    <div class="chips">${Object.entries(MANNERS).map(([k, m]) =>
+      `<button class="chip${state.manner === k ? " on" : ""}${mannerAllowed(k) ? "" : " dis"}" onclick="selectManner('${k}')">${m.label}</button>`).join("")}</div>
+    <p class="hint">${MANNERS[state.manner].desc}</p></div>`;
+  h += `<div class="blk grid2">${opts}</div>`;
+
+  // Verum effect + the tier ladder
+  const verums = coreCog?.verumEffects?.[verumKey()] || [];
+  if (verums.length) {
+    let v = "";
+    if (verums.length > 1) v += `<div class="chips" style="margin-bottom:9px">` + verums.map(e =>
+      `<button class="chip${state.coreVerum === e.name ? " on" : ""}" onclick="selectCoreVerum('${escAttr(e.name)}')">${e.name}</button>`).join("") + `</div>`;
+    const av = verums.find(e => e.name === state.coreVerum) || verums[0];
+    v += `<div class="vname">${av.name}</div>` +
+         `<p class="hint" style="margin:0 0 9px">${av.description || ""}</p><div class="ladder">` +
+      av.tiers.map((t, i) => i > tier ? "" :
+        `<div class="rung ${i === tier ? "now" : "past"}"><span class="lv">${TIERS[i].label}</span>
+         <span>${resolve(partText(t))}</span></div>`).join("") + `</div>`;
+    h += block(`Verum effect — ${verumLabel()} pool`, v);
+  } else {
+    h += block("Verum effect", `<p class="hint">${INDEX.find(c=>c.id===state.core)?.name} has no ${verumLabel()} effect yet.</p>`);
+  }
+
+  // Scaling — the whole ladder, current slot lit
+  const row = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  let sc = `<div class="scale">` + sub.rows.map(r =>
+    `<button class="sl${r[0] === ORDINALS[state.slotLevel] ? " on" : ""}" onclick="bumpSlotTo(${ORDINALS.indexOf(r[0])})">
+      <b>${r[0]}</b><span>${resolve(r[1])}</span></button>`).join("") + `</div>`;
+  if (row) sc += `<p class="scale-note">` + sub.columns.map((c, i) => `${c}: <strong>${resolve(row[i])}</strong>`).join(" · ") + `</p>`;
+  if (sub.notes) sc += `<p class="scale-note" style="font-style:italic">${sub.notes.split("\n")[0]}</p>`;
+  h += block(`${state.compSub} — scaling`, sc);
+
+  // Complements
+  if (maxComps() > 0) {
+    let c = "";
+    state.complements.forEach((cs, idx) => {
+      const cog = LOADED[cs.id], entry = INDEX.find(x => x.id === cs.id);
+      if (!cog || !entry) return;
+      const avail = complementPool(cog);
+      if (avail.length && !avail.find(f => f.name === cs.compEffect)) cs.compEffect = avail[0].name;
+      const fx = avail.find(f => f.name === cs.compEffect) || avail[0];
+      const coven = idx >= state.slotLevel - 1;
+      c += `<div class="cmp"><div class="cmp-h"><span>${entry.icon || "◆"}</span><b>${entry.name}</b>
+        <span class="tag">${coven ? "coven sigil" : "sigil " + (idx + 1)}</span></div>`;
+      if (!fx) {
+        c += `<div class="cmp-b"><span class="hint">No ${verumLabel()} complement for ${entry.name} yet.</span></div></div>`;
+        return;
+      }
+      if (avail.length > 1) c += `<div class="cmp-b" style="padding-bottom:0"><div class="chips">` +
+        avail.map(f => `<button class="chip${f.name === cs.compEffect ? " on" : ""}" onclick="selectCompEffect(${idx},'${escAttr(f.name)}')">${f.name}</button>`).join("") + `</div></div>`;
+      c += `<div class="cmp-b">${resolve(partText(fx.effect))}` +
+        liveUpgrades(fx.upgrades, tier).map(u => `<span class="cmp-up">${resolve(partText(u))}</span>`).join("") + `</div></div>`;
+    });
+    const free = maxComps() - state.complements.length;
+    if (free > 0) c += `<p class="hint">${free} more sigil${free > 1 ? "s" : ""} available — add from the list on the left.</p>`;
+    h += block("Sigils", c || `<p class="hint">No sigils yet. Add up to ${maxComps()} from the list on the left.</p>`);
+  }
+  return h;
+}
+
+function bumpSlotTo(n) {
+  state.slotLevel = n;
+  state.complements = state.complements.slice(0, maxComps());
+  syncBar(); renderCogList(); renderMain();
+}
+
+function rulesDrawer() {
+  return `<details class="rules"><summary>Rules of the seal</summary><div class="rules-b">
+    <h3>Numbers</h3><ul>${RULES.numbers.map(([k, v]) => `<li><strong>${k}</strong> — ${v}</li>`).join("")}</ul>
+    <p class="prem">${RULES.premium}</p>
+    <h3>Limits</h3><ul>${RULES.limits.map(x => `<li>${x}</li>`).join("")}</ul>
+    <h3>Countering</h3><ul>${RULES.countering.map(x => `<li>${x}</li>`).join("")}</ul>
+  </div></details>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SELECTION
 // ═══════════════════════════════════════════════════════════
 async function toggleCog(id) {
   const entry = INDEX.find(c => c.id === id);
@@ -1328,14 +899,13 @@ async function toggleCog(id) {
   }
 
   renderCogList();
-  renderCapBar();
   renderMain();
 }
 
 function clearAll() {
   state.core = null; state.coreVerum = null;
   state.compType = null; state.compSub = null; state.complements = [];
-  renderCogList(); renderCapBar(); renderMain();
+  renderCogList(); renderMain();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1369,7 +939,7 @@ function selectManner(m)  {
   if (!mannerAllowed(m)) return;
   state.manner = m;
   state.complements = state.complements.slice(0, maxComps());
-  updateSlotUI(); renderCogList(); renderMain();
+  syncBar(); renderCogList(); renderMain();
 }
 
 function selectCoreVerum(name) {
@@ -1385,341 +955,6 @@ function selectCompEffect(idx, name) {
 // ═══════════════════════════════════════════════════════════
 //  MAIN RENDER
 // ═══════════════════════════════════════════════════════════
-function buildRulesCard(open) {
-  let h = `<details class="rules-card"${open ? " open" : ""}><summary>RULES OF THE SEAL — global numbers, limits, countering</summary><div class="rules-body">`;
-  h += `<div><h4>Global numbers</h4><ul>` + RULES.numbers.map(([k,v]) => `<li><b>${k}</b> — ${v}</li>`).join("") + `</ul></div>`;
-  h += `<div class="premium">${RULES.premium}</div>`;
-  h += `<div><h4>Limits</h4><ul>` + RULES.limits.map(x => `<li>${x}</li>`).join("") + `</ul></div>`;
-  h += `<div><h4>Countering</h4><ul>` + RULES.countering.map(x => `<li>${x}</li>`).join("") + `</ul></div>`;
-  h += `</div></details>`;
-  return h;
-}
-
-function renderMain() {
-  const panel = document.getElementById("mainPanel");
-
-  if (!state.core) {
-    panel.innerHTML = `<div class="state-panel">
-      <div class="state-glyph">✦</div>
-      <h2>No Core Cognition Selected</h2>
-      <p>Set your spell slot level, then click a Cognition in the sidebar to begin.</p>
-    </div>` + buildRulesCard(true);
-    return;
-  }
-
-  const coreCog  = LOADED[state.core];
-  const tier     = getTier(state.charLevel);
-
-  // Full-width band, then a two-column workspace: build on the left, read on the right
-  let head = buildFlowSteps() + buildRulesCard(false);
-  let left  = buildCompPicker(coreCog);
-  let right = "";
-  if (state.compType && state.compSub) {
-    left  += buildScaleTable();
-    right += buildSummary(coreCog, tier);
-    right += buildSpellCard(coreCog, tier);
-  }
-
-  panel.innerHTML = head +
-    `<div class="work"><div class="work-col left">${left}</div>` +
-    (right ? `<div class="work-col right">${right}</div>` : "") +
-    `</div>`;
-}
-
-// ─── Flow step ribbon ────────────────────────────────────
-function buildFlowSteps() {
-  const coreEntry = INDEX.find(c => c.id === state.core);
-  const tier = getTier(state.charLevel);
-  const steps = [
-    { n:"01", label:"Slot Level",     val: ORDINALS[state.slotLevel],                                  done: true },
-    { n:"02", label:"Char Level",     val: `Lv ${state.charLevel} (${TIERS[tier].label})`,             done: true },
-    { n:"03", label:"Core",           val: coreEntry ? `${coreEntry.icon} ${coreEntry.name}` : "",     done: !!state.core },
-    { n:"04", label:"Composition",    val: state.compType ? `${COMP_DATA[state.compType].label} · ${state.compSub}${currentSub()?.shape && state.shape!=="sphere" ? ` · ${SHAPES[state.shape].label}` : ""}${state.manner!=="standard" ? ` · ${MANNERS[state.manner].label}` : ""}` : "", done: !!state.compType },
-    { n:"05", label:"Verum Effect",   val: state.coreVerum || "",                                      done: !!state.coreVerum },
-    { n:"06", label:"Complements",    val: state.slotLevel === 1 ? "N/A" : state.complements.length > 0
-        ? state.complements.map(x => INDEX.find(c=>c.id===x.id)?.icon || "◈").join(" ") : "None",
-      done: state.slotLevel === 1 || state.complements.length > 0 },
-  ];
-
-  let h = `<div class="flow-steps">`;
-  steps.forEach(s => {
-    const cls = s.done ? "done" : "";
-    h += `<div class="flow-step ${cls}">
-      <span class="fstep-num">STEP ${s.n}</span>
-      <span class="fstep-label">${s.label}</span>
-      <span class="fstep-val">${s.val}</span>
-    </div>`;
-  });
-  h += `</div>`;
-  return h;
-}
-
-// ─── Composition picker ───────────────────────────────────
-function buildCompPicker(coreCog) {
-  let h = `<div class="comp-picker">
-    <div class="comp-picker-head">
-      <span class="picker-title">STEP 04 — COMPOSITION, SUBTYPE &amp; VERUM EFFECT</span>
-    </div>
-    <div class="picker-body">`;
-
-  // Type buttons
-  h += `<div>
-    <span class="picker-section-lbl">COMPOSITION TYPE</span>
-    <div class="comp-type-row">`;
-  Object.entries(COMP_DATA).forEach(([key, cd]) => {
-    const sel = state.compType === key;
-    h += `<button class="comp-type-btn${sel ? ` sel-${cd.color}` : ""}" onclick="selectCompType('${key}')">
-      <span class="ct-icon">${cd.icon}</span>
-      <span class="ct-name">${cd.label}</span>
-      <span class="ct-desc">${cd.desc}</span>
-    </button>`;
-  });
-  h += `</div></div>`;
-
-  if (state.compType) {
-    const subtypes = Object.keys(COMP_DATA[state.compType].subtypes);
-
-    // Subtype tabs
-    h += `<div>
-      <span class="picker-section-lbl">SUBTYPE</span>
-      <div class="sub-row">`;
-    subtypes.forEach(sub => {
-      h += `<button class="sub-btn${state.compSub === sub ? " active" : ""}" onclick="selectCompSub('${esc(sub)}')">` + sub + `</button>`;
-    });
-    h += `</div></div>`;
-
-    // Shape (Area / Field / Control Area)
-    const sub = currentSub();
-    if (sub?.shape) {
-      h += `<div><span class="picker-section-lbl">SHAPE</span><div class="sub-row">`;
-      Object.entries(SHAPES).forEach(([k,sh]) => {
-        h += `<button class="sub-btn${state.shape===k?" active":""}" onclick="selectShape('${k}')">${sh.label}</button>`;
-      });
-      h += `</div><p class="pick-desc">${SHAPES[state.shape].desc}</p></div>`;
-    }
-
-    // Manner of Drawing
-    h += `<div><span class="picker-section-lbl">MANNER OF DRAWING</span><div class="sub-row">`;
-    Object.entries(MANNERS).forEach(([k,m]) => {
-      const dis = !mannerAllowed(k);
-      h += `<button class="sub-btn${state.manner===k?" active":""}${dis?" disabled":""}" onclick="selectManner('${k}')">${m.label}</button>`;
-    });
-    h += `</div><p class="pick-desc">${MANNERS[state.manner].desc}</p></div>`;
-
-    // Verum Effect picker — effects from the Ring's pool
-    if (coreCog) {
-      const coreVerums = (coreCog.verumEffects?.[verumKey()] || []);
-      h += `<div>
-        <span class="picker-section-lbl">VERUM EFFECT (Core — ${verumLabel()} pool)</span>`;
-      if (coreVerums.length === 0) {
-        h += `<p class="no-effects-note">No ${verumLabel()} Verum Effects for ${coreCog.name}.</p>`;
-      } else {
-        h += `<div class="effect-pick-row">`;
-        coreVerums.forEach(v => {
-          const sel = state.coreVerum === v.name;
-          h += `<button class="effect-pick-btn${sel ? " active" : ""}" onclick="selectCoreVerum('${esc(v.name)}')">` + v.name + `</button>`;
-        });
-        h += `</div>`;
-      }
-      h += `</div>`;
-    }
-  }
-
-  h += `</div></div>`;
-  return h;
-}
-
-// ─── Scaling table ─────────────────────────────────────────
-function buildScaleTable() {
-  const cd  = COMP_DATA[state.compType];
-  const sub = cd.subtypes[state.compSub];
-  const l   = state.slotLevel;
-
-  let h = `<div class="scale-card">
-    <div class="scale-head">
-      <span class="scale-title">${cd.label.toUpperCase()} · ${state.compSub.toUpperCase()} — SCALING</span>
-      <span class="scale-type-tag tag-${cd.color}">${cd.label}</span>
-    </div>`;
-
-  if (sub.notes) {
-    h += `<div style="padding:7px 16px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font-size:0.78rem;color:var(--gold);font-style:italic;">${sub.notes}</div>`;
-  }
-
-  h += `<div class="scale-table-wrap"><table class="scale-table"><thead><tr>`;
-  sub.columns.forEach(c => h += `<th>${c}</th>`);
-  h += `</tr></thead><tbody>`;
-
-  sub.rows.forEach(row => {
-    const isNow = row[0] === ORDINALS[l];
-    h += `<tr class="${isNow ? "now-row" : ""}">`;
-    row.forEach((cell, ci) => {
-      h += `<td class="${ci===0?"slot-col":""}">${cell}${isNow && ci===0 ? `<span class="now-mark">NOW</span>` : ""}</td>`;
-    });
-    h += `</tr>`;
-  });
-
-  h += `</tbody></table></div>`;
-  if (sub.shape && state.shape !== "sphere") {
-    const row = sub.rows.find(r => r[0] === ORDINALS[l]);
-    const ri  = sub.columns.indexOf("Radius");
-    const r   = row && ri >= 0 ? parseInt(row[ri], 10) : NaN;
-    if (!isNaN(r)) {
-      const dims = state.shape === "cone" ? `${r*2}-ft cone from your hand` : `${r*4}-ft line, 5 ft wide, from your hand`;
-      h += `<div style=\"padding:7px 16px;font-size:0.78rem;color:var(--gold);font-style:italic;\">Drawn as a ${SHAPES[state.shape].label}: ${dims} — no range.</div>`;
-    }
-  }
-  h += `</div>`;
-  return h;
-}
-
-// ─── Spell card ─────────────────────────────────────────────
-function buildSpellCard(coreCog, tier) {
-  const cd        = COMP_DATA[state.compType];
-  const coreEntry = INDEX.find(c => c.id === state.core);
-
-  // Core verum effects from the Ring's pool — never mutate state here
-  const coreVerums  = coreCog?.verumEffects?.[verumKey()] || [];
-  const sub         = cd.subtypes[state.compSub];
-  const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0] || null;
-
-  let h = `<div class="spell-card">
-    <div class="sc-head">
-      <h2>${coreEntry?.icon || ""} ${coreEntry?.name || ""} — ${cd.label} · ${state.compSub}</h2>
-      <div class="pill-row">
-        <span class="pill">${ORDINALS[state.slotLevel]} Slot</span>
-        <span class="pill">Char Lv ${state.charLevel}</span>
-        <span class="pill">${TIERS[tier].label}</span>
-        ${coreCog?.savingThrow ? `<span class="pill gold">${coreCog.savingThrow} Save</span>` : ""}
-        ${coreCog?.damageType  ? `<span class="pill gold">${coreCog.damageType}</span>` : ""}
-        ${sub?.shape && state.shape!=="sphere" ? `<span class="pill">${SHAPES[state.shape].label}</span>` : ""}
-        ${state.manner!=="standard" ? `<span class="pill">${MANNERS[state.manner].label}</span>` : ""}
-        ${sub?.concentration ? `<span class="pill">Concentration</span>` : ""}
-        ${sub?.reaction ? `<span class="pill">Reaction</span>` : ""}
-      </div>
-    </div>`;
-
-  // ── Core section ──
-  h += `<div class="sc-section">
-    <div class="sec-head">
-      <span class="sec-badge badge-core">CORE</span>
-      <span class="sec-title">${coreEntry?.icon || ""} ${coreEntry?.name || ""}</span>
-    </div>`;
-
-  if (coreVerums.length > 1) {
-    h += `<div class="verum-tabs">`;
-    coreVerums.forEach(v => {
-      h += `<button class="v-tab${v.name === state.coreVerum ? " active" : ""}" onclick="selectCoreVerum('${esc(v.name)}')">` + v.name + `</button>`;
-    });
-    h += `</div>`;
-  }
-
-  if (activeVerum) {
-    h += `<div class="tier-block">`;
-    activeVerum.tiers.forEach((txt, i) => {
-      if (i > tier) return; // only show tiers up to current
-      const now = i === tier;
-      h += `<div class="tier-row${now ? " now" : ""}">
-        <span class="t-lbl${now ? " now" : ""}">${TIERS[i].label}</span>
-        <span class="t-txt${now ? " now" : ""}">${resolve(partText(txt))}</span>
-        ${now ? `<span class="now-badge">NOW</span>` : ""}
-      </div>`;
-    });
-    h += `</div>`;
-  } else {
-    h += `<p style="font-size:0.82rem;color:var(--text3);font-style:italic;">No ${verumLabel()} Verum Effects for ${coreCog?.name || "this Cognition"}.</p>`;
-  }
-  h += `</div>`;
-
-  // ── Complement sections ──
-  state.complements.forEach((compState, idx) => {
-    const cog   = LOADED[compState.id];
-    const entry = INDEX.find(c => c.id === compState.id);
-    if (!cog || !entry) return;
-
-    const compTypeLabel = verumLabel();
-    const isCoven = idx >= state.slotLevel - 1;
-    const available = complementPool(cog);
-
-    // Auto-select first valid option
-    if (available.length > 0 && !available.find(fx => fx.name === compState.compEffect)) {
-      compState.compEffect = available[0].name;
-    }
-    const activeFx = available.find(fx => fx.name === compState.compEffect) || available[0] || null;
-
-    h += `<div class="sc-section">
-      <div class="sec-head">
-        <span class="sec-badge badge-comp">${isCoven ? "COVEN SIGIL" : "COMPLEMENT"} ${idx+1}</span>
-        <span class="sec-title">${entry.icon} ${entry.name}</span>
-      </div>`;
-
-    if (available.length === 0) {
-      h += `<div class="contrib">
-        <div class="contrib-lbl">COMPLEMENT — ${compTypeLabel.toUpperCase()}</div>
-        <div class="contrib-txt" style="font-style:italic;color:var(--text3);">No ${compTypeLabel} complement effect for ${entry.name} yet.</div>
-      </div>`;
-    } else {
-      // Tab picker if multiple
-      if (available.length > 1) {
-        h += `<div class="verum-tabs">`;
-        available.forEach(fx => {
-          h += `<button class="v-tab${fx.name === compState.compEffect ? " active" : ""}" onclick="selectCompEffect(${idx}, '${esc(fx.name)}')">` + fx.name + `</button>`;
-        });
-        h += `</div>`;
-      }
-      if (activeFx) {
-        h += `<div class="contrib">
-          <div class="contrib-lbl">${activeFx.name.toUpperCase()} — ${compTypeLabel.toUpperCase()} COMPLEMENT</div>
-          <div class="contrib-txt">${partText(activeFx.effect)}</div>`;
-        if (activeFx.upgrades?.length) {
-          activeFx.upgrades.forEach(u => {
-            h += `<div class="contrib-upg">↑ ${resolve(partText(u))}</div>`;
-          });
-        }
-        h += `</div>`;
-      }
-    }
-    h += `</div>`;
-  });
-
-  // ── Stats row ──
-  h += `<div class="stats-row">
-    <div class="stat-cell"><div class="stat-k">SAVE</div><div class="stat-v">${coreCog?.savingThrow||"—"}</div></div>
-    <div class="stat-cell"><div class="stat-k">DAMAGE</div><div class="stat-v">${coreCog?.damageType||"—"}</div></div>
-    <div class="stat-cell"><div class="stat-k">COMPOSITION</div><div class="stat-v" style="font-size:0.62rem">${cd.label}</div></div>
-    <div class="stat-cell"><div class="stat-k">SUBTYPE</div><div class="stat-v" style="font-size:0.62rem">${state.compSub}</div></div>
-    <div class="stat-cell"><div class="stat-k">SLOT</div><div class="stat-v">${ORDINALS[state.slotLevel]}</div></div>
-    <div class="stat-cell"><div class="stat-k">CHAR LV</div><div class="stat-v">${state.charLevel}</div></div>
-  </div>`;
-
-  h += `</div>`;
-  return h;
-}
-
-// ─── Summary card ─────────────────────────────────────────
-function buildSummary(coreCog, tier) {
-  const lines = state.sumMode === "play"
-    ? buildPlayCard(coreCog, tier)
-    : buildFullRef(coreCog, tier);
-  const bodyHTML = state.sumMode === "play"
-    ? buildPlayCardHTML(coreCog, tier)
-    : null;
-
-  const modeBtn = (id, label) =>
-    `<button class="mode-btn${state.sumMode === id ? " active" : ""}" onclick="setSumMode('${id}')">${label}</button>`;
-
-  return `<div class="summary-card">
-    <div class="sum-head">
-      <span class="sum-title">SUMMARY CARD</span>
-      <div class="btn-row">
-        <span class="sum-modes">${modeBtn("play","PLAY")}${modeBtn("full","FULL")}</span>
-        <button class="act-btn" onclick="copySum()">Copy Text</button>
-        <button class="act-btn g" onclick="window.print()">Print</button>
-      </div>
-    </div>
-    <div class="sum-body${bodyHTML ? " pc" : ""}" id="sumBody" data-text="${lines.join("\n").replace(/"/g,"&quot;")}">${bodyHTML || lines.join("\n")}</div>
-  </div>`;
-}
-
 // ─── Gather every complement's live text. One Seal, One Roll: Sigils never add their own save.
 function gatherRiders(tier) {
   const riders = [], missing = [];
@@ -1910,74 +1145,72 @@ function buildPlayCardHTML(coreCog, tier) {
   const sub = cd.subtypes[state.compSub];
   const isAttack = state.compSub === "Direct Attack";
 
-  const row = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  const row  = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
   const cell = (c) => { const i = sub.columns.indexOf(c); return i >= 0 && row ? resolve(row[i]) : null; };
 
-  // ── Hero: the numbers you actually roll
-  let stats = "";
-  if (isAttack) stats += `<span class="stat hit"><b>${sgn(sealAttack())}</b><span>to hit</span></span>`;
-  // The Verum DC is always live — Sigils and escape clauses hang off it even on a Direct Attack
+  // The numbers you roll, largest first
+  let nums = "";
+  if (isAttack) nums += `<span class="n atk"><b>${sgn(sealAttack())}</b><i>to hit</i></span>`;
   if (coreCog?.savingThrow)
-    stats += `<span class="stat dc"><b>${verumDC()}</b><span>${esc(coreCog.savingThrow)} save</span></span>`;
+    nums += `<span class="n dc"><b>${verumDC()}</b><i>${esc(coreCog.savingThrow)} save</i></span>`;
   const dmgCell = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
   if (dmgCell) {
-    const kind = cell("Healing") || cell("Healing / Target") ? "heal" : cell("Absorb") ? "absorb" : (coreCog?.damageType || "damage").toLowerCase();
+    const kind = (cell("Healing") || cell("Healing / Target")) ? "healing"
+               : cell("Absorb") ? "absorbed"
+               : (coreCog?.damageType || "damage").toLowerCase();
     const t = totalDamage(dmgCell, coreCog, tier);
-    if (t && typeof t === "object")
-      stats += `<span class="stat dmg"><b>${esc(t.total)}</b><span>${esc(kind)}</span><span class="stat-sub">${esc(t.base)} ${esc(t.bonus)}</span></span>`;
-    else
-      stats += `<span class="stat dmg"><b>${esc(t || dmgCell)}</b><span>${esc(kind)}</span></span>`;
+    nums += (t && typeof t === "object")
+      ? `<span class="n dmg"><b>${esc(t.total)}</b><i>${esc(kind)}</i><u>${esc(t.base)} ${esc(t.bonus)}</u></span>`
+      : `<span class="n dmg"><b>${esc(t || dmgCell)}</b><i>${esc(kind)}</i></span>`;
   }
-  [["Range","range"],["Radius","radius"],["Targets","targets"],["Weapon Die","weapon die"],
-   ["CR cap","cr"],["Size","size"],["HP / segment","hp/seg"],["Max size","size"],["Tier","tier"],
-   ["Duration","duration"],["Buff Duration","duration"],["Zone Duration","zone"]].forEach(([c,lab]) => {
-    const v = cell(c); if (v) stats += `<span class="stat"><b>${esc(v)}</b><span>${lab}</span></span>`;
-  });
+  [["Range","range"],["Radius","radius"],["Targets","targets"],["Duration","duration"],
+   ["Buff Duration","duration"],["Zone Duration","zone"],["Weapon Die","weapon die"],
+   ["CR cap","CR"],["Size","size"],["HP / segment","HP each"],["Max size","size"],["Tier","tier"]]
+   .forEach(([c,lab]) => { const v = cell(c); if (v) nums += `<span class="n"><b>${esc(v)}</b><i>${lab}</i></span>`; });
 
   const { conds, denies, resource } = collectTags(coreCog, tier);
   let tags = "";
-  if (sub.reaction)      tags += `<span class="tg warn">Reaction</span>`;
-  if (sub.concentration) tags += `<span class="tg warn">Concentration</span>`;
-  if (sub.shape && state.shape !== "sphere") tags += `<span class="tg">${SHAPES[state.shape].label}</span>`;
-  if (state.manner !== "standard")           tags += `<span class="tg">${MANNERS[state.manner].label}</span>`;
-  if (resource) tags += `<span class="tg">${esc(resource)}</span>`;
-  conds.forEach(c  => tags += `<span class="tg warn">${esc(c)}</span>`);
-  denies.forEach(d => tags += `<span class="tg">no ${esc(d)}</span>`);
+  if (sub.reaction)      tags += `<span class="t hot">reaction</span>`;
+  if (sub.concentration) tags += `<span class="t hot">concentration</span>`;
+  if (sub.shape && state.shape !== "sphere") tags += `<span class="t">${SHAPES[state.shape].label.toLowerCase()}</span>`;
+  if (state.manner !== "standard")           tags += `<span class="t">${MANNERS[state.manner].label.toLowerCase()}</span>`;
+  if (resource) tags += `<span class="t">${esc(resource)}</span>`;
+  conds.forEach(c  => tags += `<span class="t hot">${esc(c.toLowerCase())}</span>`);
+  denies.forEach(d => tags += `<span class="t">no ${esc(d)}</span>`);
 
-  let h = `<div class="pc-hero">
-    <div class="pc-core">${esc(coreEntry?.name || "—")}</div>
-    <div class="pc-ring">${esc(cd.label)} · ${esc(state.compSub)} — ${ORDINALS[state.slotLevel]} slot · Lv ${state.charLevel}</div>
-    <div class="pc-stats">${stats}</div>
-    ${tags ? `<div class="pc-tags">${tags}</div>` : ""}
-  </div>`;
+  let h = `<div class="card">
+    <div class="c-name">${esc(coreEntry?.name || "—")}</div>
+    <div class="c-sub">${esc(cd.label)} ${esc(state.compSub)} · ${ORDINALS[state.slotLevel]} slot · level ${state.charLevel}</div>
+    <div class="c-nums">${nums}</div>
+    ${tags ? `<div class="c-tags">${tags}</div>` : ""}`;
 
-  // ── Core Verum at the live tier
   const cv = coreCog?.verumEffects?.[verumKey()] || [];
   const av = cv.find(v => v.name === state.coreVerum) || cv[0];
   if (av) {
-    h += `<div class="pc-sec"><div class="pc-lbl">CORE VERUM</div>
-      <div class="pc-core-line"><span class="pc-core-name">${esc(av.name)}</span>${esc(cardLine(av.tiers[tier] || av.tiers[av.tiers.length-1]))}</div></div>`;
+    h += `<div class="c-sec"><div class="c-lbl">Core verum</div>
+      <div class="c-core"><b>${esc(av.name)}</b>${esc(cardLine(av.tiers[tier] || av.tiers[av.tiers.length-1]))}</div></div>`;
   }
 
-  // ── Riders, off the single roll
   const { riders, missing } = gatherRiders(tier);
   if (riders.length) {
-    const lbl = isAttack ? "ON HIT — the attack roll is the only d20"
-                         : `ON A FAILED ${(coreCog?.savingThrow || "").toUpperCase()} SAVE — the only d20`;
-    h += `<div class="pc-sec"><div class="pc-lbl">${esc(lbl)}</div>`;
+    const lbl = isAttack
+      ? "On a hit — the attack roll is the only d20"
+      : `On a failed ${esc((coreCog?.savingThrow || "").toLowerCase())} save — the only d20`;
+    h += `<div class="c-sec"><div class="c-lbl">${lbl}</div>`;
     riders.forEach(e => {
-      h += `<div class="pc-rider"><div class="pc-src">${esc(e.name)}</div><div class="pc-txt">${esc(cardLine(e.parts[0]))}` +
-           e.parts.slice(1).map(p => `<span class="pc-up">${esc(cardLine(p))}</span>`).join("") + `</div></div>`;
+      h += `<div class="c-row"><div class="c-src">${esc(e.name)}</div><div class="c-txt">${esc(cardLine(e.parts[0]))}` +
+           e.parts.slice(1).map(p => `<span class="c-up">${esc(cardLine(p))}</span>`).join("") + `</div></div>`;
     });
     h += `</div>`;
   }
-  if (missing.length) h += `<div class="pc-sec"><div class="pc-txt">No ${esc(verumLabel())} complement defined: ${esc(missing.join(", "))}</div></div>`;
+  if (missing.length)
+    h += `<div class="c-sec"><div class="c-lbl">Not yet written</div><div class="c-txt">${esc(missing.join(", "))} has no ${esc(verumLabel().toLowerCase())} complement.</div></div>`;
 
   const foot = [];
-  if (riders.length) foot.push("Sigil conditions last until the end of the target's next turn");
-  if (tier > 0) foot.push("earlier Core tiers also apply — see FULL");
-  if (foot.length) h += `<div class="pc-foot">${esc(foot.join(" · "))}</div>`;
-  return h;
+  if (riders.length) foot.push("Sigil conditions last until the end of the target's next turn.");
+  if (tier > 0) foot.push("Earlier core tiers still apply — switch to Full to read them.");
+  if (foot.length) h += `<div class="c-foot">${foot.join(" ")}</div>`;
+  return h + `</div>`;
 }
 
 function buildFullRef(coreCog, tier) {
@@ -2064,32 +1297,22 @@ function toast(msg) {
 // ═══════════════════════════════════════════════════════════
 //  EVENTS
 // ═══════════════════════════════════════════════════════════
-document.getElementById("lvlSlider").addEventListener("input", e => {
-  state.slotLevel = +e.target.value;
-  // Trim complements if slot reduced
-  state.complements = state.complements.slice(0, maxComps());
-  updateSlotUI();
-  renderCogList();
-  renderMain();
-});
-
-document.getElementById("charSlider").addEventListener("input", e => {
-  state.charLevel = +e.target.value;
-  updateCharUI();
-  renderMain();
-});
-  const vmEl = document.getElementById("vmInput");
-  if (vmEl) vmEl.addEventListener("input", e => {
-    const v = parseInt(e.target.value, 10); state.verumMod = isNaN(v) ? 0 : v;
-    updateCharUI(); renderMain();
+// ── Bar inputs ─────────────────────────────────────────────
+["vmInput","dsInput"].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("input", e => {
+    const v = parseInt(e.target.value, 10);
+    state[id === "vmInput" ? "verumMod" : "dreamMod"] = isNaN(v) ? 0 : v;
+    syncBar(); renderMain();
   });
-  const dsEl = document.getElementById("dsInput");
-  if (dsEl) dsEl.addEventListener("input", e => {
-    const v = parseInt(e.target.value, 10); state.dreamMod = isNaN(v) ? 0 : v;
-    updateCharUI(); renderMain();
-  });
-
-
+});
+// Keyboard: arrows nudge slot, shift+arrows nudge level
+document.addEventListener("keydown", e => {
+  if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (e.key === "ArrowRight") { e.shiftKey ? bumpLvl(1)  : bumpSlot(1);  }
+  else if (e.key === "ArrowLeft") { e.shiftKey ? bumpLvl(-1) : bumpSlot(-1); }
+});
 
 // ═══════════════════════════════════════════════════════════
 //  BOOT
