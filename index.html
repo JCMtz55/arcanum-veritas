@@ -771,7 +771,7 @@ const COMP_DATA = {
     subtypes: {
       "Direct Attack": {
         columns: ["Slot","Damage","Range"],
-        notes: "One target. Seal attack roll (Prof + Verum Mod). On a hit: full damage + Core Verum Effect. Crits double the dice. Never hits more than one creature — that is what Area is for.\n\nTouch variant: draw the seal into your hand instead — range 5 ft, damage gains one additional die.",
+        notes: "One target. Seal attack roll (Prof + Verum Mod) — the only d20 this seal asks for. On a hit: full damage + Core Verum Effect, and every Complement resolves off that same hit. Crits double the dice. Never hits more than one creature — that is what Area is for.\n\nTouch variant: draw the seal into your hand instead — range 5 ft, damage gains one additional die.",
         rows: [
           ["1st","2d8 + VM","90 ft"],["2nd","3d8 + VM","90 ft"],
           ["3rd","4d8 + VM","120 ft"],["4th","5d8 + VM","120 ft"],
@@ -1642,22 +1642,18 @@ function buildSummary(coreCog, tier) {
   </div>`;
 }
 
-// ─── Gather every complement's live text, sorted into resolution buckets
+// ─── Gather every complement's live text. One Seal, One Roll: Sigils never add their own save.
 function gatherRiders(tier) {
-  const onHit = [], saves = [], missing = [];
+  const riders = [], missing = [];
   state.complements.forEach(cs => {
     const cog   = LOADED[cs.id];
     const name  = INDEX.find(c => c.id === cs.id)?.name || cs.id;
     const avail = complementPool(cog);
     const fx    = avail.find(f => f.name === cs.compEffect) || avail[0];
     if (!fx) { missing.push(name); return; }
-    const parts = [fx.effect, ...liveUpgrades(fx.upgrades, tier)];
-    const text  = parts.join(" ");
-    const ability = saveAbilityOf(text);
-    const entry = { name, fxName: fx.name, parts, ability };
-    (ability ? saves : onHit).push(entry);
+    riders.push({ name, fxName: fx.name, parts: [fx.effect, ...liveUpgrades(fx.upgrades, tier)] });
   });
-  return { onHit, saves, missing };
+  return { riders, missing };
 }
 
 // Trim an upgrade line's "Level 5+:" prefix — the card already filters by tier
@@ -1666,6 +1662,9 @@ function stripLvl(t) { return String(t).replace(/^\s*Level\s+\d+\+\s*:\s*/i, "")
 // The section header already says when a rider fires, so drop the lead-in boilerplate
 const LEAD_INS = [
   /^On a hit or failed saving throw against the primary effect,\s*/i,
+  /^On a hit or failed save against the primary effect\s*[—–,]\s*/i,
+  /^On a hit or failed save against the primary effect,\s*/i,
+  /^When the primary effect hits or a target fails their save,\s*/i,
   /^On a hit or failed saving throw,\s*/i,
   /^When the primary effect hits or a target fails their saving throw,\s*/i,
   /^When the primary effect deals damage,\s*/i,
@@ -1716,7 +1715,17 @@ function compact(t) {
   let out = stripFlavorTail(stripLead(stripLvl(t)));
   out = resolveDice(out);
   out = stripSaveBoiler(out);
+  out = foldSigilSave(out);
   return out.replace(/\s+/g, " ").trim();
+}
+// One Seal, One Roll — a Sigil's own saving throw folds into the seal's single roll
+function foldSigilSave(t) {
+  return String(t)
+    .replace(/on a failed\s+[A-Z][a-z]+\s+(?:saving throw|save)/gi, "on the failed save")
+    .replace(/(?:the target |they |it )?must succeeds?\s+on an?\s+[A-Z][a-z]+\s+(?:saving throw|save)\s+or\s+/gi, "on a failed save, ")
+    .replace(/succeeds?\s+on an?\s+[A-Z][a-z]+\s+(?:saving throw|save)/gi, "succeed on the save")
+    .replace(/\bthey succeeds\b/gi, "they succeed")
+    .replace(/([.!?]\s+)(on the failed save)/g, (m, p, r) => p + r.charAt(0).toUpperCase() + r.slice(1));
 }
 
 function buildPlayCard(coreCog, tier) {
@@ -1748,7 +1757,7 @@ function buildPlayCard(coreCog, tier) {
   ["Range","Radius","Targets","Duration","Buff Duration","Zone Duration","Weapon Die","CR cap","Size","AC","HP / segment","Max size","Quality","Tier","Scope"]
     .forEach(c => { const v = cell(c); if (v) stat.push(`${c}: ${v}`); });
   if (coreCog?.savingThrow && state.compSub !== "Direct Attack")
-    stat.push(`${coreCog.savingThrow} DC ${verumDC()}`);
+    stat.push(`${coreCog.savingThrow} save DC ${verumDC()}`);
   L.push(stat.join(" · "));
   L.push("");
 
@@ -1762,26 +1771,18 @@ function buildPlayCard(coreCog, tier) {
     L.push("");
   }
 
-  // ── Riders, in the order they resolve
-  const { onHit, saves, missing } = gatherRiders(tier);
-  if (onHit.length) {
-    L.push(state.compSub === "Direct Attack" ? "ON HIT — no save" : "ON RESOLVE — no save");
-    onHit.forEach(e => {
+  // ── Riders — all resolve off the seal's single roll
+  const { riders, missing } = gatherRiders(tier);
+  const isAttack = state.compSub === "Direct Attack";
+  if (riders.length) {
+    L.push(isAttack
+      ? "ON HIT — the attack roll is the only d20"
+      : `ON A FAILED ${(coreCog?.savingThrow || "—").toUpperCase()} SAVE — DC ${verumDC()}, the only d20`);
+    riders.forEach(e => {
       L.push(`  [${e.name}] ${compact(resolve(e.parts[0]))}`);
       e.parts.slice(1).forEach(p => L.push(`      ↑ ${compact(resolve(p))}`));
     });
-    L.push("");
-  }
-  if (saves.length) {
-    L.push(`SAVES — DC ${verumDC()}`);
-    const byAbility = {};
-    saves.forEach(e => (byAbility[e.ability] = byAbility[e.ability] || []).push(e));
-    Object.keys(byAbility).sort().forEach(ab => {
-      byAbility[ab].forEach(e => {
-        L.push(`  ${ab.slice(0,3).toUpperCase()}  [${e.name}] ${compact(resolve(e.parts[0]))}`);
-        e.parts.slice(1).forEach(p => L.push(`       ↑ ${compact(resolve(p))}`));
-      });
-    });
+    L.push(`  (Sigil conditions last until the end of the target's next turn)`);
     L.push("");
   }
   if (missing.length) L.push(`(no ${verumLabel()} complement defined: ${missing.join(", ")})`);
