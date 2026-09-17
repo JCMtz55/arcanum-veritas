@@ -1046,6 +1046,15 @@ function complementPool(cog) {
 // Complement budget: slot − 1, plus up to three from Coven Drawing
 function maxComps() { return state.slotLevel - 1 + (state.manner === "coven" ? 3 : 0); }
 function currentSub() { return COMP_DATA[state.compType]?.subtypes?.[state.compSub]; }
+// ── Schema tolerance: a tier / effect may be a plain string (v1) or {text, card, mech} (v2)
+function partText(p) { return (p && typeof p === "object") ? (p.text || "") : (p || ""); }
+function partCard(p) { return (p && typeof p === "object") ? (p.card || null) : null; }
+function partMech(p) { return (p && typeof p === "object") ? (p.mech || null) : null; }
+// PLAY card prefers the authored card line; falls back to compressing the prose
+function cardLine(p) {
+  const c = partCard(p);
+  return c ? resolve(c) : compact(resolve(partText(p)));
+}
 // ── Derived numbers ────────────────────────────────────────
 function profBonus()  { return Math.ceil(state.charLevel / 4) + 1; }
 function sealAttack() { return profBonus() + state.verumMod; }
@@ -1056,6 +1065,10 @@ function resolve(str) {
   if (!str) return str;
   const vm = state.verumMod, pb = profBonus(), dc = verumDC();
   return String(str)
+    // multipliers of the Verum Modifier resolve to a real number
+    .replace(/(\d+)\s*[×x]\s*VM\b/g, (m, n) => `${(+n) * vm}`)
+    .replace(/\b(two|three|four|five|six|seven|eight|nine|ten)\s+times\s+your\s+Verum\s+Modifier/gi,
+             (m, w) => `${({two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10})[w.toLowerCase()] * vm}`)
     // specific phrasings first, so the general ones can't mangle them
     .replace(/\(DC equals your Verum DC\)/gi, `(DC ${dc})`)
     .replace(/against your Verum DC/gi, `vs DC ${dc}`)
@@ -1594,7 +1607,7 @@ function buildSpellCard(coreCog, tier) {
       if (activeFx) {
         h += `<div class="contrib">
           <div class="contrib-lbl">${activeFx.name.toUpperCase()} — ${compTypeLabel.toUpperCase()} COMPLEMENT</div>
-          <div class="contrib-txt">${activeFx.effect}</div>`;
+          <div class="contrib-txt">${partText(activeFx.effect)}</div>`;
         if (activeFx.upgrades?.length) {
           activeFx.upgrades.forEach(u => {
             h += `<div class="contrib-upg">↑ ${u}</div>`;
@@ -1766,7 +1779,7 @@ function buildPlayCard(coreCog, tier) {
   const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
   if (activeVerum) {
     L.push(`CORE — ${(activeVerum.name || "").toUpperCase()}`);
-    L.push(`  ${compact(resolve(activeVerum.tiers[tier] || activeVerum.tiers[activeVerum.tiers.length-1] || ""))}`);
+    L.push(`  ${cardLine(activeVerum.tiers[tier] || activeVerum.tiers[activeVerum.tiers.length-1] || "")}`);
     if (tier > 0) L.push(`  (earlier tiers also apply — see FULL)`);
     L.push("");
   }
@@ -1779,8 +1792,8 @@ function buildPlayCard(coreCog, tier) {
       ? "ON HIT — the attack roll is the only d20"
       : `ON A FAILED ${(coreCog?.savingThrow || "—").toUpperCase()} SAVE — DC ${verumDC()}, the only d20`);
     riders.forEach(e => {
-      L.push(`  [${e.name}] ${compact(resolve(e.parts[0]))}`);
-      e.parts.slice(1).forEach(p => L.push(`      ↑ ${compact(resolve(p))}`));
+      L.push(`  [${e.name}] ${cardLine(e.parts[0])}`);
+      e.parts.slice(1).forEach(p => L.push(`      ↑ ${cardLine(p)}`));
     });
     L.push(`  (Sigil conditions last until the end of the target's next turn)`);
     L.push("");
@@ -1824,7 +1837,7 @@ function buildFullRef(coreCog, tier) {
   if (activeVerum) {
     lines.push(`── CORE VERUM: ${(state.coreVerum || activeVerum.name).toUpperCase()} ──`);
     for (let i = 0; i <= tier; i++) {
-      lines.push(`[${TIERS[i].label}] ${resolve(activeVerum.tiers[i] || "")}`);
+      lines.push(`[${TIERS[i].label}] ${resolve(partText(activeVerum.tiers[i]))}`);
     }
     lines.push(``);
   }
@@ -1838,8 +1851,8 @@ function buildFullRef(coreCog, tier) {
       const activeFx = avail.find(fx => fx.name === cs.compEffect) || avail[0];
       if (activeFx) {
         lines.push(`${name} — ${activeFx.name}:`);
-        lines.push(resolve(activeFx.effect));
-        liveUpgrades(activeFx.upgrades, tier).forEach(u => lines.push(`  ↑ ${resolve(u)}`));
+        lines.push(resolve(partText(activeFx.effect)));
+        liveUpgrades(activeFx.upgrades, tier).forEach(u => lines.push(`  ↑ ${resolve(partText(u))}`));
       } else {
         lines.push(`${name}: No ${verumLabel()} complement defined.`);
       }

@@ -12,10 +12,50 @@
         "name": "Magnetic Surge",
         "description": "Repel or attract metal with psychic precision — levitating weapons, ripping blades from hands, and eventually triggering a Magnetic Cataclysm that violently reshapes the entire battlefield.",
         "tiers": [
-          "Telekinetically pull or push metal objects weighing up to 30 pounds within 30 feet. Creatures holding or wearing metal that fail their save are pushed or pulled 10 feet in a direction of your choice.",
-          "Levitate metal weapons within 60 feet for 1 minute. You may make a ranged spell attack using your spellcasting modifier, dealing the weapon's damage on a hit. Creatures in metal armor that fail their save are knocked prone.",
-          "Designate a metal weapon or construct — it gains the Returning property and floats near you if disarmed. Creatures that fail their save have their metal weapons ripped from their hands and land in an unoccupied space within 15 feet.",
-          "Once per long rest, trigger a Magnetic Cataclysm — all metal within 60 feet violently shifts. Creatures in metal armor must succeed on a Strength save or be pulled prone and Restrained for 1 round. Metal weapons rip from hands. Metallic projectiles deal 8d10 force damage in a 20-foot radius (Strength save halves)."
+          {
+            "text": "Telekinetically pull or push metal objects weighing up to 30 pounds within 30 feet. Creatures holding or wearing metal that fail their save are pushed or pulled 10 feet in a direction of your choice.",
+            "mech": {
+              "movement": {
+                "push": 10
+              }
+            }
+          },
+          {
+            "text": "Levitate metal weapons within 60 feet for 1 minute. You may make a ranged spell attack using your spellcasting modifier, dealing the weapon's damage on a hit. Creatures in metal armor that fail their save are knocked prone.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Prone"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Designate a metal weapon or construct — it gains the Returning property and floats near you if disarmed. Creatures that fail their save have their metal weapons ripped from their hands and land in an unoccupied space within 15 feet."
+          },
+          {
+            "text": "Once per long rest, trigger a Magnetic Cataclysm — all metal within 60 feet violently shifts. Creatures in metal armor must succeed on a Strength save or be pulled prone and Restrained for 1 round. Metal weapons rip from hands. Metallic projectiles deal 8d10 force damage in a 20-foot radius (Strength save halves).",
+            "mech": {
+              "damage": {
+                "dice": "8d10",
+                "type": "force"
+              },
+              "save": {
+                "ability": "Strength",
+                "onSuccess": "half"
+              },
+              "conditions": [
+                {
+                  "name": "Restrained",
+                  "duration": "1 round"
+                },
+                {
+                  "name": "Prone",
+                  "duration": "1 round"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -24,20 +64,75 @@
         "name": "Living Alloy",
         "description": "Metal becomes part of you — granting AC, temporary HP each turn, and eventually the Ironborn State where your skin becomes steel and your strikes pierce anything.",
         "tiers": [
-          "While wielding or wearing metal, gain +1 to AC and resistance to bludgeoning damage for 1 minute.",
-          "Absorb a piece of armor or weapon into your form for 1 minute — while doing so, you gain temporary hit points equal to your spellcasting modifier at the start of each of your turns.",
-          "Once per short rest, gain immunity to critical hits and nonmagical slashing damage for 1 minute while wearing metal armor.",
-          "Enter the Ironborn State for 1 minute — your skin becomes steel-like, granting +3 AC and resistance to all physical damage. Your melee attacks count as adamantine and magical. You can sense all metallic objects within 60 feet through obstacles."
+          {
+            "text": "While wielding or wearing metal, gain +1 to AC and resistance to bludgeoning damage for 1 minute.",
+            "mech": {
+              "damage": {
+                "type": "bludgeoning"
+              },
+              "buff": {
+                "ac": 1
+              }
+            }
+          },
+          {
+            "text": "Absorb a piece of armor or weapon into your form for 1 minute — while doing so, you gain temporary hit points equal to your spellcasting modifier at the start of each of your turns.",
+            "mech": {
+              "heal": {
+                "tempHP": true
+              }
+            }
+          },
+          {
+            "text": "Once per short rest, gain immunity to critical hits and nonmagical slashing damage for 1 minute while wearing metal armor.",
+            "mech": {
+              "damage": {
+                "type": "slashing"
+              }
+            }
+          },
+          {
+            "text": "Enter the Ironborn State for 1 minute — your skin becomes steel-like, granting +3 AC and resistance to all physical damage. Your melee attacks count as adamantine and magical. You can sense all metallic objects within 60 feet through obstacles.",
+            "mech": {
+              "buff": {
+                "ac": 3
+              }
+            }
+          }
         ]
       },
       {
         "name": "Forgemind Invocation",
         "description": "Honor the essence of forged intent — enhancing crafted tools, reading the history of metal objects, and eventually summoning a sentient construct that obeys your every command.",
         "tiers": [
-          "When using a weapon or tool made of metal, gain +1 to all checks and attack rolls made with it, and it cannot be disarmed unless you choose.",
-          "While holding a crafted metal object, gain advantage on Insight and Investigation checks related to its history, purpose, or creator. Once per short rest, you may identify a metal item's magical properties without a spell.",
-          "Spells cast using a forged or artisan-made spell focus gain +1 to spell save DC if they manipulate physical matter, constructs, or metal. Additionally, metal weapons you wield deal +1d6 force damage on a hit.",
-          "Once per long rest, invoke the Origin Forge — summon a sentient metal construct (CR 10–12) for 10 minutes that acts as a guardian, smith, or warform at your direction. It shares your initiative, obeys your commands, and dissolves into raw ore when dismissed."
+          {
+            "text": "When using a weapon or tool made of metal, gain +1 to all checks and attack rolls made with it, and it cannot be disarmed unless you choose."
+          },
+          {
+            "text": "While holding a crafted metal object, gain advantage on Insight and Investigation checks related to its history, purpose, or creator. Once per short rest, you may identify a metal item's magical properties without a spell.",
+            "mech": {
+              "buff": {
+                "advantage": "Insight and Investigation checks related to its hi"
+              }
+            }
+          },
+          {
+            "text": "Spells cast using a forged or artisan-made spell focus gain +1 to spell save DC if they manipulate physical matter, constructs, or metal. Additionally, metal weapons you wield deal +1d6 force damage on a hit.",
+            "mech": {
+              "damage": {
+                "dice": "1d6",
+                "type": "force"
+              }
+            }
+          },
+          {
+            "text": "Once per long rest, invoke the Origin Forge — summon a sentient metal construct (CR 10–12) for 10 minutes that acts as a guardian, smith, or warform at your direction. It shares your initiative, obeys your commands, and dissolves into raw ore when dismissed.",
+            "mech": {
+              "summon": {
+                "cr": "10–12"
+              }
+            }
+          }
         ]
       }
     ],
@@ -46,10 +141,56 @@
         "name": "Ferric Anchor",
         "description": "Tether yourself or others using metal's weight — resisting displacement and eventually becoming a Metal Anchor that locks down every creature in range.",
         "tiers": [
-          "Choose a metallic object or creature in metal armor within 60 feet. The target gains advantage on Strength checks to resist being moved or knocked prone — or offensively, has disadvantage on checks to resist being grappled or restrained.",
-          "If you are wearing metal armor, you cannot be moved against your will — including by teleportation or forced displacement. Offensively, a target in metal armor that fails the save is slammed to the ground and Restrained until the end of their next turn.",
-          "You may anchor up to three metallic targets simultaneously. Each that fails their save is Restrained and cannot use the Dash action until the end of their next turn.",
-          "Once per long rest, become a Metal Anchor for 1 minute — no creature within 30 feet can teleport, be forcibly moved, or be disarmed unless they succeed on a Strength saving throw at the start of each of their turns."
+          {
+            "text": "Choose a metallic object or creature in metal armor within 60 feet. The target gains advantage on Strength checks to resist being moved or knocked prone — or offensively, has disadvantage on checks to resist being grappled or restrained.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                },
+                {
+                  "name": "Prone"
+                },
+                {
+                  "name": "Grappled"
+                }
+              ],
+              "buff": {
+                "advantage": "Strength checks to resist being moved or knocked p"
+              },
+              "penalty": {
+                "disadvantage": "checks to resist being grappled or restrained"
+              }
+            }
+          },
+          {
+            "text": "If you are wearing metal armor, you cannot be moved against your will — including by teleportation or forced displacement. Offensively, a target in metal armor that fails the save is slammed to the ground and Restrained until the end of their next turn.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "You may anchor up to three metallic targets simultaneously. Each that fails their save is Restrained and cannot use the Dash action until the end of their next turn.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Once per long rest, become a Metal Anchor for 1 minute — no creature within 30 feet can teleport, be forcibly moved, or be disarmed unless they succeed on a Strength saving throw at the start of each of their turns.",
+            "mech": {
+              "save": {
+                "ability": "Strength"
+              }
+            }
+          }
         ]
       }
     ],
@@ -58,10 +199,29 @@
         "name": "Forgeborn",
         "description": "Every blade remembers the forge.",
         "tiers": [
-          "Your creations are true steel. Structures gain +2 AC. Objects are masterwork — +1 to attack rolls or AC beyond the Ring's listed quality (to a maximum of +3).",
-          "Your creations have resistance to nonmagical bludgeoning, piercing, and slashing damage, a Construct's attacks count as adamantine, and Structures gain +10 HP per segment.",
-          "Weapons you make have the returning property and cannot be disarmed. Structures may include doors, arrow slits, or murder holes that only creatures you choose may use.",
-          "Your creations are adamantine — immune to nonmagical damage, and critical hits against them become normal hits. A Construct made with a 7th-level slot or higher may instead be a Forgemind construct: sentient, able to smith, and loyal for the duration."
+          {
+            "text": "Your creations are true steel. Structures gain +2 AC. Objects are masterwork — +1 to attack rolls or AC beyond the Ring's listed quality (to a maximum of +3).",
+            "mech": {
+              "buff": {
+                "ac": 2,
+                "attack": 1
+              }
+            }
+          },
+          {
+            "text": "Your creations have resistance to nonmagical bludgeoning, piercing, and slashing damage, a Construct's attacks count as adamantine, and Structures gain +10 HP per segment.",
+            "mech": {
+              "damage": {
+                "type": "slashing"
+              }
+            }
+          },
+          {
+            "text": "Weapons you make have the returning property and cannot be disarmed. Structures may include doors, arrow slits, or murder holes that only creatures you choose may use."
+          },
+          {
+            "text": "Your creations are adamantine — immune to nonmagical damage, and critical hits against them become normal hits. A Construct made with a 7th-level slot or higher may instead be a Forgemind construct: sentient, able to smith, and loyal for the duration."
+          }
         ]
       }
     ],
@@ -70,10 +230,30 @@
         "name": "Smith's Knowing",
         "description": "Metal does not lie about what it is.",
         "tiers": [
-          "Sense the kind and amount of metal within 60 feet. Mend a broken metal object by touch. Reshape up to a cubic foot of nonmagical metal. Open a nonmagical lock.",
-          "Fully repair a damaged metal weapon or suit of armor in 1 minute. Learn a metal object's forge, maker, and last owner by touch. Silence the metal a group carries for 8 hours.",
-          "Transmute up to 10 cubic feet of one common metal into another for 8 hours. Pass through metal doors, bars, or walls up to 5 feet thick.",
-          "The Origin Forge — forge a masterwork nonmagical item of any size from raw ore in 10 minutes, or permanently reshape a metal structure such as a gate, a bridge, or a vault door."
+          {
+            "text": "Sense the kind and amount of metal within 60 feet. Mend a broken metal object by touch. Reshape up to a cubic foot of nonmagical metal. Open a nonmagical lock.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Fully repair a damaged metal weapon or suit of armor in 1 minute. Learn a metal object's forge, maker, and last owner by touch. Silence the metal a group carries for 8 hours.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Transmute up to 10 cubic feet of one common metal into another for 8 hours. Pass through metal doors, bars, or walls up to 5 feet thick.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "The Origin Forge — forge a masterwork nonmagical item of any size from raw ore in 10 minutes, or permanently reshape a metal structure such as a gate, a bridge, or a vault door.",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -83,31 +263,87 @@
       "name": "Deadlock",
       "type": "Offensive",
       "description": "The spell leaves more than a wound — it leaves a cage, razor-thin metal fragments lodging into joints and seams until movement becomes impossible.",
-      "effect": "On a hit or failed saving throw against the primary effect, razor-thin metal fragments lodge into the target's joints and armor seams. The target must succeed on a Strength saving throw against your Verum DC or have their movement speed reduced to 0 until the end of their next turn.",
+      "effect": {
+        "text": "On a hit or failed saving throw against the primary effect, razor-thin metal fragments lodge into the target's joints and armor seams. The target must succeed on a Strength saving throw against your Verum DC or have their movement speed reduced to 0 until the end of their next turn.",
+        "mech": {
+          "save": {
+            "ability": "Strength"
+          },
+          "deny": [
+            "movement"
+          ]
+        }
+      },
       "upgrades": [
-        "On a failed save, the target is fully Restrained rather than merely stopped — the fragments binding them in place. They may use their action to attempt a Strength check against your Verum DC to break free early.",
-        "The Restrained condition now requires two consecutive successful Strength checks on separate turns to escape, and any creature that attempts to help them must first succeed on a Strength saving throw against your Verum DC or be Restrained themselves as the fragments react to contact."
+        {
+          "text": "On a failed save, the target is fully Restrained rather than merely stopped — the fragments binding them in place. They may use their action to attempt a Strength check against your Verum DC to break free early.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Restrained"
+              }
+            ]
+          }
+        },
+        {
+          "text": "The Restrained condition now requires two consecutive successful Strength checks on separate turns to escape, and any creature that attempts to help them must first succeed on a Strength saving throw against your Verum DC or be Restrained themselves as the fragments react to contact.",
+          "mech": {
+            "save": {
+              "ability": "Strength"
+            },
+            "conditions": [
+              {
+                "name": "Restrained"
+              }
+            ]
+          }
+        }
       ]
     },
     {
       "name": "Iron Skin",
       "type": "Supportive",
       "description": "Metal's endurance briefly passes to those nearby — an ally gaining bonus AC and resistance to physical damage as the Cognition's durability extends outward.",
-      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains a +2 bonus to AC and resistance to one physical damage type (bludgeoning, piercing, or slashing — declared at the time of casting) until the start of your next turn.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains a +2 bonus to AC and resistance to one physical damage type (bludgeoning, piercing, or slashing — declared at the time of casting) until the start of your next turn."
+      },
       "upgrades": [
-        "The resistance extends to all three physical damage types until the start of your next turn.",
-        "You may choose two allies to receive this benefit, and each also gains immunity to being disarmed until the start of your next turn."
+        {
+          "text": "The resistance extends to all three physical damage types until the start of your next turn."
+        },
+        {
+          "text": "You may choose two allies to receive this benefit, and each also gains immunity to being disarmed until the start of your next turn."
+        }
       ]
     },
     {
       "name": "Deadweight",
       "type": "Control",
       "description": "Metal's gravity makes every step a burden — unseen weight pressing down on the target and stripping speed, Dash, and eventually the ability to leave the ground at all.",
-      "effect": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Strength saving throw against your Verum DC or have their movement speed reduced by 15 feet and suffer disadvantage on Strength checks until the end of their next turn.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails their saving throw, that target must succeed on a Strength saving throw against your Verum DC or have their movement speed reduced by 15 feet and suffer disadvantage on Strength checks until the end of their next turn.",
+        "mech": {
+          "save": {
+            "ability": "Strength"
+          },
+          "movement": {
+            "speed": 15
+          },
+          "penalty": {
+            "speed": -15,
+            "disadvantage": "Strength checks until the end of their next turn"
+          }
+        }
+      },
       "upgrades": [
-        "On a failed save, the target also cannot take the Dash action until the end of their next turn.",
-        "Creatures that fail are additionally unable to jump or climb until the end of their next turn — the weight pressing them flat against whatever surface they stand on."
+        {
+          "text": "On a failed save, the target also cannot take the Dash action until the end of their next turn."
+        },
+        {
+          "text": "Creatures that fail are additionally unable to jump or climb until the end of their next turn — the weight pressing them flat against whatever surface they stand on."
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }

@@ -12,10 +12,48 @@
         "name": "Curse Catalyst",
         "description": "Your corruption ignites curses like kindling.",
         "tiers": [
-          "If the spell deals damage and the target is cursed, it deals additional necrotic damage equal to your Proficiency Bonus × 1d6.",
-          "If the target is affected by 2 or more curses, they must succeed on a Charisma save or be Staggered — losing their reaction until the start of their next turn.",
-          "A cursed creature that fails a save against this effect automatically suffers 1 Wound.",
-          "If a cursed target dies from your effect, there is a 50% chance they rise as a Wretched Shade under your control (CR = half their level), lasting until your next long rest."
+          {
+            "text": "If the spell deals damage and the target is cursed, it deals additional necrotic damage equal to your Proficiency Bonus × 1d6.",
+            "mech": {
+              "damage": {
+                "dice": "1d6",
+                "type": "necrotic"
+              },
+              "conditions": [
+                {
+                  "name": "Cursed"
+                }
+              ]
+            }
+          },
+          {
+            "text": "If the target is affected by 2 or more curses, they must succeed on a Charisma save or be Staggered — losing their reaction until the start of their next turn.",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              }
+            }
+          },
+          {
+            "text": "A cursed creature that fails a save against this effect automatically suffers 1 Wound.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Cursed"
+                }
+              ]
+            }
+          },
+          {
+            "text": "If a cursed target dies from your effect, there is a 50% chance they rise as a Wretched Shade under your control (CR = half their level), lasting until your next long rest.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Cursed"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -24,10 +62,53 @@
         "name": "The Bargain",
         "description": "It never takes. It offers, and lets you do the taking.",
         "tiers": [
-          "A willing creature gains +1d4 to attack rolls and saving throws for 1 minute. When the effect ends it gains 1 Corruption Point.",
-          "+1d6, and once during the duration the creature may reroll any die. 2 Corruption Points.",
-          "+1d8, and resistance to all damage while below half its hit points. 3 Corruption Points, and the creature cannot choose to end the effect early.",
-          "+1d10, advantage on all saving throws, and immunity to Frightened and Charmed. 4 Corruption Points — and you know the instant it crosses a threshold."
+          {
+            "text": "A willing creature gains +1d4 to attack rolls and saving throws for 1 minute. When the effect ends it gains 1 Corruption Point.",
+            "mech": {
+              "damage": {
+                "dice": "1d4"
+              },
+              "resource": {
+                "name": "Corruption Point",
+                "gain": 1
+              }
+            }
+          },
+          {
+            "text": "+1d6, and once during the duration the creature may reroll any die. 2 Corruption Points.",
+            "mech": {
+              "damage": {
+                "dice": "1d6"
+              }
+            }
+          },
+          {
+            "text": "+1d8, and resistance to all damage while below half its hit points. 3 Corruption Points, and the creature cannot choose to end the effect early.",
+            "mech": {
+              "damage": {
+                "dice": "1d8"
+              }
+            }
+          },
+          {
+            "text": "+1d10, advantage on all saving throws, and immunity to Frightened and Charmed. 4 Corruption Points — and you know the instant it crosses a threshold.",
+            "mech": {
+              "damage": {
+                "dice": "1d10"
+              },
+              "conditions": [
+                {
+                  "name": "Frightened"
+                },
+                {
+                  "name": "Charmed"
+                }
+              ],
+              "buff": {
+                "advantage": "all saving throws"
+              }
+            }
+          }
         ]
       }
     ],
@@ -36,40 +117,125 @@
         "name": "Soul Spoil",
         "description": "You infect the spirit, not just the flesh.",
         "tiers": [
-          "On a failed Corruption Saving Throw, the creature gains +1 Corruption Point.",
-          "Additionally, the target's Honor and Morality modifiers are reduced by 1d4 until their next long rest.",
-          "On a failed Corruption Save, you may also apply a Wicked Curse you know without expending a spell slot or components.",
-          "If the target has 5 or more Corruption Points, they lose immunity to mind-affecting and curse effects, and their soul becomes visible to scrying as a burning fracture of light."
+          {
+            "text": "On a failed Corruption Saving Throw, the creature gains +1 Corruption Point."
+          },
+          {
+            "text": "Additionally, the target's Honor and Morality modifiers are reduced by 1d4 until their next long rest.",
+            "mech": {
+              "damage": {
+                "dice": "1d4"
+              }
+            }
+          },
+          {
+            "text": "On a failed Corruption Save, you may also apply a Wicked Curse you know without expending a spell slot or components."
+          },
+          {
+            "text": "If the target has 5 or more Corruption Points, they lose immunity to mind-affecting and curse effects, and their soul becomes visible to scrying as a burning fracture of light."
+          }
         ]
       },
       {
         "name": "Vile Resonance",
         "description": "You awaken forbidden echoes in the soul.",
         "tiers": [
-          "If the target is already cursed or has 1 or more Corruption Points, they suffer disadvantage on Wisdom saving throws for the spell's duration.",
-          "If the target is currently affected by a Vile Emotion, their Corruption Save DC increases by 2 for the next 10 minutes.",
-          "Creatures with 3 or more Corruption Points automatically suffer 1 level of Dream Exhaustion when affected by this effect.",
-          "When a creature fails a save against this effect, apply a Rebound Curse of their Dominant Vile Emotion — even if they do not have one yet."
+          {
+            "text": "If the target is already cursed or has 1 or more Corruption Points, they suffer disadvantage on Wisdom saving throws for the spell's duration.",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "conditions": [
+                {
+                  "name": "Cursed"
+                }
+              ],
+              "penalty": {
+                "disadvantage": "Wisdom saving throws for the spell's duration"
+              }
+            }
+          },
+          {
+            "text": "If the target is currently affected by a Vile Emotion, their Corruption Save DC increases by 2 for the next 10 minutes."
+          },
+          {
+            "text": "Creatures with 3 or more Corruption Points automatically suffer 1 level of Dream Exhaustion when affected by this effect.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Exhaustion"
+                }
+              ]
+            }
+          },
+          {
+            "text": "When a creature fails a save against this effect, apply a Rebound Curse of their Dominant Vile Emotion — even if they do not have one yet."
+          }
         ]
       },
       {
         "name": "Whispering Sin",
         "description": "You sow the temptation of corruption through whispers.",
         "tiers": [
-          "On a failed save, the target is haunted by whispers — until their next long rest, they must subtract their current Corruption Point total from each d20 roll they make.",
-          "Choose a Vice (envy, ambition, wrath, etc.) — the target must succeed on a Wisdom save or act according to that Vice when next presented with a moral choice.",
-          "The effect's area becomes Corruption-linked — any divine healing cast within the area is halved, and the caster of that healing takes psychic damage equal to half the healing prevented.",
-          "Holy effects are reversed within the area for 1 minute — Aura of Courage becomes Aura of Fear, Sanctuary causes vulnerability instead of protection, and similar inversions apply at DM's discretion."
+          {
+            "text": "On a failed save, the target is haunted by whispers — until their next long rest, they must subtract their current Corruption Point total from each d20 roll they make."
+          },
+          {
+            "text": "Choose a Vice (envy, ambition, wrath, etc.) — the target must succeed on a Wisdom save or act according to that Vice when next presented with a moral choice.",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              }
+            }
+          },
+          {
+            "text": "The effect's area becomes Corruption-linked — any divine healing cast within the area is halved, and the caster of that healing takes psychic damage equal to half the healing prevented.",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              }
+            }
+          },
+          {
+            "text": "Holy effects are reversed within the area for 1 minute — Aura of Courage becomes Aura of Fear, Sanctuary causes vulnerability instead of protection, and similar inversions apply at DM's discretion."
+          }
         ]
       },
       {
         "name": "Dark Soul",
         "description": "You make the soul choose defilement or death.",
         "tiers": [
-          "On a failed Wisdom save, the target suffers disadvantage on Morality checks for 24 hours.",
-          "If they already have 1 or more Corruption Points, they automatically fail their next Honor Check triggered by a curse or soul-based effect.",
-          "The effect causes a spiritual severance — the target rolls 1d6. On a 1 or 2, their alignment shifts one step toward Neutral Evil until reversed through Atonement or confession to Null.",
-          "Once per long rest, if the target has 3 or more Corruption Points on a failed save: they gain +1 Corruption Point, are bound to your Dominant Vile Emotion aura, and if they die under this effect their soul cannot be resurrected without Wish or True Resurrection granted by a deity."
+          {
+            "text": "On a failed Wisdom save, the target suffers disadvantage on Morality checks for 24 hours.",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "penalty": {
+                "disadvantage": "Morality checks for 24 hours"
+              }
+            }
+          },
+          {
+            "text": "If they already have 1 or more Corruption Points, they automatically fail their next Honor Check triggered by a curse or soul-based effect."
+          },
+          {
+            "text": "The effect causes a spiritual severance — the target rolls 1d6. On a 1 or 2, their alignment shifts one step toward Neutral Evil until reversed through Atonement or confession to Null.",
+            "mech": {
+              "damage": {
+                "dice": "1d6"
+              }
+            }
+          },
+          {
+            "text": "Once per long rest, if the target has 3 or more Corruption Points on a failed save: they gain +1 Corruption Point, are bound to your Dominant Vile Emotion aura, and if they die under this effect their soul cannot be resurrected without Wish or True Resurrection granted by a deity.",
+            "mech": {
+              "deny": [
+                "revival"
+              ]
+            }
+          }
         ]
       }
     ],
@@ -78,10 +244,30 @@
         "name": "Rot Beneath",
         "description": "It does not introduce the evil. It finds the evil already there and gives it permission.",
         "tiers": [
-          "See a creature's Corruption Points and Dominant Vile Emotion by looking at it. Spoil food, wine, or a stored good by touch. Know the most shameful thing a creature within 30 feet has done this week.",
-          "Age or decay a nonmagical object by a century. Plant a single idea in a sleeping creature's mind — it wakes believing the idea was its own.",
-          "Read the moral history of a place: every oath broken, every betrayal, every crime committed within its walls. Forge a document, seal, or memory that survives any mundane scrutiny.",
-          "Name an institution, family, or order you have touched — learn its weakest member and the precise pressure that would break them. Or sour a region's harvest, luck, and trust for a season."
+          {
+            "text": "See a creature's Corruption Points and Dominant Vile Emotion by looking at it. Spoil food, wine, or a stored good by touch. Know the most shameful thing a creature within 30 feet has done this week.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Age or decay a nonmagical object by a century. Plant a single idea in a sleeping creature's mind — it wakes believing the idea was its own.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Read the moral history of a place: every oath broken, every betrayal, every crime committed within its walls. Forge a document, seal, or memory that survives any mundane scrutiny.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Name an institution, family, or order you have touched — learn its weakest member and the precise pressure that would break them. Or sour a region's harvest, luck, and trust for a season.",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -91,31 +277,86 @@
       "name": "Taint",
       "type": "Offensive",
       "description": "The spell leaves more than a wound — it leaves a stain.",
-      "effect": "On a hit or failed saving throw against the primary effect, the target must succeed on a Corruption Saving Throw against your Verum DC or gain +1 Corruption Point, and they have disadvantage on their next Corruption Save before the end of your next turn.",
+      "effect": {
+        "text": "On a hit or failed saving throw against the primary effect, the target must succeed on a Corruption Saving Throw against your Verum DC or gain +1 Corruption Point, and they have disadvantage on their next Corruption Save before the end of your next turn.",
+        "mech": {
+          "penalty": {
+            "disadvantage": "their next Corruption Save before the end of your"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: The Corruption Point is applied automatically on a failed save with no secondary save required, and the disadvantage extends to all Corruption Saves until the end of your next turn.",
-        "Level 11+: The target gains +1 Corruption Point regardless of the save result, and if they already have 3 or more Corruption Points, they also suffer 1 level of Dream Exhaustion."
+        {
+          "text": "Level 5+: The Corruption Point is applied automatically on a failed save with no secondary save required, and the disadvantage extends to all Corruption Saves until the end of your next turn."
+        },
+        {
+          "text": "Level 11+: The target gains +1 Corruption Point regardless of the save result, and if they already have 3 or more Corruption Points, they also suffer 1 level of Dream Exhaustion.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Exhaustion"
+              }
+            ]
+          }
+        }
       ]
     },
     {
       "name": "Vile Sympathy",
       "type": "Supportive",
       "description": "Corruption feeds those who understand it.",
-      "effect": "When the primary effect resolves, for each corrupted creature (1 or more Corruption Points) within 30 feet, you gain temporary hit points equal to your Charisma modifier and advantage on your next Charisma saving throw before the start of your next turn.",
+      "effect": {
+        "text": "When the primary effect resolves, for each corrupted creature (1 or more Corruption Points) within 30 feet, you gain temporary hit points equal to your Charisma modifier and advantage on your next Charisma saving throw before the start of your next turn.",
+        "mech": {
+          "save": {
+            "ability": "Charisma"
+          },
+          "heal": {
+            "tempHP": true
+          },
+          "buff": {
+            "advantage": "your next Charisma saving throw before the start o"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: The temporary HP per corrupted creature increases to your Charisma modifier + your proficiency bonus, and the advantage extends to all Charisma saving throws until the start of your next turn.",
-        "Level 11+: You may also reduce one corrupted creature's Corruption Point total by 1 to immediately regain a spell slot of 3rd level or lower — absorbing their spiritual decay as raw magical fuel."
+        {
+          "text": "Level 5+: The temporary HP per corrupted creature increases to your Charisma modifier + your proficiency bonus, and the advantage extends to all Charisma saving throws until the start of your next turn.",
+          "mech": {
+            "save": {
+              "ability": "Charisma"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: You may also reduce one corrupted creature's Corruption Point total by 1 to immediately regain a spell slot of 3rd level or lower — absorbing their spiritual decay as raw magical fuel."
+        }
       ]
     },
     {
       "name": "Corrupt Ground",
       "type": "Control",
       "description": "The soul of the place is poisoned.",
-      "effect": "When the primary effect hits or a target fails their saving throw, the ground in a 15-foot radius around them becomes spiritually tainted for 1 minute. Within this area, divine healing is halved, and the DC of all Corruption Saving Throws increases by 2.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails their saving throw, the ground in a 15-foot radius around them becomes spiritually tainted for 1 minute. Within this area, divine healing is halved, and the DC of all Corruption Saving Throws increases by 2."
+      },
       "upgrades": [
-        "Level 5+: Creatures that start their turn within the tainted ground must succeed on a Charisma saving throw or have disadvantage on their next Wisdom saving throw.",
-        "Level 11+: The radius increases to 30 feet, and removing the corruption requires a successful DC 20 Divine Intervention check or the casting of Hallow at 5th level or higher."
+        {
+          "text": "Level 5+: Creatures that start their turn within the tainted ground must succeed on a Charisma saving throw or have disadvantage on their next Wisdom saving throw.",
+          "mech": {
+            "save": {
+              "ability": "Charisma"
+            },
+            "penalty": {
+              "disadvantage": "their next Wisdom saving throw"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: The radius increases to 30 feet, and removing the corruption requires a successful DC 20 Divine Intervention check or the casting of Hallow at 5th level or higher."
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }

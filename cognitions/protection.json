@@ -12,10 +12,41 @@
         "name": "Answering Blow",
         "description": "A shield that only ever holds is half a shield.",
         "tiers": [
-          "The damage becomes force and gains +2 dice, plus additional damage equal to your Verum Modifier for each ally who has taken damage since your last turn (maximum 3).",
-          "+4 dice. The target has disadvantage on attack rolls against anyone but you until the end of its next turn.",
-          "+6 dice. If the target has damaged an ally this round, this effect ignores its resistances and immunities.",
-          "+8 dice. For 1 minute, whenever an ally within 30 feet is hit by an attack, you may use your reaction to deal this effect's damage to the attacker at half value."
+          {
+            "text": "The damage becomes force and gains +2 dice, plus additional damage equal to your Verum Modifier for each ally who has taken damage since your last turn (maximum 3).",
+            "mech": {
+              "damage": {
+                "bonusDice": 2
+              }
+            }
+          },
+          {
+            "text": "+4 dice. The target has disadvantage on attack rolls against anyone but you until the end of its next turn.",
+            "mech": {
+              "damage": {
+                "bonusDice": 4
+              },
+              "penalty": {
+                "disadvantage": "attack rolls against anyone but you until the end"
+              }
+            }
+          },
+          {
+            "text": "+6 dice. If the target has damaged an ally this round, this effect ignores its resistances and immunities.",
+            "mech": {
+              "damage": {
+                "bonusDice": 6
+              }
+            }
+          },
+          {
+            "text": "+8 dice. For 1 minute, whenever an ally within 30 feet is hit by an attack, you may use your reaction to deal this effect's damage to the attacker at half value.",
+            "mech": {
+              "damage": {
+                "bonusDice": 8
+              }
+            }
+          }
         ]
       }
     ],
@@ -24,30 +55,101 @@
         "name": "Guardian's Shell",
         "description": "Create an arcane barrier to absorb damage — granting scaling temporary HP, damage resistance, and eventually reflecting resisted damage back at attackers as force.",
         "tiers": [
-          "You or one ally within 30 feet gains temporary hit points equal to 10 × the spell slot level used.",
-          "The target instead gains temp HP equal to 20 × the spell slot level, and resistance to one damage type of your choice for 1 round.",
-          "Resistance extends to two damage types, and the temp HP increases to 30 × the spell slot level.",
-          "The shell reflects incoming damage of the resisted type back at the attacker — the attacker takes 1d6 force damage per spell slot level used (Constitution save halves)."
+          {
+            "text": "You or one ally within 30 feet gains temporary hit points equal to 10 × the spell slot level used.",
+            "mech": {
+              "heal": {
+                "tempHP": true
+              }
+            }
+          },
+          {
+            "text": "The target instead gains temp HP equal to 20 × the spell slot level, and resistance to one damage type of your choice for 1 round.",
+            "mech": {
+              "heal": {
+                "tempHP": true
+              }
+            }
+          },
+          {
+            "text": "Resistance extends to two damage types, and the temp HP increases to 30 × the spell slot level.",
+            "mech": {
+              "heal": {
+                "tempHP": true
+              }
+            }
+          },
+          {
+            "text": "The shell reflects incoming damage of the resisted type back at the attacker — the attacker takes 1d6 force damage per spell slot level used (Constitution save halves).",
+            "mech": {
+              "damage": {
+                "dice": "1d6",
+                "type": "force"
+              },
+              "save": {
+                "ability": "Constitution",
+                "onSuccess": "half"
+              }
+            }
+          }
         ]
       },
       {
         "name": "Impenetrable Will",
         "description": "Your protection weaves into the mind and soul — granting condition advantage, then immunity, and eventually a once-per-rest Legendary Resistance for one chosen ally.",
         "tiers": [
-          "Choose one condition (Frightened, Charmed, or Stunned) — the target gains advantage on saving throws against it for 1 minute.",
-          "The target is immune to the chosen condition for 1 minute.",
-          "You may target two conditions — immunity applies to both for 1 minute.",
-          "Once per long rest, you may grant one affected ally Legendary Resistance — they may choose to automatically succeed on one saving throw before the effect ends."
+          {
+            "text": "Choose one condition (Frightened, Charmed, or Stunned) — the target gains advantage on saving throws against it for 1 minute.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Stunned",
+                  "duration": "1 minute"
+                },
+                {
+                  "name": "Frightened"
+                },
+                {
+                  "name": "Charmed"
+                }
+              ],
+              "buff": {
+                "advantage": "saving throws against it for 1 minute"
+              }
+            }
+          },
+          {
+            "text": "The target is immune to the chosen condition for 1 minute."
+          },
+          {
+            "text": "You may target two conditions — immunity applies to both for 1 minute."
+          },
+          {
+            "text": "Once per long rest, you may grant one affected ally Legendary Resistance — they may choose to automatically succeed on one saving throw before the effect ends."
+          }
         ]
       },
       {
         "name": "Ward of the Guardian",
         "description": "Mark an ally for divine protection — imposing disadvantage on attackers, halving damage on hits, and eventually granting critical hit immunity and automatic save successes each round.",
         "tiers": [
-          "Designate one ally within 30 feet — attack rolls against them are made at disadvantage until the start of your next turn.",
-          "If an attacker hits despite the ward, the target takes half damage and cannot suffer Wounds from that hit.",
-          "You may mark two allies simultaneously, and each gains +2 AC for the duration.",
-          "Allies under your ward are immune to critical hits and may automatically succeed on one saving throw per round — you choose which save when it occurs."
+          {
+            "text": "Designate one ally within 30 feet — attack rolls against them are made at disadvantage until the start of your next turn."
+          },
+          {
+            "text": "If an attacker hits despite the ward, the target takes half damage and cannot suffer Wounds from that hit."
+          },
+          {
+            "text": "You may mark two allies simultaneously, and each gains +2 AC for the duration.",
+            "mech": {
+              "buff": {
+                "ac": 2
+              }
+            }
+          },
+          {
+            "text": "Allies under your ward are immune to critical hits and may automatically succeed on one saving throw per round — you choose which save when it occurs."
+          }
         ]
       }
     ],
@@ -56,10 +158,36 @@
         "name": "Protective Pulse",
         "description": "Repel harm from all nearby — boosting AC, granting half cover, pushing enemies prone, and eventually dispelling magical effects targeting your allies within the radius.",
         "tiers": [
-          "When cast, allies within 10 feet gain +1 AC and cannot suffer Wounds until the start of your next turn.",
-          "Radius increases to 20 feet, the AC bonus increases to +2, and allies gain half cover against ranged attacks.",
-          "Enemies in the area must succeed on a Strength save or be pushed 15 feet and knocked prone.",
-          "The pulse additionally dispels magical effects of 5th level or lower targeting your allies within the radius."
+          {
+            "text": "When cast, allies within 10 feet gain +1 AC and cannot suffer Wounds until the start of your next turn.",
+            "mech": {
+              "buff": {
+                "ac": 1
+              }
+            }
+          },
+          {
+            "text": "Radius increases to 20 feet, the AC bonus increases to +2, and allies gain half cover against ranged attacks."
+          },
+          {
+            "text": "Enemies in the area must succeed on a Strength save or be pushed 15 feet and knocked prone.",
+            "mech": {
+              "save": {
+                "ability": "Strength"
+              },
+              "conditions": [
+                {
+                  "name": "Prone"
+                }
+              ],
+              "movement": {
+                "push": 15
+              }
+            }
+          },
+          {
+            "text": "The pulse additionally dispels magical effects of 5th level or lower targeting your allies within the radius."
+          }
         ]
       }
     ],
@@ -68,10 +196,23 @@
         "name": "Bulwark of Faith",
         "description": "To make a shield is to promise it will hold.",
         "tiers": [
-          "Allies behind a Structure gain +1 AC beyond its cover. A Construct may use its reaction to grant half cover to an ally within 5 feet. Objects made as shields or armor grant +1 AC.",
-          "Your Structures are immune to nonmagical damage. A Construct adjacent to an ally may take a hit meant for them.",
-          "Once per seal, you may raise the Structure as a reaction when an ally within range is targeted. Constructs have resistance to all damage while protecting someone.",
-          "Sanctum: allies within 5 feet of a Structure are immune to forced movement and death effects, and a Structure that would be destroyed instead stands at 1 hit point until the start of your next turn."
+          {
+            "text": "Allies behind a Structure gain +1 AC beyond its cover. A Construct may use its reaction to grant half cover to an ally within 5 feet. Objects made as shields or armor grant +1 AC.",
+            "mech": {
+              "buff": {
+                "ac": 1
+              }
+            }
+          },
+          {
+            "text": "Your Structures are immune to nonmagical damage. A Construct adjacent to an ally may take a hit meant for them."
+          },
+          {
+            "text": "Once per seal, you may raise the Structure as a reaction when an ally within range is targeted. Constructs have resistance to all damage while protecting someone."
+          },
+          {
+            "text": "Sanctum: allies within 5 feet of a Structure are immune to forced movement and death effects, and a Structure that would be destroyed instead stands at 1 hit point until the start of your next turn."
+          }
         ]
       }
     ],
@@ -80,10 +221,32 @@
         "name": "Warding Rite",
         "description": "A door does not need a guard if the guard is the door.",
         "tiers": [
-          "Ward a door, chest, or 10-foot area: it locks (opened with a check against your Verum DC) and alerts you when crossed.",
-          "Ward a room for 8 hours against scrying and against teleportation into it.",
-          "Ward a place against a named creature type; they cannot willingly enter without succeeding on a Charisma save against your Verum DC.",
-          "Sanctify a region up to 100 feet across: no hostile Arcanum Veritas of a lower slot than yours can be drawn inside it."
+          {
+            "text": "Ward a door, chest, or 10-foot area: it locks (opened with a check against your Verum DC) and alerts you when crossed.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ward a room for 8 hours against scrying and against teleportation into it.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ward a place against a named creature type; they cannot willingly enter without succeeding on a Charisma save against your Verum DC.",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              }
+            }
+          },
+          {
+            "text": "Sanctify a region up to 100 feet across: no hostile Arcanum Veritas of a lower slot than yours can be drawn inside it.",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -93,31 +256,103 @@
       "name": "Retribution Ward",
       "type": "Offensive",
       "description": "Strike the protected and the protection strikes back — a ward discharging force damage at every attacker who dares hit the warded creature.",
-      "effect": "When the primary effect resolves, place a Retribution Ward on one creature within 30 feet for 1 minute. The next time that creature is hit by a melee or ranged attack, the attacker takes force damage equal to your spellcasting modifier + your proficiency bonus as the ward discharges.",
+      "effect": {
+        "text": "When the primary effect resolves, place a Retribution Ward on one creature within 30 feet for 1 minute. The next time that creature is hit by a melee or ranged attack, the attacker takes force damage equal to your spellcasting modifier + your proficiency bonus as the ward discharges.",
+        "mech": {
+          "damage": {
+            "type": "force"
+          }
+        }
+      },
       "upgrades": [
-        "The ward discharges on the first two attacks that hit rather than just the first, and the force damage increases to twice your spellcasting modifier + your proficiency bonus.",
-        "The ward discharges on every attack that hits for 1 minute, dealing force damage equal to your spellcasting modifier + your proficiency bonus each time — protection becoming a persistent deterrent against striking the warded creature."
+        {
+          "text": "The ward discharges on the first two attacks that hit rather than just the first, and the force damage increases to twice your spellcasting modifier + your proficiency bonus.",
+          "mech": {
+            "damage": {
+              "type": "force"
+            }
+          }
+        },
+        {
+          "text": "The ward discharges on every attack that hits for 1 minute, dealing force damage equal to your spellcasting modifier + your proficiency bonus each time — protection becoming a persistent deterrent against striking the warded creature.",
+          "mech": {
+            "damage": {
+              "type": "force"
+            }
+          }
+        }
       ]
     },
     {
       "name": "Fortify",
       "type": "Supportive",
       "description": "A moment of protection hardens those nearby — granting temporary HP, Constitution save advantage, and eventually immunity to the Frightened condition.",
-      "effect": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus and advantage on their next Constitution saving throw before the start of your next turn.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus and advantage on their next Constitution saving throw before the start of your next turn.",
+        "mech": {
+          "save": {
+            "ability": "Constitution"
+          },
+          "heal": {
+            "tempHP": true
+          },
+          "buff": {
+            "advantage": "their next Constitution saving throw before the st"
+          }
+        }
+      },
       "upgrades": [
-        "The temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the advantage extends to all Constitution saving throws until the start of your next turn.",
-        "You may choose two allies to receive this benefit, and each is also immune to the Frightened condition until the start of your next turn — protection fortifying not just the body but the nerve."
+        {
+          "text": "The temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the advantage extends to all Constitution saving throws until the start of your next turn.",
+          "mech": {
+            "save": {
+              "ability": "Constitution"
+            }
+          }
+        },
+        {
+          "text": "You may choose two allies to receive this benefit, and each is also immune to the Frightened condition until the start of your next turn — protection fortifying not just the body but the nerve.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Frightened"
+              }
+            ]
+          }
+        }
       ]
     },
     {
       "name": "Repel",
       "type": "Control",
       "description": "Protection does not just hold — it pushes back, forcing the nearest enemy away from the protected target and eventually making approach feel actively impossible.",
-      "effect": "When the primary effect resolves, the nearest enemy within 30 feet of the primary target must succeed on a Strength saving throw against your Verum DC or be pushed 15 feet directly away from the target.",
+      "effect": {
+        "text": "When the primary effect resolves, the nearest enemy within 30 feet of the primary target must succeed on a Strength saving throw against your Verum DC or be pushed 15 feet directly away from the target.",
+        "mech": {
+          "save": {
+            "ability": "Strength"
+          },
+          "movement": {
+            "push": 15
+          }
+        }
+      },
       "upgrades": [
-        "On a failed save, the enemy is also knocked prone after being pushed — the force of repulsion taking their footing with it.",
-        "You may choose up to two enemies within 30 feet to be affected, and creatures that fail are also unable to move toward the protected target until the end of their next turn — the ward making approach feel actively painful."
+        {
+          "text": "On a failed save, the enemy is also knocked prone after being pushed — the force of repulsion taking their footing with it.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Prone"
+              }
+            ]
+          }
+        },
+        {
+          "text": "You may choose up to two enemies within 30 feet to be affected, and creatures that fail are also unable to move toward the protected target until the end of their next turn — the ward making approach feel actively painful."
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }

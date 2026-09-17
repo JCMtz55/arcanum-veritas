@@ -172,7 +172,7 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 
 The card at the bottom of the build has two modes:
 
-- **PLAY** — the table-facing version. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
+- **PLAY** — the table-facing version. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
 - **FULL** — the complete reference: every tier up to your level, full effect prose, the Ring's rules note. Use it when building or levelling.
 
 Both copy and print. Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
@@ -189,6 +189,8 @@ Both copy and print. Note that the PLAY card's compression is text-pattern based
 | Saving throw type | set by the Core (its Main Saving Throw) |
 
 **The Premium Rule.** A seal of slot *N* should perform like the best spell of slot *N+1* — before its Verum Effect and Sigils. It costs a slot **and** a use; you get Proficiency Bonus uses per long rest; there are no cantrips.
+
+**One Seal, One Roll.** A seal asks each target for at most one d20 — your seal attack roll, or one saving throw whose ability is set by the **Core**. Every Complement resolves off that single result; a Complement's own saving throw is ignored while it is a Complement. A condition imposed by a Complement lasts only **until the end of the target's next turn**; only the Core's condition runs its full tabled duration.
 
 **Limits.** One Core + (slot − 1) Complements (Coven adds up to 3). Your action, once per turn, never a bonus action — Ward is a reaction. Aura, Field, Control zones, and Constructs concentrate. A seal is immune to *Counterspell* and *Dispel Magic*, suppressed by *Antimagic Field*, and unmade early only by an opposing seal.
 

@@ -12,10 +12,38 @@
         "name": "Vital Theft",
         "description": "Life is not created here. It is moved.",
         "tiers": [
-          "+2 dice. You regain hit points equal to half the damage dealt.",
-          "+4 dice. The target's hit point maximum is reduced by the amount you healed until it finishes a long rest.",
-          "+6 dice. Healing beyond your maximum spills to allies within 30 feet.",
-          "+8 dice. If this reduces a creature to 0 hit points, one ally at 0 hit points within 60 feet returns to half their maximum."
+          {
+            "text": "+2 dice. You regain hit points equal to half the damage dealt.",
+            "mech": {
+              "damage": {
+                "bonusDice": 2
+              }
+            }
+          },
+          {
+            "text": "+4 dice. The target's hit point maximum is reduced by the amount you healed until it finishes a long rest.",
+            "mech": {
+              "damage": {
+                "bonusDice": 4
+              }
+            }
+          },
+          {
+            "text": "+6 dice. Healing beyond your maximum spills to allies within 30 feet.",
+            "mech": {
+              "damage": {
+                "bonusDice": 6
+              }
+            }
+          },
+          {
+            "text": "+8 dice. If this reduces a creature to 0 hit points, one ally at 0 hit points within 60 feet returns to half their maximum.",
+            "mech": {
+              "damage": {
+                "bonusDice": 8
+              }
+            }
+          }
         ]
       }
     ],
@@ -24,40 +52,106 @@
         "name": "Healing",
         "description": "Your touch accelerates the very rhythm of cellular regeneration.",
         "tiers": [
-          "When a healing effect is used, it gains +1 additional die of the same type.",
-          "Healing gains +2 dice, and the target also gains 1d4 temporary HP at the start of their next turn.",
-          "Healing gains +3 dice, and removes one condition or disease of your choice from the target.",
-          "Healing becomes absolute — once per long rest you may restore a creature to full HP. Additionally, if a creature died within the last round and their body is intact, you may revive them to 1 HP without expending a spell slot."
+          {
+            "text": "When a healing effect is used, it gains +1 additional die of the same type."
+          },
+          {
+            "text": "Healing gains +2 dice, and the target also gains 1d4 temporary HP at the start of their next turn.",
+            "mech": {
+              "damage": {
+                "bonusDice": 2,
+                "dice": "1d4"
+              }
+            }
+          },
+          {
+            "text": "Healing gains +3 dice, and removes one condition or disease of your choice from the target.",
+            "mech": {
+              "damage": {
+                "bonusDice": 3
+              }
+            }
+          },
+          {
+            "text": "Healing becomes absolute — once per long rest you may restore a creature to full HP. Additionally, if a creature died within the last round and their body is intact, you may revive them to 1 HP without expending a spell slot."
+          }
         ]
       },
       {
         "name": "Restorative",
         "description": "You do not mend flesh — you return identity.",
         "tiers": [
-          "You can restore one minor physical defect — a missing finger, damaged eye, or scarred voice.",
-          "You may regrow lost limbs, restore damaged senses, and cleanse any mundane poison or disease.",
-          "You can rebuild internal organs, erase magical corruption, and reverse up to 6 months of physical trauma from the target's body.",
-          "You may rebuild a being from a handful of remains, returning them to prime health. May undo aging, deformity, or cursed mutations. You may additionally choose to evolve the creature toward its ideal physical form — at DM discretion."
+          {
+            "text": "You can restore one minor physical defect — a missing finger, damaged eye, or scarred voice."
+          },
+          {
+            "text": "You may regrow lost limbs, restore damaged senses, and cleanse any mundane poison or disease."
+          },
+          {
+            "text": "You can rebuild internal organs, erase magical corruption, and reverse up to 6 months of physical trauma from the target's body."
+          },
+          {
+            "text": "You may rebuild a being from a handful of remains, returning them to prime health. May undo aging, deformity, or cursed mutations. You may additionally choose to evolve the creature toward its ideal physical form — at DM discretion.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Cursed"
+                }
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Sentience",
         "description": "Life demands more than form — it seeks purpose.",
         "tiers": [
-          "You may animate a plant or small construct for 1 minute. It gains limited awareness and follows basic commands.",
-          "You may infuse sentience into a newborn creature, seed, homunculus, or egg. The being begins learning immediately and recognizes you as its creator.",
-          "The created creature is fully sapient — it develops a unique soul with emotions, memory, and ambition. Unstable environments may produce feral or corrupted variants at DM discretion.",
-          "You may create true life — a fully realized soul with a unique Cognition Seed. This creation draws cosmic attention and may disrupt prophecy, fate, or planar balance. You do not choose what it ultimately becomes."
+          {
+            "text": "You may animate a plant or small construct for 1 minute. It gains limited awareness and follows basic commands."
+          },
+          {
+            "text": "You may infuse sentience into a newborn creature, seed, homunculus, or egg. The being begins learning immediately and recognizes you as its creator."
+          },
+          {
+            "text": "The created creature is fully sapient — it develops a unique soul with emotions, memory, and ambition. Unstable environments may produce feral or corrupted variants at DM discretion."
+          },
+          {
+            "text": "You may create true life — a fully realized soul with a unique Cognition Seed. This creation draws cosmic attention and may disrupt prophecy, fate, or planar balance. You do not choose what it ultimately becomes."
+          }
         ]
       },
       {
         "name": "Overflowing Vitality",
         "description": "You surge with living force, overflowing into the world.",
         "tiers": [
-          "Allies within 10 feet gain 1d4 temporary hit points at the start of their turns for 1 minute.",
-          "Whenever you heal a creature, one additional creature within 30 feet gains half that amount as overflow healing.",
-          "For 1 minute, all allies within a 60-foot radius regain 1d6 hit points at the start of each of their turns.",
-          "You become a Font of Life for 1 minute — you heal 20 HP at the start of every turn, allies in range automatically succeed on death saving throws, and allies that died this round rise to 1 HP unless their body was disintegrated."
+          {
+            "text": "Allies within 10 feet gain 1d4 temporary hit points at the start of their turns for 1 minute.",
+            "mech": {
+              "damage": {
+                "dice": "1d4"
+              },
+              "heal": {
+                "tempHP": true
+              }
+            }
+          },
+          {
+            "text": "Whenever you heal a creature, one additional creature within 30 feet gains half that amount as overflow healing."
+          },
+          {
+            "text": "For 1 minute, all allies within a 60-foot radius regain 1d6 hit points at the start of each of their turns.",
+            "mech": {
+              "damage": {
+                "dice": "1d6"
+              },
+              "heal": {
+                "amount": "1d6"
+              }
+            }
+          },
+          {
+            "text": "You become a Font of Life for 1 minute — you heal 20 HP at the start of every turn, allies in range automatically succeed on death saving throws, and allies that died this round rise to 1 HP unless their body was disintegrated."
+          }
         ]
       }
     ],
@@ -66,10 +160,47 @@
         "name": "Unbearable Vitality",
         "description": "Too much life, too fast, in a body that never agreed to it.",
         "tiers": [
-          "On a failed Constitution save, the target's speed is halved and it cannot take reactions as tissue overgrows.",
-          "The target is Restrained by its own body, repeating the save at the end of each of its turns.",
-          "The target is Incapacitated as its cells riot.",
-          "The target is Paralyzed, and life sustains it against its will — it cannot drop below 1 hit point or die while the effect lasts."
+          {
+            "text": "On a failed Constitution save, the target's speed is halved and it cannot take reactions as tissue overgrows.",
+            "mech": {
+              "save": {
+                "ability": "Constitution"
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "The target is Restrained by its own body, repeating the save at the end of each of its turns.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The target is Incapacitated as its cells riot.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The target is Paralyzed, and life sustains it against its will — it cannot drop below 1 hit point or die while the effect lasts.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Paralyzed"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -78,10 +209,43 @@
         "name": "Biogenesis",
         "description": "You guide the world to remake itself.",
         "tiers": [
-          "Your creations are living matter — moss, vine, bark, chitin. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant or beast creatures of the listed CR.",
-          "Your creations are immune to poison damage and disease. A Structure supports an ecosystem — allies who rest within 10 feet of one regain 1 additional Hit Die on a short rest.",
-          "Structures are awakened — once per turn, one may make an opportunity attack against a creature that leaves its reach, dealing 2d8 bludgeoning damage on a failed Dexterity saving throw against your Verum DC. Constructs regenerate 5 hit points at the start of each of their turns.",
-          "A Living Domain — within 30 feet of a Structure made with a 7th-level slot or higher, allies regain 1d6 hit points at the start of each of their turns, and the ground is difficult terrain for your enemies."
+          {
+            "text": "Your creations are living matter — moss, vine, bark, chitin. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant or beast creatures of the listed CR."
+          },
+          {
+            "text": "Your creations are immune to poison damage and disease. A Structure supports an ecosystem — allies who rest within 10 feet of one regain 1 additional Hit Die on a short rest.",
+            "mech": {
+              "damage": {
+                "type": "poison"
+              }
+            }
+          },
+          {
+            "text": "Structures are awakened — once per turn, one may make an opportunity attack against a creature that leaves its reach, dealing 2d8 bludgeoning damage on a failed Dexterity saving throw against your Verum DC. Constructs regenerate 5 hit points at the start of each of their turns.",
+            "mech": {
+              "damage": {
+                "dice": "2d8",
+                "type": "bludgeoning"
+              },
+              "save": {
+                "ability": "Dexterity"
+              }
+            }
+          },
+          {
+            "text": "A Living Domain — within 30 feet of a Structure made with a 7th-level slot or higher, allies regain 1d6 hit points at the start of each of their turns, and the ground is difficult terrain for your enemies.",
+            "mech": {
+              "damage": {
+                "dice": "1d6"
+              },
+              "heal": {
+                "amount": "1d6"
+              },
+              "terrain": {
+                "effect": "difficult"
+              }
+            }
+          }
         ]
       }
     ],
@@ -90,10 +254,30 @@
         "name": "Quickening",
         "description": "Life does not ask permission. It only asks for room.",
         "tiers": [
-          "Purify food and water for ten creatures. Cure a mundane disease or poison by touch. Know whether a creature within 60 feet is alive, dead, or undead — and how long it has been so.",
-          "Speak with any living plant or beast for 1 hour. Close a wound so that it leaves no scar. Sense every living creature within 300 feet.",
-          "Grant a willing creature the benefit of a full night's rest in 1 hour. Restore fertility to a barren field, animal, or person.",
-          "Seed life where there was none — an island, a wasteland, a dead god's body — and it sustains itself thereafter. Or extend a willing creature's natural lifespan by a decade."
+          {
+            "text": "Purify food and water for ten creatures. Cure a mundane disease or poison by touch. Know whether a creature within 60 feet is alive, dead, or undead — and how long it has been so.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Speak with any living plant or beast for 1 hour. Close a wound so that it leaves no scar. Sense every living creature within 300 feet.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Grant a willing creature the benefit of a full night's rest in 1 hour. Restore fertility to a barren field, animal, or person.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Seed life where there was none — an island, a wasteland, a dead god's body — and it sustains itself thereafter. Or extend a willing creature's natural lifespan by a decade.",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -103,31 +287,106 @@
       "name": "Life Drain",
       "type": "Offensive",
       "description": "Life taken from one vessel feeds another.",
-      "effect": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), as living energy is siphoned from them. You regain HP equal to half the bonus damage dealt.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), as living energy is siphoned from them. You regain HP equal to half the bonus damage dealt.",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "necrotic"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: Bonus damage increases to two dice, and you may redirect the healing to one ally within 30 feet instead of yourself.",
-        "Level 11+: Bonus damage increases to three dice, and the target must succeed on a Constitution saving throw vs your Verum DC or have their maximum HP reduced by the bonus damage dealt until they finish a long rest."
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and you may redirect the healing to one ally within 30 feet instead of yourself."
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and the target must succeed on a Constitution saving throw vs your Verum DC or have their maximum HP reduced by the bonus damage dealt until they finish a long rest.",
+          "mech": {
+            "save": {
+              "ability": "Constitution"
+            }
+          }
+        }
       ]
     },
     {
       "name": "Vital Surge",
       "type": "Supportive",
       "description": "A pulse of living energy fortifies those nearby.",
-      "effect": "When the primary effect resolves, one ally within 30 feet gains temporary HP equal to your spellcasting modifier and advantage on their next Constitution saving throw before the start of your next turn.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally within 30 feet gains temporary HP equal to your spellcasting modifier and advantage on their next Constitution saving throw before the start of your next turn.",
+        "mech": {
+          "save": {
+            "ability": "Constitution"
+          },
+          "buff": {
+            "advantage": "their next Constitution saving throw before the st"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: Temporary HP increases to your spellcasting modifier + proficiency bonus, and advantage extends to all Constitution saving throws until the start of your next turn.",
-        "Level 11+: Choose two allies to receive this benefit. Each also removes one condition of your choice affecting them as the surge of life pushes the ailment out."
+        {
+          "text": "Level 5+: Temporary HP increases to your spellcasting modifier + proficiency bonus, and advantage extends to all Constitution saving throws until the start of your next turn.",
+          "mech": {
+            "save": {
+              "ability": "Constitution"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: Choose two allies to receive this benefit. Each also removes one condition of your choice affecting them as the surge of life pushes the ailment out."
+        }
       ]
     },
     {
       "name": "Overgrowth",
       "type": "Control",
       "description": "Where the spell lands, life erupts uninvited.",
-      "effect": "After the primary effect resolves, the point of impact erupts in a 10-foot radius of rapid growth — becoming difficult terrain until the end of your next turn. Creatures must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 10 feet until the end of their next turn.",
+      "effect": {
+        "text": "After the primary effect resolves, the point of impact erupts in a 10-foot radius of rapid growth — becoming difficult terrain until the end of your next turn. Creatures must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 10 feet until the end of their next turn.",
+        "mech": {
+          "save": {
+            "ability": "Constitution"
+          },
+          "movement": {
+            "speed": 10
+          },
+          "terrain": {
+            "effect": "difficult",
+            "radius": 10
+          },
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: Growth persists for 1 minute, and creatures that fail the save are Restrained until the end of their next turn rather than merely slowed.",
-        "Level 11+: Radius increases to 20 feet, and Restrained creatures must use their full action to escape rather than a bonus action."
+        {
+          "text": "Level 5+: Growth persists for 1 minute, and creatures that fail the save are Restrained until the end of their next turn rather than merely slowed.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Restrained"
+              },
+              {
+                "name": "Slowed"
+              }
+            ]
+          }
+        },
+        {
+          "text": "Level 11+: Radius increases to 20 feet, and Restrained creatures must use their full action to escape rather than a bonus action.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Restrained"
+              }
+            ]
+          }
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }

@@ -12,30 +12,143 @@
         "name": "Chain Spark",
         "description": "Your lightning leaps from one victim to the next.",
         "tiers": [
-          "Dexterity save; arcs originate from one affected creature of your choice and cannot leap to creatures already affected this casting. The effect deals +1 die of lightning damage, and one arc leaps to a creature within 15 feet of the original target — it takes half the effect's damage on a failed save.",
-          "Bonus damage increases to +2 dice. Arcs leap to 2 creatures within 15 feet — each takes full damage on a failed save, half on a success.",
-          "Bonus damage increases to +3 dice. Arcs leap to 3 creatures within 20 feet. Creatures wearing metal armor or made of metal have disadvantage on the save.",
-          "Trigger a Chainstorm — lightning arcs to all creatures within 30 feet of the arcs' origin creature. Each must make a Dexterity save or take full damage and be Stunned until the end of their next turn."
+          {
+            "text": "Dexterity save; arcs originate from one affected creature of your choice and cannot leap to creatures already affected this casting. The effect deals +1 die of lightning damage, and one arc leaps to a creature within 15 feet of the original target — it takes half the effect's damage on a failed save.",
+            "mech": {
+              "damage": {
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity"
+              }
+            }
+          },
+          {
+            "text": "Bonus damage increases to +2 dice. Arcs leap to 2 creatures within 15 feet — each takes full damage on a failed save, half on a success.",
+            "mech": {
+              "damage": {
+                "bonusDice": 2
+              },
+              "save": {
+                "onSuccess": "half"
+              }
+            }
+          },
+          {
+            "text": "Bonus damage increases to +3 dice. Arcs leap to 3 creatures within 20 feet. Creatures wearing metal armor or made of metal have disadvantage on the save.",
+            "mech": {
+              "damage": {
+                "bonusDice": 3
+              },
+              "penalty": {
+                "disadvantage": "the save"
+              }
+            }
+          },
+          {
+            "text": "Trigger a Chainstorm — lightning arcs to all creatures within 30 feet of the arcs' origin creature. Each must make a Dexterity save or take full damage and be Stunned until the end of their next turn.",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "conditions": [
+                {
+                  "name": "Stunned"
+                }
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Thunderbreak",
         "description": "Your lightning doesn't just shock — it shatters.",
         "tiers": [
-          "Strength save (in addition to the Composition's saving throw, if any). The effect deals +1d8 thunder damage, and targets hit must succeed on a Strength save or be knocked back 10 feet.",
-          "Bonus damage increases to +2d8. Knockback increases to 20 feet, and failed saves also impose disadvantage on Concentration checks until the end of their next turn.",
-          "Bonus damage increases to +3d8, and nearby objects or barriers within 5 feet must make a Dexterity save or shatter.",
-          "Thunderbreak becomes a concussive burst — all creatures within 20 feet of the original target must succeed on a Strength save or be knocked prone, pushed 30 feet, and Deafened for 1 minute."
+          {
+            "text": "Strength save (in addition to the Composition's saving throw, if any). The effect deals +1d8 thunder damage, and targets hit must succeed on a Strength save or be knocked back 10 feet.",
+            "mech": {
+              "damage": {
+                "dice": "1d8",
+                "type": "thunder"
+              },
+              "save": {
+                "ability": "Strength"
+              },
+              "movement": {
+                "push": 10
+              }
+            }
+          },
+          {
+            "text": "Bonus damage increases to +2d8. Knockback increases to 20 feet, and failed saves also impose disadvantage on Concentration checks until the end of their next turn.",
+            "mech": {
+              "damage": {
+                "dice": "2d8"
+              },
+              "penalty": {
+                "disadvantage": "Concentration checks until the end of their next t"
+              }
+            }
+          },
+          {
+            "text": "Bonus damage increases to +3d8, and nearby objects or barriers within 5 feet must make a Dexterity save or shatter.",
+            "mech": {
+              "damage": {
+                "dice": "3d8"
+              },
+              "save": {
+                "ability": "Dexterity"
+              }
+            }
+          },
+          {
+            "text": "Thunderbreak becomes a concussive burst — all creatures within 20 feet of the original target must succeed on a Strength save or be knocked prone, pushed 30 feet, and Deafened for 1 minute.",
+            "mech": {
+              "save": {
+                "ability": "Strength"
+              },
+              "conditions": [
+                {
+                  "name": "Prone",
+                  "duration": "1 minute"
+                },
+                {
+                  "name": "Deafened",
+                  "duration": "1 minute"
+                }
+              ],
+              "movement": {
+                "push": 30
+              }
+            }
+          }
         ]
       },
       {
         "name": "Flash Precision",
         "description": "Lightning always hits first — it doesn't miss, it decides.",
         "tiers": [
-          "You may reroll one attack roll or saving throw associated with this effect, taking the new result.",
-          "Your lightning effects ignore cover and cannot have disadvantage imposed on their attack rolls.",
-          "Once per effect, you may automatically hit with one lightning-based attack or spell — no roll required.",
-          "Designate one creature within 120 feet — it is struck by a Sky Bolt with no attack roll, making a Dexterity save at disadvantage against your Verum DC and taking 12d12 lightning damage on a failure (half on success). On a failure it also cannot use reactions until the end of its next turn and immediately drops Concentration if applicable."
+          {
+            "text": "You may reroll one attack roll or saving throw associated with this effect, taking the new result."
+          },
+          {
+            "text": "Your lightning effects ignore cover and cannot have disadvantage imposed on their attack rolls."
+          },
+          {
+            "text": "Once per effect, you may automatically hit with one lightning-based attack or spell — no roll required."
+          },
+          {
+            "text": "Designate one creature within 120 feet — it is struck by a Sky Bolt with no attack roll, making a Dexterity save at disadvantage against your Verum DC and taking 12d12 lightning damage on a failure (half on success). On a failure it also cannot use reactions until the end of its next turn and immediately drops Concentration if applicable.",
+            "mech": {
+              "damage": {
+                "dice": "12d12",
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity"
+              }
+            }
+          }
         ]
       }
     ],
@@ -44,10 +157,39 @@
         "name": "Voltstride",
         "description": "You move as fast as thought.",
         "tiers": [
-          "When casting the effect, you may teleport up to 10 feet as part of the same action.",
-          "Teleport range increases to 30 feet, and you gain advantage on the next Dexterity saving throw you make before the start of your next turn.",
-          "You may teleport before or after the effect resolves, and you ignore opportunity attacks during this movement.",
-          "For 1 minute, you may divide yourself into afterimages — gaining +5 AC against one attack per turn, and teleporting up to 60 feet as a reaction whenever you are targeted by an attack or spell."
+          {
+            "text": "When casting the effect, you may teleport up to 10 feet as part of the same action.",
+            "mech": {
+              "movement": {
+                "teleport": 10
+              }
+            }
+          },
+          {
+            "text": "Teleport range increases to 30 feet, and you gain advantage on the next Dexterity saving throw you make before the start of your next turn.",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "buff": {
+                "advantage": "the next Dexterity saving throw you make before th"
+              }
+            }
+          },
+          {
+            "text": "You may teleport before or after the effect resolves, and you ignore opportunity attacks during this movement."
+          },
+          {
+            "text": "For 1 minute, you may divide yourself into afterimages — gaining +5 AC against one attack per turn, and teleporting up to 60 feet as a reaction whenever you are targeted by an attack or spell.",
+            "mech": {
+              "movement": {
+                "teleport": 60
+              },
+              "buff": {
+                "ac": 5
+              }
+            }
+          }
         ]
       }
     ],
@@ -56,10 +198,54 @@
         "name": "Conductive Charge",
         "description": "You leave behind a charge that's waiting to explode.",
         "tiers": [
-          "Dexterity save. A creature that fails becomes Charged for the Composition's condition duration or until triggered. The next time it takes damage, it takes an extra 1d6 + your Verum Modifier lightning damage.",
-          "Detonation increases to 2d6 + your Verum Modifier. Charged creatures glow faintly, cannot benefit from invisibility, and have disadvantage on Dexterity saving throws.",
-          "Detonation increases to 3d6 + your Verum Modifier. The charge jumps — if the Charged creature is within 10 feet of another creature when it takes damage, that creature also takes the bonus lightning damage.",
-          "Charged targets become highly unstable — if they die while Charged, they explode, dealing 6d10 lightning damage in a 20-foot radius (Dexterity save halves)."
+          {
+            "text": "Dexterity save. A creature that fails becomes Charged for the Composition's condition duration or until triggered. The next time it takes damage, it takes an extra 1d6 + your Verum Modifier lightning damage.",
+            "mech": {
+              "damage": {
+                "dice": "1d6",
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity"
+              }
+            }
+          },
+          {
+            "text": "Detonation increases to 2d6 + your Verum Modifier. Charged creatures glow faintly, cannot benefit from invisibility, and have disadvantage on Dexterity saving throws.",
+            "mech": {
+              "damage": {
+                "dice": "2d6"
+              },
+              "save": {
+                "ability": "Dexterity"
+              },
+              "penalty": {
+                "disadvantage": "Dexterity saving throws"
+              }
+            }
+          },
+          {
+            "text": "Detonation increases to 3d6 + your Verum Modifier. The charge jumps — if the Charged creature is within 10 feet of another creature when it takes damage, that creature also takes the bonus lightning damage.",
+            "mech": {
+              "damage": {
+                "dice": "3d6",
+                "type": "lightning"
+              }
+            }
+          },
+          {
+            "text": "Charged targets become highly unstable — if they die while Charged, they explode, dealing 6d10 lightning damage in a 20-foot radius (Dexterity save halves).",
+            "mech": {
+              "damage": {
+                "dice": "6d10",
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity",
+                "onSuccess": "half"
+              }
+            }
+          }
         ]
       }
     ],
@@ -68,10 +254,57 @@
         "name": "Stormforged",
         "description": "Nothing you make from lightning ever holds still.",
         "tiers": [
-          "Your creations crackle. A creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 lightning damage. Constructs gain +10 feet of speed.",
-          "Your creations are immune to lightning damage. A creature hit by a Construct must succeed on a Dexterity saving throw against your Verum DC or lose its reaction until the start of its next turn.",
-          "Structures conduct — a creature wearing metal armor that starts its turn within 5 feet of one takes 2d6 lightning damage. Constructs may teleport up to 30 feet as a bonus action.",
-          "Constructs are living storms: once per turn, their attack arcs to one creature within 15 feet of the target for half damage. A destroyed Structure or Construct discharges for 6d10 lightning damage in a 20-foot radius (Dexterity save for half)."
+          {
+            "text": "Your creations crackle. A creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 lightning damage. Constructs gain +10 feet of speed.",
+            "mech": {
+              "damage": {
+                "dice": "1d6",
+                "type": "lightning"
+              },
+              "movement": {
+                "speed": 10
+              }
+            }
+          },
+          {
+            "text": "Your creations are immune to lightning damage. A creature hit by a Construct must succeed on a Dexterity saving throw against your Verum DC or lose its reaction until the start of its next turn.",
+            "mech": {
+              "damage": {
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity"
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "Structures conduct — a creature wearing metal armor that starts its turn within 5 feet of one takes 2d6 lightning damage. Constructs may teleport up to 30 feet as a bonus action.",
+            "mech": {
+              "damage": {
+                "dice": "2d6",
+                "type": "lightning"
+              },
+              "movement": {
+                "teleport": 30
+              }
+            }
+          },
+          {
+            "text": "Constructs are living storms: once per turn, their attack arcs to one creature within 15 feet of the target for half damage. A destroyed Structure or Construct discharges for 6d10 lightning damage in a 20-foot radius (Dexterity save for half).",
+            "mech": {
+              "damage": {
+                "dice": "6d10",
+                "type": "lightning"
+              },
+              "save": {
+                "ability": "Dexterity",
+                "onSuccess": "half"
+              }
+            }
+          }
         ]
       }
     ],
@@ -80,10 +313,35 @@
         "name": "Quicksilver Current",
         "description": "The message and the messenger are the same spark.",
         "tiers": [
-          "Send a message of up to 25 words as a spark to a creature you know within 1 mile — it arrives instantly. Power or overload a small mechanism. Sense electrical currents and gathering storms within 300 feet.",
-          "Quicken a group — you and allies within 30 feet gain +10 feet of speed and advantage on initiative for 1 hour. Read the sky to know the weather for the next 24 hours.",
-          "Ride the bolt — you and up to three willing creatures travel as lightning to any point you can see within 1 mile, arriving instantly. Disable a nonmagical mechanism or construct by touch.",
-          "Call or still a storm over a region up to 1 mile across for 1 hour, or send a single spark-message to every creature you know within 100 miles."
+          {
+            "text": "Send a message of up to 25 words as a spark to a creature you know within 1 mile — it arrives instantly. Power or overload a small mechanism. Sense electrical currents and gathering storms within 300 feet.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Quicken a group — you and allies within 30 feet gain +10 feet of speed and advantage on initiative for 1 hour. Read the sky to know the weather for the next 24 hours.",
+            "mech": {
+              "movement": {
+                "speed": 10
+              },
+              "buff": {
+                "advantage": "initiative for 1 hour"
+              }
+            }
+          },
+          {
+            "text": "Ride the bolt — you and up to three willing creatures travel as lightning to any point you can see within 1 mile, arriving instantly. Disable a nonmagical mechanism or construct by touch.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Call or still a storm over a region up to 1 mile across for 1 hour, or send a single spark-message to every creature you know within 100 miles.",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -93,31 +351,99 @@
       "name": "Overclock",
       "type": "Offensive",
       "description": "The voltage doesn't just hurt — it scrambles.",
-      "effect": "On a hit or failed save against the primary effect, the target must succeed on a Dexterity save against your Verum DC or act last in the initiative order on their next turn, regardless of their initiative roll.",
+      "effect": {
+        "text": "On a hit or failed save against the primary effect, the target must succeed on a Dexterity save against your Verum DC or act last in the initiative order on their next turn, regardless of their initiative roll.",
+        "mech": {
+          "save": {
+            "ability": "Dexterity"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: On a failed save, the target also cannot take reactions until the start of their next turn.",
-        "Level 11+: Creatures that fail also have disadvantage on the first attack roll or saving throw they make on their next turn."
+        {
+          "text": "Level 5+: On a failed save, the target also cannot take reactions until the start of their next turn.",
+          "mech": {
+            "deny": [
+              "reactions"
+            ]
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that fail also have disadvantage on the first attack roll or saving throw they make on their next turn.",
+          "mech": {
+            "penalty": {
+              "disadvantage": "the first attack roll or saving throw they make on"
+            }
+          }
+        }
       ]
     },
     {
       "name": "Static Field",
       "type": "Supportive",
       "description": "Your charge bleeds outward, sharpening everything around you.",
-      "effect": "When the primary effect resolves, you generate a Static Field for 1 minute — allies within 15 feet gain +2 to initiative rolls and cannot be surprised while within range.",
+      "effect": {
+        "text": "When the primary effect resolves, you generate a Static Field for 1 minute — allies within 15 feet gain +2 to initiative rolls and cannot be surprised while within range."
+      },
       "upgrades": [
-        "Level 5+: Allies within the field also gain advantage on Dexterity saving throws while it is active.",
-        "Level 11+: The radius increases to 30 feet, and allies within it may use their reaction to move up to 10 feet when they would otherwise be hit by an attack."
+        {
+          "text": "Level 5+: Allies within the field also gain advantage on Dexterity saving throws while it is active.",
+          "mech": {
+            "save": {
+              "ability": "Dexterity"
+            },
+            "buff": {
+              "advantage": "Dexterity saving throws while it is active"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: The radius increases to 30 feet, and allies within it may use their reaction to move up to 10 feet when they would otherwise be hit by an attack."
+        }
       ]
     },
     {
       "name": "Groundstrike",
       "type": "Control",
       "description": "The bolt pins them to the earth.",
-      "effect": "When the primary effect hits or a target fails their save, that target must succeed on a Dexterity save against your Verum DC or be unable to teleport, use movement-based abilities, or take the Dash action until the end of their next turn.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails their save, that target must succeed on a Dexterity save against your Verum DC or be unable to teleport, use movement-based abilities, or take the Dash action until the end of their next turn.",
+        "mech": {
+          "save": {
+            "ability": "Dexterity"
+          },
+          "deny": [
+            "teleport"
+          ]
+        }
+      },
       "upgrades": [
-        "Level 5+: On a failed save, the target also cannot take reactions and has its movement speed reduced by 15 feet until the end of their next turn.",
-        "Level 11+: Creatures that fail are additionally knocked prone, and standing up costs them their full movement rather than half."
+        {
+          "text": "Level 5+: On a failed save, the target also cannot take reactions and has its movement speed reduced by 15 feet until the end of their next turn.",
+          "mech": {
+            "movement": {
+              "speed": 15
+            },
+            "penalty": {
+              "speed": -15
+            },
+            "deny": [
+              "reactions"
+            ]
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that fail are additionally knocked prone, and standing up costs them their full movement rather than half.",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Prone"
+              }
+            ]
+          }
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }

@@ -12,10 +12,58 @@
         "name": "Fierce",
         "description": "Your fire burns hotter with every drop of fury.",
         "tiers": [
-          "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice.",
-          "The fire damage increases by 4 additional dice.",
-          "Fire damage increases by 6 additional dice. Creatures that fail the save or are hit directly take fire damage equal to Five Times your Verum Modifier at the start of their next turn.",
-          "Fire damage increases by 8 additional dice. Creatures that fail or are hit directly are Ablaze — taking Five Times your Verum Modifier at the start of each of their turns for 1 minute, unless extinguished by cognitive means that counter this effect."
+          {
+            "text": "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice.",
+            "card": "+2 dice · damage becomes Cognitive Fire",
+            "mech": {
+              "damage": {
+                "bonusDice": 2,
+                "type": "fire"
+              }
+            }
+          },
+          {
+            "text": "The fire damage increases by 4 additional dice.",
+            "card": "+4 dice",
+            "mech": {
+              "damage": {
+                "bonusDice": 4,
+                "type": "fire"
+              }
+            }
+          },
+          {
+            "text": "Fire damage increases by 6 additional dice. Creatures that fail the save or are hit directly take fire damage equal to Five Times your Verum Modifier at the start of their next turn.",
+            "card": "+6 dice · on hit/fail: 5×VM fire at start of their next turn",
+            "mech": {
+              "damage": {
+                "bonusDice": 6,
+                "type": "fire"
+              },
+              "rider": {
+                "damage": "5×VM",
+                "type": "fire",
+                "when": "start of their next turn"
+              }
+            }
+          },
+          {
+            "text": "Fire damage increases by 8 additional dice. Creatures that fail or are hit directly are Ablaze — taking Five Times your Verum Modifier at the start of each of their turns for 1 minute, unless extinguished by cognitive means that counter this effect.",
+            "card": "+8 dice · Ablaze: 5×VM fire at start of each turn, 1 min",
+            "mech": {
+              "damage": {
+                "bonusDice": 8,
+                "type": "fire"
+              },
+              "conditions": [
+                {
+                  "name": "Ablaze",
+                  "duration": "1 minute",
+                  "tick": "5×VM fire"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -24,30 +72,148 @@
         "name": "Life-Bringer",
         "description": "Fire is not only death. It is the light that holds back the dark.",
         "tiers": [
-          "When this effect damages a creature, you or one ally within 30 feet may regain 1d4 hit points.",
-          "You may split the healing between two allies for a combined total of 2d6 hit points.",
-          "If a creature died within the last round and was within range of the effect, you may restore them to 1 HP in a burst of reviving flame.",
-          "Choose up to 5 allies touched by the flame. Each regains 6d10 hit points, removes one condition (except Petrified or Unconscious), and is wreathed in fire for 1 minute, dealing 1d8 fire damage on melee hits."
+          {
+            "text": "When this effect damages a creature, you or one ally within 30 feet may regain 1d4 hit points.",
+            "card": "You or an ally within 30 ft regains 1d4",
+            "mech": {
+              "heal": {
+                "amount": "1d4",
+                "targets": 1,
+                "range": "30 ft"
+              }
+            }
+          },
+          {
+            "text": "You may split the healing between two allies for a combined total of 2d6 hit points.",
+            "card": "2d6 split between two allies",
+            "mech": {
+              "heal": {
+                "amount": "2d6",
+                "targets": 2
+              }
+            }
+          },
+          {
+            "text": "If a creature died within the last round and was within range of the effect, you may restore them to 1 HP in a burst of reviving flame.",
+            "card": "Revive a creature that died this round at 1 HP",
+            "mech": {
+              "revive": {
+                "hp": 1,
+                "window": "died within the last round"
+              }
+            }
+          },
+          {
+            "text": "Choose up to 5 allies touched by the flame. Each regains 6d10 hit points, removes one condition (except Petrified or Unconscious), and is wreathed in fire for 1 minute, dealing 1d8 fire damage on melee hits.",
+            "card": "5 allies: 6d10 each, drop a condition, fire resistance",
+            "mech": {
+              "heal": {
+                "amount": "6d10",
+                "targets": 5
+              },
+              "conditions": [
+                {
+                  "removes": 1
+                }
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Unrelenting Heat",
         "description": "Your flame cannot be denied by resistance or resilience.",
         "tiers": [
-          "This effect's fire damage ignores resistance.",
-          "The fire bypasses immunity, dealing half damage to normally immune creatures.",
-          "Fire damage dealt to flammable objects or creatures vulnerable to fire is always treated as maximum.",
-          "The fire bypasses all resistance and immunity, prevents invisibility or hiding via a persistent heat signature, and dissolves magical barriers of 5th level or lower on contact."
+          {
+            "text": "This effect's fire damage ignores resistance.",
+            "card": "Fire damage ignores resistance",
+            "mech": {
+              "pierce": "resistance"
+            }
+          },
+          {
+            "text": "The fire bypasses immunity, dealing half damage to normally immune creatures.",
+            "card": "Bypasses immunity — half damage to immune",
+            "mech": {
+              "pierce": "immunity",
+              "note": "half to immune"
+            }
+          },
+          {
+            "text": "Fire damage dealt to flammable objects or creatures vulnerable to fire is always treated as maximum.",
+            "card": "Max damage vs flammable or fire-vulnerable",
+            "mech": {
+              "maximize": "vs flammable/vulnerable"
+            }
+          },
+          {
+            "text": "The fire bypasses all resistance and immunity, prevents invisibility or hiding via a persistent heat signature, and dissolves magical barriers of 5th level or lower on contact.",
+            "card": "Ignores all resistance and immunity · no hiding · dissolves barriers ≤5th",
+            "mech": {
+              "pierce": "all"
+            }
+          }
         ]
       },
       {
         "name": "Infernal Passion",
         "description": "You do not merely cast fire — you become it. (Save: Wisdom)",
         "tiers": [
-          "Gain advantage on your next Charisma check or saving throw before the end of your next turn.",
-          "For 1 minute, you and allies within 30 feet gain +2 to attack rolls while the fire persists.",
-          "Enemies within 60 feet who fail a Wisdom saving throw are Frightened of you for 1 round.",
-          "You radiate burning presence. Hostile creatures beginning their turn within 30 feet must succeed on a Charisma saving throw or become Charmed, Frightened, or Enraged (your choice) for 1 minute. Allies within range gain immunity to fear and +1 to all damage rolls."
+          {
+            "text": "Gain advantage on your next Charisma check or saving throw before the end of your next turn.",
+            "card": "Advantage on your next Cha check or save",
+            "mech": {
+              "buff": {
+                "advantage": "next Cha check or save",
+                "who": "self"
+              }
+            }
+          },
+          {
+            "text": "For 1 minute, you and allies within 30 feet gain +2 to attack rolls while the fire persists.",
+            "card": "1 min: you and allies within 30 ft get +2 to attack",
+            "mech": {
+              "buff": {
+                "attack": "+2",
+                "range": "30 ft",
+                "duration": "1 minute"
+              }
+            }
+          },
+          {
+            "text": "Enemies within 60 feet who fail a Wisdom saving throw are Frightened of you for 1 round.",
+            "card": "Enemies within 60 ft: Wis save or Frightened 1 round",
+            "mech": {
+              "save": {
+                "ability": "Wisdom",
+                "range": "60 ft"
+              },
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "1 round"
+                }
+              ]
+            }
+          },
+          {
+            "text": "You radiate burning presence. Hostile creatures beginning their turn within 30 feet must succeed on a Charisma saving throw or become Charmed, Frightened, or Enraged (your choice) for 1 minute. Allies within range gain immunity to fear and +1 to all damage rolls.",
+            "card": "Enemies starting turn within 30 ft: Cha save or Charmed/Frightened",
+            "mech": {
+              "save": {
+                "ability": "Charisma",
+                "range": "30 ft"
+              },
+              "conditions": [
+                {
+                  "name": "Charmed"
+                },
+                {
+                  "name": "Frightened"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -56,10 +222,51 @@
         "name": "Wildflame Wake",
         "description": "Fire leaves behind more than ashes — it reshapes the ground itself. (Save: Dexterity)",
         "tiers": [
-          "Terrain scorched by the effect becomes difficult terrain for enemies until the end of your next turn.",
-          "The area becomes blazing terrain — any creature starting its turn there takes 2d6 fire damage.",
-          "Creatures entering or starting their turn in scorched terrain must succeed on a Dexterity saving throw or be Ignited.",
-          "The terrain erupts into a Living Flame Storm for 1 minute. Hostile creatures treat it as impassable solid terrain unless immune to fire. Any creature that enters or starts its turn there takes 5d10 fire damage."
+          {
+            "text": "Terrain scorched by the effect becomes difficult terrain for enemies until the end of your next turn.",
+            "card": "Scorched ground = difficult terrain for enemies",
+            "mech": {
+              "terrain": {
+                "effect": "difficult",
+                "duration": "end of your next turn"
+              }
+            }
+          },
+          {
+            "text": "The area becomes blazing terrain — any creature starting its turn there takes 2d6 fire damage.",
+            "card": "Blazing terrain — 2d6 fire on starting a turn there",
+            "mech": {
+              "terrain": {
+                "effect": "blazing",
+                "tick": "2d6 fire"
+              }
+            }
+          },
+          {
+            "text": "Creatures entering or starting their turn in scorched terrain must succeed on a Dexterity saving throw or be Ignited.",
+            "card": "Enter or start turn there: Dex save or Ignited",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "conditions": [
+                {
+                  "name": "Ignited"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The terrain erupts into a Living Flame Storm for 1 minute. Hostile creatures treat it as impassable solid terrain unless immune to fire. Any creature that enters or starts its turn there takes 5d10 fire damage.",
+            "card": "Living Flame Storm 1 min — impassable, 5d10 fire to enter or start there",
+            "mech": {
+              "terrain": {
+                "effect": "impassable",
+                "tick": "5d10 fire",
+                "duration": "1 minute"
+              }
+            }
+          }
         ]
       }
     ],
@@ -68,10 +275,58 @@
         "name": "Kiln-Forged",
         "description": "What fire makes, fire keeps.",
         "tiers": [
-          "Your creations are of living flame. They shed bright light in a 20-foot radius, and a creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 fire damage.",
-          "That fire damage becomes 2d6. Your creations are immune to fire and cannot be extinguished by nonmagical means.",
-          "A creature that ends its turn within 5 feet of one of your Structures takes 2d6 fire damage. A Construct's attacks Ignite on a hit.",
-          "Your creations are eternal flame — unaffected by cold or water effects of 5th level or lower. When a Structure or Construct is destroyed, it erupts for 6d10 fire damage in a 20-foot radius (Dexterity save for half)."
+          {
+            "text": "Your creations are of living flame. They shed bright light in a 20-foot radius, and a creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 fire damage.",
+            "card": "Creations are living flame · 20-ft light · 1d6 fire to touch or be hit",
+            "mech": {
+              "damage": {
+                "amount": "1d6",
+                "type": "fire",
+                "trigger": "touch or hit"
+              }
+            }
+          },
+          {
+            "text": "That fire damage becomes 2d6. Your creations are immune to fire and cannot be extinguished by nonmagical means.",
+            "card": "That damage becomes 2d6 · creations immune to fire",
+            "mech": {
+              "damage": {
+                "amount": "2d6",
+                "type": "fire"
+              }
+            }
+          },
+          {
+            "text": "A creature that ends its turn within 5 feet of one of your Structures takes 2d6 fire damage. A Construct's attacks Ignite on a hit.",
+            "card": "2d6 fire to end turn within 5 ft of a Structure · Constructs Ignite on hit",
+            "mech": {
+              "damage": {
+                "amount": "2d6",
+                "type": "fire"
+              },
+              "conditions": [
+                {
+                  "name": "Ignited",
+                  "source": "Construct hit"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Your creations are eternal flame — unaffected by cold or water effects of 5th level or lower. When a Structure or Construct is destroyed, it erupts for 6d10 fire damage in a 20-foot radius (Dexterity save for half).",
+            "card": "Eternal flame · destroyed creation erupts 6d10 fire in 20 ft (Dex half)",
+            "mech": {
+              "damage": {
+                "amount": "6d10",
+                "type": "fire",
+                "area": "20 ft",
+                "save": {
+                  "ability": "Dexterity",
+                  "onSuccess": "half"
+                }
+              }
+            }
+          }
         ]
       }
     ],
@@ -80,10 +335,34 @@
         "name": "Hearthlight",
         "description": "Fire was the first gift, and it was never only for burning.",
         "tiers": [
-          "Kindle bright light in a 30-foot radius, keep a group warm through any cold, light mundane fires at a distance, and sense sources of heat within 60 feet.",
-          "See clearly through smoke and heat haze; heat a nonmagical object until it glows; purify food and water by flame.",
-          "Step into one fire and out of another you can see within 300 feet. Burn or melt through a 5-foot cube of nonmagical material each turn.",
-          "The pyre of renewal: burn away one curse or magical effect of 6th level or lower from a willing creature, or reforge a broken nonmagical object whole."
+          {
+            "text": "Kindle bright light in a 30-foot radius, keep a group warm through any cold, light mundane fires at a distance, and sense sources of heat within 60 feet.",
+            "card": "30-ft light · group stays warm · light fires at range · sense heat 60 ft",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "See clearly through smoke and heat haze; heat a nonmagical object until it glows; purify food and water by flame.",
+            "card": "See through smoke and haze · heat an object · purify food and water",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Step into one fire and out of another you can see within 300 feet. Burn or melt through a 5-foot cube of nonmagical material each turn.",
+            "card": "Step fire-to-fire within 300 ft · burn through a 5-ft cube per turn",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "The pyre of renewal: burn away one curse or magical effect of 6th level or lower from a willing creature, or reforge a broken nonmagical object whole.",
+            "card": "Burn away a curse or effect ≤6th, or reforge a broken object whole",
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -93,41 +372,135 @@
       "name": "Ember's Bite",
       "type": "Offensive",
       "description": "The primary effect carries a burning edge.",
-      "effect": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6). On a failed Dexterity save vs your Verum DC, they are also Ignited — taking 1d6 fire damage at the start of their next turn.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6). On a failed Dexterity save vs your Verum DC, they are also Ignited — taking 1d6 fire damage at the start of their next turn.",
+        "card": "+1 die fire · Dex save or Ignited (1d6 at start of next turn)",
+        "mech": {
+          "damage": {
+            "dice": [
+              "1d6",
+              "1d6"
+            ],
+            "type": "fire"
+          },
+          "save": {
+            "ability": "Dexterity"
+          },
+          "conditions": [
+            {
+              "name": "Ignited"
+            }
+          ]
+        }
+      },
       "upgrades": [
-        "Level 5+: Bonus damage increases to two dice.",
-        "Level 11+: Bonus damage increases to three dice, and the Ignited condition lasts 1 minute instead of one turn."
+        {
+          "text": "Level 5+: Bonus damage increases to two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and the Ignited condition lasts 1 minute instead of one turn.",
+          "card": "+3 dice · Ignited lasts 1 minute",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Ignited"
+              }
+            ]
+          }
+        }
       ]
     },
     {
       "name": "Hearthglow",
       "type": "Supportive",
       "description": "A flicker of warmth accompanies the spell.",
-      "effect": "When the primary effect resolves, one creature within 30 feet regains HP equal to your spellcasting modifier. If the primary effect heals, this is added on top.",
+      "effect": {
+        "text": "When the primary effect resolves, one creature within 30 feet regains HP equal to your spellcasting modifier. If the primary effect heals, this is added on top.",
+        "card": "One creature within 30 ft regains VM HP"
+      },
       "upgrades": [
-        "Level 5+: Choose up to two creatures to receive this healing.",
-        "Level 11+: Each healed creature also gains temporary HP equal to your spellcasting modifier until the start of your next turn."
+        {
+          "text": "Level 5+: Choose up to two creatures to receive this healing.",
+          "card": "Up to two creatures"
+        },
+        {
+          "text": "Level 11+: Each healed creature also gains temporary HP equal to your spellcasting modifier until the start of your next turn.",
+          "card": "Each also gains VM temp HP"
+        }
       ]
     },
     {
       "name": "Cinder March",
       "type": "Control",
       "description": "Wherever the spell lands, fire claims the ground.",
-      "effect": "The point of impact becomes scorched terrain in a 10-foot radius until the end of your next turn. Creatures must succeed on a Dexterity save vs your Verum DC or be pushed 5 feet away from the center.",
+      "effect": {
+        "text": "The point of impact becomes scorched terrain in a 10-foot radius until the end of your next turn. Creatures must succeed on a Dexterity save vs your Verum DC or be pushed 5 feet away from the center.",
+        "card": "Scorched terrain 10 ft · Dex save or pushed 5 ft",
+        "mech": {
+          "save": {
+            "ability": "Dexterity"
+          },
+          "movement": {
+            "push": 5
+          },
+          "terrain": {
+            "radius": 10
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: Scorched terrain persists 1 minute. Creatures entering take 1d6 fire damage per 5 feet traveled through it.",
-        "Level 11+: Creatures that fail cannot willingly move toward the center for 1 round."
+        {
+          "text": "Level 5+: Scorched terrain persists 1 minute. Creatures entering take 1d6 fire damage per 5 feet traveled through it.",
+          "card": "Terrain lasts 1 min · 1d6 fire per 5 ft moved through",
+          "mech": {
+            "damage": {
+              "dice": "1d6",
+              "type": "fire"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that fail cannot willingly move toward the center for 1 round.",
+          "card": "Those who fail can't move toward the centre for 1 round"
+        }
       ]
     },
     {
       "name": "Smoldering Haze",
       "type": "Control",
       "description": "The heat rattles the mind as much as the body.",
-      "effect": "Creatures hit by or failing their save must succeed on a Dexterity save vs your Verum DC or suffer disadvantage on their next attack roll.",
+      "effect": {
+        "text": "Creatures hit by or failing their save must succeed on a Dexterity save vs your Verum DC or suffer disadvantage on their next attack roll.",
+        "card": "Dex save or disadvantage on their next attack",
+        "mech": {
+          "save": {
+            "ability": "Dexterity"
+          },
+          "penalty": {
+            "disadvantage": "their next attack roll"
+          }
+        }
+      },
       "upgrades": [
-        "Level 5+: Penalty extends to all attack rolls until the end of their next turn.",
-        "Level 11+: Creatures that fail also have their movement speed reduced by 10 feet until the end of their next turn."
+        {
+          "text": "Level 5+: Penalty extends to all attack rolls until the end of their next turn.",
+          "card": "Disadvantage on all attacks until end of their next turn"
+        },
+        {
+          "text": "Level 11+: Creatures that fail also have their movement speed reduced by 10 feet until the end of their next turn.",
+          "card": "Also −10 ft speed until end of their next turn",
+          "mech": {
+            "movement": {
+              "speed": 10
+            },
+            "penalty": {
+              "speed": -10
+            }
+          }
+        }
       ]
     }
-  ]
+  ],
+  "schema": 2
 }
