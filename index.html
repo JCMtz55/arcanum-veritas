@@ -443,6 +443,16 @@ input[type=range]::-webkit-slider-thumb {
 .rules-card .premium { font-style:italic; }
 .sub-btn.disabled { opacity:.35; pointer-events:none; }
 .pick-desc { font-size:0.72rem; color:var(--text3); font-style:italic; margin:4px 0 0; }
+.mod-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.mod-cell { display:flex; flex-direction:column; gap:3px; }
+.mod-k { font-size:0.6rem; letter-spacing:.09em; color:var(--text3); font-weight:700; }
+.mod-cell input { width:100%; padding:5px 7px; border:1px solid var(--gold-border); border-radius:5px;
+  background:var(--paper); color:var(--text1); font-family:inherit; font-size:0.85rem; text-align:center; }
+.mod-out { margin-top:7px; font-size:0.7rem; color:var(--gold); letter-spacing:.03em; text-align:center; }
+.sum-modes { display:flex; gap:5px; margin-right:8px; }
+.mode-btn { font-size:0.62rem; letter-spacing:.07em; font-weight:700; padding:4px 9px; cursor:pointer;
+  border:1px solid var(--gold-border); border-radius:5px; background:transparent; color:var(--text3); }
+.mode-btn.active { background:var(--gold); color:#fff; border-color:var(--gold); }
 
 .scale-table-wrap { overflow-x: auto; }
 .scale-table-wrap::-webkit-scrollbar { height: 4px; }
@@ -682,6 +692,17 @@ input[type=range]::-webkit-slider-thumb {
         <div class="lvl-ticks">
           <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span>
         </div>
+        <div class="mod-row">
+          <label class="mod-cell">
+            <span class="mod-k">VERUM MOD</span>
+            <input type="number" id="vmInput" min="-2" max="12" value="4">
+          </label>
+          <label class="mod-cell">
+            <span class="mod-k">DREAM MOD</span>
+            <input type="number" id="dsInput" min="-2" max="12" value="0">
+          </label>
+        </div>
+        <div class="mod-out" id="modOut"></div>
       </div>
 
       <div class="sb-divider"></div>
@@ -995,6 +1016,9 @@ const state = {
   compType:    null,
   compSub:     null,
   complements: [],  // [{id, compEffect}]
+  verumMod:    4,
+  dreamMod:    0,
+  sumMode:     "play",    // "play" | "full"
   shape:       "sphere",   // for Rings flagged shape:true
   manner:      "standard", // Manners of Drawing
 };
@@ -1022,6 +1046,41 @@ function complementPool(cog) {
 // Complement budget: slot − 1, plus up to three from Coven Drawing
 function maxComps() { return state.slotLevel - 1 + (state.manner === "coven" ? 3 : 0); }
 function currentSub() { return COMP_DATA[state.compType]?.subtypes?.[state.compSub]; }
+// ── Derived numbers ────────────────────────────────────────
+function profBonus()  { return Math.ceil(state.charLevel / 4) + 1; }
+function sealAttack() { return profBonus() + state.verumMod; }
+function verumDC()    { return 8 + profBonus() + state.verumMod + state.dreamMod; }
+function sgn(n)       { return (n >= 0 ? "+" : "") + n; }
+// Resolve the formula shorthands the tables and effect text use
+function resolve(str) {
+  if (!str) return str;
+  const vm = state.verumMod, pb = profBonus(), dc = verumDC();
+  return String(str)
+    // specific phrasings first, so the general ones can't mangle them
+    .replace(/\(DC equals your Verum DC\)/gi, `(DC ${dc})`)
+    .replace(/against your Verum DC/gi, `vs DC ${dc}`)
+    .replace(/your Verum DC/gi, `DC ${dc}`)
+    .replace(/twice your ([A-Z][a-z]+) modifier \+ your proficiency bonus/gi, (m,a)=>`2×${a.slice(0,3)}+${pb}`)
+    .replace(/your ([A-Z][a-z]+) modifier \+ your proficiency bonus/gi, (m,a)=>`${a.slice(0,3)}+${pb}`)
+    .replace(/twice your proficiency bonus/gi, `${pb*2}`)
+    .replace(/\+\s*your proficiency bonus/gi, `+${pb}`)
+    .replace(/your proficiency bonus/gi, `${pb}`)
+    .replace(/twice your Verum Modifier/gi, `${vm*2}`)
+    .replace(/\+\s*your Verum Modifier/gi, `+${vm}`)
+    .replace(/your Verum Modifier/gi, `${vm}`)
+    .replace(/\s*\+\s*VM\b/g, sgn(vm))
+    .replace(/\bVM\b/g, sgn(vm))
+    .replace(/\+\s*\+/g, "+");
+}
+// Which upgrade lines are live at the current tier (upgrade i unlocks at tier i+1)
+function liveUpgrades(ups, tier) { return (ups || []).slice(0, tier); }
+// Heuristic: does this effect text hang off a saving throw, and which one?
+const ABILITIES = ["Strength","Dexterity","Constitution","Intelligence","Wisdom","Charisma"];
+function saveAbilityOf(text) {
+  const m = String(text || "").match(new RegExp("\\b(" + ABILITIES.join("|") + ")\\s+(?:saving throw|save)", "i"));
+  return m ? m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() : null;
+}
+function setSumMode(m) { state.sumMode = m; renderMain(); }
 function mannerAllowed(m) {
   if (m === "rite")      return !(state.compSub === "Ward" || state.compSub === "Direct Attack");
   if (m === "inscribed") return state.compSub !== "Ward";
@@ -1111,6 +1170,8 @@ function updateCharUI() {
   const tier = getTier(c);
   document.getElementById("charTier").textContent = `Tier: ${TIERS[tier].label}`;
   document.getElementById("charSlider").style.setProperty("--pct", ((c-1)/19*100)+"%");
+  const mo = document.getElementById("modOut");
+  if (mo) mo.textContent = `Prof ${sgn(profBonus())} · Attack ${sgn(sealAttack())} · Verum DC ${verumDC()}`;
 }
 
 function renderCapBar() {
@@ -1561,16 +1622,184 @@ function buildSpellCard(coreCog, tier) {
 
 // ─── Summary card ─────────────────────────────────────────
 function buildSummary(coreCog, tier) {
+  const lines = state.sumMode === "play"
+    ? buildPlayCard(coreCog, tier)
+    : buildFullRef(coreCog, tier);
+
+  const modeBtn = (id, label) =>
+    `<button class="mode-btn${state.sumMode === id ? " active" : ""}" onclick="setSumMode('${id}')">${label}</button>`;
+
+  return `<div class="summary-card">
+    <div class="sum-head">
+      <span class="sum-title">SUMMARY CARD</span>
+      <div class="btn-row">
+        <span class="sum-modes">${modeBtn("play","PLAY")}${modeBtn("full","FULL")}</span>
+        <button class="act-btn" onclick="copySum()">Copy Text</button>
+        <button class="act-btn g" onclick="window.print()">Print</button>
+      </div>
+    </div>
+    <div class="sum-body" id="sumBody">${lines.join("\n")}</div>
+  </div>`;
+}
+
+// ─── Gather every complement's live text, sorted into resolution buckets
+function gatherRiders(tier) {
+  const onHit = [], saves = [], missing = [];
+  state.complements.forEach(cs => {
+    const cog   = LOADED[cs.id];
+    const name  = INDEX.find(c => c.id === cs.id)?.name || cs.id;
+    const avail = complementPool(cog);
+    const fx    = avail.find(f => f.name === cs.compEffect) || avail[0];
+    if (!fx) { missing.push(name); return; }
+    const parts = [fx.effect, ...liveUpgrades(fx.upgrades, tier)];
+    const text  = parts.join(" ");
+    const ability = saveAbilityOf(text);
+    const entry = { name, fxName: fx.name, parts, ability };
+    (ability ? saves : onHit).push(entry);
+  });
+  return { onHit, saves, missing };
+}
+
+// Trim an upgrade line's "Level 5+:" prefix — the card already filters by tier
+function stripLvl(t) { return String(t).replace(/^\s*Level\s+\d+\+\s*:\s*/i, ""); }
+
+// The section header already says when a rider fires, so drop the lead-in boilerplate
+const LEAD_INS = [
+  /^On a hit or failed saving throw against the primary effect,\s*/i,
+  /^On a hit or failed saving throw,\s*/i,
+  /^When the primary effect hits or a target fails their saving throw,\s*/i,
+  /^When the primary effect deals damage,\s*/i,
+  /^When the primary effect resolves,\s*/i,
+  /^On a failed save(?:ing throw)?,\s*/i,
+];
+function stripLead(t) {
+  let out = String(t);
+  for (const re of LEAD_INS) out = out.replace(re, "");
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+// Drop a trailing em-dash clause only when it carries no rules content (pure flavor)
+const RULES_WORDS = /\d|\bd\d|advantage|disadvantage|save|saving|DC|damage|cannot|can't|must|immune|resist|condition|speed|feet|ft\b|round|turn|minute|hour|action|reaction|restrained|prone|frightened|stunned|paralyzed|blinded|charmed|poisoned|HP|hit point/i;
+function stripFlavorTail(t) {
+  const m = String(t).match(/^([\s\S]*?)\s*[—–]\s*([^—–]+)$/);
+  if (!m) return t;
+  const tail = m[2].trim();
+  if (tail.length < 80 && !RULES_WORDS.test(tail)) return m[1].trim();
+  return t;
+}
+// The die size of the current Ring row, so "one damage die of the primary effect's type" resolves
+function primaryDie() {
+  const sub = currentSub(); if (!sub) return null;
+  const row = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]); if (!row) return null;
+  for (const col of ["Damage","Damage / turn","Weapon Die","Healing","Healing / Target","Absorb"]) {
+    const i = sub.columns.indexOf(col);
+    if (i >= 0) { const m = String(row[i]).match(/d(\d+)/); if (m) return "d" + m[1]; }
+  }
+  return null;
+}
+const WORDNUM = { one:1, two:2, three:3, four:4, five:5 };
+function resolveDice(t) {
+  const die = primaryDie(); if (!die) return t;
+  return String(t)
+    .replace(/\b(one|two|three|four|five)\s+(?:additional\s+)?damage\s+(?:die|dice)\s+of\s+the\s+primary\s+effect'?s?\s+type(\s*\(min(?:imum)?\s*\d+d\d+\))?/gi,
+             (m, w) => `${WORDNUM[w.toLowerCase()]}${die}`)
+    .replace(/\bincreases?\s+to\s+(one|two|three|four|five)\s+dice\b/gi,
+             (m, w) => `increases to ${WORDNUM[w.toLowerCase()]}${die}`);
+}
+// The SAVES header already states the DC and each line is labelled with its ability
+function stripSaveBoiler(t) {
+  return String(t)
+    .replace(/^(?:the target\s+|they\s+|creatures?\s+)?(?:must\s+)?succeeds?\s+on\s+an?\s+[A-Z][a-z]+\s+(?:saving throw|save)\s+vs\s+DC\s*\d+\s+or\s+/i, "Fail: ")
+    .replace(/[,—–]?\s*(?:the target|they|it)\s+must\s+succeeds?\s+on\s+an?\s+[A-Z][a-z]+\s+(?:saving throw|save)\s+vs\s+DC\s*\d+\s+or\s+/i, " — fail: ")
+    .replace(/\s+vs\s+DC\s*\d+/gi, "");
+}
+function compact(t) {
+  let out = stripFlavorTail(stripLead(stripLvl(t)));
+  out = resolveDice(out);
+  out = stripSaveBoiler(out);
+  return out.replace(/\s+/g, " ").trim();
+}
+
+function buildPlayCard(coreCog, tier) {
   const coreEntry = INDEX.find(c => c.id === state.core);
-  const cd        = COMP_DATA[state.compType];
-  const sub       = cd.subtypes[state.compSub];
+  const cd  = COMP_DATA[state.compType];
+  const sub = cd.subtypes[state.compSub];
+  const L   = [];
+
+  const scaleRow = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  const cell = (col) => {
+    const i = sub.columns.indexOf(col);
+    return i >= 0 && scaleRow ? resolve(scaleRow[i]) : null;
+  };
+
+  // ── Header
+  const bits = [`${ORDINALS[state.slotLevel]} slot`, `Char Lv ${state.charLevel}`];
+  if (sub.shape) bits.push(SHAPES[state.shape].label);
+  if (state.manner !== "standard") bits.push(MANNERS[state.manner].label);
+  if (sub.concentration) bits.push("Concentration");
+  if (sub.reaction) bits.push("REACTION");
+  L.push(`${(coreEntry?.name || "—").toUpperCase()} · ${cd.label} — ${state.compSub}`);
+  L.push(bits.join(" · "));
+
+  // ── The one line of math that matters
+  const stat = [];
+  const dmg = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
+  if (state.compSub === "Direct Attack") stat.push(`Attack ${sgn(sealAttack())}`);
+  if (dmg) stat.push(dmg + (coreCog?.damageType ? ` ${coreCog.damageType.toLowerCase()}` : ""));
+  ["Range","Radius","Targets","Duration","Buff Duration","Zone Duration","Weapon Die","CR cap","Size","AC","HP / segment","Max size","Quality","Tier","Scope"]
+    .forEach(c => { const v = cell(c); if (v) stat.push(`${c}: ${v}`); });
+  if (coreCog?.savingThrow && state.compSub !== "Direct Attack")
+    stat.push(`${coreCog.savingThrow} DC ${verumDC()}`);
+  L.push(stat.join(" · "));
+  L.push("");
+
+  // ── Core Verum at the live tier only
+  const coreVerums  = coreCog?.verumEffects?.[verumKey()] || [];
+  const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
+  if (activeVerum) {
+    L.push(`CORE — ${(activeVerum.name || "").toUpperCase()}`);
+    L.push(`  ${compact(resolve(activeVerum.tiers[tier] || activeVerum.tiers[activeVerum.tiers.length-1] || ""))}`);
+    if (tier > 0) L.push(`  (earlier tiers also apply — see FULL)`);
+    L.push("");
+  }
+
+  // ── Riders, in the order they resolve
+  const { onHit, saves, missing } = gatherRiders(tier);
+  if (onHit.length) {
+    L.push(state.compSub === "Direct Attack" ? "ON HIT — no save" : "ON RESOLVE — no save");
+    onHit.forEach(e => {
+      L.push(`  [${e.name}] ${compact(resolve(e.parts[0]))}`);
+      e.parts.slice(1).forEach(p => L.push(`      ↑ ${compact(resolve(p))}`));
+    });
+    L.push("");
+  }
+  if (saves.length) {
+    L.push(`SAVES — DC ${verumDC()}`);
+    const byAbility = {};
+    saves.forEach(e => (byAbility[e.ability] = byAbility[e.ability] || []).push(e));
+    Object.keys(byAbility).sort().forEach(ab => {
+      byAbility[ab].forEach(e => {
+        L.push(`  ${ab.slice(0,3).toUpperCase()}  [${e.name}] ${compact(resolve(e.parts[0]))}`);
+        e.parts.slice(1).forEach(p => L.push(`       ↑ ${compact(resolve(p))}`));
+      });
+    });
+    L.push("");
+  }
+  if (missing.length) L.push(`(no ${verumLabel()} complement defined: ${missing.join(", ")})`);
+
+  return L;
+}
+
+function buildFullRef(coreCog, tier) {
+  const coreEntry = INDEX.find(c => c.id === state.core);
+  const cd  = COMP_DATA[state.compType];
+  const sub = cd.subtypes[state.compSub];
 
   const coreVerums  = coreCog?.verumEffects?.[verumKey()] || [];
   const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
 
   const scaleRow = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
   const scaleStr = scaleRow
-    ? sub.columns.map((col, i) => `${col}: ${scaleRow[i]}`).join("  |  ")
+    ? sub.columns.map((col, i) => `${col}: ${resolve(scaleRow[i])}`).join("  |  ")
     : "";
 
   const lines = [
@@ -1584,6 +1813,7 @@ function buildSummary(coreCog, tier) {
     `Saving Throw : ${coreCog?.savingThrow || "—"}`,
     `Damage Type  : ${coreCog?.damageType  || "—"}`,
     `Tier         : ${TIERS[tier].label}`,
+    `Numbers      : Prof ${sgn(profBonus())} · Attack ${sgn(sealAttack())} · Verum DC ${verumDC()}`,
     ``,
     `── SCALING (${ORDINALS[state.slotLevel]}) ──`,
     scaleStr,
@@ -1593,7 +1823,7 @@ function buildSummary(coreCog, tier) {
   if (activeVerum) {
     lines.push(`── CORE VERUM: ${(state.coreVerum || activeVerum.name).toUpperCase()} ──`);
     for (let i = 0; i <= tier; i++) {
-      lines.push(`[${TIERS[i].label}] ${activeVerum.tiers[i] || ""}`);
+      lines.push(`[${TIERS[i].label}] ${resolve(activeVerum.tiers[i] || "")}`);
     }
     lines.push(``);
   }
@@ -1607,8 +1837,8 @@ function buildSummary(coreCog, tier) {
       const activeFx = avail.find(fx => fx.name === cs.compEffect) || avail[0];
       if (activeFx) {
         lines.push(`${name} — ${activeFx.name}:`);
-        lines.push(activeFx.effect);
-        if (activeFx.upgrades?.length) activeFx.upgrades.forEach(u => lines.push(`  ↑ ${u}`));
+        lines.push(resolve(activeFx.effect));
+        liveUpgrades(activeFx.upgrades, tier).forEach(u => lines.push(`  ↑ ${resolve(u)}`));
       } else {
         lines.push(`${name}: No ${verumLabel()} complement defined.`);
       }
@@ -1620,17 +1850,7 @@ function buildSummary(coreCog, tier) {
     lines.push(`── RULES NOTE ──`);
     lines.push(sub.notes);
   }
-
-  return `<div class="summary-card">
-    <div class="sum-head">
-      <span class="sum-title">SUMMARY CARD</span>
-      <div class="btn-row">
-        <button class="act-btn" onclick="copySum()">Copy Text</button>
-        <button class="act-btn g" onclick="window.print()">Print</button>
-      </div>
-    </div>
-    <div class="sum-body" id="sumBody">${lines.join("\n")}</div>
-  </div>`;
+  return lines;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1666,6 +1886,17 @@ document.getElementById("charSlider").addEventListener("input", e => {
   updateCharUI();
   renderMain();
 });
+  const vmEl = document.getElementById("vmInput");
+  if (vmEl) vmEl.addEventListener("input", e => {
+    const v = parseInt(e.target.value, 10); state.verumMod = isNaN(v) ? 0 : v;
+    updateCharUI(); renderMain();
+  });
+  const dsEl = document.getElementById("dsInput");
+  if (dsEl) dsEl.addEventListener("input", e => {
+    const v = parseInt(e.target.value, 10); state.dreamMod = isNaN(v) ? 0 : v;
+    updateCharUI(); renderMain();
+  });
+
 
 
 // ═══════════════════════════════════════════════════════════

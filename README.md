@@ -30,6 +30,9 @@ The HTML file and the `cognitions/` folder must stay in the same directory.
 
 ## How to Use
 
+### Step 0 — Set your numbers
+Enter **Verum Mod** (your highest ability score modifier) and **Dream Mod** under the Character Level slider. The builder derives the rest — proficiency bonus from level, **Seal attack** = Prof + Verum Mod, **Verum DC** = 8 + Prof + Verum Mod + Dream Mod — and resolves them into the summary card so there is no math left at the table.
+
 ### Step 1 — Set Slot Level
 Use the **Slot Level** slider (1–9). This determines:
 - How many cognitions you can select (1 Core + Slot−1 Complements; **Coven Drawing** adds up to 3 more)
@@ -164,6 +167,15 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 > **[PASTE MARKDOWN FILE HERE]**
 
 ---
+
+## The Summary Card
+
+The card at the bottom of the build has two modes:
+
+- **PLAY** — the table-facing version. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
+- **FULL** — the complete reference: every tier up to your level, full effect prose, the Ring's rules note. Use it when building or levelling.
+
+Both copy and print. Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
 
 ## Rules of the Seal
 
