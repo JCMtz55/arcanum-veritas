@@ -17,6 +17,7 @@
   --serif:'Spectral',Georgia,serif;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{
   margin:0; background:var(--slate); color:var(--bone);
@@ -54,6 +55,12 @@ button,input{font:inherit;color:inherit}
 .lv.atk b{color:var(--brass)} .lv.dc b{color:var(--indigo)}
 .status{font-family:var(--sans);font-size:11px;color:var(--mute);margin-left:14px}
 .status.err{color:var(--ember)}
+.tabs{display:flex;background:var(--slate);border:1px solid var(--line);border-radius:7px;
+  padding:2px;margin-right:24px}
+.tab{background:none;border:0;cursor:pointer;padding:4px 13px;border-radius:5px;
+  font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+.tab:hover{color:var(--bone)}
+.tab.on{background:var(--bone);color:var(--slate);font-weight:500}
 
 /* ── Board: three columns ─────────────────────────────────── */
 .board{display:flex; align-items:stretch; height:calc(100vh - 49px)}
@@ -76,7 +83,7 @@ button,input{font:inherit;color:inherit}
 .cog .nm{margin-right:8px}
 .cog .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cog .rl{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.04em;
-  padding:2px 5px;border-radius:4px}
+  padding:2px 5px;border-radius:4px;border:1px solid var(--line);color:var(--mute)}
 .cog.core{background:rgba(176,136,66,.14);border-color:var(--brass)}
 .cog.core .rl{background:var(--brass);color:#1B1F26}
 .cog.comp{background:rgba(98,116,184,.13);border-color:#46527d}
@@ -94,7 +101,9 @@ button,input{font:inherit;color:inherit}
   .board{flex-direction:column;height:auto}
   .rail{flex:none;border-right:0;border-bottom:1px solid var(--line)}
   .cogs{max-height:190px}
-  .seal{flex:none;border-left:0;border-top:1px solid var(--line)}
+  /* stacked, the columns size to their content — a flex-basis of 0 collapses them to nothing */
+  .composer,.codex,.seal{flex:none;overflow:visible}
+  .seal{border-left:0;border-top:1px solid var(--line)}
 }
 
 /* ── Composer blocks ──────────────────────────────────────── */
@@ -212,6 +221,33 @@ button,input{font:inherit;color:inherit}
 .rules-b ul{margin:0;padding-left:17px} .rules-b li{margin:3px 0}
 .rules-b .prem{font-style:italic;color:var(--bone2);border-left:2px solid var(--brass);padding-left:11px;margin:9px 0}
 
+/* ── Codex: one cognition, entire ────────────────────────── */
+.codex{flex:1 1 0; overflow-y:auto; padding:0; min-width:0}
+.cdx{padding:22px 30px 60px; max-width:920px}
+.cdx-hd{display:flex; align-items:flex-start; padding-bottom:16px; border-bottom:1px solid var(--line)}
+.cdx-ico{font-size:38px; line-height:1; margin-right:16px; flex:0 0 auto}
+.cdx-hd h1{margin:0; font-size:34px; font-weight:600; letter-spacing:-.015em; line-height:1.05}
+.cdx-desc{margin:4px 0 8px; color:var(--bone2); font-size:15px; font-style:italic}
+.cdx-sec{margin-top:26px}
+.cdx-sec>h2{margin:0 0 3px; font-family:var(--sans); font-size:12px; font-weight:500;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+.cdx-sec>h2.off{color:var(--ember)} .cdx-sec>h2.sup{color:var(--verdant)}
+.cdx-sec>h2.con{color:var(--indigo)} .cdx-sec>h2.cre{color:var(--brass)}
+.cdx-sec>h2.uti{color:var(--steel)}
+.cdx-rings{font-family:var(--sans);font-size:11px;color:var(--mute);margin:0 0 11px}
+.cdx-fx{border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  margin-bottom:11px;overflow:hidden}
+.cdx-fx-h{padding:9px 14px;border-bottom:1px solid var(--line)}
+.cdx-fx-h b{display:block;font-size:16px;font-weight:600;color:var(--bone)}
+.cdx-fx-h span{font-size:13px;color:var(--mute);font-style:italic}
+.cdx-fx .rung{font-size:13.5px}
+.cdx-fx .rung .lv{flex:0 0 74px}
+.cdx-up{display:block;color:var(--bone2);font-size:13px;margin-top:4px}
+.cdx-up:before{content:"↑ ";color:var(--brass)}
+.cdx-soon{padding:34px 4px;color:var(--mute);font-style:italic}
+/* later in the sheet than the shared stacking rule, so it has to restate it */
+@media (max-width:1100px){ .cdx{padding:18px 16px 48px} .codex{flex:none;overflow:visible} }
+
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);
   background:var(--bone);color:var(--slate);padding:9px 18px;border-radius:8px;
   font-family:var(--sans);font-size:13px;opacity:0;transition:.22s;pointer-events:none;z-index:99}
@@ -221,6 +257,11 @@ button,input{font:inherit;color:inherit}
   .board{display:block;height:auto} .seal{flex:none;border:0;background:#fff}
   body{background:#fff;color:#000}
   .n,.t,.card{border-color:#ccc}
+  .codex{overflow:visible} .cdx{max-width:none;padding:0}
+  .cdx-fx,.ladder{background:#fff;border-color:#ccc;break-inside:avoid}
+  .rung{border-color:#ddd} .rung.now{background:#f4f2ec}
+  .cdx-desc,.cdx-rings,.rung .lv,.cdx-fx-h span{color:#555}
+  .cdx-up{color:#333}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -229,6 +270,10 @@ button,input{font:inherit;color:inherit}
 
 <div class="bar">
   <div class="brand">Arcanum Veritas<em>seal composer</em></div>
+  <div class="tabs">
+    <button class="tab on" id="tabComposer" onclick="setView('composer')">Composer</button>
+    <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
+  </div>
   <div class="dials">
     <div class="dial"><label for="slotDn">Slot</label>
       <div class="step"><button id="slotDn" onclick="bumpSlot(-1)" aria-label="Lower slot">–</button><span id="slotVal">1st</span><button onclick="bumpSlot(1)" aria-label="Raise slot">+</button></div>
@@ -247,7 +292,7 @@ button,input{font:inherit;color:inherit}
   </div>
 </div>
 
-<div class="board">
+<div class="board" id="boardComposer">
   <aside class="rail">
     <div class="rail-top">
       <input class="search" id="cogSearch" type="search" placeholder="Search cognitions" oninput="renderCogList()">
@@ -268,6 +313,17 @@ button,input{font:inherit;color:inherit}
     </div>
     <div id="sumBody"></div>
   </section>
+</div>
+
+<div class="board" id="boardCodex" hidden>
+  <aside class="rail">
+    <div class="rail-top">
+      <input class="search" id="codexSearch" type="search" placeholder="Search cognitions" oninput="renderCodexList()">
+    </div>
+    <div class="cogs" id="codexList"></div>
+    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print entry</button></div>
+  </aside>
+  <section class="codex" id="codexBody"></section>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -532,17 +588,33 @@ const state = {
   sumMode:     "play",    // "play" | "full"
   shape:       "sphere",   // for Rings flagged shape:true
   manner:      "standard", // Manners of Drawing
+  view:        "composer", // "composer" | "codex"
+  codexId:     null,       // which cognition the Codex is reading
 };
 
 // Which Verum / Complement pool a Ring draws from.
 // A Cognition that defines its own `creation` / `utility` pool uses it; otherwise the Ring's
 // fallback mapping applies (Structure/Object → control, Construct → offensive, Utility → supportive).
+function poolFor(cog, type, sub) {
+  const cd = COMP_DATA[type]; if (!cd) return type;
+  if (cog?.verumEffects?.[type]?.length) return type;
+  const s = cd.subtypes[sub];
+  return (s && s.verumKey) || cd.verumKey || type;
+}
 function verumKey(cog) {
-  const cd = COMP_DATA[state.compType]; if (!cd) return state.compType;
-  const c = cog || LOADED[state.core];
-  if (c?.verumEffects?.[state.compType]?.length) return state.compType;
-  const sub = cd.subtypes[state.compSub];
-  return (sub && sub.verumKey) || cd.verumKey || state.compType;
+  return poolFor(cog || LOADED[state.core], state.compType, state.compSub);
+}
+// A Ring is only offered when the Core can actually fill it — its own pool, or the
+// pool it falls back to. Subtypes of one family can resolve differently
+// (Construct → offensive, Structure / Object → control), so each is checked on its own.
+function subHasVerum(cog, type, sub) {
+  return !!(cog?.verumEffects?.[poolFor(cog, type, sub)]?.length);
+}
+function availableSubs(cog, type) {
+  return Object.keys(COMP_DATA[type]?.subtypes || {}).filter(sk => subHasVerum(cog, type, sk));
+}
+function availableRings(cog) {
+  return Object.keys(COMP_DATA).filter(k => availableSubs(cog, k).length > 0);
 }
 function verumLabel(cog) { return COMP_DATA[verumKey(cog)]?.label || ""; }
 // Complement effects: a native type ("Creation" / "Utility") wins; else the fallback pool's label
@@ -643,7 +715,7 @@ async function boot() {
     const ready = INDEX.filter(c => c.ready).length;
     setStatus("ok", `✓ ${ready} cognitions ready`);
     renderCogList();
-    syncBar();
+    renderCodexList();
     syncBar();
     renderMain();
   } catch(e) {
@@ -744,6 +816,8 @@ function renderMain() {
   const comp = document.getElementById("composer");
   const seal = document.getElementById("sumBody");
   syncBar();
+  // The Codex resolves formulas off the same bar, so it re-reads whenever the bar moves
+  if (state.view === "codex") renderCodex();
 
   if (!state.core) {
     comp.innerHTML = rulesDrawer() + `<div class="empty">
@@ -774,21 +848,30 @@ function buildComposer(coreCog, tier) {
   const sub = currentSub();
   let h = "";
 
-  // Ring family
+  // Ring family — only the ones this Core can fill
+  const rings = availableRings(coreCog);
+  if (!rings.length) {
+    return block("Ring — what shape the seal takes",
+      `<p class="hint">${esc(INDEX.find(c => c.id === state.core)?.name || "This cognition")}
+       has no Verum effects written yet, so it can't take a Ring.</p>`);
+  }
   h += block("Ring — what shape the seal takes", `<div class="rings">` +
-    Object.entries(COMP_DATA).map(([k, d]) =>
-      `<button class="ring ${k}${state.compType === k ? " on" : ""}" onclick="selectCompType('${k}')">
-        <b>${d.label}</b><span>${d.desc}</span></button>`).join("") + `</div>`);
+    rings.map(k => {
+      const d = COMP_DATA[k];
+      return `<button class="ring ${k}${state.compType === k ? " on" : ""}" onclick="selectCompType('${k}')">
+        <b>${d.label}</b><span>${d.desc}</span></button>`;
+    }).join("") + `</div>`);
 
   if (!state.compType) return h;
 
-  // Subtype
+  // Subtype — likewise, only the ones with a pool behind them
+  const subs = availableSubs(coreCog, state.compType);
   h += block("Subtype", `<div class="chips">` +
-    Object.keys(cd.subtypes).map(sk =>
+    subs.map(sk =>
       `<button class="chip${state.compSub === sk ? " on" : ""}" onclick="selectCompSub('${escAttr(sk)}')">${sk}</button>`
     ).join("") + `</div>`);
 
-  if (!state.compSub) return h;
+  if (!state.compSub || !sub) return h;
 
   // Shape + Manner side by side
   let opts = "";
@@ -912,8 +995,9 @@ function clearAll() {
 //  COMPOSITION SELECTION
 // ═══════════════════════════════════════════════════════════
 function selectCompType(type) {
+  const coreCog0 = LOADED[state.core];
   state.compType = type;
-  state.compSub  = Object.keys(COMP_DATA[type].subtypes)[0];
+  state.compSub  = availableSubs(coreCog0, type)[0] || Object.keys(COMP_DATA[type].subtypes)[0];
   state.complements = state.complements.map(c => ({ ...c, compEffect: null }));
   // Auto-select first verum effect for this composition type (pure state, not in render)
   state.shape = "sphere";
@@ -1066,7 +1150,14 @@ function buildPlayCard(coreCog, tier) {
   const stat = [];
   const dmg = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
   if (state.compSub === "Direct Attack") stat.push(`Attack ${sgn(sealAttack())}`);
-  if (dmg) stat.push(dmg + (coreCog?.damageType ? ` ${coreCog.damageType.toLowerCase()}` : ""));
+  if (dmg) {
+    const kind = (cell("Healing") || cell("Healing / Target")) ? "healing"
+               : cell("Absorb") ? "absorbed"
+               : (coreCog?.damageType || "damage").toLowerCase();
+    const { head, other } = damageLedger(dmg, coreCog, tier, kind);
+    stat.push(`${head} ${kind}`);
+    other.forEach(s => stat.push(`+${s.count}${s.die} ${s.type || kind} (${s.source})`));
+  }
   ["Range","Radius","Targets","Duration","Buff Duration","Zone Duration","Weapon Die","CR cap","Size","AC","HP / segment","Max size","Quality","Tier","Scope"]
     .forEach(c => { const v = cell(c); if (v) stat.push(`${c}: ${v}`); });
   if (coreCog?.savingThrow && state.compSub !== "Direct Attack")
@@ -1139,6 +1230,56 @@ function totalDamage(baseCell, coreCog, tier) {
   return { total: `${n + bonus}d${die}${rest}`, base: `${n}d${die}`, bonus: `+${bonus}d${die}` };
 }
 
+// A Sigil adds to the seal's own damage only when its live line leads with "+N die(s)" —
+// that is the shorthand for dice of the Ring's primary die. Everything else a Complement
+// does (bleed ticks, terrain, per-turn ramps, riders on later turns) resolves on its own
+// clock and must NOT be folded into the number you roll on the hit.
+// Later live parts restate the total rather than stacking, exactly like Core tiers.
+function sigilDamage(tier) {
+  const die = primaryDie(); if (!die) return [];
+  const baseSize = +die.slice(1);
+  const out = [];
+  gatherRiders(tier).riders.forEach(e => {
+    let count = 0, type = null, minSize = 0;
+    e.parts.forEach(p => {
+      const md = (partMech(p) || {}).damage || {};
+      if (md.type) type = md.type;
+      const d0 = Array.isArray(md.dice) ? md.dice[0] : md.dice;
+      const dm = d0 && String(d0).match(/^(\d+)d(\d+)$/);
+      if (dm) minSize = Math.max(minSize, +dm[2]);   // the authored "(min 1d6)" floor
+      const m = String(partCard(p) || compact(partText(p)))
+        .match(/^\s*\+\s*(\d+)\s*(?:dice|die)\b\s*([A-Za-z]+)?/i);
+      if (m) {
+        count = +m[1];
+        if (m[2] && !/^(of|and|to|on|per)$/i.test(m[2])) type = m[2].toLowerCase();
+      }
+    });
+    if (count) out.push({ source: e.name, count, die: "d" + Math.max(baseSize, minSize), type });
+  });
+  return out;
+}
+// "Cognitive Fire" and "fire" are the same damage for the purpose of one total
+function sameType(a, b) {
+  const n = s => String(s || "").toLowerCase().replace(/^cognitive\s+/, "").trim();
+  return n(a) === n(b);
+}
+// Fold the Sigil dice that share the headline's die and type into it; hand back the rest
+function damageLedger(headCell, coreCog, tier, kind) {
+  const t = totalDamage(headCell, coreCog, tier);
+  let head = (t && typeof t === "object") ? t.total : (t || headCell);
+  const bits = (t && typeof t === "object") ? [t.base, t.bonus] : [];
+  const other = [];
+  sigilDamage(tier).forEach(s => {
+    const hm = String(head).match(/^(\d+)d(\d+)(.*)$/);
+    if (hm && s.die === "d" + hm[2] && sameType(s.type, kind)) {
+      if (!bits.length) bits.push(`${hm[1]}d${hm[2]}`);
+      bits.push(`+${s.count}d${hm[2]}`);
+      head = `${+hm[1] + s.count}d${hm[2]}${hm[3]}`;
+    } else other.push(s);
+  });
+  return { head, bits, other };
+}
+
 function buildPlayCardHTML(coreCog, tier) {
   const coreEntry = INDEX.find(c => c.id === state.core);
   const cd  = COMP_DATA[state.compType];
@@ -1158,10 +1299,12 @@ function buildPlayCardHTML(coreCog, tier) {
     const kind = (cell("Healing") || cell("Healing / Target")) ? "healing"
                : cell("Absorb") ? "absorbed"
                : (coreCog?.damageType || "damage").toLowerCase();
-    const t = totalDamage(dmgCell, coreCog, tier);
-    nums += (t && typeof t === "object")
-      ? `<span class="n dmg"><b>${esc(t.total)}</b><i>${esc(kind)}</i><u>${esc(t.base)} ${esc(t.bonus)}</u></span>`
-      : `<span class="n dmg"><b>${esc(t || dmgCell)}</b><i>${esc(kind)}</i></span>`;
+    const { head, bits, other } = damageLedger(dmgCell, coreCog, tier, kind);
+    nums += `<span class="n dmg"><b>${esc(head)}</b><i>${esc(kind)}</i>` +
+            (bits.length ? `<u>${esc(bits.join(" "))}</u>` : "") + `</span>`;
+    // Sigil dice of a different type stay their own number — resistance cares
+    other.forEach(s => nums += `<span class="n dmg"><b>+${s.count}${esc(s.die)}</b>` +
+      `<i>${esc(s.type || kind)}</i><u>${esc(s.source)}</u></span>`);
   }
   [["Range","range"],["Radius","radius"],["Targets","targets"],["Duration","duration"],
    ["Buff Duration","duration"],["Zone Duration","zone"],["Weapon Die","weapon die"],
@@ -1244,6 +1387,14 @@ function buildFullRef(coreCog, tier) {
     ``,
   ];
 
+  // Sigil dice that land on the seal's own roll, spelled out alongside the Ring's numbers
+  const sig = sigilDamage(tier);
+  if (sig.length) {
+    lines.push(`── SIGIL DICE (added to the hit) ──`);
+    sig.forEach(s => lines.push(`+${s.count}${s.die}${s.type ? ` ${s.type}` : ""} — ${s.source}`));
+    lines.push(``);
+  }
+
   if (activeVerum) {
     lines.push(`── CORE VERUM: ${(state.coreVerum || activeVerum.name).toUpperCase()} ──`);
     for (let i = 0; i <= tier; i++) {
@@ -1275,6 +1426,131 @@ function buildFullRef(coreCog, tier) {
     lines.push(sub.notes);
   }
   return lines;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CODEX — one cognition, entire
+// ═══════════════════════════════════════════════════════════
+function setView(v) {
+  state.view = v;
+  document.getElementById("boardComposer").hidden = v !== "composer";
+  document.getElementById("boardCodex").hidden    = v !== "codex";
+  document.getElementById("tabComposer").className = "tab" + (v === "composer" ? " on" : "");
+  document.getElementById("tabCodex").className    = "tab" + (v === "codex"    ? " on" : "");
+  if (v === "codex") {
+    if (!state.codexId) {
+      const first = state.core || (INDEX.find(c => c.ready) || {}).id;
+      if (first) { openCodex(first); return; }
+    }
+    renderCodexList(); renderCodex();
+  }
+}
+
+function renderCodexList() {
+  const box = document.getElementById("codexList");
+  const q = (document.getElementById("codexSearch")?.value || "").trim().toLowerCase();
+  let shown = 0, h = "";
+  INDEX.forEach(c => {
+    if (q && !c.name.toLowerCase().includes(q)) return;
+    shown++;
+    const on = state.codexId === c.id;
+    h += `<button class="cog ${on ? "core" : c.ready ? "" : "off"}" ${c.ready ? "" : "disabled"}
+      onclick="openCodex('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
+      <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
+      ${c.ready ? "" : `<span class="rl">soon</span>`}</button>`;
+  });
+  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">No cognition matches “${esc(q)}”.</div>`;
+}
+
+async function openCodex(id) {
+  const entry = INDEX.find(c => c.id === id);
+  if (!entry || !entry.ready) return;
+  await loadCognition(id);
+  state.codexId = id;
+  renderCodexList();
+  renderCodex();
+  document.getElementById("codexBody").scrollTop = 0;
+}
+
+// Which Rings actually draw on a given pool for this cognition — the fallback map made visible
+function ringsUsing(cog, pool) {
+  const out = [];
+  Object.entries(COMP_DATA).forEach(([k, d]) => {
+    const subs = Object.keys(d.subtypes).filter(sk => poolFor(cog, k, sk) === pool);
+    if (!subs.length) return;
+    out.push(subs.length === Object.keys(d.subtypes).length
+      ? d.label
+      : `${d.label} (${subs.join(", ")})`);
+  });
+  return out;
+}
+
+function renderCodex() {
+  const host = document.getElementById("codexBody");
+  if (!host) return;
+  const entry = INDEX.find(c => c.id === state.codexId);
+  const cog   = LOADED[state.codexId];
+  if (!entry || !cog) {
+    host.innerHTML = `<div class="empty">Pick a cognition from the left to read it in full.</div>`;
+    return;
+  }
+  const tier = getTier(state.charLevel);
+  const opp  = INDEX.find(c => c.id === cog.opposing);
+
+  let h = `<div class="cdx">
+    <div class="cdx-hd"><div class="cdx-ico">${entry.icon || "◆"}</div><div>
+      <h1>${esc(entry.name)}</h1>
+      ${cog.description ? `<p class="cdx-desc">${esc(cog.description)}</p>` : ""}
+      <div class="c-tags">
+        ${cog.savingThrow ? `<span class="t">${esc(cog.savingThrow)} save</span>` : ""}
+        ${cog.damageType  ? `<span class="t hot">${esc(cog.damageType)}</span>` : ""}
+        ${opp ? `<span class="t">opposed by ${esc(opp.name)}</span>` : ""}
+      </div>
+    </div></div>`;
+
+  // ── Verum effects, pool by pool
+  const POOLS = ["offensive","supportive","control","creation","utility"];
+  let any = false;
+  POOLS.forEach(pool => {
+    const fx = cog.verumEffects?.[pool] || [];
+    if (!fx.length) return;
+    any = true;
+    const d = COMP_DATA[pool];
+    h += `<div class="cdx-sec"><h2 class="${d.color}">${d.icon} ${d.label} verum</h2>
+      <p class="cdx-rings">Rings: ${esc(ringsUsing(cog, pool).join(" · ")) || "—"}</p>`;
+    fx.forEach(e => {
+      h += `<div class="cdx-fx"><div class="cdx-fx-h"><b>${esc(e.name)}</b>` +
+           (e.description ? `<span>${esc(e.description)}</span>` : "") + `</div><div class="ladder">` +
+        (e.tiers || []).map((t, i) =>
+          `<div class="rung ${i === tier ? "now" : ""}"><span class="lv">${TIERS[i]?.label || ""}</span>
+           <span>${esc(resolve(partText(t)))}</span></div>`).join("") + `</div></div>`;
+    });
+    h += `</div>`;
+  });
+  if (!any) h += `<p class="cdx-soon">No Verum effects written for ${esc(entry.name)} yet.</p>`;
+
+  // ── Complement effects, grouped the same way
+  const comps = cog.complementEffects || [];
+  if (comps.length) {
+    h += `<div class="cdx-sec"><h2>◆ Complement effects — as a Sigil</h2>
+      <p class="cdx-rings">What ${esc(entry.name)} contributes to someone else's seal.</p></div>`;
+    POOLS.forEach(pool => {
+      const label = COMP_DATA[pool].label;
+      const mine  = comps.filter(f => String(f.type).toLowerCase() === label.toLowerCase());
+      if (!mine.length) return;
+      h += `<div class="cdx-sec"><h2 class="${COMP_DATA[pool].color}">${label} sigil</h2>`;
+      mine.forEach(f => {
+        h += `<div class="cdx-fx"><div class="cdx-fx-h"><b>${esc(f.name)}</b>` +
+             (f.description ? `<span>${esc(f.description)}</span>` : "") + `</div>
+             <div class="cmp-b">${esc(resolve(partText(f.effect)))}` +
+             (f.upgrades || []).map(u => `<span class="cdx-up">${esc(resolve(partText(u)))}</span>`).join("") +
+             `</div></div>`;
+      });
+      h += `</div>`;
+    });
+  }
+
+  host.innerHTML = h + `</div>`;
 }
 
 // ═══════════════════════════════════════════════════════════

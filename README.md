@@ -56,6 +56,8 @@ Click any ready cognition from the sidebar list. This becomes the spell's **Core
 Use the **search bar** to filter cognitions by name.
 
 ### Step 4 — Choose Composition, Subtype, Shape, Manner & Verum Effect
+Only the Rings the Core can actually fill are offered. A Ring is shown when the Core has that Verum pool, or when the pool it falls back to is written — so a Cognition with no Control pool shows no Control Ring, and Creation may offer only *Construct* (which borrows Offensive) while *Structure* and *Object* (which borrow Control) stay hidden. Nothing is greyed out; it simply isn't there.
+
 - **Composition** (Offensive / Supportive / Control / Creation / Utility) — the Ring's family
 - **Subtype** — the Ring itself (Direct Attack, Area, Field, Infusion, Self, Ally, Aura, Ward, Targeted, Control Area, Structure, Construct, Object, Utility)
 - **Shape** — for any Ring with a radius: Sphere (at a point in range), Cone (2× radius, from your hand), Line (4× radius, 5 ft wide, from your hand)
@@ -168,11 +170,19 @@ Paste this into any Claude chat to convert an Obsidian markdown cognition file i
 
 ---
 
+## The Codex
+
+The **Codex** tab reads one Cognition end to end, at rest, away from any particular seal.
+
+Pick a Cognition from the rail and the reader shows its themes, saving throw, damage type and Opposed entry, then every Verum pool it defines — **all four tiers of every effect**, not just the ones your character has reached, with your current tier lit. Each pool is labelled with the Rings that actually draw on it for *that* Cognition, so the fallback map (Creation → Control for Structures and Objects, → Offensive for Constructs; Utility → Supportive) is visible rather than inferred. Below that, every Complement Effect it contributes as somebody else's Sigil, grouped by type, with both upgrade lines.
+
+Formulas resolve against the Verum mod and Dream mod in the command bar, same as the composer. **Print entry** prints the open Cognition on its own.
+
 ## Layout
 
 The builder is a three-column workbench, sized for a laptop or tablet.
 
-- **Command bar** (pinned): slot and level steppers, Verum mod and Dream mod, and the live numbers — to-hit, Verum DC, and how many cognitions you've used of your budget. These never scroll away. Arrow keys nudge the slot; shift+arrows nudge the level.
+- **Command bar** (pinned): the Composer / Codex tabs, slot and level steppers, Verum mod and Dream mod, and the live numbers — to-hit, Verum DC, and how many cognitions you've used of your budget. These never scroll away. Arrow keys nudge the slot; shift+arrows nudge the level.
 - **Left rail**: every cognition, searchable. A selected Keystone is marked `core`, complements `sigil`. Entries grey out when you hit your budget or the cognition isn't written yet.
 - **Centre**: the composer — Ring, subtype, shape, manner, Verum effect with its tier ladder, the scaling strip (click any slot to jump to it), and each sigil with its chosen effect.
 - **Right**: the seal card. Play or Full, copy, print.
@@ -183,8 +193,8 @@ Below 1100px the three columns stack, rail first.
 
 The card at the bottom of the build has two modes:
 
-- **PLAY** — a designed card, not a text dump. A hero block leads with the numbers you actually roll (to-hit or save DC, damage, range/radius/duration) as chips, followed by auto-derived tags for every condition, denial and resource the build can impose — read off the `mech` layer, so they update as you change Sigils. Then the Core Verum at your live tier, then each Sigil as its own row with its source labelled. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
-- **FULL** — the complete reference: every tier up to your level, full effect prose, the Ring's rules note. Use it when building or levelling.
+- **PLAY** — a designed card, not a text dump. A hero block leads with the numbers you actually roll (to-hit or save DC, damage, range/radius/duration) as chips. **Sigil dice are counted.** A Complement whose live line reads *"+N dice"* is adding to the roll you are about to make, so the card adds it: dice of the Core's own damage type fold into the headline total (the sub-label shows the working — `14d6 +6d6 +3d6`), and dice of any other type get their own chip labelled with the type and the Sigil that brought it, because resistance cares which is which. Anything a Complement does on its own clock — bleed ticks, terrain, per-turn ramps, riders that land next turn — is *not* folded in; it stays in the rider rows below. Then auto-derived tags for every condition, denial and resource the build can impose, followed by auto-derived tags for every condition, denial and resource the build can impose — read off the `mech` layer, so they update as you change Sigils. Then the Core Verum at your live tier, then each Sigil as its own row with its source labelled. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
+- **FULL** — the complete reference: every tier up to your level, full effect prose, a **SIGIL DICE** block listing each Complement's contribution separately, and the Ring's rules note. Use it when building or levelling.
 
 Both copy and print. Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
 
@@ -261,7 +271,8 @@ Both copy and print. Note that the PLAY card's compression is text-pattern based
 - The tool has no save state — selections reset on page refresh
 - Complement Effects filter to match the Ring's Verum pool automatically (Creation → Control / Offensive for Constructs; Utility → Supportive)
 - The **Clear Selection** button at the bottom of the sidebar resets everything
-- Print layout is supported — use browser print to export a spell card
+- Print layout is supported — use browser print to export a spell card, or **Print entry** in the Codex for a Cognition
+- No build step, no framework, no bundler. Serve the folder over HTTP — GitHub Pages, Live Server, `python -m http.server` — and it runs. `file://` will not work, because browsers block `fetch()` there
 
 ---
 
