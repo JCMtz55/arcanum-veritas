@@ -13,6 +13,9 @@
   --bone:#E8E3D7; --bone2:#C2BDB2; --mute:#7E8791;
   --ember:#C0553F; --verdant:#4E8C6A; --indigo:#6274B8; --brass:#B08842; --steel:#6E8B97;
   --accent:var(--brass);
+  /* one hue per Cognition domain — muted enough to sit beside each other in the rail */
+  --d-elemental:#C0553F; --d-corporeal:#A8556B; --d-vital:#4E8C6A; --d-psychic:#6274B8;
+  --d-umbral:#7A6EA8;    --d-fate:#B08842;     --d-dominion:#6E8B97;
   --sans:'Space Grotesk',system-ui,sans-serif;
   --serif:'Spectral',Georgia,serif;
 }
@@ -89,6 +92,42 @@ button,input{font:inherit;color:inherit}
 .cog.comp{background:rgba(98,116,184,.13);border-color:#46527d}
 .cog.comp .rl{background:var(--indigo);color:#fff}
 .cog.off{opacity:.3;cursor:not-allowed}
+/* domain picker + group headings in the rail */
+.pick{
+  width:100%; height:30px; padding:0 27px 0 10px; margin-bottom:7px;
+  background:var(--slate); color:var(--bone2);
+  border:1px solid var(--line); border-radius:7px;
+  font-family:var(--sans); font-size:12px; line-height:28px;
+  -webkit-appearance:none; appearance:none; cursor:pointer; color-scheme:dark;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237E8791' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+}
+.pick:hover{border-color:var(--mute); color:var(--bone)}
+.pick option{background:var(--panel); color:var(--bone)}
+/* an active domain tints the picker in that domain's own colour */
+.pick.elemental{border-color:var(--d-elemental); color:var(--d-elemental)}
+.pick.corporeal{border-color:var(--d-corporeal); color:var(--d-corporeal)}
+.pick.vital{border-color:var(--d-vital);         color:var(--d-vital)}
+.pick.psychic{border-color:var(--d-psychic);     color:var(--d-psychic)}
+.pick.umbral{border-color:var(--d-umbral);       color:var(--d-umbral)}
+.pick.fate{border-color:var(--d-fate);           color:var(--d-fate)}
+.pick.dominion{border-color:var(--d-dominion);   color:var(--d-dominion)}
+.grp{display:flex;align-items:center;padding:11px 9px 4px;font-family:var(--sans);
+  font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.cogs>.grp:first-child{padding-top:2px}
+.grp i{flex:1;height:1px;margin-left:8px;background:currentColor;opacity:.25;font-style:normal}
+.grp.elemental{color:var(--d-elemental)} .grp.corporeal{color:var(--d-corporeal)}
+.grp.vital{color:var(--d-vital)}         .grp.psychic{color:var(--d-psychic)}
+.grp.umbral{color:var(--d-umbral)}       .grp.fate{color:var(--d-fate)}
+.grp.dominion{color:var(--d-dominion)}
+.cog .cos{font-size:9px;color:var(--brass);margin-right:5px;opacity:.9}
+.t.dom.elemental{color:var(--d-elemental);border-color:var(--d-elemental)}
+.t.dom.corporeal{color:var(--d-corporeal);border-color:var(--d-corporeal)}
+.t.dom.vital{color:var(--d-vital);border-color:var(--d-vital)}
+.t.dom.psychic{color:var(--d-psychic);border-color:var(--d-psychic)}
+.t.dom.umbral{color:var(--d-umbral);border-color:var(--d-umbral)}
+.t.dom.fate{color:var(--d-fate);border-color:var(--d-fate)}
+.t.dom.dominion{color:var(--d-dominion);border-color:var(--d-dominion)}
 .rail-foot{padding:9px 12px;border-top:1px solid var(--line);display:flex}
 .ghost{flex:1;padding:6px;background:none;border:1px solid var(--line);border-radius:7px;
   cursor:pointer;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
@@ -234,7 +273,8 @@ button,input{font:inherit;color:inherit}
 .cdx-sec>h2.off{color:var(--ember)} .cdx-sec>h2.sup{color:var(--verdant)}
 .cdx-sec>h2.con{color:var(--indigo)} .cdx-sec>h2.cre{color:var(--brass)}
 .cdx-sec>h2.uti{color:var(--steel)}
-.cdx-rings{font-family:var(--sans);font-size:11px;color:var(--mute);margin:0 0 11px}
+.cdx-rings{font-family:var(--sans);font-size:11.5px;color:var(--mute);margin:0 0 11px;line-height:1.55}
+.cdx-rings strong{color:var(--bone2);font-weight:500}
 .cdx-fx{border:1px solid var(--line);border-radius:9px;background:var(--panel);
   margin-bottom:11px;overflow:hidden}
 .cdx-fx-h{padding:9px 14px;border-bottom:1px solid var(--line)}
@@ -245,6 +285,36 @@ button,input{font:inherit;color:inherit}
 .cdx-up{display:block;color:var(--bone2);font-size:13px;margin-top:4px}
 .cdx-up:before{content:"↑ ";color:var(--brass)}
 .cdx-soon{padding:34px 4px;color:var(--mute);font-style:italic}
+
+/* ── Rings: the composition tables, read on their own ────── */
+.rail-grp{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mute);padding:11px 9px 4px}
+.rail-grp:first-child{padding-top:2px}
+.rail-grp.off{color:var(--ember)} .rail-grp.sup{color:var(--verdant)}
+.rail-grp.con{color:var(--indigo)} .rail-grp.cre{color:var(--brass)}
+.rail-grp.uti{color:var(--steel)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.tbl{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+.tbl th{font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--mute);text-align:left;padding:8px 13px;
+  border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 13px;border-bottom:1px solid var(--line);color:var(--bone2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover td{background:var(--panel2);color:var(--bone)}
+.tbl td:first-child{font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+.tbl tr.now td{background:var(--panel2);color:var(--bone)}
+.tbl tr.now td:first-child{color:var(--brass);font-weight:700}
+.tbl td.wrap{white-space:normal;min-width:260px;line-height:1.45}
+.cdx-note{font-size:13.5px;line-height:1.6;color:var(--bone2);margin:11px 0 0;
+  border-left:2px solid var(--line);padding-left:13px}
+.cdx-note p{margin:0 0 7px} .cdx-note p:last-child{margin:0}
+.cdx-defs{border:1px solid var(--line);border-radius:9px;background:var(--panel);overflow:hidden}
+.cdx-def{display:flex;padding:9px 14px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.5}
+.cdx-def:last-child{border-bottom:0}
+.cdx-def b{flex:0 0 118px;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--bone)}
+.cdx-def span{flex:1;min-width:0;color:var(--bone2)}
+.cdx-def.dis b,.cdx-def.dis span{opacity:.4}
 /* later in the sheet than the shared stacking rule, so it has to restate it */
 @media (max-width:1100px){ .cdx{padding:18px 16px 48px} .codex{flex:none;overflow:visible} }
 
@@ -262,6 +332,11 @@ button,input{font:inherit;color:inherit}
   .rung{border-color:#ddd} .rung.now{background:#f4f2ec}
   .cdx-desc,.cdx-rings,.rung .lv,.cdx-fx-h span{color:#555}
   .cdx-up{color:#333}
+  .tbl-wrap,.cdx-defs{background:#fff;border-color:#ccc;overflow:visible;break-inside:avoid}
+  .tbl{white-space:normal} .tbl th,.tbl td{border-color:#ddd;color:#000}
+  .tbl th,.tbl td:first-child{color:#555} .tbl tr.now td{background:#f4f2ec}
+  .cdx-def{border-color:#ddd} .cdx-def span{color:#333}
+  .cdx-note{color:#333;border-color:#ccc}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -273,6 +348,7 @@ button,input{font:inherit;color:inherit}
   <div class="tabs">
     <button class="tab on" id="tabComposer" onclick="setView('composer')">Composer</button>
     <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
+    <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
   </div>
   <div class="dials">
     <div class="dial"><label for="slotDn">Slot</label>
@@ -295,6 +371,7 @@ button,input{font:inherit;color:inherit}
 <div class="board" id="boardComposer">
   <aside class="rail">
     <div class="rail-top">
+      <select class="pick" id="cogFilter" aria-label="Filter by domain" onchange="setFilter(this.value || null)"></select>
       <input class="search" id="cogSearch" type="search" placeholder="Search cognitions" oninput="renderCogList()">
     </div>
     <div class="cogs" id="cogList"></div>
@@ -318,12 +395,21 @@ button,input{font:inherit;color:inherit}
 <div class="board" id="boardCodex" hidden>
   <aside class="rail">
     <div class="rail-top">
+      <select class="pick" id="codexFilter" aria-label="Filter by domain" onchange="setFilter(this.value || null)"></select>
       <input class="search" id="codexSearch" type="search" placeholder="Search cognitions" oninput="renderCodexList()">
     </div>
     <div class="cogs" id="codexList"></div>
     <div class="rail-foot"><button class="ghost" onclick="window.print()">Print entry</button></div>
   </aside>
   <section class="codex" id="codexBody"></section>
+</div>
+
+<div class="board" id="boardRings" hidden>
+  <aside class="rail">
+    <div class="cogs" id="ringList" style="padding-top:11px"></div>
+    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print ring</button></div>
+  </aside>
+  <section class="codex" id="ringBody"></section>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -387,18 +473,18 @@ const COMP_DATA = {
     subtypes: {
       "Self": {
         columns: ["Slot","Healing","Buff Duration"],
-        notes: "Inward. No roll; resolves on cast. All Verum Effects apply at full potency — the only Ring that can touch your own body, mind, or soul.",
+        notes: "Inward. No roll; resolves on cast. All Verum Effects apply at full potency — the only Ring that can touch your own body, mind, or soul.\n\nSelf concentrates what Ally divides. It heals half again what Ally gives any one target, and its buff runs two slots longer. Ally wins on total output from the 3rd slot up, once it has more than one body to reach — Self wins on any single body, always.",
         rows: [
-          ["1st","1d8 + VM","1 minute"],["2nd","2d8 + VM","10 minutes"],
-          ["3rd","3d8 + VM","10 minutes"],["4th","4d8 + VM","1 hour"],
-          ["5th","5d8 + VM","1 hour"],["6th","6d8 + VM","8 hours"],
-          ["7th","8d8 + VM","8 hours"],["8th","10d8 + VM","24 hours"],
-          ["9th","12d8 + VM","until countered"],
+          ["1st","2d8 + VM","1 minute"],["2nd","3d8 + VM","10 minutes"],
+          ["3rd","5d8 + VM","10 minutes"],["4th","6d8 + VM","1 hour"],
+          ["5th","8d8 + VM","1 hour"],["6th","10d8 + VM","8 hours"],
+          ["7th","12d8 + VM","8 hours"],["8th","15d8 + VM","24 hours"],
+          ["9th","18d8 + VM","until countered"],
         ]
       },
       "Ally": {
         columns: ["Slot","Healing / Target","Range","Targets","Buff Duration"],
-        notes: "Delivered to willing creatures. No roll. Full healing and Verum Effect to each target. Internal-state Verum Effects do not transfer.",
+        notes: "Delivered to willing creatures. No roll. Full healing and Verum Effect to each target. Internal-state Verum Effects do not transfer.\n\nYou may be one of the targets, but you heal as a target of Ally — the Self table is only for a seal drawn inward.",
         rows: [
           ["1st","1d8 + VM","30 ft","1","1 round"],["2nd","2d8 + VM","30 ft","1","3 rounds"],
           ["3rd","3d8 + VM","60 ft","2","1 minute"],["4th","4d8 + VM","60 ft","2","10 minutes"],
@@ -435,19 +521,19 @@ const COMP_DATA = {
     label: "Control", icon: "🔗", desc: "Conditions & zones", color: "con",
     subtypes: {
       "Targeted": {
-        columns: ["Slot","Targets","Range","Duration on Fail"],
-        notes: "Each target saves independently against your Verum DC. Success = no effect.",
+        columns: ["Slot","Targets","Range","Duration on Fail"], saveDisadvantage: true,
+        notes: "Each target saves independently against your Verum DC, and saves that first one at DISADVANTAGE — a Targeted seal is the whole of your attention. Success = no effect.\n\nOnly the first save is at disadvantage. Repeat saves later in the duration are rolled normally: you commit at the drawing, not for the hour afterward.\n\nTargeted does not concentrate. It reaches further than a Control Area, it holds while you also hold an Aura or a Field, and damage cannot break it. What it will not do is deny ground — it binds creatures, not space.",
         rows: [
-          ["1st","1","60 ft","until end of their next turn"],["2nd","1","60 ft","1 min (repeat save each turn)"],
-          ["3rd","2","90 ft","1 min (repeat save each turn)"],["4th","2","90 ft","1 min (no repeat save)"],
-          ["5th","3","120 ft","10 min (repeat save, 1/min)"],["6th","3","120 ft","10 min (repeat save, 1/min)"],
-          ["7th","4","150 ft","1 hr (repeat save, 1/min)"],["8th","4","150 ft","1 hr (repeat save, 1/min)"],
-          ["9th","5","180 ft","8 hrs (repeat save, 1/hr)"],
+          ["1st","1","150 ft","until end of their next turn"],["2nd","1","150 ft","1 min (repeat save each turn)"],
+          ["3rd","2","180 ft","1 min (repeat save each turn)"],["4th","2","180 ft","1 min (no repeat save)"],
+          ["5th","3","200 ft","10 min (repeat save, 1/min)"],["6th","3","200 ft","10 min (repeat save, 1/min)"],
+          ["7th","4","250 ft","1 hr (repeat save, 1/min)"],["8th","4","250 ft","1 hr (repeat save, 1/min)"],
+          ["9th","5","300 ft","8 hrs (repeat save, 1/hr)"],
         ]
       },
       "Area": {
         columns: ["Slot","Radius","Range","Zone Duration","Condition on Fail"], shape: true, concentration: true,
-        notes: "A zone. Creatures save when it appears and again whenever they start their turn inside it. Success = no condition this turn. The zone persists for its full duration. Requires concentration.",
+        notes: "A zone. Creatures save when it appears and again whenever they start their turn inside it. Success = no condition this turn. The zone persists for its full duration. Requires concentration.\n\nArea asks the question again every turn, so a creature that saves once is not free — it is free until its next turn inside. That, and the ground it denies to everything that would cross it, is what the concentration and the shorter reach buy. Unlike Targeted, it never rolls at disadvantage, and it does not care how many bodies walk in.",
         rows: [
           ["1st","15 ft","90 ft","1 round","until end of their next turn"],
           ["2nd","15 ft","90 ft","1 minute","until end of their next turn"],
@@ -560,6 +646,24 @@ const RULES = {
   ],
 };
 
+// ═══════════════════════════════════════════════════════════
+//  DOMAINS — how the 36 Cognitions sort in the rail
+// ═══════════════════════════════════════════════════════════
+// Read from index.json's `category`, so the rail can be grouped and filtered without
+// fetching all 36 Cognition files. `cosmic` is a separate axis: a handful carry
+// campaign-level weight regardless of which domain they belong to.
+const CATEGORIES = {
+  elemental: { label:"Elemental", short:"Elem",  note:"matter and force" },
+  corporeal: { label:"Corporeal", short:"Body",  note:"blood, bone and beast" },
+  vital:     { label:"Vital",     short:"Vital", note:"the living and the unliving" },
+  psychic:   { label:"Psychic",   short:"Mind",  note:"feeling turned outward" },
+  umbral:    { label:"Umbral",    short:"Umbral",note:"absence, erasure, the unmade" },
+  fate:      { label:"Fate",      short:"Fate",  note:"what happens to you" },
+  dominion:  { label:"Dominion",  short:"Rule",  note:"will imposed on the world" },
+};
+const CAT_ORDER = Object.keys(CATEGORIES);
+function catOf(c) { return CATEGORIES[c?.category] ? c.category : null; }
+
 const ORDINALS = ["","1st","2nd","3rd","4th","5th","6th","7th","8th","9th"];
 
 const TIERS = [
@@ -588,8 +692,10 @@ const state = {
   sumMode:     "play",    // "play" | "full"
   shape:       "sphere",   // for Rings flagged shape:true
   manner:      "standard", // Manners of Drawing
-  view:        "composer", // "composer" | "codex"
+  view:        "composer", // "composer" | "codex" | "rings"
   codexId:     null,       // which cognition the Codex is reading
+  ringRef:     null,       // {type, sub} — which Ring the Rings tab is reading
+  filter:      null,       // domain filter, shared by both rails; null = all
 };
 
 // Which Verum / Complement pool a Ring draws from.
@@ -689,9 +795,9 @@ function saveAbilityOf(text) {
   return m ? m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() : null;
 }
 function setSumMode(m) { state.sumMode = m; renderMain(); }
-function mannerAllowed(m) {
-  if (m === "rite")      return !(state.compSub === "Ward" || state.compSub === "Direct Attack");
-  if (m === "inscribed") return state.compSub !== "Ward";
+function mannerAllowed(m, sub = state.compSub) {
+  if (m === "rite")      return !(sub === "Ward" || sub === "Direct Attack");
+  if (m === "inscribed") return sub !== "Ward";
   return true;
 }
 
@@ -784,25 +890,76 @@ function syncBar() {
 // ═══════════════════════════════════════════════════════════
 //  COGNITION RAIL
 // ═══════════════════════════════════════════════════════════
+// Walk the domains in order, emitting a heading and then that domain's matches.
+// `render` turns one index entry into a button; both rails share the scaffolding.
+function groupedRail(q, render) {
+  let shown = 0, h = "";
+  CAT_ORDER.forEach(key => {
+    if (state.filter && state.filter !== key) return;
+    const rows = INDEX.filter(c => catOf(c) === key && (!q || c.name.toLowerCase().includes(q)));
+    if (!rows.length) return;
+    h += `<div class="grp ${key}">${CATEGORIES[key].label}<i></i></div>`;
+    rows.forEach(c => { shown++; h += render(c); });
+  });
+  // Anything the data forgot to categorise still has to be reachable
+  const loose = INDEX.filter(c => !catOf(c) && (!q || c.name.toLowerCase().includes(q)));
+  if (loose.length && (!state.filter || state.filter === "__none")) {
+    h += `<div class="grp">Uncategorised<i></i></div>`;
+    loose.forEach(c => { shown++; h += render(c); });
+  }
+  return { shown, h };
+}
+
+function renderFilter(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const n = {};
+  INDEX.forEach(c => { const k = catOf(c); if (k) n[k] = (n[k] || 0) + 1; });
+  const loose = INDEX.filter(c => !catOf(c)).length;
+  // Labels stay short so the closed control doesn't truncate in a 218px rail;
+  // the domain's gloss rides on the title instead.
+  sel.innerHTML =
+    `<option value="">All domains · ${INDEX.length}</option>` +
+    CAT_ORDER.filter(k => n[k]).map(k =>
+      `<option value="${k}">${esc(CATEGORIES[k].label)} · ${n[k]}</option>`
+    ).join("") +
+    (loose ? `<option value="__none">Uncategorised · ${loose}</option>` : "");
+  sel.value = state.filter || "";
+  sel.className = "pick" + (state.filter ? " " + state.filter : "");
+  const cat = CATEGORIES[state.filter];
+  sel.title = cat ? `${cat.label} — ${cat.note}` : "Filter the rail by domain";
+}
+function setFilter(k) {
+  state.filter = k || null;
+  renderCogList(); renderCodexList();
+}
+
 function renderCogList() {
   const box = document.getElementById("cogList");
+  if (!box) return;
+  renderFilter("cogFilter");
   const q = (document.getElementById("cogSearch")?.value || "").trim().toLowerCase();
   const atCap = state.complements.length >= maxComps() && state.core !== null;
-  let shown = 0, h = "";
-  INDEX.forEach(c => {
-    if (q && !c.name.toLowerCase().includes(q)) return;
-    shown++;
+  const { shown, h } = groupedRail(q, c => {
     const isCore = state.core === c.id;
     const isComp = state.complements.some(x => x.id === c.id);
     const off = !c.ready || (!isCore && !isComp && atCap);
     const cls = isCore ? "core" : isComp ? "comp" : off ? "off" : "";
     const role = isCore ? "core" : isComp ? "sigil" : "";
-    h += `<button class="cog ${cls}" ${off && !isCore && !isComp ? "disabled" : ""}
+    return `<button class="cog ${cls}" ${off && !isCore && !isComp ? "disabled" : ""}
       onclick="toggleCog('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
       <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
+      ${c.cosmic ? `<span class="cos" title="campaign-level significance">★</span>` : ""}
       ${role ? `<span class="rl">${role}</span>` : ""}</button>`;
   });
-  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">No cognition matches “${q}”.</div>`;
+  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">${emptyRail(q)}</div>`;
+}
+
+function emptyRail(q) {
+  const f = state.filter ? (CATEGORIES[state.filter]?.label || "Uncategorised") : null;
+  if (q && f)  return `No ${f} cognition matches “${esc(q)}”.`;
+  if (q)       return `No cognition matches “${esc(q)}”.`;
+  return `Nothing in ${f || "this filter"}.`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -816,8 +973,9 @@ function renderMain() {
   const comp = document.getElementById("composer");
   const seal = document.getElementById("sumBody");
   syncBar();
-  // The Codex resolves formulas off the same bar, so it re-reads whenever the bar moves
+  // Codex and Rings resolve formulas off the same bar, so they re-read whenever it moves
   if (state.view === "codex") renderCodex();
+  if (state.view === "rings") renderRing();
 
   if (!state.core) {
     comp.innerHTML = rulesDrawer() + `<div class="empty">
@@ -1143,6 +1301,7 @@ function buildPlayCard(coreCog, tier) {
   if (state.manner !== "standard") bits.push(MANNERS[state.manner].label);
   if (sub.concentration) bits.push("Concentration");
   if (sub.reaction) bits.push("REACTION");
+  if (sub.saveDisadvantage) bits.push("first save at DISADVANTAGE");
   L.push(`${(coreEntry?.name || "—").toUpperCase()} · ${cd.label} — ${state.compSub}`);
   L.push(bits.join(" · "));
 
@@ -1241,17 +1400,20 @@ function sigilDamage(tier) {
   const out = [];
   gatherRiders(tier).riders.forEach(e => {
     let count = 0, type = null, minSize = 0;
-    e.parts.forEach(p => {
+    e.parts.forEach((p, i) => {
       const md = (partMech(p) || {}).damage || {};
-      if (md.type) type = md.type;
       const d0 = Array.isArray(md.dice) ? md.dice[0] : md.dice;
       const dm = d0 && String(d0).match(/^(\d+)d(\d+)$/);
-      if (dm) minSize = Math.max(minSize, +dm[2]);   // the authored "(min 1d6)" floor
+      // The "(min 1d6)" floor is authored on the base effect. A later upgrade's mech.damage
+      // may describe something else entirely — collision damage, a tick — so don't read it.
+      if (dm && i === 0) minSize = +dm[2];
       const m = String(partCard(p) || compact(partText(p)))
         .match(/^\s*\+\s*(\d+)\s*(?:dice|die)\b\s*([A-Za-z]+)?/i);
       if (m) {
         count = +m[1];
-        if (m[2] && !/^(of|and|to|on|per)$/i.test(m[2])) type = m[2].toLowerCase();
+        const word = m[2] && !/^(of|and|to|on|per)$/i.test(m[2]) ? m[2].toLowerCase() : null;
+        if (word) type = word;                       // a type named in the card lead always wins
+        else if (!type && md.type) type = md.type;   // otherwise the first declaration stands
       }
     });
     if (count) out.push({ source: e.name, count, die: "d" + Math.max(baseSize, minSize), type });
@@ -1315,6 +1477,7 @@ function buildPlayCardHTML(coreCog, tier) {
   let tags = "";
   if (sub.reaction)      tags += `<span class="t hot">reaction</span>`;
   if (sub.concentration) tags += `<span class="t hot">concentration</span>`;
+  if (sub.saveDisadvantage) tags += `<span class="t hot">first save at disadvantage</span>`;
   if (sub.shape && state.shape !== "sphere") tags += `<span class="t">${SHAPES[state.shape].label.toLowerCase()}</span>`;
   if (state.manner !== "standard")           tags += `<span class="t">${MANNERS[state.manner].label.toLowerCase()}</span>`;
   if (resource) tags += `<span class="t">${esc(resource)}</span>`;
@@ -1431,12 +1594,13 @@ function buildFullRef(coreCog, tier) {
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings" };
 function setView(v) {
   state.view = v;
-  document.getElementById("boardComposer").hidden = v !== "composer";
-  document.getElementById("boardCodex").hidden    = v !== "codex";
-  document.getElementById("tabComposer").className = "tab" + (v === "composer" ? " on" : "");
-  document.getElementById("tabCodex").className    = "tab" + (v === "codex"    ? " on" : "");
+  Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
+  Object.entries(VIEW_TABS).forEach(([k, id]) =>
+    document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
   if (v === "codex") {
     if (!state.codexId) {
       const first = state.core || (INDEX.find(c => c.ready) || {}).id;
@@ -1444,22 +1608,29 @@ function setView(v) {
     }
     renderCodexList(); renderCodex();
   }
+  if (v === "rings") {
+    // Open on whatever the composer is already building, so the tabs stay in step
+    if (!state.ringRef) state.ringRef = (state.compType && state.compSub)
+      ? { type: state.compType, sub: state.compSub }
+      : { type: "offensive", sub: "Direct Attack" };
+    renderRingList(); renderRing();
+  }
 }
 
 function renderCodexList() {
   const box = document.getElementById("codexList");
+  if (!box) return;
+  renderFilter("codexFilter");
   const q = (document.getElementById("codexSearch")?.value || "").trim().toLowerCase();
-  let shown = 0, h = "";
-  INDEX.forEach(c => {
-    if (q && !c.name.toLowerCase().includes(q)) return;
-    shown++;
+  const { shown, h } = groupedRail(q, c => {
     const on = state.codexId === c.id;
-    h += `<button class="cog ${on ? "core" : c.ready ? "" : "off"}" ${c.ready ? "" : "disabled"}
+    return `<button class="cog ${on ? "core" : c.ready ? "" : "off"}" ${c.ready ? "" : "disabled"}
       onclick="openCodex('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
       <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
+      ${c.cosmic ? `<span class="cos" title="campaign-level significance">★</span>` : ""}
       ${c.ready ? "" : `<span class="rl">soon</span>`}</button>`;
   });
-  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">No cognition matches “${esc(q)}”.</div>`;
+  box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">${emptyRail(q)}</div>`;
 }
 
 async function openCodex(id) {
@@ -1502,6 +1673,8 @@ function renderCodex() {
       <h1>${esc(entry.name)}</h1>
       ${cog.description ? `<p class="cdx-desc">${esc(cog.description)}</p>` : ""}
       <div class="c-tags">
+        ${catOf(entry) ? `<span class="t dom ${entry.category}">${esc(CATEGORIES[entry.category].label)}</span>` : ""}
+        ${entry.cosmic ? `<span class="t hot">★ campaign-level</span>` : ""}
         ${cog.savingThrow ? `<span class="t">${esc(cog.savingThrow)} save</span>` : ""}
         ${cog.damageType  ? `<span class="t hot">${esc(cog.damageType)}</span>` : ""}
         ${opp ? `<span class="t">opposed by ${esc(opp.name)}</span>` : ""}
@@ -1548,6 +1721,139 @@ function renderCodex() {
       });
       h += `</div>`;
     });
+  }
+
+  host.innerHTML = h + `</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RINGS — the composition tables, read on their own
+// ═══════════════════════════════════════════════════════════
+// What d20 the Ring asks for, if any — stated per Ring rather than inferred,
+// because "not a Direct Attack" does not mean "somebody saves".
+const RING_ROLL = {
+  "offensive/Direct Attack": "seal attack roll",
+  "offensive/Area":          "saving throw",
+  "offensive/Field":         "saving throw",
+  "offensive/Infusion":      "your weapon attack",
+  "supportive/Self":         "no roll",
+  "supportive/Ally":         "no roll",
+  "supportive/Aura":         "no roll",
+  "supportive/Ward":         "no roll — it absorbs",
+  "control/Targeted":        "saving throw",
+  "control/Area":            "saving throw",
+  "creation/Structure":      "verum on touch",
+  "creation/Construct":      "the construct's own attacks",
+  "creation/Object":         "no roll",
+  "utility/Utility":         "no roll",
+};
+
+function renderRingList() {
+  const box = document.getElementById("ringList");
+  const ref = state.ringRef || {};
+  box.innerHTML = Object.entries(COMP_DATA).map(([k, d]) =>
+    `<div class="rail-grp ${d.color}">${d.icon} ${d.label}</div>` +
+    Object.keys(d.subtypes).map(sk => {
+      const on = ref.type === k && ref.sub === sk;
+      return `<button class="cog${on ? " core" : ""}" onclick="openRing('${k}','${escAttr(sk)}')">
+        <span class="nm">${sk}</span></button>`;
+    }).join("")
+  ).join("");
+}
+
+function openRing(type, sub) {
+  state.ringRef = { type, sub };
+  renderRingList(); renderRing();
+  document.getElementById("ringBody").scrollTop = 0;
+  // Keep the rail on the selection — stacked, it is a 190px window over fourteen Rings
+  document.querySelector("#ringList .cog.core")?.scrollIntoView({ block: "nearest" });
+}
+// Jumping the slot from a table row keeps the whole tool on that slot (renderMain redraws here)
+function ringSlot(n) { bumpSlotTo(n); }
+
+function renderRing() {
+  const host = document.getElementById("ringBody");
+  if (!host) return;
+  const ref = state.ringRef;
+  const d   = ref && COMP_DATA[ref.type];
+  const sub = d && d.subtypes[ref.sub];
+  if (!sub) { host.innerHTML = `<div class="empty">Pick a Ring from the left.</div>`; return; }
+
+  // Where this Ring's Verum effects come from, in general and for the Core in play
+  const fallback = sub.verumKey || d.verumKey || ref.type;
+  const coreCog  = LOADED[state.core];
+  const live     = coreCog ? poolFor(coreCog, ref.type, ref.sub) : null;
+
+  let tags = "";
+  if (sub.reaction)      tags += `<span class="t hot">reaction</span>`;
+  if (sub.concentration) tags += `<span class="t hot">concentration</span>`;
+  // Worth saying only where a sibling Ring in the same family does concentrate — there it is a choice
+  else if (Object.values(d.subtypes).some(s => s.concentration))
+    tags += `<span class="t">no concentration</span>`;
+  if (sub.saveDisadvantage) tags += `<span class="t hot">first save at disadvantage</span>`;
+  if (sub.shape)         tags += `<span class="t">sphere · cone · line</span>`;
+  const roll = RING_ROLL[`${ref.type}/${ref.sub}`];
+  if (roll) tags += `<span class="t">${esc(roll)}</span>`;
+  if (fallback !== ref.type)
+    tags += `<span class="t">borrows the ${esc(COMP_DATA[fallback].label)} pool</span>`;
+
+  let h = `<div class="cdx">
+    <div class="cdx-hd"><div class="cdx-ico">${d.icon}</div><div>
+      <h1>${esc(ref.sub)}</h1>
+      <p class="cdx-desc">${esc(d.label)} — ${esc(d.desc)}</p>
+      <div class="c-tags">${tags}</div>
+    </div></div>`;
+
+  // ── Which pool fills it
+  h += `<div class="cdx-sec"><h2 class="${d.color}">Verum pool</h2>
+    <p class="cdx-rings">A Cognition's own <strong>${esc(d.label)}</strong> effects fill this Ring` +
+    (fallback !== ref.type
+      ? `, and when it has none written, this Ring falls back to its <strong>${esc(COMP_DATA[fallback].label)}</strong> pool.`
+      : `.`) +
+    (live ? ` For <strong>${esc(INDEX.find(c => c.id === state.core)?.name || "")}</strong>,
+        the Core you have selected, it resolves to <strong>${esc(COMP_DATA[live].label)}</strong>.` : ``) +
+    `</p></div>`;
+
+  // ── The whole table, every slot, the live one lit
+  h += `<div class="cdx-sec"><h2 class="${d.color}">Scaling — all nine slots</h2>
+    <p class="cdx-rings">Click a row to set the tool to that slot. Formulas resolve against your Verum mod.</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr>` +
+    sub.columns.map(c => `<th>${esc(c)}</th>`).join("") + `</tr></thead><tbody>` +
+    sub.rows.map(r => {
+      const n = ORDINALS.indexOf(r[0]);
+      return `<tr class="${n === state.slotLevel ? "now" : ""}" onclick="ringSlot(${n})">` +
+        r.map((cellv, i) => `<td${String(cellv).length > 40 ? ' class="wrap"' : ""}>${esc(resolve(cellv))}</td>`).join("") +
+        `</tr>`;
+    }).join("") + `</tbody></table></div></div>`;
+
+  // ── How it resolves at the table
+  if (sub.notes) {
+    h += `<div class="cdx-sec"><h2 class="${d.color}">How it resolves</h2>
+      <div class="cdx-note">` + sub.notes.split(/\n+/).map(p => `<p>${esc(p)}</p>`).join("") + `</div></div>`;
+  }
+
+  // ── Shapes, only where a radius exists to shape
+  if (sub.shape) {
+    h += `<div class="cdx-sec"><h2 class="${d.color}">Shape</h2><div class="cdx-defs">` +
+      Object.values(SHAPES).map(s =>
+        `<div class="cdx-def"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span></div>`).join("") +
+      `</div></div>`;
+  }
+
+  // ── Manners, with the ones this Ring forbids struck out
+  h += `<div class="cdx-sec"><h2 class="${d.color}">Manner of drawing</h2><div class="cdx-defs">` +
+    Object.entries(MANNERS).map(([k, m]) => {
+      const ok = mannerAllowed(k, ref.sub);
+      return `<div class="cdx-def${ok ? "" : " dis"}"><b>${esc(m.label)}</b>
+        <span>${ok ? esc(m.desc) : `Not available to ${esc(ref.sub)}.`}</span></div>`;
+    }).join("") + `</div></div>`;
+
+  // ── The rest of the family, one click away
+  const siblings = Object.keys(d.subtypes).filter(s => s !== ref.sub);
+  if (siblings.length) {
+    h += `<div class="cdx-sec"><h2 class="${d.color}">Also ${esc(d.label)}</h2><div class="chips">` +
+      siblings.map(s => `<button class="chip" onclick="openRing('${ref.type}','${escAttr(s)}')">${esc(s)}</button>`).join("") +
+      `</div></div>`;
   }
 
   host.innerHTML = h + `</div>`;

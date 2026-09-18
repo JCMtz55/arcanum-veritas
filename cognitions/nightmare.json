@@ -25,40 +25,36 @@
             }
           },
           {
-            "text": "If the effect deals damage, the target must succeed on a Constitution saving throw or have their maximum HP reduced by the Void damage dealt. This reduction lasts until a long rest.",
-            "card": "Con save or their max HP drops by the Void damage until a long rest",
+            "text": "If the effect deals damage, a creature that was hit or failed its save also has its maximum HP reduced by the Void damage dealt. This reduction lasts until a long rest.",
+            "card": "Their max HP drops by the Void damage until a long rest",
             "mech": {
               "damage": {
                 "type": "void"
               },
-              "save": {
-                "ability": "Constitution"
-              }
+              "maxHP": "reduced by the Void damage until a long rest"
             }
           },
           {
-            "text": "Creatures that take Void damage must succeed on a Dream saving throw or gain 1 level of Dream Exhaustion.",
-            "card": "Dream save or a level of Dream Exhaustion",
+            "text": "Creatures that take Void damage from this effect also gain 1 level of Dream Exhaustion.",
+            "card": "They also gain a level of Dream Exhaustion",
             "mech": {
               "damage": {
                 "type": "void"
               },
-              "save": {
-                "ability": "Dream"
-              },
               "conditions": [
                 {
-                  "name": "Exhaustion"
+                  "name": "Dream Exhaustion"
                 }
               ]
             }
           },
           {
-            "text": "On a failed Charisma saving throw, the target loses access to one feature (trait, spell, or legendary action) of your choice for 1 minute, and their soul becomes unstable — leaving them vulnerable to banishment, soul theft, or full dream severance at the DM's discretion.",
-            "card": "Cha save or lose a feature for 1 min, soul left unstable",
+            "text": "A target that is hit or fails its save loses access to one feature (trait, spell, or legendary action) of your choice for 1 minute, and its soul becomes unstable — leaving it vulnerable to banishment, soul theft, or full dream severance at the DM's discretion.",
+            "card": "Lose a feature of your choice for 1 min · soul left unstable",
             "mech": {
-              "save": {
-                "ability": "Charisma"
+              "suppress": {
+                "feature": 1,
+                "duration": "1 minute"
               }
             }
           }

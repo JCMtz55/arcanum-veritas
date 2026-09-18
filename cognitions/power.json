@@ -23,22 +23,23 @@
             }
           },
           {
-            "text": "The effect now ignores immunity to the original damage type, dealing half damage to otherwise immune creatures. Add +2 dice to the total damage.",
-            "card": "Ignores immunity too, half damage to the immune · +2 dice",
+            "text": "The effect now ignores immunity to the original damage type, dealing half damage to otherwise immune creatures.",
+            "card": "Ignores immunity too — half damage to the immune",
             "mech": {
               "damage": {
-                "bonusDice": 2
+                "type": "force"
               },
               "pierce": "immunity"
             }
           },
           {
-            "text": "Add +4 dice. The force cannot be reduced by any means — damage reduction features, Shield spell, and similar effects do not apply.",
-            "card": "+4 dice · the force can't be reduced by anything — no Shield, no damage reduction",
+            "text": "The force cannot be reduced by any means — damage reduction features, the Shield spell, and similar effects do not apply.",
+            "card": "The force can't be reduced by anything — no Shield, no damage reduction",
             "mech": {
               "damage": {
-                "bonusDice": 4
-              }
+                "type": "force"
+              },
+              "pierce": "all"
             }
           },
           {

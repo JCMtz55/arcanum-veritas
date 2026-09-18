@@ -13,38 +13,47 @@
         "description": "Your lightning leaps from one victim to the next.",
         "tiers": [
           {
-            "text": "Dexterity save; arcs originate from one affected creature of your choice and cannot leap to creatures already affected this casting. The effect deals +1 die of lightning damage, and one arc leaps to a creature within 15 feet of the original target — it takes half the effect's damage on a failed save.",
-            "card": "+1 die · one arc to a creature within 15 ft (half damage on a fail)",
+            "text": "Arcs originate from one affected creature of your choice and never leap to a creature this seal has already struck. One arc leaps to a creature within 15 feet of the original target, which takes half the effect's damage if it fails the seal's Dexterity save.",
+            "card": "One arc to a creature within 15 ft — half damage if it fails the save",
             "mech": {
               "damage": {
                 "type": "lightning"
               },
-              "save": {
-                "ability": "Dexterity"
+              "rider": {
+                "damage": "half",
+                "targets": 1,
+                "area": "15 ft"
               }
             }
           },
           {
-            "text": "Bonus damage increases to +2 dice. Arcs leap to 2 creatures within 15 feet — each takes full damage on a failed save, half on a success.",
-            "card": "+2 dice · arcs to 2 within 15 ft, full on a fail, half on a success",
+            "text": "Arcs leap to 2 creatures within 15 feet — each takes full damage on a failed save, half on a success.",
+            "card": "Arcs to 2 within 15 ft — full damage on a fail, half on a success",
             "mech": {
               "damage": {
-                "bonusDice": 2
+                "type": "lightning"
               },
-              "save": {
-                "onSuccess": "half"
+              "rider": {
+                "damage": "full; half on a success",
+                "targets": 2,
+                "area": "15 ft"
               }
             }
           },
           {
-            "text": "Bonus damage increases to +3 dice. Arcs leap to 3 creatures within 20 feet. Creatures wearing metal armor or made of metal have disadvantage on the save.",
-            "card": "+3 dice · arcs to 3 within 20 ft · metal armour saves at disadvantage",
+            "text": "Arcs leap to 3 creatures within 20 feet. Creatures wearing metal armor or made of metal have disadvantage on the save.",
+            "card": "Arcs to 3 within 20 ft · metal-clad creatures save at disadvantage",
             "mech": {
               "damage": {
-                "bonusDice": 3
+                "type": "lightning"
+              },
+              "rider": {
+                "damage": "full; half on a success",
+                "targets": 3,
+                "area": "20 ft"
               },
               "penalty": {
-                "disadvantage": "the save"
+                "disadvantage": "the save, if wearing or made of metal"
               }
             }
           },
@@ -69,15 +78,12 @@
         "description": "Your lightning doesn't just shock — it shatters.",
         "tiers": [
           {
-            "text": "Strength save (in addition to the Composition's saving throw, if any). The effect deals +1d8 thunder damage, and targets hit must succeed on a Strength save or be knocked back 10 feet.",
-            "card": "+1d8 thunder · Str save or knocked back 10 ft",
+            "text": "The effect deals an additional 1d8 thunder damage, and a creature that is hit or fails its save is knocked back 10 feet.",
+            "card": "+1d8 thunder · hit or failed save: knocked back 10 ft",
             "mech": {
               "damage": {
                 "dice": "1d8",
                 "type": "thunder"
-              },
-              "save": {
-                "ability": "Strength"
               },
               "movement": {
                 "push": 10
@@ -109,16 +115,12 @@
             }
           },
           {
-            "text": "Thunderbreak becomes a concussive burst — all creatures within 20 feet of the original target must succeed on a Strength save or be knocked prone, pushed 30 feet, and Deafened for 1 minute.",
-            "card": "Concussive burst — everyone within 20 ft: prone, pushed 30 ft, Deafened 1 min",
+            "text": "Thunderbreak becomes a concussive burst — every creature within 20 feet of the original target makes the seal's Dexterity save, and on a failure is knocked prone, pushed 30 feet, and Deafened for 1 minute.",
+            "card": "Concussive burst — everyone within 20 ft: Dex save or prone, pushed 30 ft, Deafened 1 min",
             "mech": {
-              "save": {
-                "ability": "Strength"
-              },
               "conditions": [
                 {
-                  "name": "Prone",
-                  "duration": "1 minute"
+                  "name": "Prone"
                 },
                 {
                   "name": "Deafened",
@@ -149,15 +151,20 @@
             "card": "Once per effect, one lightning attack just hits — no roll"
           },
           {
-            "text": "Designate one creature within 120 feet — it is struck by a Sky Bolt with no attack roll, making a Dexterity save at disadvantage against your Verum DC and taking 12d12 lightning damage on a failure (half on success). On a failure it also cannot use reactions until the end of its next turn and immediately drops Concentration if applicable.",
-            "card": "Sky Bolt: 12d12 lightning at 120 ft, Dex save at disadvantage (half on success), no reactions, drops Concentration",
+            "text": "Once per long rest, designate one creature within 120 feet — it is struck by a Sky Bolt with no attack roll, making a Dexterity save at disadvantage against your Verum DC and taking 12d12 lightning damage on a failure (half on success). On a failure it also cannot use reactions until the end of its next turn and immediately drops Concentration if applicable. If that creature is also this seal's target, the Sky Bolt's save replaces its save against the seal.",
+            "card": "1/long rest — Sky Bolt: 12d12 lightning at 120 ft, Dex save at disadvantage (half on success), no reactions, drops Concentration",
             "mech": {
               "damage": {
                 "dice": "12d12",
                 "type": "lightning"
               },
-              "save": {
-                "ability": "Dexterity"
+              "deny": [
+                "reactions",
+                "concentration"
+              ],
+              "resource": {
+                "name": "Sky Bolt",
+                "uses": "1 per long rest"
               }
             }
           }

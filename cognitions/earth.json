@@ -1,0 +1,388 @@
+{
+  "id": "earth",
+  "name": "Earth",
+  "icon": "🪨",
+  "opposing": "air",
+  "description": "Permanence, Rootedness, Belonging, Weight, Patience.",
+  "savingThrow": "Strength",
+  "damageType": "Tectonic",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Weight of the World",
+        "description": "Everything falls eventually. You are only asking it to fall now.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Tectonic damage and the total damage output increases by 1 additional die. A creature that fails the save is knocked Prone.",
+            "card": "+1 die · damage becomes Tectonic · Prone on a fail",
+            "mech": {
+              "damage": { "bonusDice": 1, "type": "tectonic" },
+              "conditions": [ { "name": "Prone" } ]
+            }
+          },
+          {
+            "text": "Tectonic damage increases by 2 additional dice. A creature knocked Prone this way has its speed reduced to 0 until the end of its next turn — the ground does not let go on the first ask.",
+            "card": "+2 dice · Prone, and speed 0 until the end of their next turn",
+            "mech": {
+              "damage": { "bonusDice": 2, "type": "tectonic" },
+              "conditions": [
+                { "name": "Prone", "duration": "speed 0 until the end of their next turn" }
+              ],
+              "movement": { "speed": 0 }
+            }
+          },
+          {
+            "text": "Tectonic damage increases by 4 additional dice. Creatures that fail are Buried to the waist — Restrained, and rising costs their entire movement and a successful Strength check against your Verum DC.",
+            "card": "+4 dice · Buried to the waist — Restrained, Str check {DC} and all their movement to rise",
+            "mech": {
+              "damage": { "bonusDice": 4, "type": "tectonic" },
+              "conditions": [
+                { "name": "Restrained" },
+                { "name": "Buried", "escape": "Strength check vs Verum DC" }
+              ]
+            }
+          },
+          {
+            "text": "Tectonic damage increases by 5 additional dice. Creatures that fail are Buried whole — Restrained and Blinded until they dig free or someone digs them out, which takes a successful Strength check against your Verum DC.",
+            "card": "+5 dice · Buried whole — Restrained and Blinded until dug out (Str check {DC})",
+            "mech": {
+              "damage": { "bonusDice": 5, "type": "tectonic" },
+              "conditions": [
+                { "name": "Restrained" },
+                { "name": "Blinded" },
+                { "name": "Buried", "escape": "Strength check vs Verum DC" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Fault",
+        "description": "The ground was always going to open. You only chose the hour.",
+        "tiers": [
+          {
+            "text": "The ground beneath the target cracks open. The space it occupies becomes difficult terrain until the end of your next turn.",
+            "card": "The ground under them becomes difficult terrain until the end of your next turn",
+            "mech": {
+              "terrain": { "effect": "difficult", "duration": "end of your next turn" }
+            }
+          },
+          {
+            "text": "The crack widens and stays. The area is difficult terrain for 1 minute, and a creature that enters it must succeed on a Strength saving throw against your Verum DC or be knocked Prone.",
+            "card": "Difficult terrain for 1 min · enter it: Str save {DC} or Prone",
+            "mech": {
+              "terrain": { "effect": "difficult", "duration": "1 minute" },
+              "save": { "ability": "Strength" },
+              "conditions": [ { "name": "Prone" } ]
+            }
+          },
+          {
+            "text": "The fault opens into a fissure 10 feet deep. A creature that fails is swallowed to the bottom of it, taking 3d6 Tectonic damage from the fall, and must climb out.",
+            "card": "10-ft fissure — those who fail fall in for 3d6 tectonic and have to climb out",
+            "mech": {
+              "damage": { "amount": "3d6", "type": "tectonic" },
+              "terrain": { "effect": "fissure", "depth": "10 ft" }
+            }
+          },
+          {
+            "text": "The fault runs as far as you can see and the fissure is 30 feet deep. It closes at the start of your next turn: creatures still inside are Buried — Restrained, Blinded, and unable to speak — and freeing themselves takes a successful Strength check against your Verum DC on each of their turns.",
+            "card": "30-ft fissure closes next turn — anyone inside is Buried: Restrained, Blinded, Str check {DC} each turn to dig out",
+            "mech": {
+              "terrain": { "effect": "fissure", "depth": "30 ft", "duration": "closes at the start of your next turn" },
+              "conditions": [ { "name": "Restrained" }, { "name": "Blinded" }, { "name": "Buried" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Rooted",
+        "description": "You are not standing on the ground. You are part of it, and it has opinions about being moved.",
+        "tiers": [
+          {
+            "text": "You cannot be moved against your will by any effect of 3rd level or lower, and you have advantage on saving throws against being knocked Prone.",
+            "card": "No forced movement from effects ≤3rd · advantage vs Prone",
+            "mech": {
+              "buff": { "who": "self", "advantage": "saves against being knocked Prone" },
+              "deny": [ "forced movement" ]
+            }
+          },
+          {
+            "text": "Forced movement of any level fails against you and your speed cannot be reduced. You count as one size larger for grappling, shoving, and anything that asks how much of the world you take up.",
+            "card": "No forced movement at all · speed can't be reduced · count as one size larger",
+            "mech": {
+              "deny": [ "forced movement", "speed reduction" ],
+              "buff": { "who": "self", "size": "one larger for grapple and shove" }
+            }
+          },
+          {
+            "text": "The ground answers with you. You cannot be knocked Prone, moved, or teleported against your will, and a creature that tries to grapple or shove you is knocked Prone instead.",
+            "card": "Can't be downed, moved or teleported · those who try to grapple or shove you fall Prone",
+            "mech": {
+              "deny": [ "forced movement", "teleportation" ],
+              "conditions": [ { "name": "Prone", "source": "a failed grapple or shove against you" } ]
+            }
+          },
+          {
+            "text": "While you have your footing, so does everyone you name. Choose up to five creatures within 30 feet: they gain the whole of this effect, and nothing short of an opposing seal moves, teleports, or downs any of you.",
+            "card": "Up to 5 creatures within 30 ft share all of it — only an opposing seal moves any of you",
+            "mech": {
+              "buff": { "who": "up to 5 creatures", "range": "30 ft" },
+              "deny": [ "forced movement", "teleportation" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Bedrock",
+        "description": "\"You cannot be moved\" is a thing that can be true about a mind.",
+        "tiers": [
+          {
+            "text": "You have advantage on Constitution saving throws made to maintain concentration.",
+            "card": "Advantage on concentration saves",
+            "mech": {
+              "buff": { "who": "self", "advantage": "concentration saves" }
+            }
+          },
+          {
+            "text": "You cannot be Frightened or Charmed while your feet are on the ground.",
+            "card": "Can't be Frightened or Charmed while your feet are on the ground",
+            "mech": {
+              "deny": [ "fear", "charm" ]
+            }
+          },
+          {
+            "text": "Your concentration cannot be broken by damage — only by your own choice, by unconsciousness, or by an opposing seal.",
+            "card": "Damage never breaks your concentration",
+            "mech": {
+              "deny": [ "concentration loss" ]
+            }
+          },
+          {
+            "text": "Nothing reaches the foundation. You are immune to being Frightened, Charmed, Stunned, or Paralyzed, and once per long rest you may simply refuse one effect that would move you, transform you, or take you out of where you are standing.",
+            "card": "Immune to Frightened, Charmed, Stunned, Paralyzed · 1/long rest, refuse one effect that would move or unmake you",
+            "mech": {
+              "deny": [ "fear", "charm", "stunning", "paralysis" ],
+              "resource": { "name": "Refusal", "uses": "1 per long rest" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Hold Fast",
+        "description": "Going somewhere is a privilege. You are revoking it.",
+        "tiers": [
+          {
+            "text": "A creature that fails has its speed reduced by 15 feet and cannot take the Dash action until the end of its next turn.",
+            "card": "−15 ft speed · no Dash",
+            "mech": {
+              "movement": { "speed": -15 },
+              "penalty": { "speed": -15 },
+              "deny": [ "Dash" ]
+            }
+          },
+          {
+            "text": "Speed drops to 0 until the end of their next turn, and the ground beneath them counts as difficult terrain for the duration.",
+            "card": "Speed 0 until the end of their next turn · their ground is difficult terrain",
+            "mech": {
+              "movement": { "speed": 0 },
+              "terrain": { "effect": "difficult" }
+            }
+          },
+          {
+            "text": "The earth takes hold. A creature that fails is Restrained and frees itself only by succeeding on a Strength check against your Verum DC. It cannot teleport while it is held.",
+            "card": "Restrained — Str check {DC} to break free · no teleporting out",
+            "mech": {
+              "conditions": [ { "name": "Restrained", "escape": "Strength check vs Verum DC" } ],
+              "deny": [ "teleportation" ]
+            }
+          },
+          {
+            "text": "The ground refuses to let go at all. A Restrained creature that fails its check sinks — it is Buried at the start of its next turn, and any creature that tries to pull it free must succeed on the same check.",
+            "card": "Failing the check sinks them — Buried next turn, and rescuers roll the same check",
+            "mech": {
+              "conditions": [ { "name": "Restrained" }, { "name": "Buried" } ],
+              "deny": [ "teleportation" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Of the World's Bones",
+        "description": "You are not building. You are reminding the ground what it used to be.",
+        "tiers": [
+          {
+            "text": "Your creations are raw living stone. They shed no light and make no sound, and a creature that strikes a Structure, or is hit by a Construct or an Object you made, is pushed 5 feet and takes 1d6 Tectonic damage.",
+            "card": "Creations are living stone · struck or hit: pushed 5 ft and 1d6 tectonic",
+            "mech": {
+              "damage": { "amount": "1d6", "type": "tectonic", "trigger": "touch or hit" },
+              "movement": { "push": 5 }
+            }
+          },
+          {
+            "text": "That damage becomes 2d6 and the push knocks Prone. Your Structures cannot be toppled, tipped, or shifted by anything short of destroying them.",
+            "card": "That damage becomes 2d6 and knocks Prone · Structures cannot be toppled or moved",
+            "mech": {
+              "damage": { "amount": "2d6", "type": "tectonic" },
+              "conditions": [ { "name": "Prone" } ]
+            }
+          },
+          {
+            "text": "Your creations repair themselves, regaining hit points equal to Twice your Verum Modifier at the start of each of your turns. A Construct's attacks knock Prone on a hit.",
+            "card": "Creations self-repair 2×VM each turn · Construct hits knock Prone",
+            "mech": {
+              "heal": { "amount": "2×VM", "targets": "your creations" },
+              "conditions": [ { "name": "Prone", "source": "Construct hit" } ]
+            }
+          },
+          {
+            "text": "What you raise is part of the world now. Your creations are immune to nonmagical damage and cannot be teleported or banished, and when one is destroyed the ground beneath it collapses into a 20-foot crater — creatures inside fall Prone and take 6d10 Tectonic damage (Strength save for half).",
+            "card": "Immune to nonmagical damage · a destroyed creation leaves a 20-ft crater: 6d10 tectonic and Prone (Str half)",
+            "mech": {
+              "damage": {
+                "amount": "6d10",
+                "type": "tectonic",
+                "area": "20 ft",
+                "save": { "ability": "Strength", "onSuccess": "half" }
+              },
+              "conditions": [ { "name": "Prone" } ],
+              "deny": [ "nonmagical damage", "teleportation" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "Stone Remembers",
+        "description": "Everything that ever happened here happened on top of something that was paying attention.",
+        "tiers": [
+          {
+            "text": "Sense the shape and movement of anything touching the ground within 60 feet, through stone and through darkness. Shape earth and unworked stone with your hands as though it were wet clay.",
+            "card": "Tremorsense 60 ft · shape earth and stone with your hands",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Walk on any stone surface at full speed regardless of its angle, and ask a stone what it has carried — the last day of what crossed it, in order.",
+            "card": "Walk stone walls at full speed · read the last day of what crossed a stone",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Pass through earth and unworked stone as though swimming, leaving no opening behind you. The reading reaches back a year, and to what a place felt rather than only what walked over it.",
+            "card": "Swim through earth and stone · read back a year, and what the place felt",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Name a place you have stood and step to it through the ground, however far, so long as the whole way between is earth. Or put a question to the ground about anything that has ever happened on it, and be answered.",
+            "card": "Step through the ground to anywhere you have stood · ask the ground anything that happened on it",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Ground Down",
+      "type": "Offensive",
+      "description": "Earth arrives last and stays longest.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Tectonic damage equal to one damage die of the primary effect's type (min 1d6). On a failed Strength save vs your Verum DC, they are also knocked Prone.",
+        "card": "+1 die tectonic · Str save or Prone",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "tectonic" },
+          "save": { "ability": "Strength" },
+          "conditions": [ { "name": "Prone" } ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and a creature knocked Prone this way has its speed reduced by 10 feet until the end of its next turn.",
+          "card": "+2 dice · those knocked Prone also lose 10 ft of speed",
+          "mech": {
+            "movement": { "speed": -10 },
+            "penalty": { "speed": -10 }
+          }
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and standing up from this Prone costs the creature its entire movement.",
+          "card": "+3 dice · standing up costs them all their movement",
+          "mech": {
+            "conditions": [ { "name": "Prone" } ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sure Footing",
+      "type": "Supportive",
+      "description": "A gift that is also an anchor.",
+      "effect": {
+        "text": "When the primary effect resolves, one creature within 30 feet cannot be moved against its will and ignores difficult terrain until the end of your next turn. While it holds the ground this way, its speed is halved.",
+        "card": "One creature within 30 ft can't be moved and ignores difficult terrain — but its speed is halved",
+        "mech": {
+          "deny": [ "forced movement" ],
+          "penalty": { "speed": "halved" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Choose up to two creatures. Each also has advantage on saving throws against being knocked Prone.",
+          "card": "Up to two creatures · each gets advantage vs Prone"
+        },
+        {
+          "text": "Level 11+: The speed penalty is gone, and the chosen creatures cannot be teleported against their will either.",
+          "card": "No more speed penalty · they can't be teleported either",
+          "mech": {
+            "deny": [ "forced movement", "teleportation" ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clinging Earth",
+      "type": "Control",
+      "description": "The ground has never once been in a hurry.",
+      "effect": {
+        "text": "The ground within 10 feet of the point of impact becomes difficult terrain until the end of your next turn. Creatures that fail their save have their speed reduced by 10 feet until the end of their next turn.",
+        "card": "Difficult terrain 10 ft · −10 ft speed on a fail",
+        "mech": {
+          "terrain": { "radius": 10 },
+          "movement": { "speed": -10 },
+          "penalty": { "speed": -10 },
+          "save": { "ability": "Strength" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The difficult terrain persists for 1 minute, and creatures that fail cannot take the Dash action while their speed is reduced.",
+          "card": "Terrain lasts 1 min · no Dash while they are slowed",
+          "mech": {
+            "deny": [ "Dash" ]
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that fail are Restrained until the end of their next turn instead, and cannot teleport out of the terrain.",
+          "card": "Restrained until the end of their next turn · no teleporting out",
+          "mech": {
+            "conditions": [ { "name": "Restrained" } ],
+            "deny": [ "teleportation" ]
+          }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

@@ -13,47 +13,64 @@
         "description": "The poison does not finish — it continues, repeating each turn with scaling damage and save penalties until Exhaustion and Injuries accumulate in those who cannot shake it.",
         "tiers": [
           {
-            "text": "If the primary effect deals damage, the target takes an additional 6d6 poison damage at the start of their next turn as the toxin settles into the wound.",
-            "card": "6d6 poison at the start of their next turn as the toxin settles in",
+            "text": "A creature damaged by this effect is Poisoned until the end of its next turn, and takes 2d6 poison damage at the start of that turn as the toxin settles into the wound.",
+            "card": "Poisoned until the end of their next turn · 2d6 poison at the start of it",
             "mech": {
               "damage": {
-                "dice": "6d6",
-                "type": "poison"
-              }
-            }
-          },
-          {
-            "text": "The lingering effect persists for 1 minute, repeating at the start of each of the target's turns. The target may repeat the Constitution saving throw at the end of each of their turns to end the effect early.",
-            "card": "Repeats each turn for 1 min (Con save at end of each turn to end it)",
-            "mech": {
-              "save": {
-                "ability": "Constitution"
-              }
-            }
-          },
-          {
-            "text": "The ongoing poison damage increases to 8d10, and the target suffers a penalty equal to 1d4 to all saving throws and attack rolls while the contagion persists — the toxin degrading their capacity to resist anything.",
-            "card": "8d10 ongoing · −1d4 to all their saves and attacks while it persists",
-            "mech": {
-              "damage": {
-                "dice": [
-                  "8d10",
-                  "1d4"
-                ],
-                "type": "poison"
-              }
-            }
-          },
-          {
-            "text": "Targets that fail their initial save also immediately gain one level of Exhaustion, and must make a Constitution saving throw at the start of each affected turn or take an Injury as the contagion reaches deeper tissue.",
-            "card": "Also a level of Exhaustion immediately · Con save each turn or take an Injury",
-            "mech": {
-              "save": {
-                "ability": "Constitution"
+                "amount": "2d6",
+                "type": "poison",
+                "when": "start of their next turn"
               },
               "conditions": [
                 {
+                  "name": "Poisoned"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The poison lingers for 1 minute: the target stays Poisoned and takes the 2d6 again at the start of each of its turns. It repeats the Constitution saving throw at the end of each of its turns, ending the effect on a success.",
+            "card": "Lingers 1 min — Poisoned, 2d6 each turn · Con save at the end of each of their turns ends it",
+            "mech": {
+              "damage": {
+                "amount": "2d6",
+                "type": "poison",
+                "tick": "start of each of their turns"
+              },
+              "conditions": [
+                {
+                  "name": "Poisoned",
+                  "duration": "1 minute"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The ongoing poison damage increases to 4d6, and while the contagion persists the target subtracts 1d4 from every attack roll and saving throw it makes.",
+            "card": "4d6 each turn · −1d4 to all their attacks and saves while it lasts",
+            "mech": {
+              "damage": {
+                "amount": "4d6",
+                "type": "poison",
+                "tick": "start of each of their turns"
+              },
+              "penalty": {
+                "attack": "-1d4",
+                "saves": "-1d4"
+              }
+            }
+          },
+          {
+            "text": "A target that fails the initial save also gains one level of Exhaustion, and each time it fails the repeat save at the end of its turn, the contagion reaches deeper tissue and it takes an Injury.",
+            "card": "A level of Exhaustion on the first fail · each failed repeat save deals an Injury",
+            "mech": {
+              "conditions": [
+                {
                   "name": "Exhaustion"
+                },
+                {
+                  "name": "Injury",
+                  "trigger": "each failed repeat save"
                 }
               ]
             }

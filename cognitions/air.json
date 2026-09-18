@@ -6,6 +6,7 @@
   "description": "Freedom, Movement, Breath, Fluidity, Sound.",
   "savingThrow": "Dexterity",
   "damageType": "Thunder",
+
   "verumEffects": {
     "offensive": [
       {
@@ -13,121 +14,122 @@
         "description": "The air fractures. The sound arrives before anyone is ready for it.",
         "tiers": [
           {
-            "text": "On a hit or failed save, the target suffers disadvantage on Dexterity checks and is Deafened until the start of your next turn.",
-            "card": "Fail: disadvantage on Dex checks and Deafened until your next turn",
+            "text": "The damage is turned into Thunder damage. A creature that fails is Deafened and can take no reactions until the end of its next turn, and any Concentration check it makes before then is at disadvantage.",
+            "card": "Damage becomes Thunder · Deafened and no reactions until the end of their next turn · Concentration at disadvantage",
             "mech": {
+              "damage": { "type": "thunder" },
+              "conditions": [ { "name": "Deafened", "duration": "until the end of their next turn" } ],
+              "deny": [ "reactions" ],
+              "penalty": { "disadvantage": "Concentration checks until the end of their next turn" }
+            }
+          },
+          {
+            "text": "A creature that fails is Deafened for 1 minute, loses any Concentration it was holding, and can take no reactions until the end of its next turn.",
+            "card": "Deafened 1 min · they lose any Concentration they were holding · no reactions until the end of their next turn",
+            "mech": {
+              "damage": { "type": "thunder" },
+              "conditions": [ { "name": "Deafened", "duration": "1 minute" } ],
+              "deny": [ "concentration", "reactions" ]
+            }
+          },
+          {
+            "text": "The crack carries. Every other creature within 10 feet of the target takes Five Times your Verum Modifier in Thunder damage and is Deafened until the end of its next turn, and the target itself loses any Concentration it was holding and can take no reactions until the end of its next turn.",
+            "card": "Everyone else within 10 ft takes 5×VM thunder and is Deafened · the target loses Concentration and gets no reactions",
+            "mech": {
+              "damage": { "type": "thunder" },
+              "rider": { "damage": "5×VM", "type": "thunder", "area": "10 ft" },
+              "conditions": [ { "name": "Deafened" } ],
+              "deny": [ "concentration", "reactions" ]
+            }
+          },
+          {
+            "text": "A creature that fails is Stunned until the end of its next turn, Deafened for 1 hour, and loses any Concentration it was holding. The crack still carries: every other creature within 10 feet takes Five Times your Verum Modifier in Thunder damage and is Deafened until the end of its next turn.",
+            "card": "Stunned until the end of their next turn · Deafened 1 hr · Concentration lost · 5×VM thunder to everyone else within 10 ft",
+            "mech": {
+              "damage": { "type": "thunder" },
+              "rider": { "damage": "5×VM", "type": "thunder", "area": "10 ft" },
               "conditions": [
-                {
-                  "name": "Deafened"
-                }
+                { "name": "Stunned", "duration": "until the end of their next turn" },
+                { "name": "Deafened", "duration": "1 hour" }
               ],
-              "penalty": {
-                "disadvantage": "Dexterity checks and is Deafened until the start o"
-              }
+              "deny": [ "concentration", "reactions" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Razoredge",
+        "description": "Compressed air does not need an opening. It makes one.",
+        "tiers": [
+          {
+            "text": "This effect ignores half cover and three-quarters cover. Wind does not care what the target is standing behind.",
+            "card": "Ignores half and three-quarters cover",
+            "mech": {
+              "pierce": "cover"
             }
           },
           {
-            "text": "The effect deals 4d8 thunder damage and automatically interrupts any spellcasting or Concentration unless the target is immune to the Deafened condition.",
-            "card": "4d8 thunder · interrupts casting and Concentration outright unless Deafen-immune",
+            "text": "It also ignores the Armor Class bonus granted by shields, and resistance to its damage.",
+            "card": "Ignores shield AC and resistance",
             "mech": {
-              "damage": {
-                "dice": "4d8",
-                "type": "thunder"
-              },
-              "conditions": [
-                {
-                  "name": "Deafened"
-                }
-              ]
+              "pierce": "resistance"
             }
           },
           {
-            "text": "A shockwave erupts in a 10-foot radius from the point of impact — all creatures within must succeed on a Constitution saving throw or be knocked prone and take 6d10 thunder damage.",
-            "card": "Shockwave 10 ft — Con save or prone and 6d10 thunder",
+            "text": "It ignores total cover, so long as air could reach the target by any route — around a corner, under a door, through an arrow slit. Immunity to its damage is reduced to resistance.",
+            "card": "Ignores total cover wherever air can reach · immunity becomes resistance",
             "mech": {
-              "damage": {
-                "dice": "6d10",
-                "type": "thunder"
-              },
-              "save": {
-                "ability": "Constitution"
-              },
-              "conditions": [
-                {
-                  "name": "Prone"
-                }
-              ]
+              "pierce": "immunity",
+              "note": "immunity reduced to resistance"
             }
           },
           {
-            "text": "The air detonates across a 60-foot radius. All affected creatures must succeed on a Constitution saving throw or be Stunned until the end of your next turn and Deafened for 1 hour. Creatures that succeed still take half the thunder damage and are knocked prone.",
-            "card": "60-ft detonation — Con save or Stunned until end of your next turn and Deafened 1 hr",
+            "text": "Nothing between you and them counts for anything. The effect passes through nonmagical barriers and magical ones of 5th level or lower, ignores all cover, resistance and immunity, and a creature that fails cannot benefit from cover against you until the end of your next turn.",
+            "card": "Passes through barriers ≤5th · ignores all cover, resistance and immunity · they get no cover from you next turn",
             "mech": {
-              "damage": {
-                "type": "thunder"
-              },
-              "save": {
-                "ability": "Constitution"
-              },
-              "conditions": [
-                {
-                  "name": "Stunned",
-                  "duration": "1 hour"
-                },
-                {
-                  "name": "Prone"
-                },
-                {
-                  "name": "Deafened",
-                  "duration": "1 hour"
-                }
-              ]
+              "pierce": "all",
+              "deny": [ "cover" ]
             }
           }
         ]
       }
     ],
+
     "supportive": [
       {
         "name": "Featherstep",
         "description": "Air becomes a cradle. Gravity becomes a suggestion.",
         "tiers": [
           {
-            "text": "Gain immunity to fall damage and may walk across air as if it were difficult terrain for 1 minute.",
-            "card": "Immune to fall damage · walk on air as difficult terrain, 1 min",
+            "text": "Take no damage from falling, and walk across open air as though it were difficult terrain.",
+            "card": "No falling damage · walk on air as difficult terrain",
             "mech": {
-              "terrain": {
-                "effect": "difficult"
-              }
+              "deny": [ "falling damage" ],
+              "terrain": { "effect": "walkable air" }
             }
           },
           {
-            "text": "Gain a hover speed equal to twice your movement speed for 1 minute. You do not provoke opportunity attacks while airborne.",
-            "card": "Hover at double your speed 1 min · no opportunity attacks while airborne"
-          },
-          {
-            "text": "Gain full flight for 10 minutes and cannot be knocked prone by physical or magical means while aloft.",
-            "card": "Full flight 10 min · cannot be knocked prone while aloft",
+            "text": "Gain a hover speed equal to twice your walking speed, and provoke no opportunity attacks while airborne.",
+            "card": "Hover at double your speed · no opportunity attacks while airborne",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Prone"
-                }
-              ]
+              "buff": { "who": "self", "speed": "hover at 2× walking speed" },
+              "deny": [ "opportunity attacks" ]
             }
           },
           {
-            "text": "For 1 hour, gain omnidirectional flight, hover as a free action, and become immune to the Restrained and Grappled conditions unless the source also commands the Cognition of Air.",
-            "card": "1 hr of omnidirectional flight · hover free · immune to Restrained and Grappled unless the source also wields Air",
+            "text": "Gain full flight, and while aloft you cannot be knocked prone by any means, physical or magical.",
+            "card": "Full flight · cannot be knocked down while aloft",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Restrained"
-                },
-                {
-                  "name": "Grappled"
-                }
-              ]
+              "buff": { "who": "self", "speed": "flight" },
+              "deny": [ "knockdown" ]
+            }
+          },
+          {
+            "text": "Gain omnidirectional flight and hover as a free action. You are immune to being Restrained or Grappled unless the source also commands the Cognition of Air.",
+            "card": "Omnidirectional flight · hover free · no restraint or grapples unless they also wield Air",
+            "mech": {
+              "buff": { "who": "self", "speed": "omnidirectional flight" },
+              "deny": [ "knockdown", "restraint", "grapples" ]
             }
           }
         ]
@@ -137,20 +139,26 @@
         "description": "The wind does not ask the wall for permission.",
         "tiers": [
           {
-            "text": "Ranged effects using this Cognition ignore half cover and their range increases by 100%.",
-            "card": "Ranged Air effects ignore half cover and double their range"
+            "text": "The seal's range is doubled, and it ignores half cover.",
+            "card": "Double range · ignores half cover",
+            "mech": { "pierce": "cover", "buff": { "range": "doubled" } }
           },
           {
-            "text": "Ignore three-quarters cover, and effects curve around corners — they may travel around one obstacle per 30 feet of range.",
-            "card": "Ignore three-quarters cover · curve around one obstacle per 30 ft"
+            "text": "It ignores three-quarters cover, and curves — it may travel around one obstacle per 30 feet of range.",
+            "card": "Ignores three-quarters cover · curves around one obstacle per 30 ft",
+            "mech": { "pierce": "cover" }
           },
           {
-            "text": "All ranged effects become auto-hit against creatures not behind total cover — they instead roll saving throws, and rolling a 1 on the save counts as a critical failure.",
-            "card": "Ranged effects auto-hit anything not in total cover — they save instead, a 1 is a critical failure"
+            "text": "Against a creature not in total cover, there is nothing to aim around: a Direct Attack hits automatically, and any other Ring's target rolls its save with disadvantage.",
+            "card": "Anything not in total cover: Direct Attacks auto-hit, other Rings save at disadvantage",
+            "mech": {
+              "penalty": { "disadvantage": "the save, for anything not in total cover" }
+            }
           },
           {
-            "text": "The effect ignores line of sight, passes through magical barriers of 5th level or lower, and cannot be blocked or countered by mundane obstacles. Only an opposing Air Cognition or higher-tier magical interference can redirect it.",
-            "card": "Ignores line of sight and barriers of 5th or lower · only opposing Air can block it"
+            "text": "The seal no longer needs line of sight. It passes through magical barriers of 5th level or lower and cannot be stopped by any mundane obstacle — only an opposing Air seal, or interference of higher order, turns it aside.",
+            "card": "No line of sight needed · through barriers ≤5th · only an opposing Air seal turns it",
+            "mech": { "pierce": "all" }
           }
         ]
       },
@@ -159,92 +167,67 @@
         "description": "Every breath the world has ever taken — you offer it all at once.",
         "tiers": [
           {
-            "text": "The target gains universal respiration for 10 minutes — they may breathe freely in water, smoke, magical fog, or similar hostile atmospheres.",
-            "card": "Universal respiration 10 min — water, smoke, magical fog, anything"
+            "text": "The target breathes freely in anything: water, smoke, magical fog, ash, a hostile atmosphere.",
+            "card": "Breathe anything — water, smoke, fog, ash",
+            "mech": { "deny": [ "suffocation" ] }
           },
           {
-            "text": "The target gains immunity to suffocation, inhaled poisons, and vacuum for 1 hour. They may speak and cast spells even within magical silence.",
-            "card": "1 hr immune to suffocation, inhaled poison and vacuum · speak and cast inside magical silence"
+            "text": "The target is immune to suffocation, inhaled poisons, and vacuum, and may speak and draw seals within magical silence.",
+            "card": "Immune to suffocation, inhaled poison and vacuum · speak and draw inside magical silence",
+            "mech": { "deny": [ "suffocation", "inhaled poison", "silence" ] }
           },
           {
-            "text": "As a bonus action, you may extend this effect to one additional creature within 30 feet — repeatable, with no upper limit on recipients. The duration extends to 8 hours.",
-            "card": "Bonus action to add another creature within 30 ft, no limit · duration becomes 8 hrs"
+            "text": "As a bonus action you may extend the effect to one more creature within 30 feet, and again on any later turn, with no upper limit on how many are carried.",
+            "card": "Bonus action to add another creature within 30 ft, as often as you like",
+            "mech": { "buff": { "who": "any number of creatures", "range": "30 ft" } }
           },
           {
-            "text": "The target becomes a living font of wind for 24 hours. They auto-succeed on saves against inhaled effects and silence; as an action they may exhale a Gust that disperses any spell of 5th level or lower; and allies within 60 feet may breathe freely regardless of plane or environment.",
-            "card": "A living font of wind 24 hrs — auto-succeed vs inhaled effects and silence · exhale to disperse any spell ≤5th"
+            "text": "The target becomes a living font of wind. It succeeds automatically on saves against inhaled effects and silence, may spend an action to exhale a Gust that disperses any spell of 5th level or lower, and every ally within 60 feet breathes freely regardless of plane or environment.",
+            "card": "A living font of wind — auto-succeed vs inhaled effects and silence · exhale to disperse any spell ≤5th · allies within 60 ft breathe anything",
+            "mech": {
+              "deny": [ "suffocation", "silence" ],
+              "buff": { "who": "allies", "range": "60 ft" }
+            }
           }
         ]
       }
     ],
+
     "control": [
       {
         "name": "Galeforce",
         "description": "It does not push you. It decides you were never there.",
         "tiers": [
           {
-            "text": "On a failed Strength save, the target is pushed 30 feet in a direction of your choice.",
-            "card": "Fail: pushed 30 ft wherever you choose",
+            "text": "A creature that fails is pushed 30 feet in a direction of your choice.",
+            "card": "Pushed 30 ft wherever you choose",
+            "mech": { "movement": { "push": 30 } }
+          },
+          {
+            "text": "The push becomes 60 feet and knocks them Prone. A creature driven into a solid surface takes 3d6 Thunder damage.",
+            "card": "Pushed 60 ft and Prone · 3d6 thunder if they hit a surface",
             "mech": {
-              "save": {
-                "ability": "Strength"
-              },
-              "movement": {
-                "push": 30
-              }
+              "damage": { "amount": "3d6", "type": "thunder" },
+              "conditions": [ { "name": "Prone" } ],
+              "movement": { "push": 60 }
             }
           },
           {
-            "text": "The target is pushed 60 feet and knocked prone. If they collide with a solid surface, they take 3d6 bludgeoning damage.",
-            "card": "Pushed 60 ft and prone · 3d6 bludgeoning if they hit a surface",
+            "text": "The push becomes 120 feet. They are Prone, and have disadvantage on their next check or saving throw made to stand, hold, or grab anything.",
+            "card": "Pushed 120 ft and Prone · disadvantage on their next check or save to hold on",
             "mech": {
-              "damage": {
-                "dice": "3d6",
-                "type": "bludgeoning"
-              },
-              "conditions": [
-                {
-                  "name": "Prone"
-                }
-              ],
-              "movement": {
-                "push": 60
-              }
+              "conditions": [ { "name": "Prone" } ],
+              "movement": { "push": 120 },
+              "penalty": { "disadvantage": "their next check or save to stand, hold or grab" }
             }
           },
           {
-            "text": "The target is pushed 120 feet and knocked prone. They have disadvantage on their next Strength check or saving throw.",
-            "card": "Pushed 120 ft and prone · disadvantage on their next Str check or save",
+            "text": "The push becomes 300 feet, they are knocked Prone, and any surface they strike deals 10d6 Thunder damage. A creature of Huge size or smaller does not resist this on anything but a natural 20.",
+            "card": "Pushed 300 ft, Prone, 10d6 thunder on impact · Huge and smaller need a natural 20 to resist",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Prone"
-                }
-              ],
-              "movement": {
-                "push": 120
-              },
-              "penalty": {
-                "disadvantage": "their next Strength check or saving throw"
-              }
-            }
-          },
-          {
-            "text": "The target is pushed 300 feet, knocked prone, and takes 10d6 bludgeoning damage if they strike any surface. Creatures of Huge size or smaller cannot succeed on the initial save with a roll lower than 20.",
-            "card": "Pushed 300 ft, prone, 10d6 if they strike anything · Huge and smaller need a natural 20 to resist",
-            "mech": {
-              "damage": {
-                "dice": "10d6",
-                "type": "bludgeoning"
-              },
-              "conditions": [
-                {
-                  "name": "Prone"
-                }
-              ],
-              "movement": {
-                "push": 300
-              }
+              "damage": { "amount": "10d6", "type": "thunder" },
+              "conditions": [ { "name": "Prone" } ],
+              "movement": { "push": 300 }
             }
           }
         ]
@@ -254,88 +237,139 @@
         "description": "You erase the breath. What follows is silence, then panic, then stillness.",
         "tiers": [
           {
-            "text": "Creatures in the area cannot speak or cast verbal components and must hold their breath until the end of their next turn.",
-            "card": "No speech or verbal components · they hold their breath until end of their next turn",
+            "text": "A creature that fails cannot speak or draw a seal that needs a voice, and holds its breath, until the end of its next turn.",
+            "card": "No speech, no spoken seals, holding their breath until the end of their next turn",
+            "mech": { "deny": [ "speech" ] }
+          },
+          {
+            "text": "They are Silenced for 1 minute, roll Concentration checks at disadvantage, and are gagging too hard to drink a potion or eat anything.",
+            "card": "Silenced 1 min · Concentration at disadvantage · no potions or food",
             "mech": {
-              "deny": [
-                "speech"
-              ]
+              "conditions": [ { "name": "Silenced", "duration": "1 minute" } ],
+              "penalty": { "disadvantage": "Concentration checks" },
+              "deny": [ "potions" ]
             }
           },
           {
-            "text": "On a failed save, targets are Silenced for 1 minute, have disadvantage on Concentration checks, and begin gagging — unable to consume potions or food.",
-            "card": "Fail: Silenced 1 min, disadvantage on Concentration, gagging — no potions or food",
+            "text": "They begin suffocating, are Incapacitated until the end of their next turn, and one Concentration effect of your choice that they were sustaining ends.",
+            "card": "Suffocating · Incapacitated until the end of their next turn · one of their Concentration effects ends",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Silenced",
-                  "duration": "1 minute"
-                }
-              ],
-              "penalty": {
-                "disadvantage": "Concentration checks"
-              }
+              "conditions": [ { "name": "Incapacitated", "duration": "until the end of their next turn" } ],
+              "deny": [ "concentration" ]
             }
           },
           {
-            "text": "Targets begin suffocating, are Incapacitated for 1 round, and lose one active concentration spell or buff of your choice.",
-            "card": "Suffocating · Incapacitated 1 round · loses one concentration effect of your choice",
+            "text": "Unless it is immune to vacuum or sustained by divine air, the creature is dying — it takes 10d10 Thunder damage, and gains one level of Exhaustion at the end of each of its turns that it remains in the airless space.",
+            "card": "Dying unless vacuum-immune — 10d10 thunder, and a level of Exhaustion each turn it stays",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Incapacitated",
-                  "duration": "1 round"
-                }
-              ]
+              "damage": { "amount": "10d10", "type": "thunder" },
+              "conditions": [ { "name": "Exhaustion", "tick": "1 level per turn in the area" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Given Shape",
+        "description": "Air is the only thing that has never once wanted to be a wall.",
+        "tiers": [
+          {
+            "text": "Your creations are compressed air — transparent, silent, and impossible to grip. A creature that strikes a Structure, or is hit by a Construct or Object you made, is pushed 10 feet and takes 1d6 Thunder damage.",
+            "card": "Creations are compressed air · struck or hit: pushed 10 ft and 1d6 thunder",
+            "mech": {
+              "damage": { "amount": "1d6", "type": "thunder", "trigger": "touch or hit" },
+              "movement": { "push": 10 }
             }
           },
           {
-            "text": "Targets begin dying unless immune to vacuum or sustained by divine air — taking 10d10 thunder damage on a failed save and suffering one level of Exhaustion for each subsequent failed save at end of their turn.",
-            "card": "Dying unless vacuum-immune — 10d10 thunder and a level of Exhaustion per failed save",
+            "text": "That damage becomes 2d6 and the push becomes 20 feet. Your Structures do not block sight — but anything shot through one is fighting a crosswind, and attacks made through them have disadvantage.",
+            "card": "2d6 and pushed 20 ft · Structures don't block sight, but shots through them have disadvantage",
+            "mech": {
+              "damage": { "amount": "2d6", "type": "thunder" },
+              "penalty": { "disadvantage": "attacks made through your Structures" }
+            }
+          },
+          {
+            "text": "What you made of wind still moves like wind. As a bonus action you may relocate a Structure up to 30 feet, and your Constructs gain a flying speed equal to their walking speed.",
+            "card": "Bonus action to move a Structure 30 ft · Constructs gain flight",
+            "mech": {
+              "buff": { "who": "your creations", "speed": "flight; Structures relocate 30 ft" }
+            }
+          },
+          {
+            "text": "They are solid only when you say so. Creatures and objects of your choosing pass through your creations freely while everything else is stopped cold, and when one is destroyed it detonates in a 20-foot radius for 6d10 Thunder damage, knocking creatures Prone (Dexterity save for half and no fall).",
+            "card": "Solid only for who you choose · a destroyed creation detonates: 20 ft, 6d10 thunder and Prone (Dex half)",
             "mech": {
               "damage": {
-                "dice": "10d10",
-                "type": "thunder"
+                "amount": "6d10",
+                "type": "thunder",
+                "area": "20 ft",
+                "save": { "ability": "Dexterity", "onSuccess": "half" }
               },
-              "conditions": [
-                {
-                  "name": "Exhaustion"
-                }
-              ]
+              "conditions": [ { "name": "Prone" } ]
             }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "The Long Road",
+        "description": "Every wind has been everywhere, and none of them stayed.",
+        "tiers": [
+          {
+            "text": "Fall no faster than you choose and take no damage for it. Jump three times as far as you should. Hear and smell what the wind carries within 300 feet, and send a whisper to anyone you can see.",
+            "card": "Fall safely · jump 3× as far · hear and smell 300 ft on the wind · whisper to anyone in sight",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Hover and glide at will. Speak on the wind to anyone you have met within a mile, and read the weather a full day before it arrives.",
+            "card": "Hover and glide at will · speak on the wind a mile · read tomorrow's weather",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Fly, and ride a following wind a mile in a minute. Send your voice to any place on the continent you have been, and be heard there as though you stood in the room.",
+            "card": "Fly · ride the wind a mile a minute · send your voice anywhere you have been",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Become moving air. For up to an hour you travel at ten miles a minute anywhere the sky reaches, pass through any gap air can pass through, and cannot be seen, targeted, or held. You can do nothing else while you are wind — no seals, no speech, no carrying anything that was not already part of you.",
+            "card": "Become wind up to an hour — 10 miles a minute, through any gap, untouchable · you can do nothing else while you are it",
+            "mech": { "utility": true }
           }
         ]
       }
     ]
   },
+
   "complementEffects": [
     {
       "name": "Cutting Current",
       "type": "Offensive",
-      "description": "The wind doesn't just carry the spell — it sharpens it.",
+      "description": "The wind doesn't just carry the seal — it sharpens it.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, a blade of compressed air lashes the target — dealing bonus slashing damage equal to your spellcasting modifier (minimum 1d6) and pushing them 5 feet in a direction of your choice without provoking opportunity attacks.",
-        "card": "Bonus slashing equal to {VM} · pushed a short way",
+        "text": "On a hit or failed saving throw, a blade of compressed air lashes the target for bonus Thunder damage equal to one damage die of the primary effect's type (min 1d6), and pushes them 5 feet in a direction of your choice without provoking opportunity attacks.",
+        "card": "+1 die thunder · pushed 5 ft wherever you choose",
         "mech": {
-          "damage": {
-            "dice": "1d6",
-            "type": "slashing"
-          }
+          "damage": { "dice": [ "1d6" ], "type": "thunder" },
+          "movement": { "push": 5 }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The bonus damage increases to your spellcasting modifier + your proficiency bonus, and the push increases to 15 feet.",
-          "card": "{VM}+{PB} damage · push 15 ft"
+          "text": "Level 5+: Bonus damage increases to two dice, and the push increases to 15 feet.",
+          "card": "+2 dice · push 15 ft",
+          "mech": { "movement": { "push": 15 } }
         },
         {
-          "text": "Level 11+: The push increases to 30 feet, and if the target collides with a solid surface, they take an additional 2d6 bludgeoning damage.",
-          "card": "Push 30 ft · 2d6 more if they hit a surface",
+          "text": "Level 11+: Bonus damage increases to three dice, the push increases to 30 feet, and a creature driven into a solid surface takes a further 2d6 Bludgeoning damage.",
+          "card": "+3 dice · push 30 ft · 2d6 more if they hit a surface",
           "mech": {
-            "damage": {
-              "dice": "2d6",
-              "type": "bludgeoning"
-            }
+            "damage": { "dice": "2d6", "type": "bludgeoning" },
+            "movement": { "push": 30 }
           }
         }
       ]
@@ -343,24 +377,26 @@
     {
       "name": "Tailwind",
       "type": "Supportive",
-      "description": "The air moves with you — not because you commanded it, but because it agrees.",
+      "description": "The air moves with you — not because you commanded it, but because it agrees. Nothing that agrees with the wind stays put.",
       "effect": {
-        "text": "When the primary effect resolves, one creature of your choice within 30 feet gains a bonus to their movement speed equal to 10 feet until the end of their next turn, and may ignore difficult terrain caused by natural or magical weather effects.",
-        "card": "A creature within 30 ft gets +10 ft speed and ignores difficult terrain briefly",
+        "text": "When the primary effect resolves, one creature within 30 feet gains 10 feet of speed and ignores difficult terrain from weather until the end of its next turn. While it is carried this way it weighs almost nothing: it has disadvantage on saves against being pushed, pulled, or knocked prone.",
+        "card": "One creature within 30 ft gets +10 ft speed and ignores weather terrain — but is light, and saves against being moved at disadvantage",
         "mech": {
-          "terrain": {
-            "effect": "difficult"
-          }
+          "buff": { "speed": "+10 ft", "range": "30 ft" },
+          "penalty": { "disadvantage": "saves against forced movement and being knocked prone" }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The movement bonus increases to 20 feet, and you may apply this effect to up to two creatures.",
+          "text": "Level 5+: The bonus becomes 20 feet and you may carry up to two creatures.",
           "card": "+20 ft · up to two creatures"
         },
         {
-          "text": "Level 11+: The movement bonus increases to 30 feet, the creatures may also Disengage as a bonus action once before the effect ends, and they take no falling damage during the effect's duration.",
-          "card": "+30 ft · Disengage as a bonus action once · no falling damage"
+          "text": "Level 11+: The bonus becomes 30 feet, the lightness is no longer a liability — the disadvantage is gone — and each carried creature may Disengage as a bonus action once before the effect ends and takes no falling damage while it lasts.",
+          "card": "+30 ft · no more disadvantage · a free Disengage each, and no falling damage",
+          "mech": {
+            "deny": [ "falling damage" ]
+          }
         }
       ]
     },
@@ -369,28 +405,32 @@
       "type": "Control",
       "description": "The impact breathes outward — everything in the area remembers it has somewhere else to be.",
       "effect": {
-        "text": "When the primary effect hits or a target fails their saving throw, a burst of wind radiates from the point of impact in a 10-foot radius — each creature must succeed on a Strength saving throw or be pushed 10 feet away from the origin point.",
-        "card": "10-ft burst — Str save or pushed back",
+        "text": "A burst of wind radiates from the point of impact in a 10-foot radius. Every creature that failed is pushed 10 feet away from the origin, and loose objects, fog, and gas in the area are scattered.",
+        "card": "10-ft burst — pushed 10 ft out · scatters fog, gas and loose objects",
         "mech": {
-          "save": {
-            "ability": "Strength"
-          },
-          "movement": {
-            "push": 10
-          }
+          "movement": { "push": 10 },
+          "terrain": { "radius": 10, "effect": "cleared" }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The radius increases to 20 feet and the push increases to 20 feet. Loose objects, fog, and gas effects in the area are immediately dispersed.",
-          "card": "Radius and push 20 ft · scatters fog, gas and loose objects"
+          "text": "Level 5+: The radius and the push both increase to 20 feet, and creatures pushed this way cannot take reactions until the end of their next turn.",
+          "card": "Radius and push 20 ft · no reactions from anyone pushed",
+          "mech": {
+            "movement": { "push": 20 },
+            "deny": [ "reactions" ]
+          }
         },
         {
-          "text": "Level 11+: The gust is strong enough to suspend any creature pushed by it — they are briefly airborne and treated as if affected by Feather Fall until the start of your next turn.",
-          "card": "Those pushed are left airborne, as if under Feather Fall"
+          "text": "Level 11+: The gust is strong enough to hold what it lifts. Creatures pushed by it are left airborne until the start of your next turn, falling no faster than a feather and unable to close the distance on foot.",
+          "card": "Those pushed are left airborne until your next turn, drifting down like a feather",
+          "mech": {
+            "conditions": [ { "name": "Airborne", "duration": "until the start of your next turn" } ]
+          }
         }
       ]
     }
   ],
+
   "schema": 2
 }

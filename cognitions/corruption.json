@@ -28,12 +28,17 @@
             }
           },
           {
-            "text": "If the target is affected by 2 or more curses, they must succeed on a Charisma save or be Staggered — losing their reaction until the start of their next turn.",
-            "card": "Two or more curses: Cha save or Staggered, losing their reaction",
+            "text": "A target carrying 2 or more curses that is hit, or fails its save, is also Staggered — losing its reaction until the start of its next turn.",
+            "card": "Two or more curses: also Staggered, losing their reaction",
             "mech": {
-              "save": {
-                "ability": "Charisma"
-              }
+              "conditions": [
+                {
+                  "name": "Staggered"
+                }
+              ],
+              "deny": [
+                "reactions"
+              ]
             }
           },
           {

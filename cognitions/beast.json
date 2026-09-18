@@ -46,15 +46,20 @@
         "tiers": [
           {
             "text": "Your attack or spell deals +1 die of the same damage type and reduces the target's speed by 10 feet on hit.",
-            "card": "+1 die same type · −10 ft speed on hit"
+            "card": "+1 die same type · −10 ft speed on hit",
+            "mech": {
+              "damage": {
+                "bonusDice": 1
+              },
+              "penalty": {
+                "speed": -10
+              }
+            }
           },
           {
-            "text": "If the target is below half HP, this effect deals maximum damage. The target must also succeed on a Constitution save or lose their reaction.",
-            "card": "Below half HP: maximum damage · Con save or they lose their reaction",
+            "text": "If the target is below half HP, this effect deals maximum damage. A creature that is hit, or fails its save, also loses its reaction until the start of its next turn.",
+            "card": "Below half HP: maximum damage · they lose their reaction",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              },
               "deny": [
                 "reactions"
               ]
@@ -64,14 +69,7 @@
             "text": "If the target is Frightened or Prone, your attack automatically scores a critical hit if it hits.",
             "card": "Frightened or Prone targets: a hit is automatically a critical",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Frightened"
-                },
-                {
-                  "name": "Prone"
-                }
-              ]
+              "crit": "automatic against a Frightened or Prone target"
             }
           },
           {

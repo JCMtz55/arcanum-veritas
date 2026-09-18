@@ -5,319 +5,349 @@
   "opposing": "corruption",
   "description": "Essence, Vitality, Transcendence, Memory, Spirit, Identity.",
   "savingThrow": "Charisma",
-  "damageType": "Necrotic",
+  "damageType": "All-Mighty",
+
   "verumEffects": {
     "offensive": [
       {
-        "name": "Soul Severance",
-        "description": "Reach through the veil and cut the essence itself.",
+        "name": "Unselving",
+        "description": "Everything a creature knows how to do is written on its soul. You can read. You can also erase — and copy.",
         "tiers": [
           {
-            "text": "On a hit or failed save, the target cannot regain hit points for 1 minute, and if reduced to 0 HP before the effect ends they cannot be stabilized by nonmagical means.",
-            "card": "No healing for 1 min · dropped to 0 they can't be stabilised by nonmagical means",
+            "text": "The damage is turned into All-Mighty damage. A creature that is hit or fails its save loses one proficiency of your choice — a skill, a tool, a weapon, or a saving throw — and you gain it, until the end of your next turn.",
+            "card": "Damage becomes All-Mighty · take one of their proficiencies — they lose it, you have it, until the end of your next turn",
             "mech": {
-              "deny": [
-                "healing"
-              ]
+              "damage": { "type": "all-mighty" },
+              "steal": { "what": "one proficiency", "duration": "until the end of your next turn" }
             }
           },
           {
-            "text": "On a failed save the target becomes Soul Displaced for 1 minute — disadvantage on all Wisdom and Charisma checks and saves, cannot benefit from healing, and takes +1d8 necrotic damage from all sources.",
-            "card": "Soul Displaced 1 min — disadvantage on Wis and Cha, no healing, +1d8 necrotic taken",
+            "text": "What you take can go deeper. Instead of a proficiency you may take one of its damage resistances or immunities: it loses it and you have it, for 1 minute.",
+            "card": "Or take one of their resistances or immunities — theirs becomes yours for 1 min",
             "mech": {
-              "damage": {
-                "dice": "1d8",
-                "type": "necrotic"
-              },
-              "penalty": {
-                "disadvantage": "all Wisdom and Charisma checks and saves"
-              }
+              "damage": { "type": "all-mighty" },
+              "steal": { "what": "a resistance or immunity", "duration": "1 minute" }
             }
           },
           {
-            "text": "On a failed save the target is also Soul Bound — unable to teleport, plane shift, or enter dreamspaces. If they die while Soul Bound, their soul is trapped in a vessel of your choice for 24 hours.",
-            "card": "Soul Bound — no teleport, plane shift or dreamspace · dying traps their soul in a vessel 24 hrs",
+            "text": "Or take something it does. Name one of its features, attacks, or spells: it cannot use it for 1 minute, and within that minute you may use it once yourself, with its numbers.",
+            "card": "Or take a feature, attack or spell — they can't use it for 1 min, and you can, once, with their numbers",
             "mech": {
-              "deny": [
-                "teleport"
-              ]
+              "damage": { "type": "all-mighty" },
+              "steal": { "what": "a feature, attack or spell", "duration": "1 minute", "uses": 1 }
             }
           },
           {
-            "text": "Once per long rest, attempt a True Soul Severance — on a failure: the soul is cut loose. The creature instantly falls to 0 HP and cannot be revived by Revivify, Raise Dead, or Resurrection. Only Wish, Arcanum Veritas, or Divine Intervention may restore it.",
-            "card": "1/long rest True Soul Severance — fail and they drop to 0, beyond Revivify, Raise Dead or Resurrection",
+            "text": "A creature this seal drops to 0 hit points leaves something of itself behind. Choose one thing you took from it: you keep it until your next long rest.",
+            "card": "Drop them to 0 and keep one thing you took from them until your next long rest",
             "mech": {
-              "deny": [
-                "revival"
-              ]
+              "damage": { "type": "all-mighty" },
+              "steal": { "what": "keep one taken thing", "duration": "until your next long rest", "trigger": "the target drops to 0" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Through the Flesh",
+        "description": "Armor is for bodies.",
+        "tiers": [
+          {
+            "text": "The damage is turned into All-Mighty damage. A Direct Attack drawn with this is rolled against 10 + the target's Charisma saving throw bonus instead of its Armor Class — the seal is aimed at the soul, and the soul wears no plate.",
+            "card": "Damage becomes All-Mighty · a Direct Attack rolls vs 10 + their Cha save bonus instead of AC",
+            "mech": {
+              "damage": { "type": "all-mighty" },
+              "pierce": "armor"
+            }
+          },
+          {
+            "text": "A creature that is possessed, Charmed, or dominated by another takes double damage from this seal — and whatever holds it lets go: the possession, charm, or domination ends.",
+            "card": "Possessed, Charmed or dominated creatures take double damage · and whatever holds them lets go",
+            "mech": {
+              "damage": { "type": "all-mighty" },
+              "dispel": { "what": "possession, charm or domination on the target" }
+            }
+          },
+          {
+            "text": "The seal finds the spirit wherever it hides. Incorporeal, ethereal, invisible, or projected creatures are struck as if solid and seen, and a creature wearing a shape not its own — shapechanged, polymorphed, or disguised by magic — is forced back into its true form.",
+            "card": "Hits incorporeal, ethereal, invisible or projected creatures as if solid and seen · shapechangers snap back to their true form",
+            "mech": {
+              "damage": { "type": "all-mighty" },
+              "pierce": "all"
+            }
+          },
+          {
+            "text": "The soul feels it before the body does. A creature that is hit or fails its save has disadvantage on Intelligence, Wisdom, and Charisma saving throws until the end of your next turn, and cannot use Legendary Resistance against your seals during that time.",
+            "card": "Disadvantage on Int, Wis and Cha saves until the end of your next turn · no Legendary Resistance against your seals",
+            "mech": {
+              "damage": { "type": "all-mighty" },
+              "penalty": { "disadvantage": "Intelligence, Wisdom and Charisma saves until the end of your next turn" },
+              "deny": [ "legendary resistance" ]
             }
           }
         ]
       }
     ],
+
     "supportive": [
       {
-        "name": "Soul Transcendence",
-        "description": "Allow yourself or another to temporarily transcend physical boundaries.",
+        "name": "Know Thyself",
+        "description": "Whatever else is taken, the self is not.",
         "tiers": [
           {
-            "text": "The target gains resistance to non-magical damage for 1 minute as their soul briefly reinforces the flesh.",
-            "card": "Resist nonmagical damage 1 min as the soul reinforces the flesh"
-          },
-          {
-            "text": "The target becomes incorporeal for 30 seconds — able to move through walls once per round, immune to grapples and restraints, and unable to be targeted by non-magical attacks.",
-            "card": "Incorporeal 30 sec — through walls once a round, no grapples, untouchable by nonmagical attacks"
-          },
-          {
-            "text": "Enter or grant Soulform for 1 minute — immunity to poison, disease, exhaustion, and the Charmed condition; the target floats, leaves no physical trace, and cannot be detected by mundane senses.",
-            "card": "Soulform 1 min — immune to poison, disease, exhaustion and Charm · floats, leaves no trace",
+            "text": "The target has advantage on saving throws against being Charmed, Frightened, or possessed. Once while this lasts, it may reroll a failed Intelligence or Wisdom save as a Charisma save — it remembers who it is.",
+            "card": "Advantage vs Charm, fear and possession · once, reroll a failed Int or Wis save as a Cha save",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Charmed"
-                },
-                {
-                  "name": "Exhaustion"
-                }
-              ]
+              "buff": { "who": "target", "advantage": "saves against Charmed, Frightened and possession", "reroll": "a failed Int or Wis save as Cha, once" }
             }
           },
           {
-            "text": "Possess a willing creature or haunt an item for 1 hour — while possessing, you may cast spells through the host using your own spell slots. If haunting an item, it gains sentience, your voice, and one magical property based on your soul's Cognition Affinity.",
-            "card": "Possess a willing creature or haunt an item 1 hr — cast through the host with your own slots"
+            "text": "The target cannot be Charmed or possessed, and the first time an effect would change its form, mind, or loyalty against its will, it simply does not.",
+            "card": "Can't be Charmed or possessed · the first unwanted change to its form, mind or loyalty just fails",
+            "mech": { "deny": [ "charm", "possession" ] }
+          },
+          {
+            "text": "It cannot be Frightened either, and anything that tries to read, alter, or command its mind learns nothing and takes Five Times your Verum Modifier in All-Mighty damage for the trying.",
+            "card": "Can't be Frightened · anything that tries to read or control its mind learns nothing and takes 5×VM all-mighty",
+            "mech": {
+              "deny": [ "charm", "possession", "fear" ],
+              "rider": { "damage": "5×VM", "type": "all-mighty", "trigger": "a creature tries to read or control its mind" }
+            }
+          },
+          {
+            "text": "The self is absolute. The target cannot be changed by anything it does not choose — not its form, its mind, its memories, or its name — and every ally within 30 feet has advantage on saving throws against all of those.",
+            "card": "Nothing changes its form, mind, memory or name unless it chooses · allies within 30 ft get advantage against the same",
+            "mech": {
+              "deny": [ "charm", "possession", "fear", "transformation", "memory alteration" ],
+              "buff": { "who": "allies within 30 ft", "advantage": "saves against charm, possession, fear, transformation and memory alteration" }
+            }
           }
         ]
       },
       {
-        "name": "Soulchain",
-        "description": "Bind souls together across time, distance, or fate.",
+        "name": "Lend the Self",
+        "description": "You are more than you use. Lend some of it out.",
         "tiers": [
           {
-            "text": "Two creatures you touch become soulbound — while within 30 feet they may freely transfer up to 5 damage per round between them.",
-            "card": "Two touched creatures soulbind — transfer up to 5 damage a round while within 30 ft"
+            "text": "The target gains one skill or tool proficiency you have for as long as this lasts. If the target is willing, you may borrow one of its proficiencies instead.",
+            "card": "Give them one of your skill or tool proficiencies — or, if they're willing, borrow one of theirs",
+            "mech": { "buff": { "who": "target", "share": "one skill or tool proficiency" } }
           },
           {
-            "text": "Bind up to 3 creatures — while adjacent they gain +1 AC and +1 to all saving throws.",
-            "card": "Bind up to 3 · while adjacent they gain +1 AC and +1 to all saves",
+            "text": "It may also have one of your saving throw proficiencies, and the two of you share senses: either of you can see and hear through the other as a bonus action, at any distance on this plane.",
+            "card": "Also one of your save proficiencies · share senses at any distance on this plane",
+            "mech": { "buff": { "who": "target", "share": "a saving throw proficiency and senses" } }
+          },
+          {
+            "text": "Lend it something you can do. The target may use one of your features, one of your Complement Effects, or one spell you know, once while this lasts, using your numbers.",
+            "card": "Lend them a feature, a Complement or a spell of yours — they may use it once, with your numbers",
+            "mech": { "buff": { "who": "target", "share": "one feature, Complement or spell, once" } }
+          },
+          {
+            "text": "Two souls, one intent. For as long as this lasts, you and the target share everything: each of you may use the other's proficiencies, features, and senses, and you share a single pool of hit points equal to your combined current total. Neither of you falls while the pool holds.",
+            "card": "You and the target share everything — proficiencies, features, senses, and one pooled hit point total",
+            "mech": { "buff": { "who": "you and the target", "share": "proficiencies, features, senses and hit points" } }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Soulchain",
+        "description": "Every soul is tied to something. You choose what.",
+        "tiers": [
+          {
+            "text": "A creature that fails has its soul chained to a point, creature, or object of your choice within 30 feet, and cannot willingly move more than 15 feet away from it.",
+            "card": "Chained to a point, creature or object you choose within 30 ft — can't willingly go more than 15 ft from it",
+            "mech": { "tether": { "to": "a point, creature or object", "range": "15 ft" } }
+          },
+          {
+            "text": "Chain two creatures that failed to each other: whenever one of them takes damage, the other takes half as much, as All-mighty damage.",
+            "card": "Chain two who failed together — whenever one takes damage, the other takes half",
             "mech": {
-              "buff": {
-                "ac": 1
-              }
+              "tether": { "to": "another creature that failed" },
+              "rider": { "damage": "half of what the other takes", "type": "all-mighty" }
             }
           },
           {
-            "text": "If one soulbound creature dies, the others may make a Charisma saving throw to absorb their soul — gaining temporary hit points equal to half the fallen creature's maximum HP and the knowledge of one of their known spells or abilities for 1 hour.",
-            "card": "If a bound creature dies, the rest may Cha save to absorb the soul — half its max HP as temp HP",
+            "text": "A chained soul cannot leave. The creature cannot teleport, plane shift, turn ethereal, or leave its body, and it cannot be healed by any creature it is chained to.",
+            "card": "No teleport, plane shift, going ethereal or leaving its body · can't be healed by what it's chained to",
             "mech": {
-              "save": {
-                "ability": "Charisma"
-              },
-              "heal": {
-                "tempHP": true
-              }
+              "tether": { "to": "the chosen anchor" },
+              "deny": [ "teleportation", "plane shift" ]
             }
           },
           {
-            "text": "Perform a Soul Merge — fuse two creatures (willing or unconscious) into a single being for 1 minute. The merged creature uses the higher stat of each pair. After separation, both targets gain 1 level of Exhaustion.",
-            "card": "Soul Merge 1 min — fuse two creatures into one that uses the better of every stat",
+            "text": "Chain its soul to yours. While the chain holds, it cannot willingly harm you — its soul would be harming its own — and any damage it would deal you, it takes instead.",
+            "card": "Chained to your soul — it can't willingly harm you, and any damage it would deal you, it takes instead",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Unconscious",
-                  "duration": "1 minute"
-                },
-                {
-                  "name": "Exhaustion"
-                }
-              ]
+              "tether": { "to": "you" },
+              "reflect": "damage it would deal you"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Unremembering",
+        "description": "What it doesn't remember, it cannot do.",
+        "tiers": [
+          {
+            "text": "A creature that fails loses the thread: on its next turn it cannot take the same action it took on its last one.",
+            "card": "Next turn they can't take the same action they took last turn",
+            "mech": { "penalty": { "actions": "not the same action as last turn" } }
+          },
+          {
+            "text": "It forgets you. Until the end of its next turn it cannot target you with attacks or harmful effects unless you harm it first — to it, you are no one in particular.",
+            "card": "It forgets you — can't target you with attacks or harmful effects until the end of its next turn, unless you harm it",
+            "mech": { "penalty": { "targeting": "cannot target you unless you harm it first" } }
+          },
+          {
+            "text": "It forgets who stands with it. While the effect lasts it cannot tell friend from foe: it cannot aid its allies, and its first attack each turn goes to the nearest creature, whoever that is.",
+            "card": "Can't tell friend from foe — no helping allies, and its first attack each turn hits the nearest creature",
+            "mech": {
+              "conditions": [ { "name": "Unremembering" } ],
+              "penalty": { "targeting": "first attack each turn at the nearest creature" }
+            }
+          },
+          {
+            "text": "It forgets itself. While the effect lasts it cannot use anything it learned rather than was born with — no class features, no spells, no legendary actions — only instinct, teeth, and fear.",
+            "card": "No class features, spells or legendary actions while it lasts — only instinct",
+            "mech": {
+              "conditions": [ { "name": "Unremembering" } ],
+              "deny": [ "class features", "spellcasting", "legendary actions" ]
             }
           }
         ]
       }
     ],
-    "control": [
+
+    "creation": [
       {
-        "name": "Soulbrand",
-        "description": "Burn your essence into a creature, object, or location.",
+        "name": "Kindred Vessel",
+        "description": "Nothing you make is empty. You leave a little of yourself in all of it.",
         "tiers": [
           {
-            "text": "Mark a creature with your soul signature — you always know their direction and HP status for 1 day.",
-            "card": "Brand a soul — know their direction and HP for a day"
+            "text": "Your creations carry a sliver of your soul. You can see and hear through any of them within a mile, and a Construct understands you perfectly — it acts on what you mean, not what you say.",
+            "card": "See and hear through any creation within a mile · Constructs act on what you mean, not what you say",
+            "mech": { "summon": { "senses": "through your creations within a mile" } }
           },
           {
-            "text": "While within 1 mile, you may cast Message, Detect Thoughts, or Command once per long rest on the branded target.",
-            "card": "Within a mile, cast Message, Detect Thoughts or Command on them 1/long rest"
+            "text": "What you make remembers. You can recall anything said or done within 30 feet of one of your Structures while it stood, and an Object you made always finds its way home — you know where it is, and can call it to your hand from within 30 feet.",
+            "card": "Recall anything said or done near your Structures · always know where your Objects are, and call them from 30 ft",
+            "mech": { "summon": { "memory": "your Structures remember what happened near them" } }
           },
           {
-            "text": "You may cast Dominate Person on the soulbranded target once per long rest, regardless of distance.",
-            "card": "Dominate Person on the branded target 1/long rest, at any distance"
+            "text": "Step inside. You may move your mind into one of your creations, leaving your body unconscious but safe where it lies; you act as the creation, with your own Intelligence, Wisdom, and Charisma, and may draw seals from it.",
+            "card": "Move your mind into a creation — act as it, with your own mind, and draw seals from it",
+            "mech": { "summon": { "inhabit": "move your mind into a creation" } }
           },
           {
-            "text": "Permanently brand a soul — the target cannot be resurrected unless you willingly remove the mark. You always know if the branded soul enters a different plane, and may choose to pull it back once per long rest.",
-            "card": "Permanent brand — they can't be resurrected unless you release it, and you feel them cross planes",
-            "mech": {
-              "deny": [
-                "revival"
-              ]
-            }
+            "text": "Something stays. The first Construct you raise this way becomes a being of its own: it keeps its name, its personality, and its memories, and every Construct you draw afterward is that same being returned to you. If it is destroyed, it comes back the next time you call it — changed, perhaps, but still itself.",
+            "card": "Your first Construct becomes a persistent being — the same name and memories every time you draw one",
+            "mech": { "summon": { "persistent": "the same Construct returns every time" } }
           }
         ]
-      },
+      }
+    ],
+
+    "utility": [
       {
-        "name": "Essence Echo",
-        "description": "Call forth the residual spirit of a dead being.",
+        "name": "Beyond the Body",
+        "description": "The body is where you live. It is not all you are.",
         "tiers": [
           {
-            "text": "Touching a corpse allows you to ask a single yes/no or memory-based question — the residual soul answering from whatever remains.",
-            "card": "Touch a corpse for one yes/no or memory question"
+            "text": "Touch a creature or object and read the last thing it strongly felt — or the last hand that held it, and what that hand meant. Sense every soul within 60 feet: the living, the spirits, and anything wearing someone else's.",
+            "card": "Touch a creature or object to read what it last strongly felt · sense every soul within 60 ft, possessors included",
+            "mech": { "utility": true }
           },
           {
-            "text": "Summon an Echo of the Soul — a semi-corporeal illusion that can deliver messages, answer questions about the deceased's knowledge, or enact one simple command.",
-            "card": "Summon an Echo — semi-corporeal, carries messages, answers, or one simple command"
+            "text": "Leave your body. For up to 10 minutes your soul travels up to 300 feet from it — invisible, passing through objects, seeing and hearing — while your body lies unconscious. You cannot touch anything while you are out.",
+            "card": "Project your soul up to 300 ft for 10 min — invisible, through walls · your body lies unconscious",
+            "mech": { "utility": true }
           },
           {
-            "text": "Recreate a complete ghostly simulacrum for 10 minutes — capable of full speech, emotional expression, and minor physical action. It possesses all memories the creature had in life.",
-            "card": "A full ghostly simulacrum 10 min — speech, feeling, all the memories they had in life"
+            "text": "Walk in someone's memory. With a willing creature you may enter one of its memories together and live it again, recover a memory it has lost, or give it one of yours to keep.",
+            "card": "Enter a willing creature's memory together — relive it, recover what was lost, or give them one of yours",
+            "mech": { "utility": true }
           },
           {
-            "text": "Summon an Ancestral Projection — a fully sentient ghostly avatar of the soul that fights beside you as a CR 7 creature under your command for 1 hour. It retains the original's personality, abilities, and Cognition affinities.",
-            "card": "Ancestral Projection 1 hr — a sentient CR 7 ghost fighting beside you, personality intact",
-            "mech": {
-              "summon": {
-                "cr": "7"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "name": "Soul Mask",
-        "description": "Alter, veil, or rewrite the visible imprint of a soul.",
-        "tiers": [
-          {
-            "text": "Mask your alignment and essence for 10 minutes — you do not register as celestial, fiend, or undead to detection effects.",
-            "card": "Mask your essence 10 min — you don't register as celestial, fiend or undead"
-          },
-          {
-            "text": "Project another soul's echo onto yours — you register as that creature to divination, dream-reading, and soul-detection spells for 1 hour.",
-            "card": "Wear another soul's echo 1 hr — divination and dream-reading read you as them"
-          },
-          {
-            "text": "Rewrite a creature's soul signature for 1 hour — they appear as a different species or divine origin, fooling Cognition-scanners, Grimm detectors, and Dreamcrafters entirely.",
-            "card": "Rewrite a creature's soul signature 1 hr — a different species or divine origin entirely"
-          },
-          {
-            "text": "Once per week, perform a Soul Rewrite — permanently change one subclass, Cognition affinity, or Grimm bond (GM approval required). The change is permanent unless reversed by Arcanum Veritas or a deity.",
-            "card": "1/week Soul Rewrite — permanently change a subclass, Cognition affinity or Grimm bond"
+            "text": "Possess a willing creature for up to an hour: your soul steps into its body and you act through it with your own mind and your own seals, while your body lies safe and empty. Or send your voice into the mind of anyone you have ever touched, wherever they are.",
+            "card": "Possess a willing creature for up to an hour and draw seals through it · or speak into the mind of anyone you've ever touched",
+            "mech": { "utility": true }
           }
         ]
       }
     ]
   },
+
   "complementEffects": [
     {
       "name": "Soul Wound",
       "type": "Offensive",
-      "description": "The spell tears something deeper than flesh.",
+      "description": "The seal tears something deeper than flesh.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target cannot regain hit points until the end of your next turn, and must succeed on a Charisma saving throw or have disadvantage on all Soul saving throws (Death, Curse, Possession, Dream Collapse) for 1 minute.",
-        "card": "No healing until your next turn · Cha save {DC} or worse",
+        "text": "On a hit or failed saving throw, the target takes bonus All-Mighty damage equal to one damage die of the primary effect's type (min 1d6), and loses one proficiency of your choice until the end of its next turn.",
+        "card": "+1 die all-mighty · they lose one proficiency of your choice until the end of their next turn",
         "mech": {
-          "save": {
-            "ability": "Charisma"
-          },
-          "penalty": {
-            "disadvantage": "all Soul saving throws (Death"
-          },
-          "deny": [
-            "healing"
-          ]
+          "damage": { "dice": [ "1d6" ], "type": "all-mighty" },
+          "steal": { "what": "one proficiency (lost, not gained)", "duration": "until the end of their next turn" }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The HP recovery block extends for 1 minute, and the target also loses resistance to necrotic and psychic damage for the same duration.",
-          "card": "Blocked for 1 min · also loses necrotic and psychic resistance",
-          "mech": {
-            "damage": {
-              "type": "psychic"
-            }
-          }
+          "text": "Level 5+: Bonus damage increases to two dice, and you may strip a saving throw proficiency instead.",
+          "card": "+2 dice · you may strip a save proficiency instead"
         },
         {
-          "text": "Level 11+: The Soul Wound becomes a Soul Fracture — the target loses 1 attunement slot until they complete a long rest, cannot benefit from soulbound items, and divine or dream-sourced healing on them is halved.",
-          "card": "Soul Fracture — loses an attunement slot until a long rest"
+          "text": "Level 11+: Bonus damage increases to three dice, and you gain the proficiency it lost for the same duration.",
+          "card": "+3 dice · the proficiency they lose, you gain",
+          "mech": { "steal": { "what": "the lost proficiency", "duration": "until the end of their next turn" } }
         }
       ]
     },
     {
-      "name": "Spiritual Anchor",
+      "name": "Kindred",
       "type": "Supportive",
-      "description": "The soul is briefly made unassailable.",
+      "description": "Two souls standing close enough can share the weight.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet has their soul briefly reinforced — they gain advantage on death saving throws and cannot be Soul Displaced, soul-branded by hostile effects, or possessed until the start of your next turn.",
-        "card": "An ally within 30 ft: advantage on death saves and a soul held in place",
-        "mech": {
-          "buff": {
-            "advantage": "death saving throws and cannot be Soul Displaced"
-          }
-        }
+        "text": "When the primary effect resolves, bind yourself to one ally within 30 feet until the start of your next turn. Whenever it takes damage in that time, you may take any part of that damage instead.",
+        "card": "Bind to an ally within 30 ft — until your next turn you may take any part of the damage it takes",
+        "mech": { "buff": { "who": "one ally within 30 ft", "share": "its damage, if you choose to take it" } }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The protection persists for 1 minute, and the ally also gains advantage on Charisma saving throws while the anchor holds.",
-          "card": "Lasts 1 min · also advantage on Cha saves",
-          "mech": {
-            "save": {
-              "ability": "Charisma"
-            },
-            "buff": {
-              "advantage": "Charisma saving throws while the anchor holds"
-            }
-          }
+          "text": "Level 5+: You may bind up to two allies, and the bond lasts 1 minute.",
+          "card": "Up to two allies · the bond lasts 1 minute"
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to the effects of Soul Severance and Soul Fracture for the duration.",
-          "card": "Two allies · each immune to Soul Severance effects"
+          "text": "Level 11+: Damage you take through the bond is halved.",
+          "card": "Damage you take through the bond is halved"
         }
       ]
     },
     {
-      "name": "Cursed Soul",
+      "name": "Tether",
       "type": "Control",
-      "description": "The spell marks the target's spiritual core.",
+      "description": "The soul remembers where it was standing.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target's soul is marked with a spiritual stigma — they are treated as Cursed for all magical effects, cannot benefit from Inspiration or Guidance, and are permanently detectable to divine and dream sensors.",
-        "card": "Spiritual stigma — they count as Cursed for every magical effect",
-        "mech": {
-          "conditions": [
-            {
-              "name": "Cursed"
-            }
-          ]
-        }
+        "text": "Creatures that fail are tethered to the spot where they stood: until the end of their next turn they cannot willingly end a move more than 20 feet from it.",
+        "card": "Tethered — can't end a move more than 20 ft from where they stood, until the end of their next turn",
+        "mech": { "tether": { "to": "where they stood", "range": "20 ft" } }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The target also becomes Unanchored — disadvantage on saving throws against possession, curse effects, and soul-severing for 1 minute.",
-          "card": "Also Unanchored — disadvantage against possession, curses and soul-severing",
-          "mech": {
-            "penalty": {
-              "disadvantage": "saving throws against possession"
-            }
-          }
+          "text": "Level 5+: While tethered they also cannot teleport, plane shift, or turn ethereal.",
+          "card": "Also no teleporting, plane shifting or going ethereal",
+          "mech": { "deny": [ "teleportation", "plane shift" ] }
         },
         {
-          "text": "Level 11+: Any effect that would heal the target heals for the minimum possible value, and if they attempt to attune to a holy object or cast a divine spell, a Rebound Curse activates dealing psychic damage equal to your spellcasting modifier + proficiency bonus.",
-          "card": "All healing on them is minimum value · holy attunement fails",
-          "mech": {
-            "damage": {
-              "type": "psychic"
-            }
-          }
+          "text": "Level 11+: A tethered creature forced, or trying, to go beyond the tether's reach is snapped back to the spot and takes Five Times your Verum Modifier in All-Mighty damage.",
+          "card": "Forced past the tether: snapped back and 5×VM all-mighty",
+          "mech": { "rider": { "damage": "5×VM", "type": "all-mighty", "trigger": "it goes past the tether" } }
         }
       ]
     }
   ],
+
   "schema": 2
 }

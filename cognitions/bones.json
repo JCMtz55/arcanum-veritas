@@ -31,12 +31,14 @@
             }
           },
           {
-            "text": "When you cause a creature to gain 2 or more Wounds from the same effect, they must succeed on a Constitution save or suffer an Injury — a broken limb, shattered ribs, or similar structural failure.",
-            "card": "2+ Wounds from one effect: Con save or take an Injury",
+            "text": "When you cause a creature to gain 2 or more Wounds from the same effect, it also suffers an Injury — a broken limb, shattered ribs, or similar structural failure.",
+            "card": "2+ Wounds from one effect: they also take an Injury",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              }
+              "conditions": [
+                {
+                  "name": "Injury"
+                }
+              ]
             }
           },
           {

@@ -17,14 +17,14 @@
             "card": "Move 15 ft free after casting — no opportunity attacks from anyone"
           },
           {
-            "text": "Your next melee or spell attack before the end of your turn deals +5d8 bonus damage and forces the target to succeed on a Strength saving throw against your Verum DC or be pushed 10 feet in a direction of your choice.",
-            "card": "Your next attack adds +5d8 and a Str save {DC} or they're pushed 10 ft",
+            "text": "Your next melee or spell attack before the end of your turn deals +5d8 bonus damage and forces the target to succeed on a Dexterity saving throw against your Verum DC or be pushed 10 feet in a direction of your choice.",
+            "card": "Your next attack adds +5d8 and a Dex save {DC} or they're pushed 10 ft",
             "mech": {
               "damage": {
                 "dice": "5d8"
               },
               "save": {
-                "ability": "Strength"
+                "ability": "Dexterity"
               },
               "movement": {
                 "push": 10

@@ -69,24 +69,23 @@
             }
           },
           {
-            "text": "Targets suffering two or more simultaneous Wounds must make a Constitution saving throw or gain an Injury determined by the damage type — the accumulation of trauma becoming something the body cannot simply absorb.",
-            "card": "Two or more Wounds at once: Con save or gain an Injury matching the damage type",
+            "text": "Targets suffering two or more simultaneous Wounds also gain an Injury determined by the damage type — the accumulation of trauma becoming something the body cannot simply absorb.",
+            "card": "Two or more Wounds at once: they also gain an Injury matching the damage type",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              }
+              "conditions": [
+                {
+                  "name": "Injury"
+                }
+              ]
             }
           },
           {
-            "text": "Targets who suffer an Injury from this effect must make a Wisdom saving throw against your Verum DC or suffer one level of Dream Exhaustion — the magnitude of destruction inflicted exceeding what the mind can integrate without consequence.",
-            "card": "An Injury from this also forces a Wis save {DC} or a level of Dream Exhaustion",
+            "text": "Targets who suffer an Injury from this effect also suffer one level of Dream Exhaustion — the magnitude of destruction inflicted exceeding what the mind can integrate without consequence.",
+            "card": "An Injury from this also brings a level of Dream Exhaustion",
             "mech": {
-              "save": {
-                "ability": "Wisdom"
-              },
               "conditions": [
                 {
-                  "name": "Exhaustion"
+                  "name": "Dream Exhaustion"
                 }
               ]
             }

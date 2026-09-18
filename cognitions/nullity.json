@@ -13,44 +13,57 @@
         "description": "Not destroyed. Withdrawn.",
         "tiers": [
           {
-            "text": "+2 dice. Ignores resistance.",
-            "card": "+2 dice · ignores resistance",
+            "text": "The damage ignores resistance, and Nullity takes back what was given: one spell or other magical effect of 2nd level or lower on the target ends. Seals are beyond it — only an opposing seal unmakes a seal.",
+            "card": "Ignores resistance · ends one magical effect of 2nd level or lower on them (not a seal)",
             "mech": {
-              "damage": {
-                "bonusDice": 2
-              },
-              "pierce": "resistance"
-            }
-          },
-          {
-            "text": "+4 dice. Ignores immunity, and erases the target's temporary hit points.",
-            "card": "+4 dice · ignores immunity · erases their temp HP",
-            "mech": {
-              "damage": {
-                "bonusDice": 4
-              },
-              "heal": {
-                "tempHP": true
-              },
-              "pierce": "immunity"
-            }
-          },
-          {
-            "text": "+6 dice. This damage cannot be reduced, prevented, or healed until the end of the target's next turn.",
-            "card": "+6 dice · this damage can't be reduced, prevented or healed until end of their next turn",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
+              "pierce": "resistance",
+              "dispel": {
+                "maxLevel": 2,
+                "count": 1
               }
             }
           },
           {
-            "text": "+8 dice. A creature reduced to 0 hit points is erased — no body, no remains, and no revival short of Wish or a god.",
-            "card": "+8 dice · dropped to 0 = erased. No body, no remains, no revival short of Wish or a god",
+            "text": "It ignores immunity, and strips the target's temporary hit points away before it lands. One spell or magical effect of 4th level or lower on the target ends.",
+            "card": "Ignores immunity · strips their temp HP first · ends one magical effect ≤4th (not a seal)",
             "mech": {
-              "damage": {
-                "bonusDice": 8
-              }
+              "pierce": "immunity",
+              "dispel": {
+                "maxLevel": 4,
+                "count": 1
+              },
+              "deny": [
+                "temporary hit points"
+              ]
+            }
+          },
+          {
+            "text": "Nothing the target does can soften it: this damage cannot be reduced, prevented, or healed until the end of its next turn. One spell or magical effect of 6th level or lower on it ends, and it cannot draw seals or cast spells until the end of its next turn.",
+            "card": "Can't be reduced, prevented or healed until the end of their next turn · ends one effect ≤6th · no seals or spells next turn",
+            "mech": {
+              "pierce": "all",
+              "dispel": {
+                "maxLevel": 6,
+                "count": 1
+              },
+              "deny": [
+                "healing",
+                "spellcasting"
+              ]
+            }
+          },
+          {
+            "text": "A creature reduced to 0 hit points is erased — no body, no remains, and no revival short of Wish or a god. A creature that survives has every spell and magical effect of 8th level or lower on it end at once.",
+            "card": "Reduced to 0: erased, no revival short of Wish or a god · survivors lose every magical effect ≤8th on them",
+            "mech": {
+              "pierce": "all",
+              "dispel": {
+                "maxLevel": 8,
+                "count": "all"
+              },
+              "deny": [
+                "revival"
+              ]
             }
           }
         ]

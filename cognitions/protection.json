@@ -13,41 +13,55 @@
         "description": "A shield that only ever holds is half a shield.",
         "tiers": [
           {
-            "text": "The damage becomes force and gains +2 dice, plus additional damage equal to your Verum Modifier for each ally who has taken damage since your last turn (maximum 3).",
-            "card": "+2 dice force · +{VM} more per ally hurt since your last turn (max 3)",
+            "text": "The damage becomes Force, and it answers for everyone who has been hurt: it deals additional damage equal to your Verum Modifier for each ally within 30 feet who has taken damage since your last turn (maximum 3).",
+            "card": "Damage becomes Force · +{VM} for each ally hurt since your last turn (max 3)",
             "mech": {
               "damage": {
-                "bonusDice": 2
+                "type": "force",
+                "perAlly": "VM",
+                "maxAllies": 3
               }
             }
           },
           {
-            "text": "+4 dice. The target has disadvantage on attack rolls against anyone but you until the end of its next turn.",
-            "card": "+4 dice · disadvantage on its attacks against anyone but you",
+            "text": "Up to 5 hurt allies now count. The target is also held to account: until the end of its next turn it has disadvantage on attack rolls against anyone but you.",
+            "card": "+{VM} per hurt ally (max 5) · until the end of their next turn, disadvantage on attacks against anyone but you",
             "mech": {
               "damage": {
-                "bonusDice": 4
+                "type": "force",
+                "perAlly": "VM",
+                "maxAllies": 5
               },
               "penalty": {
-                "disadvantage": "attack rolls against anyone but you until the end"
+                "disadvantage": "attack rolls against anyone but you until the end of their next turn"
               }
             }
           },
           {
-            "text": "+6 dice. If the target has damaged an ally this round, this effect ignores its resistances and immunities.",
-            "card": "+6 dice · ignores resistance and immunity if it hurt an ally this round",
+            "text": "The answer doubles — Twice your Verum Modifier for each hurt ally (maximum 5) — and if the target is one of the creatures that did the hurting, this effect ignores its resistances and immunities.",
+            "card": "+2×VM per hurt ally (max 5) · ignores resistance and immunity if they were the one who did it",
             "mech": {
               "damage": {
-                "bonusDice": 6
-              }
+                "type": "force",
+                "perAlly": "2×VM",
+                "maxAllies": 5
+              },
+              "pierce": "all"
             }
           },
           {
-            "text": "+8 dice. For 1 minute, whenever an ally within 30 feet is hit by an attack, you may use your reaction to deal this effect's damage to the attacker at half value.",
-            "card": "+8 dice · 1 min: react when an ally within 30 ft is hit to deal this damage at half to the attacker",
+            "text": "The shield keeps answering. For 1 minute after this effect lands, whenever an ally within 30 feet is hit by an attack, you may use your reaction to deal half this effect's damage to the attacker.",
+            "card": "1 min: when an ally within 30 ft is hit, your reaction deals half this effect's damage to the attacker",
             "mech": {
               "damage": {
-                "bonusDice": 8
+                "type": "force",
+                "perAlly": "2×VM",
+                "maxAllies": 5
+              },
+              "reaction": {
+                "trigger": "an ally within 30 ft is hit",
+                "effect": "half this effect's damage to the attacker",
+                "duration": "1 minute"
               }
             }
           }

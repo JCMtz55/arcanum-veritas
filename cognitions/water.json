@@ -1,0 +1,359 @@
+{
+  "id": "water",
+  "name": "Water",
+  "icon": "🌊",
+  "opposing": "toxin",
+  "description": "Depth, Yielding, Drowning, Tides, Return.",
+  "savingThrow": "Strength",
+  "damageType": "Undertow",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Undertow",
+        "description": "It is not angry with you. That is the part nobody believes until it is too late.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Undertow damage. A creature that fails is pulled 10 feet toward the point of impact, has its speed halved until the end of its next turn, and cannot end its next move further from that point than it began.",
+            "card": "Damage becomes Undertow · pulled 10 ft in · speed halved, and can't get further away next turn",
+            "mech": {
+              "damage": { "type": "undertow" },
+              "movement": { "pull": 10 },
+              "penalty": { "speed": "halved" }
+            }
+          },
+          {
+            "text": "The pull becomes 20 feet and leaves them Prone. Everything they hold is slick — they drop one item of your choice.",
+            "card": "Pulled 20 ft and Prone · they drop one item of your choice",
+            "mech": {
+              "damage": { "type": "undertow" },
+              "movement": { "pull": 20 },
+              "conditions": [ { "name": "Prone" } ],
+              "disarm": 1
+            }
+          },
+          {
+            "text": "The pull becomes 30 feet and the water closes over them — they are Swallowed: Blinded, unable to breathe, and taking Five Times your Verum Modifier in Undertow damage at the start of each of their turns until they reach air.",
+            "card": "Pulled 30 ft · Swallowed — Blinded, no breath, 5×VM undertow each turn until they surface",
+            "mech": {
+              "damage": { "type": "undertow" },
+              "movement": { "pull": 30 },
+              "conditions": [ { "name": "Blinded" }, { "name": "Swallowed", "tick": "5×VM undertow" } ],
+              "deny": [ "breathing" ]
+            }
+          },
+          {
+            "text": "The water takes the whole place. Every creature within 20 feet of the target is dragged to the centre and Swallowed alongside it, each taking Five Times your Verum Modifier in Undertow damage at the start of its turns. A creature surfaces only by spending its entire turn swimming, and the water does not hurry.",
+            "card": "Everything within 20 ft is dragged in and Swallowed — 5×VM each turn · surfacing costs a whole turn",
+            "mech": {
+              "damage": { "type": "undertow" },
+              "movement": { "pull": 20 },
+              "conditions": [
+                { "name": "Blinded" },
+                { "name": "Swallowed", "tick": "5×VM undertow", "area": "20 ft" }
+              ],
+              "deny": [ "breathing" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Flood",
+        "description": "Water does not choose a target. It chooses a direction, and then it chooses everyone.",
+        "tiers": [
+          {
+            "text": "The water sheets outward. One other creature of your choice within 10 feet of the target takes half this effect's damage.",
+            "card": "One more creature within 10 ft takes half the damage",
+            "mech": { "rider": { "damage": "half", "targets": 1, "area": "10 ft" } }
+          },
+          {
+            "text": "It keeps going. Each creature struck this way passes it to one more within 10 feet, up to three creatures beyond the target, each taking half of what the one before it took.",
+            "card": "Chains up to 3 more, each taking half of the last",
+            "mech": { "rider": { "damage": "half, halving each step", "targets": 3, "area": "10 ft" } }
+          },
+          {
+            "text": "Anything already wet takes the full damage instead of half, and a creature struck by this effect counts as wet for 1 minute afterward. The flood remembers where it has been.",
+            "card": "Anything already wet takes full instead of half · being struck leaves them wet for 1 min",
+            "mech": { "rider": { "damage": "full if wet" } }
+          },
+          {
+            "text": "There is no chain because there are no links — every creature of your choice within 30 feet of the target takes the full damage, and the ground between them is standing water until the end of your next turn.",
+            "card": "Everyone you choose within 30 ft takes full damage · standing water between them",
+            "mech": {
+              "rider": { "damage": "full", "area": "30 ft" },
+              "terrain": { "effect": "standing water", "duration": "end of your next turn" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Yielding",
+        "description": "Nothing that gives way can be broken. This is the oldest argument water has ever won.",
+        "tiers": [
+          {
+            "text": "Reduce all damage you take by your Verum Modifier, and you cannot be Grappled.",
+            "card": "All damage reduced by {VM} · can't be Grappled",
+            "mech": {
+              "buff": { "who": "self", "reduction": "VM to all damage" },
+              "deny": [ "grapples" ]
+            }
+          },
+          {
+            "text": "The reduction becomes Twice your Verum Modifier, and you may move through any space occupied by a creature or object, treating it as difficult terrain.",
+            "card": "Reduction becomes 2×VM · move through occupied spaces as difficult terrain",
+            "mech": {
+              "buff": { "who": "self", "reduction": "2×VM to all damage" },
+              "deny": [ "grapples" ]
+            }
+          },
+          {
+            "text": "You are no longer entirely solid. You have resistance to nonmagical bludgeoning, piercing, and slashing damage, and can squeeze through any opening water could pass through without slowing down.",
+            "card": "Resistance to nonmagical physical damage · squeeze through any gap water could",
+            "mech": {
+              "pierce": "form",
+              "deny": [ "grapples", "restraint" ]
+            }
+          },
+          {
+            "text": "Nothing holds you and nothing breaks you. You cannot be Restrained, Grappled, Petrified, or Paralyzed, you pass through any gap at full speed, and once each round when you would take damage you may become water instead and take none of it.",
+            "card": "No restraint, grapples, petrification or paralysis · once a round, become water and take no damage at all",
+            "mech": {
+              "deny": [ "grapples", "restraint", "petrification", "paralysis" ],
+              "resource": { "name": "Become Water", "uses": "once each round" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Tide Returns",
+        "description": "Everything the sea takes, it puts back somewhere. Not always where you left it.",
+        "tiers": [
+          {
+            "text": "When this effect heals a creature, it also sheds one of the following: Blinded, Deafened, or Poisoned.",
+            "card": "The healing also clears Blinded, Deafened or Poisoned",
+            "mech": { "conditions": [ { "removes": 1 } ] }
+          },
+          {
+            "text": "Half of everything this effect heals comes back to you as well, rounded down.",
+            "card": "You regain half of everything it heals",
+            "mech": { "heal": { "amount": "half the healing done", "targets": "self" } }
+          },
+          {
+            "text": "The tide keeps coming in. For 1 minute, the target regains hit points equal to your Verum Modifier at the start of each of its turns.",
+            "card": "1 min: they regain {VM} at the start of each of their turns",
+            "mech": { "heal": { "amount": "VM", "tick": "start of each of their turns", "duration": "1 minute" } }
+          },
+          {
+            "text": "Death is a tide as well. Once per long rest, a creature carrying this effect that drops to 0 hit points and dies returns at the start of your next turn with hit points equal to Five Times your Verum Modifier, soaked through and colder than it was.",
+            "card": "1/long rest — a creature that dies carrying this returns next turn at 5×VM hit points",
+            "mech": {
+              "revive": { "hp": "5×VM", "window": "start of your next turn" },
+              "resource": { "name": "The Tide Returns", "uses": "1 per long rest" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Riptide",
+        "description": "You are not being pushed away from shore. Shore is being taken away from you.",
+        "tiers": [
+          {
+            "text": "A creature that fails is pulled 15 feet toward a point you choose within the area, and its speed is halved until the end of its next turn.",
+            "card": "Pulled 15 ft toward a point you choose · speed halved",
+            "mech": {
+              "movement": { "pull": 15 },
+              "penalty": { "speed": "halved" }
+            }
+          },
+          {
+            "text": "The pull becomes 30 feet, and on its next turn the creature cannot willingly move away from that point.",
+            "card": "Pulled 30 ft · they can't move away from that point next turn",
+            "mech": {
+              "movement": { "pull": 30 },
+              "deny": [ "moving away" ]
+            }
+          },
+          {
+            "text": "The current takes hold. A creature that fails is Restrained, moving at all costs its entire turn, and the water spreads — everything within 20 feet of the point is difficult terrain.",
+            "card": "Restrained — moving at all costs their whole turn · difficult terrain 20 ft",
+            "mech": {
+              "conditions": [ { "name": "Restrained" } ],
+              "terrain": { "effect": "difficult", "radius": 20 }
+            }
+          },
+          {
+            "text": "The water decides where everyone is. At the start of each of its turns a creature in the area is pulled 30 feet toward a point of your choosing, and any creature that ends its turn in the water is Swallowed until it spends a turn surfacing.",
+            "card": "Pulled 30 ft toward a point of your choosing every turn · ending a turn in it means Swallowed",
+            "mech": {
+              "movement": { "pull": 30, "tick": "start of each of their turns" },
+              "conditions": [ { "name": "Swallowed" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Held Shape",
+        "description": "You are not building a wall. You are asking the water to stand still, and it has agreed for now.",
+        "tiers": [
+          {
+            "text": "Your creations are standing water, clear and cold and impossible to hold. A creature that strikes a Structure, or is hit by a Construct or an Object you made, is pulled 10 feet and takes 1d6 Undertow damage.",
+            "card": "Creations are standing water · struck or hit: pulled 10 ft and 1d6 undertow",
+            "mech": {
+              "damage": { "amount": "1d6", "type": "undertow", "trigger": "touch or hit" },
+              "movement": { "pull": 10 }
+            }
+          },
+          {
+            "text": "That damage becomes 2d6, and what you made repairs itself: at the start of each of your turns, a damaged Structure segment regains hit points equal to Five Times your Verum Modifier.",
+            "card": "2d6 · damaged Structure segments regain 5×VM at the start of each of your turns",
+            "mech": {
+              "damage": { "amount": "2d6", "type": "undertow" },
+              "heal": { "amount": "5×VM", "targets": "your creations", "tick": "start of each of your turns" }
+            }
+          },
+          {
+            "text": "A Structure segment destroyed this turn returns whole at the start of your next turn, once each. Your Constructs move through occupied spaces freely and cannot be Grappled or Restrained.",
+            "card": "Destroyed segments come back whole next turn, once each · Constructs move through anything",
+            "mech": {
+              "heal": { "amount": "restored whole", "targets": "destroyed segments" },
+              "deny": [ "grapples", "restraint" ]
+            }
+          },
+          {
+            "text": "What you make of water cannot be destroyed, only moved. A Structure reduced to 0 hit points reforms at the start of your next turn anywhere within 30 feet of where it stood, and any creature caught inside the reforming is Swallowed until it spends a turn getting out.",
+            "card": "A destroyed Structure reforms next turn within 30 ft · anyone caught inside is Swallowed",
+            "mech": {
+              "conditions": [ { "name": "Swallowed" } ],
+              "reform": { "range": "30 ft", "when": "start of your next turn" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "Everything It Has Touched",
+        "description": "The sea keeps what it is given. It has been given a great deal.",
+        "tiers": [
+          {
+            "text": "Breathe water as easily as air, swim at your walking speed, and see clearly underwater to 120 feet. Any water you touch becomes clean.",
+            "card": "Breathe and see underwater · swim at full speed · purify any water you touch",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Walk on water, part it, and shape it with your hands. Find every source of water within a mile and know how deep each one runs.",
+            "card": "Walk on water, part and shape it · find every water source within a mile",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Travel by water: step into any body of it and out of any other you have seen within a mile. Water you touch tells you what has passed through it in the last month.",
+            "card": "Step from any water to any other within a mile · read a month of what passed through it",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Put a question to any water anywhere and be answered — the sea remembers everything that has ever been given to it, and has no reason left to lie. Or call a tide: for an hour, a body of water within a mile rises, floods, parts, or stills at your word.",
+            "card": "Ask any water anything it has ever been given · or command a tide within a mile for an hour",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Drag",
+      "type": "Offensive",
+      "description": "Whatever it hits, it takes with it.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Undertow damage equal to one damage die of the primary effect's type (min 1d6) and is pulled 10 feet toward the point of impact.",
+        "card": "+1 die undertow · pulled 10 ft toward the point of impact",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "undertow" },
+          "movement": { "pull": 10 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and the pull increases to 20 feet and leaves them Prone.",
+          "card": "+2 dice · pulled 20 ft and Prone",
+          "mech": {
+            "movement": { "pull": 20 },
+            "conditions": [ { "name": "Prone" } ]
+          }
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and the target cannot willingly move away from the point of impact until the end of its next turn.",
+          "card": "+3 dice · they can't move away from the impact until the end of their next turn",
+          "mech": { "deny": [ "moving away" ] }
+        }
+      ]
+    },
+    {
+      "name": "Undercurrent",
+      "type": "Supportive",
+      "description": "The relief is real. It is simply not here yet.",
+      "effect": {
+        "text": "When the primary effect resolves, name one creature within 30 feet. At the start of its next turn it regains hit points equal to Twice your Verum Modifier and gains a swim speed equal to its walking speed for 1 minute. The healing does not arrive now — the water takes its time.",
+        "card": "One creature within 30 ft regains 2×VM at the start of its NEXT turn, and gains a swim speed",
+        "mech": {
+          "heal": { "amount": "2×VM", "when": "start of their next turn", "range": "30 ft" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The healing becomes Three Times your Verum Modifier, and you may name up to two creatures.",
+          "card": "3×VM · up to two creatures"
+        },
+        {
+          "text": "Level 11+: The water no longer takes its time — the healing arrives immediately, and each creature also sheds one condition of its choice from Blinded, Deafened, or Poisoned.",
+          "card": "Healing lands immediately now · each also sheds Blinded, Deafened or Poisoned",
+          "mech": { "conditions": [ { "removes": 1 } ] }
+        }
+      ]
+    },
+    {
+      "name": "Backwash",
+      "type": "Control",
+      "description": "The water that arrives is not the problem. It is the water going back out.",
+      "effect": {
+        "text": "The point of impact floods in a 10-foot radius, becoming difficult terrain until the end of your next turn. Creatures that fail are pulled 10 feet toward the centre of it.",
+        "card": "Floods 10 ft — difficult terrain · pulled 10 ft toward the centre",
+        "mech": {
+          "terrain": { "radius": 10, "effect": "difficult" },
+          "movement": { "pull": 10 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The radius becomes 20 feet and the flood lasts 1 minute. A creature that starts its turn in the water has its speed halved until it leaves.",
+          "card": "Radius 20 ft · lasts 1 min · speed halved while they stand in it",
+          "mech": {
+            "terrain": { "radius": 20, "duration": "1 minute" },
+            "penalty": { "speed": "halved" }
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that fail are pulled 20 feet and knocked Prone, and standing up out of the water costs their entire movement.",
+          "card": "Pulled 20 ft and Prone · standing up out of it costs all their movement",
+          "mech": {
+            "movement": { "pull": 20 },
+            "conditions": [ { "name": "Prone" } ]
+          }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

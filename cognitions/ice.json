@@ -13,48 +13,48 @@
         "description": "Cold does not break things. It waits for them to become breakable.",
         "tiers": [
           {
-            "text": "The damage becomes Cognitive Cold and gains +2 dice. A creature carrying any Frost Stack takes one additional die.",
-            "card": "+2 dice cold · +1 more die vs anything holding a Frost Stack",
+            "text": "The damage becomes Cognitive Cold and gains 1 additional die. Against a creature carrying any Frost Stack it gains 2 more — the cold was already inside.",
+            "card": "+1 die · damage becomes Cognitive Cold · 2 more dice vs anything holding a Frost Stack",
             "mech": {
               "damage": {
-                "bonusDice": 2
-              }
-            }
-          },
-          {
-            "text": "+4 dice. A creature with 2 or more Frost Stacks has vulnerability to this damage.",
-            "card": "+4 dice · vulnerability to this damage at 2+ Frost Stacks",
-            "mech": {
-              "damage": {
-                "bonusDice": 4
-              }
-            }
-          },
-          {
-            "text": "+6 dice. Against a creature that is Restrained, Frozen, or Paralyzed, this effect deals maximum damage.",
-            "card": "+6 dice · max damage vs Restrained, Frozen or Paralyzed",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              },
-              "conditions": [
-                {
-                  "name": "Restrained"
-                },
-                {
-                  "name": "Paralyzed"
-                }
-              ]
-            }
-          },
-          {
-            "text": "+8 dice. A creature reduced to 0 hit points shatters — it cannot be revived by anything short of Greater Restoration, and every creature within 10 feet takes 4d10 cold damage from the burst.",
-            "card": "+8 dice · drops to 0 = shatters (no revival short of Greater Restoration) + 4d10 cold in 10 ft",
-            "mech": {
-              "damage": {
-                "bonusDice": 8,
-                "dice": "4d10",
+                "bonusDice": 1,
                 "type": "cold"
+              }
+            }
+          },
+          {
+            "text": "Cognitive Cold damage increases by 2 additional dice. A creature with 2 or more Frost Stacks has vulnerability to this damage.",
+            "card": "+2 dice · vulnerability to this damage at 2+ Frost Stacks",
+            "mech": {
+              "damage": {
+                "bonusDice": 2,
+                "type": "cold"
+              }
+            }
+          },
+          {
+            "text": "Cognitive Cold damage increases by 3 additional dice. Against a creature that is Restrained, Frozen, or Paralyzed, this effect deals maximum damage.",
+            "card": "+3 dice · maximum damage vs Restrained, Frozen or Paralyzed",
+            "mech": {
+              "damage": {
+                "bonusDice": 3,
+                "type": "cold"
+              }
+            }
+          },
+          {
+            "text": "Cognitive Cold damage increases by 4 additional dice. A creature reduced to 0 hit points shatters — it cannot be revived by anything short of Greater Restoration, and every creature within 10 feet takes 4d10 cold damage from the burst.",
+            "card": "+4 dice · drops to 0 = shatters (no revival short of Greater Restoration) + 4d10 cold in 10 ft",
+            "mech": {
+              "damage": {
+                "bonusDice": 4,
+                "type": "cold"
+              },
+              "rider": {
+                "damage": "4d10",
+                "type": "cold",
+                "area": "10 ft",
+                "trigger": "the target drops to 0"
               },
               "deny": [
                 "revival"

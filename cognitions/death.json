@@ -6,393 +6,370 @@
   "description": "Finality, Transition, Necromancy, Loss, Inevitability.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
+
   "verumEffects": {
     "offensive": [
       {
-        "name": "Long-Lasting Pain",
-        "description": "Pain is not an instant — it is a sentence.",
+        "name": "Finality",
+        "description": "Everything that has begun to end, you are allowed to finish.",
         "tiers": [
           {
-            "text": "Half the damage from this effect is delayed, repeating at the start of the creature's next turn.",
-            "card": "Half the damage is delayed to the start of their next turn"
-          },
-          {
-            "text": "Delayed damage is now necrotic and the creature is incapacitated for the first action it takes on its next turn if it fails a Constitution save.",
-            "card": "Delayed damage is necrotic · Con save or their first action next turn is lost",
+            "text": "The damage is turned into Necrotic damage. A creature this seal leaves with no more hit points than half the damage it just took drops to 0 hit points — it had already begun to end.",
+            "card": "Damage becomes Necrotic · left with HP ≤ half the damage it took: drops to 0",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              },
-              "conditions": [
-                {
-                  "name": "Incapacitated"
-                }
-              ]
+              "damage": { "type": "necrotic" },
+              "execute": { "threshold": "half the damage dealt" }
             }
           },
           {
-            "text": "The pain leaves a curse — the target suffers disadvantage on Concentration checks and saving throws against fear for 1 minute.",
-            "card": "Also disadvantage on Concentration and fear saves, 1 min",
+            "text": "The line moves. A creature left with no more hit points than the damage it just took drops to 0, and a creature that drops this way cannot be stabilized by nonmagical means.",
+            "card": "Left with HP ≤ the damage it took: drops to 0 · no nonmagical stabilizing",
             "mech": {
-              "penalty": {
-                "disadvantage": "Concentration checks and saving throws against fea"
-              }
+              "damage": { "type": "necrotic" },
+              "execute": { "threshold": "the damage dealt" },
+              "deny": [ "stabilizing" ]
             }
           },
           {
-            "text": "Delayed pain echoes across time. The creature takes the full damage again after 1 minute unless it passes a Constitution save or is already dead.",
-            "card": "The full damage lands again after 1 min unless they pass a Con save or are already dead",
+            "text": "Temporary hit points no longer shelter it — they are ignored when you measure what is left — and a creature that drops to 0 this way fails its first death saving throw automatically.",
+            "card": "Temp HP don't count toward what's left · dropped this way: first death save fails automatically",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              }
+              "damage": { "type": "necrotic" },
+              "execute": { "threshold": "the damage dealt", "ignoresTempHP": true },
+              "deny": [ "stabilizing" ]
+            }
+          },
+          {
+            "text": "The line moves again. A creature left with no more hit points than twice the damage it just took drops to 0 — and dies. No death saving throws. It is simply over.",
+            "card": "Left with HP ≤ twice the damage it took: dies outright, no death saves",
+            "mech": {
+              "damage": { "type": "necrotic" },
+              "execute": { "threshold": "twice the damage dealt", "ignoresTempHP": true, "outcome": "death" },
+              "deny": [ "death saving throws" ]
             }
           }
         ]
       },
       {
-        "name": "Soul-Shear",
-        "description": "You do not simply harm the body — you unravel the soul's cohesion. (Save: Constitution)",
+        "name": "Doom",
+        "description": "It was always coming. Now it has a date.",
         "tiers": [
           {
-            "text": "Targets damaged by this effect cannot benefit from temporary HP for 1 minute.",
-            "card": "No benefit from temp HP for 1 min"
-          },
-          {
-            "text": "They suffer disadvantage on death saving throws and any Concentration check.",
-            "card": "Disadvantage on death saves and Concentration",
+            "text": "A creature that fails is Doomed. At the end of its third turn from now the Doom arrives, and it takes half the damage this seal dealt it again, as Necrotic damage. Healing does not delay it and running does not escape it.",
+            "card": "Doomed — at the end of their third turn from now, half this seal's damage lands again",
             "mech": {
-              "penalty": {
-                "disadvantage": "death saving throws and any Concentration check"
-              }
+              "conditions": [ { "name": "Doomed", "duration": "until the end of their third turn from now" } ],
+              "rider": { "damage": "half this seal's damage", "type": "necrotic", "when": "end of their third turn" }
             }
           },
           {
-            "text": "They gain a Lingering Fracture — for the next hour, they suffer −1 to all saving throws and cannot be revived without a Greater Restoration to patch their spirit.",
-            "card": "Lingering Fracture 1 hr — −1 all saves, no revival without Greater Restoration first",
+            "text": "The Doom comes sooner and harder: at the end of the creature's second turn from now, for the full damage this seal dealt it. Only a dispelling of the Doom itself, or an opposing seal, stops the count.",
+            "card": "Arrives at the end of their second turn, for the full damage · only a dispel or an opposing seal stops it",
             "mech": {
-              "penalty": {
-                "saves": -1
-              },
-              "deny": [
-                "revival"
-              ]
+              "conditions": [ { "name": "Doomed", "duration": "until the end of their second turn from now" } ],
+              "rider": { "damage": "this seal's damage", "type": "necrotic", "when": "end of their second turn" }
             }
           },
           {
-            "text": "The soul is split. If the creature dies, it cannot pass on — it becomes either a Wraith, a Bound Ghost, or is trapped in a Cognition-infused object. The caster chooses the fate.",
-            "card": "The soul splits — die and they become a Wraith, Bound Ghost, or object-trapped. You choose"
+            "text": "A Doom must be paid by someone. If the Doomed creature is already dead when it arrives, it falls on the nearest creature hostile to you instead. While the count runs, the Doomed creature has disadvantage on death saving throws.",
+            "card": "If they're already dead, it lands on your nearest enemy instead · disadvantage on death saves while it counts down",
+            "mech": {
+              "conditions": [ { "name": "Doomed" } ],
+              "penalty": { "disadvantage": "death saving throws while Doomed" }
+            }
+          },
+          {
+            "text": "Name the hour. You may set the Doom to arrive at any moment you choose within the next 24 hours, wherever the creature is and however far it has run, and nothing short of Wish or an opposing seal lifts it.",
+            "card": "Set the hour — any time in the next 24 hrs, anywhere they are · only Wish or an opposing seal lifts it",
+            "mech": {
+              "conditions": [ { "name": "Doomed", "duration": "up to 24 hours" } ],
+              "penalty": { "disadvantage": "death saving throws while Doomed" }
+            }
           }
         ]
       }
     ],
+
     "supportive": [
       {
-        "name": "Undying",
-        "description": "You commune with Death, and Death answers.",
+        "name": "Not Yet",
+        "description": "Death is standing in the doorway. For you, it has decided to wait.",
         "tiers": [
           {
-            "text": "You can speak with the soul of a creature that died within the last hour, even if the body is destroyed.",
-            "card": "Speak with a soul dead within the hour, body or no body"
+            "text": "If the target drops to 0 hit points while this lasts, it does not fall — not yet. It stays conscious until the end of its next turn and may move and take one action; only then does it fall and begin making death saving throws.",
+            "card": "Drop to 0 and keep going — conscious through their next turn, one action, then fall",
+            "mech": { "buff": { "who": "target", "lastStand": "one more turn at 0 HP" } }
           },
           {
-            "text": "You may see invisible spirits and undead within 120 feet and command them to stand still for 1 round (no save unless CR ≥ your level).",
-            "card": "See spirits and undead 120 ft · hold them still 1 round (no save under your level)",
-            "mech": {
-              "conditions": [
-                {
-                  "name": "Invisible"
-                }
-              ]
-            }
+            "text": "The first time the target would drop to 0 hit points while this lasts, it drops to 1 instead.",
+            "card": "The first time they'd drop to 0, they drop to 1 instead",
+            "mech": { "buff": { "who": "target", "deathWard": 1 } }
           },
           {
-            "text": "Undead summoned or controlled by you under this effect gain advantage on all attacks and saves, and ignore radiant vulnerability.",
-            "card": "Your undead get advantage on attacks and saves and ignore radiant vulnerability",
-            "mech": {
-              "buff": {
-                "advantage": "all attacks and saves"
-              }
-            }
+            "text": "When that happens, the target stands on the threshold: until the end of its next turn it has resistance to all damage and cannot be reduced below 1 hit point.",
+            "card": "When it triggers: resistance to all damage and can't drop below 1 until the end of their next turn",
+            "mech": { "buff": { "who": "target", "deathWard": 1, "resist": "all damage until the end of their next turn" } }
           },
           {
-            "text": "Your presence forces spirits to manifest. Undead within 1 mile reveal themselves, and you may bind one ghost or soul into a weapon, object, or ally to grant it spectral power for 24 hours.",
-            "card": "Undead within 1 mile reveal themselves · bind one ghost into a weapon, object or ally for 24 hrs"
-          }
-        ]
-      }
-    ],
-    "control": [
-      {
-        "name": "Anti-Healing",
-        "description": "You rot hope before it forms. Wounds do not close — only deepen. (Save: Constitution)",
-        "tiers": [
-          {
-            "text": "The target cannot regain hit points until the end of their next turn.",
-            "card": "No healing until end of their next turn",
-            "mech": {
-              "deny": [
-                "healing"
-              ]
-            }
-          },
-          {
-            "text": "The target cannot regain hit points or temporary hit points for 1 minute. They may repeat the Constitution saving throw at the end of each of their turns to end the effect early.",
-            "card": "No healing or temp HP 1 min · Con save at end of each turn to end it",
-            "mech": {
-              "save": {
-                "ability": "Constitution"
-              },
-              "heal": {
-                "tempHP": true
-              },
-              "deny": [
-                "healing"
-              ]
-            }
-          },
-          {
-            "text": "Any healing the target receives is reduced by half for 1 hour, and they lose resistance to necrotic damage for the same duration.",
-            "card": "Healing halved for 1 hr · loses necrotic resistance",
-            "mech": {
-              "damage": {
-                "type": "necrotic"
-              }
-            }
-          },
-          {
-            "text": "For 1 minute, any healing the target receives is instead dealt as necrotic damage. All healing within 10 feet of them is halved for every creature.",
-            "card": "1 min: healing they receive becomes necrotic damage · all healing within 10 ft of them is halved",
-            "mech": {
-              "damage": {
-                "type": "necrotic"
-              }
-            }
+            "text": "Death will take someone, but it does not greatly care who. When a creature under this effect would die, any willing creature within 30 feet — you included — may take its place: the willing one drops to 0 hit points and begins dying, and the one it saved is left standing on 1.",
+            "card": "When they'd die, any willing creature within 30 ft (you too) can take their place — dropping to 0 so they stay on 1",
+            "mech": { "buff": { "who": "target", "substitute": "a willing creature within 30 ft" } }
           }
         ]
       },
       {
+        "name": "Pale Walker",
+        "description": "You have one foot on the other side. It turns out the dead have their advantages.",
+        "tiers": [
+          {
+            "text": "You no longer need to breathe, you have resistance to necrotic damage, and you have advantage on saving throws against disease and poison.",
+            "card": "No need to breathe · resistance to necrotic · advantage vs disease and poison",
+            "mech": {
+              "buff": { "who": "self", "resist": "necrotic", "advantage": "saves against disease and poison" },
+              "deny": [ "suffocation" ]
+            }
+          },
+          {
+            "text": "You cannot be Frightened, Poisoned, or Exhausted, and you see invisible spirits and undead within 60 feet. The price: you count as undead for anything that singles out the undead — Turn Undead included.",
+            "card": "Can't be Frightened, Poisoned or Exhausted · see spirits and undead 60 ft · but you count as undead (Turn Undead works on you)",
+            "mech": {
+              "deny": [ "fear", "poison", "exhaustion" ],
+              "cost": { "countsAs": "undead" }
+            }
+          },
+          {
+            "text": "You walk as the dead do. You can move through creatures and objects as though they were difficult terrain, taking 1d10 force damage if you end your turn inside one, and you have resistance to nonmagical bludgeoning, piercing, and slashing damage.",
+            "card": "Move through creatures and objects (1d10 force if you end inside one) · resistance to nonmagical physical damage",
+            "mech": { "buff": { "who": "self", "movement": "incorporeal", "resist": "nonmagical physical" } }
+          },
+          {
+            "text": "For now, you are dead and walking. You are immune to necrotic and poison damage and cannot be Charmed, Frightened, Paralyzed, Poisoned, or Exhausted. Healing no longer reaches you — but whenever a creature within 30 feet dies, you take something from it and regain Five Times your Verum Modifier in hit points.",
+            "card": "Immune to necrotic and poison, charm, fear, paralysis and exhaustion · healing can't reach you · regain 5×VM whenever something within 30 ft dies",
+            "mech": {
+              "deny": [ "charm", "fear", "paralysis", "poison", "exhaustion" ],
+              "cost": { "healing": "none reaches you" },
+              "heal": { "amount": "5×VM", "trigger": "a creature within 30 ft dies" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
         "name": "Destined Death",
-        "description": "Death is not just probable — it is prophesied. The thread tightens. It was always going to. (Save: Constitution)",
+        "description": "Death is not just probable — it is prophesied. The thread tightens. It was always going to.",
         "tiers": [
           {
             "text": "The target is Marked. If reduced to 0 HP before the mark fades (1 minute), they cannot be stabilized by nonmagical means and begin dying with disadvantage on all death saving throws.",
             "card": "Marked 1 min — at 0 HP no nonmagical stabilising, death saves at disadvantage",
             "mech": {
-              "penalty": {
-                "disadvantage": "all death saving throws"
-              }
+              "conditions": [ { "name": "Marked", "duration": "1 minute" } ],
+              "penalty": { "disadvantage": "all death saving throws" }
             }
           },
           {
             "text": "The Mark deepens. If the target dies while Marked, no spell of 5th level or lower can revive them — Revivify, Raise Dead, and similar effects fail automatically.",
-            "card": "Die while Marked and nothing of 5th or lower revives them"
+            "card": "Die while Marked and nothing of 5th or lower revives them",
+            "mech": {
+              "conditions": [ { "name": "Marked" } ],
+              "deny": [ "revival" ]
+            }
           },
           {
             "text": "The Mark reaches the soul's root. If the target dies while Marked, no magic may detect, contact, or interact with their soul until the Mark is dispelled — requiring Wish, True Resurrection, or divine intervention. Even then, success may require a contested roll vs your Verum DC.",
-            "card": "Die while Marked and no magic can reach their soul until the Mark is dispelled"
+            "card": "Die while Marked and no magic can reach their soul until the Mark is dispelled",
+            "mech": {
+              "conditions": [ { "name": "Marked" } ],
+              "deny": [ "revival" ]
+            }
           },
           {
             "text": "Once per long rest, invoke True Destined Death. On a failed save, the Mark becomes absolute — if the target dies, their soul dissolves into the Loom of Creation. No magic, divine authority, dreamwalking, or intervention of any kind can retrieve it. Not Wish. Not True Resurrection. Not a Forerunner. Additionally: The Executioner notices. The DM determines the consequences.",
-            "card": "1/long rest True Destined Death — fail and the soul dissolves into the Loom. Nothing returns them"
+            "card": "1/long rest True Destined Death — fail and the soul dissolves into the Loom. Nothing returns them",
+            "mech": {
+              "conditions": [ { "name": "Marked" } ],
+              "deny": [ "revival" ],
+              "resource": { "name": "True Destined Death", "uses": "1 per long rest" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Stillness",
+        "description": "A heart has a finite number of beats. You are spending theirs.",
+        "tiers": [
+          {
+            "text": "A creature that fails has its speed halved and can take no reactions until the end of its next turn.",
+            "card": "Speed halved · no reactions until the end of their next turn",
+            "mech": {
+              "penalty": { "speed": "halved" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "While the Stillness holds, the creature can take an action or a bonus action on its turn, never both, and no reactions at all.",
+            "card": "While it holds: an action OR a bonus action each turn, never both · no reactions",
+            "mech": {
+              "penalty": { "actions": "an action or a bonus action, not both" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "The beats grow further apart. On each of its turns the creature must choose: move, or act. It cannot do both.",
+            "card": "Each turn they choose — move or act, never both",
+            "mech": {
+              "penalty": { "actions": "move or act, not both" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "The heart stops between beats. The first time a creature fails against this seal it is Paralyzed through its next turn; after that the Stillness only slows it, as above. A creature that drops to 0 hit points while the Stillness holds it dies outright.",
+            "card": "First fail: Paralyzed through their next turn, then slowed · dropping to 0 while it holds = dead outright",
+            "mech": {
+              "conditions": [ { "name": "Paralyzed", "duration": "through their next turn, first failure only" } ],
+              "deny": [ "reactions", "death saving throws" ]
+            }
           }
         ]
       }
     ],
+
     "creation": [
       {
-        "name": "Grave-Raising",
-        "description": "Death makes its own materials.",
+        "name": "Necropolis",
+        "description": "Every battlefield is a graveyard that has not been told yet.",
         "tiers": [
           {
-            "text": "Constructs are undead, raised from a corpse or remains within range. Structures are grave-cold — a creature that touches or strikes one takes 1d6 necrotic damage. Objects are grave-relics, dealing +1d4 necrotic damage on a hit.",
-            "card": "Constructs are undead from a corpse · Structures grave-cold, 1d6 necrotic to touch · Objects +1d4 necrotic",
-            "mech": {
-              "damage": {
-                "dice": [
-                  "1d6",
-                  "1d4"
-                ],
-                "type": "necrotic"
-              }
-            }
+            "text": "Your creations are made of the dead. A Construct is raised from a corpse within range — or from old grave-dust if there is none — and is undead. Structures are bone and cold earth: a creature that touches or strikes one takes 1d6 necrotic damage. Objects are grave-goods and deal an extra 1d4 necrotic damage on a hit.",
+            "card": "Constructs are undead, raised from a corpse · Structures 1d6 necrotic to touch · Objects +1d4 necrotic",
+            "mech": { "damage": { "amount": "1d6", "type": "necrotic", "trigger": "touch or strike a Structure" } }
           },
           {
-            "text": "Your creations are immune to necrotic and poison damage and to exhaustion. A creature that starts its turn touching a Structure cannot regain hit points until the end of its next turn.",
-            "card": "Immune to necrotic, poison and exhaustion · touching a Structure blocks healing until end of their next turn",
-            "mech": {
-              "damage": {
-                "type": "poison"
-              },
-              "conditions": [
-                {
-                  "name": "Exhaustion"
-                }
-              ],
-              "deny": [
-                "healing"
-              ]
-            }
+            "text": "The dead feed the dead. Whenever a creature dies within 30 feet of one of your creations, each of your creations there regains hit points equal to Five Times your Verum Modifier.",
+            "card": "When anything dies within 30 ft, your creations regain 5×VM each",
+            "mech": { "heal": { "amount": "5×VM", "targets": "your creations", "trigger": "a creature dies within 30 ft" } }
           },
           {
-            "text": "Your undead Constructs ignore radiant vulnerability and have advantage on saving throws against Turn Undead. A Structure shaped as a tomb hides what lies inside from divination.",
-            "card": "Undead Constructs ignore radiant vulnerability, advantage vs Turn Undead · tomb Structures hide from divination",
-            "mech": {
-              "buff": {
-                "advantage": "saving throws against Turn Undead"
-              }
-            }
+            "text": "Raise the fresh dead. Instead of choosing a stat block, a Construct may be raised from a creature that died within the last minute, using its own statistics if its CR is no higher than the slot — it keeps its attacks and remembers how to use them, and it is undead and yours.",
+            "card": "Raise a Construct from something dead within the minute — its own stat block, if its CR ≤ the slot",
+            "mech": { "summon": { "from": "a creature dead within 1 minute", "crCap": "slot" } }
           },
           {
-            "text": "Once per seal, a destroyed Construct rises again at half its hit points at the start of your next turn. While a Structure stands, a creature killed within 10 feet of it cannot be revived by spells of 5th level or lower.",
-            "card": "1/seal a destroyed Construct rises at half HP · killed within 10 ft of a Structure = no revival ≤5th",
-            "mech": {
-              "deny": [
-                "revival"
-              ]
-            }
+            "text": "What falls to your dead stands back up. A creature killed by one of your creations rises at the start of your next turn as a Shade under your command — undead, with its own statistics at half its hit points, if its CR is no higher than the slot — lasting until the seal ends. A destroyed Construct rises again once per seal at half its hit points.",
+            "card": "Anything your creations kill rises next turn as your Shade until the seal ends · a destroyed Construct rises once at half HP",
+            "mech": { "summon": { "from": "creatures your creations kill", "as": "Shade", "crCap": "slot", "duration": "until the seal ends" } }
           }
         ]
       }
     ],
+
     "utility": [
       {
-        "name": "Passage of the Threshold",
-        "description": "You do not fear the door. You have keys.",
+        "name": "The Threshold",
+        "description": "You do not fear the door. You have keys, and you know the one who keeps it.",
         "tiers": [
           {
-            "text": "Know how, and roughly when, any creature within 60 feet died. Preserve a corpse from decay for a week. Sense undead within 120 feet.",
-            "card": "Know how and when anyone within 60 ft died · preserve a corpse a week · sense undead 120 ft",
-            "mech": {
-              "utility": true
-            }
+            "text": "Know how, and roughly when, anything within 60 feet died. Ask a corpse that died within the last day three questions, and hear what it knew in life. Remains you touch do not decay while the seal lasts.",
+            "card": "Know how and when anything within 60 ft died · three questions to a corpse dead within a day · halt decay",
+            "mech": { "utility": true }
           },
           {
-            "text": "For 1 hour, undead of a CR below your level ignore you and up to three companions unless you act against them. Perform last rites that allow a willing restless spirit to pass on.",
-            "card": "1 hr: undead below your level ignore you and 3 companions · last rites let a willing spirit pass on",
-            "mech": {
-              "utility": true
-            }
+            "text": "Feel the dying. Sense any creature within a mile that is at 0 hit points or close to death, and in which direction. Undead of a lower CR than your level ignore you and up to three companions unless you act against them.",
+            "card": "Sense anyone dying within a mile · undead below your level ignore you and three companions",
+            "mech": { "utility": true }
           },
           {
-            "text": "For 1 minute, see and speak with any spirit within 300 feet, and once during that time step through a wall as the dead do — up to 10 feet into an adjacent space.",
-            "card": "1 min: see and speak with any spirit within 300 ft · once, step 10 ft through a wall as the dead do",
-            "mech": {
-              "utility": true
-            }
+            "text": "Step onto the threshold itself. For up to 1 minute you stand between life and death — unseen by the living, passing through walls and floors, able to see and speak with any spirit within 300 feet. While you stand there you cannot touch the living, and they cannot touch you.",
+            "card": "Up to 1 min on the threshold — unseen, through walls, speaking with spirits 300 ft · you can't touch the living, or they you",
+            "mech": { "utility": true }
           },
           {
-            "text": "Name a creature that died within the year and learn where its soul went — passed on, bound, trapped, or dissolved — and who last touched it. Or grant a dying willing creature a peaceful death that nothing can turn to undeath.",
-            "card": "Name someone dead within the year and learn where their soul went and who last touched it",
-            "mech": {
-              "utility": true
-            }
+            "text": "Speak with anyone who has died, anywhere, so long as their soul still exists somewhere to answer. Or put one question to Death about how, or when, a named creature will die — and receive an answer that is true, if rarely kind.",
+            "card": "Speak with anyone dead, wherever their soul still exists · or ask Death how or when someone will die",
+            "mech": { "utility": true }
           }
         ]
       }
     ]
   },
+
   "complementEffects": [
     {
-      "name": "Necrotic Edge",
+      "name": "Toll",
       "type": "Offensive",
-      "description": "The primary effect carries the cold touch of death.",
+      "description": "Every death pays a toll to someone. You have arranged to be that someone.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6). The target also cannot regain hit points until the end of their next turn.",
-        "card": "+1 die necrotic · no healing until end of their next turn",
+        "text": "On a hit or failed saving throw, the target takes bonus Necrotic damage equal to one damage die of the primary effect's type (min 1d6). If this seal drops the target to 0 hit points, one creature of your choice within 30 feet gains temporary hit points equal to Twice your Verum Modifier.",
+        "card": "+1 die necrotic · if the seal kills, someone within 30 ft gains 2×VM temp HP",
         "mech": {
-          "damage": {
-            "dice": "1d6",
-            "type": "necrotic"
-          },
-          "deny": [
-            "healing"
-          ]
+          "damage": { "dice": [ "1d6" ], "type": "necrotic" },
+          "heal": { "temp": "2×VM", "trigger": "the seal kills" }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Bonus damage increases to two dice, and the healing prevention lasts for 1 minute.",
-          "card": "+2 dice · healing blocked for 1 min"
+          "text": "Level 5+: Bonus damage increases to two dice, and the temporary hit points become Three Times your Verum Modifier.",
+          "card": "+2 dice · the temp HP becomes 3×VM",
+          "mech": { "heal": { "temp": "3×VM", "trigger": "the seal kills" } }
         },
         {
-          "text": "Level 11+: Bonus damage increases to three dice. If the target is brought to half HP or below by the combined effect, they also have disadvantage on death saving throws until they finish a short rest.",
-          "card": "+3 dice · at half HP or below they also have disadvantage on death saves",
-          "mech": {
-            "penalty": {
-              "disadvantage": "death saving throws until they finish a short rest"
-            }
-          }
+          "text": "Level 11+: Bonus damage increases to three dice, and on a kill the chosen creature also has advantage on its next attack roll or saving throw.",
+          "card": "+3 dice · on a kill they also get advantage on their next attack or save",
+          "mech": { "buff": { "advantage": "next attack roll or saving throw" } }
         }
       ]
     },
     {
-      "name": "Death's Reprieve",
+      "name": "Borrowed Time",
       "type": "Supportive",
-      "description": "Standing close to death's threshold grants a strange protection.",
+      "description": "It is not free. It was never going to be free.",
       "effect": {
-        "text": "When the primary effect deals damage, one ally within 30 feet gains temporary HP equal to your spellcasting modifier + your proficiency bonus.",
-        "card": "An ally within 30 ft gains {VM}+{PB} temp HP"
+        "text": "When the primary effect resolves, name one creature within 30 feet. The next time it would drop to 0 hit points before the end of your next turn, it drops to 1 instead — and gains one level of Exhaustion, because the time had to come from somewhere.",
+        "card": "One creature within 30 ft: its next drop to 0 before your next turn becomes 1 — but it gains a level of Exhaustion",
+        "mech": {
+          "buff": { "deathWard": 1, "range": "30 ft", "until": "the end of your next turn" },
+          "cost": { "exhaustion": 1 }
+        }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Choose up to two allies to receive this benefit.",
-          "card": "Up to two allies"
+          "text": "Level 5+: You may name up to two creatures, and the protection lasts for 1 minute.",
+          "card": "Up to two creatures · lasts 1 minute"
         },
         {
-          "text": "Level 11+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and each ally also gains advantage on their next death saving throw if they make one within the next hour.",
-          "card": "Temp HP doubles · each also gets advantage on their next death save",
-          "mech": {
-            "buff": {
-              "advantage": "their next death saving throw if they make one wit"
-            }
-          }
+          "text": "Level 11+: The debt is forgiven — no Exhaustion — and a creature saved this way also gains temporary hit points equal to Twice your Verum Modifier.",
+          "card": "No more Exhaustion · a saved creature also gains 2×VM temp HP",
+          "mech": { "heal": { "temp": "2×VM", "trigger": "the protection triggers" } }
         }
       ]
     },
     {
-      "name": "Grave Anchor",
+      "name": "Knell",
       "type": "Control",
-      "description": "The weight of finality pins the target in place.",
+      "description": "The bell is not ringing for them yet. It is practising.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 15 feet until the end of their next turn.",
-        "card": "Con save {DC} or −15 ft speed until end of their next turn",
-        "mech": {
-          "save": {
-            "ability": "Constitution"
-          },
-          "movement": {
-            "speed": 15
-          },
-          "penalty": {
-            "speed": -15
-          }
-        }
+        "text": "Creatures that fail hear the bell in their chest and are Frightened of you until the end of their next turn.",
+        "card": "Frightened of you until the end of their next turn",
+        "mech": { "conditions": [ { "name": "Frightened", "duration": "until the end of their next turn" } ] }
       },
       "upgrades": [
         {
-          "text": "Level 5+: On a failed save, the target also has disadvantage on their next Constitution saving throw.",
-          "card": "Fail also gives disadvantage on their next Con save",
-          "mech": {
-            "save": {
-              "ability": "Constitution"
-            },
-            "penalty": {
-              "disadvantage": "their next Constitution saving throw"
-            }
-          }
+          "text": "Level 5+: They also have disadvantage on death saving throws for 1 minute. Death has noticed them.",
+          "card": "Also disadvantage on death saves for 1 minute",
+          "mech": { "penalty": { "disadvantage": "death saving throws for 1 minute" } }
         },
         {
-          "text": "Level 11+: Creatures that fail cannot take the Dash action and suffer −2 to all saving throws until the end of their next turn.",
-          "card": "Those who fail can't Dash and take −2 to all saves",
+          "text": "Level 11+: A creature that drops below half its hit points while Frightened this way freezes where it stands — its speed becomes 0 and it can take no reactions until the fear ends.",
+          "card": "Below half HP while Frightened: speed 0 and no reactions until it ends",
           "mech": {
-            "penalty": {
-              "saves": -2
-            }
+            "movement": { "speed": 0 },
+            "deny": [ "reactions" ]
           }
         }
       ]
     }
   ],
+
   "schema": 2
 }

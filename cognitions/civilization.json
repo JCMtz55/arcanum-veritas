@@ -7,58 +7,6 @@
   "savingThrow": "Charisma",
   "damageType": "Force",
   "verumEffects": {
-    "offensive": [
-      {
-        "name": "Sentence",
-        "description": "The city does not strike you. It finds you guilty, and the striking follows.",
-        "tiers": [
-          {
-            "text": "The damage becomes force and gains +2 dice. One additional die if the target has broken an Edict of yours or attacked within one of your Structures.",
-            "card": "+2 dice force · +1 more if they broke an Edict or attacked inside your Structure",
-            "mech": {
-              "damage": {
-                "bonusDice": 2
-              }
-            }
-          },
-          {
-            "text": "+4 dice. The target cannot issue commands, rally allies, or use Intimidation until the end of its next turn.",
-            "card": "+4 dice · no commands, rallying or Intimidation until end of their next turn",
-            "mech": {
-              "damage": {
-                "bonusDice": 4
-              }
-            }
-          },
-          {
-            "text": "+6 dice. Every creature that attacked alongside the target this round and is within 30 feet takes half this damage — the verdict names accomplices.",
-            "card": "+6 dice · everyone who attacked alongside them within 30 ft takes half — the verdict names accomplices",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              }
-            }
-          },
-          {
-            "text": "+8 dice. The target is declared Outlaw for 1 minute: every attack against it by any creature deals an extra 1d8 force damage, and it cannot benefit from cover inside any settlement or Structure.",
-            "card": "+8 dice · Outlaw 1 min — every attack against them adds 1d8 force, and no cover in any settlement",
-            "mech": {
-              "damage": {
-                "bonusDice": 8,
-                "dice": "1d8",
-                "type": "force"
-              },
-              "conditions": [
-                {
-                  "name": "Outlaw",
-                  "duration": "1 minute"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    ],
     "supportive": [
       {
         "name": "Communal Resonance",

@@ -13,22 +13,32 @@
         "description": "Your fire burns hotter with every drop of fury.",
         "tiers": [
           {
-            "text": "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice.",
-            "card": "+2 dice · damage becomes Cognitive Fire",
+            "text": "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice. The fire does not go out at once — a creature that fails, or is hit, takes Twice your Verum Modifier in fire damage at the start of its next turn.",
+            "card": "+2 dice · damage becomes Cognitive Fire · 2×VM fire at the start of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 2,
                 "type": "fire"
+              },
+              "rider": {
+                "damage": "2×VM",
+                "type": "fire",
+                "when": "start of their next turn"
               }
             }
           },
           {
-            "text": "The fire damage increases by 4 additional dice.",
-            "card": "+4 dice",
+            "text": "The fire damage increases by 4 additional dice, and the burn that lingers becomes Three Times your Verum Modifier at the start of the creature's next turn.",
+            "card": "+4 dice · 3×VM fire at the start of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 4,
                 "type": "fire"
+              },
+              "rider": {
+                "damage": "3×VM",
+                "type": "fire",
+                "when": "start of their next turn"
               }
             }
           },
@@ -62,6 +72,42 @@
                   "tick": "5×VM fire"
                 }
               ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Wildfire",
+        "description": "Fire does not stop when it has done what you asked of it.",
+        "tiers": [
+          {
+            "text": "A creature that fails is set Ablaze, taking Twice your Verum Modifier in Cognitive Fire at the start of each of its turns until it or someone beside it spends an action to smother the flames.",
+            "card": "Ablaze — 2×VM fire each turn until someone spends an action putting them out",
+            "mech": {
+              "conditions": [ { "name": "Ablaze", "tick": "2×VM fire", "escape": "an action to smother" } ]
+            }
+          },
+          {
+            "text": "It spreads. A creature that is Ablaze and ends its turn within 5 feet of another creature sets that creature Ablaze as well, and anything Ablaze sheds bright light in a 10-foot radius and cannot hide.",
+            "card": "Spreads to anyone within 5 ft at the end of a burning creature's turn · nothing Ablaze can hide",
+            "mech": {
+              "conditions": [ { "name": "Ablaze", "tick": "2×VM fire", "spread": "5 ft" } ],
+              "deny": [ "hiding" ]
+            }
+          },
+          {
+            "text": "The burn becomes Five Times your Verum Modifier, the spread reaches 10 feet, and smothering it now takes both an action and a successful Dexterity check against your Verum DC.",
+            "card": "5×VM fire each turn · spreads 10 ft · smothering needs an action AND a Dex check {DC}",
+            "mech": {
+              "conditions": [ { "name": "Ablaze", "tick": "5×VM fire", "spread": "10 ft", "escape": "an action and a Dexterity check vs Verum DC" } ]
+            }
+          },
+          {
+            "text": "The fire no longer needs a body to travel by. At the start of each of your turns it spreads to every creature and flammable thing within 15 feet of anything already burning, and it does not go out while there is still something within reach that will take it.",
+            "card": "Spreads 15 ft from everything burning, every turn · it does not go out while anything nearby can still catch",
+            "mech": {
+              "conditions": [ { "name": "Ablaze", "tick": "5×VM fire", "spread": "15 ft each of your turns" } ],
+              "deny": [ "hiding" ]
             }
           }
         ]
@@ -105,7 +151,7 @@
           },
           {
             "text": "Choose up to 5 allies touched by the flame. Each regains 6d10 hit points, removes one condition (except Petrified or Unconscious), and is wreathed in fire for 1 minute, dealing 1d8 fire damage on melee hits.",
-            "card": "5 allies: 6d10 each, drop a condition, fire resistance",
+            "card": "5 allies: 6d10 each · each drops a condition · wreathed in fire 1 min, 1d8 on their melee hits",
             "mech": {
               "heal": {
                 "amount": "6d10",
@@ -157,7 +203,7 @@
       },
       {
         "name": "Infernal Passion",
-        "description": "You do not merely cast fire — you become it. (Save: Wisdom)",
+        "description": "You do not merely draw fire — you become it.",
         "tiers": [
           {
             "text": "Gain advantage on your next Charisma check or saving throw before the end of your next turn.",
@@ -181,37 +227,28 @@
             }
           },
           {
-            "text": "Enemies within 60 feet who fail a Wisdom saving throw are Frightened of you for 1 round.",
-            "card": "Enemies within 60 ft: Wis save or Frightened 1 round",
+            "text": "You and every ally within 30 feet cannot be Frightened while the fire holds, and each of you adds your Verum Modifier to the first damage roll you make on your turn.",
+            "card": "You and allies within 30 ft: can't be Frightened · +{VM} to your first damage roll each turn",
             "mech": {
-              "save": {
-                "ability": "Wisdom",
-                "range": "60 ft"
+              "buff": {
+                "who": "you and allies",
+                "range": "30 ft",
+                "damage": "+VM to the first damage roll each turn"
               },
-              "conditions": [
-                {
-                  "name": "Frightened",
-                  "duration": "1 round"
-                }
-              ]
+              "deny": [ "fear" ]
             }
           },
           {
-            "text": "You radiate burning presence. Hostile creatures beginning their turn within 30 feet must succeed on a Charisma saving throw or become Charmed, Frightened, or Enraged (your choice) for 1 minute. Allies within range gain immunity to fear and +1 to all damage rolls.",
-            "card": "Enemies starting turn within 30 ft: Cha save or Charmed/Frightened",
+            "text": "You are the fire now. You and your allies within 30 feet are immune to being Frightened or Charmed and add your Verum Modifier to every damage roll, and the first time each round one of you would drop to 0 hit points, that creature instead drops to 1 and is wreathed in flame until the end of its next turn.",
+            "card": "Immune to Frightened and Charmed · +{VM} to every damage roll · once a round, one of you drops to 1 instead of 0",
             "mech": {
-              "save": {
-                "ability": "Charisma",
-                "range": "30 ft"
+              "buff": {
+                "who": "you and allies",
+                "range": "30 ft",
+                "damage": "+VM to every damage roll"
               },
-              "conditions": [
-                {
-                  "name": "Charmed"
-                },
-                {
-                  "name": "Frightened"
-                }
-              ]
+              "deny": [ "fear", "charm" ],
+              "resource": { "name": "Wreathed", "uses": "once each round" }
             }
           }
         ]
@@ -220,7 +257,7 @@
     "control": [
       {
         "name": "Wildflame Wake",
-        "description": "Fire leaves behind more than ashes — it reshapes the ground itself. (Save: Dexterity)",
+        "description": "Fire leaves behind more than ashes — it reshapes the ground itself.",
         "tiers": [
           {
             "text": "Terrain scorched by the effect becomes difficult terrain for enemies until the end of your next turn.",
@@ -343,8 +380,8 @@
             }
           },
           {
-            "text": "See clearly through smoke and heat haze; heat a nonmagical object until it glows; purify food and water by flame.",
-            "card": "See through smoke and haze · heat an object · purify food and water",
+            "text": "See clearly through smoke and heat haze; heat a nonmagical object until it glows; purify food and water by flame; and ride your own flame — once on each of your turns a burst of fire carries you up to 30 feet in any direction, including straight up.",
+            "card": "See through smoke and haze · heat an object · purify food and water · ride your own flame 30 ft in any direction, once a turn",
             "mech": {
               "utility": true
             }
@@ -378,7 +415,6 @@
         "mech": {
           "damage": {
             "dice": [
-              "1d6",
               "1d6"
             ],
             "type": "fire"
@@ -396,7 +432,14 @@
       "upgrades": [
         {
           "text": "Level 5+: Bonus damage increases to two dice.",
-          "card": "+2 dice"
+          "card": "+2 dice",
+          "mech": {
+            "conditions": [
+              {
+                "name": "Ignited"
+              }
+            ]
+          }
         },
         {
           "text": "Level 11+: Bonus damage increases to three dice, and the Ignited condition lasts 1 minute instead of one turn.",
@@ -417,16 +460,25 @@
       "description": "A flicker of warmth accompanies the spell.",
       "effect": {
         "text": "When the primary effect resolves, one creature within 30 feet regains HP equal to your spellcasting modifier. If the primary effect heals, this is added on top.",
-        "card": "One creature within 30 ft regains VM HP"
+        "card": "One creature within 30 ft regains VM HP",
+        "mech": {
+          "heal": { "amount": "VM", "targets": 1, "range": "30 ft" }
+        }
       },
       "upgrades": [
         {
           "text": "Level 5+: Choose up to two creatures to receive this healing.",
-          "card": "Up to two creatures"
+          "card": "Up to two creatures",
+          "mech": {
+            "heal": { "amount": "VM", "targets": 2, "range": "30 ft" }
+          }
         },
         {
           "text": "Level 11+: Each healed creature also gains temporary HP equal to your spellcasting modifier until the start of your next turn.",
-          "card": "Each also gains VM temp HP"
+          "card": "Each also gains VM temp HP",
+          "mech": {
+            "heal": { "amount": "VM", "targets": 2, "temp": "VM" }
+          }
         }
       ]
     },
@@ -462,7 +514,10 @@
         },
         {
           "text": "Level 11+: Creatures that fail cannot willingly move toward the center for 1 round.",
-          "card": "Those who fail can't move toward the centre for 1 round"
+          "card": "Those who fail can't move toward the centre for 1 round",
+          "mech": {
+            "deny": [ "moving toward the centre" ]
+          }
         }
       ]
     },
@@ -485,7 +540,10 @@
       "upgrades": [
         {
           "text": "Level 5+: Penalty extends to all attack rolls until the end of their next turn.",
-          "card": "Disadvantage on all attacks until end of their next turn"
+          "card": "Disadvantage on all attacks until end of their next turn",
+          "mech": {
+            "penalty": { "disadvantage": "all attack rolls until the end of their next turn" }
+          }
         },
         {
           "text": "Level 11+: Creatures that fail also have their movement speed reduced by 10 feet until the end of their next turn.",

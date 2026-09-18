@@ -4,6 +4,7 @@
       "id": "acid",
       "name": "Acid",
       "icon": "💨",
+      "category": "elemental",
       "opposing": "metal",
       "ready": false
     },
@@ -11,13 +12,15 @@
       "id": "air",
       "name": "Air",
       "icon": "💨",
+      "category": "elemental",
       "opposing": "earth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "apathy",
       "name": "Apathy",
       "icon": "🌫️",
+      "category": "psychic",
       "opposing": "passion",
       "ready": true
     },
@@ -25,6 +28,7 @@
       "id": "balance",
       "name": "Balance",
       "icon": "⚖️",
+      "category": "fate",
       "opposing": "chaos",
       "ready": false
     },
@@ -32,6 +36,7 @@
       "id": "beast",
       "name": "Beast",
       "icon": "🐺",
+      "category": "corporeal",
       "opposing": "civilization",
       "ready": true
     },
@@ -39,6 +44,7 @@
       "id": "blood",
       "name": "Blood",
       "icon": "🩸",
+      "category": "corporeal",
       "opposing": "spirit",
       "ready": true
     },
@@ -46,6 +52,7 @@
       "id": "bones",
       "name": "Bones",
       "icon": "🦴",
+      "category": "corporeal",
       "opposing": "flesh",
       "ready": true
     },
@@ -53,6 +60,7 @@
       "id": "carnage",
       "name": "Carnage",
       "icon": "🩸",
+      "category": "dominion",
       "opposing": "harmony",
       "ready": false
     },
@@ -60,6 +68,7 @@
       "id": "civilization",
       "name": "Civilization",
       "icon": "🏛️",
+      "category": "dominion",
       "opposing": "beast",
       "ready": true
     },
@@ -67,6 +76,7 @@
       "id": "control",
       "name": "Control",
       "icon": "👑",
+      "category": "dominion",
       "opposing": "power",
       "ready": false
     },
@@ -74,6 +84,7 @@
       "id": "corruption",
       "name": "Corruption",
       "icon": "🦠",
+      "category": "vital",
       "opposing": "soul",
       "ready": true
     },
@@ -81,6 +92,8 @@
       "id": "death",
       "name": "Death",
       "icon": "💀",
+      "category": "vital",
+      "cosmic": true,
       "opposing": "life",
       "ready": true
     },
@@ -88,13 +101,23 @@
       "id": "disaster",
       "name": "Disaster",
       "icon": "🌪️",
+      "category": "fate",
       "opposing": "protection",
       "ready": false
+    },
+    {
+      "id": "earth",
+      "name": "Earth",
+      "icon": "🪨",
+      "category": "elemental",
+      "opposing": "air",
+      "ready": true
     },
     {
       "id": "fire",
       "name": "Fire",
       "icon": "🔥",
+      "category": "elemental",
       "opposing": "ice",
       "ready": true
     },
@@ -102,6 +125,7 @@
       "id": "flesh",
       "name": "Flesh",
       "icon": "🫀",
+      "category": "corporeal",
       "opposing": "bones",
       "ready": true
     },
@@ -109,6 +133,7 @@
       "id": "fortune",
       "name": "Fortune",
       "icon": "🎲",
+      "category": "fate",
       "opposing": "misfortune",
       "ready": true
     },
@@ -116,6 +141,7 @@
       "id": "growth",
       "name": "Growth",
       "icon": "🌱",
+      "category": "vital",
       "opposing": "decay",
       "ready": true
     },
@@ -123,6 +149,7 @@
       "id": "hate",
       "name": "Hate",
       "icon": "🔥",
+      "category": "psychic",
       "opposing": "love",
       "ready": true
     },
@@ -130,6 +157,7 @@
       "id": "heroism",
       "name": "Heroism",
       "icon": "⚔️",
+      "category": "psychic",
       "opposing": "vileness",
       "ready": true
     },
@@ -137,6 +165,7 @@
       "id": "ice",
       "name": "Ice",
       "icon": "❄️",
+      "category": "elemental",
       "opposing": "fire",
       "ready": true
     },
@@ -144,6 +173,7 @@
       "id": "isolation",
       "name": "Isolation",
       "icon": "🫧",
+      "category": "psychic",
       "opposing": "civilization",
       "ready": true
     },
@@ -151,6 +181,7 @@
       "id": "life",
       "name": "Life",
       "icon": "🌿",
+      "category": "vital",
       "opposing": "death",
       "ready": true
     },
@@ -158,6 +189,7 @@
       "id": "lightning",
       "name": "Lightning",
       "icon": "⚡",
+      "category": "elemental",
       "opposing": "earth",
       "ready": true
     },
@@ -165,6 +197,7 @@
       "id": "metal",
       "name": "Metal",
       "icon": "⚙️",
+      "category": "elemental",
       "opposing": "lightning",
       "ready": true
     },
@@ -172,6 +205,7 @@
       "id": "misfortune",
       "name": "Misfortune",
       "icon": "🩸",
+      "category": "fate",
       "opposing": "fortune",
       "ready": true
     },
@@ -179,6 +213,8 @@
       "id": "nightmare",
       "name": "Nightmare",
       "icon": "🕳️",
+      "category": "umbral",
+      "cosmic": true,
       "opposing": "dream",
       "ready": false
     },
@@ -186,6 +222,8 @@
       "id": "nullity",
       "name": "Nullity",
       "icon": "⬛",
+      "category": "umbral",
+      "cosmic": true,
       "opposing": "creation",
       "ready": true
     },
@@ -193,6 +231,7 @@
       "id": "pain",
       "name": "Pain",
       "icon": "🩹",
+      "category": "corporeal",
       "opposing": "healing",
       "ready": true
     },
@@ -200,6 +239,7 @@
       "id": "power",
       "name": "Power",
       "icon": "👊",
+      "category": "dominion",
       "opposing": "control",
       "ready": true
     },
@@ -207,6 +247,7 @@
       "id": "protection",
       "name": "Protection",
       "icon": "🛡️",
+      "category": "dominion",
       "opposing": "vulnerability",
       "ready": true
     },
@@ -214,6 +255,7 @@
       "id": "shadow",
       "name": "Shadow",
       "icon": "🌑",
+      "category": "umbral",
       "opposing": "light",
       "ready": true
     },
@@ -221,6 +263,7 @@
       "id": "silence",
       "name": "Silence",
       "icon": "🤫",
+      "category": "umbral",
       "opposing": "sound",
       "ready": false
     },
@@ -228,6 +271,8 @@
       "id": "soul",
       "name": "Soul",
       "icon": "🕊️",
+      "category": "vital",
+      "cosmic": true,
       "opposing": "corruption",
       "ready": true
     },
@@ -235,6 +280,7 @@
       "id": "speed",
       "name": "Speed",
       "icon": "⚡",
+      "category": "dominion",
       "opposing": "stagnation",
       "ready": false
     },
@@ -242,8 +288,17 @@
       "id": "toxin",
       "name": "Toxin",
       "icon": "🧪",
+      "category": "elemental",
       "opposing": "life",
       "ready": false
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "icon": "🌊",
+      "category": "elemental",
+      "opposing": "toxin",
+      "ready": true
     }
   ]
 }

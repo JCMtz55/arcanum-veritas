@@ -20,25 +20,18 @@
                 "dice": "1d6",
                 "type": "necrotic"
               },
-              "conditions": [
-                {
-                  "name": "Invisible"
-                }
-              ],
               "penalty": {
                 "disadvantage": "Perception checks until the end of their next turn"
               }
             }
           },
           {
-            "text": "The bonus damage increases to 2d6 necrotic. On a failed Wisdom saving throw, the target is also blinded until the end of their next turn — their mind's model of where you are proving fundamentally unreliable.",
-            "card": "+2d6 · Wis save or Blinded until end of their next turn",
+            "text": "The bonus damage increases to 2d6 necrotic, and a target that is hit or fails its save is also Blinded until the end of its next turn — its mind's model of where you are proving fundamentally unreliable.",
+            "card": "+2d6 necrotic · they're Blinded until the end of their next turn",
             "mech": {
               "damage": {
-                "dice": "2d6"
-              },
-              "save": {
-                "ability": "Wisdom"
+                "dice": "2d6",
+                "type": "necrotic"
               },
               "conditions": [
                 {

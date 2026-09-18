@@ -7,51 +7,6 @@
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
   "verumEffects": {
-    "offensive": [
-      {
-        "name": "Why Bother",
-        "description": "It does not hurt. It simply stops seeming worth it.",
-        "tiers": [
-          {
-            "text": "+2 dice. The target subtracts 1d4 from its next attack roll.",
-            "card": "+2 dice · −1d4 on their next attack",
-            "mech": {
-              "damage": {
-                "bonusDice": 2,
-                "dice": "1d4"
-              }
-            }
-          },
-          {
-            "text": "+4 dice. The target has no bonus action on its next turn.",
-            "card": "+4 dice · no bonus action on their next turn",
-            "mech": {
-              "damage": {
-                "bonusDice": 4
-              }
-            }
-          },
-          {
-            "text": "+6 dice. The target cannot use reactions or legendary actions until the end of its next turn.",
-            "card": "+6 dice · no reactions or legendary actions until end of their next turn",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              }
-            }
-          },
-          {
-            "text": "+8 dice. On a failed save, the target takes no action on its next turn at all.",
-            "card": "+8 dice · on a fail they take no action at all next turn",
-            "mech": {
-              "damage": {
-                "bonusDice": 8
-              }
-            }
-          }
-        ]
-      }
-    ],
     "supportive": [
       {
         "name": "Nothing Reaches You",

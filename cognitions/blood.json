@@ -13,8 +13,16 @@
         "description": "Sacrifice your flesh and your magic drinks the price — spending hit points to fuel automatic crits and Sanguine devastation at its peak.",
         "tiers": [
           {
-            "text": "You may lose HP up to your Constitution modifier × your Hit Dice. Your effect gains +1 damage die of the same type per point of HP sacrificed.",
-            "card": "Spend HP up to Con mod × Hit Dice · +1 damage die per point spent"
+            "text": "As you draw the seal you may give hit points to it. For every 5 hit points you sacrifice, the effect gains one additional damage die of its type, to a maximum of your Proficiency Bonus in dice.",
+            "card": "Sacrifice HP as you draw: +1 damage die per 5 HP, up to {PB} dice",
+            "mech": {
+              "cost": {
+                "hp": "5 per die"
+              },
+              "damage": {
+                "extraDice": "1 per 5 HP sacrificed, max PB"
+              }
+            }
           },
           {
             "text": "For every 10 HP sacrificed, the effect's critical hit range increases by 1 (maximum +3).",

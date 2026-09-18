@@ -6,67 +6,6 @@
   "description": "Evolution, Maturation, Prosperity, Vitality, Expansion.",
   "savingThrow": "Constitution",
   "verumEffects": {
-    "offensive": [
-      {
-        "name": "Overgrow",
-        "description": "It does not stop when it reaches you. That was never the arrangement.",
-        "tiers": [
-          {
-            "text": "The damage becomes piercing and gains +2 dice. At the start of the target's next turn it takes 1d6 piercing as the growth continues.",
-            "card": "+2 dice piercing · 1d6 more at the start of their next turn as it keeps growing",
-            "mech": {
-              "damage": {
-                "bonusDice": 2,
-                "dice": "1d6"
-              }
-            }
-          },
-          {
-            "text": "+4 dice. The ongoing damage becomes 2d6 and repeats each turn for 1 minute, increasing by 1d6 each time it triggers. The target may make a Constitution saving throw against your Verum DC at the end of each of its turns to end it.",
-            "card": "+4 dice · ongoing becomes 2d6, climbing 1d6 each turn for 1 min (Con save {DC} to end)",
-            "mech": {
-              "damage": {
-                "bonusDice": 4,
-                "dice": [
-                  "2d6",
-                  "1d6"
-                ]
-              },
-              "save": {
-                "ability": "Constitution"
-              }
-            }
-          },
-          {
-            "text": "+6 dice. A creature taking the ongoing damage is also Restrained by roots until it breaks free with a Strength check against your Verum DC.",
-            "card": "+6 dice · anything taking the ongoing damage is Restrained by roots (Str check {DC})",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              },
-              "conditions": [
-                {
-                  "name": "Restrained"
-                }
-              ]
-            }
-          },
-          {
-            "text": "+8 dice. A creature killed while overgrown is consumed — 1d4 CR 1/4 plant creatures sprout from it and serve you for 1 minute.",
-            "card": "+8 dice · killed while overgrown = consumed, 1d4 CR 1/4 plants sprout and serve you 1 min",
-            "mech": {
-              "damage": {
-                "bonusDice": 8,
-                "dice": "1d4"
-              },
-              "summon": {
-                "cr": "1"
-              }
-            }
-          }
-        ]
-      }
-    ],
     "supportive": [
       {
         "name": "Accelerate",

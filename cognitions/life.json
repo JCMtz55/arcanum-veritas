@@ -7,50 +7,6 @@
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
   "verumEffects": {
-    "offensive": [
-      {
-        "name": "Vital Theft",
-        "description": "Life is not created here. It is moved.",
-        "tiers": [
-          {
-            "text": "+2 dice. You regain hit points equal to half the damage dealt.",
-            "card": "+2 dice · you regain half the damage dealt",
-            "mech": {
-              "damage": {
-                "bonusDice": 2
-              }
-            }
-          },
-          {
-            "text": "+4 dice. The target's hit point maximum is reduced by the amount you healed until it finishes a long rest.",
-            "card": "+4 dice · their max HP drops by what you healed until they long rest",
-            "mech": {
-              "damage": {
-                "bonusDice": 4
-              }
-            }
-          },
-          {
-            "text": "+6 dice. Healing beyond your maximum spills to allies within 30 feet.",
-            "card": "+6 dice · healing past your maximum spills to allies within 30 ft",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              }
-            }
-          },
-          {
-            "text": "+8 dice. If this reduces a creature to 0 hit points, one ally at 0 hit points within 60 feet returns to half their maximum.",
-            "card": "+8 dice · a kill returns one ally at 0 HP within 60 ft to half their maximum",
-            "mech": {
-              "damage": {
-                "bonusDice": 8
-              }
-            }
-          }
-        ]
-      }
-    ],
     "supportive": [
       {
         "name": "Healing",

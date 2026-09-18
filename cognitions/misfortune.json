@@ -7,51 +7,6 @@
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
   "verumEffects": {
-    "offensive": [
-      {
-        "name": "Everything Goes Wrong",
-        "description": "The damage is incidental. The timing is the weapon.",
-        "tiers": [
-          {
-            "text": "+2 dice. The target's next attack roll or ability check has disadvantage.",
-            "card": "+2 dice · disadvantage on their next attack or check",
-            "mech": {
-              "damage": {
-                "bonusDice": 2
-              }
-            }
-          },
-          {
-            "text": "+4 dice. The target subtracts 1d4 from its next d20 roll of any kind.",
-            "card": "+4 dice · −1d4 on their next d20 of any kind",
-            "mech": {
-              "damage": {
-                "bonusDice": 4,
-                "dice": "1d4"
-              }
-            }
-          },
-          {
-            "text": "+6 dice. The target's critical hits become normal hits for 1 minute, and on a natural 1 it takes this damage again.",
-            "card": "+6 dice · their crits become normal hits 1 min · a natural 1 repeats this damage",
-            "mech": {
-              "damage": {
-                "bonusDice": 6
-              }
-            }
-          },
-          {
-            "text": "+8 dice. For 1 minute the target rolls every d20 twice and takes the lower result.",
-            "card": "+8 dice · 1 min: every d20 they roll is twice, taking the lower",
-            "mech": {
-              "damage": {
-                "bonusDice": 8
-              }
-            }
-          }
-        ]
-      }
-    ],
     "supportive": [
       {
         "name": "Borrowed Luck",

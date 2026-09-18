@@ -76,17 +76,42 @@ The card shows:
 
 ---
 
+## Domains
+
+Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Seven domains, sized 4–8, no dumping ground:
+
+| Domain | | What it is |
+|---|---|---|
+| **Elemental** | 9 | Acid · Air · Earth · Fire · Ice · Lightning · Metal · Toxin · Water — matter and force |
+| **Corporeal** | 5 | Beast · Blood · Bones · Flesh · Pain — blood, bone and beast |
+| **Vital** | 5 | Corruption · Death · Growth · Life · Soul — the living and the unliving |
+| **Psychic** | 4 | Apathy · Hate · Heroism · Isolation — feeling turned outward |
+| **Umbral** | 4 | Nightmare · Nullity · Shadow · Silence — absence, erasure, the unmade |
+| **Fate** | 4 | Balance · Disaster · Fortune · Misfortune — what happens to you |
+| **Dominion** | 6 | Carnage · Civilization · Control · Power · Protection · Speed — will imposed on the world |
+
+Domain is not the same question as cosmological weight, so it isn't the same field. **`"cosmic": true`** marks the four that carry campaign-level implications — **Death · Nightmare · Nullity · Soul** — regardless of which domain they sit in. They show a ★ in the rail and a *campaign-level* tag in the Codex.
+
+A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
+
+Category lives in `index.json` rather than the individual Cognition files on purpose. The rail draws from the one file loaded at boot; per-Cognition JSON is fetched only when you click something. Storing it per-file would mean fetching all 36 up front just to draw a sorted sidebar.
+
 ## Cognition Status
 
 In `index.json`, each cognition has a `ready` flag:
 - `true` — JSON file exists, cognition is fully playable
 - `false` — Placeholder only; shown as **SOON** in the sidebar and cannot be selected
 
-### Ready Cognitions (33)
-Acid · Air · Apathy · Balance · Beast · Blood · Bones · Civilization · Control · Corruption · Creation · Death · Disaster · Dream · Fire · Flesh · Fortune · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · Metal · Misfortune · Nightmare · Nullity · Pain · Power · Protection · Shadow · Soul
+### Ready Cognitions (28)
+Air · Apathy · Beast · Blood · Bones · Civilization · Corruption · Death · **Earth** · Fire · Flesh · Fortune · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · Metal · Misfortune · Nullity · Pain · Power · Protection · Shadow · Soul · **Water**
 
-### Pending Cognitions (in index, no JSON yet)
-Light · Darkness · Time · Space · Mind · Storm · Earth · Entropy · Binding · Void · Calm
+### Held Back (9) — JSON written, `ready: false`
+Acid · Balance · Carnage · Control · Disaster · Nightmare · Silence · Speed · Toxin
+
+Every one of these has a complete `.json` file on disk; they are flagged off in the index, not missing. Flip `"ready": true` to bring one in.
+
+### Not Yet Written
+Light · Darkness · Time · Space · Mind · Storm · Entropy · Binding · Void · Calm — no index entry and no file.
 
 ---
 
@@ -143,6 +168,14 @@ Place a new `.json` file in `cognitions/` following this structure:
 - `tiers` must always be an array of exactly 4 strings
 - `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`
 
+**Offensive Verums — read this before writing one.**
+
+- **Offense is optional.** Nine Cognitions have no Offensive pool — Apathy, Civilization, Control, Growth, Heroism, Isolation, Life, Misfortune, Silence — and the builder simply doesn't offer them an Offensive Ring. Only write one if the Cognition's own description says it hurts things. Note the side effect: a Cognition with neither an Offensive nor a Creation pool can't make **Constructs**, since Constructs borrow the Offensive pool.
+- **An offensive Verum changes what the attack *is*, not how big it is.** Pick a shape: **escalation** (Power's Rampage, Carnage's Bloodfrenzy), **propagation** (Lightning's Chain Spark, Fire's Wildfire, Water's The Flood), **denial** (Air's Razoredge, Power's Overwhelming Force, Nullity's Erasure), **conversion** (Blood-Surge, Protection's Answering Blow), or **payoff** against a set-up target (Ice's Shatterpoint).
+- **A bonus-dice ladder is the exception, and it's paid for.** Only three Cognitions use one, because for them raw output *is* the fantasy: **Fire** +2/4/6/8 (the furnace — the biggest ladder, so its riders are only burn ticks), **Earth** +1/2/4/5 (weight — lighter, because it buries), **Ice** +1/2/3/4 (payoff — the real damage comes from Frost Stacks and Restrained targets). Every tier spends roughly **3 / 6 / 9 / 12 dice' worth** of value; a Verum that adds riders adds fewer dice.
+- **One Seal, One Roll applies to Verum text too.** Never write "must succeed on a Wisdom save" inside a tier — riders land on the seal's own hit or failed save. The only extra d20s allowed are *later* ones on the Core's ability: escaping, or a repeat save to end an ongoing effect.
+- **`mech.conditions` is for what you inflict.** An immunity goes in `deny` (it renders as `no fear`); a condition the target must *already have* for a payoff belongs in the text only — listing it under `conditions` shows it on the card as something the seal imposes.
+
 ### 2. Register it in index.json
 Add an entry to the `cognitions` array in `index.json`:
 
@@ -151,10 +184,13 @@ Add an entry to the `cognitions` array in `index.json`:
   "id": "your-id",
   "name": "Your Name",
   "icon": "✨",
+  "category": "elemental",
   "opposing": "opposing-id",
   "ready": true
 }
 ```
+
+`category` must be one of `elemental`, `corporeal`, `vital`, `psychic`, `umbral`, `fate`, `dominion` — anything else (or a missing field) drops the entry into an **Uncategorised** group at the bottom of the rail rather than hiding it. Add `"cosmic": true` only for campaign-level Cognitions.
 
 Set `"ready": false` if you want it to appear as a placeholder before the JSON is finished.
 
@@ -164,7 +200,7 @@ Set `"ready": false` if you want it to appear as a placeholder before the JSON i
 
 Paste this into any Claude chat to convert an Obsidian markdown cognition file into a ready-to-use JSON:
 
-> Convert the following Obsidian markdown file into a JSON cognition for the Arcanum Veritas Builder. Follow this exact structure: `id`, `name`, `icon`, `opposing`, `description`, `savingThrow`, `damageType`, `verumEffects` (with `offensive`, `supportive`, `control` sub-arrays, each effect having `name`, `description`, and `tiers` as an array of exactly 4 strings scaling weakest to strongest), and `complementEffects` (each with `name`, `type`, `description`, `effect`, and `upgrades` as an array of 2 strings for Level 5+ and Level 11+). Tiers should scale in scope and qualitative power, not just numbers. Tone: mythic but mechanically precise.
+> Convert the following Obsidian markdown file into a JSON cognition for the Arcanum Veritas Builder. Follow this exact structure: `id`, `name`, `icon`, `opposing`, `description`, `savingThrow`, `damageType`, `verumEffects` (with `supportive` and `control` sub-arrays, plus `offensive`, `creation` and `utility` only where the Cognition genuinely does those things — each effect having `name`, `description`, and `tiers` as an array of exactly 4 strings scaling weakest to strongest), and `complementEffects` (each with `name`, `type`, `description`, `effect`, and `upgrades` as an array of 2 strings for Level 5+ and Level 11+). Tiers should scale in scope and qualitative power, not just numbers. Do not give an offensive Verum a flat "+2/+4/+6/+8 dice" ladder — make it change what the attack does (escalate, spread, deny, convert, or pay off a set-up), and never ask the target for a saving throw inside a tier. Tone: mythic but mechanically precise.
 >
 > **[PASTE MARKDOWN FILE HERE]**
 
@@ -178,12 +214,26 @@ Pick a Cognition from the rail and the reader shows its themes, saving throw, da
 
 Formulas resolve against the Verum mod and Dream mod in the command bar, same as the composer. **Print entry** prints the open Cognition on its own.
 
+## The Rings Tab
+
+The **Rings** tab reads one Composition subtype end to end, away from any particular seal — the same tables as the Composition Reference below, but live.
+
+Pick a Ring from the rail (grouped by family: Offensive, Supportive, Control, Creation, Utility) and the reader shows:
+
+- **What it asks for** — the seal attack roll, a saving throw, your weapon attack, or nothing at all, stated per Ring rather than inferred. Plus reaction, concentration and shape flags.
+- **Verum pool** — which pool fills this Ring, and what it falls back to when the Cognition has none written. If a Core is selected in the composer, it also says what that Core resolves to.
+- **Scaling, all nine slots** — the full table, not just your current row, with formulas resolved against your Verum mod and the live slot lit. Click any row to set the whole tool to that slot.
+- **How it resolves** — the Ring's complete rules note, every paragraph, not the one-line excerpt the composer shows.
+- **Shape** (where a radius exists to shape) and **Manner of drawing**, with the Manners this Ring forbids struck out and labelled — Rite is not available to Ward or Direct Attack, Inscribed is not available to Ward.
+
+Opening the tab lands on whatever Ring the composer is currently building, so the three tabs stay in step. **Print ring** prints the open Ring on its own.
+
 ## Layout
 
 The builder is a three-column workbench, sized for a laptop or tablet.
 
-- **Command bar** (pinned): the Composer / Codex tabs, slot and level steppers, Verum mod and Dream mod, and the live numbers — to-hit, Verum DC, and how many cognitions you've used of your budget. These never scroll away. Arrow keys nudge the slot; shift+arrows nudge the level.
-- **Left rail**: every cognition, searchable. A selected Keystone is marked `core`, complements `sigil`. Entries grey out when you hit your budget or the cognition isn't written yet.
+- **Command bar** (pinned): the Composer / Codex / Rings tabs, slot and level steppers, Verum mod and Dream mod, and the live numbers — to-hit, Verum DC, and how many cognitions you've used of your budget. These never scroll away. Arrow keys nudge the slot; shift+arrows nudge the level.
+- **Left rail**: every cognition, grouped under its domain, narrowed by the domain picker above the search box. A selected Keystone is marked `core`, complements `sigil`. Entries grey out when you hit your budget or the cognition isn't written yet.
 - **Centre**: the composer — Ring, subtype, shape, manner, Verum effect with its tier ladder, the scaling strip (click any slot to jump to it), and each sigil with its chosen effect.
 - **Right**: the seal card. Play or Full, copy, print.
 
@@ -221,6 +271,8 @@ Both copy and print. Note that the PLAY card's compression is text-pattern based
 
 ## Composition Reference
 
+*The **Rings** tab in the tool covers all of this with the full nine-slot tables — this is the paper copy.*
+
 ### Offensive
 | Ring | Delivery |
 |------|----------|
@@ -232,16 +284,18 @@ Both copy and print. Note that the PLAY card's compression is text-pattern based
 ### Supportive
 | Ring | Delivery |
 |------|----------|
-| Self | No roll · caster only · the only Ring for internal effects |
-| Ally | Willing creatures in range · full healing each |
+| Self | No roll · caster only · the only Ring for internal effects · heals ~1.5× Ally's per-target number, buff runs two slots longer |
+| Ally | Willing creatures in range · full healing each · you may be a target, but you heal as a target of Ally, not as a Self · out-totals Self from the 3rd slot up |
 | Aura | Creatures of your choice within radius · concentration |
 | Ward | **Reaction** · absorb damage · Verum on the attacker (or the protected creature) · never both absorb and Verum temp HP |
 
 ### Control
 | Ring | Delivery |
 |------|----------|
-| Targeted | Each target saves vs Verum DC · **success = no effect** |
-| Area | Zone · save on appearance and start of turn inside · **success = nothing this turn** · concentration · Shape |
+| Targeted | Each target saves vs Verum DC **at disadvantage on that first save** · success = no effect · no concentration · longest reach in the system · repeat saves are rolled normally |
+| Area | Zone · save on appearance and start of turn inside · success = nothing this turn · re-asks every turn · denies ground · concentration · Shape |
+
+**Targeted vs Area.** Targeted buys reliability against named creatures — disadvantage on the save, no concentration, and reach a step beyond what a zone can be thrown. Area buys persistence and space — it never rolls at disadvantage, but it asks the question again every turn and does not care how many bodies walk in. Bind a creature, or deny a room.
 
 ### Creation
 | Ring | Delivery |
@@ -271,7 +325,7 @@ Both copy and print. Note that the PLAY card's compression is text-pattern based
 - The tool has no save state — selections reset on page refresh
 - Complement Effects filter to match the Ring's Verum pool automatically (Creation → Control / Offensive for Constructs; Utility → Supportive)
 - The **Clear Selection** button at the bottom of the sidebar resets everything
-- Print layout is supported — use browser print to export a spell card, or **Print entry** in the Codex for a Cognition
+- Print layout is supported — use browser print to export a spell card, **Print entry** in the Codex for a Cognition, or **Print ring** in the Rings tab for a Composition
 - No build step, no framework, no bundler. Serve the folder over HTTP — GitHub Pages, Live Server, `python -m http.server` — and it runs. `file://` will not work, because browsers block `fetch()` there
 
 ---
