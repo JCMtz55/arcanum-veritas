@@ -5,7 +5,7 @@
   "opposing": "space",
   "description": "Moments, Regret, Foresight, Aging, Stasis.",
   "savingThrow": "Wisdom",
-  "damageType": "Temporal",
+  "damageType": "Necrotic",
 
   "verumEffects": {
     "offensive": [
@@ -14,10 +14,10 @@
         "description": "What it did, it did not do.",
         "tiers": [
           {
-            "text": "The damage is turned into Temporal damage. A creature that fails is pulled back to where it stood at the start of its last turn, and loses its reaction until the start of its next turn.",
-            "card": "Damage becomes Temporal · rewound to where they stood at the start of their last turn · no reaction until their next turn",
+            "text": "The damage is turned into Necrotic damage. A creature that fails is pulled back to where it stood at the start of its last turn, and loses its reaction until the start of its next turn.",
+            "card": "Damage becomes Necrotic · rewound to where they stood at the start of their last turn · no reaction until their next turn",
             "mech": {
-              "damage": { "type": "temporal" },
+              "damage": { "type": "necrotic" },
               "movement": { "rewind": "to where it stood at the start of its last turn" },
               "deny": [ "reactions" ]
             }
@@ -26,7 +26,7 @@
             "text": "Whatever it gained since then is taken back: any hit points it regained and any temporary hit points it gained since the start of its last turn are lost.",
             "card": "Also loses every hit point and temp HP it gained since the start of its last turn",
             "mech": {
-              "damage": { "type": "temporal" },
+              "damage": { "type": "necrotic" },
               "movement": { "rewind": "to where it stood at the start of its last turn" },
               "deny": [ "reactions" ]
             }
@@ -35,7 +35,7 @@
             "text": "Whatever it began unravels. A spell or effect it cast or started since the start of its last turn ends, as if it had never begun — though the slot or use it spent stays spent.",
             "card": "Anything it cast or started since its last turn ends as if it never happened — the slot stays spent",
             "mech": {
-              "damage": { "type": "temporal" },
+              "damage": { "type": "necrotic" },
               "dispel": { "what": "anything it cast or began since the start of its last turn" },
               "deny": [ "reactions" ]
             }
@@ -44,7 +44,7 @@
             "text": "Its last turn never happened. Every creature it damaged since the start of its last turn is restored to the hit points it had before, and every condition it imposed in that time ends.",
             "card": "Its last turn is erased — everyone it damaged gets those hit points back, and every condition it imposed ends",
             "mech": {
-              "damage": { "type": "temporal" },
+              "damage": { "type": "necrotic" },
               "heal": { "amount": "all damage it dealt since the start of its last turn", "targets": "every creature it damaged" },
               "dispel": { "what": "every condition it imposed since the start of its last turn" },
               "deny": [ "reactions" ]
@@ -283,10 +283,10 @@
       "type": "Offensive",
       "description": "The seal lands, and then — a moment later — it lands again in their bones.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus Temporal damage equal to one damage die of the primary effect's type (min 1d6), and next round it takes its turn last in the initiative order.",
-        "card": "+1 die temporal · they act last in the initiative order next round",
+        "text": "On a hit or failed saving throw, the target takes bonus Necrotic damage equal to one damage die of the primary effect's type (min 1d6), and next round it takes its turn last in the initiative order.",
+        "card": "+1 die necrotic · they act last in the initiative order next round",
         "mech": {
-          "damage": { "dice": [ "1d6" ], "type": "temporal" },
+          "damage": { "dice": [ "1d6" ], "type": "necrotic" },
           "penalty": { "initiative": "last next round" }
         }
       },

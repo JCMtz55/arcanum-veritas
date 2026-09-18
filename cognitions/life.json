@@ -3,130 +3,196 @@
   "name": "Life",
   "icon": "🌿",
   "opposing": "death",
-  "description": "Vitality, Creation, Growth, Renewal, Existence.",
+  "description": "Vitality, Creation, Growth, Renewal, Existence. Life is not gentle — it is relentless. It pushes a root through stone and drags a dying animal another mile. Those who carry it do not close wounds; they flood a body with so much living force that the wound stops mattering. The danger is the same as the power: Life fills whatever vessel it finds, and only the caster's discipline decides whether that is a miracle or an infestation.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
   "verumEffects": {
+    "offensive": [
+      {
+        "name": "Vital Theft",
+        "description": "Life is not created here. It is moved.",
+        "tiers": [
+          {
+            "text": "The damage becomes Necrotic as the life is pulled out of the target, and none of it is wasted: you, or allies of your choice within 30 feet, regain hit points equal to half the damage dealt, shared out as you choose.",
+            "card": "Damage becomes Necrotic · you and allies within 30 ft regain half the damage dealt, shared as you choose",
+            "mech": {
+              "damage": { "type": "necrotic" },
+              "heal": { "amount": "half the damage dealt", "who": "you and allies within 30 ft" }
+            }
+          },
+          {
+            "text": "The theft is whole: the healing equals all of the damage dealt, and a creature that fails has its hit point maximum reduced by the same amount until it finishes a long rest — what you took does not grow back.",
+            "card": "Healing equals ALL the damage dealt · those who fail lose that much max HP until a long rest",
+            "mech": {
+              "damage": { "type": "necrotic" },
+              "heal": { "amount": "the damage dealt", "who": "you and allies within 30 ft" },
+              "penalty": { "maxHP": "reduced by the damage dealt until a long rest" }
+            }
+          },
+          {
+            "text": "A creature that fails cannot regain hit points until the end of its next turn, and healing you give beyond a creature's maximum becomes temporary hit points instead of being lost.",
+            "card": "Those who fail can't heal until the end of their next turn · overflow healing becomes temp HP",
+            "mech": {
+              "damage": { "type": "necrotic" },
+              "heal": { "amount": "the damage dealt", "overflow": "temporary HP" },
+              "deny": [ "healing" ]
+            }
+          },
+          {
+            "text": "Life goes where it is owed. If this reduces a creature to 0 hit points, one ally within 60 feet who is at 0 hit points — or who died within the last minute with its body intact — rises with hit points equal to half its maximum.",
+            "card": "If this drops a creature to 0, an ally within 60 ft at 0 HP (or dead within the minute) rises at half their max HP",
+            "mech": {
+              "damage": { "type": "necrotic" },
+              "revive": "one ally at 0 HP or dead within 1 minute, to half max HP"
+            }
+          }
+        ]
+      }
+    ],
     "supportive": [
       {
-        "name": "Healing",
-        "description": "Your touch accelerates the very rhythm of cellular regeneration.",
+        "name": "Overriding Vitality",
+        "description": "You do not close the wound. You make it irrelevant.",
         "tiers": [
           {
-            "text": "When a healing effect is used, it gains +1 additional die of the same type.",
-            "card": "Healing effects gain +1 die of the same type"
-          },
-          {
-            "text": "Healing gains +2 dice, and the target also gains 1d4 temporary HP at the start of their next turn.",
-            "card": "+2 dice · target also gets 1d4 temp HP at the start of their next turn",
+            "text": "Life floods in past the dice: the healing gains 10 hit points × the slot level, shared out as you choose among its targets. Healing beyond a creature's maximum becomes temporary hit points instead of being lost.",
+            "card": "+10 × {SLOT} HP, shared among the targets · overflow becomes temp HP",
             "mech": {
-              "damage": {
-                "bonusDice": 2,
-                "dice": "1d4"
-              }
+              "heal": { "perSlot": 10, "overflow": "temporary HP" }
             }
           },
           {
-            "text": "Healing gains +3 dice, and removes one condition or disease of your choice from the target.",
-            "card": "+3 dice · removes one condition or disease",
+            "text": "The flood deepens to 20 hit points × the slot level. Each target is also cleansed of one of: Blinded, Deafened, Paralyzed, Poisoned, or one disease.",
+            "card": "Now +20 × {SLOT} HP · each target sheds Blinded, Deafened, Paralyzed, Poisoned or a disease",
             "mech": {
-              "damage": {
-                "bonusDice": 3
-              }
+              "heal": { "perSlot": 20, "overflow": "temporary HP" },
+              "cleanse": [ "Blinded", "Deafened", "Paralyzed", "Poisoned", "a disease" ]
             }
           },
           {
-            "text": "Healing becomes absolute — once per long rest you may restore a creature to full HP. Additionally, if a creature died within the last round and their body is intact, you may revive them to 1 HP without expending a spell slot.",
-            "card": "1/long rest restore a creature to full · or revive one dead within the round to 1 HP, no slot"
-          }
-        ]
-      },
-      {
-        "name": "Restorative",
-        "description": "You do not mend flesh — you return identity.",
-        "tiers": [
-          {
-            "text": "You can restore one minor physical defect — a missing finger, damaged eye, or scarred voice.",
-            "card": "Restore a minor defect — a finger, an eye, a scarred voice"
-          },
-          {
-            "text": "You may regrow lost limbs, restore damaged senses, and cleanse any mundane poison or disease.",
-            "card": "Regrow limbs, restore senses, cleanse any mundane poison or disease"
-          },
-          {
-            "text": "You can rebuild internal organs, erase magical corruption, and reverse up to 6 months of physical trauma from the target's body.",
-            "card": "Rebuild organs, erase magical corruption, undo 6 months of trauma"
-          },
-          {
-            "text": "You may rebuild a being from a handful of remains, returning them to prime health. May undo aging, deformity, or cursed mutations. You may additionally choose to evolve the creature toward its ideal physical form — at DM discretion.",
-            "card": "Rebuild a being from remains · undo aging, deformity or cursed mutation",
+            "text": "The flood reaches 30 hit points × the slot level. Each target's hit point maximum is restored if it had been reduced, it heals one Wound, and for the buff's duration its hit point maximum cannot be reduced.",
+            "card": "Now +30 × {SLOT} HP · max HP restored and can't be reduced · heals one Wound",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Cursed"
-                }
-              ]
+              "heal": { "perSlot": 30, "overflow": "temporary HP" },
+              "buff": { "who": "each target", "maxHP": "restored, and can't be reduced" }
+            }
+          },
+          {
+            "text": "Absolute. The healing dice are not rolled — they are treated as their maximum — and a target that died within the last minute with its body intact is brought back to life by it.",
+            "card": "ABSOLUTE — healing dice count as their maximum · a target dead within the minute returns to life with it",
+            "mech": {
+              "heal": { "perSlot": 30, "maximized": true, "overflow": "temporary HP" },
+              "revive": "a target dead within 1 minute"
             }
           }
         ]
       },
       {
-        "name": "Sentience",
-        "description": "Life demands more than form — it seeks purpose.",
+        "name": "Regeneration",
+        "description": "You do not mend flesh — you return it to what it was meant to be.",
         "tiers": [
           {
-            "text": "You may animate a plant or small construct for 1 minute. It gains limited awareness and follows basic commands.",
-            "card": "Animate a plant or small construct 1 min — basic commands"
+            "text": "The target regenerates: at the start of each of its turns while the buff lasts, it regains hit points equal to your Verum Modifier + the slot level. It is also cured of one mundane disease or poison, and one minor defect — a missing finger, a damaged eye, a scarred voice — grows back.",
+            "card": "Regenerates {VM} + {SLOT} HP at the start of each of its turns while the buff lasts · cures a mundane poison or disease · restores a minor defect",
+            "mech": {
+              "heal": { "perTurn": "VM + slot level", "duration": "buff duration" }
+            }
           },
           {
-            "text": "You may infuse sentience into a newborn creature, seed, homunculus, or egg. The being begins learning immediately and recognizes you as its creator.",
-            "card": "Infuse sentience into a newborn, seed, homunculus or egg — it knows you as creator"
+            "text": "The regeneration doubles, to twice your Verum Modifier + the slot level each turn. Lost limbs regrow by the end of its next turn, damaged senses return, and any curse or magical disease of the seal's slot level or lower is lifted.",
+            "card": "Regenerates 2 × VM + {SLOT} each turn · regrows limbs and senses · lifts curses and magical diseases of the slot's level or lower",
+            "mech": {
+              "heal": { "perTurn": "2 × VM + slot level", "duration": "buff duration" },
+              "cleanse": [ "curses of the slot level or lower", "magical diseases of the slot level or lower" ]
+            }
           },
           {
-            "text": "The created creature is fully sapient — it develops a unique soul with emotions, memory, and ambition. Unstable environments may produce feral or corrupted variants at DM discretion.",
-            "card": "The creation is fully sapient, with its own soul and ambition"
+            "text": "Nothing that was taken stays taken. Organs rebuild, magical corruption is erased, a level of Exhaustion is removed, and up to six months of physical trauma is undone. The regeneration also works while the target is at 0 hit points, so a dying creature heals back up on its own.",
+            "card": "Rebuild organs, erase magical corruption, remove 1 Exhaustion, undo 6 months of trauma · regeneration works at 0 HP",
+            "mech": {
+              "heal": { "perTurn": "2 × VM + slot level", "worksAtZero": true },
+              "cleanse": [ "magical corruption", "1 level of Exhaustion" ]
+            }
           },
           {
-            "text": "You may create true life — a fully realized soul with a unique Cognition Seed. This creation draws cosmic attention and may disrupt prophecy, fate, or planar balance. You do not choose what it ultimately becomes.",
-            "card": "Create true life with a unique Cognition Seed — this draws cosmic attention"
+            "text": "Rebuild a being from a handful of remains, returning it to prime health — undoing aging, deformity, or cursed mutation. While the buff lasts, the target cannot die from hit point loss: at 0 hit points it stays conscious and keeps regenerating.",
+            "card": "Rebuild a being from remains · undo aging, deformity or cursed mutation · while it lasts, the target can't die from HP loss",
+            "mech": {
+              "revive": "rebuilt from remains",
+              "buff": { "who": "target", "deathImmunity": "can't die from hit point loss; conscious at 0 HP" }
+            }
           }
         ]
       },
       {
         "name": "Overflowing Vitality",
-        "description": "You surge with living force, overflowing into the world.",
+        "description": "You surge with living force, and it spills over into everyone near you.",
         "tiers": [
           {
-            "text": "Allies within 10 feet gain 1d4 temporary hit points at the start of their turns for 1 minute.",
-            "card": "Allies within 10 ft gain 1d4 temp HP at the start of their turns, 1 min",
+            "text": "For the buff's duration, you and allies within 15 feet of you gain temporary hit points equal to your Verum Modifier at the start of each of their turns.",
+            "card": "While the buff lasts, you and allies within 15 ft gain {VM} temp HP at the start of each of their turns",
             "mech": {
-              "damage": {
-                "dice": "1d4"
-              },
-              "heal": {
-                "tempHP": true
-              }
+              "heal": { "tempHP": true, "perTurn": "VM", "radius": "15 ft" }
             }
           },
           {
-            "text": "Whenever you heal a creature, one additional creature within 30 feet gains half that amount as overflow healing.",
-            "card": "Every heal you cast sends half again to another creature within 30 ft"
-          },
-          {
-            "text": "For 1 minute, all allies within a 60-foot radius regain 1d6 hit points at the start of each of their turns.",
-            "card": "1 min: allies within 60 ft regain 1d6 at the start of each of their turns",
+            "text": "The seal's healing spills over: every other ally within 30 feet of a target regains half of what that target regained.",
+            "card": "The seal's healing spills — every other ally within 30 ft of a target regains half of what it did",
             "mech": {
-              "damage": {
-                "dice": "1d6"
-              },
-              "heal": {
-                "amount": "1d6"
-              }
+              "heal": { "spill": "half, to every other ally within 30 ft" }
             }
           },
           {
-            "text": "You become a Font of Life for 1 minute — you heal 20 HP at the start of every turn, allies in range automatically succeed on death saving throws, and allies that died this round rise to 1 HP unless their body was disintegrated.",
-            "card": "Font of Life 1 min — you heal 20/turn, allies auto-pass death saves, this round's dead rise at 1 HP"
+            "text": "The spill becomes a tide. For 1 minute, you and allies within 60 feet regain your Verum Modifier + your Proficiency Bonus in hit points at the start of each of their turns, and automatically succeed on death saving throws.",
+            "card": "1 min: you and allies within 60 ft regain {VM}+{PB} at the start of each turn and auto-succeed on death saves",
+            "mech": {
+              "heal": { "perTurn": "VM + PB", "radius": "60 ft", "duration": "1 minute" },
+              "buff": { "who": "allies within 60 ft", "deathSaves": "auto-succeed" }
+            }
+          },
+          {
+            "text": "You become a Font of Life for 1 minute. You and allies within 60 feet regain 20 hit points at the start of each of their turns, and an ally who dies inside the Font rises again at the start of your next turn with half its hit points — unless its body was destroyed.",
+            "card": "FONT OF LIFE, 1 min — you and allies within 60 ft regain 20/turn · allies who die inside rise at your next turn with half their HP",
+            "mech": {
+              "heal": { "perTurn": 20, "radius": "60 ft", "duration": "1 minute" },
+              "revive": "allies who die inside, at the start of your next turn, with half their HP"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Undying",
+        "description": "Life does not agree to end.",
+        "tiers": [
+          {
+            "text": "For the buff's duration, the first time the target would drop to 0 hit points, it drops to 1 hit point instead.",
+            "card": "While the buff lasts, the first time the target would drop to 0 HP it drops to 1 instead",
+            "mech": {
+              "buff": { "who": "target", "cheatDeath": "once — drops to 1 HP instead of 0" }
+            }
+          },
+          {
+            "text": "When it holds on, it surges back: it immediately regains 10 hit points × the slot level.",
+            "card": "When it holds at 1 HP, it surges back with +10 × {SLOT} HP",
+            "mech": {
+              "buff": { "who": "target", "cheatDeath": "once" },
+              "heal": { "onTrigger": "10 × slot level" }
+            }
+          },
+          {
+            "text": "It holds on twice, and while the buff lasts it cannot be killed outright by massive damage or a death effect — it drops to 0 hit points instead.",
+            "card": "Holds on twice · can't be killed outright by massive damage or death effects",
+            "mech": {
+              "buff": { "who": "target", "cheatDeath": "twice" },
+              "deny": [ "instant death" ]
+            }
+          },
+          {
+            "text": "It cannot die while the buff lasts. At 0 hit points it stays conscious and keeps acting, it makes no death saving throws, and damage cannot push it past 0.",
+            "card": "It CAN'T DIE while this lasts — conscious and acting at 0 HP, no death saves",
+            "mech": {
+              "buff": { "who": "target", "deathImmunity": "can't die; conscious at 0 HP" }
+            }
           }
         ]
       }
@@ -137,48 +203,34 @@
         "description": "Too much life, too fast, in a body that never agreed to it.",
         "tiers": [
           {
-            "text": "On a failed Constitution save, the target's speed is halved and it cannot take reactions as tissue overgrows.",
-            "card": "Fail: speed halved, no reactions, as tissue overgrows",
+            "text": "Tissue overgrows in a creature that fails: its speed is halved, it cannot take reactions, and it has disadvantage on Dexterity saving throws.",
+            "card": "Fail: speed halved, no reactions, disadvantage on Dex saves as tissue overgrows",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              },
-              "deny": [
-                "reactions"
-              ]
+              "save": { "ability": "Constitution" },
+              "deny": [ "reactions" ],
+              "penalty": { "speed": "halved", "disadvantage": "Dexterity saving throws" }
             }
           },
           {
-            "text": "The target is Restrained by its own body, repeating the save at the end of each of its turns.",
-            "card": "Restrained by its own body (save again each turn)",
+            "text": "The creature is Restrained by its own body, repeating the save at the end of each of its turns. While it is Restrained, the life it cannot contain feeds you: at the start of each of your turns, you or an ally within 30 feet regains hit points equal to your Verum Modifier.",
+            "card": "Restrained by its own body (save again each turn) · while it is, you or an ally regain {VM} HP at the start of your turn",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Restrained"
-                }
-              ]
+              "conditions": [ { "name": "Restrained" } ],
+              "heal": { "perTurn": "VM", "who": "you or an ally within 30 ft" }
             }
           },
           {
-            "text": "The target is Incapacitated as its cells riot.",
+            "text": "The creature is Incapacitated as its cells riot.",
             "card": "Incapacitated as its cells riot",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Incapacitated"
-                }
-              ]
+              "conditions": [ { "name": "Incapacitated" } ]
             }
           },
           {
-            "text": "The target is Paralyzed, and life sustains it against its will — it cannot drop below 1 hit point or die while the effect lasts.",
+            "text": "The creature is Paralyzed, and life sustains it against its will: it cannot drop below 1 hit point or die while the effect lasts.",
             "card": "Paralyzed — and it cannot drop below 1 HP or die while this lasts",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Paralyzed"
-                }
-              ]
+              "conditions": [ { "name": "Paralyzed" } ]
             }
           }
         ]
@@ -187,47 +239,36 @@
     "creation": [
       {
         "name": "Biogenesis",
-        "description": "You guide the world to remake itself.",
+        "description": "You do not build. You grow.",
         "tiers": [
           {
-            "text": "Your creations are living matter — moss, vine, bark, chitin. Structures regain 5 hit points per segment at the start of each of your turns. Constructs are plant or beast creatures of the listed CR.",
-            "card": "Creations are living matter · Structures regain 5 HP/segment each of your turns · Constructs are plant or beast"
-          },
-          {
-            "text": "Your creations are immune to poison damage and disease. A Structure supports an ecosystem — allies who rest within 10 feet of one regain 1 additional Hit Die on a short rest.",
-            "card": "Immune to poison and disease · resting within 10 ft of a Structure returns 1 extra Hit Die",
+            "text": "Your creations are living matter — moss, vine, bark, chitin. Structures regain 10 hit points per segment at the start of each of your turns, and Constructs are plant or beast creatures of the listed CR. An Object can be fruit: a creature that eats one as a bonus action regains your Verum Modifier + the slot level in hit points.",
+            "card": "Creations are living · Structures regain 10 HP/segment each of your turns · Constructs are plant or beast · Objects can be fruit that heal {VM} + {SLOT}",
             "mech": {
-              "damage": {
-                "type": "poison"
-              }
+              "heal": { "fruit": "VM + slot level" }
             }
           },
           {
-            "text": "Structures are awakened — once per turn, one may make an opportunity attack against a creature that leaves its reach, dealing 2d8 bludgeoning damage on a failed Dexterity saving throw against your Verum DC. Constructs regenerate 5 hit points at the start of each of their turns.",
-            "card": "Structures awaken — 1/turn an opportunity attack for 2d8 (Dex save {DC}) · Constructs regenerate 5",
+            "text": "Your creations are immune to poison damage and disease. A Structure supports an ecosystem: allies who rest within 10 feet of one regain 1 additional Hit Die on a short rest. Your Constructs are sentient — they learn, remember, and know you as their maker.",
+            "card": "Immune to poison and disease · resting within 10 ft of a Structure returns 1 extra Hit Die · Constructs are sentient",
             "mech": {
-              "damage": {
-                "dice": "2d8",
-                "type": "bludgeoning"
-              },
-              "save": {
-                "ability": "Dexterity"
-              }
+              "resist": { "immune": [ "poison", "disease" ] }
             }
           },
           {
-            "text": "A Living Domain — within 30 feet of a Structure made with a 7th-level slot or higher, allies regain 1d6 hit points at the start of each of their turns, and the ground is difficult terrain for your enemies.",
-            "card": "Living Domain — within 30 ft of a 7th+ Structure allies regain 1d6/turn and the ground fights your enemies",
+            "text": "Structures are awakened: once per turn, one can make an opportunity attack against a creature that leaves its reach, dealing 2d8 bludgeoning damage on a failed Dexterity saving throw against your Verum DC. Constructs regenerate 10 hit points at the start of each of their turns and are fully sapient, with their own emotion and ambition.",
+            "card": "Structures awaken — 1/turn an opportunity attack for 2d8 (Dex save {DC}) · Constructs regenerate 10 and are sapient",
             "mech": {
-              "damage": {
-                "dice": "1d6"
-              },
-              "heal": {
-                "amount": "1d6"
-              },
-              "terrain": {
-                "effect": "difficult"
-              }
+              "damage": { "dice": "2d8", "type": "bludgeoning" },
+              "save": { "ability": "Dexterity" }
+            }
+          },
+          {
+            "text": "A Living Domain. Within 30 feet of a Structure made with a 7th-level slot or higher, allies regain your Verum Modifier + your Proficiency Bonus in hit points at the start of each of their turns, and the ground is difficult terrain for your enemies. A Construct made with a 9th-level slot may be given true life: it does not end with the seal, it carries a soul and a Cognition Seed of its own, and its birth draws cosmic attention.",
+            "card": "Living Domain — within 30 ft of a 7th+ Structure allies regain {VM}+{PB}/turn and enemies wade · a 9th-slot Construct can be made truly alive",
+            "mech": {
+              "heal": { "perTurn": "VM + PB", "radius": "30 ft" },
+              "terrain": { "effect": "difficult", "for": "enemies" }
             }
           }
         ]
@@ -239,32 +280,24 @@
         "description": "Life does not ask permission. It only asks for room.",
         "tiers": [
           {
-            "text": "Purify food and water for ten creatures. Cure a mundane disease or poison by touch. Know whether a creature within 60 feet is alive, dead, or undead — and how long it has been so.",
-            "card": "Purify food and water for ten · cure a mundane disease or poison · read living, dead or undead within 60 ft",
-            "mech": {
-              "utility": true
-            }
+            "text": "Purify food and water for ten creatures. Cure a mundane disease or poison by touch. Know whether a creature within 60 feet is alive, dead, or undead — and how long it has been so. Stabilise a dying creature with a touch, no check needed.",
+            "card": "Purify food and water for ten · cure a mundane poison or disease · read living, dead or undead within 60 ft · stabilise by touch",
+            "mech": { "utility": true }
           },
           {
-            "text": "Speak with any living plant or beast for 1 hour. Close a wound so that it leaves no scar. Sense every living creature within 300 feet.",
-            "card": "Speak with any plant or beast 1 hr · close a wound scarless · sense all life within 300 ft",
-            "mech": {
-              "utility": true
-            }
+            "text": "Speak with any living plant or beast for 1 hour. Close a wound so it leaves no scar. Sense every living creature within 300 feet. Animate a plant for 1 minute; it follows simple commands.",
+            "card": "Speak with plants and beasts 1 hr · close a wound scarless · sense all life within 300 ft · animate a plant 1 min",
+            "mech": { "utility": true }
           },
           {
-            "text": "Grant a willing creature the benefit of a full night's rest in 1 hour. Restore fertility to a barren field, animal, or person.",
-            "card": "A full night's rest in 1 hr · restore fertility to a field, animal or person",
-            "mech": {
-              "utility": true
-            }
+            "text": "Grant a willing creature the benefit of a full night's rest in 1 hour. Restore fertility to a barren field, animal, or person. Infuse sentience into a seed, egg, newborn, or homunculus — it begins learning at once and knows you as its maker.",
+            "card": "A full night's rest in 1 hr · restore fertility · infuse sentience into a seed, egg, newborn or homunculus",
+            "mech": { "utility": true }
           },
           {
-            "text": "Seed life where there was none — an island, a wasteland, a dead god's body — and it sustains itself thereafter. Or extend a willing creature's natural lifespan by a decade.",
+            "text": "Seed life where there was none — an island, a wasteland, a dead god's body — and it sustains itself thereafter. Or add a decade to a willing creature's natural lifespan.",
             "card": "Seed life where there was none, and it sustains itself · or add a decade to a willing life",
-            "mech": {
-              "utility": true
-            }
+            "mech": { "utility": true }
           }
         ]
       }
@@ -276,27 +309,23 @@
       "type": "Offensive",
       "description": "Life taken from one vessel feeds another.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), as living energy is siphoned from them. You regain HP equal to half the bonus damage dealt.",
-        "card": "+1 die necrotic · you regain half the bonus damage",
+        "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6) as living energy is siphoned from it. You regain hit points equal to the bonus damage dealt.",
+        "card": "+1 die necrotic · you regain the bonus damage as HP",
         "mech": {
-          "damage": {
-            "dice": "1d6",
-            "type": "necrotic"
-          }
+          "damage": { "dice": "1d6", "type": "necrotic" },
+          "heal": { "amount": "the bonus damage" }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Bonus damage increases to two dice, and you may redirect the healing to one ally within 30 feet instead of yourself.",
+          "text": "Level 5+: The bonus damage increases to two dice, and you may send the healing to one ally within 30 feet instead of yourself.",
           "card": "+2 dice · send the healing to an ally within 30 ft instead"
         },
         {
-          "text": "Level 11+: Bonus damage increases to three dice, and the target must succeed on a Constitution saving throw vs your Verum DC or have their maximum HP reduced by the bonus damage dealt until they finish a long rest.",
-          "card": "+3 dice · Con save {DC} or their max HP drops by the bonus damage until a long rest",
+          "text": "Level 11+: The bonus damage increases to three dice, and on the same hit or failed save the target's hit point maximum drops by the bonus damage until it finishes a long rest.",
+          "card": "+3 dice · their max HP drops by the bonus damage until a long rest",
           "mech": {
-            "save": {
-              "ability": "Constitution"
-            }
+            "penalty": { "maxHP": "reduced by the bonus damage until a long rest" }
           }
         }
       ]
@@ -304,32 +333,23 @@
     {
       "name": "Vital Surge",
       "type": "Supportive",
-      "description": "A pulse of living energy fortifies those nearby.",
+      "description": "Life given is life moved — and it has to come from somewhere.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet gains temporary HP equal to your spellcasting modifier and advantage on their next Constitution saving throw before the start of your next turn.",
-        "card": "An ally within 30 ft: {VM} temp HP and advantage on their next Con save",
+        "text": "When the primary effect resolves, one ally within 30 feet regains hit points equal to your Verum Modifier + 5 × the slot level. The life is your own: you lose hit points equal to the slot level.",
+        "card": "An ally within 30 ft regains {VM} + 5 × {SLOT} HP · you lose {SLOT} HP",
         "mech": {
-          "save": {
-            "ability": "Constitution"
-          },
-          "buff": {
-            "advantage": "their next Constitution saving throw before the st"
-          }
+          "heal": { "amount": "VM + 5 × slot level", "who": "one ally within 30 ft" },
+          "cost": "you lose HP equal to the slot level"
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Temporary HP increases to your spellcasting modifier + proficiency bonus, and advantage extends to all Constitution saving throws until the start of your next turn.",
-          "card": "Temp HP becomes {VM}+{PB} · advantage on all Con saves until your next turn",
-          "mech": {
-            "save": {
-              "ability": "Constitution"
-            }
-          }
+          "text": "Level 5+: Up to two allies each regain it, and each also ends one condition of your choice affecting it.",
+          "card": "Up to two allies · each also sheds one condition"
         },
         {
-          "text": "Level 11+: Choose two allies to receive this benefit. Each also removes one condition of your choice affecting them as the surge of life pushes the ailment out.",
-          "card": "Two allies · each also sheds one condition"
+          "text": "Level 11+: Life no longer needs to come from you — you lose nothing — and healing beyond an ally's maximum becomes temporary hit points.",
+          "card": "No more cost to you · overflow becomes temp HP"
         }
       ]
     },
@@ -338,48 +358,26 @@
       "type": "Control",
       "description": "Where the spell lands, life erupts uninvited.",
       "effect": {
-        "text": "After the primary effect resolves, the point of impact erupts in a 10-foot radius of rapid growth — becoming difficult terrain until the end of your next turn. Creatures must succeed on a Constitution saving throw vs your Verum DC or have their movement speed reduced by 10 feet until the end of their next turn.",
-        "card": "10-ft burst of growth — difficult terrain until your next turn, save or slowed",
+        "text": "After the primary effect resolves, the point of impact erupts in a 10-foot radius of rapid growth — difficult terrain until the end of your next turn. Creatures that failed the seal's save have their speed reduced by 10 feet until the end of their next turn.",
+        "card": "10-ft burst of growth — difficult terrain until your next turn · those who failed are slowed 10 ft",
         "mech": {
-          "save": {
-            "ability": "Constitution"
-          },
-          "movement": {
-            "speed": 10
-          },
-          "terrain": {
-            "effect": "difficult",
-            "radius": 10
-          },
-          "penalty": {
-            "speed": -10
-          }
+          "terrain": { "effect": "difficult", "radius": 10 },
+          "penalty": { "speed": -10 }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Growth persists for 1 minute, and creatures that fail the save are Restrained until the end of their next turn rather than merely slowed.",
-          "card": "Growth lasts 1 min · those who fail are Restrained instead of slowed",
+          "text": "Level 5+: The growth persists for 1 minute, and creatures that failed are Restrained until the end of their next turn rather than slowed.",
+          "card": "Growth lasts 1 min · those who failed are Restrained instead of slowed",
           "mech": {
-            "conditions": [
-              {
-                "name": "Restrained"
-              },
-              {
-                "name": "Slowed"
-              }
-            ]
+            "conditions": [ { "name": "Restrained" } ]
           }
         },
         {
-          "text": "Level 11+: Radius increases to 20 feet, and Restrained creatures must use their full action to escape rather than a bonus action.",
-          "card": "Radius 20 ft · escaping costs a full action",
+          "text": "Level 11+: The radius increases to 20 feet, and a Restrained creature must use its full action to break free.",
+          "card": "Radius 20 ft · breaking free costs a full action",
           "mech": {
-            "conditions": [
-              {
-                "name": "Restrained"
-              }
-            ]
+            "conditions": [ { "name": "Restrained" } ]
           }
         }
       ]

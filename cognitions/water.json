@@ -5,7 +5,7 @@
   "opposing": "toxin",
   "description": "Depth, Yielding, Drowning, Tides, Return.",
   "savingThrow": "Strength",
-  "damageType": "Undertow",
+  "damageType": "Bludgeoning",
 
   "verumEffects": {
     "offensive": [
@@ -14,10 +14,10 @@
         "description": "It is not angry with you. That is the part nobody believes until it is too late.",
         "tiers": [
           {
-            "text": "The damage is turned into Undertow damage. A creature that fails is pulled 10 feet toward the point of impact, has its speed halved until the end of its next turn, and cannot end its next move further from that point than it began.",
-            "card": "Damage becomes Undertow · pulled 10 ft in · speed halved, and can't get further away next turn",
+            "text": "The damage is turned into Bludgeoning damage. A creature that fails is pulled 10 feet toward the point of impact, has its speed halved until the end of its next turn, and cannot end its next move further from that point than it began.",
+            "card": "Damage becomes Bludgeoning · pulled 10 ft in · speed halved, and can't get further away next turn",
             "mech": {
-              "damage": { "type": "undertow" },
+              "damage": { "type": "bludgeoning" },
               "movement": { "pull": 10 },
               "penalty": { "speed": "halved" }
             }
@@ -26,31 +26,31 @@
             "text": "The pull becomes 20 feet and leaves them Prone. Everything they hold is slick — they drop one item of your choice.",
             "card": "Pulled 20 ft and Prone · they drop one item of your choice",
             "mech": {
-              "damage": { "type": "undertow" },
+              "damage": { "type": "bludgeoning" },
               "movement": { "pull": 20 },
               "conditions": [ { "name": "Prone" } ],
               "disarm": 1
             }
           },
           {
-            "text": "The pull becomes 30 feet and the water closes over them — they are Swallowed: Blinded, unable to breathe, and taking Five Times your Verum Modifier in Undertow damage at the start of each of their turns until they reach air.",
-            "card": "Pulled 30 ft · Swallowed — Blinded, no breath, 5×VM undertow each turn until they surface",
+            "text": "The pull becomes 30 feet and the water closes over them — they are Swallowed: Blinded, unable to breathe, and taking Five Times your Verum Modifier in Bludgeoning damage at the start of each of their turns until they reach air.",
+            "card": "Pulled 30 ft · Swallowed — Blinded, no breath, 5×VM bludgeoning each turn until they surface",
             "mech": {
-              "damage": { "type": "undertow" },
+              "damage": { "type": "bludgeoning" },
               "movement": { "pull": 30 },
-              "conditions": [ { "name": "Blinded" }, { "name": "Swallowed", "tick": "5×VM undertow" } ],
+              "conditions": [ { "name": "Blinded" }, { "name": "Swallowed", "tick": "5×VM bludgeoning" } ],
               "deny": [ "breathing" ]
             }
           },
           {
-            "text": "The water takes the whole place. Every creature within 20 feet of the target is dragged to the centre and Swallowed alongside it, each taking Five Times your Verum Modifier in Undertow damage at the start of its turns. A creature surfaces only by spending its entire turn swimming, and the water does not hurry.",
+            "text": "The water takes the whole place. Every creature within 20 feet of the target is dragged to the centre and Swallowed alongside it, each taking Five Times your Verum Modifier in Bludgeoning damage at the start of its turns. A creature surfaces only by spending its entire turn swimming, and the water does not hurry.",
             "card": "Everything within 20 ft is dragged in and Swallowed — 5×VM each turn · surfacing costs a whole turn",
             "mech": {
-              "damage": { "type": "undertow" },
+              "damage": { "type": "bludgeoning" },
               "movement": { "pull": 20 },
               "conditions": [
                 { "name": "Blinded" },
-                { "name": "Swallowed", "tick": "5×VM undertow", "area": "20 ft" }
+                { "name": "Swallowed", "tick": "5×VM bludgeoning", "area": "20 ft" }
               ],
               "deny": [ "breathing" ]
             }
@@ -205,10 +205,10 @@
         "description": "You are not building a wall. You are asking the water to stand still, and it has agreed for now.",
         "tiers": [
           {
-            "text": "Your creations are standing water, clear and cold and impossible to hold. A creature that strikes a Structure, or is hit by a Construct or an Object you made, is pulled 10 feet and takes 1d6 Undertow damage.",
-            "card": "Creations are standing water · struck or hit: pulled 10 ft and 1d6 undertow",
+            "text": "Your creations are standing water, clear and cold and impossible to hold. A creature that strikes a Structure, or is hit by a Construct or an Object you made, is pulled 10 feet and takes 1d6 Bludgeoning damage.",
+            "card": "Creations are standing water · struck or hit: pulled 10 ft and 1d6 bludgeoning",
             "mech": {
-              "damage": { "amount": "1d6", "type": "undertow", "trigger": "touch or hit" },
+              "damage": { "amount": "1d6", "type": "bludgeoning", "trigger": "touch or hit" },
               "movement": { "pull": 10 }
             }
           },
@@ -216,7 +216,7 @@
             "text": "That damage becomes 2d6, and what you made repairs itself: at the start of each of your turns, a damaged Structure segment regains hit points equal to Five Times your Verum Modifier.",
             "card": "2d6 · damaged Structure segments regain 5×VM at the start of each of your turns",
             "mech": {
-              "damage": { "amount": "2d6", "type": "undertow" },
+              "damage": { "amount": "2d6", "type": "bludgeoning" },
               "heal": { "amount": "5×VM", "targets": "your creations", "tick": "start of each of your turns" }
             }
           },
@@ -276,10 +276,10 @@
       "type": "Offensive",
       "description": "Whatever it hits, it takes with it.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus Undertow damage equal to one damage die of the primary effect's type (min 1d6) and is pulled 10 feet toward the point of impact.",
-        "card": "+1 die undertow · pulled 10 ft toward the point of impact",
+        "text": "On a hit or failed saving throw, the target takes bonus Bludgeoning damage equal to one damage die of the primary effect's type (min 1d6) and is pulled 10 feet toward the point of impact.",
+        "card": "+1 die bludgeoning · pulled 10 ft toward the point of impact",
         "mech": {
-          "damage": { "dice": [ "1d6" ], "type": "undertow" },
+          "damage": { "dice": [ "1d6" ], "type": "bludgeoning" },
           "movement": { "pull": 10 }
         }
       },

@@ -78,12 +78,12 @@ The card shows:
 
 ## Domains
 
-Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 3–9, no dumping ground:
+Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 4–9, no dumping ground:
 
 | Domain | | What it is |
 |---|---|---|
 | **Elemental** | 9 | Acid · Air · Earth · Fire · Ice · Lightning · Metal · Toxin · Water — matter and force |
-| **Cosmical** | 3 | Gravity · Space · Time — the shape of creation itself |
+| **Cosmical** | 5 | Gravity · Lunar · Space · Sun · Time — the shape of creation itself |
 | **Corporeal** | 5 | Beast · Blood · Bones · Flesh · Pain — blood, bone and beast |
 | **Vital** | 5 | Corruption · Death · Growth · Life · Soul — the living and the unliving |
 | **Psychic** | 4 | Apathy · Hate · Heroism · Isolation — feeling turned outward |
@@ -91,7 +91,7 @@ Every Cognition carries a `category` in `index.json`, and both rails group and f
 | **Fate** | 4 | Balance · Disaster · Fortune · Misfortune — what happens to you |
 | **Dominion** | 7 | Carnage · Civilization · Control · Craft · Power · Protection · Speed — will imposed on the world |
 
-Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Death · Nightmare · Nullity · Soul** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
+Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Blood · Death · Life · Lunar · Nightmare · Nullity · Soul · Sun** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
 
 A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
 
@@ -103,8 +103,8 @@ In `index.json`, each cognition has a `ready` flag:
 - `true` — JSON file exists, cognition is fully playable
 - `false` — Placeholder only; shown as **SOON** in the sidebar and cannot be selected
 
-### Ready Cognitions (35)
-Air · Apathy · Beast · Blood · Bones · Civilization · Control · Corruption · **Craft** · Death · **Earth** · Fire · Flesh · Fortune · **Gravity** · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · Metal · Misfortune · **Nightmare** · Nullity · Pain · Power · Protection · Shadow · Soul · **Space** · **Time** · **Void** · **Water**
+### Ready Cognitions (36)
+Air · Apathy · Beast · Blood · Bones · Civilization · Control · Corruption · **Craft** · Death · **Earth** · Fire · Flesh · Fortune · **Gravity** · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · **Lunar** · Metal · Misfortune · **Nightmare** · Nullity · Pain · Power · Protection · Shadow · Soul · **Space** · **Sun** · **Time** · **Void** · **Water**
 
 ### Held Back (7) — JSON written, `ready: false`
 Acid · Balance · Carnage · Disaster · Silence · Speed · Toxin
@@ -168,12 +168,30 @@ Place a new `.json` file in `cognitions/` following this structure:
 - `complementEffects` `type` may also be `"Creation"` or `"Utility"`; those win for their Ring, otherwise the fallback pool's complements are offered
 - `tiers` must always be an array of exactly 4 strings
 - **`cost`** (optional) is for a Cognition that charges for its use — Nightmare's Dream save, for instance. Give it `text` (the full rule) and `card` (the short version). It prints as a warning box on the PLAY card, a `COST` line in the copyable text, its own block in FULL, and a *Cost of use* section at the top of the Codex entry, since it's a roll the player makes every time.
+- **`engine`** (optional) is for a Cognition that runs on a cycle — Lunar's eight phases. Give it `title`, `text`, `card`, and `phases`: a list of `{ name, epithet, card }`, one per step. When such a Cognition is the Core, the composer shows a picker for the current phase; the PLAY card, copyable text and FULL all print that phase's gift and the two phases it can turn to next (the cycle turns either way), and the Codex lists every phase.
+  An `engine` can instead carry a **`tracker`** — Sun's *Two Suns*: `{ name, window, gold: {label, card}, black: {label, card}, reckoning: [{ min, max, name, card, corona? }] }`. The composer then shows the tracker: one pip per activation in the window (click to log Gold, click again for Black, again to clear), a Gold / Black choice for this activation, **Log it ›** to advance after you draw, and **Reset**. On the last activation of the window the card prints the Reckoning whose `min`–`max` range matches the number of Blacks; a Reckoning with `corona: true` also prints the chosen Verum's Corona in a gold box. Each Verum then carries **`fuel`** (its cost, a number) and **`corona`** `{ name, text, card }` — both shown in the Codex under the Verum.
+- **`coreOnly: true`** (on the Cognition and its `index.json` entry) means it can never be a Sigil — the rail disables it once a Core is set, and it is never added as a complement. Give it `"complementEffects": []`. Sun is the only one.
+- **`incompatible`** lists Rings the Cognition declares it cannot fill, e.g. `["creation"]`. A declared incompatibility beats the fallback map, so those Rings are never offered. Sun uses it; the eleven Cognitions the vault lists as Creation-incompatible don't yet.
+- **`damageType` is an ordinary damage type** — Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Sanguine, Slashing, Thunder, Void, All-Mighty — and so are `mech.damage.type` values (lower-case) and the damage words in Verum and Sigil text ("1d6 fire", "5×VM force"). Don't invent new ones (no "Moonlight", "Undertow", "Gravitic"); a Cognition's flavour belongs in its Verums. The builder warns in the console if a `damageType` isn't on the list.
+- **Absolute damage is a progression.** From **Tier III (level 11+)** every seal's damage — the Verum's, the Sigils', ticks and riders — turns into its type's Absolute form, the type at its zenith:
+
+  | Ordinary | Absolute | Ordinary | Absolute | Ordinary | Absolute | Ordinary | Absolute |
+  |---|---|---|---|---|---|---|---|
+  | Acid | **Corrosive** | Fire | **Infernal** | Necrotic | **Doom** | Radiant | **Holy** |
+  | Bludgeoning | **Tectonic** | Force | **Astral** | Piercing | **Impale** | Sanguine | **Hemal** |
+  | Cold | **Everfrost** | Lightning | **Voltaic** | Poison | **Toxin** | Slashing | **Severe** |
+  | Psychic | **Neural** | Thunder | **Sonic** | Void | **Void** | All-Mighty | **All-Mighty** |
+
+  The text keeps the ordinary names; the builder does the swap — from Tier III the damage chip reads *infernal · absolute*, Sigil and Doom chips follow, and the Codex shows "→ Infernal from Lv 11". A Verum built around piercing can get there sooner: mark the tier with `mech.absolute: true` and say so in the text (Nightmare *Void-Bleed* from Tier I, Nullity *Erasure* from Tier II). The threshold is `ABSOLUTE_FROM_TIER` in index.html; a Cognition can set its own with `"absoluteTier"` (an index into the tiers — `0` means from level 1). Sun uses `0`: its damage is Holy from the first dawn, and its text says holy outright.
+- **Against Absolute damage, resistance and immunity only reduce it.** A creature resistant to the matching ordinary type (fire for Infernal, force for Astral…) reduces it by **2 × its Proficiency Bonus**; an immune one by **4 × its Proficiency Bonus** — once per damage roll, never below 0. Vulnerability still doubles it. Against ordinary damage they work as usual. So "ignores resistance / immunity" in a Verum means: ignore the halving or negation below Tier III, ignore the reduction from Tier III on; "immunity counts only as resistance" means half damage below Tier III and the 2× reduction after. The numbers keep Absolute ahead of resisted ordinary damage (2d8+3 against a resistant CR 1 creature: 13 − 4 = 9, where halving gives 6) while protection still matters.
+- **Healing that scales with the slot** goes in `mech.heal.perSlot` (a number). Life's Overriding Vitality uses 10 / 20 / 30, the same yardstick as Protection's Guardian's Shell, but as real hit points on top of the Ring's dice rather than temp HP. Like `bonusDice`, later tiers restate the value rather than stack it, and the PLAY card folds it into the healing total (`5d8 + 64` on a 3rd slot at Tier 2 with VM 4). In card text, `10 × {SLOT}` resolves to the number and `{SLOT}` alone to the slot level.
+- **`mastery`** (optional) holds Cognition-wide abilities that wake with character level rather than with a seal — Blood's *Blood Magic* (Blood Samples, Blood Echo, Blood Debt, Blood Runes). Give it `title`, an optional `text`, and `traits`: a list of `{ name, level, text, card }`. When the Cognition is the Core, the PLAY card lists every trait the character's level has reached, the copyable text and FULL print them, and the Codex lists all of them with their level. Verums can lean on them (Blood's Verums get stronger "with a sample").
 - `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`
 
 **Offensive Verums — read this before writing one.**
 
-- **Offense is optional.** Nine Cognitions have no Offensive pool — Apathy, Civilization, Control, Growth, Heroism, Isolation, Life, Misfortune, Silence — and the builder simply doesn't offer them an Offensive Ring. Only write one if the Cognition's own description says it hurts things. Note the side effect: a Cognition with neither an Offensive nor a Creation pool can't make **Constructs**, since Constructs borrow the Offensive pool.
-- **An offensive Verum changes what the attack *is*, not how big it is.** Pick a shape: **escalation** (Power's Rampage, Carnage's Bloodfrenzy), **propagation** (Lightning's Chain Spark, Fire's Wildfire, Water's The Flood), **denial** (Air's Razoredge, Power's Overwhelming Force, Nullity's Erasure), **conversion** (Blood-Surge, Protection's Answering Blow), or **payoff** against a set-up target (Ice's Shatterpoint).
+- **Offense is optional.** Eight Cognitions have no Offensive pool — Apathy, Civilization, Control, Growth, Heroism, Isolation, Misfortune, Silence — and the builder simply doesn't offer them an Offensive Ring. Only write one if the Cognition's own description says it hurts things. Note the side effect: a Cognition with neither an Offensive nor a Creation pool can't make **Constructs**, since Constructs borrow the Offensive pool.
+- **An offensive Verum changes what the attack *is*, not how big it is.** Pick a shape: **escalation** (Power's Rampage, Carnage's Bloodfrenzy), **propagation** (Lightning's Chain Spark, Fire's Wildfire, Water's The Flood), **denial** (Air's Razoredge, Power's Overwhelming Force, Nullity's Erasure), **conversion** (Blood-Surge, Protection's Answering Blow, Life's Vital Theft), or **payoff** against a set-up target (Ice's Shatterpoint).
 - **A bonus-dice ladder is the exception, and it's paid for.** Only three Cognitions use one, because for them raw output *is* the fantasy: **Fire** +2/4/6/8 (the furnace — the biggest ladder, so its riders are only burn ticks), **Earth** +1/2/4/5 (weight — lighter, because it buries), **Ice** +1/2/3/4 (payoff — the real damage comes from Frost Stacks and Restrained targets). Every tier spends roughly **3 / 6 / 9 / 12 dice' worth** of value; a Verum that adds riders adds fewer dice.
 - **One Seal, One Roll applies to Verum text too.** Never write "must succeed on a Wisdom save" inside a tier — riders land on the seal's own hit or failed save. The only extra d20s allowed are *later* ones on the Core's ability: escaping, or a repeat save to end an ongoing effect.
 - **`mech.conditions` is for what you inflict.** An immunity goes in `deny` (it renders as `no fear`); a condition the target must *already have* for a payoff belongs in the text only — listing it under `conditions` shows it on the card as something the seal imposes.

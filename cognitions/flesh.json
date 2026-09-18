@@ -5,7 +5,7 @@
   "opposing": "bones",
   "description": "Mortality, Sensation, Growth, Vulnerability, Embodiment.",
   "savingThrow": "Constitution",
-  "damageType": "Sinew",
+  "damageType": "Slashing",
   "verumEffects": {
     "offensive": [
       {
@@ -13,8 +13,8 @@
         "description": "Turn body into blades, tendrils, and horrors — hardening sinew into weapons until the caster themselves becomes something biology never intended.",
         "tiers": [
           {
-            "text": "Create biological weapons — hardened bone spikes, veins twisted into whips. Your unarmed strikes now deal 1d8 sinew damage.",
-            "card": "Unarmed strikes become 1d8 sinew — bone spikes, vein whips",
+            "text": "Create biological weapons — hardened bone spikes, veins twisted into whips. Your unarmed strikes now deal 1d8 slashing damage.",
+            "card": "Unarmed strikes become 1d8 slashing — bone spikes, vein whips",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -52,8 +52,8 @@
         "description": "Accelerate or hijack the body's repair process — closing wounds and regrowing limbs with the same motion that, pointed differently, turns regeneration cancerous.",
         "tiers": [
           {
-            "text": "A target you touch heals 1d6 HP or takes 1d6 sinew damage (your choice). This healing cannot affect undead or constructs.",
-            "card": "Touch: heal 1d6 or deal 1d6 sinew, your choice (not undead or constructs)",
+            "text": "A target you touch heals 1d6 HP or takes 1d6 slashing damage (your choice). This healing cannot affect undead or constructs.",
+            "card": "Touch: heal 1d6 or deal 1d6 slashing, your choice (not undead or constructs)",
             "mech": {
               "damage": {
                 "dice": [
@@ -77,8 +77,8 @@
             }
           },
           {
-            "text": "Redirect regeneration violently — a regenerating creature instead bloats, grows tumors, or collapses, taking necrotic + sinew damage equal to your level as their immortality turns cancerous.",
-            "card": "A regenerating creature bloats instead — necrotic + sinew equal to your level"
+            "text": "Redirect regeneration violently — a regenerating creature instead bloats, grows tumors, or collapses, taking necrotic + slashing damage equal to your level as their immortality turns cancerous.",
+            "card": "A regenerating creature bloats instead — necrotic + slashing equal to your level"
           }
         ]
       }
@@ -98,8 +98,8 @@
             }
           },
           {
-            "text": "Alter a limb's function — dislocate a knee, reduce grip, or hyperextend a joint. The target suffers −1 AC, drops one held item, or takes sinew damage equal to half your level.",
-            "card": "Dislocate a joint — −1 AC, drop a held item, or half your level in sinew",
+            "text": "Alter a limb's function — dislocate a knee, reduce grip, or hyperextend a joint. The target suffers −1 AC, drops one held item, or takes slashing damage equal to half your level.",
+            "card": "Dislocate a joint — −1 AC, drop a held item, or half your level in slashing",
             "mech": {
               "penalty": {
                 "ac": -1
@@ -107,8 +107,8 @@
             }
           },
           {
-            "text": "Reshape flesh into armor or weapons on a willing creature — granting temporary natural armor (AC = 20 + Constitution modifier) or a meaty weapon dealing 4d8 sinew damage (versatile) for 1 hour.",
-            "card": "Reshape a willing creature — natural armour (AC 20 + Con) or a 4d8 sinew weapon, 1 hr",
+            "text": "Reshape flesh into armor or weapons on a willing creature — granting temporary natural armor (AC = 20 + Constitution modifier) or a meaty weapon dealing 4d8 slashing damage (versatile) for 1 hour.",
+            "card": "Reshape a willing creature — natural armour (AC 20 + Con) or a 4d8 slashing weapon, 1 hr",
             "mech": {
               "damage": {
                 "dice": "4d8"
@@ -173,8 +173,8 @@
             }
           },
           {
-            "text": "Cause phantom nerve pain in an unused part of the body — the target takes 1d8 sinew damage and must succeed on a Constitution save or drop Concentration.",
-            "card": "Phantom nerve pain — 1d8 sinew and a Con save or Concentration drops",
+            "text": "Cause phantom nerve pain in an unused part of the body — the target takes 1d8 slashing damage and must succeed on a Constitution save or drop Concentration.",
+            "card": "Phantom nerve pain — 1d8 slashing and a Con save or Concentration drops",
             "mech": {
               "damage": {
                 "dice": "1d8"
@@ -214,8 +214,8 @@
         "description": "A body is a system, and a system can be built.",
         "tiers": [
           {
-            "text": "Your creations are living tissue. Structures regain 5 hit points per segment at the start of each of your turns and are unnervingly warm. Objects are living sinew — they deal +1d4 sinew damage and cannot be disarmed.",
-            "card": "Creations are living tissue, warm · Structures regain 5 HP/segment each of your turns · Objects +1d4 sinew, undisarmable",
+            "text": "Your creations are living tissue. Structures regain 5 hit points per segment at the start of each of your turns and are unnervingly warm. Objects are living sinew — they deal +1d4 slashing damage and cannot be disarmed.",
+            "card": "Creations are living tissue, warm · Structures regain 5 HP/segment each of your turns · Objects +1d4 slashing, undisarmable",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -293,7 +293,7 @@
       "type": "Offensive",
       "description": "The primary effect leaves something raw and open — the next source of damage fires every nerve in the affected area at once for amplified sinew pain.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target's pain receptors are left hypersensitive — the next time they take damage before the end of your next turn, that damage deals +1d8 sinew bonus damage.",
+        "text": "On a hit or failed saving throw against the primary effect, the target's pain receptors are left hypersensitive — the next time they take damage before the end of your next turn, that damage deals +1d8 slashing bonus damage.",
         "card": "Nerves left raw — their next damage taken before your next turn is +1d8",
         "mech": {
           "damage": {

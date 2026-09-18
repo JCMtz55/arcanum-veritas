@@ -5,7 +5,7 @@
   "opposing": "levity",
   "description": "Pull, Mass, Orbit, Descent, Singularity.",
   "savingThrow": "Strength",
-  "damageType": "Gravitic",
+  "damageType": "Force",
 
   "verumEffects": {
     "offensive": [
@@ -14,20 +14,20 @@
         "description": "Everything falls. You decide which way, and how far.",
         "tiers": [
           {
-            "text": "The damage is turned into Gravitic damage. A creature that fails is lifted 20 feet and let go: it takes 2d6 Gravitic damage from the fall and lands Prone.",
-            "card": "Damage becomes Gravitic · lifted 20 ft and dropped — 2d6 gravitic and Prone",
+            "text": "The damage is turned into Force damage. A creature that fails is lifted 20 feet and let go: it takes 2d6 Force damage from the fall and lands Prone.",
+            "card": "Damage becomes Force · lifted 20 ft and dropped — 2d6 force and Prone",
             "mech": {
-              "damage": { "type": "gravitic" },
-              "rider": { "damage": "2d6", "type": "gravitic", "when": "the fall" },
+              "damage": { "type": "force" },
+              "rider": { "damage": "2d6", "type": "force", "when": "the fall" },
               "conditions": [ { "name": "Prone" } ]
             }
           },
           {
-            "text": "The lift becomes 40 feet and the fall 4d6 Gravitic damage. It lands so hard that it cannot stand up until the end of its next turn.",
+            "text": "The lift becomes 40 feet and the fall 4d6 Force damage. It lands so hard that it cannot stand up until the end of its next turn.",
             "card": "The lift becomes 40 ft — 4d6 on landing · they can't stand up until the end of their next turn",
             "mech": {
-              "damage": { "type": "gravitic" },
-              "rider": { "damage": "4d6", "type": "gravitic", "when": "the fall" },
+              "damage": { "type": "force" },
+              "rider": { "damage": "4d6", "type": "force", "when": "the fall" },
               "conditions": [ { "name": "Prone", "duration": "can't stand until the end of their next turn" } ],
               "deny": [ "standing" ]
             }
@@ -36,18 +36,18 @@
             "text": "The lift becomes 60 feet and the fall 6d6, and you choose which way it falls — down, or sideways at any surface or creature within 60 feet. A creature it is thrown into takes the same falling damage and is knocked Prone too.",
             "card": "The lift becomes 60 ft — 6d6 · you choose the direction of the fall, and whatever it hits takes the same and falls Prone",
             "mech": {
-              "damage": { "type": "gravitic" },
-              "rider": { "damage": "6d6", "type": "gravitic", "when": "the fall", "splash": "whatever it's thrown into" },
+              "damage": { "type": "force" },
+              "rider": { "damage": "6d6", "type": "force", "when": "the fall", "splash": "whatever it's thrown into" },
               "conditions": [ { "name": "Prone" } ],
               "deny": [ "standing" ]
             }
           },
           {
-            "text": "Down is no longer where it was. A creature that fails falls upward 100 feet and hangs there, helpless and Restrained, until the start of your next turn — then the world remembers it, and it falls the whole way back for 10d6 Gravitic damage, landing Prone.",
+            "text": "Down is no longer where it was. A creature that fails falls upward 100 feet and hangs there, helpless and Restrained, until the start of your next turn — then the world remembers it, and it falls the whole way back for 10d6 Force damage, landing Prone.",
             "card": "They fall UP 100 ft and hang Restrained until your next turn — then drop the whole way for 10d6 and land Prone",
             "mech": {
-              "damage": { "type": "gravitic" },
-              "rider": { "damage": "10d6", "type": "gravitic", "when": "the start of your next turn" },
+              "damage": { "type": "force" },
+              "rider": { "damage": "10d6", "type": "force", "when": "the start of your next turn" },
               "conditions": [ { "name": "Restrained", "duration": "aloft until the start of your next turn" }, { "name": "Prone" } ]
             }
           }
@@ -58,11 +58,11 @@
         "description": "You do not strike the crowd. You give it something to fall toward.",
         "tiers": [
           {
-            "text": "The target becomes a point of mass. Every other creature of your choice within 10 feet of it makes the seal's save; those that fail are pulled into the nearest space beside it, and the target and each creature pulled take 1d6 Gravitic damage for every creature pulled in.",
+            "text": "The target becomes a point of mass. Every other creature of your choice within 10 feet of it makes the seal's save; those that fail are pulled into the nearest space beside it, and the target and each creature pulled take 1d6 Force damage for every creature pulled in.",
             "card": "Everyone you choose within 10 ft: save or be pulled onto the target — it and each of them take 1d6 per creature pulled",
             "mech": {
               "movement": { "pull": 10 },
-              "rider": { "damage": "1d6 per creature pulled", "type": "gravitic", "area": "10 ft" }
+              "rider": { "damage": "1d6 per creature pulled", "type": "force", "area": "10 ft" }
             }
           },
           {
@@ -70,7 +70,7 @@
             "card": "The reach becomes 15 ft · the pulled are left Prone and can't move away from the target until the end of their next turn",
             "mech": {
               "movement": { "pull": 15 },
-              "rider": { "damage": "1d6 per creature pulled", "type": "gravitic", "area": "15 ft" },
+              "rider": { "damage": "1d6 per creature pulled", "type": "force", "area": "15 ft" },
               "conditions": [ { "name": "Prone" } ],
               "deny": [ "moving away" ]
             }
@@ -80,17 +80,17 @@
             "card": "The reach becomes 20 ft and each collision 1d10 · until your next turn, ranged attacks at anyone within 20 ft curve into the target",
             "mech": {
               "movement": { "pull": 20 },
-              "rider": { "damage": "1d10 per creature pulled", "type": "gravitic", "area": "20 ft" },
+              "rider": { "damage": "1d10 per creature pulled", "type": "force", "area": "20 ft" },
               "conditions": [ { "name": "Prone" } ],
               "deny": [ "moving away" ]
             }
           },
           {
-            "text": "Singularity. The point collapses. Every creature of your choice within 30 feet that fails is dragged to the center and Restrained there, taking 2d10 Gravitic damage for every creature caught with it. At the start of your next turn the singularity bursts: everything caught is thrown 30 feet outward and lands Prone.",
+            "text": "Singularity. The point collapses. Every creature of your choice within 30 feet that fails is dragged to the center and Restrained there, taking 2d10 Force damage for every creature caught with it. At the start of your next turn the singularity bursts: everything caught is thrown 30 feet outward and lands Prone.",
             "card": "SINGULARITY — everyone you choose within 30 ft who fails is dragged in and Restrained, 2d10 per creature caught · next turn it bursts: 30 ft out, Prone",
             "mech": {
               "movement": { "pull": 30, "push": "30 when it bursts" },
-              "rider": { "damage": "2d10 per creature caught", "type": "gravitic", "area": "30 ft" },
+              "rider": { "damage": "2d10 per creature caught", "type": "force", "area": "30 ft" },
               "conditions": [ { "name": "Restrained", "duration": "until the start of your next turn" }, { "name": "Prone" } ]
             }
           }
@@ -120,11 +120,11 @@
             }
           },
           {
-            "text": "Things orbit you now. Ranged weapon attacks against you have disadvantage as they curve away, and up to three small objects circle you; as a bonus action you may hurl one at a creature within 60 feet — a ranged attack using your seal attack bonus, dealing 1d10 + your Verum Modifier Gravitic damage.",
-            "card": "Ranged weapon attacks against you have disadvantage · three objects orbit you — bonus action: hurl one for 1d10+{VM} gravitic",
+            "text": "Things orbit you now. Ranged weapon attacks against you have disadvantage as they curve away, and up to three small objects circle you; as a bonus action you may hurl one at a creature within 60 feet — a ranged attack using your seal attack bonus, dealing 1d10 + your Verum Modifier Force damage.",
+            "card": "Ranged weapon attacks against you have disadvantage · three objects orbit you — bonus action: hurl one for 1d10+{VM} force",
             "mech": {
               "buff": { "who": "self", "defense": "disadvantage on ranged weapon attacks against you" },
-              "damage": { "amount": "1d10 + VM", "type": "gravitic", "trigger": "a bonus-action hurl" }
+              "damage": { "amount": "1d10 + VM", "type": "force", "trigger": "a bonus-action hurl" }
             }
           },
           {
@@ -170,10 +170,10 @@
             }
           },
           {
-            "text": "The weight becomes crushing. A pinned creature takes Five Times your Verum Modifier in Gravitic damage at the start of each of its turns, and the ground beneath it buckles — everything within 20 feet becomes difficult terrain.",
-            "card": "Crushing — 5×VM gravitic at the start of each of their turns while pinned · 20 ft of buckled ground becomes difficult terrain",
+            "text": "The weight becomes crushing. A pinned creature takes Five Times your Verum Modifier in Force damage at the start of each of its turns, and the ground beneath it buckles — everything within 20 feet becomes difficult terrain.",
+            "card": "Crushing — 5×VM force at the start of each of their turns while pinned · 20 ft of buckled ground becomes difficult terrain",
             "mech": {
-              "conditions": [ { "name": "Pinned", "tick": "5×VM gravitic" } ],
+              "conditions": [ { "name": "Pinned", "tick": "5×VM force" } ],
               "terrain": { "effect": "difficult", "radius": 20 },
               "deny": [ "standing" ]
             }
@@ -203,19 +203,19 @@
             }
           },
           {
-            "text": "Choose any direction as down for each creature that fails — sideways, backward, up. It falls 30 feet that way, taking 3d6 Gravitic damage if it strikes anything before it stops.",
-            "card": "Pick each one's down — up, sideways, back · they fall 30 ft that way, 3d6 gravitic if they hit anything",
+            "text": "Choose any direction as down for each creature that fails — sideways, backward, up. It falls 30 feet that way, taking 3d6 Force damage if it strikes anything before it stops.",
+            "card": "Pick each one's down — up, sideways, back · they fall 30 ft that way, 3d6 force if they hit anything",
             "mech": {
               "movement": { "fall": "30 ft in a direction you choose" },
-              "rider": { "damage": "3d6", "type": "gravitic", "trigger": "striking something" }
+              "rider": { "damage": "3d6", "type": "force", "trigger": "striking something" }
             }
           },
           {
-            "text": "Rewrite the room. While the effect lasts, at the start of each of your turns you choose which way is down inside the area; every unsecured creature and object there falls 60 feet that way, taking 6d6 Gravitic damage if it strikes anything. Only you, and those you choose, keep your own down.",
+            "text": "Rewrite the room. While the effect lasts, at the start of each of your turns you choose which way is down inside the area; every unsecured creature and object there falls 60 feet that way, taking 6d6 Force damage if it strikes anything. Only you, and those you choose, keep your own down.",
             "card": "Each of your turns, choose the direction of down across the whole area — everything unsecured falls 60 ft that way, 6d6 if it hits · you and yours are spared",
             "mech": {
               "movement": { "fall": "60 ft in a direction you choose, each of your turns" },
-              "rider": { "damage": "6d6", "type": "gravitic", "trigger": "striking something" }
+              "rider": { "damage": "6d6", "type": "force", "trigger": "striking something" }
             }
           }
         ]
@@ -233,26 +233,26 @@
             "mech": { "conditions": [ { "name": "Prone", "source": "striking a Structure" } ] }
           },
           {
-            "text": "Your Constructs are dense beyond their size: they cannot be moved against their will, and their slams knock Large or smaller creatures Prone. As an action you may drop one Structure segment onto the space beneath it — each creature there takes 4d10 Gravitic damage (a Strength save halves).",
-            "card": "Constructs can't be moved and their slams knock Prone · action: drop a Structure segment for 4d10 gravitic (Str half)",
+            "text": "Your Constructs are dense beyond their size: they cannot be moved against their will, and their slams knock Large or smaller creatures Prone. As an action you may drop one Structure segment onto the space beneath it — each creature there takes 4d10 Force damage (a Strength save halves).",
+            "card": "Constructs can't be moved and their slams knock Prone · action: drop a Structure segment for 4d10 force (Str half)",
             "mech": {
-              "damage": { "amount": "4d10", "type": "gravitic", "trigger": "dropping a Structure segment", "save": { "ability": "Strength", "onSuccess": "half" } },
+              "damage": { "amount": "4d10", "type": "force", "trigger": "dropping a Structure segment", "save": { "ability": "Strength", "onSuccess": "half" } },
               "conditions": [ { "name": "Prone", "source": "a Construct's slam" } ]
             }
           },
           {
-            "text": "What you build moves when you ask it to. As a bonus action, move one Structure up to 30 feet in any direction — through the air, if you like — and any creature it passes through takes 4d10 Gravitic damage and is knocked Prone (a Strength save halves the damage and keeps it standing).",
-            "card": "Bonus action: fly a Structure 30 ft in any direction — anyone in its path takes 4d10 gravitic and falls Prone (Str half, stays up)",
+            "text": "What you build moves when you ask it to. As a bonus action, move one Structure up to 30 feet in any direction — through the air, if you like — and any creature it passes through takes 4d10 Force damage and is knocked Prone (a Strength save halves the damage and keeps it standing).",
+            "card": "Bonus action: fly a Structure 30 ft in any direction — anyone in its path takes 4d10 force and falls Prone (Str half, stays up)",
             "mech": {
-              "damage": { "amount": "4d10", "type": "gravitic", "trigger": "a moving Structure", "save": { "ability": "Strength", "onSuccess": "half" } },
+              "damage": { "amount": "4d10", "type": "force", "trigger": "a moving Structure", "save": { "ability": "Strength", "onSuccess": "half" } },
               "conditions": [ { "name": "Prone" } ]
             }
           },
           {
-            "text": "Your Constructs carry their own gravity. A creature hostile to you that starts its turn within 10 feet of one cannot willingly move away from it, and when a Construct is destroyed it collapses into a brief singularity — everything within 20 feet is pulled to where it stood and takes 6d10 Gravitic damage, landing Prone (a Strength save halves the damage and resists the pull).",
-            "card": "Enemies starting within 10 ft of a Construct can't move away · a destroyed Construct collapses: 20-ft pull, 6d10 gravitic, Prone (Str half)",
+            "text": "Your Constructs carry their own gravity. A creature hostile to you that starts its turn within 10 feet of one cannot willingly move away from it, and when a Construct is destroyed it collapses into a brief singularity — everything within 20 feet is pulled to where it stood and takes 6d10 Force damage, landing Prone (a Strength save halves the damage and resists the pull).",
+            "card": "Enemies starting within 10 ft of a Construct can't move away · a destroyed Construct collapses: 20-ft pull, 6d10 force, Prone (Str half)",
             "mech": {
-              "damage": { "amount": "6d10", "type": "gravitic", "area": "20 ft", "trigger": "a Construct is destroyed", "save": { "ability": "Strength", "onSuccess": "half" } },
+              "damage": { "amount": "6d10", "type": "force", "area": "20 ft", "trigger": "a Construct is destroyed", "save": { "ability": "Strength", "onSuccess": "half" } },
               "conditions": [ { "name": "Prone" } ],
               "deny": [ "moving away" ]
             }
@@ -297,10 +297,10 @@
       "type": "Offensive",
       "description": "The seal lands with more weight than anything its size should carry.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus Gravitic damage equal to one damage die of the primary effect's type (min 1d6), and a Large or smaller target is knocked Prone.",
-        "card": "+1 die gravitic · Large or smaller are knocked Prone",
+        "text": "On a hit or failed saving throw, the target takes bonus Force damage equal to one damage die of the primary effect's type (min 1d6), and a Large or smaller target is knocked Prone.",
+        "card": "+1 die force · Large or smaller are knocked Prone",
         "mech": {
-          "damage": { "dice": [ "1d6" ], "type": "gravitic" },
+          "damage": { "dice": [ "1d6" ], "type": "force" },
           "conditions": [ { "name": "Prone" } ]
         }
       },

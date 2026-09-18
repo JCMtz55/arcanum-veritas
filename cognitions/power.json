@@ -23,8 +23,8 @@
             }
           },
           {
-            "text": "The effect now ignores immunity to the original damage type, dealing half damage to otherwise immune creatures.",
-            "card": "Ignores immunity too — half damage to the immune",
+            "text": "The effect now ignores immunity to the original damage type: against it, immunity counts only as resistance.",
+            "card": "Immunity counts only as resistance against it",
             "mech": {
               "damage": {
                 "type": "force"
@@ -73,8 +73,8 @@
             }
           },
           {
-            "text": "The stack limit increases to 7 times, and at maximum stacks you additionally ignore immunity, dealing half damage to otherwise immune creatures. Stacks no longer reset between rounds — only between combats.",
-            "card": "Stacks to 7 · at max you ignore immunity too · stacks only reset between combats",
+            "text": "The stack limit increases to 7 times, and at maximum stacks immunity counts only as resistance against you. Stacks no longer reset between rounds — only between combats.",
+            "card": "Stacks to 7 · at max immunity counts only as resistance · stacks only reset between combats",
             "mech": {
               "pierce": "immunity"
             }

@@ -5,6 +5,7 @@
   "opposing": "decay",
   "description": "Evolution, Maturation, Prosperity, Vitality, Expansion.",
   "savingThrow": "Constitution",
+  "damageType": "Piercing",
   "verumEffects": {
     "supportive": [
       {

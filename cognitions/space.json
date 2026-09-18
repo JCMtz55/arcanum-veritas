@@ -5,7 +5,7 @@
   "opposing": "time",
   "description": "Distance, Displacement, Passage, Expanse, Elsewhere.",
   "savingThrow": "Charisma",
-  "damageType": "Rift",
+  "damageType": "Force",
 
   "verumEffects": {
     "offensive": [
@@ -14,10 +14,10 @@
         "description": "Where a thing stands is only an agreement. You can revoke it.",
         "tiers": [
           {
-            "text": "The damage is turned into Rift damage. A creature that fails is displaced — teleported up to 10 feet to an unoccupied space of your choice that you can see.",
-            "card": "Damage becomes Rift · teleported 10 ft to a space you choose",
+            "text": "The damage is turned into Force damage. A creature that fails is displaced — teleported up to 10 feet to an unoccupied space of your choice that you can see.",
+            "card": "Damage becomes Force · teleported 10 ft to a space you choose",
             "mech": {
-              "damage": { "type": "rift" },
+              "damage": { "type": "force" },
               "movement": { "teleport": 10 }
             }
           },
@@ -25,7 +25,7 @@
             "text": "The displacement becomes 30 feet, and it arrives wrong-footed: it has disadvantage on attack rolls until the end of its next turn.",
             "card": "The displacement becomes 30 ft · they attack at disadvantage until the end of their next turn",
             "mech": {
-              "damage": { "type": "rift" },
+              "damage": { "type": "force" },
               "movement": { "teleport": 30 },
               "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
             }
@@ -34,7 +34,7 @@
             "text": "Or trade them. Instead of moving it, you may swap it with any other creature within 30 feet — a willing ally, yourself, or another creature that failed.",
             "card": "Or swap them with any creature within 30 ft — an ally, you, or another who failed",
             "mech": {
-              "damage": { "type": "rift" },
+              "damage": { "type": "force" },
               "movement": { "teleport": 30, "swap": "any creature within 30 ft" },
               "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
             }
@@ -43,7 +43,7 @@
             "text": "Scatter. Every creature of your choice within 30 feet of the target makes the seal's save, and you place each one that fails — and the target — anywhere you can see within 60 feet, all at once. The battlefield is the shape you say it is.",
             "card": "Scatter — everyone you choose within 30 ft saves, and you place each who fails anywhere within 60 ft, all at once",
             "mech": {
-              "damage": { "type": "rift" },
+              "damage": { "type": "force" },
               "movement": { "teleport": 60, "area": "30 ft" },
               "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
             }
@@ -276,10 +276,10 @@
       "type": "Offensive",
       "description": "The seal cuts a little further than the target does.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus Rift damage equal to one damage die of the primary effect's type (min 1d6), and is teleported 5 feet to an unoccupied space of your choice.",
-        "card": "+1 die rift · teleported 5 ft to a space you choose",
+        "text": "On a hit or failed saving throw, the target takes bonus Force damage equal to one damage die of the primary effect's type (min 1d6), and is teleported 5 feet to an unoccupied space of your choice.",
+        "card": "+1 die force · teleported 5 ft to a space you choose",
         "mech": {
-          "damage": { "dice": [ "1d6" ], "type": "rift" },
+          "damage": { "dice": [ "1d6" ], "type": "force" },
           "movement": { "teleport": 5 }
         }
       },

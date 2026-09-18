@@ -5,7 +5,7 @@
   "opposing": "ice",
   "description": "Destruction, Passion, Purification, Rebirth, Warmth.",
   "savingThrow": "Dexterity",
-  "damageType": "Cognitive Fire",
+  "damageType": "Fire",
   "verumEffects": {
     "offensive": [
       {
@@ -13,8 +13,8 @@
         "description": "Your fire burns hotter with every drop of fury.",
         "tiers": [
           {
-            "text": "The damage is turned into Cognitive Fire Damage and the total damage output increases by 2 additional dice. The fire does not go out at once — a creature that fails, or is hit, takes Twice your Verum Modifier in fire damage at the start of its next turn.",
-            "card": "+2 dice · damage becomes Cognitive Fire · 2×VM fire at the start of their next turn",
+            "text": "The damage is turned into fire damage and the total damage output increases by 2 additional dice. The fire does not go out at once — a creature that fails, or is hit, takes Twice your Verum Modifier in fire damage at the start of its next turn.",
+            "card": "+2 dice · damage becomes Fire · 2×VM fire at the start of their next turn",
             "mech": {
               "damage": {
                 "bonusDice": 2,
@@ -81,7 +81,7 @@
         "description": "Fire does not stop when it has done what you asked of it.",
         "tiers": [
           {
-            "text": "A creature that fails is set Ablaze, taking Twice your Verum Modifier in Cognitive Fire at the start of each of its turns until it or someone beside it spends an action to smother the flames.",
+            "text": "A creature that fails is set Ablaze, taking Twice your Verum Modifier in fire damage at the start of each of its turns until it or someone beside it spends an action to smother the flames.",
             "card": "Ablaze — 2×VM fire each turn until someone spends an action putting them out",
             "mech": {
               "conditions": [ { "name": "Ablaze", "tick": "2×VM fire", "escape": "an action to smother" } ]
@@ -178,11 +178,11 @@
             }
           },
           {
-            "text": "The fire bypasses immunity, dealing half damage to normally immune creatures.",
-            "card": "Bypasses immunity — half damage to immune",
+            "text": "The fire bypasses immunity: against it, immunity counts only as resistance.",
+            "card": "Immunity counts only as resistance against it",
             "mech": {
               "pierce": "immunity",
-              "note": "half to immune"
+              "note": "immunity counts as resistance"
             }
           },
           {

@@ -18,7 +18,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "earth",
-      "ready": true
+      "ready": false
     },
     {
       "id": "apathy",
@@ -57,6 +57,7 @@
       "icon": "🩸",
       "fa": "droplet",
       "category": "corporeal",
+      "favorite": true,
       "tier": "II",
       "opposing": "spirit",
       "ready": true
@@ -111,7 +112,7 @@
       "tier": "III",
       "requires": [ "Vileness", "Decay" ],
       "opposing": "soul",
-      "ready": true
+      "ready": false
     },
     {
       "id": "craft",
@@ -153,7 +154,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "air",
-      "ready": true
+      "ready": false
     },
     {
       "id": "fire",
@@ -193,7 +194,7 @@
       "category": "cosmical",
       "tier": "II",
       "opposing": "levity",
-      "ready": true
+      "ready": false
     },
     {
       "id": "growth",
@@ -254,6 +255,7 @@
       "tier": "III",
       "requires": [ "Growth", "Flesh" ],
       "divineLaw": "The Intimate Law of Life",
+      "favorite": true,
       "opposing": "death",
       "ready": true
     },
@@ -266,6 +268,18 @@
       "tier": "II",
       "opposing": "earth",
       "ready": true
+    },
+    {
+      "id": "lunar",
+      "name": "Lunar",
+      "icon": "🌙",
+      "fa": "moon",
+      "category": "cosmical",
+      "favorite": true,
+      "tier": "III",
+      "requires": [ "Night", "Water" ],
+      "opposing": "chaos",
+      "ready": false
     },
     {
       "id": "metal",
@@ -297,7 +311,7 @@
       "requires": [ "Fear", "Shadow", "Insanity" ],
       "favorite": true,
       "opposing": "dream",
-      "ready": true
+      "ready": false
     },
     {
       "id": "nullity",
@@ -382,7 +396,7 @@
       "tier": "IV",
       "requires": [ "Gravity", "Travel" ],
       "opposing": "time",
-      "ready": true
+      "ready": false
     },
     {
       "id": "speed",
@@ -395,6 +409,19 @@
       "ready": false
     },
     {
+      "id": "sun",
+      "name": "Sun",
+      "icon": "☀️",
+      "fa": "sun",
+      "category": "cosmical",
+      "favorite": true,
+      "tier": "III",
+      "requires": [ "Fire", "Life" ],
+      "opposing": "night",
+      "coreOnly": true,
+      "ready": false
+    },
+    {
       "id": "time",
       "name": "Time",
       "icon": "⏳",
@@ -404,7 +431,7 @@
       "requires": [ "Memory", "Travel" ],
       "divineLaw": "The Universal Law of Time",
       "opposing": "space",
-      "ready": true
+      "ready": false
     },
     {
       "id": "toxin",
@@ -425,7 +452,7 @@
       "tier": "IV",
       "requires": [ "Darkness", "Silence" ],
       "opposing": "abundance",
-      "ready": true
+      "ready": false
     },
     {
       "id": "water",
@@ -435,7 +462,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "toxin",
-      "ready": true
+      "ready": false
     }
   ]
 }

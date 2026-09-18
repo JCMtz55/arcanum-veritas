@@ -5,7 +5,7 @@
   "opposing": "civilization",
   "description": "Ferocity, Strength, Savagery, Predation, Survival.",
   "savingThrow": "Strength",
-  "damageType": "Physical",
+  "damageType": "Slashing",
   "verumEffects": {
     "offensive": [
       {

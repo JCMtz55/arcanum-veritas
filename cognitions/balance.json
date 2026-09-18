@@ -5,6 +5,7 @@
   "opposing": "chaos",
   "description": "Equilibrium, Symmetry, Reflection, Redistribution, Harmony.",
   "savingThrow": "Wisdom",
+  "damageType": "Force",
   "verumEffects": {
     "offensive": [
       {

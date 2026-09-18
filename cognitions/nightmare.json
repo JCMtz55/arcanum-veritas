@@ -19,10 +19,11 @@
         "description": "You tear open the fragile membrane between sanity and oblivion.",
         "tiers": [
           {
-            "text": "The damage is turned into Void damage, which cannot be resisted or ignored by immunity — it strikes soul, dream-form, and body alike. A creature that is hit or fails cannot regain hit points until the end of its next turn.",
-            "card": "Damage becomes Void — no resistance or immunity applies · no healing until the end of their next turn",
+            "text": "The damage is turned into Absolute Void from the first tier, and it ignores resistance and immunity altogether — it strikes soul, dream-form, and body alike. A creature that is hit or fails cannot regain hit points until the end of its next turn.",
+            "card": "Damage becomes ABSOLUTE VOID — ignores resistance and immunity entirely · no healing until the end of their next turn",
             "mech": {
               "damage": { "type": "void" },
+              "absolute": true,
               "pierce": "all",
               "deny": [ "healing" ]
             }

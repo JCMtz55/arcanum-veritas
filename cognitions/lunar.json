@@ -1,0 +1,334 @@
+{
+  "id": "lunar",
+  "name": "Lunar",
+  "icon": "🌙",
+  "opposing": "chaos",
+  "description": "Phases, Tides, Regulation, Reflection, Lucidity.",
+  "savingThrow": "Dream",
+  "damageType": "Radiant",
+
+  "engine": {
+    "title": "The Lunar Cycle",
+    "text": "You carry Selaris's phase within you, and you wake at the New Moon after every long rest. Each Lunar Verum Effect you apply resolves under your current phase — adding that phase's gift to the seal — and then you turn the Moon one step, waxing or waning, whichever way you choose. After the Waning Crescent comes the New Moon, and before the New Moon the Waning Crescent. You may hold the Moon where it is instead of turning it, but holding it costs you: gain 1 level of Dream Exhaustion.",
+    "card": "Each Lunar seal takes your current phase's gift, then you turn the Moon one step — waxing or waning, your choice · hold it still and gain 1 Dream Exhaustion",
+    "phases": [
+      { "name": "New Moon", "epithet": "The Veiled Silence", "card": "The seal is silent and unseen — it cannot be sensed, identified, or reacted to, and a creature that fails loses sight of you: you are invisible to it until the end of your next turn" },
+      { "name": "Waxing Crescent", "epithet": "The Whispering Thread", "card": "You and every ally within 30 ft gain Inspiration" },
+      { "name": "First Quarter", "epithet": "The Awakening Pulse", "card": "+2 to the seal's attack bonus and DC, and it deals one extra damage die" },
+      { "name": "Waxing Gibbous", "epithet": "The Clarity of Stars", "card": "Learn each target's weakest saving throw and every resistance it has — and the seal asks for that save instead of its usual one" },
+      { "name": "Full Moon", "epithet": "The Mantle Unveiled", "card": "The seal's dice are maximized — but targets that fail gain 1 Dream Exhaustion, and every other creature within 30 ft, you included, makes a Dream save or gains 1" },
+      { "name": "Waning Gibbous", "epithet": "The Echoing Flame", "card": "One curse or magical condition on each ally within 30 ft of you ends" },
+      { "name": "Last Quarter", "epithet": "The Fading Mirror", "card": "All is seen in reverse — targets save at disadvantage (or you attack with advantage), and one that fails takes you for a friend until the end of its next turn" },
+      { "name": "Waning Crescent", "epithet": "The Cradle of Endings", "card": "A summoned or extraplanar creature that fails is banished to where it came from; any other that fails at or below half its hit points is banished into a dream until the end of its next turn" }
+    ]
+  },
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Silver Reflection",
+        "description": "Selaris never made magic. She conducted it. So can you — even when it isn't yours.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Radiant damage, and the more magic a creature carries, the more of it answers you: the effect deals one additional damage die for every spell or magical effect currently on the target, up to your Proficiency Bonus. A creature that fails also makes any Concentration check this damage forces at disadvantage.",
+            "card": "Damage becomes Radiant · +1 die for each spell or magical effect on the target (max {PB}) · its Concentration check is at disadvantage",
+            "mech": {
+              "damage": { "type": "radiant", "extraDice": "1 per magical effect on the target, max PB" },
+              "penalty": { "disadvantage": "the Concentration check this damage forces" }
+            }
+          },
+          {
+            "text": "Moon Silver's gift: the first spell of 3rd level or lower the target casts before your next turn that targets only you or one of your allies is turned back upon it instead.",
+            "card": "Its next spell ≤3rd aimed at you or an ally before your next turn is reflected back at it",
+            "mech": {
+              "damage": { "type": "radiant" },
+              "reflect": "its next spell of 3rd level or lower aimed at you or an ally"
+            }
+          },
+          {
+            "text": "Seize the weave. If the target is concentrating on a spell of 5th level or lower, you may take that concentration from it: the spell continues under your control, for its remaining duration, as if you had cast it — ending any concentration you held.",
+            "card": "Take over its concentration spell (≤5th) — it continues under your control for the rest of its duration",
+            "mech": {
+              "damage": { "type": "radiant" },
+              "seize": "its concentration spell of 5th level or lower"
+            }
+          },
+          {
+            "text": "Its magic answers to you. Until the end of your next turn, once per round when the target creates a spell or magical effect, you may use your reaction to choose new targets for it within its range.",
+            "card": "Until your next turn, once a round, your reaction redirects any spell or effect it creates to new targets",
+            "mech": {
+              "damage": { "type": "radiant" },
+              "reaction": { "trigger": "the target creates a spell or magical effect", "effect": "choose its new targets", "uses": "once each round" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Moon Silver",
+        "description": "What fell from Selaris still remembers how to keep the weave from harming what it holds.",
+        "tiers": [
+          {
+            "text": "The target is silvered: it has advantage on saving throws against spells and magical effects, and resistance to damage from spells.",
+            "card": "Advantage on saves against spells and magical effects · resistance to spell damage",
+            "mech": { "buff": { "who": "target", "advantage": "saves against spells and magical effects", "resist": "damage from spells" } }
+          },
+          {
+            "text": "Once while this lasts, as a reaction when the target is targeted by a spell of 3rd level or lower, it reflects the spell back upon its caster.",
+            "card": "Once: reaction to reflect a spell ≤3rd aimed at it back at its caster",
+            "mech": { "reaction": { "trigger": "the target is targeted by a spell of 3rd level or lower", "effect": "reflect it at the caster", "uses": "once" } }
+          },
+          {
+            "text": "Moon Silver resists corruption: the target cannot gain Corruption Points or be cursed while this lasts, and it may reflect spells of 5th level or lower.",
+            "card": "No Corruption Points or curses · reflects spells up to 5th",
+            "mech": {
+              "deny": [ "corruption", "curses" ],
+              "reaction": { "trigger": "the target is targeted by a spell of 5th level or lower", "effect": "reflect it at the caster", "uses": "once" }
+            }
+          },
+          {
+            "text": "The target shines like the Mantle's keystone. It may reflect once every round rather than once, spells of 7th level or lower, and while this lasts it cannot be Charmed, Frightened, or have its mind read by magic.",
+            "card": "Reflect once every round, spells up to 7th · can't be Charmed, Frightened or magically mind-read",
+            "mech": {
+              "deny": [ "corruption", "curses", "charm", "fear" ],
+              "reaction": { "trigger": "the target is targeted by a spell of 7th level or lower", "effect": "reflect it at the caster", "uses": "once each round" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Lucid Night",
+        "description": "Under the full Moon, every dream is awake.",
+        "tiers": [
+          {
+            "text": "The target has advantage on Dream saving throws, and it cannot be Frightened or put to sleep by magic.",
+            "card": "Advantage on Dream saves · can't be Frightened or magically put to sleep",
+            "mech": {
+              "buff": { "who": "target", "advantage": "Dream saving throws" },
+              "deny": [ "fear", "magical sleep" ]
+            }
+          },
+          {
+            "text": "Its next rest is lucid. If it finishes a short rest while this lasts, it loses all of its Dream Exhaustion, and it may spend that rest walking Insomnia instead of dreaming blindly.",
+            "card": "A short rest while this lasts clears ALL Dream Exhaustion, and may be spent walking Insomnia",
+            "mech": { "buff": { "who": "target", "rest": "a short rest removes 1 Dream Exhaustion" } }
+          },
+          {
+            "text": "The dreaming self stands up. If the target drops to 0 hit points or falls unconscious while this lasts, on each of its turns it may take one action as its dreaming self — until it wakes or the effect ends.",
+            "card": "At 0 HP or unconscious, it still takes one action a turn as its dreaming self",
+            "mech": { "buff": { "who": "target", "dreamingSelf": "one action a turn while unconscious" } }
+          },
+          {
+            "text": "Lucid mastery. While this lasts, the target is treated as the Dream Lord of any Node it stands in, and in the waking world it cannot be Charmed, put to sleep, or have its dreams entered without its leave.",
+            "card": "Dream Lord of any Node it stands in · awake, no one enters its dreams or charms it without leave",
+            "mech": { "deny": [ "charm", "magical sleep", "dream intrusion" ] }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Ebb and Flow",
+        "description": "The Moon does not stop the tide. It decides where the tide goes.",
+        "tiers": [
+          {
+            "text": "The tide of magic runs your way. Inside the seal's area, a creature that fails has disadvantage on Concentration checks and its spell save DC and spell attack bonus drop by 2 while it remains inside — and your allies inside add +2 to their spell save DCs, spell attack bonuses, and Verum DC.",
+            "card": "Enemies who fail: disadvantage on Concentration, spell DC and attacks −2 inside · allies inside: +2 to spell DCs, spell attacks and Verum DC",
+            "mech": {
+              "penalty": { "disadvantage": "Concentration checks", "spellDC": -2, "spellAttack": -2 },
+              "buff": { "who": "allies inside", "spellDC": "+2", "verumDC": "+2" }
+            }
+          },
+          {
+            "text": "The ebb takes hold. A creature that fails cannot cast a spell above 5th level while it remains inside — the tide will not lift that much magic for it.",
+            "card": "Enemies who fail can't cast above 5th level inside",
+            "mech": {
+              "deny": [ "spells above 5th level" ],
+              "buff": { "who": "allies inside", "spellDC": "+2", "verumDC": "+2" }
+            }
+          },
+          {
+            "text": "The ebb deepens. A creature that fails cannot cast a spell above 3rd level while it remains inside — the weave simply does not carry that much for it — and wild magic surges within the area are suppressed.",
+            "card": "Enemies who fail can't cast above 3rd level inside · wild surges are suppressed",
+            "mech": {
+              "deny": [ "spells above 3rd level" ],
+              "buff": { "who": "allies inside", "spellDC": "+2", "verumDC": "+2" }
+            }
+          },
+          {
+            "text": "Eclipse. Inside the area, no magic of 5th level or lower functions except yours and your allies' — spells fail, magical effects are suppressed, magic items go quiet — and your own seals drawn from within it cannot be countered by anything short of an opposing Chaos seal.",
+            "card": "ECLIPSE — inside, only your side's magic works (all else ≤5th is suppressed) · your seals from within can't be countered but by Chaos",
+            "mech": {
+              "deny": [ "enemy magic of 5th level or lower" ],
+              "buff": { "who": "allies inside", "magic": "unaffected" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Moonstruck",
+        "description": "Everyone who has ever stared too long at the Moon knows the feeling. Few survive knowing it this well.",
+        "tiers": [
+          {
+            "text": "A creature that fails is transfixed by silver light: until the end of its next turn it cannot take reactions, its speed is halved, and it has disadvantage on attack rolls.",
+            "card": "Transfixed — no reactions, speed halved, disadvantage on attacks until the end of their next turn",
+            "mech": {
+              "deny": [ "reactions" ],
+              "penalty": { "speed": "halved", "disadvantage": "attack rolls" }
+            }
+          },
+          {
+            "text": "Lunacy. On its next turn it cannot choose what it does: roll a d8 for the phase that holds it — 1–2 it does nothing, 3–4 it moves toward the brightest light it can see, 5–6 it attacks the nearest creature, 7–8 it acts normally.",
+            "card": "Lunacy next turn — d8: 1–2 nothing · 3–4 walks toward the brightest light · 5–6 attacks the nearest creature · 7–8 acts normally",
+            "mech": { "conditions": [ { "name": "Lunacy", "duration": "their next turn" } ] }
+          },
+          {
+            "text": "The Moon sings it to sleep. A creature that fails at or below half its hit points falls Unconscious until the end of its next turn, or until it takes damage or someone uses an action to shake it awake.",
+            "card": "At or below half HP: falls asleep until the end of their next turn — damage or a shake wakes them",
+            "mech": { "conditions": [ { "name": "Unconscious", "duration": "until the end of their next turn, or woken" } ] }
+          },
+          {
+            "text": "Drawn into the dream. A creature that fails falls asleep as above — whatever its hit points — and its dreaming self is pulled into a Node of your making. Until it wakes, you decide what it dreams, and it wakes with 1 level of Dream Exhaustion unless the dream was kind.",
+            "card": "Anything that fails falls asleep, and its dreaming self is pulled into a Node you shape · it wakes with 1 Dream Exhaustion",
+            "mech": { "conditions": [ { "name": "Unconscious", "duration": "until woken" }, { "name": "Dream Exhaustion" } ] }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Moonforged",
+        "description": "Selaris fell in pieces. You have learned to pick them up.",
+        "tiers": [
+          {
+            "text": "Your creations are Moonstone, shedding dim silver light for 20 feet, and nothing hides in moonlight — an invisible creature within it is outlined and gains no benefit from being invisible. An Object you make can change its form — weapon, tool, shield, key — as a bonus action.",
+            "card": "Creations shed 20-ft moonlight that outlines the invisible · your Objects change form as a bonus action",
+            "mech": { "summon": { "light": "dim, 20 ft", "shapeshift": "Objects, bonus action" } }
+          },
+          {
+            "text": "Moon Silver. Once per round, a spell of 2nd level or lower that targets a creature holding one of your Objects is reflected back at its caster, and wild magic surges cannot occur within 30 feet of your Structures.",
+            "card": "Your Objects reflect one spell ≤2nd a round · no wild surges within 30 ft of your Structures",
+            "mech": { "reflect": "one spell of 2nd level or lower each round, for whoever holds your Object" }
+          },
+          {
+            "text": "A Lunar Keystone. A Structure you raise can hold one: while it stands, allies within 30 feet of it add your current phase's gift to their own spells, as though they were Lunar seals.",
+            "card": "A Keystone Structure — allies within 30 ft add your current phase's gift to their own spells",
+            "mech": { "summon": { "keystone": "allies within 30 ft share your current phase" } }
+          },
+          {
+            "text": "Your Constructs are shards of Selaris and keep her time. A Construct may hold its own phase, separate from yours, and when it is destroyed it shatters into Moonstone — every spell and magical effect of 5th level or lower within 20 feet that you choose ends at once.",
+            "card": "Constructs hold their own phase · a destroyed one shatters: end any magic ≤5th you choose within 20 ft",
+            "mech": { "dispel": { "maxLevel": 5, "area": "20 ft", "trigger": "a Construct is destroyed" } }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "Keeper of the Phases",
+        "description": "Someone has to remember how the sky used to move.",
+        "tiers": [
+          {
+            "text": "Always know Selaris's current phase and how strongly magic runs in the place you stand. Sense spells and magical effects within 60 feet, and read an omen from the Moon: learn whether a course of action you describe tonight tends toward fortune or ruin.",
+            "card": "Know the phase and the local strength of magic · sense magic within 60 ft · read one omen tonight",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "See truly by moonlight: under any moonlight, you see through illusions and magical disguises within 60 feet, and you can identify any spell or magic item you can see.",
+            "card": "By moonlight, see through illusions and disguises within 60 ft · identify any spell or magic item you see",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Walk the moonlit dream. Send a message into the dream of anyone sleeping under the open sky anywhere on this plane, and hear their answer in your own sleep.",
+            "card": "Send a dream message to anyone sleeping under the open sky, anywhere on this plane — and hear their reply",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Call the phase. For 24 hours, across a mile around you, the world answers as though Selaris stood in the phase you choose — a Full Moon of lucid dreams and walking spirits, a New Moon of quiet magic and silent oaths, or any phase between.",
+            "card": "For 24 hrs across a mile, the world behaves as if Selaris stood in whatever phase you name",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Moonshard",
+      "type": "Offensive",
+      "description": "A sliver of the broken keystone rides the seal in.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Radiant damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next Concentration check before the end of your next turn.",
+        "card": "+1 die radiant · disadvantage on their next Concentration check",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "radiant" },
+          "penalty": { "disadvantage": "their next Concentration check" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and if the target is concentrating on a spell of 3rd level or lower, that spell ends.",
+          "card": "+3 dice · it loses any concentration spell of 3rd level or lower",
+          "mech": { "deny": [ "concentration" ] }
+        }
+      ]
+    },
+    {
+      "name": "Silvered",
+      "type": "Supportive",
+      "description": "Moonlight protects what it can see — and it sees everything.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally within 30 feet is silvered until the start of your next turn: the first spell of 2nd level or lower that targets it is reflected back at its caster. But the ally shines — it cannot be hidden or invisible until then.",
+        "card": "An ally within 30 ft reflects the first spell ≤2nd aimed at it until your next turn — but it shines, and can't hide or be invisible",
+        "mech": {
+          "reflect": "the first spell of 2nd level or lower aimed at the ally",
+          "cost": { "stealth": "the ally can't be hidden or invisible" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The reflection reaches spells of 4th level or lower, and lasts 1 minute.",
+          "card": "Spells up to 4th · lasts 1 minute"
+        },
+        {
+          "text": "Level 11+: The silver dims when it should — the ally may hide and turn invisible again.",
+          "card": "No more cost — the ally can hide again"
+        }
+      ]
+    },
+    {
+      "name": "Lunacy",
+      "type": "Control",
+      "description": "The seal leaves a little moonlight behind their eyes.",
+      "effect": {
+        "text": "Creatures that fail cannot take reactions until the end of their next turn, their gaze pulled toward the sky.",
+        "card": "No reactions until the end of their next turn",
+        "mech": { "deny": [ "reactions" ] }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Their speed is also halved until the end of their next turn.",
+          "card": "Speed halved too",
+          "mech": { "penalty": { "speed": "halved" } }
+        },
+        {
+          "text": "Level 11+: A creature that fails at or below half its hit points falls asleep until the end of its next turn, or until it takes damage or is shaken awake.",
+          "card": "At or below half HP: asleep until the end of their next turn, or until woken",
+          "mech": { "conditions": [ { "name": "Unconscious", "duration": "until the end of their next turn, or woken" } ] }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

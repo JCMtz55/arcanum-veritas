@@ -1,0 +1,242 @@
+{
+  "id": "sun",
+  "name": "Sun",
+  "icon": "☀️",
+  "opposing": "night",
+  "description": "Radiance, Revelation, Vigilance, Warmth, Judgment. The Sun is not fire, though the ignorant confuse the two. Fire consumes and moves on; the Sun keeps watch — the eye that does not close, the light that arrives every morning whether it is wanted or not. It cannot abide a hidden thing: no lie survives noon, no shadow keeps its shape. To resist it is not to dodge or endure but to withstand being seen through, a contest waged in the dreaming soul. And beneath Ikar's vigil burns the thing he guards — Kaiser's trapped wrath, older than any dawn. To wield the Sun is to keep that cage yourself.",
+  "savingThrow": "Dream",
+  "damageType": "Radiant",
+  "absoluteTier": 0,
+  "coreOnly": true,
+  "incompatible": [ "creation" ],
+
+  "cost": {
+    "text": "Sun runs on Corruption Points carried on your own soul — Kaiser's caged fire, held in you. Sun grants you none freely: you gain them only by seeking them in the world (Vile Emotion, curses, corrupt ground, the Taint effect, or other corruption abroad). They are the same Corruption Points the Cognition of Corruption tracks, and you suffer their consequences like any corrupted creature: at 3 or more you are exploitable by Corruption and Vile effects; at 5 or more your soul burns visible to scrying and you lose immunity to mind-affecting and curse effects.",
+    "card": "Fuel: Corruption Points you've taken in from the world · 3+: exploitable by Corruption and Vile effects · 5+: visible to scrying, and you lose immunity to mind and curse effects"
+  },
+
+  "engine": {
+    "title": "The Two Suns",
+    "text": "This engine governs every Sun activation, and once you learn Sun it can never be suppressed, dismissed, or set aside — you are always the cage. Every Core ability has a fixed Corruption cost. Pay the full cost and you spend it: a Gold Sun activation, Ikar's discipline, the fire burning clean. Cannot pay in full and the ability fires anyway while the Void feeds it: you gain 1d4 Corruption Points (no save — chaos does not measure) and spend nothing, a Black Sun activation. Both resolve at the same effect; only the ledger and the Tracker change. Keep a running count of your Sun activations on the Solar Tracker, 1 to 3, logging each as Gold or Black. It does not reset on a Black. The 3rd activation resolves normally — then you face the Reckoning and the count returns to 0.",
+    "card": "Pay the ability's Corruption cost = GOLD Sun · can't pay = BLACK Sun: it fires anyway, you gain 1d4 Corruption · every 3rd activation, the Reckoning",
+    "tracker": {
+      "name": "Solar Tracker",
+      "window": 3,
+      "gold":  { "label": "Gold Sun",  "card": "Spend the full Corruption cost — Ikar's discipline, the fire burns clean" },
+      "black": { "label": "Black Sun", "card": "Can't pay in full — it fires anyway, you gain 1d4 Corruption Points (no save) and spend nothing" },
+      "reckoning": [
+        { "min": 0, "max": 0, "name": "☀ Corona", "corona": true,
+          "card": "All three were Gold — the 3rd activation blooms into its apex form" },
+        { "min": 1, "max": 1, "name": "The chain breaks",
+          "card": "No Corona — and no penalty" },
+        { "min": 2, "max": 2, "name": "The Void Rises",
+          "card": "A 20-ft holy burst centred on you deals 8d10 to everyone else, allies included · you gain 1 Exhaustion and 1d4 Corruption, and can't draw a Supportive Sun seal until your next turn" },
+        { "min": 3, "max": 3, "name": "Kaiser Takes the Wheel",
+          "card": "For 1 round you lose control — each turn you must Enflare the nearest living thing, ally or enemy, at maximum damage and move toward the nearest creature · then 2 Exhaustion and 2d4 Corruption" }
+      ]
+    }
+  },
+
+  "mastery": {
+    "title": "The Sun's Judgment",
+    "text": "Two terms the Sun's abilities are written in.",
+    "traits": [
+      {
+        "name": "Sworn Adversary",
+        "level": 1,
+        "text": "A creature the Sun is built to burn: any undead or fiend; any creature with resistance or immunity to necrotic damage; and any creature that can natively create magical darkness or see through it — devils, shadows, drow, and all creatures of Night.",
+        "card": "Undead, fiends, anything resistant or immune to necrotic, and anything that makes or sees through magical darkness (creatures of Night)"
+      },
+      {
+        "name": "Sunstruck",
+        "level": 1,
+        "text": "Until the end of your next turn unless stated, a Sunstruck creature sheds bright light in a 10-foot radius and cannot benefit from invisibility, magical darkness, or being hidden.",
+        "card": "Until the end of your next turn: sheds 10-ft bright light, no invisibility, magical darkness or hiding"
+      }
+    ]
+  },
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Enflare",
+        "description": "You stop asking the dark to leave and simply turn the light on it.",
+        "fuel": 2,
+        "tiers": [
+          {
+            "text": "The damage becomes Holy — Cognitive Sunlight, radiance already at its zenith and Absolute from the first dawn. It ignores resistance, ignores cover and concealment, and gains 3 bonus damage dice — against a sworn adversary, 1 further die. A creature hit, or that fails its save, is Sunstruck, and the light keeps burning: it takes holy damage equal to Twice your Verum Modifier at the start of each of its turns while Sunstruck.",
+            "card": "+3 dice · damage becomes HOLY sunlight, ignoring resistance, cover and concealment · +1 more die vs a sworn adversary · Sunstruck: 2×VM holy at the start of each of their turns",
+            "mech": {
+              "damage": { "bonusDice": 3, "type": "holy" },
+              "pierce": "resistance, cover and concealment",
+              "conditions": [ { "name": "Sunstruck", "tick": "2×VM holy" } ]
+            }
+          },
+          {
+            "text": "5 bonus dice, and the Sunstruck burn becomes Three Times your Verum Modifier. A sworn adversary that fails takes 2d10 more holy and cannot regain hit points until the end of your next turn.",
+            "card": "+5 dice · the Sunstruck burn becomes 3×VM · a sworn adversary that fails takes +2d10 holy and can't heal until the end of your next turn",
+            "mech": {
+              "damage": { "bonusDice": 5, "type": "holy" },
+              "conditions": [ { "name": "Sunstruck", "tick": "3×VM holy" } ],
+              "rider": { "damage": "2d10", "type": "holy", "vs": "sworn adversary that fails" }
+            }
+          },
+          {
+            "text": "7 bonus dice. The Sunstruck burn becomes Five Times your Verum Modifier, and sworn adversaries are vulnerable to your Cognitive Sunlight.",
+            "card": "+7 dice · the Sunstruck burn becomes 5×VM · sworn adversaries are vulnerable to it",
+            "mech": {
+              "damage": { "bonusDice": 7, "type": "holy" },
+              "conditions": [ { "name": "Sunstruck", "tick": "5×VM holy" } ],
+              "penalty": { "vulnerability": "your sunlight, sworn adversaries" }
+            }
+          },
+          {
+            "text": "9 bonus dice. A creature reduced to 0 hit points by this effect cannot be revived short of divine intervention, and Sunstruck now lasts 1 minute.",
+            "card": "+9 dice · anything it drops to 0 can't be revived short of a god · Sunstruck lasts 1 min",
+            "mech": {
+              "damage": { "bonusDice": 9, "type": "holy" },
+              "conditions": [ { "name": "Sunstruck", "duration": "1 minute", "tick": "5×VM holy" } ],
+              "deny": [ "revival" ]
+            }
+          }
+        ],
+        "corona": {
+          "name": "Supernova",
+          "text": "The activation deals maximum damage, ignoring all resistance and immunity, plus bonus holy damage equal to half the target's maximum hit points (no save). It strikes every enemy within 60 feet of the target for the full activation. Legendary Resistance cannot be spent to succeed on the save. A sworn adversary reduced to 0 hit points is annihilated, and a sworn adversary left at or below half its hit points is destroyed outright. For a breath the cage is a star, and everything false in its light stops being.",
+          "card": "SUPERNOVA — maximum damage, no resistance or immunity, + half the target's max HP as holy (no save) · hits every enemy within 60 ft of the target · no Legendary Resistance · sworn adversaries at 0 are annihilated, at half HP or below destroyed outright"
+        }
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Enlight",
+        "description": "Every night that ever was ended the same way.",
+        "fuel": 1,
+        "tiers": [
+          {
+            "text": "You clad yourself in dawnlight, and the dawn floods the wounded: the healing gains 15 hit points × the slot level, shared out as you choose among its targets. You and each target gain resistance to necrotic damage and advantage on your next saving throw against being Frightened.",
+            "card": "+15 × {SLOT} HP, shared among the targets · you and each target: resistance to necrotic, advantage on the next save vs Frightened",
+            "mech": {
+              "buff": { "who": "you and each target", "resist": "necrotic", "advantage": "the next save against being Frightened" },
+              "heal": { "perSlot": 15 }
+            }
+          },
+          {
+            "text": "The dawn rises to 25 hit points × the slot level. Each target ends one instance of magical darkness or the Blinded condition on it; an ally at 0 hit points within range is restored to 1 before the healing lands. You shed daylight and cannot be hidden from.",
+            "card": "Now +25 × {SLOT} HP · each target ends magical darkness or Blinded on it · an ally at 0 HP in range rises first · you shed daylight and nothing hides from you",
+            "mech": {
+              "heal": { "perSlot": 25 },
+              "cleanse": [ "magical darkness", "Blinded" ],
+              "revive": "an ally at 0 HP within range, to 1 HP"
+            }
+          },
+          {
+            "text": "Solar aspect. The dawn reaches 35 hit points × the slot level. For the buff's duration you have truesight out to 30 feet and immunity to being Frightened, and allies you heal cannot be reduced below 1 hit point by necrotic damage.",
+            "card": "Now +35 × {SLOT} HP · while it lasts: truesight 30 ft, immune to Frightened · allies you heal can't be dropped below 1 HP by necrotic",
+            "mech": {
+              "heal": { "perSlot": 35 },
+              "buff": { "who": "you", "senses": "truesight 30 ft" },
+              "deny": [ "fear" ]
+            }
+          },
+          {
+            "text": "Avatar of the dawn. The dawn reaches 40 hit points × the slot level. You gain a flying speed equal to your walking speed, creatures that hit you with a melee attack take holy damage equal to your Verum Modifier, and once before the effect ends you may turn a failed save against a Night, darkness, or death effect into a success — for yourself or an ally.",
+            "card": "Now +40 × {SLOT} HP · fly at your walking speed · melee attackers take {VM} holy · once: turn a failed save vs Night, darkness or death into a success, for you or an ally",
+            "mech": {
+              "heal": { "perSlot": 40 },
+              "buff": { "who": "you", "speed": "fly = walking speed" },
+              "reflect": { "amount": "VM", "type": "holy", "trigger": "a melee hit on you" }
+            }
+          }
+        ],
+        "corona": {
+          "name": "Ascension — The Sun Made Flesh",
+          "text": "You become the Sun for 1 minute. Every ally you can see is healed to full and freed of the Frightened, Charmed, and Blinded conditions and any magical darkness on them; an ally who died within the last minute returns at half its hit points. You cannot be reduced below 1 hit point by any source. You have advantage on all saving throws and are immune to being Charmed, Frightened, Stunned, Paralyzed, or Blinded. You project a 60-foot aura of true daylight that nothing can suppress; allies within it are immune to being Frightened and to necrotic and radiant damage. All of your Sun activations deal maximum effect for the duration. When it ends, the Void collects: gain 2d4 Corruption Points and 1 level of Exhaustion — you held the whole cage alone.",
+          "card": "ASCENSION, 1 min — every ally you see healed to full and freed of Frightened, Charmed, Blinded and darkness; the dead of the last minute return at half HP · you can't drop below 1 HP, advantage on all saves, immune to Charm, Fear, Stun, Paralysis, Blindness · 60-ft true daylight: allies immune to fear, necrotic and radiant · every Sun activation at maximum · after: 2d4 Corruption and 1 Exhaustion"
+        }
+      }
+    ],
+    "control": [
+      {
+        "name": "Engulf",
+        "description": "Some places the sun simply refuses to leave.",
+        "fuel": 2,
+        "tiers": [
+          {
+            "text": "The zone fills with true daylight: magical darkness of 3rd level or lower is suppressed within it, and it is difficult terrain for sworn adversaries.",
+            "card": "True daylight — suppresses magical darkness ≤3rd · difficult terrain for sworn adversaries",
+            "mech": {
+              "terrain": { "effect": "difficult", "for": "sworn adversaries" },
+              "dispel": { "what": "magical darkness", "maxLevel": 3 }
+            }
+          },
+          {
+            "text": "A sworn adversary that starts its turn inside takes 3d8 holy damage, and creatures of Night have disadvantage on attack rolls and saving throws while inside.",
+            "card": "Sworn adversaries starting a turn inside take 3d8 holy · creatures of Night inside: disadvantage on attacks and saves",
+            "mech": {
+              "rider": { "damage": "3d8", "type": "holy", "when": "a sworn adversary starts its turn inside" },
+              "penalty": { "disadvantage": "attack rolls and saving throws, creatures of Night inside" }
+            }
+          },
+          {
+            "text": "A creature of Night that fails its save while inside is Blinded until it leaves; darkness up to 5th level is suppressed, and allies inside are immune to being Frightened.",
+            "card": "Creatures of Night that fail inside are Blinded until they leave · darkness ≤5th suppressed · allies inside can't be Frightened",
+            "mech": {
+              "conditions": [ { "name": "Blinded", "who": "creatures of Night that fail", "duration": "until it leaves" } ],
+              "dispel": { "what": "magical darkness", "maxLevel": 5 }
+            }
+          },
+          {
+            "text": "Standing Noon. The zone becomes true sunlight: sworn adversaries take 5d10 holy damage on entering or starting their turn there and cannot regain hit points while inside, and allies inside cannot be Blinded.",
+            "card": "STANDING NOON — sworn adversaries take 5d10 holy entering or starting a turn inside, and can't heal there · allies inside can't be Blinded",
+            "mech": {
+              "rider": { "damage": "5d10", "type": "holy", "when": "a sworn adversary enters or starts its turn inside" },
+              "deny": [ "healing, for sworn adversaries inside" ]
+            }
+          }
+        ],
+        "corona": {
+          "name": "Endless Noon",
+          "text": "The zone's radius doubles and it becomes permanent daylight for the scene — it lasts until you fall unconscious or dismiss it, requires no concentration, and no darkness of any level can exist within it. Sworn adversaries that end their turn inside are seared for maximum holy damage and cannot regain hit points until they leave; allies inside cannot be reduced below 1 hit point. The noon cannot be dispelled or countered except by an opposing Night Arcanum Veritas of equal or higher slot.",
+          "card": "ENDLESS NOON — radius doubles, lasts the scene with no concentration, no darkness of any level · sworn adversaries ending a turn inside take maximum holy and can't heal · allies inside can't drop below 1 HP · only a Night seal of equal or higher slot can end it"
+        }
+      }
+    ],
+    "utility": [
+      {
+        "name": "Enkindle",
+        "description": "The eye that does not close. The light that arrives whether it is wanted or not.",
+        "fuel": 1,
+        "tiers": [
+          {
+            "text": "Kindle a sunflame — candle to bonfire — that burns without fuel for 24 hours and cannot be put out by mundane means. Its warmth keeps everyone within 30 feet safe from extreme cold, food and water left in its light for an hour are purified, and while you stand in its light you know whenever a creature speaks a deliberate lie within it.",
+            "card": "A fuel-less sunflame 24 hrs — warmth vs extreme cold within 30 ft, purifies food and water · in its light you know every deliberate lie",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Noon's gaze. For 1 hour your eyes carry daylight: you see through illusions and magical disguises within 30 feet and see invisible creatures there outlined in gold. Or ask the Sun what it saw: touching a place the sun shone on today, you see its last 24 hours of daylight in a minute's vision.",
+            "card": "1 hr: see through illusions and disguises within 30 ft, invisible creatures outlined in gold · or see the last 24 hrs of daylight at a place you touch",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "The Vigil. Light a Vigil flame that burns for 7 days: you sense the moment any sworn adversary comes within 300 feet of it, and see through the flame once per day. Or ask the Sun for a place it shone on within 1 mile in the last 7 days — you see what it saw there, in a vision up to 10 minutes long.",
+            "card": "A 7-day Vigil flame — you feel any sworn adversary within 300 ft and can look through it daily · or see what the sun saw anywhere within 1 mile, last 7 days",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Dawn on command. Call true dawn over a 1-mile radius for 1 hour, whatever the hour: it counts as true sunlight, no magical darkness below 9th level can form within it, and nothing inside can hide from the sky. Or kindle a sunflame that never goes out — until a divine hand snuffs it, it keeps its warmth, its purity and its truth for as long as the world lasts.",
+            "card": "Call true dawn over 1 mile for 1 hr — true sunlight, no darkness below 9th, nothing hides from the sky · or kindle a flame that never goes out",
+            "mech": { "utility": true }
+          }
+        ],
+        "corona": {
+          "name": "The Unblinking Eye",
+          "text": "For 1 hour you see anything the sun shines on within 10 miles as though you stood beside it, and you may ask the Sun three questions about anything it has shone on in the last year; it answers truly, in images. While it lasts, no lie can be spoken aloud anywhere under your sky — a creature that tries finds only the truth in its mouth. And the moment it blooms, dawn comes for every magic item carried by you and your allies within 60 feet: each one that regains charges or uses at dawn regains them now, as though the sun had just risen.",
+          "card": "THE UNBLINKING EYE, 1 hr — see anything sunlit within 10 miles · ask the Sun three questions about anything it shone on in the last year · no lie can be spoken under your sky · as it blooms, every magic item you and allies within 60 ft carry that recharges at dawn recharges now"
+        }
+      }
+    ]
+  },
+  "complementEffects": [],
+  "schema": 2
+}

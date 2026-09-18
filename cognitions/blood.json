@@ -3,91 +3,124 @@
   "name": "Blood",
   "icon": "🩸",
   "opposing": "spirit",
-  "description": "Vitality, Kinship, Sacrifice, Lineage, Power.",
+  "description": "Vitality, Kinship, Sacrifice, Lineage, Power. Blood remembers. Blood binds. Blood pays the price. Hemomancy — the Crimson Art — turns the body into both fuel and focus: terrifying power, bought with vitality, identity, or lineage. Every drop carries the full record of a life, and whoever holds that drop holds a thread to its owner.",
   "savingThrow": "Constitution",
   "damageType": "Sanguine",
+
+  "cost": {
+    "text": "All Blood Magic takes a toll. As you draw a seal with Blood as its Core, you lose hit points equal to five times the slot level. The loss can't be reduced or prevented, and temporary hit points don't pay it. You may take 1 level of Exhaustion instead.",
+    "card": "The Toll — lose 5 × {SLOT} HP as you draw (temp HP can't pay it) · or take 1 Exhaustion instead"
+  },
+
+  "mastery": {
+    "title": "Blood Magic",
+    "text": "Whoever attunes to Blood begins to master the Crimson Art. These abilities are yours whether or not a seal is drawn; the level beside each is when it wakes.",
+    "traits": [
+      {
+        "name": "Blood Samples",
+        "level": 1,
+        "text": "A creature your Blood seal damages — or one who offers it willingly — can leave you a sample: a drop you draw off as the seal lands. You keep up to your Proficiency Bonus samples fresh at a time. A sample is a Blood Component: spells and seals that call for a creature's blood can use it, hexes bound with it can't be traced back to you, and a curse bound with it binds to its owner's true self — it ends only with Greater Restoration and the destruction of the sample.",
+        "card": "Take a sample from anything your Blood seal damages · hold {PB} · hexes with it are untraceable, curses with it bind to the true self"
+      },
+      {
+        "name": "Blood Echo",
+        "level": 1,
+        "text": "All blood carries fragments of ancestral memory. In a 1-hour ritual you may drain a sample to commune with its echo: an Arcana or History check — DC 10 for fresh blood, up to 25 for the ancient — reveals a family secret, a hidden magical talent, a forgotten language, or a suppressed memory. Curses ride the echo too: a creature can be born under the weight of an ancestor's crime, and you can read it there.",
+        "card": "1-hr ritual: drain a sample — Arcana or History reveals a family secret, a talent, a lost language or a buried memory"
+      },
+      {
+        "name": "Blood Debt",
+        "level": 5,
+        "text": "Seal a Blood Debt with a willing creature through mutual bleeding (1 minute). While it holds, once per short or long rest either of you may use a reaction to take the damage the other just took; either of you may serve as the other's Source of Magic; and a betrayal triggers the Blood Curse — both of you take necrotic damage equal to 90% of your hit point maximum and gain 3 levels of Exhaustion. A creature that holds more than one Blood Debt begins to be corrupted, toward becoming Bloodbound.",
+        "card": "A Blood Debt with a willing creature — 1/rest either takes the other's damage, each is the other's Source of Magic · betrayal: both take 90% max HP and 3 Exhaustion"
+      },
+      {
+        "name": "Blood Runes",
+        "level": 11,
+        "text": "Instead of releasing a Blood seal, carve it into a Blood Rune on a surface, an object, or a creature: 10 minutes per slot level, with the use, the slot and the toll spent as you carve. The rune holds the seal until it is triggered or destroyed — by touch, by a timer, when a linked creature bleeds, by a command word, or by your bonus action within 300 feet — and the seal resolves then, with its one roll. You keep up to your Proficiency Bonus runes. Pay 5 more hit points per slot level while carving and it can be triggered from anywhere on the same plane.",
+        "card": "Carve a Blood seal into a rune (10 min per slot) — it waits for touch, a timer, blood, a word, or your bonus action within 300 ft · {PB} runes · +5 HP per slot: trigger it anywhere on the plane"
+      }
+    ]
+  },
+
   "verumEffects": {
     "offensive": [
       {
         "name": "Blood-Surge",
-        "description": "Sacrifice your flesh and your magic drinks the price — spending hit points to fuel automatic crits and Sanguine devastation at its peak.",
+        "description": "Pour more of yourself in. The magic drinks the price.",
         "tiers": [
           {
-            "text": "As you draw the seal you may give hit points to it. For every 5 hit points you sacrifice, the effect gains one additional damage die of its type, to a maximum of your Proficiency Bonus in dice.",
-            "card": "Sacrifice HP as you draw: +1 damage die per 5 HP, up to {PB} dice",
+            "text": "The damage becomes Sanguine — the target's own blood turns on it. Pour more of yourself in as you draw: for every 5 hit points you lose, the effect gains one additional damage die, up to your Proficiency Bonus in dice.",
+            "card": "Damage becomes Sanguine · lose 5 HP per extra die as you draw, up to {PB} dice",
             "mech": {
-              "cost": {
-                "hp": "5 per die"
-              },
-              "damage": {
-                "extraDice": "1 per 5 HP sacrificed, max PB"
-              }
+              "damage": { "type": "sanguine", "extraDice": "1 per 5 HP lost, max PB" },
+              "cost": { "hp": "5 per die" }
             }
           },
           {
-            "text": "For every 10 HP sacrificed, the effect's critical hit range increases by 1 (maximum +3).",
-            "card": "Every 10 HP spent widens the crit range by 1 (max +3)"
-          },
-          {
-            "text": "Damage from the effect is multiplied by 1.5 and becomes Sanguine damage type, bypassing resistances that apply to the original type.",
-            "card": "Damage ×1.5 and becomes Sanguine, bypassing the original type's resistances",
+            "text": "The price buys more: up to twice your Proficiency Bonus in dice, and while you are at half your hit points or lower, every 5 hit points buys two dice.",
+            "card": "Up to 2 × {PB} dice · at half HP or lower, each 5 HP buys two",
             "mech": {
-              "damage": {
-                "type": "sanguine"
-              }
+              "damage": { "type": "sanguine", "extraDice": "1 per 5 HP lost (2 at half HP or lower), max 2×PB" },
+              "cost": { "hp": "5 per die" }
             }
           },
           {
-            "text": "You may reduce your maximum HP by 50% for 1 minute. During this time, all your damaging effects automatically critically hit and are treated as effects from a Cognition Tier artifact. When this ends, the lost maximum HP cannot be recovered until a Greater Restoration or Cognition-based healing is applied.",
-            "card": "Halve your max HP 1 min — every damaging effect auto-crits at artifact tier"
+            "text": "Exsanguinate. A creature that is hit or fails bleeds out: at the start of each of its turns it takes 2d10 sanguine damage, and you regain hit points equal to what it takes. At the end of each of its turns it makes a Constitution saving throw against your Verum DC, ending the bleeding on a success. A creature without blood is unaffected.",
+            "card": "EXSANGUINATE — 2d10 sanguine at the start of each of their turns, and you regain what it takes · Con save {DC} at the end of each turn stops it",
+            "mech": {
+              "damage": { "type": "sanguine" },
+              "conditions": [ { "name": "Bleeding", "tick": "2d10 sanguine", "escape": "Constitution save at the end of each of its turns" } ],
+              "heal": { "amount": "the bleed damage", "who": "you" }
+            }
+          },
+          {
+            "text": "Blood Moon. As you draw, you may pay half your current hit points: the effect's damage dice are doubled, and every creature it damages leaves you a sample.",
+            "card": "BLOOD MOON — pay half your current HP as you draw: double the damage dice, and everything it hurts leaves you a sample",
+            "mech": {
+              "damage": { "type": "sanguine", "doubleDice": "if you pay half your current HP" },
+              "cost": { "hp": "half your current HP, optional" }
+            }
           }
         ]
       },
       {
         "name": "Blood Curse",
-        "description": "Your blood is both weapon and vector — punishing those who strike you, hexing those who touch it, and etching catastrophe into the land itself.",
+        "description": "Your blood is weapon and vector both. What it touches, it hexes.",
         "tiers": [
           {
-            "text": "When you take damage, you may use your reaction to deal equal Sanguine damage to the attacker. Constitution save halves.",
-            "card": "React to damage taken: deal that much Sanguine back (Con save halves)",
+            "text": "The damage becomes Sanguine, and a creature that is hit or fails is Hexed for 1 minute: once per turn when it takes damage from you or an ally, it takes extra sanguine damage equal to your Verum Modifier, and it can't regain hit points above half its maximum.",
+            "card": "Damage becomes Sanguine · Hexed 1 min — +{VM} sanguine once per turn when it's hurt, and it can't heal past half its max HP",
             "mech": {
-              "damage": {
-                "type": "sanguine"
-              },
-              "save": {
-                "ability": "Constitution",
-                "onSuccess": "half"
-              }
+              "damage": { "type": "sanguine" },
+              "conditions": [ { "name": "Hexed", "duration": "1 minute" } ],
+              "rider": { "damage": "VM", "type": "sanguine", "when": "once per turn when it takes damage from you or an ally" },
+              "penalty": { "healing": "capped at half its maximum" }
             }
           },
           {
-            "text": "Any creature that drinks your blood or is struck by a weapon coated in it must succeed on a Constitution save or become hexed for 1 hour — suffering disadvantage on saving throws against your effects.",
-            "card": "Blood-touched creatures: Con save or hexed 1 hr — disadvantage on saves against you",
+            "text": "Bound in blood. If you hold a sample of its blood, the hex lasts 1 hour, can't be traced back to you, and ends only with Remove Curse or stronger magic. While Hexed it has disadvantage on saving throws against your Blood seals.",
+            "card": "With its sample: the hex lasts 1 hr, untraceable, only Remove Curse ends it · Hexed: disadvantage on saves against your Blood seals",
             "mech": {
-              "save": {
-                "ability": "Constitution"
-              },
-              "penalty": {
-                "disadvantage": "saving throws against your effects"
-              }
+              "damage": { "type": "sanguine" },
+              "conditions": [ { "name": "Hexed", "duration": "1 hour, with a sample" } ],
+              "penalty": { "disadvantage": "saves against your Blood seals" }
             }
           },
           {
-            "text": "Once per round, every creature struck by your effect becomes vulnerable to your next spell or attack before the start of your next turn.",
-            "card": "1/round, anything your effect strikes is vulnerable to your next attack or spell"
+            "text": "Blood remembers. With a sample, the hex is permanent until Greater Restoration is cast on it and the sample is destroyed. The first time each round the Hexed creature takes damage from your Blood seals, that damage is doubled.",
+            "card": "With its sample, the hex is permanent until Greater Restoration AND the sample's destruction · your Blood seals deal double to it once a round",
+            "mech": {
+              "damage": { "type": "sanguine", "double": "once per round, against the Hexed creature" },
+              "conditions": [ { "name": "Hexed", "duration": "permanent, with a sample" } ]
+            }
           },
           {
-            "text": "As an action, offer your blood to the land in a 100-foot radius. All allies inside are revived to 1 HP if downed. All enemies take 6d10 Sanguine damage (Constitution save halves). A Blood Curse is etched into the area for 24 hours — all healing is halved and all death saves are made with disadvantage unless cleansed by divine means.",
-            "card": "Offer blood to the land 100 ft — downed allies rise at 1 HP, enemies take 6d10 Sanguine",
+            "text": "Lineage Leech. When your Blood seal damages a Hexed creature, it loses one Legendary Resistance or one use of a class feature — Action Surge, Wild Shape, a Smite — until it finishes a long rest. If you hold a relative's blood, you may spread the hex along the bloodline to every kin of the target within 1 mile.",
+            "card": "LINEAGE LEECH — hurting a Hexed creature strips a Legendary Resistance or a class-feature use until its long rest · with a relative's blood, the hex spreads to its kin within 1 mile",
             "mech": {
-              "damage": {
-                "dice": "6d10",
-                "type": "sanguine"
-              },
-              "save": {
-                "ability": "Constitution",
-                "onSuccess": "half"
-              }
+              "damage": { "type": "sanguine" },
+              "suppress": { "feature": "one Legendary Resistance or class-feature use", "duration": "until its long rest" }
             }
           }
         ]
@@ -96,82 +129,174 @@
     "supportive": [
       {
         "name": "Blood-Healing",
-        "description": "Blood remembers the shape the body was before it broke — and given the right direction, given a sample, it will return there.",
+        "description": "Blood remembers the shape the body was before it broke — and, given a sample, it will return there.",
         "tiers": [
           {
-            "text": "If you possess a creature's blood sample, your healing effect is doubled when used on them.",
-            "card": "With a blood sample, your healing on that creature doubles"
-          },
-          {
-            "text": "You may use a blood sample to target that creature at any range, even without line of sight. If they are dead and their body is intact, you may revive them to 1 HP as part of this effect.",
-            "card": "Target them at any range without line of sight · revive an intact body to 1 HP"
-          },
-          {
-            "text": "Healing through this effect ignores all healing penalties, removes one curse, and heals one level of exhaustion.",
-            "card": "Healing ignores all penalties, removes a curse, and clears one exhaustion level",
+            "text": "The seal's healing gains 5 hit points × the slot level, doubled if you hold a sample of the target's blood — and a sample lets the healing reach its owner at any distance on the same plane, without line of sight.",
+            "card": "+5 × {SLOT} HP (double with the target's sample) · with a sample, reach its owner anywhere on the plane",
             "mech": {
-              "conditions": [
-                {
-                  "name": "Exhaustion"
-                }
-              ]
+              "heal": { "perSlot": 5, "withSample": "doubled, and any range on the plane" }
             }
           },
           {
-            "text": "You may store blood from up to three creatures. As long as you retain each sample, you may resurrect that creature at any distance as a reaction to the moment of their death — once per day per creature. Missing body parts are restored instantly as part of the resurrection.",
-            "card": "Hold three samples — resurrect any of them as a reaction to their death, once a day each"
+            "text": "Healing through this seal ignores every penalty to healing, and ends one curse, disease, or level of Exhaustion on each target.",
+            "card": "Ignores every healing penalty · ends one curse, disease or Exhaustion level on each target",
+            "mech": {
+              "heal": { "perSlot": 5, "ignores": "healing penalties" },
+              "cleanse": [ "one curse, disease, or level of Exhaustion" ]
+            }
+          },
+          {
+            "text": "The flood reaches 10 hit points × the slot level (doubled with a sample). A target that died within the last minute with its body intact — or within the last day, if you hold its sample — returns to life with the healing.",
+            "card": "Now +10 × {SLOT} HP (double with a sample) · raises the dead of the last minute, or the last day with their sample",
+            "mech": {
+              "heal": { "perSlot": 10 },
+              "revive": "dead within 1 minute, or 1 day with a sample"
+            }
+          },
+          {
+            "text": "Blood never forgets its owner. When a creature whose sample you hold dies, at any distance, you may use your reaction to raise it with all its hit points, missing parts restored — without drawing a seal, once per day for each sample.",
+            "card": "When anyone whose sample you hold dies, anywhere: your reaction raises them at full HP, whole — no seal needed, 1/day per sample",
+            "mech": {
+              "heal": { "perSlot": 10 },
+              "revive": "reaction, at any distance, full HP, once per day per sample"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Crimson Veil",
+        "description": "A veil of glimmering blood-mist, and blood that violently refuses intrusion.",
+        "tiers": [
+          {
+            "text": "Blood-mist veils the target for the buff's duration: it gains temporary hit points equal to your Verum Modifier at the start of each of its turns, and the first time it would drop to 0 hit points it drops to 1 instead and the veil ends.",
+            "card": "While the buff lasts: {VM} temp HP at the start of each of its turns · the first drop to 0 leaves it at 1 (and ends the veil)",
+            "mech": {
+              "heal": { "tempHP": true, "perTurn": "VM" },
+              "buff": { "who": "target", "cheatDeath": "once, ending the veil" }
+            }
+          },
+          {
+            "text": "The blood refuses intrusion. The temporary hit points become your Verum Modifier + the slot level; the first time each round a creature damages the target with a spell or seal, that creature takes sanguine damage equal to your Verum Modifier + the slot level; and the target has advantage on saving throws against being charmed, possessed, or magically compelled.",
+            "card": "Temp HP becomes {VM} + {SLOT} · the first spell or seal to hurt it each round costs the caster {VM} + {SLOT} sanguine · advantage vs charm, possession and compulsion",
+            "mech": {
+              "heal": { "tempHP": true, "perTurn": "VM + slot level" },
+              "reflect": { "amount": "VM + slot level", "type": "sanguine", "trigger": "first spell or seal each round" },
+              "buff": { "who": "target", "advantage": "saves against being charmed, possessed, or compelled" }
+            }
+          },
+          {
+            "text": "While it has temporary hit points from the veil, the target has resistance to all damage except psychic, and bleeding on it ends.",
+            "card": "While the veil's temp HP hold: resistance to all damage but psychic · bleeding on it ends",
+            "mech": {
+              "buff": { "who": "target", "resist": "all damage except psychic, while the veil's temp HP last" }
+            }
+          },
+          {
+            "text": "Crimson Tide. Once per turn, when the target damages a creature, it regains hit points equal to half the damage dealt, and the drop-to-1 protection returns at the start of each of its turns instead of ending the veil.",
+            "card": "CRIMSON TIDE — 1/turn it heals half the damage it deals · the drop-to-1 protection comes back every turn",
+            "mech": {
+              "heal": { "amount": "half the damage it deals", "uses": "once per turn" },
+              "buff": { "who": "target", "cheatDeath": "once each turn" }
+            }
           }
         ]
       },
       {
         "name": "Blood-Bond",
-        "description": "The red thread of lineage cuts across realms and mortality — reaching any relative regardless of distance, death, or the planes between.",
+        "description": "The red thread of lineage cuts across realms and mortality.",
         "tiers": [
           {
-            "text": "Your effect can target a blood relative (parent, sibling, child) regardless of distance, even across planes.",
+            "text": "The seal can reach a blood relative of yours — parent, sibling, child — at any distance, even across planes.",
             "card": "Reach a blood relative at any distance, even across planes"
           },
           {
-            "text": "If the bonded creature is dead but their body remains, you can speak with them or grant them one action expressed as a ghost acting through your body.",
-            "card": "Speak with a dead relative, or let them act once through your body"
+            "text": "If the relative is dead but its body remains, you can speak with it, or let it take one action through your body as a ghost.",
+            "card": "Speak with a dead relative, or let it act once through your body"
           },
           {
-            "text": "Blood Bonds extend to ancestors and descendants. You may learn one memory, flaw, or trait from any related bloodline member — living or dead.",
-            "card": "Bonds reach ancestors and descendants — learn one memory, flaw or trait from the line"
+            "text": "The bond reaches ancestors and descendants. Learn one memory, flaw, or trait from any member of the line, living or dead.",
+            "card": "Reach ancestors and descendants — learn one memory, flaw or trait from the line"
           },
           {
-            "text": "Choose one bloodline member, living or dead, and absorb their power for 1 hour — gaining one feature they possessed in life (racial trait, class feature, magic, or Cognition affinity). Your effect may target every member of that bloodline simultaneously, regardless of their status, realm, or physical condition.",
-            "card": "Absorb a bloodline member's power 1 hr — one feature they had in life"
+            "text": "Choose one member of the bloodline, living or dead, and take up its power for 1 hour — one feature it had in life: a racial trait, a class feature, a spell, or a Cognition affinity. The seal may reach every member of that bloodline at once, whatever their state, realm, or condition.",
+            "card": "Take up one feature of any bloodline member for 1 hr · the seal may reach the whole line at once"
           }
         ]
       }
     ],
     "control": [
       {
-        "name": "Blood Oath",
-        "description": "Magic that is bound in blood cannot be undone — sealing promises in the body itself until the oath is kept or the oathbreaker is marked before every god.",
+        "name": "Blood Puppet",
+        "description": "Every body is a marionette. The strings are already inside.",
         "tiers": [
           {
-            "text": "Link yourself to a willing creature. While bonded, you may transfer half of any damage taken to each other, and you share languages and senses.",
-            "card": "Bond with a willing creature — split damage taken, share languages and senses"
-          },
-          {
-            "text": "When a creature swears an oath in blood (a drop on skin), they are bound to it for 7 days. Breaking it causes 5d10 psychic damage and costs them one Hit Die.",
-            "card": "An oath sworn in blood binds 7 days · breaking it costs 5d10 psychic and a Hit Die",
+            "text": "You seize the blood of a creature that fails: move it up to 15 feet in a direction you choose, and it can't take reactions until the end of its next turn.",
+            "card": "Fail: you move them 15 ft where you choose · no reactions until the end of their next turn",
             "mech": {
-              "damage": {
-                "dice": "5d10",
-                "type": "psychic"
-              }
+              "save": { "ability": "Constitution" },
+              "movement": { "move": 15 },
+              "deny": [ "reactions" ]
             }
           },
           {
-            "text": "Forge a binding pact lasting 24 hours. If the bonded creature dies during this time, you may die in their place or pull them back to life, taking on their wounds as your own.",
-            "card": "A 24-hr pact — if they die you may die in their place, or pull them back and take the wounds"
+            "text": "Its blood locks. It is Restrained until the end of its next turn — or, if you hold its sample, for the effect's duration, repeating the save at the end of each of its turns.",
+            "card": "Restrained until the end of their next turn · with their sample, for the whole duration (save again each turn)",
+            "mech": {
+              "conditions": [ { "name": "Restrained" } ]
+            }
           },
           {
-            "text": "Forge a Perpetual Blood Oath lasting one year and one day. The target cannot attack you, betray you, or speak falsehoods against you. If they do, they immediately suffer a Cognition-tier curse and are marked as Oathbreakers — visible to all gods and creatures with divine sight.",
-            "card": "Perpetual Blood Oath, a year and a day — they cannot attack, betray or lie about you"
+            "text": "Marionette. It is also Charmed by you, and on each of your turns you may use a bonus action to move it up to 15 feet and make it take one action you choose — attack, drop, open, flee.",
+            "card": "MARIONETTE — also Charmed · your bonus action each turn: move them 15 ft and make them take an action you choose",
+            "mech": {
+              "conditions": [ { "name": "Restrained" }, { "name": "Charmed" } ],
+              "control": "bonus action: move 15 ft and choose its action"
+            }
+          },
+          {
+            "text": "Every creature that fails becomes a puppet, each one moved and commanded with the same bonus action. A puppet that breaks free with its repeat save still takes 4d10 sanguine damage as its blood tears loose.",
+            "card": "Every one who fails is a puppet, all driven by one bonus action · breaking free still costs them 4d10 sanguine",
+            "mech": {
+              "conditions": [ { "name": "Restrained" }, { "name": "Charmed" } ],
+              "rider": { "damage": "4d10", "type": "sanguine", "when": "it breaks free" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Blood Oath",
+        "description": "Magic bound in blood cannot be undone. The body keeps the promise even when the mind would not.",
+        "tiers": [
+          {
+            "text": "Speak an oath into a creature that fails — one prohibition, one sentence: “do not strike her”, “do not leave this room”. Until the end of its next turn, if it breaks the oath its blood rebels: it takes 1d10 sanguine damage per slot level, and the oath ends.",
+            "card": "Fail: bind them with a one-sentence prohibition until the end of their next turn · breaking it costs 1d10 sanguine per slot level",
+            "mech": {
+              "save": { "ability": "Constitution" },
+              "oath": "one prohibition",
+              "rider": { "damage": "1d10 per slot level", "type": "sanguine", "when": "it breaks the oath" }
+            }
+          },
+          {
+            "text": "The oath holds for 1 minute, and breaking it also gives the creature a Wound.",
+            "card": "The oath holds 1 min · breaking it also gives them a Wound",
+            "mech": {
+              "wound": { "count": 1, "when": "it breaks the oath" }
+            }
+          },
+          {
+            "text": "A blood pact of 24 hours. If you hold its sample, the oath becomes its own: no charm, command, or domination can make it break it.",
+            "card": "The oath holds 24 hrs · with their sample, nothing — charm, command, domination — can make them break it",
+            "mech": {
+              "deny": [ "compulsion to break the oath" ]
+            }
+          },
+          {
+            "text": "A Perpetual Blood Oath: a year and a day. Breaking it marks the creature an Oathbreaker, visible to every god and every creature with divine sight, under a curse that only Greater Restoration and the destruction of your sample can end.",
+            "card": "PERPETUAL — a year and a day · an oathbreaker is marked before every god, cursed until Greater Restoration and your sample's destruction",
+            "mech": {
+              "curse": "Oathbreaker, until Greater Restoration and the sample's destruction"
+            }
           }
         ]
       }
@@ -184,30 +309,22 @@
           {
             "text": "Learn a creature's species, approximate age, and state of health from a drop of its blood. Know whether two creatures are blood kin. Preserve a blood sample indefinitely.",
             "card": "From one drop: species, age, health · tell blood kin apart · preserve a sample forever",
-            "mech": {
-              "utility": true
-            }
+            "mech": { "utility": true }
           },
           {
             "text": "Track a creature whose blood you hold, unerringly, within 1 mile. Read the last hour of a creature's life from blood spilled within the last day.",
             "card": "Track its owner within 1 mile · read the last hour of a life from day-old blood",
-            "mech": {
-              "utility": true
-            }
+            "mech": { "utility": true }
           },
           {
             "text": "Witness one scene from the life of any ancestor of the blood you hold. Send a wordless call along a blood-bond that the kin feels at any distance.",
             "card": "Witness a scene from any ancestor's life · send a wordless call the kin feels anywhere",
-            "mech": {
-              "utility": true
-            }
+            "mech": { "utility": true }
           },
           {
-            "text": "Trace a bloodline in full — every living descendant of a drop you hold, where they are and what they are. Or seal an oath in blood that both parties feel broken the instant it is broken, anywhere in the world.",
+            "text": "Trace a bloodline in full — every living descendant of a drop you hold, where they are and what they are. Or seal an oath in blood that both parties feel break the instant it is broken, anywhere in the world.",
             "card": "Trace a whole bloodline · or seal an oath both parties feel break, anywhere in the world",
-            "mech": {
-              "utility": true
-            }
+            "mech": { "utility": true }
           }
         ]
       }
@@ -217,37 +334,27 @@
     {
       "name": "Sanguine Wound",
       "type": "Offensive",
-      "description": "The spell doesn't just damage — it opens something that keeps opening, bleeding the target at the start of each turn until staunched or healed.",
+      "description": "The seal doesn't just hurt — it opens something that keeps opening.",
       "effect": {
-        "text": "On a hit or failed saving throw against the primary effect, the target begins bleeding — losing 1d6 Sanguine damage at the start of each of their turns. The bleeding persists until they or an ally uses an action to staunch it (Medicine check DC equals your Verum DC), or until they receive magical healing.",
-        "card": "Bleeding — 1d6 Sanguine at the start of each of their turns until staunched",
+        "text": "On a hit or failed saving throw, the target begins bleeding: 1d6 sanguine damage at the start of each of its turns, until it or an ally spends an action to staunch it (a Medicine check against your Verum DC) or it receives magical healing.",
+        "card": "Bleeding — 1d6 sanguine at the start of each of their turns until staunched (Medicine {DC}) or magically healed",
         "mech": {
-          "damage": {
-            "dice": "1d6",
-            "type": "sanguine"
-          }
+          "conditions": [ { "name": "Bleeding", "tick": "1d6 sanguine", "escape": "an action and a Medicine check, or magical healing" } ]
         }
       },
       "upgrades": [
         {
-          "text": "The bleeding damage increases to 2d6, and the DC to staunch it increases to your Verum DC + 2.",
-          "card": "2d6 · staunching DC rises to {DC}+2",
+          "text": "Level 5+: The bleeding becomes 2d6, and staunching it takes a Medicine check against your Verum DC + 2.",
+          "card": "2d6 a turn · staunching takes Medicine {DC}+2",
           "mech": {
-            "damage": {
-              "dice": "2d6"
-            }
+            "conditions": [ { "name": "Bleeding", "tick": "2d6 sanguine" } ]
           }
         },
         {
-          "text": "The bleeding damage increases to 3d6, and the wound cannot be staunched by mundane means — only magical healing or a successful Constitution saving throw at the start of their turn (DC equals your Verum DC) ends it.",
-          "card": "3d6 · only magical healing or a Con save can close it",
+          "text": "Level 11+: The bleeding becomes 3d6, no mundane care can close it — only magical healing — and the wound leaves you a sample of its blood.",
+          "card": "3d6 a turn · only magical healing closes it · it leaves you a sample",
           "mech": {
-            "damage": {
-              "dice": "3d6"
-            },
-            "save": {
-              "ability": "Constitution"
-            }
+            "conditions": [ { "name": "Bleeding", "tick": "3d6 sanguine", "escape": "magical healing only" } ]
           }
         }
       ]
@@ -255,48 +362,48 @@
     {
       "name": "Transfusion",
       "type": "Supportive",
-      "description": "You give of yourself so another might endure — sacrificing your own hit points to send vitality directly into an ally.",
+      "description": "You give of yourself so another might endure.",
       "effect": {
-        "text": "When the primary effect resolves, you may voluntarily lose hit points up to your proficiency bonus. One ally within 30 feet gains twice that amount as healing.",
-        "card": "Spend up to {PB} HP — an ally within 30 ft heals twice that"
+        "text": "When the primary effect resolves, you may lose up to twice your Proficiency Bonus in hit points. One ally within 30 feet regains twice what you lost.",
+        "card": "Lose up to 2 × {PB} HP — an ally within 30 ft regains twice that",
+        "mech": {
+          "heal": { "amount": "twice the HP you lose", "who": "one ally within 30 ft" },
+          "cost": "up to 2×PB hit points"
+        }
       },
       "upgrades": [
         {
-          "text": "You may sacrifice up to your proficiency bonus + your Constitution modifier HP, and the healing ratio increases to three times the amount sacrificed.",
-          "card": "Spend up to {PB}+Con · healing is triple what you spent"
+          "text": "Level 5+: You may lose up to twice your Proficiency Bonus + your Constitution modifier, and the ally regains three times what you lost.",
+          "card": "Lose up to 2 × {PB} + Con · the ally regains triple"
         },
         {
-          "text": "The healing now also removes one condition of your choice from the ally, and you do not suffer any negative effects from being reduced to low HP by this sacrifice — the act of giving stabilizes rather than diminishes you.",
-          "card": "Also removes one condition · low HP from this costs you nothing"
+          "text": "Level 11+: The ally also ends one condition of your choice, and the blood you gave comes back to you: you regain what you lost at the start of your next turn.",
+          "card": "It also ends one condition · you regain what you gave at the start of your next turn"
         }
       ]
     },
     {
       "name": "Bloodline Mark",
       "type": "Control",
-      "description": "Once your blood touches them, they are known — tracked, visible through illusion, and easier to strike for as long as the mark endures.",
+      "description": "Once your blood touches them, they are known.",
       "effect": {
-        "text": "When the primary effect hits or a target fails their saving throw, they are marked by blood for 1 hour — you always know their exact location and distance, they cannot benefit from invisibility or illusions against you, and your spell attacks against them gain +1 to hit.",
-        "card": "Marked by blood 1 hr — you always know where they are, no hiding from you"
+        "text": "A creature that is hit or fails is marked by blood for 1 hour: you always know its exact location and distance, it gains no benefit from invisibility or illusions against you, and the mark leaves you a sample of its blood.",
+        "card": "Marked 1 hr — you always know where they are, no invisibility or illusion against you · you take a sample",
+        "mech": {
+          "deny": [ "invisibility against you", "illusions against you" ]
+        }
       },
       "upgrades": [
         {
-          "text": "All allies who can see the marked creature also gain advantage on attack rolls against them on the first attack each turn, as the blood mark pulses visibly to those attuned to it.",
-          "card": "Allies who can see them get advantage on their first attack each turn",
+          "text": "Level 5+: Allies who can see the marked creature have advantage on their first attack roll against it each turn.",
+          "card": "Allies who can see them: advantage on their first attack against them each turn",
           "mech": {
-            "buff": {
-              "advantage": "attack rolls against them on the first attack each"
-            }
+            "buff": { "who": "allies", "advantage": "the first attack roll against it each turn" }
           }
         },
         {
-          "text": "The mark persists for 24 hours and becomes permanent until removed by Remove Curse or Greater Restoration. Additionally, any spell you cast that deals damage to the marked creature deals +1d8 Sanguine bonus damage.",
-          "card": "Lasts 24 hrs and turns permanent until Remove Curse or Greater Restoration",
-          "mech": {
-            "damage": {
-              "dice": "1d8"
-            }
-          }
+          "text": "Level 11+: The mark lasts 24 hours and then turns permanent until Remove Curse or Greater Restoration, and your Blood seals deal one additional sanguine damage die to the marked creature.",
+          "card": "Lasts 24 hrs, then permanent until Remove Curse or Greater Restoration · your Blood seals deal +1 die sanguine to them"
         }
       ]
     }

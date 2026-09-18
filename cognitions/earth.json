@@ -5,7 +5,7 @@
   "opposing": "air",
   "description": "Permanence, Rootedness, Belonging, Weight, Patience.",
   "savingThrow": "Strength",
-  "damageType": "Tectonic",
+  "damageType": "Bludgeoning",
 
   "verumEffects": {
     "offensive": [
@@ -14,18 +14,18 @@
         "description": "Everything falls eventually. You are only asking it to fall now.",
         "tiers": [
           {
-            "text": "The damage is turned into Tectonic damage and the total damage output increases by 1 additional die. A creature that fails the save is knocked Prone.",
-            "card": "+1 die · damage becomes Tectonic · Prone on a fail",
+            "text": "The damage is turned into Bludgeoning damage and the total damage output increases by 1 additional die. A creature that fails the save is knocked Prone.",
+            "card": "+1 die · damage becomes Bludgeoning · Prone on a fail",
             "mech": {
-              "damage": { "bonusDice": 1, "type": "tectonic" },
+              "damage": { "bonusDice": 1, "type": "bludgeoning" },
               "conditions": [ { "name": "Prone" } ]
             }
           },
           {
-            "text": "Tectonic damage increases by 2 additional dice. A creature knocked Prone this way has its speed reduced to 0 until the end of its next turn — the ground does not let go on the first ask.",
+            "text": "Bludgeoning damage increases by 2 additional dice. A creature knocked Prone this way has its speed reduced to 0 until the end of its next turn — the ground does not let go on the first ask.",
             "card": "+2 dice · Prone, and speed 0 until the end of their next turn",
             "mech": {
-              "damage": { "bonusDice": 2, "type": "tectonic" },
+              "damage": { "bonusDice": 2, "type": "bludgeoning" },
               "conditions": [
                 { "name": "Prone", "duration": "speed 0 until the end of their next turn" }
               ],
@@ -33,10 +33,10 @@
             }
           },
           {
-            "text": "Tectonic damage increases by 4 additional dice. Creatures that fail are Buried to the waist — Restrained, and rising costs their entire movement and a successful Strength check against your Verum DC.",
+            "text": "Bludgeoning damage increases by 4 additional dice. Creatures that fail are Buried to the waist — Restrained, and rising costs their entire movement and a successful Strength check against your Verum DC.",
             "card": "+4 dice · Buried to the waist — Restrained, Str check {DC} and all their movement to rise",
             "mech": {
-              "damage": { "bonusDice": 4, "type": "tectonic" },
+              "damage": { "bonusDice": 4, "type": "bludgeoning" },
               "conditions": [
                 { "name": "Restrained" },
                 { "name": "Buried", "escape": "Strength check vs Verum DC" }
@@ -44,10 +44,10 @@
             }
           },
           {
-            "text": "Tectonic damage increases by 5 additional dice. Creatures that fail are Buried whole — Restrained and Blinded until they dig free or someone digs them out, which takes a successful Strength check against your Verum DC.",
+            "text": "Bludgeoning damage increases by 5 additional dice. Creatures that fail are Buried whole — Restrained and Blinded until they dig free or someone digs them out, which takes a successful Strength check against your Verum DC.",
             "card": "+5 dice · Buried whole — Restrained and Blinded until dug out (Str check {DC})",
             "mech": {
-              "damage": { "bonusDice": 5, "type": "tectonic" },
+              "damage": { "bonusDice": 5, "type": "bludgeoning" },
               "conditions": [
                 { "name": "Restrained" },
                 { "name": "Blinded" },
@@ -78,10 +78,10 @@
             }
           },
           {
-            "text": "The fault opens into a fissure 10 feet deep. A creature that fails is swallowed to the bottom of it, taking 3d6 Tectonic damage from the fall, and must climb out.",
-            "card": "10-ft fissure — those who fail fall in for 3d6 tectonic and have to climb out",
+            "text": "The fault opens into a fissure 10 feet deep. A creature that fails is swallowed to the bottom of it, taking 3d6 Bludgeoning damage from the fall, and must climb out.",
+            "card": "10-ft fissure — those who fail fall in for 3d6 bludgeoning and have to climb out",
             "mech": {
-              "damage": { "amount": "3d6", "type": "tectonic" },
+              "damage": { "amount": "3d6", "type": "bludgeoning" },
               "terrain": { "effect": "fissure", "depth": "10 ft" }
             }
           },
@@ -221,10 +221,10 @@
         "description": "You are not building. You are reminding the ground what it used to be.",
         "tiers": [
           {
-            "text": "Your creations are raw living stone. They shed no light and make no sound, and a creature that strikes a Structure, or is hit by a Construct or an Object you made, is pushed 5 feet and takes 1d6 Tectonic damage.",
-            "card": "Creations are living stone · struck or hit: pushed 5 ft and 1d6 tectonic",
+            "text": "Your creations are raw living stone. They shed no light and make no sound, and a creature that strikes a Structure, or is hit by a Construct or an Object you made, is pushed 5 feet and takes 1d6 Bludgeoning damage.",
+            "card": "Creations are living stone · struck or hit: pushed 5 ft and 1d6 bludgeoning",
             "mech": {
-              "damage": { "amount": "1d6", "type": "tectonic", "trigger": "touch or hit" },
+              "damage": { "amount": "1d6", "type": "bludgeoning", "trigger": "touch or hit" },
               "movement": { "push": 5 }
             }
           },
@@ -232,7 +232,7 @@
             "text": "That damage becomes 2d6 and the push knocks Prone. Your Structures cannot be toppled, tipped, or shifted by anything short of destroying them.",
             "card": "That damage becomes 2d6 and knocks Prone · Structures cannot be toppled or moved",
             "mech": {
-              "damage": { "amount": "2d6", "type": "tectonic" },
+              "damage": { "amount": "2d6", "type": "bludgeoning" },
               "conditions": [ { "name": "Prone" } ]
             }
           },
@@ -245,12 +245,12 @@
             }
           },
           {
-            "text": "What you raise is part of the world now. Your creations are immune to nonmagical damage and cannot be teleported or banished, and when one is destroyed the ground beneath it collapses into a 20-foot crater — creatures inside fall Prone and take 6d10 Tectonic damage (Strength save for half).",
-            "card": "Immune to nonmagical damage · a destroyed creation leaves a 20-ft crater: 6d10 tectonic and Prone (Str half)",
+            "text": "What you raise is part of the world now. Your creations are immune to nonmagical damage and cannot be teleported or banished, and when one is destroyed the ground beneath it collapses into a 20-foot crater — creatures inside fall Prone and take 6d10 Bludgeoning damage (Strength save for half).",
+            "card": "Immune to nonmagical damage · a destroyed creation leaves a 20-ft crater: 6d10 bludgeoning and Prone (Str half)",
             "mech": {
               "damage": {
                 "amount": "6d10",
-                "type": "tectonic",
+                "type": "bludgeoning",
                 "area": "20 ft",
                 "save": { "ability": "Strength", "onSuccess": "half" }
               },
@@ -298,10 +298,10 @@
       "type": "Offensive",
       "description": "Earth arrives last and stays longest.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus Tectonic damage equal to one damage die of the primary effect's type (min 1d6). On a failed Strength save vs your Verum DC, they are also knocked Prone.",
-        "card": "+1 die tectonic · Str save or Prone",
+        "text": "On a hit or failed saving throw, the target takes bonus Bludgeoning damage equal to one damage die of the primary effect's type (min 1d6). On a failed Strength save vs your Verum DC, they are also knocked Prone.",
+        "card": "+1 die bludgeoning · Str save or Prone",
         "mech": {
-          "damage": { "dice": [ "1d6" ], "type": "tectonic" },
+          "damage": { "dice": [ "1d6" ], "type": "bludgeoning" },
           "save": { "ability": "Strength" },
           "conditions": [ { "name": "Prone" } ]
         }
