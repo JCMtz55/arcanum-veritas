@@ -1,0 +1,287 @@
+{
+  "id": "craft",
+  "name": "Craft",
+  "icon": "🛠️",
+  "opposing": "destruction",
+  "description": "Making, Artifice, Inscription, Reinforcement, Ingenuity.",
+  "savingThrow": "Intelligence",
+  "damageType": "Force",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Conjured Armament",
+        "description": "You do not carry your tools. You call them into being the instant before they are needed.",
+        "tiers": [
+          {
+            "text": "The effect deals 1 additional die of force damage, manifesting a weapon of pure make. At the start of each of your turns you may reshape it — choosing bludgeoning, piercing, slashing, or force — so that the effect bypasses one resistance of that type.",
+            "card": "+1 die force · reshape it each turn to bludgeoning, piercing, slashing or force — bypass that one resistance",
+            "mech": {
+              "damage": { "bonusDice": 1, "type": "force" },
+              "pierce": "one chosen resistance"
+            }
+          },
+          {
+            "text": "The bonus becomes 2 dice of force damage. The armament gains your choice of the reach or thrown (60 ft.) property, and on a failed save a shard lodges in the target, dealing 1d6 force damage at the start of its next turn.",
+            "card": "+2 dice · reach or thrown 60 ft · on a fail a shard lodges — 1d6 force at the start of their next turn",
+            "mech": {
+              "damage": { "bonusDice": 2, "type": "force" },
+              "rider": { "damage": "1d6", "type": "force", "when": "start of their next turn" }
+            }
+          },
+          {
+            "text": "The bonus becomes 3 dice of force damage. You conjure a matched set — once per turn you may make one additional attack with a duplicate implement as a bonus action — and your crafted weapons ignore nonmagical armor bonuses to AC.",
+            "card": "+3 dice · a matched set: one extra attack as a bonus action each turn · ignores nonmagical armor bonuses to AC",
+            "mech": {
+              "damage": { "bonusDice": 3, "type": "force" },
+              "pierce": "nonmagical armor"
+            }
+          },
+          {
+            "text": "Once per long rest, forge a Masterwork Engine of War — a siege-grade fabrication that strikes one creature within 60 feet for 12d8 force damage (Intelligence save halves). On a failed save the target is Sundered: one weapon, shield, or worn item it carries is broken, or it loses any AC bonus from armor, until repaired. The Engine then collapses into inert fragments. If that creature is also this seal's target, its save against the Engine replaces its save against the seal.",
+            "card": "1/long rest — Engine of War: 12d8 force at 60 ft (Int half) · on a fail they're Sundered — a weapon, shield or armor's AC broken until repaired",
+            "mech": {
+              "damage": { "dice": "12d8", "type": "force" },
+              "conditions": [ { "name": "Sundered", "duration": "until repaired" } ],
+              "resource": { "name": "Engine of War", "uses": "1 per long rest" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Master's Reinforcement",
+        "description": "A thing made well does not fail when it is asked to matter. You make things well.",
+        "tiers": [
+          {
+            "text": "A creature gains temporary hit points equal to Twice your Verum Modifier; an object is instantly repaired of any nonmagical damage or breakage.",
+            "card": "A creature gains 2×VM temp HP · or an object is repaired of any nonmagical damage",
+            "mech": { "heal": { "temp": "2×VM" } }
+          },
+          {
+            "text": "You augment the target's gear while this lasts — granting +1 AC, or +1 to attack and damage rolls with one weapon, as the make of their equipment is temporarily perfected.",
+            "card": "Gear perfected: +1 AC, or +1 to attack and damage with one weapon",
+            "mech": { "buff": { "who": "target", "choice": "+1 AC, or +1 attack and damage with one weapon" } }
+          },
+          {
+            "text": "You reforge: restore one broken magic item to function for 1 hour, or restore one expended charge, use, or slot of an item or ability the target possesses (once per target per long rest).",
+            "card": "Reforge a broken magic item for 1 hr · or restore one spent charge, use or slot (1/target/long rest)",
+            "mech": { "restore": { "what": "one broken magic item, or one expended charge, use or slot", "limit": "once per target per long rest" } }
+          },
+          {
+            "text": "Perfect the Work on one willing creature for 1 minute: it gains temporary hit points equal to your Verum DC, its weapons and armor count as magical and +2, and it cannot be Disarmed, nor its gear Sundered or broken, by any effect below the level of Wish or Destruction.",
+            "card": "Perfect the Work 1 min — temp HP equal to your DC · weapons and armor magical +2 · can't be disarmed or sundered",
+            "mech": {
+              "heal": { "temp": "your Verum DC" },
+              "buff": { "who": "one willing creature", "gear": "magical +2" },
+              "deny": [ "disarming", "sundering" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Runework Sigil",
+        "description": "A rule written into the floor is more patient than any guard, and far less merciful.",
+        "tiers": [
+          {
+            "text": "The seal is written as a sigil onto a surface. A creature that fails is seized by the runework and Restrained until the end of its next turn.",
+            "card": "Written as a sigil · a creature that fails is Restrained until the end of its next turn",
+            "mech": { "conditions": [ { "name": "Restrained", "duration": "until the end of their next turn" } ] }
+          },
+          {
+            "text": "The sigil becomes a stored glyph, dormant and invisible until triggered. When you write it, choose one condition — Slowed, Frightened, Silenced, or Blinded — and a creature that fails suffers that condition instead of being Restrained.",
+            "card": "A hidden glyph · choose Slowed, Frightened, Silenced or Blinded when you write it — that's what a fail inflicts",
+            "mech": { "conditions": [ { "name": "Glyph", "choice": "Slowed, Frightened, Silenced or Blinded" } ] }
+          },
+          {
+            "text": "Lay a network of up to 3 linked sigils within range. When any one triggers, all of them detonate, and each creature within 5 feet of any sigil in the network makes the save. You may set the network to trigger on a specific condition: a creature enters, casts a spell, or speaks.",
+            "card": "Up to 3 linked sigils — one triggers, all detonate · set the trigger: someone enters, casts, or speaks",
+            "mech": { "conditions": [ { "name": "Glyph" } ], "network": { "sigils": 3, "trigger": "enters, casts a spell, or speaks" } }
+          },
+          {
+            "text": "Inscribe a Grand Ward across a 30-foot area for 1 hour. Declare one prohibition as you inscribe it — \"None may cast here uninvited,\" \"None may cross armed,\" \"None may lie.\" A creature that violates the ward takes 8d10 force damage and is Restrained until the start of your next turn (an Intelligence save halves the damage and negates the restraint). Only Destruction or divine authority can unmake the ward early.",
+            "card": "Grand Ward 30 ft for 1 hr with a prohibition you declare · violators take 8d10 force and are Restrained (Int save halves, no restraint)",
+            "mech": {
+              "damage": { "amount": "8d10", "type": "force", "trigger": "violating the ward" },
+              "conditions": [ { "name": "Restrained", "duration": "until the start of your next turn" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Animate Construct",
+        "description": "You give the make a purpose, and the purpose gives it motion. It does not tire, and it does not ask why.",
+        "tiers": [
+          {
+            "text": "Your Constructs are built with a maker's care: they follow detailed instructions, can carry, fetch, and manipulate objects, can take the Help action, and have an AC of 10 + your Verum Modifier if that is higher than their own.",
+            "card": "Constructs follow detailed instructions, take the Help action, and have AC 10 + {VM} if that's better",
+            "mech": { "summon": { "ac": "10 + VM", "help": true } }
+          },
+          {
+            "text": "Your Constructs strike with make: once per turn their attacks deal an extra 1d10 + your Verum Modifier force damage, and they can Dodge, Disengage, or Help as a bonus action.",
+            "card": "Construct attacks add 1d10+{VM} force once per turn · Dodge, Disengage or Help as a bonus action",
+            "mech": { "summon": { "attackBonus": "1d10 + VM force, once per turn" } }
+          },
+          {
+            "text": "When you build one, give it a special function: a Ranged Assembly attack (60 ft.), a Reactive Guard (as a reaction, impose disadvantage on one attack against an adjacent ally), or Self-Repair (it regains hit points equal to your Verum Modifier at the start of its turns).",
+            "card": "Pick a function: 60-ft Ranged Assembly · Reactive Guard (disadvantage on an attack vs an adjacent ally) · Self-Repair {VM} a turn",
+            "mech": { "summon": { "function": "Ranged Assembly, Reactive Guard or Self-Repair" } }
+          },
+          {
+            "text": "Forge a Masterwork Automaton — fully sentient, keeping your tactical instructions even out of your sight. It is immune to poison and psychic damage and to being Charmed, Frightened, or Exhausted, and when it is destroyed it detonates for 6d10 force damage in a 15-foot radius (Intelligence save halves).",
+            "card": "Masterwork: sentient, follows orders out of sight · immune to poison, psychic, charm, fear, exhaustion · detonates 6d10 force in 15 ft (Int half)",
+            "mech": {
+              "summon": { "sentient": true, "immune": "poison, psychic, Charmed, Frightened, Exhaustion" },
+              "damage": { "amount": "6d10", "type": "force", "area": "15 ft", "trigger": "the construct is destroyed", "save": { "ability": "Intelligence", "onSuccess": "half" } }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Bulwark Fabrication",
+        "description": "The battlefield was a suggestion. You are here to make corrections.",
+        "tiers": [
+          {
+            "text": "Your Structures are raised with a maker's precision: you may shape them as any mix of wall, pillar, and waist-high cover within their size, they need no support to stand, and each segment has +2 AC.",
+            "card": "Shape Structures as any mix of wall, pillar and cover · they need no support · +2 AC per segment",
+            "mech": { "summon": { "structureAC": "+2" } }
+          },
+          {
+            "text": "Your Structures gain hazardous fittings. A creature that ends its turn adjacent to one, or strikes it in melee, takes 2d6 force damage from lashing components (an Intelligence save negates).",
+            "card": "Hazardous fittings — end a turn adjacent or strike it in melee: 2d6 force (Int negates)",
+            "mech": { "damage": { "amount": "2d6", "type": "force", "trigger": "ending a turn adjacent, or striking it" } }
+          },
+          {
+            "text": "You reconfigure a Structure as a bonus action each turn — reshaping it into a bridge, a ramp, an enclosure, or a set of grasping arms that force a creature within 5 feet to make an Intelligence save or be Restrained until the start of your next turn.",
+            "card": "Bonus action each turn: reshape into bridge, ramp, enclosure or grasping arms (Int save or Restrained)",
+            "mech": { "conditions": [ { "name": "Restrained", "duration": "until the start of your next turn" } ] }
+          },
+          {
+            "text": "Your Structure becomes a Reconfiguring Fortress you reshape freely at the start of each of your turns. Allies inside gain half cover and +2 AC; enemies that enter its footprint treat the interior as difficult terrain and must succeed on an Intelligence saving throw or be Restrained until they escape (a Strength or Intelligence check against your Verum DC).",
+            "card": "Reconfiguring Fortress — allies inside get half cover and +2 AC · enemies entering: Int save or Restrained until they escape",
+            "mech": {
+              "buff": { "who": "allies inside", "cover": "half", "ac": "+2" },
+              "conditions": [ { "name": "Restrained", "escape": "Strength or Intelligence check vs Verum DC" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "The Maker's Eye",
+        "description": "Every made thing tells you how it was made — and how it will break.",
+        "tiers": [
+          {
+            "text": "Read the make of anything you handle: what it is made of, how, roughly when, the mark of the hand that made it, and exactly where it would break. Mend any nonmagical object you hold, and turn scrap into any common tool in a minute.",
+            "card": "Read any made thing — material, maker, age, and where it breaks · mend nonmagical objects · scrap into tools",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Open or seal anything made. Nonmagical locks, doors, mechanisms, and traps yield or hold at your touch without a roll, and handling a magic item for a minute tells you all of its properties.",
+            "card": "Open or seal any nonmagical lock, door, mechanism or trap without a roll · identify a magic item by handling it",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Fabricate. Over 10 minutes, build any nonmagical object up to Large size from the material at hand — a cart, a bridge span, a suit of armor — or take a structure apart into its parts.",
+            "card": "In 10 min, build any nonmagical object up to Large from what's at hand · or dismantle a structure",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Everything made can be remade. Understand any made thing completely — a construct's commands, a ward's conditions, a vault's every defense — and rewrite one of its rules: give a construct a new master, change a ward's prohibition, or change the key that opens a lock.",
+            "card": "Understand any made thing completely — and rewrite one rule: a construct's master, a ward's prohibition, a lock's key",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Exploit Seam",
+      "type": "Offensive",
+      "description": "You do not hit harder. You find where the work was done poorly, and you put your seal there.",
+      "effect": {
+        "text": "On a hit or failed saving throw against the primary effect, the maker's eye finds the target's structural flaw. Instead of adding damage, the target loses 2 AC and one damage resistance of your choice until the start of your next turn — the seam you have exposed refusing to hold. The first attack that hits the target while the seam is open is made against the reduced AC and lands in full.",
+        "card": "No extra damage — they lose 2 AC and one resistance of your choice until the start of your next turn",
+        "mech": {
+          "penalty": { "ac": -2 },
+          "pierce": "one chosen resistance"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The AC reduction increases to 3, and the exposed seam lasts for 1 minute. While it is open, the first attack each round that hits the target treats its damage dice as if it had rolled its maximum.",
+          "card": "−3 AC for 1 min · the first hit each round deals maximum dice",
+          "mech": { "penalty": { "ac": -3 } }
+        },
+        {
+          "text": "Level 11+: On a failed save, the flaw becomes catastrophic — the target's worn armor or a weapon it wields is Sundered (broken until repaired), and it loses all resistances for the duration. A creature with no equipment or resistances instead takes 3d8 force damage as the seam runs through its body.",
+          "card": "On a failed save: armor or weapon Sundered, and all resistances lost · nothing to break = 3d8 force instead",
+          "mech": {
+            "conditions": [ { "name": "Sundered", "duration": "until repaired" } ],
+            "pierce": "all resistances"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Field Repair",
+      "type": "Supportive",
+      "description": "While one hand strikes, the other is already mending.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally within 30 feet (or yourself) is tended by your make — it gains temporary hit points equal to your Verum Modifier, and one broken or expended item it carries is restored (a snapped weapon, a spent single-use item, or a depleted charge).",
+        "card": "An ally within 30 ft (or you) gains {VM} temp HP and one broken or spent item is restored",
+        "mech": { "heal": { "temp": "VM" }, "restore": { "what": "one broken or expended item" } }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The temporary hit points increase to Twice your Verum Modifier, and the ally also repairs their armor — regaining any AC lost to Sundering, corrosion, or breakage for the rest of the encounter.",
+          "card": "2×VM temp HP · their armor is repaired, restoring any lost AC",
+          "mech": { "heal": { "temp": "2×VM" } }
+        },
+        {
+          "text": "Level 11+: You may tend two allies, and each also ends one of the following on itself: Disarmed, the effect of a Sunder, or a single stack of gear-based penalty.",
+          "card": "Two allies · each also shakes off Disarmed, a Sunder, or one gear penalty"
+        }
+      ]
+    },
+    {
+      "name": "Deployed Contraption",
+      "type": "Control",
+      "description": "You leave a little something behind. It is not friendly.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails its saving throw, a small crafted device assembles at the point of impact, turning a 10-foot radius into difficult terrain for 1 minute. The first creature to enter or end its turn in the area must succeed on an Intelligence saving throw against your Verum DC or be Restrained until the end of its next turn as the contraption snares it.",
+        "card": "A contraption at the impact — 10 ft difficult terrain for 1 min · the first to enter or end a turn there: Int save or Restrained",
+        "mech": {
+          "terrain": { "radius": 10, "effect": "difficult", "duration": "1 minute" },
+          "conditions": [ { "name": "Restrained", "duration": "until the end of their next turn" } ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The radius increases to 15 feet, and the contraption re-arms — it can snare a creature once per round rather than only once, and a Restrained creature takes 1d8 force damage when the mechanism cinches.",
+          "card": "Radius 15 ft · re-arms every round · 1d8 force when it cinches",
+          "mech": { "terrain": { "radius": 15 }, "damage": { "dice": "1d8", "type": "force", "trigger": "it snares someone" } }
+        },
+        {
+          "text": "Level 11+: The device becomes a Sentry. At the start of each of your turns it makes a ranged attack, using your seal attack bonus, against one creature in or adjacent to the area, dealing 2d8 force damage on a hit, until the contraption is destroyed (AC 14, 15 HP) or the duration ends.",
+          "card": "Becomes a Sentry — each of your turns it shoots one creature nearby for 2d8 force (your seal attack) · AC 14, 15 HP",
+          "mech": { "damage": { "dice": "2d8", "type": "force", "trigger": "start of your turn" } }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

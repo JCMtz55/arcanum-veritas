@@ -1,0 +1,356 @@
+{
+  "id": "time",
+  "name": "Time",
+  "icon": "⏳",
+  "opposing": "space",
+  "description": "Moments, Regret, Foresight, Aging, Stasis.",
+  "savingThrow": "Wisdom",
+  "damageType": "Temporal",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Undone",
+        "description": "What it did, it did not do.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Temporal damage. A creature that fails is pulled back to where it stood at the start of its last turn, and loses its reaction until the start of its next turn.",
+            "card": "Damage becomes Temporal · rewound to where they stood at the start of their last turn · no reaction until their next turn",
+            "mech": {
+              "damage": { "type": "temporal" },
+              "movement": { "rewind": "to where it stood at the start of its last turn" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "Whatever it gained since then is taken back: any hit points it regained and any temporary hit points it gained since the start of its last turn are lost.",
+            "card": "Also loses every hit point and temp HP it gained since the start of its last turn",
+            "mech": {
+              "damage": { "type": "temporal" },
+              "movement": { "rewind": "to where it stood at the start of its last turn" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "Whatever it began unravels. A spell or effect it cast or started since the start of its last turn ends, as if it had never begun — though the slot or use it spent stays spent.",
+            "card": "Anything it cast or started since its last turn ends as if it never happened — the slot stays spent",
+            "mech": {
+              "damage": { "type": "temporal" },
+              "dispel": { "what": "anything it cast or began since the start of its last turn" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "Its last turn never happened. Every creature it damaged since the start of its last turn is restored to the hit points it had before, and every condition it imposed in that time ends.",
+            "card": "Its last turn is erased — everyone it damaged gets those hit points back, and every condition it imposed ends",
+            "mech": {
+              "damage": { "type": "temporal" },
+              "heal": { "amount": "all damage it dealt since the start of its last turn", "targets": "every creature it damaged" },
+              "dispel": { "what": "every condition it imposed since the start of its last turn" },
+              "deny": [ "reactions" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Years",
+        "description": "You do not wound them. You give them the time it would have taken.",
+        "tiers": [
+          {
+            "text": "A creature that fails gains 1 Year. Each Year it carries gives it −1 to attack rolls and to Strength and Dexterity saving throws. It can carry no more Years than your Proficiency Bonus, and they fall away when it finishes a short rest.",
+            "card": "+1 Year per fail — each Year is −1 to their attacks and Str and Dex saves (max {PB}, a short rest clears them)",
+            "mech": {
+              "resource": { "name": "Years", "gain": 1, "max": "PB" },
+              "penalty": { "attack": "-1 per Year", "saves": "-1 per Year (Str, Dex)" }
+            }
+          },
+          {
+            "text": "Each fail now adds 2 Years, the most it can carry becomes twice your Proficiency Bonus, and while it carries 3 or more its speed is halved.",
+            "card": "2 Years per fail, up to twice {PB} · at 3+ Years their speed is halved",
+            "mech": {
+              "resource": { "name": "Years", "gain": 2, "max": "2×PB" },
+              "penalty": { "speed": "halved at 3+ Years" }
+            }
+          },
+          {
+            "text": "At 5 or more Years it cannot take reactions and has disadvantage on Strength checks and saving throws, and its Years no longer fall away on a short rest — only a long rest clears them.",
+            "card": "At 5+ Years: no reactions, disadvantage on Str checks and saves · only a long rest clears them now",
+            "mech": {
+              "resource": { "name": "Years", "gain": 2, "max": "2×PB" },
+              "deny": [ "reactions" ],
+              "penalty": { "disadvantage": "Strength checks and saves at 5+ Years" }
+            }
+          },
+          {
+            "text": "The weight of the years comes due. A creature carrying 10 or more Years is Incapacitated by them; it may spend its action to shake one Year off, and is freed the moment it drops below 10.",
+            "card": "At 10+ Years it's Incapacitated — an action sheds one Year, and it's free again below 10",
+            "mech": {
+              "resource": { "name": "Years", "gain": 2, "max": "2×PB" },
+              "conditions": [ { "name": "Incapacitated", "source": "10 or more Years" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Rewind",
+        "description": "Not yet. Again.",
+        "tiers": [
+          {
+            "text": "Once while this lasts, as a reaction when the target takes damage, it may take back up to Twice your Verum Modifier of that damage — the wound closing as if it had not happened yet.",
+            "card": "Once: a reaction to take back up to 2×VM of a hit",
+            "mech": { "reaction": { "trigger": "the target takes damage", "effect": "undo up to 2×VM of it", "uses": "once" } }
+          },
+          {
+            "text": "Once while this lasts, as a bonus action, it may return to any space it occupied since the start of its last turn.",
+            "card": "Once: bonus action to step back to anywhere it stood since its last turn began",
+            "mech": { "buff": { "who": "target", "rewind": "position, once, bonus action" } }
+          },
+          {
+            "text": "The reaction takes back up to Five Times your Verum Modifier instead, and if the hit also imposed a condition, that condition never happened.",
+            "card": "The reaction takes back up to 5×VM instead — and any condition that hit carried",
+            "mech": { "reaction": { "trigger": "the target takes damage", "effect": "undo up to 5×VM and any condition it imposed", "uses": "once" } }
+          },
+          {
+            "text": "Once while this lasts, when the target would drop to 0 hit points or die, it may rewind itself to the start of its last turn instead — hit points, position, and conditions all exactly as they were.",
+            "card": "Once: when it would drop to 0 or die, it rewinds to the start of its last turn — HP, place and conditions as they were",
+            "mech": {
+              "resource": { "name": "Rewind", "uses": "once while this lasts" },
+              "buff": { "who": "target", "rewind": "everything, to the start of its last turn" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Foresight",
+        "description": "You have already seen this part.",
+        "tiers": [
+          {
+            "text": "The target cannot be surprised, and adds your Verum Modifier to its initiative.",
+            "card": "Can't be surprised · +{VM} to initiative",
+            "mech": {
+              "buff": { "who": "target", "initiative": "+VM" },
+              "deny": [ "surprise" ]
+            }
+          },
+          {
+            "text": "Once per round, when a creature it can see attacks it, it saw it coming — the attack has disadvantage.",
+            "card": "Once a round, an attack it can see coming has disadvantage",
+            "mech": { "buff": { "who": "target", "defense": "disadvantage on one attack each round" } }
+          },
+          {
+            "text": "It sees a turn ahead. At the start of each round, it learns truly what one creature it can see within 60 feet intends to do on its next turn, and it has advantage on Dexterity saving throws.",
+            "card": "Each round learn truly what one creature within 60 ft means to do next · advantage on Dex saves",
+            "mech": { "buff": { "who": "target", "advantage": "Dexterity saving throws", "foresight": "one creature's intent each round" } }
+          },
+          {
+            "text": "It acts in the moment just before. At the start of each round it may choose to take its turn at any point in the initiative order that round, and attacks against it have disadvantage.",
+            "card": "Each round it chooses when in the order it acts · attacks against it have disadvantage",
+            "mech": { "buff": { "who": "target", "initiative": "act at any point each round", "defense": "disadvantage on attacks against it" } }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Stasis",
+        "description": "Stop. Just — stop.",
+        "tiers": [
+          {
+            "text": "A creature that fails falls a half-second behind the world: next round it takes its turn last in the initiative order.",
+            "card": "Next round they act last in the initiative order",
+            "mech": { "penalty": { "initiative": "last next round" } }
+          },
+          {
+            "text": "It loses its reaction, and it stays at the bottom of the initiative order for as long as the effect holds.",
+            "card": "No reaction · stuck at the bottom of the initiative order while it holds",
+            "mech": {
+              "penalty": { "initiative": "last while the effect holds" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "Stasis. A creature that fails is frozen in time until the end of its next turn: Incapacitated and unmoving, and nothing can reach it either — it cannot be damaged, moved, or targeted by anything. You may release it early on your turn.",
+            "card": "Frozen in time until the end of their next turn — Incapacitated, but nothing can damage, move or target them · you may release them early",
+            "mech": { "conditions": [ { "name": "Stasis", "duration": "until the end of their next turn" }, { "name": "Incapacitated" } ] }
+          },
+          {
+            "text": "The stasis lasts as long as the effect does, with its repeat saves. While a creature is held in it you may move it as though it were an object you carry, and you may release it early on your turn.",
+            "card": "Stasis for the effect's whole duration (with repeat saves) · you can carry a frozen creature like an object",
+            "mech": { "conditions": [ { "name": "Stasis", "duration": "for the effect's duration" }, { "name": "Incapacitated" } ] }
+          }
+        ]
+      },
+      {
+        "name": "Loop",
+        "description": "Again. And again. And again.",
+        "tiers": [
+          {
+            "text": "A creature that fails is caught in its own last moment: on its next turn it must repeat the action it took on its last turn, against the same target if it can.",
+            "card": "Next turn they must repeat last turn's action — same target if they can",
+            "mech": { "penalty": { "actions": "must repeat last turn's action" } }
+          },
+          {
+            "text": "Its movement loops as well: at the end of its next turn it returns to wherever it began that turn.",
+            "card": "At the end of their next turn, they snap back to where that turn began",
+            "mech": { "movement": { "rewind": "to where its turn began" } }
+          },
+          {
+            "text": "While the effect holds, the loop closes at the end of each of its turns — it snaps back to where the turn began, and anything it started that turn ends.",
+            "card": "While it holds: every turn ends back where it began, and anything they started that turn ends",
+            "mech": {
+              "movement": { "rewind": "to where each turn began" },
+              "dispel": { "what": "anything it began that turn" }
+            }
+          },
+          {
+            "text": "The whole moment loops. At the end of each round while the effect holds, every creature that failed against this seal returns to where it stood at the start of that round.",
+            "card": "At the end of every round, everyone who failed returns to where they stood when the round began",
+            "mech": { "movement": { "rewind": "to where each stood at the start of the round" } }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Outside the Hours",
+        "description": "What you make was always there. It is only now that anyone has noticed.",
+        "tiers": [
+          {
+            "text": "Your creations stand outside time: they never tire, rust, or weaken with age. A Structure you raise can appear in an occupied space as though it had always been there — creatures in the way are set aside into the nearest free space, unharmed.",
+            "card": "Creations never tire or age · a Structure can appear where creatures stand — they're set aside, unharmed",
+            "mech": { "summon": { "structure": "can be raised in occupied space" } }
+          },
+          {
+            "text": "Undo the damage. Once per turn, restore one of your Structure segments or Constructs to the hit points it had at the start of your last turn.",
+            "card": "Once a turn, rewind a Structure segment or Construct to the HP it had at the start of your last turn",
+            "mech": { "heal": { "amount": "back to its HP at the start of your last turn", "targets": "your creations", "uses": "once per turn" } }
+          },
+          {
+            "text": "Your Constructs keep their own hours: each round they take their turn at any initiative count you choose, and once per seal a Construct may take a second turn in the same round.",
+            "card": "Constructs act whenever you choose in the round · once per seal, one takes a second turn",
+            "mech": { "summon": { "initiative": "any count", "extraTurn": "once per seal" } }
+          },
+          {
+            "text": "Time runs slow around what you build. A creature hostile to you within 10 feet of one of your creations has its speed halved and cannot take reactions.",
+            "card": "Enemies within 10 ft of your creations: speed halved, no reactions",
+            "mech": {
+              "penalty": { "speed": "halved within 10 ft of your creations" },
+              "deny": [ "reactions" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "The Long Now",
+        "description": "Every moment is still here. You simply know where to look.",
+        "tiers": [
+          {
+            "text": "Always know the exact time. Touch an object or place and know how long ago it was last opened, touched, or disturbed. Hold food, a body, or a wound exactly as it is for as long as the seal lasts, or ripen and wither a plant at will.",
+            "card": "Know the exact time · know when anything you touch was last disturbed · hold things unchanged, or ripen and wither plants",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Look back. For up to a minute, see what happened where you stand at any moment within the last day. Or age or un-age a nonmagical object by up to a century — rust a lock to flakes, or make a rotted bridge whole again.",
+            "card": "Watch what happened here within the last day · age or restore a nonmagical object by up to a century",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Look further. See the past of a place as far back as a year. Or glimpse ahead: ask one question about what will happen within the next day, and receive a true answer — weal, woe, both, or neither.",
+            "card": "See a place's past up to a year back · or ask one true question about the next day",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Walk the long now: see any moment in this place's whole history, or one possible future in full detail. At Major scope (a 7th-level slot or higher) you may instead stop time around you and take up to three turns in a row, during which nothing else moves.",
+            "card": "See any moment of a place's history, or one future in detail · at Major scope, stop time and take three turns in a row",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Echo",
+      "type": "Offensive",
+      "description": "The seal lands, and then — a moment later — it lands again in their bones.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Temporal damage equal to one damage die of the primary effect's type (min 1d6), and next round it takes its turn last in the initiative order.",
+        "card": "+1 die temporal · they act last in the initiative order next round",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "temporal" },
+          "penalty": { "initiative": "last next round" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and it also loses its reaction until it next acts.",
+          "card": "+3 dice · no reaction until they next act",
+          "mech": { "deny": [ "reactions" ] }
+        }
+      ]
+    },
+    {
+      "name": "Borrowed Moment",
+      "type": "Supportive",
+      "description": "Someone has to wait. It might as well be you.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally within 30 feet takes its next turn immediately after yours this round — and you take your turn last in the initiative order next round, the moment having come out of yours.",
+        "card": "An ally within 30 ft acts right after you this round — but you act last next round",
+        "mech": {
+          "buff": { "who": "one ally within 30 ft", "initiative": "acts right after you" },
+          "cost": { "initiative": "you act last next round" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The ally also gains 10 feet of speed on that turn.",
+          "card": "The ally also gets +10 ft speed on that turn"
+        },
+        {
+          "text": "Level 11+: The moment is freely given — you no longer drop to the end of the order.",
+          "card": "No more cost — you keep your place in the order"
+        }
+      ]
+    },
+    {
+      "name": "Lag",
+      "type": "Control",
+      "description": "They are a beat behind, and they will stay that way.",
+      "effect": {
+        "text": "Creatures that fail cannot take reactions until the end of their next turn, and their speed is reduced by 10 feet.",
+        "card": "No reactions until the end of their next turn · −10 ft speed",
+        "mech": {
+          "deny": [ "reactions" ],
+          "penalty": { "speed": -10 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: They also take their turn last in the initiative order next round.",
+          "card": "They also act last next round",
+          "mech": { "penalty": { "initiative": "last next round" } }
+        },
+        {
+          "text": "Level 11+: On their next turn they must repeat the action they took on their last one, if they can.",
+          "card": "Next turn they must repeat last turn's action",
+          "mech": { "penalty": { "actions": "must repeat last turn's action" } }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

@@ -1,0 +1,351 @@
+{
+  "id": "space",
+  "name": "Space",
+  "icon": "🌌",
+  "opposing": "time",
+  "description": "Distance, Displacement, Passage, Expanse, Elsewhere.",
+  "savingThrow": "Charisma",
+  "damageType": "Rift",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Displace",
+        "description": "Where a thing stands is only an agreement. You can revoke it.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Rift damage. A creature that fails is displaced — teleported up to 10 feet to an unoccupied space of your choice that you can see.",
+            "card": "Damage becomes Rift · teleported 10 ft to a space you choose",
+            "mech": {
+              "damage": { "type": "rift" },
+              "movement": { "teleport": 10 }
+            }
+          },
+          {
+            "text": "The displacement becomes 30 feet, and it arrives wrong-footed: it has disadvantage on attack rolls until the end of its next turn.",
+            "card": "The displacement becomes 30 ft · they attack at disadvantage until the end of their next turn",
+            "mech": {
+              "damage": { "type": "rift" },
+              "movement": { "teleport": 30 },
+              "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
+            }
+          },
+          {
+            "text": "Or trade them. Instead of moving it, you may swap it with any other creature within 30 feet — a willing ally, yourself, or another creature that failed.",
+            "card": "Or swap them with any creature within 30 ft — an ally, you, or another who failed",
+            "mech": {
+              "damage": { "type": "rift" },
+              "movement": { "teleport": 30, "swap": "any creature within 30 ft" },
+              "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
+            }
+          },
+          {
+            "text": "Scatter. Every creature of your choice within 30 feet of the target makes the seal's save, and you place each one that fails — and the target — anywhere you can see within 60 feet, all at once. The battlefield is the shape you say it is.",
+            "card": "Scatter — everyone you choose within 30 ft saves, and you place each who fails anywhere within 60 ft, all at once",
+            "mech": {
+              "damage": { "type": "rift" },
+              "movement": { "teleport": 60, "area": "30 ft" },
+              "penalty": { "disadvantage": "attack rolls until the end of their next turn" }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Folded Distance",
+        "description": "The distance between you was only ever a suggestion.",
+        "tiers": [
+          {
+            "text": "The seal's range is doubled, and it may arrive from any point you can see — behind the target, above it — so the target gets no cover against it from the direction you choose.",
+            "card": "Double range · it arrives from any point you can see, so no cover from the side you choose",
+            "mech": { "pierce": "cover", "buff": { "range": "doubled" } }
+          },
+          {
+            "text": "It comes from an angle that does not exist. The target cannot use reactions against this seal, a Direct Attack drawn this way has advantage, and any other target that cannot see where it came from has disadvantage on the save.",
+            "card": "No reactions against it · Direct Attacks at advantage · others save at disadvantage if they can't see where it came from",
+            "mech": {
+              "pierce": "cover",
+              "deny": [ "reactions" ],
+              "penalty": { "disadvantage": "the save, if they can't see its origin" }
+            }
+          },
+          {
+            "text": "Two places at once. The seal also lands on one other creature you can see within range, as if that creature were a second target: it makes the seal's save, and on a failure takes half the damage along with every rider.",
+            "card": "It also lands on a second creature you can see in range — half damage and every rider on a failed save",
+            "mech": {
+              "rider": { "damage": "half", "targets": 1, "note": "a second target, with every rider" },
+              "deny": [ "reactions" ]
+            }
+          },
+          {
+            "text": "Distance collapses. You may draw this seal at any creature you can see, however far away it is, and no cover of any kind protects it.",
+            "card": "Any creature you can see, at any distance · no cover of any kind protects it",
+            "mech": {
+              "pierce": "all cover",
+              "buff": { "range": "anything you can see" },
+              "deny": [ "reactions" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Blink",
+        "description": "You were never where they thought you were.",
+        "tiers": [
+          {
+            "text": "Once while this lasts, as a bonus action, the target may teleport up to 30 feet to an unoccupied space it can see.",
+            "card": "Once: bonus action to teleport 30 ft",
+            "mech": { "buff": { "who": "target", "teleport": "30 ft, once, bonus action" } }
+          },
+          {
+            "text": "It may teleport 30 feet as a bonus action on each of its turns, and when an attack would hit it, it may use its reaction to teleport 10 feet and make the attack miss.",
+            "card": "Bonus action every turn: teleport 30 ft · reaction: blink 10 ft and make a hit miss",
+            "mech": {
+              "buff": { "who": "target", "teleport": "30 ft each turn, bonus action" },
+              "reaction": { "trigger": "an attack would hit it", "effect": "teleport 10 ft; the attack misses" }
+            }
+          },
+          {
+            "text": "The teleport becomes 60 feet, it may bring one willing creature it is touching, and its first attack after teleporting on a turn has advantage.",
+            "card": "The teleport becomes 60 ft · bring one willing creature along · first attack after a blink has advantage",
+            "mech": { "buff": { "who": "target", "teleport": "60 ft, with one passenger", "advantage": "first attack after teleporting" } }
+          },
+          {
+            "text": "It exists half a step to one side of the world. Attacks against it have disadvantage, it cannot be grappled, restrained, or held in place by anything short of an opposing seal, and its teleport reaches anywhere it can see.",
+            "card": "Half a step aside — attacks against it at disadvantage · can't be grappled or held · teleport anywhere it can see",
+            "mech": {
+              "buff": { "who": "target", "defense": "disadvantage on attacks against it", "teleport": "anywhere it can see" },
+              "deny": [ "grapples", "restraint" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Elsewhere",
+        "description": "You keep a small place with you that is not here.",
+        "tiers": [
+          {
+            "text": "Open a pocket of elsewhere at the target's side: it may stow or draw an object of up to 10 pounds as a free action, and anything stowed cannot be found, stolen, or detected while it is gone.",
+            "card": "A pocket at their side — stow or draw up to 10 lb as a free action, and nothing stowed can be found or stolen",
+            "mech": { "buff": { "who": "target", "pocket": "10 lb, free action" } }
+          },
+          {
+            "text": "The pocket holds up to 500 pounds, and anything in it can be drawn or stowed as part of any other action — a sword into the hand mid-swing, a shield from nowhere.",
+            "card": "Holds up to 500 lb · stow or draw as part of any action",
+            "mech": { "buff": { "who": "target", "pocket": "500 lb" } }
+          },
+          {
+            "text": "Shelter. A willing creature within 5 feet of the target may step into the pocket as a reaction when it is about to be hit or caught in an area — the harm finds nothing there. It steps back out, within 30 feet of the target, at the start of its next turn.",
+            "card": "A willing creature within 5 ft can dive into the pocket as a reaction — the hit or area finds nothing — and steps out next turn",
+            "mech": { "reaction": { "trigger": "a nearby ally is about to be hit or caught in an area", "effect": "it shelters in the pocket until its next turn" } }
+          },
+          {
+            "text": "The pocket becomes a room. Up to eight willing creatures may enter it together and stay for up to an hour — safe, unseen, and unreachable by anything short of an opposing seal — long enough for a short rest before they step out anywhere within 30 feet of where they went in.",
+            "card": "A room of elsewhere — up to 8 creatures shelter for an hour, safe and unreachable, time enough for a short rest",
+            "mech": { "buff": { "who": "up to 8 willing creatures", "shelter": "1 hour, short rest possible" } }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "The Long Way",
+        "description": "The room grows a little longer every time they try to cross it.",
+        "tiers": [
+          {
+            "text": "For a creature that fails, distance stretches: every foot it moves costs 2 feet, and nothing that ignores difficult terrain helps — the ground is not difficult, there is simply more of it.",
+            "card": "Every foot they move costs 2 — and ignoring difficult terrain doesn't help, there's just more room",
+            "mech": { "penalty": { "speed": "each foot costs 2, can't be ignored" } }
+          },
+          {
+            "text": "Its reach stretches thin as well. Its melee attacks can only reach creatures directly beside it, and the range of its ranged attacks and spells is halved.",
+            "card": "Melee only reaches right beside them · their ranged attacks and spells have half range",
+            "mech": { "penalty": { "reach": "adjacent only", "range": "halved" } }
+          },
+          {
+            "text": "It can never quite arrive. It cannot end its movement closer to any creature it can see than where it began — the distance unfolds as fast as it crosses it.",
+            "card": "They can't end a move any closer to anyone they can see — the distance keeps unfolding",
+            "mech": { "deny": [ "closing distance" ] }
+          },
+          {
+            "text": "It is lost in a fold of the world. Each time it moves, you choose where along its path it actually ends up — including back where it started.",
+            "card": "Each time they move, you choose where along the path they actually end up — including where they began",
+            "mech": {
+              "conditions": [ { "name": "Folded" } ],
+              "deny": [ "closing distance" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Here and Nowhere Else",
+        "description": "You are not going anywhere. That is not a threat. It is a location.",
+        "tiers": [
+          {
+            "text": "A creature that fails is anchored to this place: it cannot teleport, plane shift, or be teleported by anyone else.",
+            "card": "Anchored — no teleporting, plane shifting, or being teleported",
+            "mech": { "deny": [ "teleportation", "plane shift" ] }
+          },
+          {
+            "text": "It is pinned into the world completely: it cannot turn invisible, ethereal, or incorporeal, and any such state it is already in ends.",
+            "card": "Also can't be invisible, ethereal or incorporeal — and any such state ends",
+            "mech": { "deny": [ "teleportation", "plane shift", "invisibility", "etherealness" ] }
+          },
+          {
+            "text": "Nothing comes through for it either. Portals and summonings it opens fail, and any creature it has summoned or called within 30 feet is sent back to wherever it came from.",
+            "card": "Its portals and summonings fail · anything it summoned within 30 ft is sent back",
+            "mech": { "deny": [ "teleportation", "plane shift", "summoning" ] }
+          },
+          {
+            "text": "Or send it elsewhere. A creature that fails and is not native to this plane is banished to its home plane; a native creature is banished to a pocket of nowhere, Incapacitated and beyond reach, until the end of its next turn — then returns to the nearest unoccupied space to where it was.",
+            "card": "Banish — not from here: sent home · from here: gone to nowhere until the end of its next turn",
+            "mech": {
+              "conditions": [ { "name": "Banished" }, { "name": "Incapacitated", "duration": "until the end of their next turn" } ],
+              "deny": [ "teleportation", "plane shift" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Doorways",
+        "description": "Every wall is a door that has not been asked properly.",
+        "tiers": [
+          {
+            "text": "Your creations fold space. A creature that passes through one of your Structures may come out of any other segment you made, and Objects you make are larger inside than out — a satchel that holds a chest's worth.",
+            "card": "Step into one Structure segment and out of any other · your Objects are bigger inside than out",
+            "mech": { "summon": { "portal": "between your Structure segments" } }
+          },
+          {
+            "text": "Link two points within 120 feet into a doorway for as long as the seal lasts. Anything — creatures, thrown objects, ranged attacks — that enters one leaves the other.",
+            "card": "Link two points within 120 ft — anything entering one leaves the other, attacks included",
+            "mech": { "summon": { "portal": "two points within 120 ft" } }
+          },
+          {
+            "text": "Your Constructs teleport up to 30 feet as part of their movement, and may take one creature they are grappling with them.",
+            "card": "Constructs teleport 30 ft as part of moving, and can take a grappled creature along",
+            "mech": { "summon": { "teleport": "30 ft, with a grappled creature" } }
+          },
+          {
+            "text": "A Gate. One doorway you make may open onto any place you have stood on this plane, for as long as the seal lasts.",
+            "card": "A Gate — one doorway opens onto anywhere you've stood on this plane",
+            "mech": { "summon": { "portal": "anywhere you have stood on this plane" } }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "The Map Folds",
+        "description": "Every distance is a map, and every map can be folded.",
+        "tiers": [
+          {
+            "text": "Know the exact distance and direction to anything you can see, and sense any extradimensional space — a bag of holding, a hidden pocket, a folded room — within 60 feet. Once, teleport up to 30 feet to a space you can see.",
+            "card": "Know exact distances · sense extradimensional spaces within 60 ft · teleport 30 ft once",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Teleport up to 500 feet to a place you can see or can describe precisely, taking up to three willing companions with you.",
+            "card": "Teleport 500 ft with three companions",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Teleport to any place you have been within 100 miles, with up to five willing companions. Or look through the fold: see and hear any place you have been, as though standing there, for up to 10 minutes.",
+            "card": "Teleport anywhere you've been within 100 miles, with five companions · or see and hear any place you've been",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Step between worlds: travel to another plane with up to eight willing companions, or open a door to a place you have only ever seen — in a vision, a painting, a dream.",
+            "card": "Step to another plane with eight companions · or open a door to a place you've only seen",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Rift",
+      "type": "Offensive",
+      "description": "The seal cuts a little further than the target does.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Rift damage equal to one damage die of the primary effect's type (min 1d6), and is teleported 5 feet to an unoccupied space of your choice.",
+        "card": "+1 die rift · teleported 5 ft to a space you choose",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "rift" },
+          "movement": { "teleport": 5 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and the teleport becomes 15 feet.",
+          "card": "+2 dice · the teleport becomes 15 ft",
+          "mech": { "movement": { "teleport": 15 } }
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and the teleport becomes 30 feet — anywhere you can see, including into the air.",
+          "card": "+3 dice · the teleport becomes 30 ft, anywhere you can see — up included",
+          "mech": { "movement": { "teleport": 30 } }
+        }
+      ]
+    },
+    {
+      "name": "Swap",
+      "type": "Supportive",
+      "description": "Somebody has to stand where they were standing. You volunteer.",
+      "effect": {
+        "text": "When the primary effect resolves, you may trade places with one willing ally within 30 feet — it appears where you were, and you appear where it was, whatever was about to happen there.",
+        "card": "Trade places with a willing ally within 30 ft — you take their spot, and whatever was coming for it",
+        "mech": { "movement": { "swap": "you and a willing ally within 30 ft" } }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The range becomes 60 feet, and you may swap two willing allies with each other instead of yourself.",
+          "card": "60 ft · or swap two allies with each other instead of yourself"
+        },
+        {
+          "text": "Level 11+: Every creature you move this way has +2 AC until the start of your next turn.",
+          "card": "Everyone swapped gets +2 AC until your next turn",
+          "mech": { "buff": { "ac": "+2 until the start of your next turn" } }
+        }
+      ]
+    },
+    {
+      "name": "Anchor",
+      "type": "Control",
+      "description": "You nail them to the map.",
+      "effect": {
+        "text": "Creatures that fail cannot teleport or be teleported until the end of their next turn, and their speed is reduced by 10 feet.",
+        "card": "No teleporting or being teleported until the end of their next turn · −10 ft speed",
+        "mech": {
+          "deny": [ "teleportation" ],
+          "penalty": { "speed": -10 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: They also cannot turn invisible, ethereal, or incorporeal until the end of their next turn.",
+          "card": "Also no turning invisible, ethereal or incorporeal",
+          "mech": { "deny": [ "invisibility", "etherealness" ] }
+        },
+        {
+          "text": "Level 11+: A creature that fails is also shunted 15 feet to a space of your choice and lands Prone.",
+          "card": "Also shunted 15 ft wherever you choose, landing Prone",
+          "mech": {
+            "movement": { "teleport": 15 },
+            "conditions": [ { "name": "Prone" } ]
+          }
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

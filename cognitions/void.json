@@ -1,0 +1,344 @@
+{
+  "id": "void",
+  "name": "Void",
+  "icon": "🌀",
+  "opposing": "abundance",
+  "description": "Hunger, Absence, Emptiness, Consumption, Oblivion.",
+  "savingThrow": "Constitution",
+  "damageType": "Void",
+
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Stomach",
+        "description": "It is not a hole. It is a mouth that has forgotten it has a face.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Void damage. A creature that fails loses something to the dark: one item it is holding — not wearing — is swallowed, gone until the end of your next turn, when it drops at the creature's feet.",
+            "card": "Damage becomes Void · one item they hold is swallowed until the end of your next turn",
+            "mech": {
+              "damage": { "type": "void" },
+              "disarm": 1
+            }
+          },
+          {
+            "text": "The dark swallows small things whole. A Small or smaller creature that fails is swallowed until the end of its next turn — gone from the field, Blinded and Restrained in the nothing, taking 2d6 Void damage at the start of its turn — then spat back out Prone where it stood.",
+            "card": "Small or smaller: swallowed until the end of their next turn — Blinded, Restrained, 2d6 void — then spat out Prone",
+            "mech": {
+              "damage": { "type": "void" },
+              "conditions": [ { "name": "Swallowed", "tick": "2d6 void", "size": "Small or smaller" }, { "name": "Blinded" }, { "name": "Restrained" } ],
+              "disarm": 1
+            }
+          },
+          {
+            "text": "It digests. The void takes Medium creatures now, and the damage at the start of each of their turns becomes 4d6. A swallowed creature cannot concentrate, and it is not spat out until it succeeds on a Constitution saving throw at the end of one of its turns.",
+            "card": "Now takes Medium creatures · 4d6 void each turn inside · no Concentration · out only on a Con save at the end of their turn",
+            "mech": {
+              "damage": { "type": "void" },
+              "conditions": [ { "name": "Swallowed", "tick": "4d6 void", "size": "Medium or smaller", "escape": "a Constitution save at the end of their turn" }, { "name": "Blinded" }, { "name": "Restrained" } ],
+              "deny": [ "concentration" ]
+            }
+          },
+          {
+            "text": "It keeps what it takes. The void swallows Large creatures now, and a creature that dies while swallowed is simply gone — no body, no remains, nothing to return.",
+            "card": "Now takes Large creatures · anything that dies inside is gone — no body, no remains",
+            "mech": {
+              "damage": { "type": "void" },
+              "conditions": [ { "name": "Swallowed", "tick": "4d6 void", "size": "Large or smaller", "escape": "a Constitution save at the end of their turn" }, { "name": "Blinded" }, { "name": "Restrained" } ],
+              "deny": [ "concentration", "revival" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hunger",
+        "description": "Every time it is fed, it remembers how empty it was.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Void damage. Each time one of your Void seals drops a creature to 0 hit points, or below half its hit points for the first time, the void is Fed — up to your Proficiency Bonus. Every Fed stack adds one damage die to your Void seals. The void goes hungry again when you finish a long rest.",
+            "card": "Damage becomes Void · Fed when a seal drops someone to 0 or below half (max {PB}) · each Fed adds a die to your Void seals",
+            "mech": {
+              "damage": { "type": "void" },
+              "resource": { "name": "Fed", "gain": 1, "max": "PB", "effect": "+1 damage die per stack" }
+            }
+          },
+          {
+            "text": "Feeding it feeds you: each time the void is Fed, you gain temporary hit points equal to Twice your Verum Modifier.",
+            "card": "Each time it's Fed, you gain 2×VM temp HP",
+            "mech": {
+              "damage": { "type": "void" },
+              "resource": { "name": "Fed", "gain": 1, "max": "PB" },
+              "heal": { "temp": "2×VM", "trigger": "the void is Fed" }
+            }
+          },
+          {
+            "text": "Well fed, it stops being particular. While the void holds its maximum Fed, your Void seals ignore resistance and immunity.",
+            "card": "At maximum Fed, your Void seals ignore resistance and immunity",
+            "mech": {
+              "damage": { "type": "void" },
+              "resource": { "name": "Fed", "gain": 1, "max": "PB" },
+              "pierce": "all, at maximum Fed"
+            }
+          },
+          {
+            "text": "It is never full. While the void holds its maximum Fed, a creature your Void seal drops to 0 hit points is devoured outright — dead, with nothing left behind — and the void is Fed again past its limit, up to twice your Proficiency Bonus.",
+            "card": "At maximum Fed, whatever your seal drops to 0 is devoured whole — and Fed can climb to twice {PB}",
+            "mech": {
+              "damage": { "type": "void" },
+              "resource": { "name": "Fed", "gain": 1, "max": "2×PB" },
+              "deny": [ "revival" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "supportive": [
+      {
+        "name": "Swallow",
+        "description": "Everything that is thrown at you has to land somewhere. You give it somewhere.",
+        "tiers": [
+          {
+            "text": "Once while this lasts, as a reaction when the target takes damage, the void swallows up to Twice your Verum Modifier of it. What it swallows it keeps — you hold that much damage in store until your next long rest.",
+            "card": "Once: reaction to swallow up to 2×VM of a hit on them — and you keep it in store",
+            "mech": {
+              "reaction": { "trigger": "the target takes damage", "effect": "swallow up to 2×VM and store it", "uses": "once" },
+              "resource": { "name": "Stored", "keeps": "until your next long rest" }
+            }
+          },
+          {
+            "text": "Give it back. When you next draw an offensive seal, you may release everything in store: its first target takes that much extra Void damage, and your store empties.",
+            "card": "Release the store on your next offensive seal — its first target takes all of it as extra void",
+            "mech": {
+              "reaction": { "trigger": "the target takes damage", "effect": "swallow up to 2×VM and store it", "uses": "once" },
+              "resource": { "name": "Stored", "release": "as extra Void damage on your next offensive seal" }
+            }
+          },
+          {
+            "text": "It swallows more than blows. The reaction may take up to Five Times your Verum Modifier, and it may instead swallow a spell of 3rd level or lower aimed at the target — the spell has no effect, and three times its level in damage goes into your store.",
+            "card": "Swallow up to 5×VM — or a spell ≤3rd aimed at them (it fizzles, and 3× its level goes into store)",
+            "mech": {
+              "reaction": { "trigger": "the target is hit or targeted by a spell", "effect": "swallow up to 5×VM, or a spell of 3rd level or lower", "uses": "once" },
+              "resource": { "name": "Stored" }
+            }
+          },
+          {
+            "text": "Nothing reaches the bottom of it. The target may swallow once each round rather than once, spells of 6th level or lower, and your store has no limit until your next long rest.",
+            "card": "Once every round, not once · spells up to 6th · the store has no limit",
+            "mech": {
+              "reaction": { "trigger": "the target is hit or targeted by a spell", "effect": "swallow up to 5×VM, or a spell of 6th level or lower", "uses": "once each round" },
+              "resource": { "name": "Stored", "max": "none" }
+            }
+          }
+        ]
+      }
+    ],
+
+    "control": [
+      {
+        "name": "Starve",
+        "description": "Nothing given to it will ever arrive. You have seen to that.",
+        "tiers": [
+          {
+            "text": "Until the end of its next turn, a creature that fails cannot regain hit points or gain temporary hit points.",
+            "card": "No healing or temp HP until the end of their next turn",
+            "mech": { "deny": [ "healing", "temporary hit points" ] }
+          },
+          {
+            "text": "Nothing its allies give it arrives. While the effect holds it gains no benefit from its allies' spells, features, Help actions, or items — a potion is water, a blessing is silence.",
+            "card": "While it holds: no benefit from its allies' spells, features, Help or items — potions are water",
+            "mech": { "deny": [ "healing", "temporary hit points", "aid from allies" ] }
+          },
+          {
+            "text": "What it already had drains away. When it fails it loses all of its temporary hit points, and one ongoing benefit another creature granted it ends.",
+            "card": "On a fail it loses all its temp HP, and one benefit an ally gave it ends",
+            "mech": {
+              "deny": [ "healing", "temporary hit points", "aid from allies" ],
+              "dispel": { "what": "one benefit granted by another creature" }
+            }
+          },
+          {
+            "text": "It starves. While the effect holds, it takes Five Times your Verum Modifier in Void damage at the start of each of its turns, and it cannot take a short rest.",
+            "card": "5×VM void at the start of each of their turns while it holds · no short rests",
+            "mech": {
+              "conditions": [ { "name": "Starved", "tick": "5×VM void" } ],
+              "deny": [ "healing", "temporary hit points", "aid from allies" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Oblivion",
+        "description": "First the world goes quiet. Then it goes.",
+        "tiers": [
+          {
+            "text": "The void swallows the world around it. A creature that fails is Deafened, and any sense it has beyond sight — blindsight, tremorsense, telepathy — goes dark, until the end of its next turn.",
+            "card": "Deafened, and every sense beyond sight gone, until the end of their next turn",
+            "mech": {
+              "conditions": [ { "name": "Deafened", "duration": "until the end of their next turn" } ],
+              "deny": [ "blindsight", "tremorsense", "telepathy" ]
+            }
+          },
+          {
+            "text": "It goes Blinded as well.",
+            "card": "Blinded too",
+            "mech": {
+              "conditions": [ { "name": "Blinded" }, { "name": "Deafened" } ],
+              "deny": [ "blindsight", "tremorsense", "telepathy" ]
+            }
+          },
+          {
+            "text": "Nothing is anywhere. While the effect holds, it cannot sense anything at all, cannot tell where anything is, and must name a space and guess whenever it tries to target a creature.",
+            "card": "While it holds: no senses at all — it must guess the space of anything it targets",
+            "mech": {
+              "conditions": [ { "name": "Blinded" }, { "name": "Deafened" }, { "name": "Senseless" } ],
+              "deny": [ "blindsight", "tremorsense", "telepathy" ]
+            }
+          },
+          {
+            "text": "It is alone in the dark with nothing. While the effect holds, it is Incapacitated, lost inside its own emptiness. Pain reaches it, though: whenever it takes damage, it may make its repeat saving throw at once.",
+            "card": "Incapacitated in the dark while it holds · taking damage lets them make the repeat save at once",
+            "mech": {
+              "conditions": [ { "name": "Incapacitated" }, { "name": "Senseless" } ],
+              "deny": [ "blindsight", "tremorsense", "telepathy" ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "creation": [
+      {
+        "name": "Hollow Works",
+        "description": "You build with the one material that is never in short supply.",
+        "tiers": [
+          {
+            "text": "Your creations are carved out of nothing. Arrows, bolts, and thrown things that strike one of your Structures simply vanish, and a creature that touches or strikes a Structure, or is hit by a Construct or an Object you made, takes 1d6 Void damage.",
+            "card": "Projectiles that hit your Structures vanish · touch, strike, or be hit by a creation: 1d6 void",
+            "mech": { "damage": { "amount": "1d6", "type": "void", "trigger": "touch or hit" } }
+          },
+          {
+            "text": "That damage becomes 2d6, and your Structures swallow magic too: a spell or effect cannot pass through or target a segment — it is blocked for everything, not only bodies.",
+            "card": "That damage becomes 2d6 · spells and effects can't pass through or target your Structures",
+            "mech": { "damage": { "amount": "2d6", "type": "void" } }
+          },
+          {
+            "text": "Your Constructs feed. The first damage each Construct takes each round is swallowed — up to Five Times your Verum Modifier — and it regains hit points equal to half the damage its own attacks deal.",
+            "card": "Each round a Construct swallows the first 5×VM it takes · it heals half the damage it deals",
+            "mech": { "heal": { "amount": "half the damage it deals", "targets": "your Constructs" } }
+          },
+          {
+            "text": "When one of your creations is destroyed it collapses into its own emptiness. Every creature within 10 feet makes the seal's save: on a failure it takes 6d10 Void damage and is swallowed until the end of its next turn; on a success it takes half and is not.",
+            "card": "A destroyed creation collapses — everyone within 10 ft: 6d10 void and swallowed until next turn (save: half, not swallowed)",
+            "mech": {
+              "damage": { "amount": "6d10", "type": "void", "area": "10 ft", "trigger": "a creation is destroyed", "save": { "ability": "Constitution", "onSuccess": "half" } },
+              "conditions": [ { "name": "Swallowed", "duration": "until the end of their next turn" } ]
+            }
+          }
+        ]
+      }
+    ],
+
+    "utility": [
+      {
+        "name": "Nothing Here",
+        "description": "Absence is the easiest thing in the world to leave behind.",
+        "tiers": [
+          {
+            "text": "You and up to four companions leave no tracks, no scent, and no sound of passage. Swallow a small object of up to a pound into nothing and draw it back out whenever you like.",
+            "card": "You and four companions leave no trace · swallow a small object and bring it back at will",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Erase the evidence: blood, footprints, magical residue, and lingering auras within 30 feet vanish. For the next hour, divination cannot find you or your companions.",
+            "card": "Erase every trace within 30 ft · divination can't find your group for an hour",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Step into any unlit space and be nowhere: for up to 10 minutes you cannot be perceived, found, or harmed, and cannot act; you return from any unlit space within a mile.",
+            "card": "Step into any darkness and be nowhere for up to 10 min · come back out of any darkness within a mile",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Make a place forgotten. An area up to the size of a house becomes an absence for 24 hours: divination cannot find it, maps slide around it, and anyone not already inside walks past without noticing it is there. Draw it again on the same place every day for a week and it stays forgotten.",
+            "card": "Make a place up to a house forgotten for 24 hrs — unfindable, unnoticed · a week of redrawing makes it permanent",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+
+  "complementEffects": [
+    {
+      "name": "Bite",
+      "type": "Offensive",
+      "description": "The seal takes a little more than it was sent for.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Void damage equal to one damage die of the primary effect's type (min 1d6), and one item it is holding is swallowed until the end of your next turn.",
+        "card": "+1 die void · one item they hold is swallowed until the end of your next turn",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "void" },
+          "disarm": 1
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and it cannot regain hit points until the end of its next turn.",
+          "card": "+3 dice · no healing until the end of their next turn",
+          "mech": { "deny": [ "healing" ] }
+        }
+      ]
+    },
+    {
+      "name": "Hollow Out",
+      "type": "Supportive",
+      "description": "The void will take anything. It asks only that someone feed it.",
+      "effect": {
+        "text": "When the primary effect resolves, one ally within 30 feet is emptied of one condition it is suffering — Charmed, Frightened, Poisoned, Blinded, or Deafened — as the void swallows it. The void feeds on you for it: you cannot regain hit points until the start of your next turn.",
+        "card": "An ally within 30 ft loses Charmed, Frightened, Poisoned, Blinded or Deafened — but you can't heal until your next turn",
+        "mech": {
+          "conditions": [ { "removes": 1 } ],
+          "cost": { "healing": "you can't regain HP until the start of your next turn" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: You may empty two allies, or two conditions from one.",
+          "card": "Two allies, or two conditions from one"
+        },
+        {
+          "text": "Level 11+: The void no longer feeds on you — the cost is gone.",
+          "card": "No more cost"
+        }
+      ]
+    },
+    {
+      "name": "Gnaw",
+      "type": "Control",
+      "description": "It eats at the edges of whatever holds them up.",
+      "effect": {
+        "text": "Creatures that fail cannot regain hit points or gain temporary hit points until the end of their next turn.",
+        "card": "No healing or temp HP until the end of their next turn",
+        "mech": { "deny": [ "healing", "temporary hit points" ] }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Until then they also gain no benefit from their allies' spells, features, or Help actions.",
+          "card": "Also no benefit from allies' spells, features or Help",
+          "mech": { "deny": [ "aid from allies" ] }
+        },
+        {
+          "text": "Level 11+: A creature that fails also loses all of its temporary hit points at once.",
+          "card": "They also lose all their temp HP at once"
+        }
+      ]
+    }
+  ],
+
+  "schema": 2
+}

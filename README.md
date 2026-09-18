@@ -78,19 +78,20 @@ The card shows:
 
 ## Domains
 
-Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Seven domains, sized 4–8, no dumping ground:
+Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 3–9, no dumping ground:
 
 | Domain | | What it is |
 |---|---|---|
 | **Elemental** | 9 | Acid · Air · Earth · Fire · Ice · Lightning · Metal · Toxin · Water — matter and force |
+| **Cosmical** | 3 | Gravity · Space · Time — the shape of creation itself |
 | **Corporeal** | 5 | Beast · Blood · Bones · Flesh · Pain — blood, bone and beast |
 | **Vital** | 5 | Corruption · Death · Growth · Life · Soul — the living and the unliving |
 | **Psychic** | 4 | Apathy · Hate · Heroism · Isolation — feeling turned outward |
-| **Umbral** | 4 | Nightmare · Nullity · Shadow · Silence — absence, erasure, the unmade |
+| **Umbral** | 5 | Nightmare · Nullity · Shadow · Silence · Void — absence, erasure, the unmade |
 | **Fate** | 4 | Balance · Disaster · Fortune · Misfortune — what happens to you |
-| **Dominion** | 6 | Carnage · Civilization · Control · Power · Protection · Speed — will imposed on the world |
+| **Dominion** | 7 | Carnage · Civilization · Control · Craft · Power · Protection · Speed — will imposed on the world |
 
-Domain is not the same question as cosmological weight, so it isn't the same field. **`"cosmic": true`** marks the four that carry campaign-level implications — **Death · Nightmare · Nullity · Soul** — regardless of which domain they sit in. They show a ★ in the rail and a *campaign-level* tag in the Codex.
+Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Death · Nightmare · Nullity · Soul** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
 
 A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
 
@@ -102,16 +103,16 @@ In `index.json`, each cognition has a `ready` flag:
 - `true` — JSON file exists, cognition is fully playable
 - `false` — Placeholder only; shown as **SOON** in the sidebar and cannot be selected
 
-### Ready Cognitions (28)
-Air · Apathy · Beast · Blood · Bones · Civilization · Corruption · Death · **Earth** · Fire · Flesh · Fortune · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · Metal · Misfortune · Nullity · Pain · Power · Protection · Shadow · Soul · **Water**
+### Ready Cognitions (35)
+Air · Apathy · Beast · Blood · Bones · Civilization · Control · Corruption · **Craft** · Death · **Earth** · Fire · Flesh · Fortune · **Gravity** · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · Metal · Misfortune · **Nightmare** · Nullity · Pain · Power · Protection · Shadow · Soul · **Space** · **Time** · **Void** · **Water**
 
-### Held Back (9) — JSON written, `ready: false`
-Acid · Balance · Carnage · Control · Disaster · Nightmare · Silence · Speed · Toxin
+### Held Back (7) — JSON written, `ready: false`
+Acid · Balance · Carnage · Disaster · Silence · Speed · Toxin
 
 Every one of these has a complete `.json` file on disk; they are flagged off in the index, not missing. Flip `"ready": true` to bring one in.
 
 ### Not Yet Written
-Light · Darkness · Time · Space · Mind · Storm · Entropy · Binding · Void · Calm — no index entry and no file.
+Light · Darkness · Mind · Storm · Entropy · Binding · Calm — no index entry and no file.
 
 ---
 
@@ -166,6 +167,7 @@ Place a new `.json` file in `cognitions/` following this structure:
 - Only include `verumEffects` categories that have at least one effect. Optional `creation` and `utility` arrays are supported: when present, Creation and Utility Rings use them; when absent, they fall back to the mapping in Step 4
 - `complementEffects` `type` may also be `"Creation"` or `"Utility"`; those win for their Ring, otherwise the fallback pool's complements are offered
 - `tiers` must always be an array of exactly 4 strings
+- **`cost`** (optional) is for a Cognition that charges for its use — Nightmare's Dream save, for instance. Give it `text` (the full rule) and `card` (the short version). It prints as a warning box on the PLAY card, a `COST` line in the copyable text, its own block in FULL, and a *Cost of use* section at the top of the Codex entry, since it's a roll the player makes every time.
 - `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`
 
 **Offensive Verums — read this before writing one.**
@@ -184,13 +186,20 @@ Add an entry to the `cognitions` array in `index.json`:
   "id": "your-id",
   "name": "Your Name",
   "icon": "✨",
+  "fa": "wand-sparkles",
   "category": "elemental",
+  "tier": "III",
+  "requires": [ "Growth", "Flesh" ],
   "opposing": "opposing-id",
   "ready": true
 }
 ```
 
-`category` must be one of `elemental`, `corporeal`, `vital`, `psychic`, `umbral`, `fate`, `dominion` — anything else (or a missing field) drops the entry into an **Uncategorised** group at the bottom of the rail rather than hiding it. Add `"cosmic": true` only for campaign-level Cognitions.
+`fa` is a **Font Awesome 6 Free (solid)** icon name — the part after `fa-`, e.g. `skull` for `fa-skull`. Browse them at fontawesome.com/icons with the *Free* and *Solid* filters on; a Pro-only or misspelled name renders as a blank square. The icon is tinted in its domain's colour automatically. `icon` (an emoji) is still required: it's what the rail shows if Font Awesome can't load — offline, or with the CDN blocked. Keep every `fa` unique, so no two Cognitions share a glyph.
+
+`category` must be one of `elemental`, `cosmical`, `corporeal`, `vital`, `psychic`, `umbral`, `fate`, `dominion` — anything else (or a missing field) drops the entry into an **Uncategorised** group at the bottom of the rail rather than hiding it. Add `"favorite": true` only for the players' favourites — it means the Cognition is expected to be strong.
+
+**Tier** comes from the vault's *Cognition Index* — how hard the Cognition is to learn and how much it can bend a scene: `I` Basic · `II` Advanced · `III` Profound · `IV` Absolute · `V` Primordial. Keep it in Roman numerals: the builder already uses *Tier 1–4* for the character-level Verum bands, and the numerals are how the two stay apart. Every Tier III or higher Cognition must also list `requires` — the prerequisite Cognitions, by name, as the Index gives them. A Cognition that embodies one of the Thirteen Divine Laws adds `"divineLaw": "The Universal Law of Time"` (the Law's full name). All three are data only — the builder stores them but does not display them.
 
 Set `"ready": false` if you want it to appear as a placeholder before the JSON is finished.
 
@@ -243,7 +252,7 @@ Below 1100px the three columns stack, rail first.
 
 The card at the bottom of the build has two modes:
 
-- **PLAY** — a designed card, not a text dump. A hero block leads with the numbers you actually roll (to-hit or save DC, damage, range/radius/duration) as chips. **Sigil dice are counted.** A Complement whose live line reads *"+N dice"* is adding to the roll you are about to make, so the card adds it: dice of the Core's own damage type fold into the headline total (the sub-label shows the working — `14d6 +6d6 +3d6`), and dice of any other type get their own chip labelled with the type and the Sigil that brought it, because resistance cares which is which. Anything a Complement does on its own clock — bleed ticks, terrain, per-turn ramps, riders that land next turn — is *not* folded in; it stays in the rider rows below. Then auto-derived tags for every condition, denial and resource the build can impose, followed by auto-derived tags for every condition, denial and resource the build can impose — read off the `mech` layer, so they update as you change Sigils. Then the Core Verum at your live tier, then each Sigil as its own row with its source labelled. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
+- **PLAY** — a designed card, not a text dump. A hero block leads with the numbers you actually roll (to-hit or save DC, damage, range/radius/duration) as chips. **Sigil dice are counted.** A Complement whose live line reads *"+N dice"* is adding to the roll you are about to make, so the card adds it: dice of the Core's own damage type fold into the headline total (the sub-label shows the working — `14d6 +6d6 +3d6`), and dice of any other type get their own chip labelled with the type and the Sigil that brought it, because resistance cares which is which. Anything a Complement does on its own clock — bleed ticks, terrain, per-turn ramps, riders that land next turn — is *not* folded in; it stays in the rider rows below. Then auto-derived tags for every condition, denial and resource the build can impose — read off the `mech` layer, so they update as you change Sigils. Then the Core Verum with **every tier you have reached, oldest first**, the current one highlighted — tiers accumulate, so all of them apply. Where a later tier gives a bigger number for the same thing (a longer push, a bigger burn), it replaces the smaller one; where a tier restates a dice ladder, the earlier "+N dice" is dropped so it isn't read as extra. Then each Sigil as its own row with its source labelled. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
 - **FULL** — the complete reference: every tier up to your level, full effect prose, a **SIGIL DICE** block listing each Complement's contribution separately, and the Ring's rules note. Use it when building or levelling.
 
 Both copy and print. Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.

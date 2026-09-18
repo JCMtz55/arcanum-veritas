@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Cognition icons. If this can't load, the emoji in index.json are used instead. -->
+<link id="faCss" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <style>
 :root{
   --slate:#1B1F26; --panel:#232A33; --panel2:#2B333D; --line:#39424E;
@@ -16,6 +18,7 @@
   /* one hue per Cognition domain — muted enough to sit beside each other in the rail */
   --d-elemental:#C0553F; --d-corporeal:#A8556B; --d-vital:#4E8C6A; --d-psychic:#6274B8;
   --d-umbral:#7A6EA8;    --d-fate:#B08842;     --d-dominion:#6E8B97;
+  --d-cosmical:#4FA4C4;
   --sans:'Space Grotesk',system-ui,sans-serif;
   --serif:'Spectral',Georgia,serif;
 }
@@ -112,6 +115,7 @@ button,input{font:inherit;color:inherit}
 .pick.umbral{border-color:var(--d-umbral);       color:var(--d-umbral)}
 .pick.fate{border-color:var(--d-fate);           color:var(--d-fate)}
 .pick.dominion{border-color:var(--d-dominion);   color:var(--d-dominion)}
+.pick.cosmical{border-color:var(--d-cosmical);   color:var(--d-cosmical)}
 .grp{display:flex;align-items:center;padding:11px 9px 4px;font-family:var(--sans);
   font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .cogs>.grp:first-child{padding-top:2px}
@@ -120,7 +124,17 @@ button,input{font:inherit;color:inherit}
 .grp.vital{color:var(--d-vital)}         .grp.psychic{color:var(--d-psychic)}
 .grp.umbral{color:var(--d-umbral)}       .grp.fate{color:var(--d-fate)}
 .grp.dominion{color:var(--d-dominion)}
+.grp.cosmical{color:var(--d-cosmical)}
 .cog .cos{font-size:9px;color:var(--brass);margin-right:5px;opacity:.9}
+/* Font Awesome glyphs take their domain's colour */
+.ico i, .cdx-ico i{color:var(--bone2)}
+i.dom-elemental{color:var(--d-elemental)} i.dom-corporeal{color:var(--d-corporeal)}
+i.dom-vital{color:var(--d-vital)}         i.dom-psychic{color:var(--d-psychic)}
+i.dom-umbral{color:var(--d-umbral)}       i.dom-fate{color:var(--d-fate)}
+i.dom-dominion{color:var(--d-dominion)}
+i.dom-cosmical{color:var(--d-cosmical)}
+.cog.core .ico i{filter:brightness(1.15)}
+.cmp-h .ico{display:inline-block;width:18px;text-align:center}
 .t.dom.elemental{color:var(--d-elemental);border-color:var(--d-elemental)}
 .t.dom.corporeal{color:var(--d-corporeal);border-color:var(--d-corporeal)}
 .t.dom.vital{color:var(--d-vital);border-color:var(--d-vital)}
@@ -128,6 +142,7 @@ button,input{font:inherit;color:inherit}
 .t.dom.umbral{color:var(--d-umbral);border-color:var(--d-umbral)}
 .t.dom.fate{color:var(--d-fate);border-color:var(--d-fate)}
 .t.dom.dominion{color:var(--d-dominion);border-color:var(--d-dominion)}
+.t.dom.cosmical{color:var(--d-cosmical);border-color:var(--d-cosmical)}
 .rail-foot{padding:9px 12px;border-top:1px solid var(--line);display:flex}
 .ghost{flex:1;padding:6px;background:none;border:1px solid var(--line);border-radius:7px;
   cursor:pointer;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
@@ -236,9 +251,19 @@ button,input{font:inherit;color:inherit}
   border-radius:999px;background:var(--slate);border:1px solid var(--line);color:var(--bone2)}
 .t.hot{color:var(--ember);border-color:#6b3229}
 .c-sec{margin-top:16px;padding-top:13px;border-top:1px solid var(--line)}
+/* a Cognition that charges for its use — the roll you make every time, so it sits up top */
+.c-cost{margin-top:9px;padding:7px 11px;border:1px solid #6b3229;border-radius:7px;
+  background:rgba(192,85,63,.08);font-family:var(--sans);font-size:11.5px;line-height:1.45;color:var(--bone2)}
+.c-cost:before{content:"⚠ ";color:var(--ember)}
 .c-lbl{font-family:var(--sans);font-size:10.5px;color:var(--mute);margin-bottom:7px}
 .c-core{font-size:15px;line-height:1.5}
-.c-core b{color:var(--brass);font-weight:600;margin-right:7px}
+.c-core b{display:block;color:var(--brass);font-weight:600;margin-bottom:4px}
+/* every tier reached, oldest first — they accumulate */
+.c-tier{display:flex;padding:3px 0;font-size:14px;line-height:1.45;color:var(--bone2)}
+.c-tier .c-tl{flex:0 0 62px;padding-top:3px;font-family:var(--sans);font-size:10.5px;color:var(--mute)}
+.c-tier span:last-child{flex:1;min-width:0}
+.c-tier.now{color:var(--bone)}
+.c-tier.now .c-tl{color:var(--brass);font-weight:700}
 .c-row{display:flex;padding:8px 0;border-top:1px dashed var(--line);font-size:14px;line-height:1.5}
 .c-row:first-of-type{border-top:0}
 .c-src{flex:0 0 74px;padding-right:12px;font-family:var(--sans);font-size:10.5px;color:var(--mute);padding-top:3px}
@@ -327,6 +352,7 @@ button,input{font:inherit;color:inherit}
   .board{display:block;height:auto} .seal{flex:none;border:0;background:#fff}
   body{background:#fff;color:#000}
   .n,.t,.card{border-color:#ccc}
+  .c-tier,.c-tier.now{color:#000} .c-tier .c-tl{color:#555}
   .codex{overflow:visible} .cdx{max-width:none;padding:0}
   .cdx-fx,.ladder{background:#fff;border-color:#ccc;break-inside:avoid}
   .rung{border-color:#ddd} .rung.now{background:#f4f2ec}
@@ -650,10 +676,11 @@ const RULES = {
 //  DOMAINS — how the 36 Cognitions sort in the rail
 // ═══════════════════════════════════════════════════════════
 // Read from index.json's `category`, so the rail can be grouped and filtered without
-// fetching all 36 Cognition files. `cosmic` is a separate axis: a handful carry
-// campaign-level weight regardless of which domain they belong to.
+// fetching all 36 Cognition files. `favorite` is a separate axis: the players' favourites,
+// held to a higher power bar, wherever they sit by domain.
 const CATEGORIES = {
   elemental: { label:"Elemental", short:"Elem",  note:"matter and force" },
+  cosmical:  { label:"Cosmical",  short:"Cosmos",note:"the shape of creation itself" },
   corporeal: { label:"Corporeal", short:"Body",  note:"blood, bone and beast" },
   vital:     { label:"Vital",     short:"Vital", note:"the living and the unliving" },
   psychic:   { label:"Psychic",   short:"Mind",  note:"feeling turned outward" },
@@ -663,6 +690,24 @@ const CATEGORIES = {
 };
 const CAT_ORDER = Object.keys(CATEGORIES);
 function catOf(c) { return CATEGORIES[c?.category] ? c.category : null; }
+
+// Cognition icons: a Font Awesome glyph (`fa` in index.json) tinted in the domain's colour.
+// Until the icon font has actually loaded — or if it never does (offline, blocked CDN) —
+// the emoji in `icon` is used instead, so nothing ever renders as an empty box.
+let FA_READY = false;
+function cogIcon(c) {
+  if (FA_READY && c?.fa) return `<i class="fa-solid fa-${c.fa} dom-${catOf(c) || "none"}" aria-hidden="true"></i>`;
+  return c?.icon || "◆";
+}
+function initIcons() {
+  if (!document.fonts?.load) return;
+  document.fonts.load('900 1em "Font Awesome 6 Free"').then(faces => {
+    if (!faces.length) return;
+    FA_READY = true;
+    renderCogList(); renderCodexList(); renderMain();
+    if (state.view === "codex") renderCodex();
+  }).catch(() => {});
+}
 
 const ORDINALS = ["","1st","2nd","3rd","4th","5th","6th","7th","8th","9th"];
 
@@ -744,6 +789,20 @@ function cardLine(p) {
   const c = partCard(p);
   return c ? resolve(c) : compact(resolve(partText(p)));
 }
+// Core tiers accumulate: everything up to the live tier applies, oldest first.
+// A dice ladder is the exception — each tier restates the total — so when a later reached
+// tier restates bonusDice, an earlier tier's "+N dice" lead is dropped rather than read as extra.
+function coreLadder(av, tier) {
+  const top = Math.min(tier, (av?.tiers?.length || 0) - 1), out = [];
+  for (let i = 0; i <= top; i++) {
+    let line = cardLine(av.tiers[i]);
+    const restated = av.tiers.slice(i + 1, top + 1)
+      .some(t => typeof partMech(t)?.damage?.bonusDice === "number");
+    if (restated) line = line.replace(/^\s*\+\s*\d+\s*(?:dice|die)\b\s*(?:·\s*)?/i, "");
+    if (line.trim()) out.push({ label: TIERS[i].label, line, now: i === top });
+  }
+  return out;
+}
 // ── Derived numbers ────────────────────────────────────────
 function profBonus()  { return Math.ceil(state.charLevel / 4) + 1; }
 function sealAttack() { return profBonus() + state.verumMod; }
@@ -824,6 +883,8 @@ async function boot() {
     renderCodexList();
     syncBar();
     renderMain();
+    const fa = document.getElementById("faCss");
+    if (fa?.sheet) initIcons(); else fa?.addEventListener("load", initIcons);
   } catch(e) {
     console.error("Arcanum Veritas Builder boot error:", e);
     const isFetch = !INDEX.length;
@@ -948,8 +1009,8 @@ function renderCogList() {
     const role = isCore ? "core" : isComp ? "sigil" : "";
     return `<button class="cog ${cls}" ${off && !isCore && !isComp ? "disabled" : ""}
       onclick="toggleCog('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
-      <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
-      ${c.cosmic ? `<span class="cos" title="campaign-level significance">★</span>` : ""}
+      <span class="ico">${cogIcon(c)}</span><span class="nm">${c.name}</span>
+      ${c.favorite ? `<span class="cos" title="Player favourite — held to a higher power bar">★</span>` : ""}
       ${role ? `<span class="rl">${role}</span>` : ""}</button>`;
   });
   box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">${emptyRail(q)}</div>`;
@@ -1079,7 +1140,7 @@ function buildComposer(coreCog, tier) {
       if (avail.length && !avail.find(f => f.name === cs.compEffect)) cs.compEffect = avail[0].name;
       const fx = avail.find(f => f.name === cs.compEffect) || avail[0];
       const coven = idx >= state.slotLevel - 1;
-      c += `<div class="cmp"><div class="cmp-h"><span>${entry.icon || "◆"}</span><b>${entry.name}</b>
+      c += `<div class="cmp"><div class="cmp-h"><span class="ico">${cogIcon(entry)}</span><b>${entry.name}</b>
         <span class="tag">${coven ? "coven sigil" : "sigil " + (idx + 1)}</span></div>`;
       if (!fx) {
         c += `<div class="cmp-b"><span class="hint">No ${verumLabel()} complement for ${entry.name} yet.</span></div></div>`;
@@ -1316,21 +1377,23 @@ function buildPlayCard(coreCog, tier) {
     const { head, other } = damageLedger(dmg, coreCog, tier, kind);
     stat.push(`${head} ${kind}`);
     other.forEach(s => stat.push(`+${s.count}${s.die} ${s.type || kind} (${s.source})`));
+    const doom = doomOf(coreCog, tier), roll = doomRoll(head, doom);
+    if (roll) stat.push(`Doom ${roll} ${doom.type || kind} (${doom.when || "later"})`);
   }
   ["Range","Radius","Targets","Duration","Buff Duration","Zone Duration","Weapon Die","CR cap","Size","AC","HP / segment","Max size","Quality","Tier","Scope"]
     .forEach(c => { const v = cell(c); if (v) stat.push(`${c}: ${v}`); });
   if (coreCog?.savingThrow && state.compSub !== "Direct Attack")
     stat.push(`${coreCog.savingThrow} save DC ${verumDC()}`);
   L.push(stat.join(" · "));
+  if (coreCog?.cost) L.push(`COST — ${cardLine(coreCog.cost)}`);
   L.push("");
 
-  // ── Core Verum at the live tier only
+  // ── Core Verum: every tier reached, oldest first (they accumulate)
   const coreVerums  = coreCog?.verumEffects?.[verumKey()] || [];
   const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
   if (activeVerum) {
-    L.push(`CORE — ${(activeVerum.name || "").toUpperCase()}`);
-    L.push(`  ${cardLine(activeVerum.tiers[tier] || activeVerum.tiers[activeVerum.tiers.length-1] || "")}`);
-    if (tier > 0) L.push(`  (earlier tiers also apply — see FULL)`);
+    L.push(`CORE — ${(activeVerum.name || "").toUpperCase()}${tier > 0 ? "  (tiers stack; a bigger number replaces a smaller one)" : ""}`);
+    coreLadder(activeVerum, tier).forEach(r => L.push(`  ${r.now ? "▸" : "·"} ${r.label}: ${r.line}`));
     L.push("");
   }
 
@@ -1420,6 +1483,26 @@ function sigilDamage(tier) {
   });
   return out;
 }
+// A Doom is the seal's damage coming back later, carrying extra dice of the Ring's die.
+// Tiers accumulate, so later `doom` fields override earlier ones key by key.
+function doomOf(coreCog, tier) {
+  const cv = coreCog?.verumEffects?.[verumKey()] || [];
+  const av = cv.find(v => v.name === state.coreVerum) || cv[0];
+  let d = null;
+  if (av) for (let i = 0; i <= tier && i < av.tiers.length; i++) {
+    const m = partMech(av.tiers[i])?.doom;
+    if (m) d = { ...d, ...m };
+  }
+  return d && d.extraDice ? d : null;
+}
+// What the Doom will land, written the way you'd roll it
+function doomRoll(head, d) {
+  const die = primaryDie(); if (!die || !d) return null;
+  const m = String(head).match(/^(\d+)d(\d+)(.*)$/);
+  if (d.share === "half" || !m) return `½ the hit +${d.extraDice}${die}`;
+  return `${+m[1] + d.extraDice}d${m[2]}${m[3]}`;
+}
+
 // "Cognitive Fire" and "fire" are the same damage for the purpose of one total
 function sameType(a, b) {
   const n = s => String(s || "").toLowerCase().replace(/^cognitive\s+/, "").trim();
@@ -1467,6 +1550,10 @@ function buildPlayCardHTML(coreCog, tier) {
     // Sigil dice of a different type stay their own number — resistance cares
     other.forEach(s => nums += `<span class="n dmg"><b>+${s.count}${esc(s.die)}</b>` +
       `<i>${esc(s.type || kind)}</i><u>${esc(s.source)}</u></span>`);
+    // Damage that comes back later gets its own chip, with when it lands
+    const doom = doomOf(coreCog, tier), roll = doomRoll(head, doom);
+    if (roll) nums += `<span class="n dmg"><b>${esc(roll)}</b><i>doom · ${esc(doom.type || kind)}</i>` +
+      `<u>${esc(doom.when || "later")}</u></span>`;
   }
   [["Range","range"],["Radius","radius"],["Targets","targets"],["Duration","duration"],
    ["Buff Duration","duration"],["Zone Duration","zone"],["Weapon Die","weapon die"],
@@ -1488,13 +1575,17 @@ function buildPlayCardHTML(coreCog, tier) {
     <div class="c-name">${esc(coreEntry?.name || "—")}</div>
     <div class="c-sub">${esc(cd.label)} ${esc(state.compSub)} · ${ORDINALS[state.slotLevel]} slot · level ${state.charLevel}</div>
     <div class="c-nums">${nums}</div>
-    ${tags ? `<div class="c-tags">${tags}</div>` : ""}`;
+    ${tags ? `<div class="c-tags">${tags}</div>` : ""}
+    ${coreCog?.cost ? `<div class="c-cost">${esc(cardLine(coreCog.cost))}</div>` : ""}`;
 
   const cv = coreCog?.verumEffects?.[verumKey()] || [];
   const av = cv.find(v => v.name === state.coreVerum) || cv[0];
   if (av) {
-    h += `<div class="c-sec"><div class="c-lbl">Core verum</div>
-      <div class="c-core"><b>${esc(av.name)}</b>${esc(cardLine(av.tiers[tier] || av.tiers[av.tiers.length-1]))}</div></div>`;
+    const lbl = tier > 0 ? "Core verum — every tier reached applies; a bigger number replaces a smaller one" : "Core verum";
+    h += `<div class="c-sec"><div class="c-lbl">${lbl}</div><div class="c-core"><b>${esc(av.name)}</b>` +
+      coreLadder(av, tier).map(r =>
+        `<div class="c-tier${r.now ? " now" : ""}"><span class="c-tl">${esc(r.label)}</span><span>${esc(r.line)}</span></div>`
+      ).join("") + `</div></div>`;
   }
 
   const { riders, missing } = gatherRiders(tier);
@@ -1514,7 +1605,6 @@ function buildPlayCardHTML(coreCog, tier) {
 
   const foot = [];
   if (riders.length) foot.push("Sigil conditions last until the end of the target's next turn.");
-  if (tier > 0) foot.push("Earlier core tiers still apply — switch to Full to read them.");
   if (foot.length) h += `<div class="c-foot">${foot.join(" ")}</div>`;
   return h + `</div>`;
 }
@@ -1549,6 +1639,8 @@ function buildFullRef(coreCog, tier) {
     scaleStr,
     ``,
   ];
+  // A Cognition that charges for its use says so before anything else it does
+  if (coreCog?.cost) lines.push(`── COST ──`, resolve(partText(coreCog.cost)), ``);
 
   // Sigil dice that land on the seal's own roll, spelled out alongside the Ring's numbers
   const sig = sigilDamage(tier);
@@ -1626,8 +1718,8 @@ function renderCodexList() {
     const on = state.codexId === c.id;
     return `<button class="cog ${on ? "core" : c.ready ? "" : "off"}" ${c.ready ? "" : "disabled"}
       onclick="openCodex('${escAttr(c.id)}')" title="${c.ready ? c.name : c.name + " — not written yet"}">
-      <span class="ico">${c.icon || "◆"}</span><span class="nm">${c.name}</span>
-      ${c.cosmic ? `<span class="cos" title="campaign-level significance">★</span>` : ""}
+      <span class="ico">${cogIcon(c)}</span><span class="nm">${c.name}</span>
+      ${c.favorite ? `<span class="cos" title="Player favourite — held to a higher power bar">★</span>` : ""}
       ${c.ready ? "" : `<span class="rl">soon</span>`}</button>`;
   });
   box.innerHTML = shown ? h : `<div class="empty" style="padding:22px 8px">${emptyRail(q)}</div>`;
@@ -1669,17 +1761,21 @@ function renderCodex() {
   const opp  = INDEX.find(c => c.id === cog.opposing);
 
   let h = `<div class="cdx">
-    <div class="cdx-hd"><div class="cdx-ico">${entry.icon || "◆"}</div><div>
+    <div class="cdx-hd"><div class="cdx-ico">${cogIcon(entry)}</div><div>
       <h1>${esc(entry.name)}</h1>
       ${cog.description ? `<p class="cdx-desc">${esc(cog.description)}</p>` : ""}
       <div class="c-tags">
         ${catOf(entry) ? `<span class="t dom ${entry.category}">${esc(CATEGORIES[entry.category].label)}</span>` : ""}
-        ${entry.cosmic ? `<span class="t hot">★ campaign-level</span>` : ""}
+        ${entry.favorite ? `<span class="t hot">★ player favourite</span>` : ""}
         ${cog.savingThrow ? `<span class="t">${esc(cog.savingThrow)} save</span>` : ""}
         ${cog.damageType  ? `<span class="t hot">${esc(cog.damageType)}</span>` : ""}
         ${opp ? `<span class="t">opposed by ${esc(opp.name)}</span>` : ""}
       </div>
     </div></div>`;
+
+  // ── What using it costs, before what it does
+  if (cog.cost) h += `<div class="cdx-sec"><h2>Cost of use</h2>
+    <div class="cdx-note"><p>${esc(resolve(partText(cog.cost)))}</p></div></div>`;
 
   // ── Verum effects, pool by pool
   const POOLS = ["offensive","supportive","control","creation","utility"];

@@ -29,7 +29,7 @@
           },
           {
             "text": "The fire damage increases by 4 additional dice, and the burn that lingers becomes Three Times your Verum Modifier at the start of the creature's next turn.",
-            "card": "+4 dice · 3×VM fire at the start of their next turn",
+            "card": "+4 dice · the lingering burn becomes 3×VM",
             "mech": {
               "damage": {
                 "bonusDice": 4,
@@ -44,7 +44,7 @@
           },
           {
             "text": "Fire damage increases by 6 additional dice. Creatures that fail the save or are hit directly take fire damage equal to Five Times your Verum Modifier at the start of their next turn.",
-            "card": "+6 dice · on hit/fail: 5×VM fire at start of their next turn",
+            "card": "+6 dice · the lingering burn becomes 5×VM",
             "mech": {
               "damage": {
                 "bonusDice": 6,
@@ -59,7 +59,7 @@
           },
           {
             "text": "Fire damage increases by 8 additional dice. Creatures that fail or are hit directly are Ablaze — taking Five Times your Verum Modifier at the start of each of their turns for 1 minute, unless extinguished by cognitive means that counter this effect.",
-            "card": "+8 dice · Ablaze: 5×VM fire at start of each turn, 1 min",
+            "card": "+8 dice · the burn no longer stops — Ablaze, 5×VM at the start of each of their turns for 1 min",
             "mech": {
               "damage": {
                 "bonusDice": 8,

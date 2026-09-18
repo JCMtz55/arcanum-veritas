@@ -55,34 +55,36 @@
         "description": "It was always coming. Now it has a date.",
         "tiers": [
           {
-            "text": "A creature that fails is Doomed. At the end of its third turn from now the Doom arrives, and it takes half the damage this seal dealt it again, as Necrotic damage. Healing does not delay it and running does not escape it.",
-            "card": "Doomed — at the end of their third turn from now, half this seal's damage lands again",
+            "text": "A creature that fails is Doomed. At the end of its third turn from now the Doom arrives: it takes half the damage this seal dealt it again, plus 4 additional damage dice of the seal's type, all as Necrotic damage. Healing does not delay it and running does not escape it.",
+            "card": "Doomed — at the end of their third turn, half this seal's damage lands again, carrying 4 extra dice",
             "mech": {
               "conditions": [ { "name": "Doomed", "duration": "until the end of their third turn from now" } ],
-              "rider": { "damage": "half this seal's damage", "type": "necrotic", "when": "end of their third turn" }
+              "doom": { "extraDice": 4, "share": "half", "when": "end of their 3rd turn", "type": "necrotic" }
             }
           },
           {
-            "text": "The Doom comes sooner and harder: at the end of the creature's second turn from now, for the full damage this seal dealt it. Only a dispelling of the Doom itself, or an opposing seal, stops the count.",
-            "card": "Arrives at the end of their second turn, for the full damage · only a dispel or an opposing seal stops it",
+            "text": "The Doom comes sooner and harder: at the end of the creature's second turn from now, for the full damage this seal dealt it, and the extra dice it carries become 8. Only a dispelling of the Doom itself, or an opposing seal, stops the count.",
+            "card": "Arrives at the end of their second turn — the full damage again, and its extra dice become 8 · only a dispel or an opposing seal stops it",
             "mech": {
               "conditions": [ { "name": "Doomed", "duration": "until the end of their second turn from now" } ],
-              "rider": { "damage": "this seal's damage", "type": "necrotic", "when": "end of their second turn" }
+              "doom": { "extraDice": 8, "share": "full", "when": "end of their 2nd turn", "type": "necrotic" }
             }
           },
           {
-            "text": "A Doom must be paid by someone. If the Doomed creature is already dead when it arrives, it falls on the nearest creature hostile to you instead. While the count runs, the Doomed creature has disadvantage on death saving throws.",
-            "card": "If they're already dead, it lands on your nearest enemy instead · disadvantage on death saves while it counts down",
+            "text": "A Doom must be paid by someone, and it has grown heavy with waiting: its extra dice become 12. If the Doomed creature is already dead when it arrives, it falls on the nearest creature hostile to you instead. While the count runs, the Doomed creature has disadvantage on death saving throws.",
+            "card": "Its extra dice become 12 · if they're already dead, it lands on your nearest enemy · disadvantage on death saves while it counts down",
             "mech": {
               "conditions": [ { "name": "Doomed" } ],
+              "doom": { "extraDice": 12 },
               "penalty": { "disadvantage": "death saving throws while Doomed" }
             }
           },
           {
-            "text": "Name the hour. You may set the Doom to arrive at any moment you choose within the next 24 hours, wherever the creature is and however far it has run, and nothing short of Wish or an opposing seal lifts it.",
-            "card": "Set the hour — any time in the next 24 hrs, anywhere they are · only Wish or an opposing seal lifts it",
+            "text": "Name the hour. You may set the Doom to arrive at any moment you choose within the next 24 hours, wherever the creature is and however far it has run, and nothing short of Wish or an opposing seal lifts it. Everything it has waited for comes due at once: its extra dice become 16.",
+            "card": "Set the hour — any time in the next 24 hrs, anywhere they are · its extra dice become 16 · only Wish or an opposing seal lifts it",
             "mech": {
               "conditions": [ { "name": "Doomed", "duration": "up to 24 hours" } ],
+              "doom": { "extraDice": 16, "when": "the hour you name (within 24 hrs)" },
               "penalty": { "disadvantage": "death saving throws while Doomed" }
             }
           }
