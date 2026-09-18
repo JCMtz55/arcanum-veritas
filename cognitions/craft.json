@@ -6,6 +6,13 @@
   "description": "Making, Artifice, Inscription, Reinforcement, Ingenuity.",
   "savingThrow": "Intelligence",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Snagged", "card": "its speed is halved by conjured caltrops" },
+      "major":  { "name": "Caged", "card": "Restrained inside quick-built bars" },
+      "severe": { "name": "Riveted", "card": "Paralyzed, pinned in place by forged bindings" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

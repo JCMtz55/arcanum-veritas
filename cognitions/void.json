@@ -6,6 +6,13 @@
   "description": "Hunger, Absence, Emptiness, Consumption, Oblivion.",
   "savingThrow": "Constitution",
   "damageType": "Void",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Hollowed", "card": "can't regain hit points" },
+      "major":  { "name": "Void-blind", "card": "Blinded by the void" },
+      "severe": { "name": "Unmade", "card": "Incapacitated, half out of existence" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

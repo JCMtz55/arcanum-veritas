@@ -6,6 +6,13 @@
   "description": "Cold, Stillness, Preservation, Endurance, Restraint.",
   "savingThrow": "Constitution",
   "damageType": "Cold",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Chilled", "card": "its speed is halved" },
+      "major":  { "name": "Frozen fast", "card": "Restrained, feet frozen to the ground" },
+      "severe": { "name": "Frozen solid", "card": "Paralyzed in ice" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

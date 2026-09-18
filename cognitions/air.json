@@ -6,6 +6,13 @@
   "description": "Freedom, Movement, Breath, Fluidity, Sound.",
   "savingThrow": "Dexterity",
   "damageType": "Thunder",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Buffeted", "card": "pushed 10 ft and its speed is halved" },
+      "major":  { "name": "Breathless", "card": "can't speak or breathe, and has disadvantage on attacks" },
+      "severe": { "name": "Vacuum", "card": "Stunned as the air is torn from its lungs" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

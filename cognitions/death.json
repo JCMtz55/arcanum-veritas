@@ -6,6 +6,13 @@
   "description": "Finality, Transition, Necromancy, Loss, Inevitability.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Deathly chill", "card": "can't regain hit points" },
+      "major":  { "name": "Death-marked", "card": "Frightened of you, and can't regain hit points" },
+      "severe": { "name": "Stilled", "card": "Paralyzed — its body forgets it is alive" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

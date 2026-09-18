@@ -6,6 +6,13 @@
   "description": "Stillness, Suppression, Nullification, Erasure, Prohibition.",
   "savingThrow": "Intelligence",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Hushed", "card": "can't speak — no verbal components" },
+      "major":  { "name": "Silenced", "card": "Deafened and can't speak" },
+      "severe": { "name": "Stilled", "card": "Incapacitated in total silence" }
+    }
+  },
   "verumEffects": {
     "control": [
       {

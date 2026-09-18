@@ -6,6 +6,13 @@
   "description": "Indifference, Emotional Detachment, Numbness, Passivity, The Hollow.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Listless", "card": "no reactions" },
+      "major":  { "name": "Indifferent", "card": "Charmed — it sees no reason to fight you" },
+      "severe": { "name": "Hollow", "card": "Incapacitated — nothing seems worth doing" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

@@ -6,6 +6,13 @@
   "description": "Domination, Authority, Regulation, Influence, Order.",
   "savingThrow": "Intelligence",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Commanded", "card": "drops what it holds, or moves 10 ft where you choose" },
+      "major":  { "name": "Compelled", "card": "Charmed by you" },
+      "severe": { "name": "Dominated", "card": "Incapacitated, and you move it up to 15 ft" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

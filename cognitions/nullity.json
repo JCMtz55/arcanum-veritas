@@ -6,6 +6,13 @@
   "description": "Anti-Magic, Negation, Void, Severance, Erasure.",
   "savingThrow": "Intelligence",
   "damageType": "Void",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Dampened", "card": "can't cast spells with a casting time of a bonus action or reaction" },
+      "major":  { "name": "Severed from magic", "card": "can't cast spells or use magical abilities" },
+      "severe": { "name": "Nullified", "card": "Incapacitated, and its magical effects are suppressed" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

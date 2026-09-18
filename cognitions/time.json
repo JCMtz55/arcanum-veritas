@@ -6,6 +6,13 @@
   "description": "Moments, Regret, Foresight, Aging, Stasis.",
   "savingThrow": "Wisdom",
   "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Delayed", "card": "acts last in the initiative order next round" },
+      "major":  { "name": "Slowed", "card": "speed halved, and only an action or a bonus action on its turn" },
+      "severe": { "name": "Frozen in time", "card": "Stunned" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

@@ -6,6 +6,13 @@
   "description": "Solitude, Detachment, Withdrawal, Loneliness, Self-Sufficiency.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Alone", "card": "gains no benefit from allies — no Help, flanking or shared buffs" },
+      "major":  { "name": "Severed", "card": "Blinded and Deafened to everyone but you" },
+      "severe": { "name": "Solitary", "card": "Incapacitated, cut off from the world" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

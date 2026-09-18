@@ -6,6 +6,13 @@
   "description": "Pull, Mass, Orbit, Descent, Singularity.",
   "savingThrow": "Strength",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Heavy", "card": "its speed is halved" },
+      "major":  { "name": "Pressed", "card": "knocked Prone and Restrained" },
+      "severe": { "name": "Crushed flat", "card": "Stunned under its own weight" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

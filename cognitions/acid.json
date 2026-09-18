@@ -6,6 +6,13 @@
   "description": "Corrosion, Dissolution, Decay, Persistence, Destruction.",
   "savingThrow": "Constitution",
   "damageType": "Acid",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Etched", "card": "its AC drops by 2 as its armour pits" },
+      "major":  { "name": "Acid-blind", "card": "Blinded — acid in the eyes" },
+      "severe": { "name": "Dissolving", "card": "Incapacitated as armour and skin melt together" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

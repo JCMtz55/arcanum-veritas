@@ -6,6 +6,13 @@
   "description": "Contamination, Venom, Debilitation, Corruption, Attrition.",
   "savingThrow": "Constitution",
   "damageType": "Poison",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Nauseous", "card": "Poisoned" },
+      "major":  { "name": "Paralytic", "card": "Poisoned and Restrained as its muscles lock" },
+      "severe": { "name": "Toxic seizure", "card": "Paralyzed" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

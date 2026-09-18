@@ -6,6 +6,13 @@
   "description": "Vitality, Creation, Growth, Renewal, Existence. Life is not gentle — it is relentless. It pushes a root through stone and drags a dying animal another mile. Those who carry it do not close wounds; they flood a body with so much living force that the wound stops mattering. The danger is the same as the power: Life fills whatever vessel it finds, and only the caster's discipline decides whether that is a miracle or an infestation.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Overgrown tissue", "card": "its speed is halved" },
+      "major":  { "name": "Swollen", "card": "Restrained by its own body" },
+      "severe": { "name": "Overflowing", "card": "Paralyzed by too much life at once" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

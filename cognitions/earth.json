@@ -6,6 +6,13 @@
   "description": "Permanence, Rootedness, Belonging, Weight, Patience.",
   "savingThrow": "Strength",
   "damageType": "Bludgeoning",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Grounded", "card": "speed halved, and it can't fly or levitate" },
+      "major":  { "name": "Sunk", "card": "Restrained, buried to the waist" },
+      "severe": { "name": "Entombed", "card": "Paralyzed, sealed in stone" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

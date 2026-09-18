@@ -6,6 +6,13 @@
   "description": "Luck, Chance, Opportunity, Unpredictability, Serendipity.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Outplayed", "card": "its next d20 roll is made twice, taking the lower" },
+      "major":  { "name": "Luck-turned", "card": "disadvantage on every d20 roll" },
+      "severe": { "name": "Fortune's fool", "card": "Incapacitated as everything it tries goes wrong" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

@@ -5,26 +5,38 @@
 
 ## Overview
 
-The **Arcanum Veritas Builder** is a single-file HTML tool for drawing seals — spells composed in the moment through the Arcanum Veritas system. A seal is a **Core Cognition** (what it is), a **Composition / Ring** (what shape it takes), and **Complement Cognitions** (how it's modified). The tool calculates every Ring's numbers from slot level, shows the Core's Verum Effect tiers from character level, and produces a copyable summary.
+The **Arcanum Veritas Builder** is a browser tool for drawing seals — spells composed in the moment through the Arcanum Veritas system. A seal is a **Core Cognition** (what it is), a **Composition / Ring** (what shape it takes), and **Complement Cognitions** (how it's modified). The tool calculates every Ring's numbers from slot level, shows the Core's Verum Effect tiers from character level, and produces a copyable summary.
 
-The tool runs entirely in the browser — no server, no install, no internet required.
+It also has an **Ignition mode** (the ⇄ switch in the header) for the martial side of magic: Burning Cognitions, Blaze Points, and the Eidon Forge — see [Ignition Mode](#ignition-mode).
+
+The tool runs entirely in the browser — no install and no build step. It needs to be served (GitHub Pages, VS Code Live Server, or `python -m http.server`) because it reads the `cognitions/` folder with `fetch()`.
 
 ---
 
 ## File Structure
 
 ```
-arcanum_veritas_builder.html   ← The tool (open this in any browser)
+index.html          ← The page: header, boards, and the script tags (open this)
+css/
+  app.css           ← Every style
+js/                 ← Plain scripts sharing one global scope, loaded in this order:
+  data.js           ← Composition tables (every Ring and its scaling) and the domains
+  core.js           ← State, formula helpers, boot, the command bar
+  rail.js           ← The Cognition rail
+  composer.js       ← The composer and selection
+  card.js           ← The seal card, damage math, the Absolute progression
+  codex.js          ← The Codex tab (and the view switcher)
+  rings.js          ← The Rings tab
+  damage.js         ← The Damage tab
+  ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
+  events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
-  index.json                   ← Master list of all cognitions + ready status
-  fire.json
-  ice.json
-  soul.json
-  ... (one .json per cognition)
-README.md                      ← This file
+  index.json        ← Master list of all cognitions + ready status
+  fire.json, ice.json, … (one .json per cognition)
+README.md           ← This file
 ```
 
-The HTML file and the `cognitions/` folder must stay in the same directory.
+The scripts are ordinary `<script>` tags, not modules, so inline `onclick` handlers keep working and any file can call any other's functions. Order matters only for code that runs at load: `events.js` goes last because it registers the listeners and calls `boot()`. Keep `index.html`, `css/`, `js/` and `cognitions/` together.
 
 ---
 
@@ -185,6 +197,7 @@ Place a new `.json` file in `cognitions/` following this structure:
   The text keeps the ordinary names; the builder does the swap — from Tier III the damage chip reads *infernal · absolute*, Sigil and Doom chips follow, and the Codex shows "→ Infernal from Lv 11". A Verum built around piercing can get there sooner: mark the tier with `mech.absolute: true` and say so in the text (Nightmare *Void-Bleed* from Tier I, Nullity *Erasure* from Tier II). The threshold is `ABSOLUTE_FROM_TIER` in index.html; a Cognition can set its own with `"absoluteTier"` (an index into the tiers — `0` means from level 1). Sun uses `0`: its damage is Holy from the first dawn, and its text says holy outright.
 - **Against Absolute damage, resistance and immunity only reduce it.** A creature resistant to the matching ordinary type (fire for Infernal, force for Astral…) reduces it by **2 × its Proficiency Bonus**; an immune one by **4 × its Proficiency Bonus** — once per damage roll, never below 0. Vulnerability still doubles it. Against ordinary damage they work as usual. So "ignores resistance / immunity" in a Verum means: ignore the halving or negation below Tier III, ignore the reduction from Tier III on; "immunity counts only as resistance" means half damage below Tier III and the 2× reduction after. The numbers keep Absolute ahead of resisted ordinary damage (2d8+3 against a resistant CR 1 creature: 13 − 4 = 9, where halving gives 6) while protection still matters.
 - **Healing that scales with the slot** goes in `mech.heal.perSlot` (a number). Life's Overriding Vitality uses 10 / 20 / 30, the same yardstick as Protection's Guardian's Shell, but as real hit points on top of the Ring's dice rather than temp HP. Like `bonusDice`, later tiers restate the value rather than stack it, and the PLAY card folds it into the healing total (`5d8 + 64` on a 3rd slot at Tier 2 with VM 4). In card text, `10 × {SLOT}` resolves to the number and `{SLOT}` alone to the slot level.
+- **`eidon.conditions`** — every Cognition names the three conditions its Eidons inflict: `{ "minor": { "name", "card" }, "major": {…}, "severe": {…} }`. Minor is a one-round hindrance (speed, reactions, disadvantage); major is Restrained / Blinded / Charmed / Frightened-class; severe is Stunned / Paralyzed / Incapacitated-class. They last until the end of the target's next turn. Without it, the Forge falls back to generic names.
 - **`mastery`** (optional) holds Cognition-wide abilities that wake with character level rather than with a seal — Blood's *Blood Magic* (Blood Samples, Blood Echo, Blood Debt, Blood Runes). Give it `title`, an optional `text`, and `traits`: a list of `{ name, level, text, card }`. When the Cognition is the Core, the PLAY card lists every trait the character's level has reached, the copyable text and FULL print them, and the Codex lists all of them with their level. Verums can lean on them (Blood's Verums get stronger "with a sample").
 - `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`
 
@@ -255,6 +268,30 @@ Pick a Ring from the rail (grouped by family: Offensive, Supportive, Control, Cr
 
 Opening the tab lands on whatever Ring the composer is currently building, so the three tabs stay in step. **Print ring** prints the open Ring on its own.
 
+## The Damage Tab
+
+The **Damage** tab is the reference for the sixteen damage types and their **Absolute** evolution — the type at its zenith.
+
+- **Overview** — how the progression works (ordinary through Tier II, Absolute from Tier III, sooner where a Cognition or Verum says so), what resistance, immunity and vulnerability do against Absolute damage, how "ignores resistance" reads, and a table of all sixteen: ordinary → Absolute, and which Cognitions deal each. Click a row to open that type.
+- **One type** — its family (Physical, Elemental, Arcane & Spirit, Beyond), the ordinary form beside its Absolute form with what each means at the table, any **special rules** from the vault's damage-type notes (Sanguine, Void, All-Mighty), the Cognitions that deal it as their own type with the level each turns it Absolute (and the Verum, if one gets there early), and the ones whose Verums, Sigils or riders deal it too. Click a Cognition to open it in the Codex.
+- **Born Absolute** — Void and All-Mighty have no gentler form: nothing resists, reduces or absorbs them at any level (per the vault's *Void Damage* and *All-Mighty Damage* notes). The builder treats both as Absolute from level 1, and the Codex tags them *born Absolute*.
+
+"Dealt by" is read from the Cognition files themselves, so it stays current as Cognitions are added or rebalanced. It lists only ready Cognitions — held-back ones appear when they're opened up.
+
+## Ignition Mode
+
+The **⇄ Ignition** button in the header switches the builder from Arcanum Veritas to the **Ignition system** — the way non-spellcasters channel a Cognition through the body. The rail, Codex, Damage tab and your level stay shared; the Composer becomes the **Forge**, the card becomes **The Eidon**, and the Rings tab becomes the **Ignitions** reference. The choice is remembered in the browser. The two systems don't mix at the table: **a creature that knows Arcanum Veritas can't learn Ignitions or manifest Eidons.**
+
+- **Header** — Slot and Verum mod give way to **Physical mod** (your highest Strength, Dexterity or Constitution modifier). The live chips show your **Eidon check** bonus (your Dream mod), the **Eidon save DC** (8 + Physical + Proficiency + Dream), and **Blaze** left.
+- **Blaze & Burning** — Blaze Points equal your Proficiency Bonus. Click a Cognition in the rail to **Burn** it (free action, once per round, lasts 10 rounds — Burning costs no Blaze); click again to put it out. **Blaze is spent only to activate an Eidon.** **Burn as many as you like** (the once-per-turn Burn is the limit). The first is the **primary**; an Eidon draws on the primary plus **up to two** others you choose with **add to Eidon / leave out** (each +3 to the check), and any Burning Cognition can be made primary. **Next round** ticks Burns down and resets the once-per-round limits; **Short rest** spends a Hit Die for 1 Blaze; **Long rest** restores Blaze and puts every Burn out; **Clear selection** puts every Burn out.
+- **Templates** — **one per Eidon**, and each is the Eidon's Ring: **Strike** (the empowered blow), **Mobility** (the dream-step), **Defense** (the manifested guard), **Status** (the breaking touch), **Zone** (the claimed ground), **Bind** (the seal on the body), **Reversal** (the answer). Each has its own **roll** (weapon attack, a save, or none), **activation** (Action, Bonus Action, Reaction), **output** (damage, temp HP, or damage reduced), a **reach** that grows by tier (Mobility 15/20/30/40 ft, Zone 10/15/20/30-ft radius…), **four cumulative tier features**, and a **menu of options to spend power dice on** (Strike: reach, shove, ignore resistance, sure hit; Status: raise to major/severe, stack; Zone: wider, linger, a condition…). Options with a `minTier` open later; ones that `need` another (stack) wait for it. It also **borrows the primary Cognition's Verum** of its pool (Strike → Offensive; Status, Bind → Control; Zone → Control or Offensive; Defense → Supportive; Mobility → Utility or Supportive; Reversal → Supportive or Offensive) with a picker when there are several, and every other Cognition in the Eidon lends that **Sigil**. The data lives in `EIDON_TEMPLATES` in `js/ignition.js`.
+- **The primary Cognition's own rules bind the Eidon** exactly as they bind a seal's Core: its `cost` (Blood's toll, Nightmare's Dream save…), its `engine` (Sun's Solar Tracker — an Eidon is a Sun activation, costing the highest `fuel` of the Verums it borrows, and a clean run blooms their Coronas; Lunar's phase gift and turn), and its `mastery`. The forge shows them in a block of their own, and the card carries them. Sigil Cognitions don't pay, as on a seal.
+- **Power dice** — **4d12 / 6d12 / 8d12 / 10d12** at levels 1–4 / 5–10 / 11–16 / 17+. Spend them on the Template's options with **− / +**; **what's left is the output**, and dice a borrowed Verum adds always join it (a spend that halves, like Strike's sure hit, halves the lot). **Bonus Action:** any Template but Reversal can be manifested as a Bonus Action instead, at **half its output** (and half Mobility's distance). Conditions are the primary Cognition's own minor / major / severe (`eidon.conditions`). For anything a borrowed Verum scales by slot, an Eidon counts as a **1st / 2nd / 4th / 6th**-level slot by tier — a step below a seal.
+- **Eidon Check** — the DC breakdown, the roll you need and your odds, and a **Roll** button: it spends the Eidon's 1 Blaze Point (success or failure), rolls **d20 + Dream mod against DC 6**, +1 per die spent and +3 per extra Cognition (no Proficiency — the gamble is the same at every level; a plain one-Cognition Eidon lands 80% of the time at Dream +1, a three-Cognition Complex one 30%), and counts successes toward the **3 manifestations** that let an Eidon become a permanent Ignition.
+- **The Eidon card** — check DC and odds, the Template's roll (weapon attack or save and DC), the output (e.g. `6d12 infernal · absolute` with `8d12 pool − 2 spent`), the Burning Cognitions and the Template's reach, the Blaze cost and the primary Cognition's own rules, the Template's tier features up to your level with what the dice were spent on, the condition with its save, the borrowed Verum ladder with its Sigils, and any warnings. **Copy** gives the text version.
+- **Forge it in downtime** — under the Eidon Check, what forging the recipe on screen into a permanent Ignition would take (the vault's *Forging Ignitions*): its **Rank** by character tier (I–IV), **workweeks** (2 / 4 / 6 / 8, +1 for each of the second and third Cognitions), **Forge DC** (10 / 12 / 14 / 16, +2 per extra Cognition, +1 per 2 dice spent), the **Dream Catalyst** value, and your odds per week on a Forge roll of d20 + Dream + Proficiency. The **Forged recipe** toggle lifts the three-Cognition cap to **3 + Dream mod**: each Cognition beyond the third costs +2 workweeks, +2 DC and its own Catalyst, and such a recipe can't be manifested as an improvised Eidon (the Roll button refuses it). The card's footer and the copied text carry the plan too.
+- **Ignitions tab** — the rules from the vault's *Ignitions* and *Eidons* notes: Blaze and Burning, inheriting an Ignition, manifesting Eidons, **a page per Template** (roll, activation, output, what it borrows, power dice / reach / slot by tier, its four tier features and its spend menu — read the way the Rings tab reads a Ring), the Eidon Check and its odds, converting an Eidon into an Ignition, **Forging (downtime)**, and the example Eidons.
+
 ## Layout
 
 The builder is a three-column workbench, sized for a laptop or tablet.
@@ -273,7 +310,7 @@ The card at the bottom of the build has two modes:
 - **PLAY** — a designed card, not a text dump. A hero block leads with the numbers you actually roll (to-hit or save DC, damage, range/radius/duration) as chips. **Sigil dice are counted.** A Complement whose live line reads *"+N dice"* is adding to the roll you are about to make, so the card adds it: dice of the Core's own damage type fold into the headline total (the sub-label shows the working — `14d6 +6d6 +3d6`), and dice of any other type get their own chip labelled with the type and the Sigil that brought it, because resistance cares which is which. Anything a Complement does on its own clock — bleed ticks, terrain, per-turn ramps, riders that land next turn — is *not* folded in; it stays in the rider rows below. Then auto-derived tags for every condition, denial and resource the build can impose — read off the `mech` layer, so they update as you change Sigils. Then the Core Verum with **every tier you have reached, oldest first**, the current one highlighted — tiers accumulate, so all of them apply. Where a later tier gives a bigger number for the same thing (a longer push, a bigger burn), it replaces the smaller one; where a tier restates a dice ladder, the earlier "+N dice" is dropped so it isn't read as extra. Then each Sigil as its own row with its source labelled. Collapses to the seal's single roll: **ON HIT** for a Direct Attack, or **ON A FAILED \<ability\> SAVE** for everything else, with every Complement listed beneath it. Shows only the tiers your character has actually reached, resolves every formula into real numbers (attack bonus, DC, `1d8` instead of "one damage die of the primary effect's type"), drops boilerplate the header already states, and groups riders by how they resolve: **ON HIT** (no save) first, then **SAVES** grouped by ability. Roughly two-thirds shorter than the full text.
 - **FULL** — the complete reference: every tier up to your level, full effect prose, a **SIGIL DICE** block listing each Complement's contribution separately, and the Ring's rules note. Use it when building or levelling.
 
-Both copy and print. Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
+Both copy and print, and both save as an image: **Image** renders the card showing (a seal or an Eidon — PLAY, or FULL's text) as a 2× PNG on the builder's dark ground, stamped with a small "Once Upon a Star ★ · Arcanum Veritas / Ignition · date" footer and named after the card (`fire-zone.png`). On a phone it opens the share sheet so it can go straight to Photos; elsewhere it downloads. It uses html2canvas from cdnjs, fetched only the first time someone asks for an image; the `.exporting` rules in `app.css` are export-only fixes for what html2canvas draws badly (inline-flex chips, inset outlines). Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
 
 ## Rules of the Seal
 

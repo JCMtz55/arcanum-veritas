@@ -6,6 +6,13 @@
   "description": "Distance, Displacement, Passage, Expanse, Elsewhere.",
   "savingThrow": "Charisma",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Displaced", "card": "teleported up to 10 ft where you choose" },
+      "major":  { "name": "Folded", "card": "Restrained in bent space" },
+      "severe": { "name": "Pocketed", "card": "Incapacitated, stepped out of reality" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

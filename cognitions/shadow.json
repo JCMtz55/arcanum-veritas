@@ -6,6 +6,13 @@
   "description": "Obscurity, Concealment, Mystery, Misdirection, Erasure.",
   "savingThrow": "Wisdom",
   "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Dimmed", "card": "can't see beyond 10 ft" },
+      "major":  { "name": "Shadow-blind", "card": "Blinded" },
+      "severe": { "name": "Swallowed", "card": "Incapacitated and Blinded inside the dark" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

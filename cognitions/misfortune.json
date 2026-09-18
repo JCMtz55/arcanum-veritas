@@ -6,6 +6,13 @@
   "description": "Bad Luck, Calamity, Accidents, Failure, Ruin.",
   "savingThrow": "Wisdom",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Unlucky", "card": "disadvantage on its next d20 roll" },
+      "major":  { "name": "Cursed luck", "card": "disadvantage on every d20 roll" },
+      "severe": { "name": "Doomed moment", "card": "Incapacitated as everything fails at once" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

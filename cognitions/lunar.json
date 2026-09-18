@@ -6,6 +6,13 @@
   "description": "Phases, Tides, Regulation, Reflection, Lucidity.",
   "savingThrow": "Dream",
   "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Moonstruck", "card": "no reactions and half speed" },
+      "major":  { "name": "Moon-charmed", "card": "Charmed — it takes you for a friend" },
+      "severe": { "name": "Dreaming", "card": "falls Unconscious until it takes damage or the effect ends" }
+    }
+  },
 
   "engine": {
     "title": "The Lunar Cycle",

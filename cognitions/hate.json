@@ -6,6 +6,13 @@
   "description": "Anger, Malice, Destruction, Hostility, Vengeance.",
   "savingThrow": "Charisma",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Provoked", "card": "disadvantage on attacks against anyone but you" },
+      "major":  { "name": "Seething", "card": "must attack you, and can't cast spells" },
+      "severe": { "name": "Blind fury", "card": "Stunned by its own rage" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

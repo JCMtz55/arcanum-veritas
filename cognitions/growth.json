@@ -6,6 +6,13 @@
   "description": "Evolution, Maturation, Prosperity, Vitality, Expansion.",
   "savingThrow": "Constitution",
   "damageType": "Piercing",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Snared", "card": "its speed is halved by grasping roots" },
+      "major":  { "name": "Entangled", "card": "Restrained by vines" },
+      "severe": { "name": "Overgrown", "card": "Paralyzed inside a shell of growth" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

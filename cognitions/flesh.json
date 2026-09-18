@@ -6,6 +6,13 @@
   "description": "Mortality, Sensation, Growth, Vulnerability, Embodiment.",
   "savingThrow": "Constitution",
   "damageType": "Slashing",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Cramped", "card": "its speed is halved as its muscles knot" },
+      "major":  { "name": "Knotted", "card": "Restrained by its own flesh" },
+      "severe": { "name": "Seized", "card": "Paralyzed — its body stops answering" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

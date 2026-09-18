@@ -6,6 +6,13 @@
   "description": "Decay, Greed, Soul Unraveling, Spiritual Erosion, Temptation.",
   "savingThrow": "Charisma",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Tainted", "card": "can't regain hit points" },
+      "major":  { "name": "Corrupted", "card": "Poisoned, with disadvantage on saves against you" },
+      "severe": { "name": "Consumed", "card": "Incapacitated by the rot in its soul" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

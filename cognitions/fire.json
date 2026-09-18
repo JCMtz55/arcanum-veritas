@@ -6,6 +6,13 @@
   "description": "Destruction, Passion, Purification, Rebirth, Warmth.",
   "savingThrow": "Dexterity",
   "damageType": "Fire",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Singed", "card": "disadvantage on its next attack roll" },
+      "major":  { "name": "Smoke-blind", "card": "Blinded by smoke and flash" },
+      "severe": { "name": "Immolated", "card": "Incapacitated, wreathed in flame" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

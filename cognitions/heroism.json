@@ -6,6 +6,13 @@
   "description": "Bravery, Sacrifice, Leadership, Courage, Defiance.",
   "savingThrow": "Charisma",
   "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Challenged", "card": "disadvantage on attacks against anyone but you" },
+      "major":  { "name": "Humbled", "card": "Frightened of you" },
+      "severe": { "name": "Awestruck", "card": "Stunned before true heroism" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

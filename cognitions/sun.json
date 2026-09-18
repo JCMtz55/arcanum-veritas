@@ -6,6 +6,13 @@
   "description": "Radiance, Revelation, Vigilance, Warmth, Judgment. The Sun is not fire, though the ignorant confuse the two. Fire consumes and moves on; the Sun keeps watch — the eye that does not close, the light that arrives every morning whether it is wanted or not. It cannot abide a hidden thing: no lie survives noon, no shadow keeps its shape. To resist it is not to dodge or endure but to withstand being seen through, a contest waged in the dreaming soul. And beneath Ikar's vigil burns the thing he guards — Kaiser's trapped wrath, older than any dawn. To wield the Sun is to keep that cage yourself.",
   "savingThrow": "Dream",
   "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Sunstruck", "card": "sheds light, and can't be invisible, hidden, or in magical darkness" },
+      "major":  { "name": "Glare-blind", "card": "Blinded by glare" },
+      "severe": { "name": "Judged", "card": "Stunned by radiance" }
+    }
+  },
   "absoluteTier": 0,
   "coreOnly": true,
   "incompatible": [ "creation" ],

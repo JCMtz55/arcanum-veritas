@@ -6,6 +6,13 @@
   "description": "Essence, Vitality, Transcendence, Memory, Spirit, Identity.",
   "savingThrow": "Charisma",
   "damageType": "All-Mighty",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Unmoored", "card": "disadvantage on its next save" },
+      "major":  { "name": "Soul-bound", "card": "Charmed — its soul answers you" },
+      "severe": { "name": "Soul-struck", "card": "Stunned" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

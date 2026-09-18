@@ -6,6 +6,13 @@
   "description": "Suffering, Endurance, Injury, Torment, Clarity. Pain is not sadism — it is information, the body's most honest signal. Those attuned to it learn how pain moves through a body, how it compounds, how the expectation of it paralyzes, and that it is the most transferable substance there is: it can be shared, reflected, carried for someone else, and handed back to the one who caused it. Its currency is the Wound.",
   "savingThrow": "Constitution",
   "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Flinching", "card": "disadvantage on attack rolls" },
+      "major":  { "name": "Crippled", "card": "speed 0 and disadvantage on Dexterity saves" },
+      "severe": { "name": "Agony", "card": "Stunned by pain" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

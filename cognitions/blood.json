@@ -6,6 +6,13 @@
   "description": "Vitality, Kinship, Sacrifice, Lineage, Power. Blood remembers. Blood binds. Blood pays the price. Hemomancy — the Crimson Art — turns the body into both fuel and focus: terrifying power, bought with vitality, identity, or lineage. Every drop carries the full record of a life, and whoever holds that drop holds a thread to its owner.",
   "savingThrow": "Constitution",
   "damageType": "Sanguine",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Thinned", "card": "its speed is halved as its blood runs slow" },
+      "major":  { "name": "Blood-locked", "card": "Restrained — its blood refuses to let it move" },
+      "severe": { "name": "Seized", "card": "Paralyzed; its blood answers you, not it" }
+    }
+  },
 
   "cost": {
     "text": "All Blood Magic takes a toll. As you draw a seal with Blood as its Core, you lose hit points equal to five times the slot level. The loss can't be reduced or prevented, and temporary hit points don't pay it. You may take 1 level of Exhaustion instead.",

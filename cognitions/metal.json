@@ -6,6 +6,13 @@
   "description": "Strength, Resilience, Craftsmanship, Durability, Precision.",
   "savingThrow": "Strength",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Weighted", "card": "its speed is halved" },
+      "major":  { "name": "Shackled", "card": "Restrained in iron" },
+      "severe": { "name": "Encased", "card": "Paralyzed inside a metal shell" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

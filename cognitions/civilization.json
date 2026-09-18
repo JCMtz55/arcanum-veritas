@@ -6,6 +6,13 @@
   "description": "Society, Structure, Progress, Culture, Legacy.",
   "savingThrow": "Charisma",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Cited", "card": "no reactions — the law holds it" },
+      "major":  { "name": "Arrested", "card": "Restrained by chains of order" },
+      "severe": { "name": "Sentenced", "card": "Incapacitated, standing to hear its verdict" }
+    }
+  },
   "verumEffects": {
     "supportive": [
       {

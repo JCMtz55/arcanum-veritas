@@ -6,6 +6,13 @@
   "description": "Structure, Death, Durability, Foundation, Memory.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Rattled", "card": "its speed is halved" },
+      "major":  { "name": "Fractured", "card": "knocked Prone and can't stand up" },
+      "severe": { "name": "Ossified", "card": "Paralyzed as its joints lock into bone" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

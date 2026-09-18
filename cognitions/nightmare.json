@@ -6,6 +6,13 @@
   "description": "Fear, Terror, Illusion, The Subconscious, Void.",
   "savingThrow": "Dream",
   "damageType": "Void",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Haunted", "card": "disadvantage on its next save" },
+      "major":  { "name": "Terrified", "card": "Frightened of you" },
+      "severe": { "name": "Dread-frozen", "card": "Paralyzed with dread" }
+    }
+  },
 
   "cost": {
     "text": "Every time you apply a Nightmare Verum Effect, you make a Dream saving throw — DC 10, +2 for each use since your last long rest, +5 in Insomnia. On a failure you gain 1 level of Dream Exhaustion. Past your Proficiency Bonus in uses per long rest, you gain the level automatically.",

@@ -6,6 +6,13 @@
   "description": "Depth, Yielding, Drowning, Tides, Return.",
   "savingThrow": "Strength",
   "damageType": "Bludgeoning",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Soaked", "card": "its speed is halved" },
+      "major":  { "name": "Dragged under", "card": "Restrained and can't breathe" },
+      "severe": { "name": "Drowning", "card": "Incapacitated and can't breathe" }
+    }
+  },
 
   "verumEffects": {
     "offensive": [

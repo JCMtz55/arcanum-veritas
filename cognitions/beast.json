@@ -6,6 +6,13 @@
   "description": "Ferocity, Strength, Savagery, Predation, Survival.",
   "savingThrow": "Strength",
   "damageType": "Slashing",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Hunted", "card": "the first attack against it each turn has advantage" },
+      "major":  { "name": "Pinned", "card": "Restrained under claw and weight" },
+      "severe": { "name": "Mauled", "card": "Stunned by the savagery of it" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

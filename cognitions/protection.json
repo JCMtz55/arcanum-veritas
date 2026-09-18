@@ -6,6 +6,13 @@
   "description": "Defense, Guardianship, Shielding, Safety, Endurance.",
   "savingThrow": "Constitution",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Repelled", "card": "pushed 15 ft away from your allies" },
+      "major":  { "name": "Warded out", "card": "can't target your allies" },
+      "severe": { "name": "Sealed", "card": "Incapacitated inside a barrier" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

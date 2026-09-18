@@ -6,6 +6,13 @@
   "description": "Slaughter, Frenzy, Momentum, Bloodlust, the Mob.",
   "savingThrow": "Strength",
   "damageType": "Sanguine",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Gored", "card": "disadvantage on attack rolls" },
+      "major":  { "name": "Frenzied", "card": "must attack the nearest creature, friend or foe" },
+      "severe": { "name": "Butchered", "card": "Incapacitated by the wounds" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

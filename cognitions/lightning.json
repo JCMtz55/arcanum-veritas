@@ -6,6 +6,13 @@
   "description": "Speed, Energy, Precision, Destruction, Momentum.",
   "savingThrow": "Dexterity",
   "damageType": "Lightning",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Jolted", "card": "no reactions" },
+      "major":  { "name": "Flash-blind", "card": "Blinded by the flash" },
+      "severe": { "name": "Seizing", "card": "Stunned, and drops what it holds" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

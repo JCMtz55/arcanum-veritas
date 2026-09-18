@@ -6,6 +6,13 @@
   "description": "Equilibrium, Symmetry, Reflection, Redistribution, Harmony.",
   "savingThrow": "Wisdom",
   "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Off-kilter", "card": "disadvantage on its next attack roll or save" },
+      "major":  { "name": "Counterweighted", "card": "Restrained, held against an equal and opposite force" },
+      "severe": { "name": "Equilibrium", "card": "Paralyzed in perfect, motionless balance" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {

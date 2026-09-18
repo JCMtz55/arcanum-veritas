@@ -6,6 +6,13 @@
   "description": "Velocity, Acceleration, Momentum, Reaction, Tempo.",
   "savingThrow": "Dexterity",
   "damageType": "Bludgeoning",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Outpaced", "card": "no reactions" },
+      "major":  { "name": "Slowed", "card": "speed halved, and only an action or a bonus action on its turn" },
+      "severe": { "name": "Frozen frame", "card": "Stunned between moments" }
+    }
+  },
   "verumEffects": {
     "offensive": [
       {
