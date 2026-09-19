@@ -45,6 +45,10 @@ function buildComposer(coreCog, tier) {
   const sub = currentSub();
   let h = "";
 
+  // The seal's own name — optional; the card falls back to the Core's
+  h += block("Name your seal", `<input class="search eidon-name" type="text" placeholder="Name your seal — or leave it as ${esc(INDEX.find(c => c.id === state.core)?.name || "its Core")}"
+    value="${esc(state.sealName || "").replace(/"/g, "&quot;")}" oninput="sealName(this.value)">`);
+
   // Ring family — only the ones this Core can fill
   const rings = availableRings(coreCog);
   if (!rings.length) {
@@ -188,7 +192,7 @@ async function toggleCog(id) {
 
   if (state.core === id) {
     // Deselect core → reset everything
-    state.core = null; state.coreVerum = null;
+    state.core = null; state.coreVerum = null; state.sealName = "";
     state.compType = null; state.compSub = null; state.complements = [];
   } else if (state.complements.some(x => x.id === id)) {
     // Remove complement
@@ -210,9 +214,18 @@ async function toggleCog(id) {
   renderMain();
 }
 
+// Typing the name updates only the card, so the field you're typing in keeps its focus
+function sealName(v) {
+  state.sealName = v;
+  if (!state.core || !state.compType || !state.compSub || !currentSub()) return;
+  const seal = document.getElementById("sumBody"), coreCog = LOADED[state.core], tier = getTier(state.charLevel);
+  seal.innerHTML = state.sumMode === "play" ? buildPlayCardHTML(coreCog, tier) : `<div class="raw">${buildFullRef(coreCog, tier).join("\n")}</div>`;
+  seal.dataset.text = buildPlayCard(coreCog, tier).join("\n");
+}
+
 function clearAll() {
   if (state.mode === "ign") { state.ign.burning = []; renderCogList(); renderMain(); return; }   // Ignition: put every Burn out
-  state.core = null; state.coreVerum = null;
+  state.core = null; state.coreVerum = null; state.sealName = "";
   state.compType = null; state.compSub = null; state.complements = [];
   renderCogList(); renderMain();
 }

@@ -237,22 +237,27 @@
       "type": "Supportive",
       "description": "Distance becomes defense — isolation briefly insulating you or an ally from harm with a bonus to AC and saving throws.",
       "effect": {
-        "text": "When the primary effect resolves, you or one ally within 30 feet gains a +2 bonus to AC and advantage on the next saving throw they make before the start of your next turn.",
-        "card": "You or an ally within 30 ft: +2 AC and advantage on their next save",
+        "text": "When the primary effect resolves, each of its targets gains a +2 bonus to AC and advantage on the next saving throw it makes before the start of your next turn.",
+        "card": "The seal's targets: +2 AC and advantage on their next save until your next turn",
         "mech": {
           "buff": {
-            "advantage": "the next saving throw they make before the start o"
+            "ac": 2
           }
         }
       },
       "upgrades": [
         {
-          "text": "The bonus extends to all saving throws until the start of your next turn, not just the first.",
+          "text": "Level 5+: The advantage extends to all saving throws until the start of your next turn.",
           "card": "Advantage on all saves until your next turn"
         },
         {
-          "text": "You may choose two creatures to receive this benefit, and the AC bonus increases to +3.",
-          "card": "Two creatures · +3 AC"
+          "text": "Level 11+: The AC bonus becomes +3.",
+          "card": "+3 AC",
+          "mech": {
+            "buff": {
+              "ac": 3
+            }
+          }
         }
       ]
     },

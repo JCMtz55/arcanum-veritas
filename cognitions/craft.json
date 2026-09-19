@@ -247,19 +247,23 @@
       "type": "Supportive",
       "description": "While one hand strikes, the other is already mending.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet (or yourself) is tended by your make — it gains temporary hit points equal to your Verum Modifier, and one broken or expended item it carries is restored (a snapped weapon, a spent single-use item, or a depleted charge).",
-        "card": "An ally within 30 ft (or you) gains {VM} temp HP and one broken or spent item is restored",
-        "mech": { "heal": { "temp": "VM" }, "restore": { "what": "one broken or expended item" } }
+        "text": "When the primary effect resolves, each of its targets is tended by your make — it gains temporary hit points equal to your Verum Modifier, and one broken or expended item it carries is restored (a snapped weapon, a spent single-use item, or a depleted charge).",
+        "card": "The seal's targets: {VM} temp HP · one broken or spent item each is restored",
+        "mech": {
+          "heal": {
+            "tempHP": true,
+            "who": "the seal's targets"
+          }
+        }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The temporary hit points increase to Twice your Verum Modifier, and the ally also repairs their armor — regaining any AC lost to Sundering, corrosion, or breakage for the rest of the encounter.",
-          "card": "2×VM temp HP · their armor is repaired, restoring any lost AC",
-          "mech": { "heal": { "temp": "2×VM" } }
+          "text": "Level 5+: The temporary hit points become Twice your Verum Modifier, and each target's armour is repaired — regaining any AC lost to Sundering, corrosion, or breakage for the rest of the encounter.",
+          "card": "Temp HP becomes 2×VM · armour AC restored"
         },
         {
-          "text": "Level 11+: You may tend two allies, and each also ends one of the following on itself: Disarmed, the effect of a Sunder, or a single stack of gear-based penalty.",
-          "card": "Two allies · each also shakes off Disarmed, a Sunder, or one gear penalty"
+          "text": "Level 11+: Each target also ends one of: Disarmed, the effect of a Sunder, or a single stack of gear-based penalty.",
+          "card": "Each also ends Disarmed, a Sunder, or a gear penalty"
         }
       ]
     },

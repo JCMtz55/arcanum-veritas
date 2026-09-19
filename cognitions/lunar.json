@@ -295,21 +295,27 @@
       "type": "Supportive",
       "description": "Moonlight protects what it can see — and it sees everything.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet is silvered until the start of your next turn: the first spell of 2nd level or lower that targets it is reflected back at its caster. But the ally shines — it cannot be hidden or invisible until then.",
-        "card": "An ally within 30 ft reflects the first spell ≤2nd aimed at it until your next turn — but it shines, and can't hide or be invisible",
+        "text": "When the primary effect resolves, each of its targets is silvered until the start of your next turn: the first spell of 2nd level or lower that targets it is reflected back at its caster. But it shines — it cannot be hidden or invisible until then.",
+        "card": "The seal's targets are silvered until your next turn — each reflects the first spell ≤2nd aimed at it · but they can't hide or be invisible",
         "mech": {
-          "reflect": "the first spell of 2nd level or lower aimed at the ally",
-          "cost": { "stealth": "the ally can't be hidden or invisible" }
+          "reaction": {
+            "trigger": "the first spell of 2nd level or lower that targets it",
+            "effect": "reflect it at the caster"
+          },
+          "deny": [
+            "hiding",
+            "invisibility"
+          ]
         }
       },
       "upgrades": [
         {
           "text": "Level 5+: The reflection reaches spells of 4th level or lower, and lasts 1 minute.",
-          "card": "Spells up to 4th · lasts 1 minute"
+          "card": "Reflects spells ≤4th · lasts 1 minute"
         },
         {
-          "text": "Level 11+: The silver dims when it should — the ally may hide and turn invisible again.",
-          "card": "No more cost — the ally can hide again"
+          "text": "Level 11+: The silver dims when it should — the targets may hide and turn invisible again.",
+          "card": "They can hide and turn invisible again"
         }
       ]
     },

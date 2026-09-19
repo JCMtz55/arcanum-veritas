@@ -301,21 +301,25 @@
       "type": "Supportive",
       "description": "Wounds become walls — and someone has to hold them up.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet gains a bonus to AC and saving throws equal to its Wound count (minimum +1, maximum +3) until the start of your next turn. You carry some of it: you take psychic damage equal to twice the slot level.",
-        "card": "An ally within 30 ft: + its Wound count (min 1, max 3) to AC and saves until your next turn · you take 2 × {SLOT} psychic",
+        "text": "When the primary effect resolves, each of its targets gains a bonus to AC and saving throws equal to its Wound count (minimum +1, maximum +3) until the start of your next turn. You carry some of it: you take psychic damage equal to twice the slot level.",
+        "card": "The seal's targets: + their Wound count (min 1, max 3) to AC and saves until your next turn · you take 2 × {SLOT} psychic",
         "mech": {
-          "buff": { "who": "one ally within 30 ft", "ac": "+Wound count (1–3)", "saves": "+Wound count (1–3)" },
+          "buff": {
+            "who": "the seal's targets",
+            "ac": "+Wound count (1–3)",
+            "saves": "+Wound count (1–3)"
+          },
           "cost": "you take psychic damage equal to twice the slot level"
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The bonus lasts 1 minute, and the ally's Wounds don't raise its death saving throw DC while it does.",
-          "card": "Lasts 1 min · its Wounds don't raise its death save DC"
+          "text": "Level 5+: The bonus lasts 1 minute, and the targets' Wounds don't raise their death saving throw DC while it does.",
+          "card": "Lasts 1 min · their Wounds don't raise their death save DC"
         },
         {
-          "text": "Level 11+: Choose two allies, and the guard no longer costs you anything.",
-          "card": "Two allies · no more cost to you"
+          "text": "Level 11+: The guard no longer costs you anything.",
+          "card": "No more cost to you"
         }
       ]
     },

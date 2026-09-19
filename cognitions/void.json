@@ -306,21 +306,17 @@
       "type": "Supportive",
       "description": "The void will take anything. It asks only that someone feed it.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet is emptied of one condition it is suffering — Charmed, Frightened, Poisoned, Blinded, or Deafened — as the void swallows it. The void feeds on you for it: you cannot regain hit points until the start of your next turn.",
-        "card": "An ally within 30 ft loses Charmed, Frightened, Poisoned, Blinded or Deafened — but you can't heal until your next turn",
-        "mech": {
-          "conditions": [ { "removes": 1 } ],
-          "cost": { "healing": "you can't regain HP until the start of your next turn" }
-        }
+        "text": "When the primary effect resolves, each of its targets is emptied of one condition it is suffering — Charmed, Frightened, Poisoned, Blinded, or Deafened — as the void swallows it. The void feeds on you for it: you cannot regain hit points until the start of your next turn.",
+        "card": "The seal's targets each lose one of Charmed, Frightened, Poisoned, Blinded or Deafened · you can't heal until your next turn"
       },
       "upgrades": [
         {
-          "text": "Level 5+: You may empty two allies, or two conditions from one.",
-          "card": "Two allies, or two conditions from one"
+          "text": "Level 5+: The void takes two conditions from each target.",
+          "card": "Two conditions each"
         },
         {
           "text": "Level 11+: The void no longer feeds on you — the cost is gone.",
-          "card": "No more cost"
+          "card": "No more cost to you"
         }
       ]
     },

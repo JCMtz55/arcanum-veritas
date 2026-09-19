@@ -371,21 +371,24 @@
       "type": "Supportive",
       "description": "You give of yourself so another might endure.",
       "effect": {
-        "text": "When the primary effect resolves, you may lose up to twice your Proficiency Bonus in hit points. One ally within 30 feet regains twice what you lost.",
-        "card": "Lose up to 2 × {PB} HP — an ally within 30 ft regains twice that",
+        "text": "When the primary effect resolves, you may lose up to twice your Proficiency Bonus in hit points. The seal's targets regain twice what you lost, shared among them as you choose.",
+        "card": "Lose up to 2 × {PB} HP — the seal's targets regain twice that, shared as you choose",
         "mech": {
-          "heal": { "amount": "twice the HP you lose", "who": "one ally within 30 ft" },
+          "heal": {
+            "amount": "twice the HP you lose, shared",
+            "who": "the seal's targets"
+          },
           "cost": "up to 2×PB hit points"
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: You may lose up to twice your Proficiency Bonus + your Constitution modifier, and the ally regains three times what you lost.",
-          "card": "Lose up to 2 × {PB} + Con · the ally regains triple"
+          "text": "Level 5+: You may lose up to twice your Proficiency Bonus + your Constitution modifier, and the targets regain three times what you lost.",
+          "card": "Lose up to 2 × {PB} + Con · they regain triple"
         },
         {
-          "text": "Level 11+: The ally also ends one condition of your choice, and the blood you gave comes back to you: you regain what you lost at the start of your next turn.",
-          "card": "It also ends one condition · you regain what you gave at the start of your next turn"
+          "text": "Level 11+: Each target also ends one condition of your choice, and the blood you gave comes back to you: you regain what you lost at the start of your next turn.",
+          "card": "Each also ends one condition · you regain what you gave at the start of your next turn"
         }
       ]
     },

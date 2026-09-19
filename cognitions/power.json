@@ -327,35 +327,27 @@
       "type": "Supportive",
       "description": "A surge of power briefly makes an ally more than they are — granting speed, save bonuses, and eventually immunity to being Restrained or knocked prone.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains +10 feet of movement speed and +1 to Strength and Constitution saving throws until the start of your next turn.",
-        "card": "An ally within 30 ft: +10 ft speed and +1 to Str and Con saves",
+        "text": "When the primary effect resolves, each of its targets gains +10 feet of speed and +1 to Strength and Constitution saving throws until the start of your next turn.",
+        "card": "The seal's targets: +10 ft speed and +1 to Str and Con saves until your next turn",
         "mech": {
-          "save": {
-            "ability": "Constitution"
+          "buff": {
+            "who": "the seal's targets",
+            "speed": "+10 ft"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The ally also gains advantage on Strength checks and may add your spellcasting modifier to one damage roll before the start of your next turn.",
-          "card": "Also advantage on Str checks and adds {VM} to one damage roll",
-          "mech": {
-            "buff": {
-              "advantage": "Strength checks and may add your spellcasting modi"
-            }
-          }
+          "text": "Level 5+: Each target also has advantage on Strength checks and may add your Verum Modifier to one damage roll before the start of your next turn.",
+          "card": "Advantage on Str checks · add {VM} to one damage roll"
         },
         {
-          "text": "The ally additionally becomes immune to being Restrained or Knocked Prone until the start of your next turn — nothing can slow them down.",
-          "card": "Also immune to Restrained and prone — nothing slows them",
+          "text": "Level 11+: Each target is also immune to being Restrained or knocked Prone until the start of your next turn.",
+          "card": "Can't be Restrained or knocked Prone",
           "mech": {
-            "conditions": [
-              {
-                "name": "Restrained"
-              },
-              {
-                "name": "Prone"
-              }
+            "deny": [
+              "restraint",
+              "knockdown"
             ]
           }
         }

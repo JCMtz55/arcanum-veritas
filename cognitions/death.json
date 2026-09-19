@@ -334,22 +334,17 @@
       "type": "Supportive",
       "description": "It is not free. It was never going to be free.",
       "effect": {
-        "text": "When the primary effect resolves, name one creature within 30 feet. The next time it would drop to 0 hit points before the end of your next turn, it drops to 1 instead — and gains one level of Exhaustion, because the time had to come from somewhere.",
-        "card": "One creature within 30 ft: its next drop to 0 before your next turn becomes 1 — but it gains a level of Exhaustion",
-        "mech": {
-          "buff": { "deathWard": 1, "range": "30 ft", "until": "the end of your next turn" },
-          "cost": { "exhaustion": 1 }
-        }
+        "text": "When the primary effect resolves, each of its targets borrows time: the next time it would drop to 0 hit points before the end of your next turn, it drops to 1 instead — and gains one level of Exhaustion, because the time had to come from somewhere.",
+        "card": "The seal's targets: the next drop to 0 before your next turn ends at 1 instead — and costs them 1 Exhaustion"
       },
       "upgrades": [
         {
-          "text": "Level 5+: You may name up to two creatures, and the protection lasts for 1 minute.",
-          "card": "Up to two creatures · lasts 1 minute"
+          "text": "Level 5+: The protection lasts 1 minute.",
+          "card": "It lasts 1 minute"
         },
         {
           "text": "Level 11+: The debt is forgiven — no Exhaustion — and a creature saved this way also gains temporary hit points equal to Twice your Verum Modifier.",
-          "card": "No more Exhaustion · a saved creature also gains 2×VM temp HP",
-          "mech": { "heal": { "temp": "2×VM", "trigger": "the protection triggers" } }
+          "card": "No Exhaustion · a saved target gains 2×VM temp HP"
         }
       ]
     },

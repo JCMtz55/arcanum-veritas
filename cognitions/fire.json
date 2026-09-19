@@ -466,26 +466,23 @@
       "type": "Supportive",
       "description": "A flicker of warmth accompanies the spell.",
       "effect": {
-        "text": "When the primary effect resolves, one creature within 30 feet regains HP equal to your spellcasting modifier. If the primary effect heals, this is added on top.",
-        "card": "One creature within 30 ft regains VM HP",
+        "text": "When the primary effect resolves, its healing reignites: at the start of each healed target's next turn, it regains half the hit points the seal's healing gave it. If the seal doesn't heal, each of its targets instead regains your Verum Modifier + the slot level at the start of its next turn, the ember catching from nothing.",
+        "card": "The seal's healing reignites — at the start of their next turn, each healed target regains HALF of it again (no healing? {VM} + {SLOT} instead)",
         "mech": {
-          "heal": { "amount": "VM", "targets": 1, "range": "30 ft" }
+          "heal": {
+            "amount": "half the seal's healing, again, at the start of the target's next turn",
+            "who": "the seal's targets"
+          }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Choose up to two creatures to receive this healing.",
-          "card": "Up to two creatures",
-          "mech": {
-            "heal": { "amount": "VM", "targets": 2, "range": "30 ft" }
-          }
+          "text": "Level 5+: It reignites twice: half at the start of the target's next turn, and a quarter at the start of the turn after that.",
+          "card": "Reignites twice — half, then a quarter the turn after"
         },
         {
-          "text": "Level 11+: Each healed creature also gains temporary HP equal to your spellcasting modifier until the start of your next turn.",
-          "card": "Each also gains VM temp HP",
-          "mech": {
-            "heal": { "amount": "VM", "targets": 2, "temp": "VM" }
-          }
+          "text": "Level 11+: The first reignition is the full amount, and the second is half.",
+          "card": "The first reignition is the FULL amount, the second half"
         }
       ]
     },

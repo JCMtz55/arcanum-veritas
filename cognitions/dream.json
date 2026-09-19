@@ -1,0 +1,182 @@
+{
+  "id": "dream",
+  "name": "Dream",
+  "icon": "💭",
+  "opposing": "nightmare",
+  "description": "Imagination, Foresight, Illusion, The Subconscious, Unreality. Dream is the limitless force of the subconscious — the infinite canvas of thought unshackled by law or logic. It is the birthplace of Denizens, the cradle of Hub Dreams, and the tool with which mortals dream realities into being. Its wielders walk the blurred line between waking and slumber, wielding imagination as both blade and truth. In Insomnia they are not magicians: they are Dream Lords in the making.",
+  "savingThrow": "Dream",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Daydreaming", "card": "disadvantage on Perception checks and initiative" },
+      "major":  { "name": "Half-Asleep", "card": "Charmed by a dream only it can see" },
+      "severe": { "name": "Dreaming", "card": "Unconscious — it wakes when damaged or shaken" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Lucid Blade",
+        "description": "You imagine it hurting them. They agree.",
+        "tiers": [
+          { "text": "The damage becomes psychic and increases by 2 additional dice, dealt by something you imagine for them — a blade, a fall, a beast. A creature hit or that fails has disadvantage on its next Dream save before the end of your next turn.",
+            "card": "+2 dice · damage becomes Psychic · disadvantage on their next Dream save",
+            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "penalty": { "disadvantage": "the next Dream save" } } },
+          { "text": "The damage increases by 4 additional dice, and the imagined wound stays real: a creature hit or that fails has the Ring's damage die as a lingering psychic hurt at the start of its next turn.",
+            "card": "+4 dice · one Ring die again as psychic at the start of their next turn",
+            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "rider": { "damage": "one damage die", "type": "psychic", "when": "start of their next turn" } } },
+          { "text": "The damage increases by 6 additional dice. A creature hit or that fails gains 1 level of Dream Exhaustion as its mind loses its grip on what is real.",
+            "card": "+6 dice · 1 Dream Exhaustion",
+            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "Dream Exhaustion" } ] } },
+          { "text": "Wake Them Elsewhere. The damage increases by 8 additional dice. A creature hit or that fails is pulled into a Dream Pocket of your making for 1 minute — gone from the field, repeating the Dream save at the end of each of its turns to wake back where it stood.",
+            "card": "+8 dice · WAKE THEM ELSEWHERE — pulled into your Dream Pocket for 1 min (Dream save each turn to return)",
+            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Banished", "duration": "1 minute", "escape": "Dream save at the end of each of its turns" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Reverie",
+        "description": "You let them dream they win. The dream takes it seriously.",
+        "tiers": [
+          { "text": "For 1 minute the target is lucid: it can't be Frightened by illusions or dreams, and once it may roll a d4 and add it to an attack roll, ability check or saving throw.",
+            "card": "1 min, lucid: illusions and dreams can't frighten it · once, +1d4 to a roll",
+            "mech": { "buff": { "who": "target", "bonus": "+1d4 once" } } },
+          { "text": "Its dream-self walks beside it: attacks against it have disadvantage until the first one hits, as the attacker strikes at the wrong one.",
+            "card": "Attacks against it have disadvantage until the first hit — they strike its dream-self",
+            "mech": { "penalty": { "disadvantage": "attacks against the target, until one hits" } } },
+          { "text": "Once while the seal lasts, when the target takes damage, it may declare it a dream: it takes none, and regains hit points equal to Five Times the slot level as it wakes stronger.",
+            "card": "Once: declare a hit a dream — no damage, and it regains 5 × {SLOT} HP",
+            "mech": { "buff": { "who": "target", "reduce": "one hit entirely" } } },
+          { "text": "Dream Lord. For the minute the target counts as being in Insomnia: once per round it may rewrite one small fact about itself — its position within 30 feet, one condition it has, or a weapon in its hand.",
+            "card": "DREAM LORD — it counts as in Insomnia · once a round, rewrite its position (30 ft), one condition, or its weapon" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Dream Manifestation",
+        "description": "Shape the unreal into tangible form — and make them believe it.",
+        "tiers": [
+          { "text": "An emotionally reactive dreamscape fills the area for 1 minute. A creature that fails believes it: the scape can be difficult terrain, walls or a chasm to it, as you choose, and it treats the scape as real until it succeeds on the Dream save at the end of one of its turns.",
+            "card": "1 min dreamscape — those who fail treat it as real terrain, walls or chasms (Dream save each turn)",
+            "mech": { "save": { "ability": "Dream" }, "conditions": [ { "name": "Deceived", "duration": "1 minute", "escape": "Dream save at the end of each of its turns" } ] } },
+          { "text": "Semi-real things live in it: once per round you may direct a manifested figure (CR 3 or lower) to act; it vanishes when struck.",
+            "card": "Once a round, a manifested figure (CR ≤ 3) acts for you — it vanishes when struck" },
+          { "text": "A creature that fails is Half-Asleep: Charmed by the dream, it wanders the scape as you direct on its turn.",
+            "card": "HALF-ASLEEP — Charmed, it wanders the scape as you direct",
+            "mech": { "conditions": [ { "name": "Charmed" } ] } },
+          { "text": "A Lucid Construct. Anything you manifest is real for those who failed: its walls hold, its figures hit, and a creature that fails and drops to 0 hit points inside wakes at 1 hit point outside the scape, having lived a night of dreams.",
+            "card": "A LUCID CONSTRUCT — to those who failed it is fully real · dropping to 0 inside: they wake at 1 HP outside" }
+        ]
+      },
+      {
+        "name": "Dream Genesis",
+        "description": "Create new reality out of unreal thought.",
+        "tiers": [
+          { "text": "A Fleeting Dream rewrites the area for 1 minute — its light, weather and mood as you choose. Creatures that fail have disadvantage on attack rolls against creatures they can't see clearly through it.",
+            "card": "1 min: rewrite light, weather and mood · those who fail: disadvantage vs anyone not clearly seen",
+            "mech": { "save": { "ability": "Dream" }, "penalty": { "disadvantage": "attacks against creatures not clearly seen" } } },
+          { "text": "A creature that fails is drawn into a Dream Pocket, a small demi-plane of a memory you choose, until the end of its next turn. It returns to the nearest free space.",
+            "card": "Fail: drawn into a Dream Pocket until the end of their next turn",
+            "mech": { "conditions": [ { "name": "Banished", "duration": "until the end of its next turn" } ] } },
+          { "text": "The dream fuses with the world: objects you imagine in the area become semi-real for 10 minutes — ropes bind (Restrained), doors close, stairs appear. A creature that fails is Restrained by them until it succeeds on the Dream save at the end of its turn.",
+            "card": "10 min: imagined objects are semi-real · those who fail are Restrained (Dream save each turn)",
+            "mech": { "conditions": [ { "name": "Restrained", "escape": "Dream save at the end of each of its turns" } ] } },
+          { "text": "Sub-Node. The area becomes a Sub-Node of Insomnia for 10 minutes: time moves as you decide (half or double speed for everyone inside), and a creature that fails gains 1 Dream Exhaustion each time it starts its turn inside and fails the repeat save.",
+            "card": "SUB-NODE — 10 min: you set its time (half or double) · Dream Exhaustion on each failed save inside",
+            "mech": { "conditions": [ { "name": "Dream Exhaustion" } ] } }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Denizen Creation",
+        "description": "Birth a being from the haze of your thoughts.",
+        "tiers": [
+          { "text": "Your Constructs are Wild Denizens with 1d6 personality tags and their own instincts. They last 1 hour.",
+            "card": "Constructs are Wild Denizens with 1d6 personality tags, 1 hr" },
+          { "text": "Dreamcraft a unique Denizen of CR up to 5, with one Motivation and one Flaw you choose. It lasts 8 hours or until slain.",
+            "card": "A unique Denizen (CR ≤ 5), one Motivation and one Flaw, 8 hrs" },
+          { "text": "Bind a Denizen you made into a Node or a Dream Item: it becomes a permanent spirit of that place or thing.",
+            "card": "Bind a Denizen into a Node or Dream Item — permanently" },
+          { "text": "Forge a Named Denizen (CR 10 or lower) bound by one Commandment and one Desire. It may bond with a Grimm or Soul Anchor. It requires a sacrifice or dream ritual.",
+            "card": "A NAMED DENIZEN (CR ≤ 10) — one Commandment, one Desire" }
+        ]
+      },
+      {
+        "name": "Dream Hub",
+        "description": "Weave a central dream that connects many.",
+        "tiers": [
+          { "text": "A Structure you raise in Insomnia is a Dream Seed: it reacts to your thoughts and slowly forms a personality. In Ephemer, your Structures shimmer like dreams — creatures of your choice can pass through them.",
+            "card": "In Insomnia, a Structure is a Dream Seed · in Ephemer, allies pass through your Structures" },
+          { "text": "A Dream Seed grows into a Hub Dream — a semi-permanent Node that anyone bearing your sigil can enter while dreaming.",
+            "card": "The Seed becomes a Hub Dream others can enter" },
+          { "text": "Install Inception Gates, Dream Keys, or Dreamforged Buildings in your Hub, and set its weather and time.",
+            "card": "Add Inception Gates, Dream Keys, Dreamforged Buildings, weather and time" },
+          { "text": "The Hub bonds to your soul. If you die, your consciousness reforms there unless it is destroyed by divine means. It can host up to 3 Denizens of CR 10 or lower.",
+            "card": "The Hub bonds to your soul — if you die, you reform there" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Dream Travel",
+        "description": "Tread the threads between dreamscapes.",
+        "tiers": [
+          { "text": "Enter the dream of a sleeping creature within 60 feet. You may speak or observe, but not alter.",
+            "card": "Enter a sleeper's dream within 60 ft — speak or watch",
+            "mech": { "utility": true } },
+          { "text": "Incept on a Node: you and one ally pass into or out of a dream landscape.",
+            "card": "Incept on a Node — you and one ally pass in or out",
+            "mech": { "utility": true } },
+          { "text": "Project your awareness across dream bridges: traverse Nodes, glimpse REM layers, or send a dream message across planes.",
+            "card": "Cross Nodes, glimpse REM, or send a dream message across planes",
+            "mech": { "utility": true } },
+          { "text": "Walk the Dream Axis: open a temporary connection between personal dreams or Personal Spaces, or enter the REM Vault of a god or Dream Lord.",
+            "card": "Walk the Dream Axis — link dreams, or enter a god's REM Vault",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Figment Edge",
+      "type": "Offensive",
+      "description": "Part of the wound was imagined. It still counts.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6).",
+        "card": "+1 die psychic",
+        "mech": { "damage": { "dice": "1d6", "type": "psychic" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and the target has disadvantage on its next Dream save.", "card": "+2 dice · disadvantage on their next Dream save" },
+        { "text": "Level 11+: Three dice.", "card": "+3 dice" }
+      ]
+    },
+    {
+      "name": "Sweet Dream",
+      "type": "Supportive",
+      "description": "Somewhere in the seal is the memory of a better night.",
+      "effect": { "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and advantage on its next saving throw against being Frightened or Charmed.",
+        "card": "The seal's targets: {VM} + {SLOT} temp HP · advantage on their next save vs fear or charm",
+        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "advantage": "the next save against Frightened or Charmed" } } },
+      "upgrades": [
+        { "text": "Level 5+: Each also loses one level of Dream Exhaustion.", "card": "Each loses 1 Dream Exhaustion" },
+        { "text": "Level 11+: The temporary hit points become Twice your Verum Modifier + the slot level.", "card": "2×VM + {SLOT} temp HP" }
+      ]
+    },
+    {
+      "name": "Drowsing",
+      "type": "Control",
+      "description": "The seal leaves them a little less awake than they were.",
+      "effect": { "text": "A creature hit by or failing the seal has disadvantage on Perception checks and its speed reduced by 10 feet until the end of its next turn.",
+        "card": "Disadvantage on Perception · −10 ft speed until the end of their next turn",
+        "mech": { "penalty": { "disadvantage": "Perception checks", "speed": -10 } } },
+      "upgrades": [
+        { "text": "Level 5+: It also can't take reactions until the start of its next turn.", "card": "No reactions until their next turn" },
+        { "text": "Level 11+: If it has 5 × the slot level hit points or fewer, it falls Unconscious for 1 minute instead, waking if damaged or shaken.", "card": "At 5 × {SLOT} HP or less: Unconscious 1 min (wakes if hurt)" }
+      ]
+    }
+  ],
+  "schema": 2
+}

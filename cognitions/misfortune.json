@@ -280,17 +280,17 @@
       "type": "Supportive",
       "description": "The curse finds someone else to land on.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains the Deflection benefit — the next time they would fail a saving throw or ability check before the start of your next turn, they may reroll it once and take the higher result.",
-        "card": "An ally within 30 ft rerolls their next failed save or check"
+        "text": "When the primary effect resolves, each of its targets gains the Deflection benefit — the next time it would fail a saving throw or ability check before the start of your next turn, it may reroll once and take the higher result.",
+        "card": "The seal's targets: the next failed save or check before your next turn may be rerolled, higher result"
       },
       "upgrades": [
         {
-          "text": "Level 5+: The ally may apply this reroll to attack rolls as well, and the benefit persists until the start of your next turn.",
-          "card": "Covers attack rolls too · lasts until your next turn"
+          "text": "Level 5+: The reroll also covers attack rolls, and the benefit lasts until the start of your next turn.",
+          "card": "Covers attack rolls too"
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each reroll gains a +2 bonus.",
-          "card": "Two allies · each reroll gets +2"
+          "text": "Level 11+: Each reroll gains a +2 bonus.",
+          "card": "Each reroll +2"
         }
       ]
     },

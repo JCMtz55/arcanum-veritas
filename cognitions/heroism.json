@@ -267,37 +267,23 @@
       "type": "Supportive",
       "description": "The act of heroism itself becomes a lifeline — one ally gaining temporary HP buoyed by the visible force of your conviction.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your Charisma modifier + your proficiency bonus.",
-        "card": "An ally within 30 ft gains {VM}+{PB} temp HP",
+        "text": "When the primary effect resolves, each of its targets gains temporary hit points equal to your Charisma modifier + your Proficiency Bonus.",
+        "card": "The seal's targets each gain Cha + {PB} temp HP",
         "mech": {
           "heal": {
-            "tempHP": true
+            "tempHP": true,
+            "who": "each of the seal's targets"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The ally also gains advantage on their next saving throw before the start of your next turn.",
-          "card": "Also advantage on their next save",
-          "mech": {
-            "buff": {
-              "advantage": "their next saving throw before the start of your n"
-            }
-          }
+          "text": "Level 5+: Each target also has advantage on its next saving throw before the start of your next turn.",
+          "card": "Advantage on their next save"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also removes one instance of the Frightened or Charmed condition if they are currently affected by one.",
-          "card": "Two allies · each also sheds Frightened or Charmed",
-          "mech": {
-            "conditions": [
-              {
-                "name": "Frightened"
-              },
-              {
-                "name": "Charmed"
-              }
-            ]
-          }
+          "text": "Level 11+: Each target also ends one instance of the Frightened or Charmed condition affecting it.",
+          "card": "Each also sheds Frightened or Charmed"
         }
       ]
     },

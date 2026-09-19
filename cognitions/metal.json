@@ -339,17 +339,23 @@
       "type": "Supportive",
       "description": "Metal's endurance briefly passes to those nearby — an ally gaining bonus AC and resistance to physical damage as the Cognition's durability extends outward.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains a +2 bonus to AC and resistance to one physical damage type (bludgeoning, piercing, or slashing — declared at the time of casting) until the start of your next turn.",
-        "card": "An ally within 30 ft: +2 AC and resistance to one physical type until your next turn"
+        "text": "When the primary effect resolves, each of its targets gains a +2 bonus to AC and resistance to one physical damage type (bludgeoning, piercing, or slashing — declared when you draw the seal) until the start of your next turn.",
+        "card": "The seal's targets: +2 AC and resistance to one physical type until your next turn",
+        "mech": {
+          "buff": {
+            "ac": 2,
+            "resist": "one physical damage type"
+          }
+        }
       },
       "upgrades": [
         {
-          "text": "The resistance extends to all three physical damage types until the start of your next turn.",
+          "text": "Level 5+: The resistance covers all three physical damage types.",
           "card": "Resistance covers all three physical types"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also gains immunity to being disarmed until the start of your next turn.",
-          "card": "Two allies · each also can't be disarmed"
+          "text": "Level 11+: Each target is also immune to being disarmed until the start of your next turn.",
+          "card": "Each can't be disarmed"
         }
       ]
     },

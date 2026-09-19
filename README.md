@@ -67,6 +67,9 @@ Click any ready cognition from the sidebar list. This becomes the spell's **Core
 
 Use the **search bar** to filter cognitions by name.
 
+### Step 3½ — Name your seal (optional)
+Give the seal your own name — *Ember of Ruin* — in the field at the top of the composer. It becomes the card's title (the Core moves into the subtitle), leads the copied text and the FULL reference, and names the saved image (`ember-of-ruin.png`). Leave it empty and the card keeps the Core's name. Clear selection, or deselecting the Core, clears it.
+
 ### Step 4 — Choose Composition, Subtype, Shape, Manner & Verum Effect
 Only the Rings the Core can actually fill are offered. A Ring is shown when the Core has that Verum pool, or when the pool it falls back to is written — so a Cognition with no Control pool shows no Control Ring, and Creation may offer only *Construct* (which borrows Offensive) while *Structure* and *Object* (which borrow Control) stay hidden. Nothing is greyed out; it simply isn't there.
 
@@ -90,24 +93,24 @@ The card shows:
 
 ## Domains
 
-Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 4–9, no dumping ground:
+Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 5–10, no dumping ground:
 
 | Domain | | What it is |
 |---|---|---|
-| **Elemental** | 9 | Acid · Air · Earth · Fire · Ice · Lightning · Metal · Toxin · Water — matter and force |
-| **Cosmical** | 5 | Gravity · Lunar · Space · Sun · Time — the shape of creation itself |
-| **Corporeal** | 5 | Beast · Blood · Bones · Flesh · Pain — blood, bone and beast |
+| **Elemental** | 10 | Acid · Air · Crystal · Earth · Fire · Ice · Lightning · Metal · Toxin · Water — matter and force |
+| **Cosmical** | 7 | Dream · Gravity · Lunar · Night · Space · Sun · Time — the shape of creation itself |
+| **Corporeal** | 6 | Beast · Blood · Bones · Flesh · Hunger · Pain — blood, bone and beast |
 | **Vital** | 5 | Corruption · Death · Growth · Life · Soul — the living and the unliving |
-| **Psychic** | 4 | Apathy · Hate · Heroism · Isolation — feeling turned outward |
-| **Umbral** | 5 | Nightmare · Nullity · Shadow · Silence · Void — absence, erasure, the unmade |
-| **Fate** | 4 | Balance · Disaster · Fortune · Misfortune — what happens to you |
-| **Dominion** | 7 | Carnage · Civilization · Control · Craft · Power · Protection · Speed — will imposed on the world |
+| **Psychic** | 6 | Apathy · Despair · Hate · Heroism · Identity · Isolation — feeling turned outward |
+| **Umbral** | 6 | Hollowing · Nightmare · Nullity · Shadow · Silence · Void — absence, erasure, the unmade |
+| **Fate** | 5 | Balance · Disaster · Fortune · Misfortune · Promises — what happens to you |
+| **Dominion** | 8 | Carnage · Civilization · Control · Craft · Creation · Power · Protection · Speed — will imposed on the world |
 
 Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Blood · Death · Life · Lunar · Nightmare · Nullity · Soul · Sun** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
 
 A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
 
-Category lives in `index.json` rather than the individual Cognition files on purpose. The rail draws from the one file loaded at boot; per-Cognition JSON is fetched only when you click something. Storing it per-file would mean fetching all 36 up front just to draw a sorted sidebar.
+Category lives in `index.json` rather than the individual Cognition files on purpose. The rail draws from the one file loaded at boot; per-Cognition JSON is fetched only when you click something. Storing it per-file would mean fetching all 53 up front just to draw a sorted sidebar.
 
 ## Cognition Status
 
@@ -115,11 +118,11 @@ In `index.json`, each cognition has a `ready` flag:
 - `true` — JSON file exists, cognition is fully playable
 - `false` — Placeholder only; shown as **SOON** in the sidebar and cannot be selected
 
-### Ready Cognitions (36)
-Air · Apathy · Beast · Blood · Bones · Civilization · Control · Corruption · **Craft** · Death · **Earth** · Fire · Flesh · Fortune · **Gravity** · Growth · Hate · Heroism · Ice · Isolation · Life · Lightning · **Lunar** · Metal · Misfortune · **Nightmare** · Nullity · Pain · Power · Protection · Shadow · Soul · **Space** · **Sun** · **Time** · **Void** · **Water**
+### Ready Cognitions (35)
+Apathy · Beast · Blood · Bones · Civilization · Control · Craft · Creation · Crystal · Death · Despair · Dream · Fire · Flesh · Fortune · Growth · Hate · Heroism · Hollowing · Hunger · Ice · Identity · Isolation · Life · Lightning · Metal · Misfortune · Night · Nullity · Pain · Power · Promises · Protection · Shadow · Soul
 
-### Held Back (7) — JSON written, `ready: false`
-Acid · Balance · Carnage · Disaster · Silence · Speed · Toxin
+### Held Back (18) — JSON written, `ready: false`
+Acid · Air · Balance · Carnage · Corruption · Disaster · Earth · Gravity · Lunar · Nightmare · Silence · Space · Speed · Sun · Time · Toxin · Void · Water
 
 Every one of these has a complete `.json` file on disk; they are flagged off in the index, not missing. Flip `"ready": true` to bring one in.
 
@@ -183,7 +186,7 @@ Place a new `.json` file in `cognitions/` following this structure:
 - **`engine`** (optional) is for a Cognition that runs on a cycle — Lunar's eight phases. Give it `title`, `text`, `card`, and `phases`: a list of `{ name, epithet, card }`, one per step. When such a Cognition is the Core, the composer shows a picker for the current phase; the PLAY card, copyable text and FULL all print that phase's gift and the two phases it can turn to next (the cycle turns either way), and the Codex lists every phase.
   An `engine` can instead carry a **`tracker`** — Sun's *Two Suns*: `{ name, window, gold: {label, card}, black: {label, card}, reckoning: [{ min, max, name, card, corona? }] }`. The composer then shows the tracker: one pip per activation in the window (click to log Gold, click again for Black, again to clear), a Gold / Black choice for this activation, **Log it ›** to advance after you draw, and **Reset**. On the last activation of the window the card prints the Reckoning whose `min`–`max` range matches the number of Blacks; a Reckoning with `corona: true` also prints the chosen Verum's Corona in a gold box. Each Verum then carries **`fuel`** (its cost, a number) and **`corona`** `{ name, text, card }` — both shown in the Codex under the Verum.
 - **`coreOnly: true`** (on the Cognition and its `index.json` entry) means it can never be a Sigil — the rail disables it once a Core is set, and it is never added as a complement. Give it `"complementEffects": []`. Sun is the only one.
-- **`incompatible`** lists Rings the Cognition declares it cannot fill, e.g. `["creation"]`. A declared incompatibility beats the fallback map, so those Rings are never offered. Sun uses it; the eleven Cognitions the vault lists as Creation-incompatible don't yet.
+- **`incompatible`** lists Rings the Cognition declares it cannot fill, e.g. `["creation"]`. A declared incompatibility beats the fallback map, so those Rings are never offered. Sun, Despair, Hollowing and Hunger use it; the eleven Cognitions the vault lists as Creation-incompatible don't yet.
 - **`damageType` is an ordinary damage type** — Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Sanguine, Slashing, Thunder, Void, All-Mighty — and so are `mech.damage.type` values (lower-case) and the damage words in Verum and Sigil text ("1d6 fire", "5×VM force"). Don't invent new ones (no "Moonlight", "Undertow", "Gravitic"); a Cognition's flavour belongs in its Verums. The builder warns in the console if a `damageType` isn't on the list.
 - **Absolute damage is a progression.** From **Tier III (level 11+)** every seal's damage — the Verum's, the Sigils', ticks and riders — turns into its type's Absolute form, the type at its zenith:
 
@@ -197,6 +200,8 @@ Place a new `.json` file in `cognitions/` following this structure:
   The text keeps the ordinary names; the builder does the swap — from Tier III the damage chip reads *infernal · absolute*, Sigil and Doom chips follow, and the Codex shows "→ Infernal from Lv 11". A Verum built around piercing can get there sooner: mark the tier with `mech.absolute: true` and say so in the text (Nightmare *Void-Bleed* from Tier I, Nullity *Erasure* from Tier II). The threshold is `ABSOLUTE_FROM_TIER` in index.html; a Cognition can set its own with `"absoluteTier"` (an index into the tiers — `0` means from level 1). Sun uses `0`: its damage is Holy from the first dawn, and its text says holy outright.
 - **Against Absolute damage, resistance and immunity only reduce it.** A creature resistant to the matching ordinary type (fire for Infernal, force for Astral…) reduces it by **2 × its Proficiency Bonus**; an immune one by **4 × its Proficiency Bonus** — once per damage roll, never below 0. Vulnerability still doubles it. Against ordinary damage they work as usual. So "ignores resistance / immunity" in a Verum means: ignore the halving or negation below Tier III, ignore the reduction from Tier III on; "immunity counts only as resistance" means half damage below Tier III and the 2× reduction after. The numbers keep Absolute ahead of resisted ordinary damage (2d8+3 against a resistant CR 1 creature: 13 − 4 = 9, where halving gives 6) while protection still matters.
 - **Healing that scales with the slot** goes in `mech.heal.perSlot` (a number). Life's Overriding Vitality uses 10 / 20 / 30, the same yardstick as Protection's Guardian's Shell, but as real hit points on top of the Ring's dice rather than temp HP. Like `bonusDice`, later tiers restate the value rather than stack it, and the PLAY card folds it into the healing total (`5d8 + 64` on a 3rd slot at Tier 2 with VM 4). In card text, `10 × {SLOT}` resolves to the number and `{SLOT}` alone to the slot level.
+- **Supportive Sigils buff the seal's own targets.** A Supportive complement lands on *the seal's targets* (you, on a Self seal; each target, on an Ally seal) — not on "one ally within 30 ft". The Ring already decides how many targets there are, so upgrades add power, not headcount. Two exceptions share instead of repeating: big flat heals (Life's *Vital Surge*, Blood's *Transfusion*) are split among the targets as you choose. Sigils that only affect you, fields, and triggers on damage or death keep their own wording.
+- **`mech.targets`** on a complement (effect or upgrade) adds that many targets to the seal — Civilization's *Civic Ward* (+1, +2 at level 5, +3 at level 11; later parts restate the number). The card's **Targets** reads `4 (2 +2 Sigil)`.
 - **`eidon.conditions`** — every Cognition names the three conditions its Eidons inflict: `{ "minor": { "name", "card" }, "major": {…}, "severe": {…} }`. Minor is a one-round hindrance (speed, reactions, disadvantage); major is Restrained / Blinded / Charmed / Frightened-class; severe is Stunned / Paralyzed / Incapacitated-class. They last until the end of the target's next turn. Without it, the Forge falls back to generic names.
 - **`mastery`** (optional) holds Cognition-wide abilities that wake with character level rather than with a seal — Blood's *Blood Magic* (Blood Samples, Blood Echo, Blood Debt, Blood Runes). Give it `title`, an optional `text`, and `traits`: a list of `{ name, level, text, card }`. When the Cognition is the Core, the PLAY card lists every trait the character's level has reached, the copyable text and FULL print them, and the Codex lists all of them with their level. Verums can lean on them (Blood's Verums get stronger "with a sample").
 - `complementEffects` `type` must match exactly: `"Offensive"`, `"Supportive"`, `"Control"`, `"Creation"`, or `"Utility"`

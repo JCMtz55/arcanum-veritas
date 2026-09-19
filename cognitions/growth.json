@@ -318,35 +318,23 @@
       "type": "Supportive",
       "description": "Growth spills where it is needed — vital energy touching an ally and briefly accelerating their recovery beyond what the moment would otherwise allow.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as the growth momentarily accelerates their recovery.",
-        "card": "An ally within 30 ft regains {VM}+{PB}",
+        "text": "When the primary effect resolves, each of its targets regains hit points equal to your Verum Modifier + your Proficiency Bonus as the growth accelerates its recovery.",
+        "card": "The seal's targets each regain {VM} + {PB} HP",
         "mech": {
           "heal": {
-            "amount": "your spellcasting modifier"
+            "amount": "VM + PB",
+            "who": "each of the seal's targets"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains advantage on their next Constitution saving throw before the start of your next turn.",
-          "card": "Healing doubles · also advantage on their next Con save",
-          "mech": {
-            "save": {
-              "ability": "Constitution"
-            },
-            "buff": {
-              "advantage": "their next Constitution saving throw before the st"
-            }
-          }
+          "text": "Level 5+: The healing becomes Twice your Verum Modifier + your Proficiency Bonus, and each target also has advantage on its next Constitution saving throw before the start of your next turn.",
+          "card": "Heal 2×VM + {PB} · advantage on their next Con save"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also gains temporary hit points equal to your proficiency bonus on top of the healing — growth leaving behind more than it found.",
-          "card": "Two allies · each also gets {PB} temp HP",
-          "mech": {
-            "heal": {
-              "tempHP": true
-            }
-          }
+          "text": "Level 11+: Each target also gains temporary hit points equal to your Proficiency Bonus on top of the healing — growth leaving behind more than it found.",
+          "card": "Each also gains {PB} temp HP"
         }
       ]
     },

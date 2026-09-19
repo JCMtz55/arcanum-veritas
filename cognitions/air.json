@@ -386,24 +386,23 @@
       "type": "Supportive",
       "description": "The air moves with you — not because you commanded it, but because it agrees. Nothing that agrees with the wind stays put.",
       "effect": {
-        "text": "When the primary effect resolves, one creature within 30 feet gains 10 feet of speed and ignores difficult terrain from weather until the end of its next turn. While it is carried this way it weighs almost nothing: it has disadvantage on saves against being pushed, pulled, or knocked prone.",
-        "card": "One creature within 30 ft gets +10 ft speed and ignores weather terrain — but is light, and saves against being moved at disadvantage",
+        "text": "When the primary effect resolves, each of its targets gains 10 feet of speed and ignores difficult terrain from weather until the end of its next turn. While carried this way it weighs almost nothing: it has disadvantage on saves against being pushed, pulled, or knocked prone.",
+        "card": "The seal's targets: +10 ft speed and no weather terrain until the end of their next turn · but disadvantage on saves vs push, pull and Prone",
         "mech": {
-          "buff": { "speed": "+10 ft", "range": "30 ft" },
-          "penalty": { "disadvantage": "saves against forced movement and being knocked prone" }
+          "buff": {
+            "who": "the seal's targets",
+            "speed": "+10 ft"
+          }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The bonus becomes 20 feet and you may carry up to two creatures.",
-          "card": "+20 ft · up to two creatures"
+          "text": "Level 5+: The bonus becomes 20 feet, and each target may Disengage as a bonus action once before the effect ends.",
+          "card": "+20 ft · each may Disengage as a bonus action once"
         },
         {
-          "text": "Level 11+: The bonus becomes 30 feet, the lightness is no longer a liability — the disadvantage is gone — and each carried creature may Disengage as a bonus action once before the effect ends and takes no falling damage while it lasts.",
-          "card": "+30 ft · no more disadvantage · a free Disengage each, and no falling damage",
-          "mech": {
-            "deny": [ "falling damage" ]
-          }
+          "text": "Level 11+: The bonus becomes 30 feet, the lightness is no longer a liability — the disadvantage is gone — and each target takes no falling damage while it lasts.",
+          "card": "+30 ft · no more disadvantage · no falling damage"
         }
       ]
     },

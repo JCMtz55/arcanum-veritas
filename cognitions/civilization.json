@@ -207,22 +207,33 @@
       "type": "Supportive",
       "description": "The structure of civilization shields those who uphold it.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet gains a +2 bonus to AC until the start of your next turn.",
-        "card": "An ally within 30 ft: +2 AC until your next turn"
+        "text": "When the primary effect resolves, order reaches further: the seal gains one more target within its range (a Self seal also reaches one ally within 30 feet), and every target gains +1 AC until the start of your next turn.",
+        "card": "+1 target for the seal (a Self seal also reaches an ally within 30 ft) · every target +1 AC until your next turn",
+        "mech": {
+          "targets": 1,
+          "buff": {
+            "who": "the seal's targets",
+            "ac": 1
+          }
+        }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The ally also gains advantage on the next saving throw they make before the start of your next turn.",
-          "card": "Also advantage on their next save",
+          "text": "Level 5+: The seal gains two more targets instead, and the AC bonus becomes +2.",
+          "card": "+2 targets · +2 AC",
           "mech": {
+            "targets": 2,
             "buff": {
-              "advantage": "the next saving throw they make before the start o"
+              "ac": 2
             }
           }
         },
         {
-          "text": "Level 11+: Choose two allies to receive this benefit, and the AC bonus increases to +3.",
-          "card": "Two allies · +3 AC"
+          "text": "Level 11+: The seal gains three more targets instead, and each target also has advantage on its next saving throw before the start of your next turn.",
+          "card": "+3 targets · advantage on their next save",
+          "mech": {
+            "targets": 3
+          }
         }
       ]
     },

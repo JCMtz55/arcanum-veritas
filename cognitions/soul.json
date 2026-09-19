@@ -317,14 +317,19 @@
       "type": "Supportive",
       "description": "Two souls standing close enough can share the weight.",
       "effect": {
-        "text": "When the primary effect resolves, bind yourself to one ally within 30 feet until the start of your next turn. Whenever it takes damage in that time, you may take any part of that damage instead.",
-        "card": "Bind to an ally within 30 ft — until your next turn you may take any part of the damage it takes",
-        "mech": { "buff": { "who": "one ally within 30 ft", "share": "its damage, if you choose to take it" } }
+        "text": "When the primary effect resolves, bind yourself to each of its targets until the start of your next turn. Whenever one of them takes damage in that time, you may take any part of that damage instead.",
+        "card": "Bound to the seal's targets until your next turn — you may take any part of the damage any of them takes",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "share": "their damage, if you choose to take it"
+          }
+        }
       },
       "upgrades": [
         {
-          "text": "Level 5+: You may bind up to two allies, and the bond lasts 1 minute.",
-          "card": "Up to two allies · the bond lasts 1 minute"
+          "text": "Level 5+: The bond lasts 1 minute.",
+          "card": "The bond lasts 1 minute"
         },
         {
           "text": "Level 11+: Damage you take through the bond is halved.",

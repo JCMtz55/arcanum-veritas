@@ -125,6 +125,27 @@
       "ready": true
     },
     {
+      "id": "creation",
+      "name": "Creation",
+      "icon": "✨",
+      "fa": "wand-magic-sparkles",
+      "category": "dominion",
+      "tier": "III",
+      "requires": [ "Craft", "Emotion" ],
+      "opposing": "destruction",
+      "ready": false
+    },
+    {
+      "id": "crystal",
+      "name": "Crystal",
+      "icon": "💎",
+      "fa": "gem",
+      "category": "elemental",
+      "tier": "II",
+      "opposing": "decay",
+      "ready": false
+    },
+    {
       "id": "death",
       "name": "Death",
       "icon": "💀",
@@ -137,6 +158,17 @@
       "ready": true
     },
     {
+      "id": "despair",
+      "name": "Despair",
+      "icon": "🥀",
+      "fa": "face-sad-tear",
+      "category": "psychic",
+      "tier": "III",
+      "requires": [ "Grief", "Apathy" ],
+      "opposing": "hope",
+      "ready": false
+    },
+    {
       "id": "disaster",
       "name": "Disaster",
       "icon": "🌪️",
@@ -144,6 +176,17 @@
       "category": "fate",
       "tier": "I",
       "opposing": "protection",
+      "ready": false
+    },
+    {
+      "id": "dream",
+      "name": "Dream",
+      "icon": "💭",
+      "fa": "cloud",
+      "category": "cosmical",
+      "tier": "IV",
+      "requires": [ "Emotion", "Fear", "Hope" ],
+      "opposing": "nightmare",
       "ready": false
     },
     {
@@ -227,6 +270,28 @@
       "ready": true
     },
     {
+      "id": "hollowing",
+      "name": "Hollowing",
+      "icon": "🫥",
+      "fa": "circle-notch",
+      "category": "umbral",
+      "tier": "IV",
+      "requires": [ "Soul", "Void" ],
+      "opposing": "night",
+      "ready": false
+    },
+    {
+      "id": "hunger",
+      "name": "Hunger",
+      "icon": "🦷",
+      "fa": "drumstick-bite",
+      "category": "corporeal",
+      "tier": "III",
+      "requires": [ "Beast", "Void" ],
+      "opposing": "apathy",
+      "ready": false
+    },
+    {
       "id": "ice",
       "name": "Ice",
       "icon": "❄️",
@@ -235,6 +300,17 @@
       "tier": "II",
       "opposing": "fire",
       "ready": true
+    },
+    {
+      "id": "identity",
+      "name": "Identity",
+      "icon": "🎭",
+      "fa": "masks-theater",
+      "category": "psychic",
+      "tier": "IV",
+      "requires": [ "History", "Clarity" ],
+      "opposing": "oblivion",
+      "ready": false
     },
     {
       "id": "isolation",
@@ -302,6 +378,17 @@
       "ready": true
     },
     {
+      "id": "night",
+      "name": "Night",
+      "icon": "🌃",
+      "fa": "cloud-moon",
+      "category": "cosmical",
+      "tier": "III",
+      "requires": [ "Darkness", "Fear" ],
+      "opposing": "sun",
+      "ready": false
+    },
+    {
       "id": "nightmare",
       "name": "Nightmare",
       "icon": "🕳️",
@@ -344,6 +431,18 @@
       "tier": "I",
       "opposing": "control",
       "ready": true
+    },
+    {
+      "id": "promises",
+      "name": "Promises",
+      "icon": "🤝",
+      "fa": "handshake",
+      "category": "fate",
+      "tier": "IV",
+      "requires": [ "Vinculum", "Truth" ],
+      "divineLaw": "The Upholding Law of Promises",
+      "opposing": "betrayal",
+      "ready": false
     },
     {
       "id": "protection",

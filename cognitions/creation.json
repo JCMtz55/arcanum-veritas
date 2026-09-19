@@ -1,0 +1,192 @@
+{
+  "id": "creation",
+  "name": "Creation",
+  "icon": "✨",
+  "opposing": "destruction",
+  "description": "Birth, Invention, Art, Construction, Meaning Given Form. Creation is the divine spark, the forge of matter and soul. It goes beyond schools of magic and philosophy: its wielders make objects, life and structure from nothing but intent, and sculpt the impossible out of ideas, memory and desire. Where Craft is the maker's patient hand, Creation is the first word — and it is at its truest in the Creation composition, where every Ring it touches comes out larger, stranger and more alive.",
+  "savingThrow": "Intelligence",
+  "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Overwritten", "card": "disadvantage on its next ability check" },
+      "major":  { "name": "Caged", "card": "Restrained inside conjured matter" },
+      "severe": { "name": "Remade", "card": "Incapacitated while its shape is rewritten" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Ex Nihilo",
+        "description": "You don't throw the blade. You decide there was always a blade there.",
+        "tiers": [
+          { "text": "The damage becomes force and increases by 2 additional dice, dealt by weapons conjured from nothing at the target. When the seal ends, one conjured weapon of your choice remains for 10 minutes in the hand of an ally within 30 feet, counting as magical.",
+            "card": "+2 dice · damage becomes Force · one conjured weapon stays with an ally for 10 min",
+            "mech": { "damage": { "bonusDice": 2, "type": "force" } } },
+          { "text": "The damage increases by 4 additional dice. Matter left in the wound hardens: a creature hit or that fails has its speed reduced by 15 feet until the end of its next turn.",
+            "card": "+4 dice · −15 ft speed until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 4, "type": "force" }, "penalty": { "speed": -15 } } },
+          { "text": "The damage increases by 6 additional dice. A creature hit or that fails is Caged — Restrained inside conjured matter until it breaks free with a Strength check against your DC as an action.",
+            "card": "+6 dice · CAGED — Restrained (Str check vs {DC} as an action)",
+            "mech": { "damage": { "bonusDice": 6, "type": "force" }, "conditions": [ { "name": "Restrained", "escape": "Strength check vs Verum DC as an action" } ] } },
+          { "text": "Genesis Strike. The damage increases by 8 additional dice, and from the ground where each creature was struck, something new is born: a Construct of CR up to a quarter of your level that serves you for 1 minute.",
+            "card": "+8 dice · GENESIS STRIKE — each struck creature's ground births a Construct (CR ≤ level ÷ 4) for 1 min",
+            "mech": { "damage": { "bonusDice": 8, "type": "force" }, "summon": { "cr": "level ÷ 4", "duration": "1 minute" } } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Soulbinder's Will",
+        "description": "Forge a fragment of soul, memory or spirit into a keepsake, and put it in their hand.",
+        "tiers": [
+          { "text": "You bind a fragment of your memory into a keepsake the target carries for 1 hour. It adds your Verum Modifier to one ability check or saving throw of its choice, and may reroll one d20 of its own.",
+            "card": "1 hr keepsake: +{VM} to one check or save · one reroll",
+            "mech": { "buff": { "who": "target", "check": "+VM once", "reroll": 1 } } },
+          { "text": "The keepsake holds a minor bound spirit that keeps watch: the target can't be surprised, gains +5 to passive Perception, and is warmed against extreme cold and heat.",
+            "card": "The keepsake keeps watch — can't be surprised · +5 passive Perception · warm",
+            "mech": { "buff": { "who": "target", "passivePerception": 5 } } },
+          { "text": "The keepsake anchors an Ephemerian echo that acts beside the target: once per round it takes the Help action for the target, and it can take one hit meant for the target, reducing the damage by Five Times the slot level before it fades.",
+            "card": "A bound echo Helps it once a round · can absorb one hit, 5 × {SLOT} damage",
+            "mech": { "buff": { "who": "target", "reduce": "5 × slot level, once" } } },
+          { "text": "Cognition-bound Keepsake. The keepsake carries one Cognition you know; for the hour the target may cast one seal with it as its Core using your numbers, then the keepsake falls silent.",
+            "card": "The keepsake carries one of your Cognitions — the target casts ONE seal with it at your numbers" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Blueprint Cage",
+        "description": "You draw the room again, with them inside it.",
+        "tiers": [
+          { "text": "Conjured walls rise around the area for 1 minute. A creature that fails is enclosed in a 5-foot cell of force-hardened matter: it can't leave until it breaks a wall (AC 15, hit points equal to Five Times the slot level).",
+            "card": "Fail: enclosed in a 5-ft cell, 1 min · breaking out: AC 15, 5 × {SLOT} HP",
+            "mech": { "save": { "ability": "Intelligence" }, "conditions": [ { "name": "Caged", "escape": "destroy a wall" } ] } },
+          { "text": "The cells have no gaps: creatures inside have total cover from outside and outside from inside, and can't teleport out unless they succeed on the Intelligence save at the end of their turn.",
+            "card": "Total cover both ways · no teleporting out without an Int save at the end of their turn",
+            "mech": { "deny": [ "teleporting out" ] } },
+          { "text": "You redraw the plan: as a bonus action each turn you may move one cell up to 30 feet with its occupant, or merge two cells.",
+            "card": "Bonus action: move a cell 30 ft with its prisoner, or merge two" },
+          { "text": "Architect's Prison. The cells last 1 hour, heal to full at the start of each of your turns, and you choose what fills them: darkness, silence, water, or slow sleep.",
+            "card": "ARCHITECT'S PRISON — 1 hr, walls heal each turn · fill cells with dark, silence, water or sleep" }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Genesis Pulse",
+        "description": "Create matter from pure arcane resonance.",
+        "tiers": [
+          { "text": "Your Objects may be anything nonmagical worth up to 5,000 gp — a tool, a weapon, a vessel, fine clothing — and last until dismissed or your next long rest.",
+            "card": "Objects up to 5,000 gp, lasting until your next long rest" },
+          { "text": "Your Objects may be a simple magic item — uncommon, with no charges — for 1 hour. This is the one exception to the rule that Objects are never magic.",
+            "card": "An Object may be an uncommon magic item (no charges) for 1 hr" },
+          { "text": "Your Objects may be rare items, rare components, or complex machines (a siege engine, a golem frame), lasting 8 hours.",
+            "card": "Rare items, components or complex machines, 8 hrs" },
+          { "text": "Once per week, an Object made with a 7th-level slot or higher is permanent: a relic that gains sentience or reflects a Cognition you have mastered.",
+            "card": "1/week, a 7th+ Object is PERMANENT — a sentient relic" }
+        ]
+      },
+      {
+        "name": "Architect of the Impossible",
+        "description": "Bend logic and physics with divine blueprints.",
+        "tiers": [
+          { "text": "Your Structures ignore physics: they can hang unsupported, grow at impossible angles, and be twice the size the Ring allows. They last 1 hour.",
+            "card": "Structures ignore physics and are double size · 1 hr" },
+          { "text": "Your Structures may be complex — a bridge, tower, ship or vault with working doors, stairs and locks — and last 24 hours.",
+            "card": "Complex Structures (bridge, tower, ship, vault) · 24 hrs" },
+          { "text": "Your Structures are anchored in reality: semi-permanent, ending only if destroyed or dismissed.",
+            "card": "Structures are anchored — they last until destroyed" },
+          { "text": "Raise a landmark or sanctuary (DM approval): a permanent structure bonded to you — a temple, forge or library of thought — that grants you a boon of its nature whenever you return to it.",
+            "card": "A permanent landmark bonded to you, granting a boon when you return" }
+        ]
+      },
+      {
+        "name": "Sculpted Beings",
+        "description": "Bring life, or echoes of life, into the world.",
+        "tiers": [
+          { "text": "Your Constructs may be a homunculus, a small construct or a tiny elemental, and last 1 hour. They obey spoken commands without using your action.",
+            "card": "Homunculus, construct or tiny elemental, 1 hr · commanded for free" },
+          { "text": "Your Constructs may be any creature of CR 5 or lower you have seen, remade from matter; they won't attack unless you command it or they're attacked.",
+            "card": "Remake any seen creature of CR ≤ 5" },
+          { "text": "Build a custom Construct from the traits of creatures you've seen, CR up to half your level. It obeys you absolutely.",
+            "card": "Custom Construct from seen traits, CR ≤ level ÷ 2" },
+          { "text": "Once per long rest, manifest a Sentient Avatar of Creation (CR 10 or higher) of a theme you choose, for 10 minutes. It can cast your seals.",
+            "card": "1/long rest: an AVATAR OF CREATION (CR 10+) that casts your seals, 10 min" }
+        ]
+      },
+      {
+        "name": "Living Invention",
+        "description": "Your creations move, speak, or grow.",
+        "tiers": [
+          { "text": "Everything you create can move or float 10 feet a round and follows simple commands.",
+            "card": "Creations move or float 10 ft a round and follow simple commands" },
+          { "text": "Your creations may speak, shed light, or record up to 10 minutes of sound.",
+            "card": "Creations speak, shine, or record 10 min of sound" },
+          { "text": "Your creations may have limited sentience — Intelligence 6, one language, loyalty to you.",
+            "card": "Creations have limited sentience (Int 6, one language)" },
+          { "text": "One creation may be a living thing that grows over time — a companion that gains a new trait each time you finish a long rest, and persists until destroyed.",
+            "card": "One creation LIVES — a companion that grows a trait each long rest" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Maker's Eye",
+        "description": "Everything made was first imagined. You can see the imagining.",
+        "tiers": [
+          { "text": "Mend any break in an object in a minute, and know what any object is for, how it was made, and by whom.",
+            "card": "Mend anything in a minute · know any object's use, making and maker",
+            "mech": { "utility": true } },
+          { "text": "Copy a nonmagical object you touch, down to the scratches. The copy lasts 24 hours.",
+            "card": "Copy a nonmagical object exactly, 24 hrs",
+            "mech": { "utility": true } },
+          { "text": "Draw the blueprint of a place you stand in — every room, passage and hidden chamber within 300 feet.",
+            "card": "See the blueprint of everything within 300 ft, hidden rooms included",
+            "mech": { "utility": true } },
+          { "text": "Restore something destroyed to how it was, if you have any piece of it — a shattered statue, a burned letter, a fallen bridge.",
+            "card": "Restore something destroyed from any piece of it",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Conjured Edge",
+      "type": "Offensive",
+      "description": "Blades appear where the seal lands.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6).",
+        "card": "+1 die force",
+        "mech": { "damage": { "dice": "1d6", "type": "force" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and one conjured weapon remains in an ally's hand for 10 minutes.", "card": "+2 dice · a conjured weapon stays with an ally" },
+        { "text": "Level 11+: Three dice.", "card": "+3 dice" }
+      ]
+    },
+    {
+      "name": "Made for You",
+      "type": "Supportive",
+      "description": "Each ally the seal touches finds exactly what they needed in their hand.",
+      "effect": { "text": "Each of the seal's targets receives a conjured nonmagical tool, weapon, shield or item of its choice worth up to 500 gp, lasting 1 hour, and gains temporary hit points equal to your Verum Modifier + the slot level.",
+        "card": "The seal's targets each get a conjured item of their choice (≤ 500 gp, 1 hr) and {VM} + {SLOT} temp HP",
+        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level" } } },
+      "upgrades": [
+        { "text": "Level 5+: The item may be worth up to 5,000 gp, and a weapon or shield counts as +1.", "card": "Up to 5,000 gp · weapons and shields are +1" },
+        { "text": "Level 11+: The item may be an uncommon magic item with no charges.", "card": "Or an uncommon magic item" }
+      ]
+    },
+    {
+      "name": "New Ground",
+      "type": "Control",
+      "description": "The seal leaves the place rebuilt around where it landed.",
+      "effect": { "text": "The seal raises a 10-foot section of wall, pillar or cover (AC 15, hit points equal to Five Times the slot level) within 30 feet of where it lands, lasting 1 minute.",
+        "card": "Raise 10 ft of wall, pillar or cover (AC 15, 5 × {SLOT} HP) for 1 min",
+        "mech": { "terrain": { "wall": 10 } } },
+      "upgrades": [
+        { "text": "Level 5+: 20 feet of it, and it can be shaped as stairs or a bridge.", "card": "20 ft · stairs or bridges too" },
+        { "text": "Level 11+: A creature that failed the seal can be enclosed inside it, Restrained until it breaks free.", "card": "Enclose one who failed — Restrained until it breaks out" }
+      ]
+    }
+  ],
+  "schema": 2
+}

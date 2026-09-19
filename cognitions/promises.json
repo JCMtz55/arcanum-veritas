@@ -1,0 +1,174 @@
+{
+  "id": "promises",
+  "name": "Promises",
+  "icon": "🤝",
+  "opposing": "betrayal",
+  "description": "Oaths, Vows, Geas, Binding Words, The Sworn Future. Promises is the Upholding Law, kept by the Magistrate: a word given is a thread tied between now and a future that must come. Those attuned bind others to terms, enforce the oaths already sworn, and reshape possibility around a vow until the world bends to let it be kept. Its power is anchored to honesty. A Promises wielder speaks a promise with every seal, and the Law holds them to it harder than anyone.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "cost": {
+    "text": "The Sworn Word. Every Promises seal carries a short promise you speak aloud as you cast it — one you mean to keep. If you break a promise you sealed, you are Forsworn until you atone at a dawn before the Magistrate's Law: your Promises seals gain no Verum effect and can't take Sigils.",
+    "card": "THE SWORN WORD — speak a true promise with the seal · break one and you are Forsworn: no Verum, no Sigils until you atone at dawn"
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Held to Word", "card": "can't lie, and can't take reactions against you" },
+      "major":  { "name": "Bound", "card": "can't move farther from you" },
+      "severe": { "name": "Sworn", "card": "Charmed — it keeps a promise you dictate" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Debt Called",
+        "description": "Every broken word leaves a debt. You are the collector.",
+        "tiers": [
+          { "text": "The damage becomes radiant and increases by 2 additional dice. Against a creature that has broken a promise, oath or contract in your presence, or lied to you this day, it deals Twice your Verum Modifier more.",
+            "card": "+2 dice · damage becomes Radiant · +2×VM against one who broke a word or lied to you today",
+            "mech": { "damage": { "bonusDice": 2, "type": "radiant" }, "rider": { "damage": "2×VM", "type": "radiant", "when": "against an oathbreaker or liar" } } },
+          { "text": "The damage increases by 4 additional dice. A creature hit or that fails is Held to Word until the end of its next turn: it can't lie, and can't take reactions against you.",
+            "card": "+4 dice · HELD TO WORD until their next turn — can't lie, no reactions against you",
+            "mech": { "damage": { "bonusDice": 4, "type": "radiant" }, "deny": [ "lying", "reactions against you" ] } },
+          { "text": "The damage increases by 6 additional dice. Every promise the creature has broken becomes a debt: the seal deals one extra die for each broken oath you name aloud (max your Verum Modifier), and the damage can't be reduced by any means.",
+            "card": "+6 dice · +1 die per broken oath you name (max {VM}) · the damage can't be reduced",
+            "mech": { "damage": { "bonusDice": 6, "type": "radiant" }, "pierce": "all reduction" } },
+          { "text": "The Judgment. The damage increases by 8 additional dice. A creature hit or that fails is Bound for 1 minute — it can't move farther from you or teleport — repeating the Charisma save at the end of each of its turns. An oathbreaker that drops to 0 hit points from the seal can't be raised until its broken oath is kept by someone.",
+            "card": "+8 dice · THE JUDGMENT — Bound 1 min, can't move away or teleport (Cha save each turn) · a slain oathbreaker can't be raised until its oath is kept",
+            "mech": { "damage": { "bonusDice": 8, "type": "radiant" }, "conditions": [ { "name": "Bound", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "The Vow Made Flesh",
+        "description": "Say what you will do. The world will make room.",
+        "tiers": [
+          { "text": "The target swears a vow of one sentence — to reach a place, protect a person, defeat a foe. For 1 minute, while acting toward it, it has advantage on saves against effects that would stop it and +10 feet of speed.",
+            "card": "The target swears a vow · 1 min, acting toward it: advantage vs being stopped · +10 ft speed",
+            "mech": { "buff": { "who": "target", "advantage": "saves against effects that would stop its vow", "speed": 10 } } },
+          { "text": "Its attacks and seals against anything standing in the vow's way deal an extra die of damage, and it can't be Charmed or Frightened into abandoning the vow.",
+            "card": "+1 die against anything in the vow's way · can't be Charmed or Frightened off it",
+            "mech": { "deny": [ "charm", "fear" ] } },
+          { "text": "The vow holds it up. The first time the target would drop to 0 hit points while the vow is unfulfilled, it drops to 1 instead and regains Ten Times the slot level in hit points.",
+            "card": "First drop to 0 while unfulfilled: stays at 1 and regains 10 × {SLOT} HP",
+            "mech": { "buff": { "who": "target", "heal": "10 × slot level, on first dropping to 0" } } },
+          { "text": "Possibility bends. Once while the vow lasts, when the target fails a roll that would keep it from its vow, it succeeds instead. The vow lasts until kept — but if the target abandons it, it is Forsworn as you would be.",
+            "card": "Once, a failed roll toward the vow becomes a success · lasts until kept — abandoning it makes the target Forsworn" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Geas",
+        "description": "You dictate the terms. The Law enforces them.",
+        "tiers": [
+          { "text": "A creature that fails is bound by one term you speak — a single short prohibition such as \"you will not attack her\" — until the end of its next turn. If it breaks the term, it takes radiant damage equal to Five Times your Verum Modifier and the geas ends.",
+            "card": "Fail: bound by one short term until their next turn · breaking it: 5×VM radiant",
+            "mech": { "save": { "ability": "Charisma" }, "rider": { "damage": "5×VM", "type": "radiant", "when": "if it breaks the term" } } },
+          { "text": "The geas lasts 1 minute, repeating the Charisma save at the end of each of its turns, and breaking it also leaves the creature Stunned until the end of its next turn.",
+            "card": "1 min (Cha save each turn) · breaking it also Stuns until their next turn",
+            "mech": { "conditions": [ { "name": "Stunned", "when": "if it breaks the term" } ] } },
+          { "text": "The term may be a command as well as a prohibition, and the geas lasts 1 hour with no repeat save while it is being kept. The creature knows exactly what the Law will do if it breaks it.",
+            "card": "A command or a prohibition · 1 hr, no repeat save while it is kept",
+            "mech": { "conditions": [ { "name": "Geas", "duration": "1 hour" } ] } },
+          { "text": "The Upholding Law. The geas lasts 30 days, holds a full sentence of terms, and each breach deals Ten Times your Verum Modifier radiant damage without ending it. Only you, a Wish, or the Magistrate can release it.",
+            "card": "THE UPHOLDING LAW — 30 days, a full sentence of terms · each breach 10×VM radiant, and it holds",
+            "mech": { "conditions": [ { "name": "Geas", "duration": "30 days" } ], "rider": { "damage": "10×VM", "type": "radiant", "when": "each breach" } } }
+        ]
+      },
+      {
+        "name": "Held to Your Word",
+        "description": "What they said they would do, they now must.",
+        "tiers": [
+          { "text": "A creature that fails can't knowingly lie until the end of its next turn, and must spend its turn doing what it last declared it would do, if it can.",
+            "card": "Fail: can't lie · must do what it last declared it would, on its next turn",
+            "mech": { "save": { "ability": "Charisma" }, "deny": [ "lying" ] } },
+          { "text": "A creature that fails also can't take reactions, and any ally of yours it threatened this encounter has advantage on attacks against it until the end of its next turn.",
+            "card": "No reactions · allies it threatened have advantage on it until its next turn",
+            "mech": { "deny": [ "reactions" ] } },
+          { "text": "A creature that fails is Held to Word for 1 minute, repeating the save at the end of each of its turns, and any bargain it offers or accepts while held is binding as a geas.",
+            "card": "HELD TO WORD 1 min (Cha save each turn) · any bargain it makes meanwhile binds as a geas",
+            "mech": { "conditions": [ { "name": "Held to Word", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } },
+          { "text": "Every oath the creature has ever broken returns at once: it is Stunned until the end of its next turn, then Held to Word, and it can't use any feature, pact or Cognition gained through an oath it has broken.",
+            "card": "Stunned until their next turn, then Held to Word · no feature, pact or Cognition from an oath it broke",
+            "mech": { "conditions": [ { "name": "Stunned", "duration": "until the end of its next turn" } ] } }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Covenant",
+        "description": "What you build, you build on a word — and it keeps it.",
+        "tiers": [
+          { "text": "Each creation is sworn to one promise you speak when you make it (guard this door, carry this child home). It keeps that promise above any other command, and knows when it has been kept.",
+            "card": "Each creation is sworn to one promise — it keeps it above all else" },
+          { "text": "Your Structures can't be entered by any creature that has broken an oath sworn within them, and your Constructs know when anyone lies within 30 feet of them.",
+            "card": "Oathbreakers can't enter your Structures · your Constructs sense lies within 30 ft" },
+          { "text": "A contract written on one of your Objects binds its signers as a geas for as long as the Object exists.",
+            "card": "A contract on your Object binds its signers as a geas" },
+          { "text": "A creation made to keep a promise does not fall while the promise is unkept: it can't be reduced below 1 hit point or destroyed until its promise is fulfilled or released.",
+            "card": "While its promise is unkept, a creation can't be destroyed" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Witnessed",
+        "description": "The Magistrate hears every promise. So do you.",
+        "tiers": [
+          { "text": "You know whenever a promise made in your presence is broken, wherever you are on the same plane. Or witness a promise: the two parties both know if the other breaks it.",
+            "card": "Know when a promise made in your presence is broken · witness one for both parties",
+            "mech": { "utility": true } },
+          { "text": "Ask a creature what it intends: if it answers, it answers truly, and it knows it has been heard by the Law.",
+            "card": "Ask a creature its intent — its answer is true",
+            "mech": { "utility": true } },
+          { "text": "Seal a contract: for as long as its terms run (up to a year), each signer takes radiant damage equal to Five Times your Verum Modifier the moment they break it.",
+            "card": "Seal a contract up to a year — breaking it deals 5×VM radiant",
+            "mech": { "utility": true } },
+          { "text": "Hold a promise open: a promise made by someone now dead is still owed. Name who it was made to and learn if it was kept, and what keeping it would take.",
+            "card": "Trace a dead person's promise — was it kept, and what would keep it",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Debt Collector",
+      "type": "Offensive",
+      "description": "The seal remembers every broken word.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has broken a promise or lied to you this day.",
+        "card": "+1 die radiant — +2 dice against an oathbreaker or liar",
+        "mech": { "damage": { "dice": "1d6", "type": "radiant" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, or four against an oathbreaker.", "card": "+2 dice (4 against an oathbreaker)" },
+        { "text": "Level 11+: Three dice, or six against an oathbreaker, and it can't lie until the end of its next turn.", "card": "+3 dice (6 against an oathbreaker) · they can't lie until their next turn" }
+      ]
+    },
+    {
+      "name": "Pledge",
+      "type": "Supportive",
+      "description": "They swear to see it through. The Law lends them the means.",
+      "effect": { "text": "Each of the seal's targets may swear a one-sentence pledge. For 1 minute, while acting toward it, it adds your Verum Modifier to its saving throws against effects that would stop it.",
+        "card": "The seal's targets swear a pledge · 1 min: +{VM} to saves against being stopped",
+        "mech": { "buff": { "who": "the seal's targets", "save": "+VM against effects that would stop its pledge" } } },
+      "upgrades": [
+        { "text": "Level 5+: They also gain temporary hit points equal to your Verum Modifier + the slot level.", "card": "Also {VM} + {SLOT} temp HP" },
+        { "text": "Level 11+: Once, each may turn a failed roll toward its pledge into a success.", "card": "Once each, a failed roll toward the pledge succeeds" }
+      ]
+    },
+    {
+      "name": "Binding Word",
+      "type": "Control",
+      "description": "The seal carries a term. They agreed to it by failing.",
+      "effect": { "text": "A creature hit by or failing the seal can't take reactions against you or the seal's targets until the start of your next turn.",
+        "card": "No reactions against you or the seal's targets until your next turn",
+        "mech": { "deny": [ "reactions against you" ] } },
+      "upgrades": [
+        { "text": "Level 5+: It also can't move farther from you on its next turn.", "card": "Can't move farther from you next turn" },
+        { "text": "Level 11+: It also can't knowingly lie for 1 minute.", "card": "Can't lie for 1 minute" }
+      ]
+    }
+  ],
+  "schema": 2
+}

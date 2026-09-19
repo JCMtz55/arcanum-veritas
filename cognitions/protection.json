@@ -340,38 +340,29 @@
       "type": "Supportive",
       "description": "A moment of protection hardens those nearby — granting temporary HP, Constitution save advantage, and eventually immunity to the Frightened condition.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus and advantage on their next Constitution saving throw before the start of your next turn.",
-        "card": "An ally within 30 ft: {VM}+{PB} temp HP and advantage on their next Con save",
+        "text": "When the primary effect resolves, each of its targets gains temporary hit points equal to your Verum Modifier + your Proficiency Bonus and advantage on its next Constitution saving throw before the start of your next turn.",
+        "card": "The seal's targets: {VM} + {PB} temp HP and advantage on their next Con save",
         "mech": {
-          "save": {
-            "ability": "Constitution"
-          },
           "heal": {
-            "tempHP": true
+            "tempHP": true,
+            "who": "each of the seal's targets"
           },
           "buff": {
-            "advantage": "their next Constitution saving throw before the st"
+            "advantage": "the next Constitution saving throw"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the advantage extends to all Constitution saving throws until the start of your next turn.",
-          "card": "Temp HP doubles · advantage on all Con saves until your next turn",
-          "mech": {
-            "save": {
-              "ability": "Constitution"
-            }
-          }
+          "text": "Level 5+: The temporary hit points double, and the advantage extends to all Constitution saving throws until the start of your next turn.",
+          "card": "Temp HP doubles · advantage on all Con saves until your next turn"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each is also immune to the Frightened condition until the start of your next turn — protection fortifying not just the body but the nerve.",
-          "card": "Two allies · each also immune to Frightened",
+          "text": "Level 11+: Each target is also immune to the Frightened condition until the start of your next turn — protection fortifying not just the body but the nerve.",
+          "card": "Each also can't be Frightened",
           "mech": {
-            "conditions": [
-              {
-                "name": "Frightened"
-              }
+            "deny": [
+              "fear"
             ]
           }
         }

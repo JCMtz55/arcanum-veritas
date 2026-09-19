@@ -203,17 +203,17 @@
       "type": "Supportive",
       "description": "A brush with fortune leaves something behind.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet may reroll one die of their choice on the next roll they make before the start of your next turn, taking the new result.",
-        "card": "An ally within 30 ft rerolls one die on their next roll"
+        "text": "When the primary effect resolves, each of its targets may reroll one die of its choice on the next roll it makes before the start of your next turn, taking the new result.",
+        "card": "The seal's targets may each reroll one die of their next roll before your next turn"
       },
       "upgrades": [
         {
-          "text": "Level 5+: The ally also regains HP equal to your spellcasting modifier.",
-          "card": "They also regain {VM}"
+          "text": "Level 5+: Each target also regains hit points equal to your Verum Modifier.",
+          "card": "Each also regains {VM} HP"
         },
         {
-          "text": "Level 11+: Choose two allies to receive this benefit. Each may reroll two dice instead of one on their next roll.",
-          "card": "Two allies · each rerolls two dice"
+          "text": "Level 11+: Each may reroll two dice instead of one.",
+          "card": "Two dice instead of one"
         }
       ]
     },

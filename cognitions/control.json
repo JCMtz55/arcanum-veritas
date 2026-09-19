@@ -221,30 +221,17 @@
       "type": "Supportive",
       "description": "Your authority over the moment extends to those you fight beside — one ally rerolls a failed save on the strength of your presence alone.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet who can see or hear you may immediately reroll one failed saving throw they made since the start of your last turn, using the new result.",
-        "card": "An ally within 30 ft rerolls one failed save from this round"
+        "text": "When the primary effect resolves, each of its targets who can see or hear you may immediately reroll one failed saving throw it made since the start of your last turn, using the new result.",
+        "card": "The seal's targets may each reroll one failed save from since your last turn"
       },
       "upgrades": [
         {
-          "text": "You may apply this benefit to two allies simultaneously, and the reroll gains a bonus equal to your proficiency bonus.",
-          "card": "Two allies · each reroll gains {PB}"
+          "text": "Level 5+: The reroll gains a bonus equal to your Proficiency Bonus.",
+          "card": "The reroll gains +{PB}"
         },
         {
-          "text": "The chosen ally may also end one condition of your choice currently affecting them (Frightened, Charmed, or Stunned only) as the clarity of your authority cuts through the effect.",
-          "card": "They may also shed Frightened, Charmed or Stunned",
-          "mech": {
-            "conditions": [
-              {
-                "name": "Stunned"
-              },
-              {
-                "name": "Frightened"
-              },
-              {
-                "name": "Charmed"
-              }
-            ]
-          }
+          "text": "Level 11+: Each target may also end one condition of your choice affecting it (Frightened, Charmed, or Stunned only) as the clarity of your authority cuts through.",
+          "card": "Each may also end Frightened, Charmed or Stunned"
         }
       ]
     },

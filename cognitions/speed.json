@@ -228,25 +228,23 @@
       "type": "Supportive",
       "description": "A fraction of your speed detaches and finds someone who needs it more — granting bonus movement and a free Disengage to one or two allies.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet gains bonus movement equal to your proficiency bonus × 5 feet until the start of your next turn. For the same duration, that ally may Disengage as a free action once.",
-        "card": "An ally within 30 ft gains {PB}×5 ft of movement"
+        "text": "When the primary effect resolves, each of its targets gains bonus movement equal to your Proficiency Bonus × 5 feet until the start of your next turn, and may Disengage as a free action once in that time.",
+        "card": "The seal's targets: +{PB} × 5 ft movement until your next turn · one free Disengage",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "speed": "+PB × 5 ft"
+          }
+        }
       },
       "upgrades": [
         {
-          "text": "You may apply this benefit to two allies simultaneously, and the bonus movement increases to your proficiency bonus × 10 feet.",
-          "card": "Two allies · {PB}×10 ft"
+          "text": "Level 5+: The bonus movement becomes your Proficiency Bonus × 10 feet.",
+          "card": "+{PB} × 10 ft instead"
         },
         {
-          "text": "Each ally receiving the blessing also gains advantage on the next Dexterity saving throw they make before the effect ends — the borrowed speed making them briefly as elusive as the caster.",
-          "card": "Each also gets advantage on their next Dex save",
-          "mech": {
-            "save": {
-              "ability": "Dexterity"
-            },
-            "buff": {
-              "advantage": "the next Dexterity saving throw they make before t"
-            }
-          }
+          "text": "Level 11+: Each target also has advantage on the next Dexterity saving throw it makes before the effect ends.",
+          "card": "Advantage on their next Dex save"
         }
       ]
     },

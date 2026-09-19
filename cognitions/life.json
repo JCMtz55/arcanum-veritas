@@ -342,20 +342,23 @@
       "type": "Supportive",
       "description": "Life given is life moved — and it has to come from somewhere.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet regains hit points equal to your Verum Modifier + 5 × the slot level. The life is your own: you lose hit points equal to the slot level.",
-        "card": "An ally within 30 ft regains {VM} + 5 × {SLOT} HP · you lose {SLOT} HP",
+        "text": "When the primary effect resolves, the seal's targets regain hit points equal to your Verum Modifier + 5 × the slot level, shared among them as you choose. The life is your own: you lose hit points equal to the slot level.",
+        "card": "The seal's targets share {VM} + 5 × {SLOT} HP as you choose · you lose {SLOT} HP",
         "mech": {
-          "heal": { "amount": "VM + 5 × slot level", "who": "one ally within 30 ft" },
+          "heal": {
+            "amount": "VM + 5 × slot level, shared",
+            "who": "the seal's targets"
+          },
           "cost": "you lose HP equal to the slot level"
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Up to two allies each regain it, and each also ends one condition of your choice affecting it.",
-          "card": "Up to two allies · each also sheds one condition"
+          "text": "Level 5+: Each target also ends one condition of your choice affecting it.",
+          "card": "Each also sheds one condition"
         },
         {
-          "text": "Level 11+: Life no longer needs to come from you — you lose nothing — and healing beyond an ally's maximum becomes temporary hit points.",
+          "text": "Level 11+: Life no longer needs to come from you — you lose nothing — and healing beyond a target's maximum becomes temporary hit points.",
           "card": "No more cost to you · overflow becomes temp HP"
         }
       ]

@@ -311,21 +311,23 @@
       "type": "Supportive",
       "description": "The relief is real. It is simply not here yet.",
       "effect": {
-        "text": "When the primary effect resolves, name one creature within 30 feet. At the start of its next turn it regains hit points equal to Twice your Verum Modifier and gains a swim speed equal to its walking speed for 1 minute. The healing does not arrive now — the water takes its time.",
-        "card": "One creature within 30 ft regains 2×VM at the start of its NEXT turn, and gains a swim speed",
+        "text": "When the primary effect resolves, each of its targets is caught by the current: at the start of its next turn it regains hit points equal to Twice your Verum Modifier and gains a swim speed equal to its walking speed for 1 minute. The healing does not arrive now — the water takes its time.",
+        "card": "The seal's targets: at the start of their next turn, each regains 2×VM HP · swim speed 1 min",
         "mech": {
-          "heal": { "amount": "2×VM", "when": "start of their next turn", "range": "30 ft" }
+          "heal": {
+            "amount": "2×VM, at the start of its next turn",
+            "who": "each of the seal's targets"
+          }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: The healing becomes Three Times your Verum Modifier, and you may name up to two creatures.",
-          "card": "3×VM · up to two creatures"
+          "text": "Level 5+: The healing becomes Three Times your Verum Modifier.",
+          "card": "Healing becomes 3×VM"
         },
         {
-          "text": "Level 11+: The water no longer takes its time — the healing arrives immediately, and each creature also sheds one condition of its choice from Blinded, Deafened, or Poisoned.",
-          "card": "Healing lands immediately now · each also sheds Blinded, Deafened or Poisoned",
-          "mech": { "conditions": [ { "removes": 1 } ] }
+          "text": "Level 11+: The water no longer takes its time — the healing arrives immediately, and each target also sheds one condition of its choice from Blinded, Deafened, or Poisoned.",
+          "card": "It heals now · each also sheds Blinded, Deafened or Poisoned"
         }
       ]
     },

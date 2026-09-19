@@ -1,0 +1,160 @@
+{
+  "id": "despair",
+  "name": "Despair",
+  "icon": "🥀",
+  "opposing": "hope",
+  "description": "Hopelessness, Resignation, Surrender, The Drowning Thought, The Last Light Going Out. Where Grief mourns what was lost and Apathy no longer cares, Despair has looked at what is coming and decided it cannot be survived. Those attuned do not wound the body so much as the reason to keep going: they suppress the will, paralyse resolve, and smother every buff and borrowed courage until a foe cannot remember why it lifted its sword. It is a heavy Cognition to carry. A seal of Despair that finds no one to fall on falls on its caster.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+  "incompatible": [ "creation" ],
+  "cost": {
+    "text": "The Inward Turn. Despair must land somewhere. If a Despair seal leaves no creature hit and no creature failing its save, it turns inward: you take psychic damage equal to Twice the slot level, and you can't gain Inspiration or benefit from morale effects until you finish a short rest.",
+    "card": "THE INWARD TURN — if no one is hit or fails, you take 2 × {SLOT} psychic and lose Inspiration and morale until a short rest"
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Disheartened", "card": "no Inspiration or morale bonuses" },
+      "major":  { "name": "Forlorn", "card": "disadvantage on attack rolls" },
+      "severe": { "name": "Hopeless", "card": "Incapacitated — it sees no point in trying" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Weight",
+        "description": "You don't wound them. You hand them the whole of what is coming, all at once.",
+        "tiers": [
+          { "text": "The damage becomes psychic and increases by 2 additional dice. A creature hit or that fails loses any Inspiration it carries and can't benefit from Inspiration, Bardic Inspiration, or morale effects until the end of its next turn.",
+            "card": "+2 dice · damage becomes Psychic · Inspiration lost, no morale effects until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "deny": [ "Inspiration", "morale effects" ] } },
+          { "text": "The damage increases by 4 additional dice. The weight falls hardest on the hopeful: it deals one extra die for each beneficial spell or effect currently on the creature (max your Verum Modifier), and one such effect of your choice is suppressed until the end of its next turn.",
+            "card": "+4 dice · +1 die per buff on them (max {VM}) · one buff suppressed until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "deny": [ "one beneficial effect" ] } },
+          { "text": "The damage increases by 6 additional dice. A creature hit or that fails is Forlorn for 1 minute — disadvantage on attack rolls and saving throws — repeating the Wisdom save at the end of each of its turns.",
+            "card": "+6 dice · FORLORN 1 min: disadvantage on attacks and saves (Wis save each turn)",
+            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "Forlorn", "duration": "1 minute", "escape": "Wisdom save at the end of each of its turns" } ] } },
+          { "text": "The Last Light. The damage increases by 8 additional dice. A creature hit or that fails is Forlorn, and one reduced to half its hit points or fewer by the seal becomes Hopeless as well — Incapacitated, laying down its arms — until it succeeds on the repeat save or an ally spends an action to rally it.",
+            "card": "+8 dice · THE LAST LIGHT — Forlorn · at half HP or less: HOPELESS, Incapacitated until it saves or is rallied",
+            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Forlorn" }, { "name": "Incapacitated", "escape": "Wisdom save each turn, or an ally's action" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Nothing Left to Lose",
+        "description": "Past hope there is a strange floor, and people who stand on it do not flinch.",
+        "tiers": [
+          { "text": "For 1 minute the target can't be Frightened, and while it is at half its hit points or fewer its weapon and seal damage rolls gain a bonus equal to your Verum Modifier.",
+            "card": "1 min: can't be Frightened · at half HP or less, +{VM} to its damage rolls",
+            "mech": { "deny": [ "fear" ], "buff": { "who": "target", "damage": "+VM while at half HP or fewer" } } },
+          { "text": "It also can't be Charmed, and has advantage on saves against effects that would make it lose its turn, its actions, or its will.",
+            "card": "Also can't be Charmed · advantage vs losing its turn, actions or will",
+            "mech": { "deny": [ "charm" ], "buff": { "who": "target", "advantage": "saves against losing its turn, actions or will" } } },
+          { "text": "The first time it would drop to 0 hit points while the seal lasts, it drops to 1 instead and gains temporary hit points equal to Five Times the slot level.",
+            "card": "The first drop to 0: stays at 1 and gains 5 × {SLOT} temp HP",
+            "mech": { "buff": { "who": "target", "tempHP": "5 × slot level, on first dropping to 0" } } },
+          { "text": "The Floor. While at half its hit points or fewer, the target has resistance to all damage, and its attacks score a critical hit on a 19 or 20 — the fearlessness of someone who has already accepted the ending.",
+            "card": "THE FLOOR — at half HP or less: resistance to ALL damage, crits on 19–20",
+            "mech": { "buff": { "who": "target", "resist": "all damage while at half HP or fewer" } } }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Paralysis of Resolve",
+        "description": "Every plan they make, you show them how it fails.",
+        "tiers": [
+          { "text": "A creature that fails can't take reactions and can't take the Dash, Help, or Ready actions until the end of its next turn — nothing seems worth hurrying for.",
+            "card": "No reactions · no Dash, Help or Ready until the end of their next turn",
+            "mech": { "save": { "ability": "Wisdom" }, "deny": [ "reactions", "Dash", "Help", "Ready" ] } },
+          { "text": "A creature that fails also has its speed halved and has disadvantage on attack rolls until the end of its next turn.",
+            "card": "Also half speed and disadvantage on attacks until the end of their next turn",
+            "mech": { "penalty": { "speed": "half", "disadvantage": "attack rolls" } } },
+          { "text": "A creature that fails is Hopeless for 1 minute: on each of its turns it rolls a d6, and on a 1–3 it spends the turn doing nothing. It repeats the Wisdom save at the end of each of its turns.",
+            "card": "HOPELESS 1 min — d6 each turn, 1–3 it does nothing (Wis save each turn)",
+            "mech": { "conditions": [ { "name": "Hopeless", "duration": "1 minute", "escape": "Wisdom save at the end of each of its turns" } ] } },
+          { "text": "Surrender. A creature that fails is Incapacitated for 1 minute, laying down its arms; each time it takes damage it repeats the save with advantage. A creature that fails three repeat saves in a row surrenders in truth, and will not fight you again this day.",
+            "card": "SURRENDER — Incapacitated 1 min (repeat with advantage when hurt) · 3 failed repeats: it yields for the day",
+            "mech": { "conditions": [ { "name": "Incapacitated", "duration": "1 minute", "escape": "Wisdom save when it takes damage, with advantage" } ] } }
+        ]
+      },
+      {
+        "name": "Smother",
+        "description": "Hope is a small flame. You close your hand around it.",
+        "tiers": [
+          { "text": "Every creature in the area that fails loses one beneficial spell or effect of your choice (a spell of the slot level or lower ends; a higher one is suppressed until the end of its next turn), and loses any Inspiration.",
+            "card": "Fail: one buff ends (≤ slot level) or is suppressed · Inspiration lost",
+            "mech": { "save": { "ability": "Wisdom" }, "deny": [ "one beneficial effect", "Inspiration" ] } },
+          { "text": "For 1 minute the area is Grey. A creature inside can't gain temporary hit points, and healing it receives is halved.",
+            "card": "1 min, the area is Grey — no temp HP · healing halved inside",
+            "mech": { "penalty": { "healing": "half" }, "deny": [ "temporary hit points" ] } },
+          { "text": "A creature that fails loses every beneficial effect of the slot level or lower, and can't gain a new one until the end of its next turn.",
+            "card": "Fail: EVERY buff of the slot level or lower ends · no new ones until their next turn",
+            "mech": { "deny": [ "beneficial effects" ] } },
+          { "text": "The Long Dark. The Grey lasts 10 minutes and spreads to 60 feet: no Grimm can escalate its Stage inside, no Hope-borne effect functions, and creatures that failed can't regain hit points at all.",
+            "card": "THE LONG DARK — 10 min, 60 ft · no Grimm escalation, no Hope effects · those who failed can't heal",
+            "mech": { "deny": [ "Grimm escalation", "Hope effects", "healing" ] } }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Grey Company",
+        "description": "Despair recognises its own, and knows every room it has ever sat in.",
+        "tiers": [
+          { "text": "Sense the despair of creatures within 60 feet — who has given up, and on what. A creature in despair speaks more freely to you: advantage on Insight and Persuasion checks against it.",
+            "card": "Sense who within 60 ft has given up, and on what · advantage on Insight and Persuasion with them",
+            "mech": { "utility": true } },
+          { "text": "Take a creature's despair into yourself for 1 hour — it acts freely of it, and you carry the weight (disadvantage on your Wisdom checks). Or leave a room so bleak that no one lingers in it for 8 hours.",
+            "card": "Carry someone's despair for 1 hr · or make a room no one lingers in for 8 hrs",
+            "mech": { "utility": true } },
+          { "text": "Read the last hopeless moment of a place or an object — the moment someone there gave up, and why.",
+            "card": "See the moment someone gave up, here or on this object",
+            "mech": { "utility": true } },
+          { "text": "Walk the Grey: for 1 hour you and up to your Verum Modifier companions go unnoticed by anyone who has lost hope — guards who have stopped caring, prisoners, the dying — and they will answer one question each truly.",
+            "card": "1 hr: you and {VM} allies go unnoticed by the hopeless · each answers one question truly",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Sinking Feeling",
+      "type": "Offensive",
+      "description": "The seal lands and something in them sinks with it.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and loses any Inspiration it carries.",
+        "card": "+1 die psychic · they lose their Inspiration",
+        "mech": { "damage": { "dice": "1d6", "type": "psychic" }, "deny": [ "Inspiration" ] } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and one beneficial effect on the target is suppressed until the end of its next turn.", "card": "+2 dice · one buff suppressed until their next turn" },
+        { "text": "Level 11+: Three dice, and the target has disadvantage on its next saving throw.", "card": "+3 dice · disadvantage on their next save" }
+      ]
+    },
+    {
+      "name": "Numb Resolve",
+      "type": "Supportive",
+      "description": "They have stopped expecting to win, and so they stopped being afraid of losing.",
+      "effect": { "text": "Each of the seal's targets can't be Frightened until the end of its next turn, and gains temporary hit points equal to your Verum Modifier + the slot level.",
+        "card": "The seal's targets: can't be Frightened until their next turn · {VM} + {SLOT} temp HP",
+        "mech": { "deny": [ "fear" ], "buff": { "who": "the seal's targets", "tempHP": "VM + slot level" } } },
+      "upgrades": [
+        { "text": "Level 5+: The immunity lasts 1 minute and extends to Charmed.", "card": "1 min · Charmed too" },
+        { "text": "Level 11+: While at half their hit points or fewer, the targets add your Verum Modifier to their damage rolls for the minute.", "card": "At half HP or less, +{VM} damage for the minute" }
+      ]
+    },
+    {
+      "name": "Heavy Heart",
+      "type": "Control",
+      "description": "Their feet feel the weight before their minds do.",
+      "effect": { "text": "A creature hit by or failing the seal has its speed reduced by 10 feet and can't take reactions until the start of its next turn.",
+        "card": "−10 ft speed · no reactions until their next turn",
+        "mech": { "penalty": { "speed": -10 }, "deny": [ "reactions" ] } },
+      "upgrades": [
+        { "text": "Level 5+: It also can't take the Dash action on its next turn.", "card": "No Dash next turn" },
+        { "text": "Level 11+: It has disadvantage on attack rolls until the end of its next turn.", "card": "Disadvantage on attacks until the end of their next turn" }
+      ]
+    }
+  ],
+  "schema": 2
+}

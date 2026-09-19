@@ -1,0 +1,184 @@
+{
+  "id": "crystal",
+  "name": "Crystal",
+  "icon": "💎",
+  "opposing": "decay",
+  "description": "Crystalline Structure, Resonance, Refraction, Dream-matter, Memory. Crystal is ordered, resonant matter — the lattice that holds light, sound and even thought in perfect arrangement. Where Metal endures by density and Bones by structure, Crystal endures by pattern: it refracts, it rings, it remembers. Alone among the Cognitions of matter it can hold a thing that is not matter at all — light, force, the shape of a spell — sealed in a facet to be drawn out again. It is the truest enemy of Decay, and the Crystal Masters who work Aeon Crystals are, knowingly or not, its students.",
+  "savingThrow": "Constitution",
+  "damageType": "Piercing",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Brittle", "card": "the next hit against it deals +1d8 piercing" },
+      "major":  { "name": "Crystal-bound", "card": "Restrained by living crystal" },
+      "severe": { "name": "Encased", "card": "Petrified in crystal — a hit of {DC}+ damage cracks it free" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Prismatic Shards",
+        "description": "The light does not pass through. It chooses a second throat to open.",
+        "tiers": [
+          { "text": "The damage becomes piercing and increases by 1 additional die. A facet of each wound refracts a beam to one other creature within 15 feet of the target, dealing half the seal's damage — the refraction rides the same roll, no second save.",
+            "card": "+1 die · damage becomes Piercing · each wound refracts HALF the damage to 1 more creature within 15 ft",
+            "mech": { "damage": { "bonusDice": 1, "type": "piercing" }, "rider": { "damage": "half", "type": "piercing", "when": "refracted to 1 creature within 15 ft" } } },
+          { "text": "The damage increases by 2 additional dice and the beam refracts to two other creatures. A lodged shard works deeper: each struck creature takes Twice your Verum Modifier in piercing damage at the start of its next turn.",
+            "card": "+2 dice · refracts to 2 creatures · 2×VM piercing at the start of their next turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "piercing" }, "rider": { "damage": "2×VM", "type": "piercing", "when": "start of their next turn" } } },
+          { "text": "The damage increases by 3 additional dice. When the seal drops a creature to 0 hit points or scores a critical hit, the body crystallizes and bursts: every other creature within 10 feet of it takes half the seal's damage as piercing.",
+            "card": "+3 dice · a creature dropped or crit bursts — half the damage to everyone within 10 ft",
+            "mech": { "damage": { "bonusDice": 3, "type": "piercing" } } },
+          { "text": "Cascade. The damage increases by 4 additional dice. The light no longer stops: each wound refracts to every enemy within 15 feet of it, and each creature the seal drops bursts and refracts onward in turn — a chain of breaking light that ends only when nothing is left to catch it.",
+            "card": "+4 dice · CASCADE — refracts to EVERY enemy within 15 ft · each one dropped bursts and refracts onward",
+            "mech": { "damage": { "bonusDice": 4, "type": "piercing" } } }
+        ]
+      },
+      {
+        "name": "Resonant Overload",
+        "description": "Every struck note is stored. You are only waiting to hear the chord.",
+        "tiers": [
+          { "text": "The damage becomes piercing and increases by 2 additional dice. Each creature it damages gains 1 Resonance (max stacks equal to your Verum Modifier) for 1 minute. As a bonus action you may shatter one creature's Resonance: it takes 1d6 piercing per stack, no save — the chord was struck when the stacks landed.",
+            "card": "+2 dice · +1 Resonance (max {VM}) · bonus action: shatter for 1d6 piercing per stack, no save",
+            "mech": { "damage": { "bonusDice": 2, "type": "piercing" }, "conditions": [ { "name": "Resonance", "duration": "1 minute", "max": "VM" } ] } },
+          { "text": "The damage increases by 3 additional dice, each hit lays 2 Resonance, and shattering deals 1d8 per stack.",
+            "card": "+3 dice · +2 Resonance a hit · shatter 1d8 per stack",
+            "mech": { "damage": { "bonusDice": 3, "type": "piercing" }, "conditions": [ { "name": "Resonance" } ] } },
+          { "text": "The damage increases by 4 additional dice and shattering deals 1d10 per stack. When a shattered creature drops to 0 hit points, the resonance jumps: the nearest creature within 15 feet gains Resonance equal to half the stacks shattered.",
+            "card": "+4 dice · shatter 1d10 per stack · a kill jumps half the stacks to the nearest creature",
+            "mech": { "damage": { "bonusDice": 4, "type": "piercing" } } },
+          { "text": "The Chord. The damage increases by 6 additional dice. A creature at maximum Resonance that takes damage from any source shatters at once, and the burst lays 2 Resonance on every creature within 10 feet of it. A single struck note can bring down a hall.",
+            "card": "+6 dice · THE CHORD — at max Resonance, ANY damage shatters it · the burst resonates everything within 10 ft",
+            "mech": { "damage": { "bonusDice": 6, "type": "piercing" } } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Resonant Reliquary",
+        "description": "A crystal keeps what the world was careless enough to spill.",
+        "tiers": [
+          { "text": "The target carries a Reliquary for 1 hour, attuned to a damage type you choose. It has resistance to that type, and the crystal stores whatever that resistance prevents, up to Twice your Verum Modifier. As an action it can hurl the store as a burst (30 feet, 10-foot radius, that type).",
+            "card": "1 hr: resistance to one type · the crystal banks what it stops (max 2×VM) · action: hurl it, 10-ft burst",
+            "mech": { "buff": { "who": "target", "resist": "a chosen damage type" } } },
+          { "text": "The Reliquary stores up to Five Times your Verum Modifier, and can also catch one spell effect that targets its bearer: the spell fails against it and waits in the crystal, to be released on the bearer's action with its original caster's numbers.",
+            "card": "Banks up to 5×VM · catches ONE spell aimed at the bearer, to be thrown back later" },
+          { "text": "You may seal one of your own spells or seals, up to your Verum Modifier in level, into the crystal instead of casting it. Its bearer releases it as an action, with your numbers.",
+            "card": "Seal one of your spells (level ≤ {VM}) into it — the bearer releases it later with your numbers" },
+          { "text": "A Vault of the Weave. The Reliquary holds any number of stored energies and sealed spells, lasts until used, and anything drawn from it is cast one slot level higher.",
+            "card": "A VAULT OF THE WEAVE — holds everything, lasts until used · what comes out is one slot higher" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Crystalize",
+        "description": "The stillness is not death. It is worse — it is being kept.",
+        "tiers": [
+          { "text": "Living crystal erupts in a 10-foot radius and becomes difficult terrain. A creature that fails is Restrained until it breaks free with a Strength check against your DC as an action.",
+            "card": "10-ft crystal field, difficult terrain · fail: Restrained (Str check vs {DC} as an action to break)",
+            "mech": { "save": { "ability": "Constitution" }, "conditions": [ { "name": "Restrained", "escape": "Strength check vs Verum DC as an action" } ], "terrain": { "radius": 10 } } },
+          { "text": "The radius grows to 15 feet, and a Restrained creature takes Twice your Verum Modifier in piercing damage at the start of each of its turns as the crystal grows through it.",
+            "card": "15 ft · 2×VM piercing each turn while Restrained",
+            "mech": { "conditions": [ { "name": "Restrained", "tick": "2×VM piercing" } ], "terrain": { "radius": 15 } } },
+          { "text": "A creature that fails by 5 or more is Encased — Petrified in crystal rather than Restrained, until a single hit of damage equal to your DC or more cracks it free.",
+            "card": "Fail by 5+: ENCASED, Petrified until one hit of {DC}+ damage cracks it",
+            "mech": { "conditions": [ { "name": "Petrified", "escape": "a single hit of damage ≥ Verum DC" } ] } },
+          { "text": "The crystal answers you like a limb. For 1 minute, as a bonus action, you may move the field, raise spires that Restrain again a creature that failed the seal and broke free, or raise a crystal wall giving total cover. A creature Encased for the full minute is preserved in stasis — ageless and unaware — until the crystal is broken.",
+            "card": "1 min: bonus action to move it, raise spires (re-Restrain one who failed), or raise walls · a full minute Encased = stasis",
+            "mech": { "conditions": [ { "name": "Restrained" }, { "name": "Petrified" } ] } }
+        ]
+      },
+      {
+        "name": "Refraction Field",
+        "description": "Aim all you like. The room disagrees about where anyone is standing.",
+        "tiers": [
+          { "text": "Hanging facets fill a 15-foot radius for 1 minute. Ranged attacks that pass into or through it have disadvantage, and it is lightly obscured by scattered light.",
+            "card": "15-ft field, 1 min · ranged attacks into or through it at disadvantage · lightly obscured",
+            "mech": { "penalty": { "disadvantage": "ranged attacks into or through the field" } } },
+          { "text": "A creature that fails is Blinded until the end of its next turn, and as an action you may flare the field: every creature that failed and is still inside is Blinded again until the end of its next turn.",
+            "card": "Fail: Blinded until the end of their next turn · action: flare to Blind them again",
+            "mech": { "save": { "ability": "Constitution" }, "conditions": [ { "name": "Blinded", "duration": "until the end of its next turn" } ] } },
+          { "text": "The field redirects. Once per round, when a ranged attack from outside misses a creature inside, you reflect it at a creature of your choice in the field.",
+            "card": "1/round, a ranged miss from outside is reflected at a creature of your choice" },
+          { "text": "The facets drink the light of magic itself. A spell cast into or through the field is refracted unless its caster succeeds on a spellcasting check against your DC — its targets are rerolled at random among creatures in the field, friend or foe alike.",
+            "card": "Spells into it need a spellcasting check vs {DC} — or their targets are rerolled at random" }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Living Lattice",
+        "description": "What you grow does not rot. It rings when struck, and remembers.",
+        "tiers": [
+          { "text": "Your creations are living crystal: they resist piercing and slashing damage, can't be corroded or rot, and shed dim light you can turn on or off.",
+            "card": "Crystal creations: resist piercing and slashing · never rot or corrode · shed light at will" },
+          { "text": "Your Structures ring: you hear anything spoken within 30 feet of one while you're on the same plane. Your Constructs refract — a ranged attack that misses one is reflected at a creature within 10 feet of it.",
+            "card": "Hear through your Structures anywhere on the plane · a ranged miss on your Constructs reflects" },
+          { "text": "Your Objects remember: each may hold a memory of up to 1 minute, a spoken message, or one stored spell of up to your Verum Modifier in level, released by whoever holds it.",
+            "card": "Objects hold a memory, a message, or one stored spell (level ≤ {VM})" },
+          { "text": "A Structure grown from a 7th-level slot or higher is permanent, repairs itself fully each dawn, and can be attuned as an Aeon Crystal for Crystal'ology.",
+            "card": "7th+ Structures are permanent, self-mending, and count as Aeon Crystals" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Crystal'ology",
+        "description": "The quiet craft of the Crystal Masters.",
+        "tiers": [
+          { "text": "Grow a thumb-sized crystal that holds a light, a sound, or a sentence of speech until shattered. Or read any gem or crystal: where it was cut, and whether it holds anything.",
+            "card": "Grow a crystal that keeps a light, sound or sentence · read a gem's origin and contents",
+            "mech": { "utility": true } },
+          { "text": "Grow a pair of linked crystals: whatever is spoken to one is heard from the other, at any distance on the same plane, for 24 hours.",
+            "card": "Linked crystal pair — speak through them anywhere on the plane, 24 hrs",
+            "mech": { "utility": true } },
+          { "text": "Lay a memory of your own — up to 10 minutes — into a crystal, whole and exact. Anyone who holds it relives it. Or halt Decay in something the size of a room for a year.",
+            "card": "Store 10 minutes of your memory in a crystal · or halt decay in a room for a year",
+            "mech": { "utility": true } },
+          { "text": "Touch an Aeon Crystal and hear the fragment of the Collective it dreams — a question answered truly, once per crystal.",
+            "card": "Ask an Aeon Crystal one question — it answers truly, once",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Prism",
+      "type": "Offensive",
+      "description": "One wound, cut twice by the same light.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus piercing damage equal to one damage die of the primary effect's type (min 1d6), and the same beam refracts to one other creature within 10 feet of it, dealing that die again — no second save.",
+        "card": "+1 die piercing · the beam refracts to 1 more creature within 10 ft for the same die",
+        "mech": { "damage": { "dice": "1d6", "type": "piercing" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and the beam refracts to two creatures.", "card": "+2 dice · refracts to 2 creatures" },
+        { "text": "Level 11+: Three dice, and each refracted beam may split once more to a further creature within 10 feet.", "card": "+3 dice · every beam splits once more" }
+      ]
+    },
+    {
+      "name": "Reliquary",
+      "type": "Supportive",
+      "description": "Keep a splinter of it. They will want it later.",
+      "effect": { "text": "Each of the seal's targets carries a crystal splinter for 1 hour. As a reaction when it takes damage it may shatter it, reducing that damage by your Verum Modifier + the slot level — or as a bonus action, regain that many hit points.",
+        "card": "The seal's targets each hold a splinter, 1 hr: shatter it to stop {VM} + {SLOT} damage, or heal that much",
+        "mech": { "buff": { "who": "the seal's targets", "reduce": "VM + slot level, once" } } },
+      "upgrades": [
+        { "text": "Level 5+: The splinter holds Twice your Verum Modifier + the slot level.", "card": "Holds 2×VM + {SLOT}" },
+        { "text": "Level 11+: The splinter lasts until used, and shattering it also grants resistance to the damage's type until the end of the bearer's next turn.", "card": "Lasts until used · shattering it grants resistance to that type" }
+      ]
+    },
+    {
+      "name": "Brittle",
+      "type": "Control",
+      "description": "Half a statue already. The rest is only a matter of pressure.",
+      "effect": { "text": "A creature hit by or failing the seal has its speed reduced by 10 feet and is Brittle until the end of your next turn: the next attack to hit it deals +1d8 piercing as the crust shatters, ending the condition.",
+        "card": "−10 ft speed · Brittle: the next hit on them deals +1d8 piercing",
+        "mech": { "penalty": { "speed": -10 }, "conditions": [ { "name": "Brittle" } ] } },
+      "upgrades": [
+        { "text": "Level 5+: −15 feet, and the shatter deals +2d8.", "card": "−15 ft · shatter +2d8" },
+        { "text": "Level 11+: A critical hit on a Brittle creature also leaves it Restrained until the end of its next turn.", "card": "A crit on them also Restrains until the end of their next turn" }
+      ]
+    }
+  ],
+  "schema": 2
+}

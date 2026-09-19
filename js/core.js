@@ -25,6 +25,7 @@ const state = {
   dmgRef:      "overview", // which damage type the Damage tab is reading
   filter:      null,       // domain filter, shared by both rails; null = all
   phase:       0,          // where a cycling Core (Lunar) stands in its cycle
+  sealName:    "",         // the player's own name for the seal (optional)
   track:       { marks: [], now: "gold" }, // a tracker Core (Sun): activations logged this window, and this one
 };
 
@@ -102,6 +103,7 @@ function resolve(str) {
     .replace(/2\s*×\s*\{VM\}\s*\+\s*\{PB\}/g, `${2*vm + pb}`)
     .replace(/\{VM\}\s*\+\s*\{PB\}/g, `${vm + pb}`)
     .replace(/\{PB\}\s*\+\s*\{VM\}/g, `${vm + pb}`)
+    .replace(/\{VM\}\s*\+\s*\{SLOT\}/g, `${vm + state.slotLevel}`)
     .replace(/(\d+)\s*×\s*\{SLOT\}/g, (m, n) => `${(+n) * state.slotLevel}`)
     .replace(/\{SLOT\}/g, `${state.slotLevel}`)
     .replace(/\{DC\}/g, `DC ${dc}`)

@@ -343,22 +343,23 @@
       "type": "Supportive",
       "description": "Biology accelerates where it is needed most — minor wounds closing of their own accord as the body's repair process is briefly redirected toward an ally.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet regains hit points equal to your spellcasting modifier + your proficiency bonus as minor wounds close of their own accord.",
-        "card": "An ally within 30 ft regains {VM}+{PB}",
+        "text": "When the primary effect resolves, each of its targets regains hit points equal to your Verum Modifier + your Proficiency Bonus as minor wounds close of their own accord.",
+        "card": "The seal's targets each regain {VM} + {PB} HP",
         "mech": {
           "heal": {
-            "amount": "your spellcasting modifier"
+            "amount": "VM + PB",
+            "who": "each of the seal's targets"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The healing increases to twice your spellcasting modifier + your proficiency bonus, and the ally also removes one condition affecting them as the biological surge pushes the ailment out.",
-          "card": "Healing doubles · also removes one condition"
+          "text": "Level 5+: The healing becomes Twice your Verum Modifier + your Proficiency Bonus, and each target also removes one condition affecting it.",
+          "card": "Heal 2×VM + {PB} · each sheds one condition"
         },
         {
-          "text": "You may choose two allies to receive this benefit, and each also removes one Wound — the flesh knitting past surface damage into deeper repair.",
-          "card": "Two allies · each also removes one Wound"
+          "text": "Level 11+: Each target also removes one Wound — the flesh knitting past surface damage into deeper repair.",
+          "card": "Each also loses one Wound"
         }
       ]
     },

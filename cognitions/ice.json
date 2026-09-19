@@ -425,30 +425,23 @@
       "type": "Supportive",
       "description": "A thin shell of ice forms between you and the world's heat.",
       "effect": {
-        "text": "When the primary effect resolves, one ally of your choice within 30 feet gains temporary hit points equal to your spellcasting modifier + your proficiency bonus. While these temporary HP remain, the ally has resistance to fire damage.",
-        "card": "An ally within 30 ft gains VM+prof temp HP and fire resistance while it lasts",
+        "text": "When the primary effect resolves, each of its targets gains temporary hit points equal to your Verum Modifier + your Proficiency Bonus. While these temporary hit points remain, it has resistance to fire damage.",
+        "card": "The seal's targets: {VM} + {PB} temp HP · resistance to fire while it holds",
         "mech": {
-          "damage": {
-            "type": "fire"
-          },
           "heal": {
-            "tempHP": true
+            "tempHP": true,
+            "who": "each of the seal's targets"
           }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Temporary HP increases to twice your spellcasting modifier + your proficiency bonus, and the ally also gains resistance to cold damage.",
-          "card": "Temp HP doubles · also cold resistance",
-          "mech": {
-            "damage": {
-              "type": "cold"
-            }
-          }
+          "text": "Level 5+: The temporary hit points become Twice your Verum Modifier + your Proficiency Bonus, and each target also has resistance to cold damage.",
+          "card": "Temp HP 2×VM + {PB} · resistance to cold too"
         },
         {
-          "text": "Level 11+: You may choose two allies to receive this benefit, and each is additionally immune to being set on fire or affected by environmental heat while the temporary HP persists.",
-          "card": "Two allies · each also immune to catching fire or environmental heat"
+          "text": "Level 11+: While the temporary hit points persist, each target is immune to being set on fire and to environmental heat.",
+          "card": "Immune to burning and environmental heat while it holds"
         }
       ]
     },

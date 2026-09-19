@@ -328,23 +328,26 @@
       "type": "Supportive",
       "description": "Something has to carry the weight. You volunteer.",
       "effect": {
-        "text": "When the primary effect resolves, one ally within 30 feet cannot be moved or knocked Prone against its will and has advantage on Strength saving throws until the start of your next turn. You take its weight: your own speed is halved for the same time.",
-        "card": "An ally within 30 ft can't be moved or knocked Prone, advantage on Str saves — but your speed is halved until your next turn",
+        "text": "When the primary effect resolves, each of its targets cannot be moved or knocked Prone against its will and has advantage on Strength saving throws until the start of your next turn. You take their weight: your own speed is halved for the same time.",
+        "card": "The seal's targets can't be moved or knocked Prone and have advantage on Str saves until your next turn · your speed is halved",
         "mech": {
-          "buff": { "who": "one ally within 30 ft", "advantage": "Strength saving throws" },
-          "deny": [ "forced movement", "knockdown" ],
-          "cost": { "speed": "your speed halved" }
+          "deny": [
+            "forced movement",
+            "knockdown"
+          ],
+          "buff": {
+            "advantage": "Strength saving throws"
+          }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: You may steady two allies, and the effect lasts 1 minute.",
-          "card": "Two allies · lasts 1 minute"
+          "text": "Level 5+: The effect lasts 1 minute.",
+          "card": "It lasts 1 minute"
         },
         {
-          "text": "Level 11+: The weight no longer slows you — your speed is unaffected — and each steadied ally takes no damage from falling.",
-          "card": "No more speed cost · steadied allies take no falling damage",
-          "mech": { "deny": [ "forced movement", "knockdown", "falling damage" ] }
+          "text": "Level 11+: The weight no longer slows you — your speed is unaffected — and each target takes no damage from falling.",
+          "card": "No more speed cost · they take no falling damage"
         }
       ]
     },

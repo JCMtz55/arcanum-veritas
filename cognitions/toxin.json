@@ -371,8 +371,8 @@
       },
       "upgrades": [
         {
-          "text": "The immunity and advantage extend for 1 minute, and one ally within 30 feet who can see you gains the same benefit — the resilience spreading through proximity to the caster.",
-          "card": "Lasts 1 min · an ally within 30 ft shares it"
+          "text": "Level 5+: The immunity and advantage extend for 1 minute, and each of the seal's targets gains the same benefit.",
+          "card": "Lasts 1 min · the seal's targets gain it too"
         },
         {
           "text": "While the effect is active, any creature that attempts to Poison you or the affected ally must first succeed on a Constitution saving throw against your Verum DC or the attempt fails entirely — the toxin in your system recognizing and neutralizing the incoming one.",

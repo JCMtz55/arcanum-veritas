@@ -17,6 +17,23 @@ function gatherRiders(tier) {
   return { riders, missing };
 }
 
+// Sigils that reach more of the seal's targets (Civilization's Civic Ward: mech.targets) — a later
+// live part restates the number rather than stacking, like bonus dice
+function sigilTargets(tier) {
+  let n = 0;
+  gatherRiders(tier).riders.forEach(r => {
+    let add = 0;
+    r.parts.forEach(p => { const m = partMech(p)?.targets; if (typeof m === "number") add = m; });
+    n += add;
+  });
+  return n;
+}
+function withSigilTargets(v, tier) {
+  const n = sigilTargets(tier); if (!n || v == null) return v;
+  const m = String(v).match(/^(\d+)/);
+  return m ? `${+m[1] + n} (${m[1]} +${n} Sigil)` : v;
+}
+
 // Trim an upgrade line's "Level 5+:" prefix — the card already filters by tier
 function stripLvl(t) { return String(t).replace(/^\s*Level\s+\d+\+\s*:\s*/i, ""); }
 
@@ -98,7 +115,8 @@ function buildPlayCard(coreCog, tier) {
   const scaleRow = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
   const cell = (col) => {
     const i = sub.columns.indexOf(col);
-    return i >= 0 && scaleRow ? resolve(scaleRow[i]) : null;
+    const v = i >= 0 && scaleRow ? resolve(scaleRow[i]) : null;
+    return col === "Targets" ? withSigilTargets(v, tier) : v;
   };
 
   // ── Header
@@ -108,7 +126,8 @@ function buildPlayCard(coreCog, tier) {
   if (sub.concentration) bits.push("Concentration");
   if (sub.reaction) bits.push("REACTION");
   if (sub.saveDisadvantage) bits.push("first save at DISADVANTAGE");
-  L.push(`${(coreEntry?.name || "—").toUpperCase()} · ${cd.label} — ${state.compSub}`);
+  const nm = (state.sealName || "").trim();
+  L.push(`${nm ? nm.toUpperCase() + " · " + (coreEntry?.name || "—") : (coreEntry?.name || "—").toUpperCase()} · ${cd.label} — ${state.compSub}`);
   L.push(bits.join(" · "));
 
   // ── The one line of math that matters
@@ -341,7 +360,7 @@ function buildPlayCardHTML(coreCog, tier) {
   const isAttack = state.compSub === "Direct Attack";
 
   const row  = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
-  const cell = (c) => { const i = sub.columns.indexOf(c); return i >= 0 && row ? resolve(row[i]) : null; };
+  const cell = (c) => { const i = sub.columns.indexOf(c); const v = i >= 0 && row ? resolve(row[i]) : null; return c === "Targets" ? withSigilTargets(v, tier) : v; };
 
   // The numbers you roll, largest first
   let nums = "";
@@ -384,8 +403,8 @@ function buildPlayCardHTML(coreCog, tier) {
   denies.forEach(d => tags += `<span class="t">no ${esc(d)}</span>`);
 
   let h = `<div class="card">
-    <div class="c-name">${esc(coreEntry?.name || "—")}</div>
-    <div class="c-sub">${esc(cd.label)} ${esc(state.compSub)} · ${ORDINALS[state.slotLevel]} slot · level ${state.charLevel}</div>
+    <div class="c-name">${esc((state.sealName || "").trim() || coreEntry?.name || "—")}</div>
+    <div class="c-sub">${(state.sealName || "").trim() ? esc(coreEntry?.name || "") + " · " : ""}${esc(cd.label)} ${esc(state.compSub)} · ${ORDINALS[state.slotLevel]} slot · level ${state.charLevel}</div>
     <div class="c-nums">${nums}</div>
     ${tags ? `<div class="c-tags">${tags}</div>` : ""}
     ${coreCog?.cost ? `<div class="c-cost">${esc(cardLine(coreCog.cost))}</div>` : ""}
@@ -443,7 +462,7 @@ function buildFullRef(coreCog, tier) {
     : "";
 
   const lines = [
-    `ARCANUM VERITAS — ${ORDINALS[state.slotLevel].toUpperCase()} LEVEL SLOT · Char Lv ${state.charLevel}`,
+    `${(state.sealName || "").trim() ? state.sealName.trim().toUpperCase() + " — " : ""}ARCANUM VERITAS — ${ORDINALS[state.slotLevel].toUpperCase()} LEVEL SLOT · Char Lv ${state.charLevel}`,
     "═".repeat(52),
     `Composition  : ${cd.label} · ${state.compSub}${sub.shape ? ` · ${SHAPES[state.shape].label}` : ""}`,
     `Manner       : ${MANNERS[state.manner].label}${state.manner!=="standard" ? ` — ${MANNERS[state.manner].desc}` : ""}`,

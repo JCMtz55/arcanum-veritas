@@ -1,0 +1,209 @@
+{
+  "id": "hollowing",
+  "name": "Hollowing",
+  "icon": "🫥",
+  "opposing": "night",
+  "description": "Erasure, Stasis, Anti-Imagination, Termination, The Uncreated. Hollowing is not a weapon — it is the absence of argument. Before Rhea was broken there was only this: the perfect Hollowness the One Above All intended as its masterwork, possibility answered once and for all with no. Those attuned reach into the gap beneath all things and pull that design forward. Dreams do not shatter in its presence; they cease to have occurred. Magic does not fail; it forgets what it was trying to become. It is the only Cognition that does not express — it unexpresses — and the only one that strikes at a creature's Cognitions themselves.",
+  "savingThrow": "Cognition",
+  "damageType": "Void",
+  "incompatible": [ "creation" ],
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Flattened", "card": "can't gain advantage or Inspiration" },
+      "major":  { "name": "Fractured", "card": "one of its Cognitions is Fractured" },
+      "severe": { "name": "Answered", "card": "Stunned — its intention to act is caught before it becomes an action" }
+    }
+  },
+  "mastery": {
+    "title": "Broken Abilities",
+    "text": "Hollowing forces a Cognition saving throw — a save against the suppression of one's own attuned Cognitions. Whatever the Verum, a failure always Fractures at least one Cognition.",
+    "traits": [
+      { "name": "Cognition Save", "level": 1,
+        "text": "A Cognition saving throw is Intelligence modifier, + proficiency bonus if proficient in Intelligence saves, + the number of Cognitions the creature has attuned. A creature with no attuned Cognitions makes it at disadvantage — there is nothing for the Hollowness to meet.",
+        "card": "Cognition save = Int mod (+PB if proficient) + attuned Cognitions · none attuned: disadvantage" },
+      { "name": "Fractured", "level": 1,
+        "text": "A Fractured Cognition can only be used as a Core, never as a Sigil, and each time it is used its wielder rolls a d6: on a 1–2 it fires at half potency and the wielder suffers the Arcanum Veritas debuff. It mends after a long rest, or when its wielder uses a bonus action and succeeds on a Wisdom save against {DC}.",
+        "card": "Fractured: Core only · d6 on each use, 1–2 = half potency + AV debuff · mends on a long rest or a bonus-action Wis save vs {DC}" },
+      { "name": "Shattered", "level": 5,
+        "text": "A Cognition Fractured again is Shattered: fully inert until its wielder finishes a short rest and expends a spell slot of 3rd level or higher to rebuild it.",
+        "card": "Fractured twice = Shattered: inert until a short rest and a 3rd+ slot" },
+      { "name": "Hollowing Insomnia", "level": 17,
+        "text": "A creature whose every Cognition is Shattered at once by your seal suffers Stage One Hollowing Insomnia (or advances one stage) — the collapse of its imaginative architecture does real cosmological damage. This happens at most once per seal.",
+        "card": "Every Cognition Shattered at once = Stage One Hollowing Insomnia (once per seal)" }
+    ]
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Quiet Erasure",
+        "description": "You do not silence the dream. You make it so the dream was never, in that moment, something that could have been.",
+        "tiers": [
+          { "text": "The damage becomes Void. A creature that fails loses any Inspiration it carries, and one Cognition of your choice is Fractured until the end of your next turn. On a success it loses only its Inspiration.",
+            "card": "Damage becomes Void · fail: lose Inspiration, 1 Cognition Fractured until the end of your next turn · success: lose Inspiration",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+          { "text": "A creature that fails has two Cognitions of your choice Fractured — now until mended — and can't gain Inspiration or advantage on Dream-linked checks until the end of your next turn. On a success, one Cognition is Fractured.",
+            "card": "Fail: 2 Cognitions Fractured, no Inspiration or Dream advantage · success: 1 Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 2 } ], "deny": [ "Inspiration" ] } },
+          { "text": "A creature that fails has one Cognition of your choice Shattered and up to two others Fractured. On a success, two are Fractured. A creature with no Cognitions that fails is Stunned until the end of its next turn instead — there was nothing to take, so the Hollowness takes the moment.",
+            "card": "Fail: 1 Cognition Shattered + 2 Fractured (none attuned: Stunned) · success: 2 Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Shattered", "count": 1 }, { "name": "Fractured", "count": 2 } ] } },
+          { "text": "The Complete Erasure. A creature that fails has every attuned Cognition Shattered, and restoration below a divine miracle can't mend them sooner than a long rest. Even on a success, one is Shattered and two are Fractured.",
+            "card": "THE COMPLETE ERASURE — fail: EVERY Cognition Shattered · success: 1 Shattered + 2 Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Shattered", "count": "all" } ] } }
+        ]
+      },
+      {
+        "name": "The Final Answer",
+        "description": "Not death. Not injury. Something quieter and more permanent: the end of a particular kind of wanting.",
+        "tiers": [
+          { "text": "The damage becomes Void. A creature that fails has one stated intention foreclosed — a readied action simply is not, a spell it is concentrating on ends, or a creature it chose to attack can't be located by it until the end of its next turn. The Cognition tied to that intention, if any, is Fractured.",
+            "card": "Damage becomes Void · fail: one intention foreclosed (readied action, concentration, or its chosen foe) · its Cognition Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+          { "text": "A creature that fails also has one Virtue, bond, or named class feature suppressed for 1 hour — no mechanical benefit tied to it works. If that feature draws on a Cognition, the Cognition is Shattered while it lasts.",
+            "card": "Fail: one Virtue, bond or class feature suppressed 1 hr — its Cognition Shattered meanwhile",
+            "mech": { "damage": { "type": "void" }, "deny": [ "one Virtue, bond or class feature" ] } },
+          { "text": "A creature that fails has its Greatest Wish touched for 24 hours: it can't escalate a Grimm Stage, can't use a Cognition-rated 5th-level effect or higher, and every attuned Cognition is Fractured. On a success, only the previous tier applies.",
+            "card": "Fail: Greatest Wish touched 24 hrs — no Grimm escalation, nothing 5th-level+, EVERY Cognition Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": "all" } ] } },
+          { "text": "The Sealing. A creature that fails has its Greatest Wish sealed for 1 week, suffering the previous tier the whole time. At each dawn of the sealing it repeats the Cognition save; each failure advances Hollowing Insomnia one stage, and the third failure Shatters one random Cognition permanently — only a Wish or divine restoration brings it back.",
+            "card": "THE SEALING — Greatest Wish sealed 1 week · a Cognition save each dawn: fail = Hollowing Insomnia advances · 3rd fail = a Cognition Shattered forever",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Hollowing Insomnia", "duration": "1 week", "escape": "Cognition save at each dawn" } ] } }
+        ]
+      },
+      {
+        "name": "The Wound Reversed",
+        "description": "Before Rhea was broken, there was no Imagination. For one terrible moment, you restore that. It is not taught; it appears, fully formed, in those who can bear it.",
+        "tiers": [
+          { "text": "The Wound only whispers. The damage becomes Void, and every creature in the area — ally or enemy, but not other Hollowing wielders — that fails has one Cognition of its highest tier Fractured. The true Surge awakens at level 11.",
+            "card": "Damage becomes Void · EVERY creature in the area that fails (allies too): highest Cognition Fractured",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+          { "text": "Every creature in the area that fails has two Cognitions Fractured, and can't use Arcanum Veritas until the start of your next turn.",
+            "card": "Everyone who fails: 2 Cognitions Fractured, no Arcanum Veritas until your next turn",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 2 } ], "deny": [ "Arcanum Veritas" ] } },
+          { "text": "Hollowness Surge. The area becomes a Surge until the start of your next turn. Every creature in it that fails has every attuned Cognition Fractured; one that succeeds has its highest-tier Cognition Fractured.",
+            "card": "HOLLOWNESS SURGE — fail: EVERY Cognition Fractured · success: the highest one Fractured · allies too",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": "all" } ] } },
+          { "text": "The Wound Reversed. The Surge holds for 1 minute (Concentration). At the start of each of your turns every enemy inside repeats the Cognition save: on a failure every Cognition it has is Shattered, on a success every one is Fractured — nothing inside comes through whole. Allies inside suffer the previous tier once. When it ends, every creature that ended it with all its Cognitions Shattered can't use Arcanum Veritas until it finishes a long rest.",
+            "card": "THE WOUND REVERSED — 1 min: enemies repeat each turn · fail: ALL Shattered, success: ALL Fractured · all Shattered at the end: no Arcanum Veritas until a long rest",
+            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Shattered", "count": "all", "duration": "1 minute", "escape": "none — repeats each of your turns" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Uncreated Armor",
+        "description": "You wrap the target in the logic of Hollowness: it is already what it will be. There is no imaginative gap for change to enter.",
+        "tiers": [
+          { "text": "The target gains resistance to psychic damage and advantage on Cognition saves. Illusions, charms and dream-sourced attacks that would need to imagine it as a target fail to register it unless their source succeeds on a Cognition save against your DC.",
+            "card": "Resistance to psychic · advantage on Cognition saves · illusions, charms and dream attacks miss it unless their source makes a Cognition save",
+            "mech": { "buff": { "who": "target", "resist": "psychic", "advantage": "Cognition saving throws" } } },
+          { "text": "It can't be Frightened, has advantage on saves against Vile-emotion effects, and a curse, polymorph, compulsion or Cognition-borne condition aimed at it is foreclosed unless its source succeeds on a Cognition save — failing, the source's Cognition is Fractured.",
+            "card": "Can't be Frightened · advantage vs Vile effects · curses, polymorphs, compulsions foreclosed (source's Cognition Fractured)",
+            "mech": { "deny": [ "fear" ], "buff": { "who": "target", "advantage": "saves against Vile-emotion effects" } } },
+          { "text": "For 1 hour, the target is immune to outside Dream Exhaustion and to Cognition effects from creatures with fewer attuned Cognitions than it. The first time each turn a creature targets it with a spell or ability, that creature makes a Cognition save — failing, the targeting fails, the action is wasted, and its Cognition Fractures.",
+            "card": "1 hr: immune to outside Dream Exhaustion and to lesser Cognition-bearers · 1st targeting each turn: Cognition save or wasted + Fractured",
+            "mech": { "deny": [ "outside Dream Exhaustion" ] } },
+          { "text": "Fixed Point. For 1 minute (Concentration) the target is resolved into exactly what it is: immune to the first four magical damage instances, conditions and effects it would receive each round. A creature that seals Arcanum Veritas against it makes a Cognition save — failing, the whole seal fails, every Cognition in it Fractures, and its caster suffers the Arcanum Veritas debuff.",
+            "card": "FIXED POINT — 1 min: ignores the first 4 magical effects each round · an AV seal against it: Cognition save or the seal fails, Fractured, debuffed" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Stasis Field",
+        "description": "The original design of the world, briefly restored. In here, nothing becomes. Nothing grows. Nothing changes its mind.",
+        "tiers": [
+          { "text": "The area enters a Hollowness State for 1 minute. Enemies concentrating inside must succeed on a DC 13 Concentration check at the start of each of their turns. A creature that fails has the Cognition it used most recently Fractured, and each creature starting its turn inside repeats the Cognition save.",
+            "card": "1 min · DC 13 Concentration each turn inside · fail: its most recent Cognition Fractured · repeat each turn inside",
+            "mech": { "save": { "ability": "Cognition" }, "conditions": [ { "name": "Fractured", "count": 1, "escape": "repeats each turn it starts inside" } ] } },
+          { "text": "A creature that fails can't expend spell slots or Grimm Slots until the start of its next turn — sealed, not suppressed — and any Cognition it uses inside Fractures on use.",
+            "card": "Fail: no spell slots or Grimm Slots until its next turn · Cognitions used inside Fracture on use",
+            "mech": { "deny": [ "spell slots", "Grimm Slots" ] } },
+          { "text": "A creature that fails is Stunned until the end of its next turn as the field catches its intention before it becomes an action, and the Cognition it used last round is Shattered. The field lasts 10 minutes.",
+            "card": "Fail: Stunned until the end of their next turn · last round's Cognition Shattered · 10 min",
+            "mech": { "conditions": [ { "name": "Stunned", "duration": "until the end of its next turn" }, { "name": "Shattered", "count": 1 } ] } },
+          { "text": "Perfect Stasis. For 1 minute (Concentration), enemy spell slots inside count as one level lower, their Grimm Slots do nothing unless they succeed on the Cognition save as they spend them, and at the start of each of your turns one enemy of your choice inside fails automatically and suffers the previous tier.",
+            "card": "PERFECT STASIS — enemy slots one level lower · Grimm Slots void without a save · each of your turns one enemy fails automatically",
+            "mech": { "conditions": [ { "name": "Stunned" }, { "name": "Shattered", "count": 1 } ] } }
+        ]
+      },
+      {
+        "name": "Hollow Ground",
+        "description": "Terrain should be neutral. You make it an argument: nothing new can take root here.",
+        "tiers": [
+          { "text": "The area becomes anti-imaginative ground for 1 minute. Magic that would alter the terrain needs a spellcasting check against your DC to work. A creature that fails, or enters for the first time on a turn and fails, has its most recently used Cognition Fractured while it stays and for 1 round after.",
+            "card": "1 min · terrain magic needs a check vs {DC} · fail (on cast or entering): most recent Cognition Fractured while inside",
+            "mech": { "save": { "ability": "Cognition" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+          { "text": "Transmutation aimed at the ground fails outright. Creatures that failed regain only half from healing inside, and any Cognition they fire from inside Fractures on use.",
+            "card": "Transmutation on the ground fails · those who failed: half healing, Cognitions Fracture on use",
+            "mech": { "penalty": { "healing": "half" } } },
+          { "text": "The ground turns hostile to becoming. A Grimm ability used by a creature that failed is erased on use — the Slot is spent, nothing happens, its Cognition Shatters — and no creature on the ground benefits from its Vagabond Path. It lasts 10 minutes.",
+            "card": "Grimm abilities of those who failed erased on use (Cognition Shattered) · no Vagabond Paths · 10 min",
+            "mech": { "deny": [ "Grimm abilities", "Vagabond Path" ] } },
+          { "text": "Dead Ground. For 1 minute (Concentration), every spell slot expended inside produces nothing unless its caster succeeds on the Cognition save as it casts. At the start of each of your turns, choose one creature on the ground: its highest-tier Cognition counts as Shattered for 1 round, no save.",
+            "card": "DEAD GROUND — every spell inside needs a Cognition save or fizzles · each of your turns, one creature's highest Cognition Shattered, no save",
+            "mech": { "deny": [ "spellcasting without a Cognition save" ] } }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Unwriting",
+        "description": "Small answers of no, given to the world where it asked a question.",
+        "tiers": [
+          { "text": "Foreclose a trace: footprints, scent, a spoken word hanging in the air, or the lingering aura of a spell cast in the last hour simply were not. Or touch a door, lock or lid — no magic can open it for 1 hour.",
+            "card": "Erase a trace (tracks, scent, an hour-old aura) · or seal a door against magic 1 hr",
+            "mech": { "utility": true } },
+          { "text": "For 8 hours the target can't be found by divination, scrying or dream-sending — there is no imagined path that arrives at it. It can end this at will.",
+            "card": "8 hrs: no divination, scrying or dream-sending can find the target",
+            "mech": { "utility": true } },
+          { "text": "Hollow a place, up to a 60-foot cube, for 24 hours: no ritual can be completed there, no portal opens into it, and Insomnia can't be entered from it.",
+            "card": "24 hrs, 60-ft cube: no rituals, no portals in, no way into Insomnia",
+            "mech": { "utility": true } },
+          { "text": "Answer a Curse, a Blight, or a lingering magical condition with no: it ends. If it was laid by a Cognition, that Cognition in its caster is Fractured wherever they are.",
+            "card": "End a curse, blight or lasting magical condition — its source's Cognition Fractures",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Sealing Touch",
+      "type": "Control",
+      "description": "The seal arrives with the texture of finality — one small door closes behind it.",
+      "effect": { "text": "A creature hit by or failing the seal loses one instance of advantage it currently has, one stored Inspiration, or its reaction this round (your choice), and one Cognition of your choice is Fractured.",
+        "card": "Those who fail or are hit: lose advantage, Inspiration or their reaction · 1 Cognition Fractured",
+        "mech": { "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+      "upgrades": [
+        { "text": "Level 5+: Two Cognitions are Fractured, and the creature can't gain Inspiration until the start of your next turn.", "card": "2 Cognitions Fractured · no Inspiration until your next turn" },
+        { "text": "Level 11+: Its highest-tier Cognition is Shattered instead.", "card": "Its highest Cognition is Shattered instead" }
+      ]
+    },
+    {
+      "name": "The Flat",
+      "type": "Offensive",
+      "description": "Something emotional tried to happen. The Hollowness noted it and removed the texture.",
+      "effect": { "text": "On a hit or failed saving throw, the target's next Grimm ability, Arcanum Veritas seal, or emotion-based check is made at disadvantage, and the Cognition tied to it Fractures the moment it is used.",
+        "card": "Their next Grimm ability, AV seal or emotion check at disadvantage — and its Cognition Fractures on use",
+        "mech": { "penalty": { "disadvantage": "the next Grimm ability, Arcanum Veritas seal or emotion-based check" } } },
+      "upgrades": [
+        { "text": "Level 5+: It covers both its next Grimm ability and its next emotion-based check, Fracturing both Cognitions.", "card": "Covers the next Grimm ability AND the next emotion check" },
+        { "text": "Level 11+: The tied Cognition Shatters instead, and it can't have advantage on saves against Hollowing until the end of your next turn.", "card": "The tied Cognition Shatters · no advantage vs Hollowing until your next turn" }
+      ]
+    },
+    {
+      "name": "Erasure Mark",
+      "type": "Control",
+      "description": "The seal left a scar on possibility. One thing, in that space, will not be allowed to happen.",
+      "effect": { "text": "A creature hit by or failing the seal is marked for 1 minute. The first spell or Cognition effect it uses is sealed — its resource is spent, nothing happens, and any Cognition used in it is Fractured. Truesight, a DC {DC} Arcana check, or a Hollowing wielder can see the mark.",
+        "card": "Marked 1 min: its first spell or Cognition effect is sealed — spent, nothing happens, Cognition Fractured",
+        "mech": { "conditions": [ { "name": "Erasure Mark", "duration": "1 minute" } ] } },
+      "upgrades": [
+        { "text": "Level 5+: The mark seals two uses before fading.", "card": "Seals two uses" },
+        { "text": "Level 11+: Name one Cognition or effect type: the mark seals it three times, each Shattering that Cognition, and only Hollowing or Forerunner-level perception can see it.", "card": "Name a Cognition — sealed 3 times, each Shattering it · all but undetectable" }
+      ]
+    }
+  ],
+  "schema": 2
+}

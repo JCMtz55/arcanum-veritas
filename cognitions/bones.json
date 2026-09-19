@@ -362,18 +362,19 @@
       "type": "Supportive",
       "description": "Structure hardens where structure is needed most — a thin layer of calcified bone forming over skin to absorb what follows.",
       "effect": {
-        "text": "When the primary effect resolves, you or one ally within 30 feet gains temporary hit points equal to your proficiency bonus + your spellcasting modifier as a thin layer of calcified bone briefly forms over exposed skin.",
-        "card": "You or an ally within 30 ft: {PB}+{VM} temp HP from a bone layer",
+        "text": "When the primary effect resolves, each of its targets gains temporary hit points equal to your Proficiency Bonus + your Verum Modifier as a thin layer of calcified bone forms over exposed skin.",
+        "card": "The seal's targets: {PB} + {VM} temp HP of calcified bone",
         "mech": {
           "heal": {
-            "tempHP": true
+            "tempHP": true,
+            "who": "the seal's targets"
           }
         }
       },
       "upgrades": [
         {
-          "text": "The temporary HP increases to twice your proficiency bonus + your spellcasting modifier, and the ally also gains +1 to AC until the temporary HP is depleted.",
-          "card": "Temp HP doubles · +1 AC while any remains",
+          "text": "Level 5+: The temporary hit points double, and each target gains +1 AC while they last.",
+          "card": "Temp HP doubles · +1 AC while it lasts",
           "mech": {
             "buff": {
               "ac": 1
@@ -381,15 +382,8 @@
           }
         },
         {
-          "text": "You may choose two creatures to receive this benefit, and while the temporary HP remains, each is immune to being knocked prone — the bone layer keeping them grounded and stable.",
-          "card": "Two creatures · each immune to prone while the temp HP lasts",
-          "mech": {
-            "conditions": [
-              {
-                "name": "Prone"
-              }
-            ]
-          }
+          "text": "Level 11+: While the temporary hit points last, each target is immune to being knocked Prone and has resistance to piercing damage.",
+          "card": "While it holds: can't be knocked Prone · resistance to piercing"
         }
       ]
     },

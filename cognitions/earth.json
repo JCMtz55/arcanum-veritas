@@ -336,23 +336,30 @@
       "type": "Supportive",
       "description": "A gift that is also an anchor.",
       "effect": {
-        "text": "When the primary effect resolves, one creature within 30 feet cannot be moved against its will and ignores difficult terrain until the end of your next turn. While it holds the ground this way, its speed is halved.",
-        "card": "One creature within 30 ft can't be moved and ignores difficult terrain — but its speed is halved",
+        "text": "When the primary effect resolves, each of its targets cannot be moved against its will and ignores difficult terrain until the end of your next turn. While it holds the ground this way, its speed is halved.",
+        "card": "The seal's targets can't be moved and ignore difficult terrain until your next turn — but their speed is halved",
         "mech": {
-          "deny": [ "forced movement" ],
-          "penalty": { "speed": "halved" }
+          "deny": [
+            "forced movement"
+          ],
+          "penalty": {
+            "speed": "halved"
+          }
         }
       },
       "upgrades": [
         {
-          "text": "Level 5+: Choose up to two creatures. Each also has advantage on saving throws against being knocked Prone.",
-          "card": "Up to two creatures · each gets advantage vs Prone"
+          "text": "Level 5+: Each target also has advantage on saving throws against being knocked Prone.",
+          "card": "Each also gets advantage vs Prone"
         },
         {
-          "text": "Level 11+: The speed penalty is gone, and the chosen creatures cannot be teleported against their will either.",
+          "text": "Level 11+: The speed penalty is gone, and the targets cannot be teleported against their will either.",
           "card": "No more speed penalty · they can't be teleported either",
           "mech": {
-            "deny": [ "forced movement", "teleportation" ]
+            "deny": [
+              "forced movement",
+              "teleportation"
+            ]
           }
         }
       ]
