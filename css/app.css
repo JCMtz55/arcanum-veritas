@@ -147,6 +147,8 @@ i.dom-cosmical{color:var(--d-cosmical)}
   /* stacked, the columns size to their content — a flex-basis of 0 collapses them to nothing */
   .composer,.codex,.seal{flex:none;overflow:visible}
   .seal{border-left:0;border-top:1px solid var(--line)}
+  /* stacked, nothing scrolls inside the column — a sticky tray would float over the card */
+  .tray{position:static;max-height:none}
 }
 
 /* ── Composer blocks ──────────────────────────────────────── */
@@ -236,6 +238,45 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .n u{text-decoration:none;font-family:var(--sans);font-size:10px;color:var(--mute);opacity:.75}
 .n.atk b{color:var(--brass)} .n.dc b{color:var(--indigo)} .n.dmg b{color:var(--ember)}
 .n.dmg.abs{box-shadow:inset 0 0 0 1px var(--ember)} .n.dmg.abs i{color:var(--ember);font-weight:600}.c-tags{margin-top:3px}
+/* a chip you can throw — the card printed the number, the tray rolls it */
+.n.rollable{cursor:pointer;transition:border-color .12s,transform .06s}
+.n.rollable:hover{border-color:var(--bone2)}
+.n.rollable:active{transform:translateY(1px)}
+
+/* ── Dice tray ─────────────────────────────────────────────
+   Sits under the card, never inside it: the PNG export and print both skip it. */
+.tray{position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);
+  padding:9px 16px 12px;max-height:44vh;overflow:auto;z-index:4}
+.tray-h{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.tray-h b{font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--mute);flex:1}
+.tray-h .mini{margin-left:0}
+.roll{display:flex;align-items:baseline;gap:10px;padding:6px 9px;margin-bottom:5px;border-radius:7px;
+  background:var(--slate);border:1px solid var(--line)}
+.roll.new{border-color:var(--bone2)}
+.roll .rv{font-family:var(--sans);font-weight:700;font-size:19px;letter-spacing:-.02em;
+  min-width:44px;text-align:right;color:var(--bone)}
+/* a whole seal thrown at once: the sum leads, each type under it */
+.roll.total{display:block;padding:7px 9px 5px}
+.roll.total .rt{display:flex;align-items:baseline;gap:10px;padding-bottom:6px;margin-bottom:5px;
+  border-bottom:1px solid var(--line)}
+.roll.total .rt .rv{font-size:25px}
+.roll.total .rt .rb i{font-size:11.5px;color:var(--bone)}
+/* turn a throw you already made into a crit — it rolls the extra dice onto the same entry */
+.x2{margin-left:auto;align-self:center;padding:2px 8px;background:none;border:1px solid var(--line);
+  border-radius:999px;cursor:pointer;font-family:var(--sans);font-size:11px;color:var(--mute)}
+.x2:hover{color:var(--brass);border-color:var(--brass)}
+.roll.total .rt{gap:10px}
+.rp{display:flex;align-items:baseline;gap:10px;padding:2px 0}
+.rp .rv{font-family:var(--sans);font-weight:700;font-size:15px;min-width:44px;text-align:right}
+.rp.dmg .rv{color:var(--ember)} .rp.heal .rv{color:var(--verdant)}
+.roll .rb{display:flex;flex-direction:column;gap:1px;min-width:0}
+.roll .rb i{font-style:normal;font-family:var(--sans);font-size:11px;color:var(--bone2)}
+.roll .rb u{text-decoration:none;font-family:var(--sans);font-size:10px;color:var(--mute);
+  word-break:break-word;line-height:1.35}
+.roll.dmg   .rv{color:var(--ember)}
+.roll.heal  .rv{color:var(--verdant)}
+.roll.total .rt .rv{color:var(--bone)}
+@media print{.tray{display:none}}
 .t{display:inline-block;font-family:var(--sans);font-size:10.5px;padding:3px 8px;margin:0 5px 5px 0;
   border-radius:999px;background:var(--slate);border:1px solid var(--line);color:var(--bone2)}
 .t.hot{color:var(--ember);border-color:#6b3229}

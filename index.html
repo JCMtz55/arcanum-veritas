@@ -58,11 +58,14 @@
       <h2 id="sealTitle">The seal</h2>
       <button class="mini on" id="mPlay" onclick="setSumMode('play')">Play</button>
       <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
+      <button class="mini" onclick="rollSeal()" title="Roll the seal's dice — every damage and healing number, added up (R)">Roll</button>
+      <button class="mini" onclick="rollSeal(true)" title="Roll it as a critical hit — double dice (shift+R, or shift-click a chip)">Crit</button>
       <button class="mini" onclick="copySum()">Copy</button>
       <button class="mini" onclick="saveImage()" title="Save this card as a PNG — on a phone, it opens the share sheet">Image</button>
       <button class="mini" onclick="window.print()">Print</button>
     </div>
     <div id="sumBody"></div>
+    <div id="tray" class="tray" hidden></div>
   </section>
 </div>
 
@@ -105,6 +108,7 @@
 <script src="js/rings.js"></script>
 <script src="js/damage.js"></script>
 <script src="js/ignition.js"></script>
+<script src="js/dice.js"></script>
 <script src="js/events.js"></script>
 </body>
 </html>

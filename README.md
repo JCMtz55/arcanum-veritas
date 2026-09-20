@@ -29,6 +29,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   rings.js          ← The Rings tab
   damage.js         ← The Damage tab
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
+  dice.js           ← The dice tray: rolls the numbers the card already printed
   events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
   index.json        ← Master list of all cognitions + ready status
@@ -316,6 +317,19 @@ The card at the bottom of the build has two modes:
 - **FULL** — the complete reference: every tier up to your level, full effect prose, a **SIGIL DICE** block listing each Complement's contribution separately, and the Ring's rules note. Use it when building or levelling.
 
 Both copy and print, and both save as an image: **Image** renders the card showing (a seal or an Eidon — PLAY, or FULL's text) as a 2× PNG on the builder's dark ground, stamped with a small "Once Upon a Star ★ · Arcanum Veritas / Ignition · date" footer and named after the card (`fire-zone.png`). On a phone it opens the share sheet so it can go straight to Photos; elsewhere it downloads. It uses html2canvas from cdnjs, fetched only the first time someone asks for an image; the `.exporting` rules in `app.css` are export-only fixes for what html2canvas draws badly (inline-flex chips, inset outlines). Note that the PLAY card's compression is text-pattern based — it strips known lead-in phrases and pure-flavour trailing clauses. If an effect ever reads oddly there, check it against FULL, which is never altered.
+
+### The Dice Tray
+
+The PLAY card's dice chips roll. **Click one** — or hit **Roll** in the seal header, or the **R** key — and the throw lands in a tray under the card. Nothing is re-derived: `dice.js` reads the chip the card printed, which keeps one source of truth for the maths.
+
+**Dice only.** The seal's d20s — the attack roll, the target's save — stay the table's to make, so the to-hit and save-DC chips are deliberately not clickable. The tray throws damage and healing, nothing else.
+
+- **Roll** throws every damage and healing number on the card, each separately — resistance still cares which die is which — then **adds them up**: the sum leads the entry, with each type listed under it. Clicking a single chip throws just that one.
+- Each throw lists every face, so a player can see the 1s, and carries the chip's own working (`6d8 +6d8`, or the Sigil that brought it).
+- **A crit is never a mode you have to arm first.** If you know before you throw, hit **Crit** in the header (shift+R, or shift-click a chip) and the dice come up doubled. If you find out after, the **×2** on the throw itself rolls the same dice again and adds them to the number already sitting there — what your hand does at the table. The ×2 disappears once it's been used, and never appears on healing, temp HP or damage reduction, which don't double.
+- It works the same on an **Eidon card** in Ignition mode: the output dice are a chip like any other. The Eidon Check stays on the forge's own button, since manifesting spends a Blaze Point.
+
+The tray lives outside `.card` on purpose: **Image** and **Print** capture the card alone, so a throw never ends up in a saved PNG. It holds the last 8 throws, newest first, and **Clear** empties it.
 
 ## Rules of the Seal
 
