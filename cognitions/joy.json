@@ -1,0 +1,165 @@
+{
+  "id": "joy",
+  "name": "Joy",
+  "icon": "🟡",
+  "opposing": "despair",
+  "description": "One of the five Primals of the Heart — the warmth of connection, creation and contentment, the world telling a soul that it is welcome here. Joy is the brightest of the Primals and the most generous: doubled it becomes Clarity, laid over Sadness it becomes Love, carried through Fear it becomes Hope, and turned inward alone it curdles into Vanity. Those attuned to it burn with it, hand it out, and know how much of it a room has left.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "mastery": {
+    "title": "Primal Harvest",
+    "text": "A Primal seal leaves raw emotion behind it, and you are standing right there.",
+    "traits": [
+      { "name": "Harvest", "level": 1,
+        "text": "Once per seal, when your Joy seal damages a creature, heals one, or a creature fails its save, you may fill one empty Emotion Vessel you carry with Joy — no Extraction check, no attunement to Emotion required.",
+        "card": "1/seal: fill an empty vessel with Joy, no check" },
+      { "name": "Deep Harvest", "level": 11,
+        "text": "The harvest yields two Joy instead of one, or, if the creature's dominant feeling is a Complex Emotion built on Joy, that emotion whole.",
+        "card": "Harvest 2 Joy — or the whole Complex Emotion if Joy is at its root" }
+    ]
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Giddy", "card": "disadvantage on Concentration checks" },
+      "major":  { "name": "Delighted", "card": "Charmed — it is too pleased to fight you" },
+      "severe": { "name": "Overjoyed", "card": "Incapacitated with helpless laughter" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Radiance",
+        "description": "Joy at full volume is not gentle. Ask anyone who has stood too close to someone in love.",
+        "tiers": [
+          { "text": "The damage becomes radiant and increases by 2 additional dice. A creature hit or that fails is Giddy until the end of its next turn: disadvantage on Concentration checks.",
+            "card": "+2 dice · damage becomes Radiant · disadvantage on Concentration until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "radiant" }, "penalty": { "disadvantage": "Concentration checks" } } },
+          { "text": "The damage increases by 4 additional dice. A creature hit or that fails lowers its guard — the next attack against it before the end of your next turn has advantage.",
+            "card": "+4 dice · the next attack against them has advantage",
+            "mech": { "damage": { "bonusDice": 4, "type": "radiant" } } },
+          { "text": "The damage increases by 6 additional dice, and it spills over: one ally within 30 feet of a creature the seal damaged regains hit points equal to Twice your Verum Modifier.",
+            "card": "+6 dice · an ally within 30 ft of each target regains 2×VM HP",
+            "mech": { "damage": { "bonusDice": 6, "type": "radiant" }, "heal": { "amount": "2×VM", "who": "an ally near each target" } } },
+          { "text": "Gladness. The damage increases by 8 additional dice. A creature hit or that fails is Incapacitated with helpless laughter until the end of its next turn, and every ally within 30 feet of the seal gains Inspiration.",
+            "card": "+8 dice · GLADNESS — Incapacitated laughing until their next turn · every ally within 30 ft gains Inspiration",
+            "mech": { "damage": { "bonusDice": 8, "type": "radiant" }, "conditions": [ { "name": "Incapacitated", "duration": "until the end of its next turn" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Warmth",
+        "description": "The oldest medicine there is: someone is glad you are here.",
+        "tiers": [
+          { "text": "The target gains Inspiration and temporary hit points equal to Five Times the slot level, and can't be Frightened for 1 minute.",
+            "card": "Inspiration · 5 × {SLOT} temp HP · can't be Frightened, 1 min",
+            "mech": { "deny": [ "fear" ], "buff": { "who": "target", "tempHP": "5 × slot level" } } },
+          { "text": "It also ends one effect on itself that is making it sad, hopeless, apathetic or ashamed, and has advantage on saves against Vile-emotion effects while the warmth lasts.",
+            "card": "Ends one sorrow, despair, apathy or shame on itself · advantage vs Vile effects",
+            "mech": { "buff": { "who": "target", "advantage": "saves against Vile-emotion effects" } } },
+          { "text": "The warmth spreads: at the start of each of the target's turns, one ally within 30 feet of it regains hit points equal to Twice your Verum Modifier and can add 1d4 to its next roll.",
+            "card": "Each turn, an ally within 30 ft regains 2×VM HP and gets +1d4 on its next roll",
+            "mech": { "heal": { "amount": "2×VM a turn", "who": "an ally within 30 ft" } } },
+          { "text": "Gladhearted. For 1 minute the target and every ally within 30 feet of it are immune to Frightened and Charmed, can't have disadvantage from fear, grief or despair, and each regains hit points equal to Ten Times the slot level the first time they drop below half.",
+            "card": "GLADHEARTED — the target and allies within 30 ft: immune to fear and charm · 10 × {SLOT} HP the first time each drops below half",
+            "mech": { "deny": [ "fear", "charm" ], "heal": { "perSlot": 10, "who": "the target and allies within 30 ft, once each" } } }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Mirth",
+        "description": "It is very hard to kill someone while you are laughing.",
+        "tiers": [
+          { "text": "A creature that fails can't take reactions until the end of its next turn, and has disadvantage on attack rolls against any creature that has not hurt it this combat.",
+            "card": "Fail: no reactions · disadvantage attacking anyone who hasn't hurt them yet",
+            "mech": { "save": { "ability": "Charisma" }, "deny": [ "reactions" ] } },
+          { "text": "A creature that fails is Charmed by you until the end of its next turn — it is enjoying itself too much to treat you as an enemy.",
+            "card": "Charmed by you until the end of their next turn",
+            "mech": { "conditions": [ { "name": "Charmed", "duration": "until the end of its next turn" } ] } },
+          { "text": "The mirth lasts 1 minute, repeating the Charisma save at the end of each of its turns, and a creature that fails falls Prone with laughter the first time it tries to attack while it lasts.",
+            "card": "1 min (Cha save each turn) · the first attack they try drops them Prone laughing",
+            "mech": { "conditions": [ { "name": "Charmed", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" }, { "name": "Prone" } ] } },
+          { "text": "Helpless Delight. A creature that fails is Incapacitated and Prone with laughter for 1 minute, repeating the save at the end of each of its turns, and any creature that starts its turn within 10 feet of it makes the save or joins it until the end of that turn.",
+            "card": "HELPLESS DELIGHT — Incapacitated and Prone 1 min · it spreads to anyone starting a turn within 10 ft",
+            "mech": { "conditions": [ { "name": "Incapacitated", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" }, { "name": "Prone" } ] } }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Delight",
+        "description": "You make the small good things, and they are not small.",
+        "tiers": [
+          { "text": "Your creations are a pleasure to be near: food that is exactly what someone wanted, warm light, music, a chair that fits. An ally that spends 10 minutes with one gains Inspiration.",
+            "card": "Creations comfort — 10 minutes with one grants Inspiration" },
+          { "text": "A short rest taken in or around one of your Structures restores a level of exhaustion, and no one resting there can be Frightened.",
+            "card": "A short rest with your Structure removes 1 exhaustion · no fear inside" },
+          { "text": "Your Objects hold a feeling: whoever carries one has advantage on saves against Vile-emotion effects, and your Constructs can Help as a free action and never willingly leave a hurt ally.",
+            "card": "Objects ward against Vile emotion · Constructs Help for free and stay with the hurt" },
+          { "text": "A Hearth. One Structure becomes a place people are glad in: a long rest there also removes a curse of the slot level or lower, one Vile condition, and all Dream Exhaustion.",
+            "card": "A HEARTH — a long rest there lifts a curse, a Vile condition, and all Dream Exhaustion" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Gladness",
+        "description": "Knowing where the good is, and putting some back.",
+        "tiers": [
+          { "text": "Know what would genuinely delight a creature you can see, and gain advantage on your next Persuasion or Performance check with it.",
+            "card": "Know what would truly please someone · advantage on your next Persuasion or Performance",
+            "mech": { "utility": true } },
+          { "text": "Lift a room: everyone in a 30-foot space who is willing loses one level of exhaustion's worth of weariness for an hour, and hostility cools unless blood has already been drawn.",
+            "card": "Lift a room for an hour — weariness eases, hostility cools",
+            "mech": { "utility": true } },
+          { "text": "Give a creature back a joy it had lost — a memory, a taste, a face — clearly enough to feel it again. Once done, it can't be taken by grief, apathy or a Nightmare's feeding.",
+            "card": "Give back a lost joy, and make it un-takeable",
+            "mech": { "utility": true } },
+          { "text": "Hold a festival: for 24 hours, a settlement's people are proof against despair, Vile influence and Nightmare feeding, and remember it for a generation.",
+            "card": "A festival — 24 hrs of a town proofed against despair and Nightmares",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Bright Edge",
+      "type": "Offensive",
+      "description": "The seal arrives pleased with itself.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next Concentration check.",
+        "card": "+1 die radiant · disadvantage on their next Concentration check",
+        "mech": { "damage": { "dice": "1d6", "type": "radiant" }, "penalty": { "disadvantage": "the next Concentration check" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and the next attack against the target has advantage.", "card": "+2 dice · the next attack on them has advantage" },
+        { "text": "Level 11+: Three dice, and an ally within 30 feet of the target regains hit points equal to your Verum Modifier.", "card": "+3 dice · an ally near them regains {VM} HP" }
+      ]
+    },
+    {
+      "name": "Good Cheer",
+      "type": "Supportive",
+      "description": "A little of it goes to everyone the seal touches.",
+      "effect": { "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and may add 1d4 to one roll before the end of its next turn.",
+        "card": "The seal's targets: {VM} + {SLOT} temp HP · +1d4 on one roll",
+        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "bonus": "+1d4 on one roll" } } },
+      "upgrades": [
+        { "text": "Level 5+: Each also can't be Frightened until the end of its next turn.", "card": "Can't be Frightened until their next turn" },
+        { "text": "Level 11+: Each may instead end one Vile condition or one level of exhaustion on itself.", "card": "Or end a Vile condition or a level of exhaustion" }
+      ]
+    },
+    {
+      "name": "Disarming",
+      "type": "Control",
+      "description": "Whatever else the seal did, it was hard to stay angry through.",
+      "effect": { "text": "A creature hit by or failing the seal has disadvantage on its next attack roll against a creature that hasn't yet harmed it, and can't take reactions until the start of its next turn.",
+        "card": "Disadvantage attacking anyone who hasn't hurt them · no reactions until their next turn",
+        "mech": { "deny": [ "reactions" ] } },
+      "upgrades": [
+        { "text": "Level 5+: It also can't make opportunity attacks against the seal's targets for 1 minute.", "card": "No opportunity attacks on the seal's targets, 1 min" },
+        { "text": "Level 11+: It is Charmed by you until the end of its next turn.", "card": "Charmed by you until their next turn" }
+      ]
+    }
+  ],
+  "schema": 2
+}

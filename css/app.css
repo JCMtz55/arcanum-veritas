@@ -277,6 +277,28 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .roll.heal  .rv{color:var(--verdant)}
 .roll.total .rt .rv{color:var(--bone)}
 @media print{.tray{display:none}}
+
+/* ── Emotion tab ───────────────────────────────────────────
+   One Primal, one colour — the same five the vault uses. */
+.emo-core{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:10.5px;
+  padding:2px 8px;margin:0 4px 4px 0;border-radius:999px;background:var(--slate);border:1px solid var(--line)}
+.emo-core.joy{color:#D9B44A;border-color:#6b5a29} .emo-core.sad{color:#6E9BC4;border-color:#2f4b63}
+.emo-core.ang{color:#C0553F;border-color:#6b3229} .emo-core.fea{color:#9AA2AC;border-color:#4a525c}
+.emo-core.dis{color:#5FA37A;border-color:#2e5a43}
+.emo-good-t{color:var(--verdant)} .emo-vile-t{color:var(--ember)}
+.emo-twin{display:block;font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);margin-top:2px}
+.emo-tbl td{vertical-align:top}
+.emo-tbl .t{margin-left:4px}
+.emo-primals{display:flex;flex-wrap:wrap;gap:10px}
+.emo-primal{flex:1 1 220px;padding:12px 13px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
+.emo-primal b{display:block;font-family:var(--sans);font-size:14px;margin-bottom:5px}
+.emo-primal p{margin:0 0 7px;font-size:13px;line-height:1.45;color:var(--bone2)}
+.emo-primal span{display:block;font-family:var(--sans);font-size:10.5px;color:var(--mute);margin-bottom:8px}
+.emo-primal.joy{border-color:#6b5a29} .emo-primal.joy b{color:#D9B44A}
+.emo-primal.sad{border-color:#2f4b63} .emo-primal.sad b{color:#6E9BC4}
+.emo-primal.ang{border-color:#6b3229} .emo-primal.ang b{color:#C0553F}
+.emo-primal.fea{border-color:#4a525c} .emo-primal.fea b{color:#9AA2AC}
+.emo-primal.dis{border-color:#2e5a43} .emo-primal.dis b{color:#5FA37A}
 .t{display:inline-block;font-family:var(--sans);font-size:10.5px;padding:3px 8px;margin:0 5px 5px 0;
   border-radius:999px;background:var(--slate);border:1px solid var(--line);color:var(--bone2)}
 .t.hot{color:var(--ember);border-color:#6b3229}

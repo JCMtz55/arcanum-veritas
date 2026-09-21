@@ -21,6 +21,16 @@
       "ready": false
     },
     {
+      "id": "anger",
+      "name": "Anger",
+      "icon": "🔴",
+      "fa": "fire-flame-curved",
+      "category": "psychic",
+      "tier": "II",
+      "opposing": "peace",
+      "ready": false
+    },
+    {
       "id": "apathy",
       "name": "Apathy",
       "icon": "🌫️",
@@ -112,7 +122,7 @@
       "tier": "III",
       "requires": [ "Vileness", "Decay" ],
       "opposing": "soul",
-      "ready": false
+      "ready": true
     },
     {
       "id": "craft",
@@ -179,6 +189,16 @@
       "ready": false
     },
     {
+      "id": "disgust",
+      "name": "Disgust",
+      "icon": "🟢",
+      "fa": "face-frown-open",
+      "category": "psychic",
+      "tier": "II",
+      "opposing": "love",
+      "ready": false
+    },
+    {
       "id": "dream",
       "name": "Dream",
       "icon": "💭",
@@ -197,6 +217,28 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "air",
+      "ready": false
+    },
+    {
+      "id": "emotion",
+      "name": "Emotion",
+      "icon": "❤️‍🔥",
+      "fa": "heart",
+      "category": "psychic",
+      "tier": "III",
+      "requires": [ "Joy", "Fear" ],
+      "divineLaw": "The Honest Law of Emotions",
+      "opposing": "apathy",
+      "ready": true
+    },
+    {
+      "id": "fear",
+      "name": "Fear",
+      "icon": "⚫",
+      "fa": "eye",
+      "category": "psychic",
+      "tier": "II",
+      "opposing": "heroism",
       "ready": false
     },
     {
@@ -321,6 +363,16 @@
       "tier": "I",
       "opposing": "civilization",
       "ready": true
+    },
+    {
+      "id": "joy",
+      "name": "Joy",
+      "icon": "🟡",
+      "fa": "face-laugh",
+      "category": "psychic",
+      "tier": "II",
+      "opposing": "despair",
+      "ready": false
     },
     {
       "id": "life",
@@ -453,6 +505,16 @@
       "tier": "I",
       "opposing": "vulnerability",
       "ready": true
+    },
+    {
+      "id": "sadness",
+      "name": "Sadness",
+      "icon": "🔵",
+      "fa": "cloud-rain",
+      "category": "psychic",
+      "tier": "II",
+      "opposing": "joy",
+      "ready": false
     },
     {
       "id": "shadow",

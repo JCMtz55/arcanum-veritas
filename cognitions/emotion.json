@@ -1,0 +1,177 @@
+{
+  "id": "emotion",
+  "name": "Emotion",
+  "icon": "❤️‍🔥",
+  "opposing": "apathy",
+  "description": "The Honest Law of Emotions, kept by Nero. Emotion is one of the primordial threads from which all sentient life is woven — not a reaction or a state but the soul's language, the fuel that shapes thought, intention, magic and reality itself. Every creature that bears a soul can feel, and feeling is the first sign of sentience: the spark that lifts instinct into will. To feel is to be; to deny emotion is to hollow oneself. Attuning to Emotion opens Emotional Alchemy — the extraction, dissection, crafting and infusion of the five Primals of the Heart and the Virtuous and Vile emotions built from them.",
+  "savingThrow": "Charisma",
+  "damageType": "Psychic",
+  "cost": {
+    "text": "The Weight You Carry. While you carry a crystallised Vile Emotion in any vessel, you have disadvantage on saving throws against Vile-emotion effects — what you hold recognises what comes for you. Carrying a Pure Vile Emotion also bars you from Virtuous infusion until you are rid of it.",
+    "card": "THE WEIGHT YOU CARRY — carrying a Vile Emotion: disadvantage on saves vs Vile effects · a Pure one blocks Virtuous infusion"
+  },
+  "mastery": {
+    "title": "Emotional Alchemy",
+    "text": "Emotion is the key to the Alchemy, not a bonus on top of it. Emotion Identification stays open to anyone — it is trained perception, not magic — but Extraction, Dissect, Craft and Infuse can only be attempted by a creature attuned to this Cognition.",
+    "traits": [
+      { "name": "The Gate", "level": 1,
+        "text": "Only a creature attuned to Emotion may attempt Emotion Extraction, Emotion Dissect, Emotion Craft or Emotion Infuse. Emotion Identification remains open to all.",
+        "card": "Only you can Extract, Dissect, Craft or Infuse · Identification stays open to anyone" },
+      { "name": "The Practised Hand", "level": 1,
+        "text": "On any Emotion Crafting, Dissect or Extraction check you may use your Verum Modifier in place of the Alignment Modifier + ability modifier the action calls for.",
+        "card": "Alchemy checks may use {VM} instead of Alignment + ability" },
+      { "name": "Steady Under Fire", "level": 5,
+        "text": "You ignore the +5 DC that Alchemy actions take when attempted in combat, and Extraction takes you an action rather than 10 minutes.",
+        "card": "No +5 in combat · Extraction is an action" },
+      { "name": "Unbound Infusion", "level": 11,
+        "text": "Your infusions no longer come out of your daily count: you may Infuse at will, hold any number at once, and do it as part of the same bonus action.",
+        "card": "Infuse at will — no daily count, any number held at once" },
+      { "name": "Pure Work", "level": 17,
+        "text": "You can extract, hold and craft Pure Virtuous and Pure Vile Emotions (DC 35 and above), and a failure by 5 or more no longer destroys the emotion — it only fails.",
+        "card": "Pure emotions are yours to work · a bad failure no longer destroys them" }
+    ]
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Welling", "card": "disadvantage on saves against emotion effects" },
+      "major":  { "name": "Overcome", "card": "Charmed by the feeling you chose for it" },
+      "severe": { "name": "Flooded", "card": "Incapacitated, drowning in feeling" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Vile Infusion",
+        "description": "You spend a crystallised Vile Emotion into the seal. What it does to them is what that emotion has always done to everyone.",
+        "tiers": [
+          { "text": "Spend one stored Vile Emotion as you draw. The damage becomes psychic and increases by 2 additional dice, and a creature hit or that fails has disadvantage on saving throws against Vile-emotion effects until the end of its next turn.",
+            "card": "Spend a Vile Emotion · +2 dice · damage becomes Psychic · disadvantage vs Vile effects until their next turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "penalty": { "disadvantage": "saves against Vile-emotion effects" } } },
+          { "text": "The emotion takes hold. The damage increases by 4 additional dice, and a creature hit or that fails suffers the spent emotion's grip until the end of its next turn — Anxiety Frightens, Despair denies temporary hit points and Inspiration, Apathy denies reactions, Hate turns its attacks on whoever wounded it last, Loneliness cuts it off from its allies' Help and auras.",
+            "card": "+4 dice · the emotion's grip until their next turn (Anxiety: Frightened · Despair: no temp HP · Apathy: no reactions · Hate: strikes whoever hurt it · Loneliness: no allied Help)",
+            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "conditions": [ { "name": "the spent Vile Emotion's grip", "duration": "until the end of its next turn" } ] } },
+          { "text": "The damage increases by 6 additional dice and the grip lasts 1 minute, repeating the Charisma save at the end of each of its turns. A creature the seal drops yields its dominant emotion into a vessel you carry, with no Extraction check.",
+            "card": "+6 dice · the grip lasts 1 min (Cha save each turn) · a creature it drops yields its emotion into your vessel, free",
+            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "the spent Vile Emotion's grip", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } },
+          { "text": "Pure Vileness. You may spend a Pure Vile Emotion instead. The damage increases by 8 additional dice, and a creature hit or that fails gains 1 level of Dream Exhaustion and loses maximum hit points equal to Five Times the slot level until it finishes a long rest — the emotion doesn't visit it, it moves in.",
+            "card": "+8 dice · PURE VILENESS — 1 Dream Exhaustion and −5 × {SLOT} maximum HP until a long rest",
+            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Dream Exhaustion" } ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Virtuous Infusion",
+        "description": "The Infuse action, done properly — no check, no cap, and enough of it to go round.",
+        "tiers": [
+          { "text": "Spend one stored Virtuous Emotion. For 10 minutes each of the seal's targets carries it in its weapon: the weapon counts as magical and deals an extra 1d6 radiant damage, and the infusion is spent only when it purifies. This costs none of their own infusions.",
+            "card": "Spend a Virtuous Emotion · the seal's targets: magical weapons, +1d6 radiant, 10 min · spent only on purifying · none of their own uses",
+            "mech": { "buff": { "who": "the seal's targets", "damage": "+1d6 radiant, weapon counts as magical" } } },
+          { "text": "The extra damage becomes 2d6, and each target has advantage on saving throws against the Vile Emotion the spent one counters.",
+            "card": "+2d6 radiant · advantage against the Vile Emotion it counters",
+            "mech": { "buff": { "who": "the seal's targets", "advantage": "saves against the countered Vile Emotion" } } },
+          { "text": "The emotion feeds them: each target regains hit points equal to your Verum Modifier at the start of each of its turns and can't be Frightened or Charmed while the infusion lasts. Against Nightmares, their strikes purify as normal — one charge per creature per round, one per Root per round.",
+            "card": "Each regains {VM} HP a turn, can't be Frightened or Charmed · their strikes purify (1 charge each a round)",
+            "mech": { "deny": [ "fear", "charm" ], "heal": { "amount": "VM at the start of each of its turns", "who": "the seal's targets" } } },
+          { "text": "Pure Virtue. You may spend a Pure Virtuous Emotion instead: the extra damage becomes 4d6, and each purifying strike strips two charges rather than one — the per-round limits still hold. A Nightmare cured while this lasts does not merely vanish: it wakes as a dream guardian in your debt.",
+            "card": "PURE VIRTUE — +4d6 radiant · 2 charges a strike (limits still apply) · a Nightmare cured this way wakes as a guardian" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Primals",
+        "description": "Joy, Sadness, Anger, Fear, Disgust. You do not invent the feeling; you hand them one they already know.",
+        "tiers": [
+          { "text": "Name one Core Emotion as you draw. A creature that fails feels it until the end of its next turn: Fear makes it Frightened of you, Anger makes it attack the nearest creature, Sadness halves its speed and denies it reactions, Disgust stops it willingly coming within 10 feet of you, Joy makes it lower its guard — attacks against it have advantage.",
+            "card": "Name a Primal — those who fail feel it until their next turn (Fear: Frightened · Anger: attacks the nearest · Sadness: half speed, no reactions · Disgust: keeps 10 ft away · Joy: attacks on it have advantage)",
+            "mech": { "save": { "ability": "Charisma" }, "conditions": [ { "name": "the named Core Emotion", "duration": "until the end of its next turn" } ] } },
+          { "text": "The feeling lasts 1 minute, repeating the Charisma save at the end of each of its turns, and while it holds the creature can't benefit from any effect of an emotion that contradicts it.",
+            "card": "1 min (Cha save each turn) · no benefit from contradicting emotions",
+            "mech": { "conditions": [ { "name": "the named Core Emotion", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } },
+          { "text": "Name two Core Emotions and they layer into the Complex Emotion their recipe makes, Virtuous or Vile as you choose — a creature that fails is held by that emotion entire, and you may extract it from them as a bonus action while it lasts.",
+            "card": "Two Primals layer into a Complex Emotion · extract it from them as a bonus action",
+            "mech": { "conditions": [ { "name": "a crafted Complex Emotion" } ] } },
+          { "text": "Three Primals, and the emotion is the truth of them for 1 minute: while it holds, a creature that failed cannot act against what that emotion wants of it, and its Greatest Wish bends toward the feeling. Only the countering Virtuous emotion, spent on it by another creature, ends this early.",
+            "card": "THREE PRIMALS — the emotion becomes their truth for 1 min · they can't act against it · only its Virtuous counter ends it early",
+            "mech": { "conditions": [ { "name": "a crafted Complex Emotion", "duration": "1 minute", "escape": "another creature spends the countering Virtuous Emotion" } ] } }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Vessels",
+        "description": "Gold and obsidian are the only things that will hold a feeling. You make better gold and better obsidian.",
+        "tiers": [
+          { "text": "Your Objects are valid Emotion Vessels: a coin holds one emotion, an obsidian piece holds by its rarity. They never leak, and you know at a touch what any vessel holds.",
+            "card": "Your Objects are true vessels — never leak · you read any vessel by touch" },
+          { "text": "Each vessel you make holds one emotion more than its material allows, and an emotion you seal into one can be spent by anyone you name, not only by you.",
+            "card": "+1 emotion capacity · anyone you name may spend what's inside" },
+          { "text": "A vessel can be set to pour: the creature carrying it feels the emotion inside for 1 hour, gaining advantage on checks that emotion would drive and disadvantage on those it would cloud.",
+            "card": "Set a vessel to pour — its bearer feels the emotion for 1 hr, with the advantage and the blind spot both" },
+          { "text": "Forge an Emotion Shard: a Construct or Object holding a Complex Emotion whole. Whoever bears it may spend it for an Emotion Infuse without being attuned to Emotion, and it refills itself each dawn from the feelings around it.",
+            "card": "An EMOTION SHARD — lends Infusion to the unattuned and refills each dawn" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Alchemist's Work",
+        "description": "Identification, Extraction, Dissect, Craft. The four actions, made quick.",
+        "tiers": [
+          { "text": "Read the emotion of every creature within 30 feet at a glance — as Emotion Identification, treating your check as a 20 without rolling.",
+            "card": "Read every creature within 30 ft as an Identification result of 20, no roll",
+            "mech": { "utility": true } },
+          { "text": "Extract a Core Emotion from a willing or unconscious creature, a dream, a soul remnant or a cursed object with no check, straight into a vessel you hold.",
+            "card": "Extract a Core Emotion with no check, into a vessel",
+            "mech": { "utility": true } },
+          { "text": "Dissect a Complex Emotion into its Core components with no check and no risk of destroying it, or craft a Complex Emotion from Cores in 1 minute rather than five.",
+            "card": "Dissect with no check or risk · craft a Complex Emotion in 1 minute",
+            "mech": { "utility": true } },
+          { "text": "Read a creature's emotional history: every Complex Emotion that has shaped it, the wound each came from, and what Virtuous emotion would answer it. If it carries a Vile Emotion, you may draw that one out — it must be willing, or dying.",
+            "card": "Read a creature's whole emotional history · draw out one Vile Emotion (willing or dying)",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Feeling's Edge",
+      "type": "Offensive",
+      "description": "The seal carries a feeling in with it.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next saving throw against an emotion effect.",
+        "card": "+1 die psychic · disadvantage on their next save vs an emotion effect",
+        "mech": { "damage": { "dice": "1d6", "type": "psychic" }, "penalty": { "disadvantage": "the next save against an emotion effect" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and you may spend a stored Core Emotion to make the target feel it until the end of its next turn.", "card": "+2 dice · spend a Core Emotion to make them feel it" },
+        { "text": "Level 11+: Three dice, and a creature the seal drops yields its dominant emotion into a vessel you carry.", "card": "+3 dice · a creature it drops yields its emotion to your vessel" }
+      ]
+    },
+    {
+      "name": "Heart's Gift",
+      "type": "Supportive",
+      "description": "A Virtuous emotion, spread thin across everyone the seal touches.",
+      "effect": { "text": "Spend one stored Virtuous Emotion. Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level and advantage on its next saving throw against a Vile-emotion effect.",
+        "card": "Spend a Virtuous Emotion · the seal's targets: {VM} + {SLOT} temp HP · advantage on their next save vs a Vile effect",
+        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "advantage": "the next save against a Vile-emotion effect" } } },
+      "upgrades": [
+        { "text": "Level 5+: Each target's next weapon hit also deals 1d6 radiant, and counts as Virtuous-infused for Nightmare Purification.", "card": "Their next hit: +1d6 radiant, and purifies as an infusion" },
+        { "text": "Level 11+: Each target may also end one Vile condition on itself.", "card": "Each may end one Vile condition on itself" }
+      ]
+    },
+    {
+      "name": "Raw Nerve",
+      "type": "Control",
+      "description": "Whatever they were feeling, the seal turns it all the way up.",
+      "effect": { "text": "A creature hit by or failing the seal has its dominant emotion amplified until the end of its next turn: it can't take reactions, and you know what it is feeling and roughly why.",
+        "card": "Their dominant emotion is amplified — no reactions until their next turn · you read it and its cause",
+        "mech": { "deny": [ "reactions" ] } },
+      "upgrades": [
+        { "text": "Level 5+: It also has disadvantage on saving throws against emotion effects until the end of its next turn.", "card": "Disadvantage vs emotion effects until their next turn" },
+        { "text": "Level 11+: While amplified it can't benefit from Inspiration, morale effects, or any ally's attempt to calm it.", "card": "No Inspiration, morale, or being talked down" }
+      ]
+    }
+  ],
+  "schema": 2
+}

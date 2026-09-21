@@ -1,0 +1,163 @@
+{
+  "id": "anger",
+  "name": "Anger",
+  "icon": "🔴",
+  "opposing": "peace",
+  "description": "One of the five Primals of the Heart — the soul's flare when a boundary is violated. Anger is not cruelty; it is the demand that something be corrected, and it is the only Primal that arrives already pointing at someone. With Disgust it becomes Hate, with Sadness it becomes Justice, with Fear it becomes Determination, and with Fear and Joy together it becomes Courage. Those attuned to it burn hotter the more they have been wronged, and can hand that fire to someone who has earned the right to hold it.",
+  "savingThrow": "Charisma",
+  "damageType": "Fire",
+  "mastery": {
+    "title": "Primal Harvest",
+    "text": "A Primal seal leaves raw emotion behind it, and you are standing right there.",
+    "traits": [
+      { "name": "Harvest", "level": 1,
+        "text": "Once per seal, when your Anger seal damages a creature or a creature fails its save, you may fill one empty Emotion Vessel you carry with Anger — no Extraction check, no attunement to Emotion required.",
+        "card": "1/seal: fill an empty vessel with Anger, no check" },
+      { "name": "Deep Harvest", "level": 11,
+        "text": "The harvest yields two Anger instead of one, or, if the creature's dominant feeling is a Complex Emotion built on Anger, that emotion whole.",
+        "card": "Harvest 2 Anger — or the whole Complex Emotion if Anger is at its root" }
+    ]
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Riled", "card": "disadvantage on attacks against anyone but you" },
+      "major":  { "name": "Enraged", "card": "it must attack the nearest creature" },
+      "severe": { "name": "Blind wrath", "card": "Incapacitated by its own fury, unable to do anything but rage" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Flare",
+        "description": "Anger is the one feeling that already knows where it is going.",
+        "tiers": [
+          { "text": "The damage becomes fire and increases by 2 additional dice, and adds your Verum Modifier again against any creature that has damaged you since your last turn.",
+            "card": "+2 dice · damage becomes Fire · +{VM} more against anyone who hurt you since your last turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "fire" }, "rider": { "damage": "VM", "type": "fire", "when": "against a creature that damaged you" } } },
+          { "text": "The damage increases by 4 additional dice, and a creature hit or that fails has disadvantage on attack rolls against anyone but you until the end of its next turn — you are the one who matters now.",
+            "card": "+4 dice · disadvantage attacking anyone but you until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 4, "type": "fire" }, "penalty": { "disadvantage": "attacks against anyone but you" } } },
+          { "text": "The damage increases by 6 additional dice, and it keeps burning: a creature hit or that fails takes fire damage equal to Three Times your Verum Modifier at the start of each of its turns until it takes the Dodge or Disengage action, or someone puts it out.",
+            "card": "+6 dice · 3×VM fire each turn until they Dodge, Disengage, or are put out",
+            "mech": { "damage": { "bonusDice": 6, "type": "fire" }, "conditions": [ { "name": "Burning", "tick": "3×VM fire", "escape": "Dodge or Disengage" } ] } },
+          { "text": "Wrath. The damage increases by 8 additional dice, and for each creature that has wounded you this combat the seal adds one extra die, to a maximum of your Verum Modifier. A creature it drops explodes in your fire: every creature within 10 feet takes half the seal's damage.",
+            "card": "+8 dice · WRATH — +1 die per creature that wounded you (max {VM}) · a creature it drops bursts for half to everyone within 10 ft",
+            "mech": { "damage": { "bonusDice": 8, "type": "fire" } } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Righteous",
+        "description": "You do not calm them down. You aim them.",
+        "tiers": [
+          { "text": "For 1 minute the target adds your Verum Modifier to its damage rolls and can't be Charmed or Frightened.",
+            "card": "1 min: +{VM} damage · can't be Charmed or Frightened",
+            "mech": { "deny": [ "charm", "fear" ], "buff": { "who": "target", "damage": "+VM" } } },
+          { "text": "It gains temporary hit points equal to Five Times the slot level, and its first attack each turn against a creature that has harmed it or an ally has advantage.",
+            "card": "5 × {SLOT} temp HP · advantage on its first attack each turn against anyone who has harmed it or its allies",
+            "mech": { "buff": { "who": "target", "tempHP": "5 × slot level" } } },
+          { "text": "While it is below half its hit points, it has resistance to bludgeoning, piercing and slashing damage, and may make one extra weapon attack as a bonus action each turn.",
+            "card": "Below half HP: resist B/P/S · one extra attack as a bonus action",
+            "mech": { "buff": { "who": "target", "resist": "bludgeoning, piercing and slashing while below half" } } },
+          { "text": "Unspent Fury. The first time the target would drop to 0 hit points while this lasts, it stays at 1 instead and its next attack automatically hits and is a critical.",
+            "card": "UNSPENT FURY — the first drop to 0 leaves it at 1, and its next attack auto-hits as a crit" }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Provocation",
+        "description": "You make yourself the only thing in the world worth hitting.",
+        "tiers": [
+          { "text": "A creature that fails must attack you on its next turn if it can, and has disadvantage on attack rolls against anyone else until the end of that turn.",
+            "card": "Fail: it must come for you next turn, and fights everyone else at disadvantage",
+            "mech": { "save": { "ability": "Charisma" }, "penalty": { "disadvantage": "attacks against anyone but you" } } },
+          { "text": "The provocation lasts 1 minute, repeating the Charisma save at the end of each of its turns, and while it holds the creature can't take the Dodge, Disengage or Hide actions.",
+            "card": "1 min (Cha save each turn) · no Dodge, Disengage or Hide",
+            "mech": { "deny": [ "Dodge", "Disengage", "Hide" ] } },
+          { "text": "A provoked creature attacks recklessly: its attacks have advantage, and attacks against it have advantage too.",
+            "card": "Reckless — its attacks have advantage, and so do attacks against it" },
+          { "text": "Blind Wrath. A creature that fails attacks the nearest creature, friend or foe, on each of its turns, and can't distinguish allies from enemies while the wrath lasts.",
+            "card": "BLIND WRATH — it attacks the nearest creature, friend or foe, and can't tell them apart",
+            "mech": { "conditions": [ { "name": "Enraged", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Forged in Wrath",
+        "description": "Every good weapon was made by someone who was angry about something.",
+        "tiers": [
+          { "text": "Your Objects come out of the making hot: a weapon you create counts as magical and deals an extra 1d6 fire damage for as long as it lasts.",
+            "card": "Weapons you make are magical and deal +1d6 fire" },
+          { "text": "Your Constructs strike harder the more they have been struck: each adds +1 to its damage rolls for every time it has been hit since your last turn.",
+            "card": "Constructs hit harder the more they've been hit" },
+          { "text": "Your Structures answer violence: a creature that damages one takes fire damage equal to Three Times your Verum Modifier.",
+            "card": "Damage a Structure and take 3×VM fire" },
+          { "text": "A Grudge-Forged weapon: name one creature as you make it. Against that creature the weapon deals an extra 2d10 fire and ignores resistance to fire, and it does not fade until the grudge is settled.",
+            "card": "A GRUDGE-FORGED weapon — +2d10 fire against the one it's named for, and it lasts until that's settled" }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Boundary Violated",
+        "description": "Anger is evidence. Someone did something, and it is still in the air.",
+        "tiers": [
+          { "text": "Know whether a creature you can see is angry, and at whom or what.",
+            "card": "Know who is angry, and at what",
+            "mech": { "utility": true } },
+          { "text": "Stand in a place and learn the last act of violence or injustice done there — what was done, and by whom, if they are still alive.",
+            "card": "Read the last violence or injustice done in a place",
+            "mech": { "utility": true } },
+          { "text": "Speak a wrong aloud and be heard: every creature within a mile who has suffered that same wrong knows it was named, and where you stand.",
+            "card": "Name a wrong aloud — everyone within a mile who suffered it knows, and where you are",
+            "mech": { "utility": true } },
+          { "text": "Hold a grudge in trust: name a wrong and a wrongdoer, and for a year you always know the direction and rough distance to them, and no magic hides them from you.",
+            "card": "Hold a grudge for a year — you always know where they are, and nothing hides them",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Hot Blood",
+      "type": "Offensive",
+      "description": "The seal takes it personally.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has damaged you since your last turn.",
+        "card": "+1 die fire — +2 dice against anyone who hurt you since your last turn",
+        "mech": { "damage": { "dice": "1d6", "type": "fire" } } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, or four against a creature that has damaged you.", "card": "+2 dice (4 against whoever hurt you)" },
+        { "text": "Level 11+: Three dice, or six, and the target has disadvantage on attacks against anyone but you until the end of its next turn.", "card": "+3 dice (6) · it fights everyone but you at disadvantage" }
+      ]
+    },
+    {
+      "name": "Fighting Spirit",
+      "type": "Supportive",
+      "description": "The seal hands its targets something to be angry with.",
+      "effect": { "text": "Each of the seal's targets adds your Verum Modifier to its damage rolls until the end of its next turn, and can't be Frightened while that lasts.",
+        "card": "The seal's targets: +{VM} damage until their next turn · can't be Frightened",
+        "mech": { "deny": [ "fear" ], "buff": { "who": "the seal's targets", "damage": "+VM" } } },
+      "upgrades": [
+        { "text": "Level 5+: It lasts 1 minute, and each target's first attack each turn against a creature that harmed it has advantage.", "card": "1 min · advantage on its first attack against whoever harmed it" },
+        { "text": "Level 11+: Each target also gains temporary hit points equal to Five Times the slot level.", "card": "Also 5 × {SLOT} temp HP" }
+      ]
+    },
+    {
+      "name": "Taunt",
+      "type": "Control",
+      "description": "Whatever the seal did, it was rude.",
+      "effect": { "text": "A creature hit by or failing the seal has disadvantage on attack rolls against anyone but you until the end of its next turn.",
+        "card": "Disadvantage attacking anyone but you until the end of their next turn",
+        "mech": { "penalty": { "disadvantage": "attacks against anyone but you" } } },
+      "upgrades": [
+        { "text": "Level 5+: It also can't take the Dodge or Hide actions on its next turn.", "card": "No Dodge or Hide next turn" },
+        { "text": "Level 11+: It must move toward you on its next turn if it can.", "card": "It must come to you" }
+      ]
+    }
+  ],
+  "schema": 2
+}

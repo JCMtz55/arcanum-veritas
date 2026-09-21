@@ -28,6 +28,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   codex.js          ← The Codex tab (and the view switcher)
   rings.js          ← The Rings tab
   damage.js         ← The Damage tab
+  emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   dice.js           ← The dice tray: rolls the numbers the card already printed
   events.js         ← Copy/toast, keyboard, start-up — must load last
@@ -94,7 +95,7 @@ The card shows:
 
 ## Domains
 
-Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 5–10, no dumping ground:
+Every Cognition carries a `category` in `index.json`, and both rails group and filter by it. Eight domains, sized 5–12, no dumping ground:
 
 | Domain | | What it is |
 |---|---|---|
@@ -102,7 +103,7 @@ Every Cognition carries a `category` in `index.json`, and both rails group and f
 | **Cosmical** | 7 | Dream · Gravity · Lunar · Night · Space · Sun · Time — the shape of creation itself |
 | **Corporeal** | 6 | Beast · Blood · Bones · Flesh · Hunger · Pain — blood, bone and beast |
 | **Vital** | 5 | Corruption · Death · Growth · Life · Soul — the living and the unliving |
-| **Psychic** | 6 | Apathy · Despair · Hate · Heroism · Identity · Isolation — feeling turned outward |
+| **Psychic** | 12 | Anger · Apathy · Despair · Disgust · Emotion · Fear · Hate · Heroism · Identity · Isolation · Joy · Sadness — feeling turned outward |
 | **Umbral** | 6 | Hollowing · Nightmare · Nullity · Shadow · Silence · Void — absence, erasure, the unmade |
 | **Fate** | 5 | Balance · Disaster · Fortune · Misfortune · Promises — what happens to you |
 | **Dominion** | 8 | Carnage · Civilization · Control · Craft · Creation · Power · Protection · Speed — will imposed on the world |
@@ -111,7 +112,7 @@ Domain is not the same question as how strong a Cognition should be, so it isn't
 
 A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
 
-Category lives in `index.json` rather than the individual Cognition files on purpose. The rail draws from the one file loaded at boot; per-Cognition JSON is fetched only when you click something. Storing it per-file would mean fetching all 53 up front just to draw a sorted sidebar.
+Category lives in `index.json` rather than the individual Cognition files on purpose. The rail draws from the one file loaded at boot; per-Cognition JSON is fetched only when you click something. Storing it per-file would mean fetching all 59 up front just to draw a sorted sidebar.
 
 ## Cognition Status
 
@@ -119,11 +120,11 @@ In `index.json`, each cognition has a `ready` flag:
 - `true` — JSON file exists, cognition is fully playable
 - `false` — Placeholder only; shown as **SOON** in the sidebar and cannot be selected
 
-### Ready Cognitions (35)
-Apathy · Beast · Blood · Bones · Civilization · Control · Craft · Creation · Crystal · Death · Despair · Dream · Fire · Flesh · Fortune · Growth · Hate · Heroism · Hollowing · Hunger · Ice · Identity · Isolation · Life · Lightning · Metal · Misfortune · Night · Nullity · Pain · Power · Promises · Protection · Shadow · Soul
+### Ready Cognitions (32)
+Anger · Apathy · Beast · Blood · Bones · Civilization · Control · Craft · Death · Disgust · Emotion · Fear · Fire · Flesh · Fortune · Growth · Hate · Heroism · Ice · Isolation · Joy · Life · Lightning · Metal · Misfortune · Nullity · Pain · Power · Protection · Sadness · Shadow · Soul
 
-### Held Back (18) — JSON written, `ready: false`
-Acid · Air · Balance · Carnage · Corruption · Disaster · Earth · Gravity · Lunar · Nightmare · Silence · Space · Speed · Sun · Time · Toxin · Void · Water
+### Held Back (27) — JSON written, `ready: false`
+Acid · Air · Balance · Carnage · Corruption · Creation · Crystal · Despair · Disaster · Dream · Earth · Gravity · Hollowing · Hunger · Identity · Lunar · Night · Nightmare · Promises · Silence · Space · Speed · Sun · Time · Toxin · Void · Water
 
 Every one of these has a complete `.json` file on disk; they are flagged off in the index, not missing. Flip `"ready": true` to bring one in.
 
@@ -283,6 +284,20 @@ The **Damage** tab is the reference for the sixteen damage types and their **Abs
 - **Born Absolute** — Void and All-Mighty have no gentler form: nothing resists, reduces or absorbs them at any level (per the vault's *Void Damage* and *All-Mighty Damage* notes). The builder treats both as Absolute from level 1, and the Codex tags them *born Absolute*.
 
 "Dealt by" is read from the Cognition files themselves, so it stays current as Cognitions are added or rebalanced. It lists only ready Cognitions — held-back ones appear when they're opened up.
+
+## The Emotion Tab
+
+The **Emotion** tab is the table-side reference for **Emotional Alchemy** — the vault's system under `Magic System/Emotion`, which the Emotion Cognition gates and the five Primals feed. Eight pages, each printable on its own:
+
+- **Overview** — what Emotion is, how Primals, Complex Emotions, Vile fuel, the four workings and vessels fit together, and the gate: only a creature attuned to Emotion may Extract, Dissect, Craft or Infuse. Identification is trained perception and stays open to anyone.
+- **The Primals** — Joy, Sadness, Anger, Fear and Disgust, each with what it is, what it does when a seal imposes it, and a link to its Cognition. Plus how to read a recipe.
+- **Alchemy** — the check (`1d20 + Alignment Modifier + ability`, or a wielder's Verum Modifier instead), all five actions with their DCs and times, the Identification result ladder, what failure, failure by 5, and a natural 1 cost you, and the +5 for working in combat. **Infuse takes no check at all** — attunement is its gate — and runs on Proficiency Bonus per long rest.
+- **Vessels** — gold coins and the obsidian rarity table, and the note that nothing else holds an emotion at all.
+- **Virtuous** and **Vile** — 24 each, with the Primals that make them as coloured chips, the crafting DC, what each answers, and what it is. Vile rows also show the grip that Emotion's *Vile Infusion* applies when it spends them.
+- **Counters** — the full Vile → Virtuous pairing, which is what purification runs on.
+- **Purification** — the charge economy (1 / 2 / 3 / **5** per Root by the Nightmare's standing), the two caps that keep it honest (one charge per creature per round, one per Root per round), Lash Out, Legendary Resistance bounded to once per Root, Emotion Identification as the in-combat way to learn a Root, then **Unrooted** — losing its Vile powers and half its current hit points — and cured-not-slain, with the Roots regrowing if the party doesn't finish.
+
+Two things the data makes visible that the vault tables don't state outright: **ten recipes make one Virtuous and one Vile emotion** (Balance/Prejudice, Justice/Jealousy, Self-Respect/Scorn, Courage/Obsession and six more), so the Alignment Modifier is the entire difference between them — those rows say so. And the **crafting DC** is taken from the Extraction guideline (two Primals 25, three 30), since the Craft action refers to "the Complex Emotion's DC" without giving a table; if you set your own, change `emoDC` in `js/emotion.js`.
 
 ## Ignition Mode
 

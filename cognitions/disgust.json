@@ -1,0 +1,150 @@
+{
+  "id": "disgust",
+  "name": "Disgust",
+  "icon": "🟢",
+  "opposing": "love",
+  "description": "One of the five Primals of the Heart — the internal rejection of corruption, falsehood, or violation of the self. Disgust is the Primal of the line that will not be crossed: it names what does not belong and refuses it, in food, in company, in an idea. Alone it does nothing; with Anger it becomes Hate, with Fear it becomes Balance or Prejudice depending on who is holding it, doubled with Joy it becomes Sincerity, and doubled with Sadness it becomes Humility. Those attuned to it can make a foe's own body reject what it is doing — and can refuse a curse the way a stomach refuses poison.",
+  "savingThrow": "Constitution",
+  "damageType": "Poison",
+  "incompatible": [ "creation" ],
+  "mastery": {
+    "title": "Primal Harvest",
+    "text": "A Primal seal leaves raw emotion behind it, and you are standing right there. Disgust builds nothing — it is the Primal of refusal — so it has no Creation Ring.",
+    "traits": [
+      { "name": "Harvest", "level": 1,
+        "text": "Once per seal, when your Disgust seal damages a creature or a creature fails its save, you may fill one empty Emotion Vessel you carry with Disgust — no Extraction check, no attunement to Emotion required.",
+        "card": "1/seal: fill an empty vessel with Disgust, no check" },
+      { "name": "Deep Harvest", "level": 11,
+        "text": "The harvest yields two Disgust instead of one, or, if the creature's dominant feeling is a Complex Emotion built on Disgust, that emotion whole.",
+        "card": "Harvest 2 Disgust — or the whole Complex Emotion if Disgust is at its root" }
+    ]
+  },
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Queasy", "card": "Poisoned" },
+      "major":  { "name": "Retching", "card": "it can take an action or a bonus action, not both" },
+      "severe": { "name": "Rejected", "card": "Incapacitated, its own body refusing it" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Revulsion",
+        "description": "You do not poison them. You convince them that they already are poisoned.",
+        "tiers": [
+          { "text": "The damage becomes poison and increases by 2 additional dice. A creature hit or that fails is Poisoned until the end of its next turn.",
+            "card": "+2 dice · damage becomes Poison · Poisoned until the end of their next turn",
+            "mech": { "damage": { "bonusDice": 2, "type": "poison" }, "conditions": [ { "name": "Poisoned", "duration": "until the end of its next turn" } ] } },
+          { "text": "The damage increases by 4 additional dice, and a Poisoned creature can take an action or a bonus action on its next turn, not both — the body has other business.",
+            "card": "+4 dice · an action OR a bonus action next turn, not both",
+            "mech": { "damage": { "bonusDice": 4, "type": "poison" }, "conditions": [ { "name": "Poisoned" } ] } },
+          { "text": "The damage increases by 6 additional dice, and the revulsion lasts 1 minute, repeating the Constitution save at the end of each of its turns. While it holds, the creature can't regain hit points from potions, food or any effect it must swallow.",
+            "card": "+6 dice · Poisoned 1 min (Con save each turn) · nothing it swallows heals it",
+            "mech": { "damage": { "bonusDice": 6, "type": "poison" }, "conditions": [ { "name": "Poisoned", "duration": "1 minute", "escape": "Constitution save at the end of each of its turns" } ], "deny": [ "healing it must swallow" ] } },
+          { "text": "Rejection. The damage increases by 8 additional dice, and a creature hit or that fails has its own magic turn against it: the next spell or Cognition effect it attempts before the end of its next turn fails, and it takes poison damage equal to Five Times your Verum Modifier as its body throws the working back up.",
+            "card": "+8 dice · REJECTION — its next spell or Cognition fails, and costs it 5×VM poison",
+            "mech": { "damage": { "bonusDice": 8, "type": "poison" }, "deny": [ "its next spell or Cognition effect" ] } }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "What Does Not Belong",
+        "description": "A healthy soul knows what is not part of it, and expels it.",
+        "tiers": [
+          { "text": "For 1 hour the target has resistance to poison damage and advantage on saves against poison, disease and being Poisoned.",
+            "card": "1 hr: resist poison · advantage vs poison, disease and being Poisoned",
+            "mech": { "buff": { "who": "target", "resist": "poison", "advantage": "saves against poison and disease" } } },
+          { "text": "It sheds one poison, disease or Vile condition on itself at once, and can't be Charmed while this lasts — nothing gets inside that it hasn't agreed to.",
+            "card": "Sheds a poison, disease or Vile condition now · can't be Charmed",
+            "mech": { "deny": [ "charm" ] } },
+          { "text": "At the start of each of its turns it may end one effect on itself of the slot level or lower that it did not consent to — a curse, a compulsion, a possession, a transformation.",
+            "card": "Each turn: end one unconsented effect of the slot level or lower on itself",
+            "mech": { "buff": { "who": "target", "cleanse": "one unconsented effect a turn" } } },
+          { "text": "Nothing Gets In. For 1 minute the target is immune to poison and disease, can't be Charmed, possessed or transformed against its will, and the first curse or Vile Emotion laid on it each round simply fails.",
+            "card": "NOTHING GETS IN — immune to poison and disease · no charm, possession or transformation · the first curse each round fails",
+            "mech": { "deny": [ "poison", "disease", "charm", "possession", "unwilling transformation" ] } }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Repulsion",
+        "description": "They cannot make themselves come any closer. They will tell you afterwards that they don't know why.",
+        "tiers": [
+          { "text": "A creature that fails can't willingly move within 10 feet of you or of a point you choose, until the end of its next turn.",
+            "card": "Fail: it can't come within 10 ft of you or a point you name, until their next turn",
+            "mech": { "save": { "ability": "Constitution" }, "deny": [ "approaching within 10 ft" ] } },
+          { "text": "The distance becomes 20 feet, it lasts 1 minute with a Constitution save at the end of each of its turns, and a creature that begins its turn inside the radius is pushed to the edge.",
+            "card": "20 ft, 1 min (Con save each turn) · anyone starting inside is pushed out",
+            "mech": { "movement": { "push": "to the edge" } } },
+          { "text": "The refusal spreads to its work: a creature that fails has disadvantage on attack rolls and ability checks made against you or anything you are carrying.",
+            "card": "Disadvantage on anything it tries against you or what you carry",
+            "mech": { "penalty": { "disadvantage": "attacks and checks against you or your possessions" } } },
+          { "text": "Anathema. A creature that fails treats you as something it cannot bear to perceive: it can't target you with attacks or effects, and if forced to, it must first succeed on the save. Its allies see it flinch away and know something is wrong with it, not with you.",
+            "card": "ANATHEMA — it can't target you at all without making the save first",
+            "mech": { "deny": [ "targeting you" ] } }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Nose for Rot",
+        "description": "Something here is wrong. You have always been the one who says so first.",
+        "tiers": [
+          { "text": "Know whether food, drink, an object or a room within 30 feet is poisoned, diseased, cursed or spoiled, and roughly how badly.",
+            "card": "Sense poison, disease, curse or spoilage within 30 ft",
+            "mech": { "utility": true } },
+          { "text": "Spoil or purify: ruin a meal, a cask or a harvest beyond use, or make spoiled, poisoned or tainted food and water wholesome again.",
+            "card": "Spoil food beyond use — or make tainted food and water wholesome",
+            "mech": { "utility": true } },
+          { "text": "Know whether a creature you can see is lying about something it finds shameful, and whether it is carrying a curse, a Vile Emotion, or a parasite of any kind.",
+            "card": "Know a shameful lie · sense a curse, Vile Emotion or parasite in someone",
+            "mech": { "utility": true } },
+          { "text": "Refuse a thing on behalf of a place: for 24 hours, a building or a 60-foot space rejects one category you name — undead, Nightmares, poison, a named creature — which cannot enter without succeeding on the save each round.",
+            "card": "A place refuses what you name for 24 hrs — undead, Nightmares, poison, a person",
+            "mech": { "utility": true } }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Sour Note",
+      "type": "Offensive",
+      "description": "The seal leaves a taste behind it.",
+      "effect": { "text": "On a hit or failed saving throw, the target takes bonus poison damage equal to one damage die of the primary effect's type (min 1d6), and is Poisoned until the end of its next turn.",
+        "card": "+1 die poison · Poisoned until the end of their next turn",
+        "mech": { "damage": { "dice": "1d6", "type": "poison" }, "conditions": [ { "name": "Poisoned" } ] } },
+      "upgrades": [
+        { "text": "Level 5+: Two dice, and the target can't regain hit points from anything it swallows until the end of your next turn.", "card": "+2 dice · nothing it swallows heals it" },
+        { "text": "Level 11+: Three dice, and a Poisoned target has disadvantage on Constitution saves.", "card": "+3 dice · disadvantage on its Con saves" }
+      ]
+    },
+    {
+      "name": "Constitution",
+      "type": "Supportive",
+      "description": "The seal leaves its targets harder to get into.",
+      "effect": { "text": "Each of the seal's targets gains advantage on saving throws against poison, disease and Vile-emotion effects until the end of its next turn, and may end one such effect already on it.",
+        "card": "The seal's targets: advantage vs poison, disease and Vile effects · each ends one already on it",
+        "mech": { "buff": { "who": "the seal's targets", "advantage": "saves against poison, disease and Vile-emotion effects" } } },
+      "upgrades": [
+        { "text": "Level 5+: It lasts 1 hour, and each target gains resistance to poison damage.", "card": "1 hr · resistance to poison" },
+        { "text": "Level 11+: Each target also can't be Charmed while it lasts.", "card": "Can't be Charmed" }
+      ]
+    },
+    {
+      "name": "Keep Away",
+      "type": "Control",
+      "description": "Nobody wants to be near where that landed.",
+      "effect": { "text": "A creature hit by or failing the seal can't willingly move closer to you or the seal's targets until the end of its next turn.",
+        "card": "It can't move closer to you or the seal's targets until their next turn",
+        "mech": { "deny": [ "approaching you or the seal's targets" ] } },
+      "upgrades": [
+        { "text": "Level 5+: It is also Poisoned until the end of its next turn.", "card": "Also Poisoned" },
+        { "text": "Level 11+: It has disadvantage on attack rolls against you and the seal's targets while it lasts.", "card": "Disadvantage attacking you or the seal's targets" }
+      ]
+    }
+  ],
+  "schema": 2
+}

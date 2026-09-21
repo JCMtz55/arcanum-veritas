@@ -3,8 +3,8 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
@@ -25,6 +25,7 @@ function setView(v) {
     renderRingList(); renderRing();
   }
   if (v === "damage") { renderDamageList(); renderDamage(); }
+  if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
 }
 
 function renderCodexList() {

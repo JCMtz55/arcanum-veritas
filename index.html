@@ -21,6 +21,7 @@
     <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
     <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
     <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
+    <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
   </div>
   <div class="dials">
     <div class="dial" id="slotDial"><label for="slotDn">Slot</label>
@@ -89,6 +90,14 @@
   <section class="codex" id="damageBody"></section>
 </div>
 
+<div class="board" id="boardEmotion" hidden>
+  <aside class="rail">
+    <div class="cogs" id="emoList" style="padding-top:11px"></div>
+    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print</button></div>
+  </aside>
+  <section class="codex" id="emoBody"></section>
+</div>
+
 <div class="board" id="boardRings" hidden>
   <aside class="rail">
     <div class="cogs" id="ringList" style="padding-top:11px"></div>
@@ -107,6 +116,7 @@
 <script src="js/codex.js"></script>
 <script src="js/rings.js"></script>
 <script src="js/damage.js"></script>
+<script src="js/emotion.js"></script>
 <script src="js/ignition.js"></script>
 <script src="js/dice.js"></script>
 <script src="js/events.js"></script>
