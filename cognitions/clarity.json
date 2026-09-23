@@ -1,0 +1,309 @@
+{
+  "id": "clarity",
+  "name": "Clarity",
+  "icon": "🔍",
+  "opposing": "ignorance",
+  "description": "Focus, Understanding, The Cutting Away of Noise. Clarity is not knowledge — it is the state in which knowledge becomes usable: the moment the shape of a problem resolves, the confusion drops away, and the right thing to do is simply obvious. Its wielders think in straight lines under pressure, hand that steadiness to others, and take it away from anyone relying on a target's confusion.",
+  "savingThrow": "Intelligence",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Muddled",
+        "card": "disadvantage on its next ability check"
+      },
+      "major": {
+        "name": "Scattered",
+        "card": "can take an action or a bonus action, not both"
+      },
+      "severe": {
+        "name": "Blank",
+        "card": "Incapacitated — it has lost the thread entirely"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Cut",
+        "description": "You show them exactly how this ends. Some minds do not survive the clarity.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails loses whatever it was holding ready: a readied action, or a concentration effect of the slot level or lower.",
+            "card": "Damage becomes Psychic · they lose a readied action or a concentration effect (≤ slot)",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "deny": [
+                "readied actions",
+                "concentration (≤ slot)"
+              ]
+            }
+          },
+          {
+            "text": "It also loses one prepared spell or one use of a feature it had been saving — you showed it the situation clearly, and it spent the wrong thing a moment ago.",
+            "card": "Also: one prepared spell or saved feature use, gone",
+            "mech": {
+              "deny": [
+                "one prepared spell or feature use"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails can take an action or a bonus action on its next turn, not both.",
+            "card": "An action OR a bonus action next turn, not both"
+          },
+          {
+            "text": "Perfect Understanding. A creature that fails is Incapacitated until the end of its next turn, and for 1 minute afterwards it can't take the Ready, Help or Search actions — it has seen how this ends and cannot make itself useful.",
+            "card": "PERFECT UNDERSTANDING — Incapacitated a turn, then no Ready, Help or Search for 1 min",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Sharpened",
+        "description": "Everything the target was struggling to hold suddenly sits still.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target has advantage on Intelligence checks and on Concentration checks, and can't be Confused or made to lose track of what it was doing.",
+            "card": "1 min: advantage on Int and Concentration · can't be Confused",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "Intelligence and Concentration checks"
+              }
+            }
+          },
+          {
+            "text": "It adds your Verum Modifier to initiative and to one ability check of its choice each round.",
+            "card": "+{VM} initiative · +{VM} on one check each round",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "initiative": "+VM",
+                "check": "+VM once a round"
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, the target may take the Study, Search or Insight action as a free action and learn the single most useful true fact available to it.",
+            "card": "Once: a free Search, Study or Insight that returns the most useful true fact"
+          },
+          {
+            "text": "Unclouded. The target can't be Charmed, Frightened, Confused or made to act against its own judgment, sees through illusions it can touch or examine, and always knows when it is being lied to.",
+            "card": "UNCLOUDED — no charm, fear, confusion or coercion · sees through examined illusions · always knows a lie",
+            "mech": {
+              "deny": [
+                "charm",
+                "fear",
+                "confusion"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Noise",
+        "description": "You take clarity away, which turns out to be the same weapon pointed backwards.",
+        "tiers": [
+          {
+            "text": "A creature that fails has disadvantage on Intelligence and Wisdom checks and on Concentration until the end of its next turn.",
+            "card": "Fail: disadvantage on Int, Wis and Concentration until their next turn",
+            "mech": {
+              "save": {
+                "ability": "Intelligence"
+              },
+              "penalty": {
+                "disadvantage": "Intelligence and Wisdom checks and Concentration"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails can't tell allies from strangers at a glance: it loses the benefit of any ally's Help, aura or shared plan until the end of its next turn.",
+            "card": "No benefit from allies' Help, auras or plans until their next turn",
+            "mech": {
+              "deny": [
+                "benefits from allies"
+              ]
+            }
+          },
+          {
+            "text": "The confusion lasts 1 minute, repeating the save at the end of each of its turns, and while it holds the creature must roll a d6 each turn — on a 1 or 2 it spends its action doing something useless of the DM's choosing.",
+            "card": "1 min (Int save each turn) · d6 each turn, 1–2: the action is wasted",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Muddled",
+                  "duration": "1 minute",
+                  "escape": "Intelligence save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Static. Creatures that fail can't cast spells or draw seals requiring verbal or somatic precision unless they succeed on a Concentration check against your DC, and they can't communicate anything more complex than a single word.",
+            "card": "STATIC — spells and seals need a check vs {DC} · no communication beyond one word",
+            "mech": {
+              "deny": [
+                "complex communication"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Instruments",
+        "description": "What you make is exactly, unmistakably, the thing it is for.",
+        "tiers": [
+          {
+            "text": "Your creations are perfectly suited to one stated purpose: anyone using one for that purpose adds your Verum Modifier to the check.",
+            "card": "Creations add {VM} to checks for their stated purpose"
+          },
+          {
+            "text": "Your Objects explain themselves — anyone holding one knows how to use it, in any language, without instruction.",
+            "card": "Objects teach their own use, to anyone"
+          },
+          {
+            "text": "Your Structures are legible: everyone inside knows the layout, the exits, and where everyone else in it is standing.",
+            "card": "Inside your Structures, everyone knows the layout and where everyone is"
+          },
+          {
+            "text": "Make a Lens: a permanent Object that answers one question about anything examined through it — what it is, what it does, or what it is hiding.",
+            "card": "A LENS — permanent, answers one question about anything seen through it"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Resolution",
+        "description": "The noise drops away and the problem sits there, plainly.",
+        "tiers": [
+          {
+            "text": "Know whether a statement you have just heard is true as far as the speaker believes it, and read the emotional weight beneath it.",
+            "card": "Know if a statement is true as the speaker believes it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Spend a minute with a problem — a mechanism, a cipher, a wound, a room — and learn the single fact most useful to solving it.",
+            "card": "A minute with any problem yields the one most useful fact",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Clear a mind: end Confusion, madness, a compulsion of the slot level or lower, or the fog of Dream Exhaustion on a creature you touch.",
+            "card": "Clear confusion, madness, a compulsion (≤ slot) or Dream Exhaustion",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "See a situation whole: ask the DM one question about the current scene — a motive, a danger, a relationship, a way out — and get a true, useful answer.",
+            "card": "Ask one true question about the scene and get a useful answer",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Sharp Edge",
+      "type": "Offensive",
+      "description": "The seal is delivered with unwelcome precision.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next Concentration check.",
+        "card": "+1 die psychic · disadvantage on their next Concentration check",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "penalty": {
+            "disadvantage": "the next Concentration check"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target loses any readied action.",
+          "card": "+2 dice · their readied action is lost"
+        },
+        {
+          "text": "Level 11+: Three dice, and it can't take the Ready or Help action on its next turn.",
+          "card": "+3 dice · no Ready or Help next turn"
+        }
+      ]
+    },
+    {
+      "name": "Focus",
+      "type": "Supportive",
+      "description": "Everyone the seal touches stops second-guessing.",
+      "effect": {
+        "text": "Each of the seal's targets has advantage on its next Concentration check and adds your Verum Modifier to its next ability check.",
+        "card": "The seal's targets: advantage on their next Concentration · +{VM} on their next check",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "advantage": "the next Concentration check",
+            "check": "+VM once"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and they can't be Confused while it does.",
+          "card": "1 min · can't be Confused"
+        },
+        {
+          "text": "Level 11+: Each may also end one effect on itself that is clouding its judgment.",
+          "card": "Each ends one judgment-clouding effect"
+        }
+      ]
+    },
+    {
+      "name": "Distraction",
+      "type": "Control",
+      "description": "Whatever the seal did, it was also extremely distracting.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next Intelligence or Wisdom check, and on Concentration until the end of its next turn.",
+        "card": "Disadvantage on their next Int or Wis check and on Concentration",
+        "mech": {
+          "penalty": {
+            "disadvantage": "Intelligence and Wisdom checks and Concentration"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't take the Search or Study action on its next turn.",
+          "card": "No Search or Study next turn"
+        },
+        {
+          "text": "Level 11+: It loses the benefit of one ally's Help or aura until the end of its next turn.",
+          "card": "Loses an ally's Help or aura"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

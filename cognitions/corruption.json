@@ -6,7 +6,9 @@
   "description": "Decay, Greed, Soul Unraveling, Spiritual Erosion, Temptation. Corruption does not destroy — that is Fire's work. Corruption changes, slowly, in ways the target is the last to notice: it finds the crack that was already there and gives it permission. Its wielders are architects of moral erosion, and the Cognition asks them the same question it asks everyone else. It grows stronger the further its wielder has fallen, and it will always offer one more point of rot for one more measure of power.",
   "savingThrow": "Charisma",
   "damageType": "Necrotic",
-  "incompatible": [ "creation" ],
+  "incompatible": [
+    "creation"
+  ],
   "cost": {
     "text": "Contagion. Every Corruption seal offers the bargain: you may Take On a Corruption Point as you draw it, and the seal answers as though you stood a Tier higher. The first costs 1 Point, the second in the same day costs 2, the third 3. You never have to accept. It will always ask.",
     "card": "CONTAGION — Take On Corruption to draw a Tier higher · 1 Point, then 2, then 3 in the same day"
@@ -15,37 +17,70 @@
     "title": "Contagion",
     "text": "Corruption is the one Cognition that pays its wielder in the same coin it charges them. Your Corruption Score — the one on your sheet, from the Corruption ruleset — is a live part of every seal you draw.",
     "traits": [
-      { "name": "The Score Pays", "level": 1,
+      {
+        "name": "The Score Pays",
+        "level": 1,
         "text": "Add your Corruption Score to the damage rolls of every Corruption seal you draw, and to any hit points it drains. A creature carrying 1 or more Corruption Points makes its saves against your Corruption seals at disadvantage.",
-        "card": "+ your Corruption Score to damage and drain · the already-corrupted save at disadvantage" },
-      { "name": "Take On", "level": 1,
+        "card": "+ your Corruption Score to damage and drain · the already-corrupted save at disadvantage"
+      },
+      {
+        "name": "Take On",
+        "level": 1,
         "text": "As you draw a Corruption seal you may accept Corruption Points to draw it as though you were one Tier higher — its next tier applies even if your level has not reached it. At Tier 4 it instead maximises every damage die the seal rolls. Once per seal; the first Take On each day costs 1 Point, the second 2, the third 3, and so on.",
-        "card": "Take On Corruption: draw one Tier higher (at Tier 4, maximise the dice) · 1 Point, then 2, then 3 today" },
-      { "name": "What Takes Root", "level": 1,
+        "card": "Take On Corruption: draw one Tier higher (at Tier 4, maximise the dice) · 1 Point, then 2, then 3 today"
+      },
+      {
+        "name": "What Takes Root",
+        "level": 1,
         "text": "A mortal soul comes apart at Corruption Score 10. When a creature carrying Points from your seals reaches 3 or more Corruption Points, your own ceiling rises permanently by 1. Nothing takes it back — not the creature's death, not its cleansing, not your own atonement. Each creature can do this only once, ever; it must be sapient, and its CR or level must be at least half your own. Your ceiling can rise no higher than your Proficiency Bonus above 10. You still suffer every threshold you pass on the way up: you simply no longer end at 10.",
-        "card": "Bring a creature to 3 Corruption Points: your ceiling rises by 1, permanently (max 10 + {PB}) · once per creature · sapient, CR or level ≥ half yours" },
-      { "name": "The Floor Rises Too", "level": 1,
+        "card": "Bring a creature to 3 Corruption Points: your ceiling rises by 1, permanently (max 10 + {PB}) · once per creature · sapient, CR or level ≥ half yours"
+      },
+      {
+        "name": "The Floor Rises Too",
+        "level": 1,
         "text": "Every time your ceiling rises this way, so does your floor. No atonement, quest, miracle or cleansing can reduce your Corruption Score below the number of souls you have taken root in. You can hold more than a soul was built to — and you can never be clean again.",
-        "card": "Your floor rises with your ceiling — no atonement takes you below the number of souls you've rooted" },
-      { "name": "Kindred Rot", "level": 5,
+        "card": "Your floor rises with your ceiling — no atonement takes you below the number of souls you've rooted"
+      },
+      {
+        "name": "Kindred Rot",
+        "level": 5,
         "text": "Once per long rest, when a Corruption seal of yours lands on a creature with a soul, you may move 1 Corruption Point from yourself onto it: your Score drops by one, and its rises by one. You cannot move a Point onto a construct, an undead, or anything already at 10 — and never below the floor your own possessions impose.",
-        "card": "1/long rest: move 1 of your Corruption Points onto a creature the seal hit" },
-      { "name": "Unbound Draw", "level": 11,
+        "card": "1/long rest: move 1 of your Corruption Points onto a creature the seal hit"
+      },
+      {
+        "name": "Unbound Draw",
+        "level": 11,
         "text": "While your Corruption Score is 5 or higher, once per long rest you may draw a Corruption seal without expending a slot, at the highest slot level you can cast. You gain 1 Corruption Point from the raw rot channelled.",
-        "card": "Score 5+: 1/long rest, a free seal at your highest slot — and 1 Corruption Point" },
-      { "name": "Past the Table", "level": 11,
+        "card": "Score 5+: 1/long rest, a free seal at your highest slot — and 1 Corruption Point"
+      },
+      {
+        "name": "Past the Table",
+        "level": 11,
         "text": "For every Corruption Point you hold above 10, you gain another Demon Surge or Nightmare Intrusion of your Nature — and the DM takes something of yours that does not come back: a memory, a face, a name, someone who used to know you. You are, by now, quite obviously the most dangerous thing in the room.",
-        "card": "Above 10: another Surge or Intrusion per Point — and the DM takes something of yours for each" },
-      { "name": "The Long Timeline", "level": 17,
+        "card": "Above 10: another Surge or Intrusion per Point — and the DM takes something of yours for each"
+      },
+      {
+        "name": "The Long Timeline",
+        "level": 17,
         "text": "While your Corruption Score is 7 or higher, your Corruption seals against a creature carrying 3 or more Corruption Points roll maximum damage, and the Points you have given a creature cannot be removed by anything short of the atonement the ruleset names. It plays a longer game than its wielders are willing to acknowledge, and it almost always wins.",
-        "card": "Score 7+: maximum damage against anyone carrying 3+ Points · your Points only come off by atonement" }
+        "card": "Score 7+: maximum damage against anyone carrying 3+ Points · your Points only come off by atonement"
+      }
     ]
   },
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Tainted", "card": "can't regain hit points" },
-      "major":  { "name": "Corrupted", "card": "Poisoned, with disadvantage on saves against you" },
-      "severe": { "name": "Consumed", "card": "Incapacitated by the rot in its soul" }
+      "minor": {
+        "name": "Tainted",
+        "card": "can't regain hit points"
+      },
+      "major": {
+        "name": "Corrupted",
+        "card": "Poisoned, with disadvantage on saves against you"
+      },
+      "severe": {
+        "name": "Consumed",
+        "card": "Incapacitated by the rot in its soul"
+      }
     }
   },
   "verumEffects": {
@@ -54,18 +89,54 @@
         "name": "Rot Made Manifest",
         "description": "You stop being patient. Everything you have been putting into other people's souls, you put into this one at once.",
         "tiers": [
-          { "text": "The damage becomes necrotic and increases by 2 additional dice. A creature hit or that fails gains 1 Corruption Point — and from this moment its saves against your Corruption seals are made at disadvantage.",
-            "card": "+2 dice · damage becomes Necrotic · +1 Corruption Point on the target",
-            "mech": { "damage": { "bonusDice": 2, "type": "necrotic" }, "conditions": [ { "name": "Corruption Point" } ] } },
-          { "text": "The damage increases by 4 additional dice, and a creature hit or that fails can't regain hit points until the end of its next turn. If it already carried a Corruption Point, its hit point maximum drops by Five Times the slot level until it finishes a long rest.",
-            "card": "+4 dice · no healing until their next turn · already corrupted: −5 × {SLOT} max HP until a long rest",
-            "mech": { "damage": { "bonusDice": 4, "type": "necrotic" }, "deny": [ "healing" ] } },
-          { "text": "The damage increases by 6 additional dice. A creature that fails gains a second Corruption Point, and you regain hit points equal to Twice your Corruption Score as the rot comes home to you.",
-            "card": "+6 dice · a second Corruption Point · you regain twice your Corruption Score",
-            "mech": { "damage": { "bonusDice": 6, "type": "necrotic" }, "conditions": [ { "name": "Corruption Point", "count": 2 } ] } },
-          { "text": "The Unmaking. The damage increases by 8 additional dice. A creature carrying 5 or more Corruption Points that fails suffers the Rebound Curse of its Dominant Vile Emotion at once — and if it has none, the seal chooses one for it — and is Incapacitated for 1 minute, repeating the Charisma save at the end of each of its turns. A creature this seal drops to 0 hit points cannot be raised by anything that does not first cleanse its soul.",
-            "card": "+8 dice · THE UNMAKING — at 5+ Points: its Rebound Curse fires and it's Incapacitated 1 min · the dead can't be raised uncleansed",
-            "mech": { "damage": { "bonusDice": 8, "type": "necrotic" }, "conditions": [ { "name": "Incapacitated", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } }
+          {
+            "text": "The damage becomes necrotic. A creature hit or that fails gains 1 Corruption Point — and from this moment its saves against your Corruption seals are made at disadvantage.",
+            "card": "Damage becomes Necrotic · +1 Corruption Point on the target",
+            "mech": {
+              "damage": {
+                "type": "necrotic"
+              },
+              "conditions": [
+                {
+                  "name": "Corruption Point"
+                }
+              ]
+            }
+          },
+          {
+            "text": "A creature hit or that fails can't regain hit points until the end of its next turn. If it already carried a Corruption Point, its hit point maximum drops by Five Times the slot level until it finishes a long rest.",
+            "card": "No healing until their next turn · already corrupted: −5 × {SLOT} max HP until a long rest",
+            "mech": {
+              "deny": [
+                "healing"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails gains a second Corruption Point, and you regain hit points equal to Twice your Corruption Score as the rot comes home to you.",
+            "card": "A second Corruption Point · you regain twice your Corruption Score",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Corruption Point",
+                  "count": 2
+                }
+              ]
+            }
+          },
+          {
+            "text": "The Unmaking. A creature carrying 5 or more Corruption Points that fails suffers the Rebound Curse of its Dominant Vile Emotion at once — and if it has none, the seal chooses one for it — and is Incapacitated for 1 minute, repeating the Charisma save at the end of each of its turns. A creature this seal drops to 0 hit points cannot be raised by anything that does not first cleanse its soul.",
+            "card": "THE UNMAKING — at 5+ Points: its Rebound Curse fires and it's Incapacitated 1 min · the dead can't be raised uncleansed",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          }
         ]
       },
       {
@@ -77,7 +148,6 @@
             "card": "+2 dice · damage becomes Necrotic · cursed or corrupted: {PB}×1d6 more",
             "mech": {
               "damage": {
-                "bonusDice": 2,
                 "dice": "1d6",
                 "type": "necrotic"
               },

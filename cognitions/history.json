@@ -1,0 +1,288 @@
+{
+  "id": "history",
+  "name": "History",
+  "icon": "📜",
+  "opposing": "lies",
+  "description": "Record, Precedent, What Actually Happened. History is not Memory, which is personal, nor Time, which is a Law — it is the shape events leave behind them, and the weight that shape carries. Its wielders read the past off a room, hold people to what they did, and call the dead back as testimony. It is the foundation of Identity and of Knowledge, and the reason nothing in Ephemer is ever quite forgotten.",
+  "savingThrow": "Intelligence",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Reminded",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Confronted",
+        "card": "Frightened by what it has done"
+      },
+      "severe": {
+        "name": "Relived",
+        "card": "Incapacitated, back in the worst of it"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Record",
+        "description": "You show them everything they have done. Not a judgment. Just the list.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails has disadvantage on the next attack it makes against a creature it has wronged.",
+            "card": "Damage becomes Psychic · disadvantage attacking anyone they've wronged",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "penalty": {
+                "disadvantage": "attacks against those it has wronged"
+              }
+            }
+          },
+          {
+            "text": "The seal deals one additional die for each time the target has used the same ability, tactic or spell earlier in this fight, to a maximum of your Verum Modifier. You have been keeping the record.",
+            "card": "+1 die per repeat of anything it has already used this fight (max {VM})"
+          },
+          {
+            "text": "A creature that fails is Frightened of you until the end of its next turn — you evidently know what it did.",
+            "card": "Frightened of you until the end of their next turn",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Reckoning. A creature that fails relives its worst act in full: it is Incapacitated until the end of its next turn, and everyone present sees it too, in the air, as it happened.",
+            "card": "RECKONING — it relives its worst act, Incapacitated, and everyone watches",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Precedent",
+        "description": "It has been done before, and you know exactly how.",
+        "tiers": [
+          {
+            "text": "For 1 minute, the first time the target attempts something each round that it, or anyone it knows of, has done before, it adds your Verum Modifier to the roll.",
+            "card": "1 min: +{VM} on the first attempt each round at anything ever done before",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "check": "+VM once a round"
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, the target may treat a skill, tool or language it has seen used as though it were proficient in it.",
+            "card": "Once: borrow proficiency in anything it has watched someone else do"
+          },
+          {
+            "text": "When the target is hit by an attack or effect it has already faced this fight, it takes half the damage and adds your Verum Modifier to any save against it.",
+            "card": "Anything it has already faced this fight deals half, and it saves at +{VM}"
+          },
+          {
+            "text": "Nothing New. The target has advantage on every roll against a creature, spell or hazard that it has encountered before, and it cannot be surprised by anything with a history.",
+            "card": "NOTHING NEW — advantage against anything it has met before · never surprised by the known"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Weight of It",
+        "description": "The room remembers what happened here, and you let it speak up.",
+        "tiers": [
+          {
+            "text": "The area replays its past for 1 minute — the loudest thing that ever happened here, in silence and half-light. A creature that fails has disadvantage on attack rolls while inside it.",
+            "card": "1 min: the place replays its past · those who fail attack at disadvantage inside",
+            "mech": {
+              "save": {
+                "ability": "Intelligence"
+              },
+              "penalty": {
+                "disadvantage": "attack rolls inside"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails sees its own past instead: it is Frightened while it remains inside, repeating the save at the end of each of its turns.",
+            "card": "Fail: Frightened by its own past while inside (Int save each turn)",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "escape": "Intelligence save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The dead of this place stand up as witnesses — insubstantial, harmless, and impossible to ignore. Creatures that failed can't take the Hide action or lie while they watch.",
+            "card": "The dead of this place watch · no hiding and no lying in front of them",
+            "mech": {
+              "deny": [
+                "Hide",
+                "lying"
+              ]
+            }
+          },
+          {
+            "text": "History Repeats. Choose one event this place has witnessed. It happens again, in full, for 1 minute — the fire, the flood, the collapse, the battle — affecting creatures inside as it did then, though you and those you name know exactly what is coming.",
+            "card": "HISTORY REPEATS — the fire, the flood, the battle happens again for 1 min · you know what's coming, they don't"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Archive",
+        "description": "What you make is a record, and records outlast everyone.",
+        "tiers": [
+          {
+            "text": "Your creations are inscribed with their own making: who made them, when, and why, in a hand nobody can forge.",
+            "card": "Creations carry an unforgeable record of their making"
+          },
+          {
+            "text": "Your Objects remember what is done with them: hold one and watch the last day of its use, exactly.",
+            "card": "Objects replay the last day of their own use"
+          },
+          {
+            "text": "Your Structures keep the record of everything said inside them, retrievable by you or anyone you name.",
+            "card": "Structures record everything said inside, for you to retrieve"
+          },
+          {
+            "text": "Build an Archive: a permanent Structure in which nothing said or done can ever be lost, altered or forgotten, and from which any record it holds can be produced in an instant.",
+            "card": "AN ARCHIVE — permanent, nothing in it is ever lost or altered"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "What Happened Here",
+        "description": "The past does not go anywhere. Most people just cannot read it.",
+        "tiers": [
+          {
+            "text": "Read a place or an object: the most significant thing that happened to it, when, and who was there.",
+            "card": "Read the most significant thing that happened here, and who was present",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Follow a thing's provenance: every owner an object has had, and how each came by it.",
+            "card": "Trace every owner an object ever had, and how they got it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ask the dead of a place one question each — they answer as they knew it, which is not always as it was.",
+            "card": "Ask the dead of a place one question each — as they knew it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Settle a question of the past: name any event and learn what actually happened, stripped of every account written since. This is not always welcome, and word travels that you can do it.",
+            "card": "Learn what actually happened at any event, stripped of every later account",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Precedent Set",
+      "type": "Offensive",
+      "description": "They have felt something like this before, and the seal reminds them.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6) — two dice if this seal has already damaged it this combat.",
+        "card": "+1 die psychic — +2 dice if this seal has hit them before this fight",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four on a repeat, and it has disadvantage on its next save against this same seal.",
+          "card": "+2 dice (4 on a repeat) · disadvantage against it again"
+        },
+        {
+          "text": "Level 11+: Three dice, or six.",
+          "card": "+3 dice (6 on a repeat)"
+        }
+      ]
+    },
+    {
+      "name": "Done Before",
+      "type": "Supportive",
+      "description": "The seal reminds its targets that this is not new.",
+      "effect": {
+        "text": "Each of the seal's targets adds your Verum Modifier to its next roll against a creature, spell or hazard it has already faced this combat.",
+        "card": "The seal's targets: +{VM} against anything they've already faced today",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "check": "+VM against the already-faced"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It becomes advantage instead, and lasts 1 minute.",
+          "card": "Advantage instead · 1 min"
+        },
+        {
+          "text": "Level 11+: They also take half damage from any effect that has already hit them this combat.",
+          "card": "Half damage from anything that's hit them before"
+        }
+      ]
+    },
+    {
+      "name": "On the Record",
+      "type": "Control",
+      "description": "Whatever they do next is being written down.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't lie or hide its identity until the end of its next turn, and you know the last significant thing it did.",
+        "card": "No lying, no hiding who they are · you learn the last thing they did",
+        "mech": {
+          "deny": [
+            "lying",
+            "concealing its identity"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and the creature can't take the Hide action while it does.",
+          "card": "1 min · no Hiding"
+        },
+        {
+          "text": "Level 11+: Every creature present sees an image of that last deed, whether the target wants them to or not.",
+          "card": "Everyone present sees what it did"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -1,0 +1,295 @@
+{
+  "id": "wisdom",
+  "name": "Wisdom",
+  "icon": "🦉",
+  "opposing": "ignorance",
+  "description": "Judgment, Proportion, Knowing Which Thing Matters. Built from Knowledge and Clarity, Wisdom is the rarer half of thinking: not what is true, but what to do about it. It sees consequences before they arrive, spends nothing it does not need to, and is very hard to hurry. Its wielders are worth listening to even when they are wrong, which they are less often than anyone finds comfortable.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Second-guessing",
+        "card": "disadvantage on its next ability check"
+      },
+      "major": {
+        "name": "Doubting itself",
+        "card": "it cannot use the same action twice in a row"
+      },
+      "severe": {
+        "name": "Undecided",
+        "card": "Incapacitated — it cannot choose what to do"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Counsel",
+        "description": "You tell them the one thing that will matter in a minute's time.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target may add your Verum Modifier to one roll each round, declared after the roll but before the result is known.",
+            "card": "1 min: +{VM} on one roll a round — declared after the die lands",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "bonus": "+VM once a round, after the roll"
+              }
+            }
+          },
+          {
+            "text": "It can't be surprised, always acts in the first round, and knows whether an action it is about to take will go badly in a way it could have foreseen.",
+            "card": "Never surprised · always acts first · warned before a foreseeable mistake"
+          },
+          {
+            "text": "Once while this lasts, the target may undo its own action immediately after taking it — the resource is unspent, the moment is not, and it takes a different action instead.",
+            "card": "Once: take the action back, unspent, and do something else"
+          },
+          {
+            "text": "Foresight. The target has advantage on all attack rolls, ability checks and saving throws for the minute, and attacks against it have disadvantage: it is simply never where the mistake is.",
+            "card": "FORESIGHT — advantage on everything, and attacks against it at disadvantage, 1 min"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Consider What You Are Doing",
+        "description": "You make them think about it. Thinking about it is fatal to most plans.",
+        "tiers": [
+          {
+            "text": "A creature that fails has disadvantage on the first attack roll or check it makes on its next turn, as the consequences occur to it.",
+            "card": "Fail: disadvantage on the first thing they try next turn",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "penalty": {
+                "disadvantage": "the first attack or check on its next turn"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails can't take the same action two turns running while the effect lasts — it keeps seeing a better option that isn't there.",
+            "card": "They can't repeat an action two turns running",
+            "mech": {
+              "deny": [
+                "repeating an action"
+              ]
+            }
+          },
+          {
+            "text": "The hesitation lasts 1 minute, repeating the save at the end of each of its turns. While it holds, the creature must spend its bonus action each turn doing nothing but reconsidering.",
+            "card": "1 min (Wis save each turn) · its bonus action goes on reconsidering",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Hesitant",
+                  "duration": "1 minute",
+                  "escape": "Wisdom save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Paralysis of Choice. A creature that fails is Incapacitated for as long as it can see more than one course of action — which, while you are standing there offering alternatives, is indefinitely. Damage it takes ends the effect.",
+            "card": "PARALYSIS OF CHOICE — Incapacitated while it can see a choice · damage ends it",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "escape": "taking damage"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "The Right Word",
+        "description": "You say the true thing they have been arranging their life to avoid.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails has disadvantage on its next ability check.",
+            "card": "Damage becomes Psychic · disadvantage on their next check",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "penalty": {
+                "disadvantage": "the next ability check"
+              }
+            }
+          },
+          {
+            "text": "Against a creature acting against its own interest, oath or nature — which most creatures in a fight are — the seal deals 3 additional dice.",
+            "card": "+3 dice against anyone acting against their own interest"
+          },
+          {
+            "text": "A creature that fails can't take the same action it took on its last turn.",
+            "card": "They can't do what they did last turn",
+            "mech": {
+              "deny": [
+                "repeating its last action"
+              ]
+            }
+          },
+          {
+            "text": "Reconsider. A creature that fails must choose: stop what it is doing entirely for 1 minute, or take psychic damage equal to Ten Times your Verum Modifier at the start of each of its turns while it continues.",
+            "card": "RECONSIDER — stop for 1 min, or take 10×VM psychic every turn you don't",
+            "mech": {
+              "rider": {
+                "damage": "10×VM",
+                "type": "psychic",
+                "when": "each turn it persists"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Well Made",
+        "description": "You build the thing that will still be right in fifty years.",
+        "tiers": [
+          {
+            "text": "Your creations last three times as long as their Ring allows, and never fail at the moment they are most needed.",
+            "card": "Creations last three times as long, and never fail at the crucial moment"
+          },
+          {
+            "text": "Your Objects give counsel: whoever carries one may ask it once a day whether a course of action is wise, and get an honest answer.",
+            "card": "Objects answer once a day: is this wise?"
+          },
+          {
+            "text": "Your Structures are built for what is coming: they resist the specific disaster most likely to befall them, whatever it is.",
+            "card": "Structures resist the disaster most likely to come for them"
+          },
+          {
+            "text": "Raise a Seat of Judgment: a permanent Structure where any question put to it is answered with the wisest available course — not the kindest, and not always the one anyone wanted.",
+            "card": "A SEAT OF JUDGMENT — it answers with the wisest course, which is rarely the welcome one"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Perspective",
+        "description": "Seeing the size of things, which is most of knowing what to do.",
+        "tiers": [
+          {
+            "text": "Ask whether a course of action you are considering will end well, badly, or in a way you have not imagined. You get one word.",
+            "card": "One word on how your plan ends: well, badly, or unimagined",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Know the most dangerous thing in a situation, the most important, and the most urgent — and that they are usually three different things.",
+            "card": "Name the most dangerous, most important and most urgent thing present",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Give counsel that holds: a creature who takes your advice for a day has advantage on checks made following it, and knows the moment it stops applying.",
+            "card": "Advice that grants advantage while followed — and warns when it stops applying",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "See the consequence: name any action anyone might take and learn the most significant thing that follows from it within a year.",
+            "card": "Name an action — learn the most significant thing that follows within a year",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Home Truth",
+      "type": "Offensive",
+      "description": "The seal arrives with an observation they did not want.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6) and has disadvantage on its next ability check.",
+        "card": "+1 die psychic · disadvantage on their next check",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "penalty": {
+            "disadvantage": "the next ability check"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and it can't take the same action next turn that it took this one.",
+          "card": "+2 dice · no repeating its action"
+        },
+        {
+          "text": "Level 11+: Three dice, and its next saving throw is made at disadvantage too.",
+          "card": "+3 dice · disadvantage on its next save"
+        }
+      ]
+    },
+    {
+      "name": "Good Advice",
+      "type": "Supportive",
+      "description": "The seal arrives with a word in the ear.",
+      "effect": {
+        "text": "Each of the seal's targets may add your Verum Modifier to one roll before the end of your next turn, declared after the die is rolled.",
+        "card": "The seal's targets: +{VM} on one roll, declared after the die lands",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "bonus": "+VM once, after the roll"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute and refreshes each round.",
+          "card": "1 min, refreshing each round"
+        },
+        {
+          "text": "Level 11+: Each also can't be surprised while it lasts.",
+          "card": "None of them can be surprised"
+        }
+      ]
+    },
+    {
+      "name": "Hesitation",
+      "type": "Control",
+      "description": "The seal gives them a moment to think, which is the last thing they needed.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on the first attack roll or ability check it makes on its next turn.",
+        "card": "Disadvantage on the first thing they try next turn",
+        "mech": {
+          "penalty": {
+            "disadvantage": "the first roll on its next turn"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also loses its bonus action on that turn, spent reconsidering.",
+          "card": "Its bonus action goes on reconsidering"
+        },
+        {
+          "text": "Level 11+: It can't take the same action twice in a row for 1 minute.",
+          "card": "No repeating an action, 1 min"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

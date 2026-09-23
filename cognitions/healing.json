@@ -1,0 +1,325 @@
+{
+  "id": "healing",
+  "name": "Healing",
+  "icon": "✚",
+  "opposing": "pain",
+  "description": "Mending, Relief, The Closing of What Was Opened. Healing is not Life — it does not create or restore the dead. It is the narrower, kinder art of putting a body back the way it was: knitting bone, closing wound, drawing out poison, ending pain. Where Life is a Divine Law and answers to nobody, Healing is a craft, and a good healer is worth more to a company than almost anything else they could carry.",
+  "savingThrow": "Constitution",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Knitting",
+        "card": "can't regain hit points from any other source"
+      },
+      "major": {
+        "name": "Overmended",
+        "card": "Restrained as flesh closes over it"
+      },
+      "severe": {
+        "name": "Unmade whole",
+        "card": "Incapacitated while its body rearranges itself"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Mend",
+        "description": "The straightforward miracle. Most of what a healer does is this, done fast.",
+        "tiers": [
+          {
+            "text": "The target regains hit points equal to Ten Times the slot level and one condition of your choice ends: Poisoned, Blinded, Deafened, or Paralysed.",
+            "card": "Heals 10 × {SLOT} · ends Poisoned, Blinded, Deafened or Paralysed",
+            "mech": {
+              "heal": {
+                "perSlot": 10,
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "The healing becomes Fifteen Times the slot level, ends a disease or a poison in the body, and the target regains a spent Hit Die.",
+            "card": "Heals 15 × {SLOT} · ends disease or poison · a Hit Die back",
+            "mech": {
+              "heal": {
+                "perSlot": 15,
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "The healing becomes Twenty-five Times the slot level. It also mends one Wound or lost limb's function for 1 hour, and the target sheds one level of exhaustion.",
+            "card": "Heals 25 × {SLOT} · mends a Wound or limb for 1 hr · −1 exhaustion",
+            "mech": {
+              "heal": {
+                "perSlot": 25,
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "Whole. The healing becomes Thirty-five Times the slot level, every condition short of death ends, Wounds close permanently, and the target cannot drop below 1 hit point until the end of your next turn.",
+            "card": "WHOLE — heals 35 × {SLOT} · every condition ends · Wounds close for good · can't drop below 1 until your next turn",
+            "mech": {
+              "heal": {
+                "perSlot": 35,
+                "who": "target"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Healer's Hand",
+        "description": "You do not close the wound. You make them the kind of person whose wounds close.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target regains hit points equal to Twice your Verum Modifier at the start of each of its turns.",
+            "card": "1 min: 2×VM healing at the start of each of its turns",
+            "mech": {
+              "heal": {
+                "amount": "2×VM a turn",
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "The healing becomes Four Times your Verum Modifier, and any healing the target receives from any source is increased by your Verum Modifier.",
+            "card": "4×VM a turn · all healing it receives is +{VM}"
+          },
+          {
+            "text": "While this lasts the target stabilises automatically, can't be reduced below 1 hit point by a single hit that would not have killed it outright, and ignores the effects of exhaustion levels 1–2.",
+            "card": "Auto-stabilises · survives one hit that would drop it · ignores exhaustion 1–2"
+          },
+          {
+            "text": "Unkillable. The healing becomes Six Times your Verum Modifier, the target has advantage on death saving throws and treats a roll of 10 or higher as a 20, and the first time it would die while this lasts, it doesn't — it drops to 1 instead and the effect ends.",
+            "card": "UNKILLABLE — 6×VM a turn · death saves at advantage, 10+ counts as a 20 · the first death is refused"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Forced Mending",
+        "description": "Flesh knits where it should not. It is healing, technically.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant as tissue closes over eyes and joints. A creature hit or that fails can't regain hit points from any other source until the end of its next turn.",
+            "card": "Damage becomes Radiant · no other healing works on them until their next turn",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "deny": [
+                "healing from other sources"
+              ]
+            }
+          },
+          {
+            "text": "Against a creature that does not heal — undead, constructs, the already-dead — the seal deals 3 additional dice.",
+            "card": "+3 dice against the undead and things that don't heal"
+          },
+          {
+            "text": "A creature that fails is Restrained until the end of its next turn as flesh closes over what it was holding.",
+            "card": "Restrained until the end of their next turn",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Sealed. A creature that fails can't regain hit points at all for 1 minute, repeating the Constitution save at the end of each of its turns — and the healing you are so obviously capable of is not coming.",
+            "card": "SEALED — no healing at all for 1 min (Con save each turn)",
+            "mech": {
+              "deny": [
+                "healing"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Triage",
+        "description": "You decide who is getting better and who is waiting.",
+        "tiers": [
+          {
+            "text": "The area becomes a ward for 1 minute: allies inside have advantage on death saving throws and on saves against poison and disease, and enemies that fail regain half as much from healing while they remain.",
+            "card": "1 min: allies get death-save and poison advantage · enemies who fail heal for half inside",
+            "mech": {
+              "save": {
+                "ability": "Constitution"
+              },
+              "penalty": {
+                "healing": "half for enemies"
+              }
+            }
+          },
+          {
+            "text": "At the start of each of your turns, one creature of your choice inside regains hit points equal to Three Times your Verum Modifier, or loses that many if you would rather.",
+            "card": "Each turn: give 3×VM healing to one inside — or take it away"
+          },
+          {
+            "text": "Enemies that fail can't regain hit points inside at all, and allies inside can't be reduced below 1 hit point by anything that deals less than Ten Times the slot level.",
+            "card": "No enemy healing inside · allies survive anything under 10 × {SLOT}",
+            "mech": {
+              "deny": [
+                "enemy healing"
+              ]
+            }
+          },
+          {
+            "text": "The Ward. Allies inside are stable, immune to poison and disease, and shed one condition each round. Enemies inside that fail make death saving throws at disadvantage and cannot be stabilised by anyone but you.",
+            "card": "THE WARD — allies stable, immune to poison and disease, shedding a condition a round · enemies die at disadvantage"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Infirmary",
+        "description": "What you build looks after people, which is rarer than it sounds.",
+        "tiers": [
+          {
+            "text": "Your creations tend the hurt: a creature that spends a short rest with one regains all its Hit Dice and sheds a level of exhaustion.",
+            "card": "A short rest with your creation: all Hit Dice back and −1 exhaustion"
+          },
+          {
+            "text": "Your Structures are clean ground — no disease spreads inside, no poison functions, and anyone dying within is stable instead.",
+            "card": "Structures: no disease, no poison, nobody dies while inside"
+          },
+          {
+            "text": "Your Objects may be a physician's kit that never runs out, a stretcher that carries itself, or a draught equal to your Mend at the slot's tier, once per day.",
+            "card": "Objects: an endless kit, a self-carrying stretcher, or a daily draught of your Mend"
+          },
+          {
+            "text": "Found a House of Healing: a permanent Structure where a long rest restores Wounds, lost limbs regrow over a month, and no one may draw a weapon inside it.",
+            "card": "A HOUSE OF HEALING — Wounds heal on a long rest, limbs regrow in a month, no weapons drawn"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Physician",
+        "description": "Knowing exactly what is wrong is most of fixing it.",
+        "tiers": [
+          {
+            "text": "Touch a creature and know every injury, illness, poison, curse and deficiency it carries, and how long each has been there.",
+            "card": "Know everything wrong with a creature, and for how long",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Stabilise every dying creature within 30 feet, and end bleeding, pain or nausea in as many creatures as you can touch in a minute.",
+            "card": "Stabilise everyone dying within 30 ft · end bleeding, pain and nausea",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Cure a disease or a poison in a whole village over a day, or set a bone, a joint and a burn so cleanly they leave no mark.",
+            "card": "Cure a village of a plague in a day · or leave no scar at all",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Undo an injury the world had called permanent: a lost limb, a ruined eye, a mind clouded by a wound, given a week's work and a willing patient.",
+            "card": "Undo a permanent injury with a week's work",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Closing",
+      "type": "Offensive",
+      "description": "The wound the seal made starts sealing over immediately, with everything still in it.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) and can't regain hit points until the end of its next turn.",
+        "card": "+1 die radiant · no healing until the end of their next turn",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          },
+          "deny": [
+            "healing"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and healing it receives afterwards is halved for 1 minute.",
+          "card": "+2 dice · halved healing for 1 min"
+        },
+        {
+          "text": "Level 11+: Three dice, and it makes death saving throws at disadvantage while the effect lasts.",
+          "card": "+3 dice · death saves at disadvantage"
+        }
+      ]
+    },
+    {
+      "name": "Field Dressing",
+      "type": "Supportive",
+      "description": "Whatever else the seal did, everyone it touched is in better shape.",
+      "effect": {
+        "text": "Each of the seal's targets regains hit points equal to Five Times the slot level, and one of them of your choice also ends a condition: Poisoned, Blinded or Deafened.",
+        "card": "The seal's targets each heal 5 × {SLOT} · one of them sheds Poisoned, Blinded or Deafened",
+        "mech": {
+          "heal": {
+            "perSlot": 5,
+            "who": "the seal's targets"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The healing becomes Eight Times the slot level, and each target regains a spent Hit Die.",
+          "card": "8 × {SLOT} · a Hit Die back each"
+        },
+        {
+          "text": "Level 11+: Each also regains Twice your Verum Modifier at the start of its next turn.",
+          "card": "2×VM more at the start of their next turn"
+        }
+      ]
+    },
+    {
+      "name": "Clean Ground",
+      "type": "Control",
+      "description": "The place the seal landed becomes, briefly, somewhere it is hard to die.",
+      "effect": {
+        "text": "For 1 minute, the 20 feet around the point of impact stabilises any dying creature at the start of its turn, and no disease or poison functions there.",
+        "card": "20 ft, 1 min: the dying stabilise · no disease or poison works",
+        "mech": {
+          "deny": [
+            "disease",
+            "poison"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Allies inside have advantage on saves against poison and disease.",
+          "card": "Allies: advantage vs poison and disease"
+        },
+        {
+          "text": "Level 11+: Enemies that failed the seal's save regain only half as much healing inside.",
+          "card": "Enemies who failed heal for half inside"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

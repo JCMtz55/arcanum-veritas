@@ -1,0 +1,289 @@
+{
+  "id": "games",
+  "name": "Games",
+  "icon": "🎲",
+  "opposing": "carnage",
+  "description": "Rules, Play, Contest, The Agreement To Compete Without Ruin. A game is a fight both sides consented to, with terms. Games is the Cognition of that consent: the board, the wager, the turn order, the rule that everyone pretends is older than it is. Its wielders impose structure on violence — and a fight with rules is a fight you can win by being better at rules.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Out of turn",
+        "card": "can't take reactions"
+      },
+      "major": {
+        "name": "Penalised",
+        "card": "disadvantage on attack rolls and saving throws"
+      },
+      "severe": {
+        "name": "Forfeit",
+        "card": "Incapacitated — it has lost, and some part of it knows"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Your Move",
+        "description": "You are not fighting them. You are beating them, which is worse.",
+        "tiers": [
+          {
+            "text": "The damage becomes force. A creature hit or that fails can't take reactions until the end of its next turn — it is not its turn.",
+            "card": "Damage becomes Force · no reactions until their next turn",
+            "mech": {
+              "damage": {
+                "type": "force"
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "Against a creature that has already attacked you this fight, the seal deals 3 additional dice. You have been keeping score.",
+            "card": "+3 dice against anyone who has already hit you — you're keeping score"
+          },
+          {
+            "text": "A creature that fails loses its next turn's bonus action, or its next turn's movement — your choice, announced before it acts.",
+            "card": "You take their bonus action or their movement next turn",
+            "mech": {
+              "deny": [
+                "one part of its next turn"
+              ]
+            }
+          },
+          {
+            "text": "Checkmate. Name a condition aloud before you draw: if the target is reduced below half its hit points by the seal, that condition is true — it is Prone, disarmed, pushed 30 feet, or Stunned until the end of its next turn.",
+            "card": "CHECKMATE — call it first: under half HP they are Prone, disarmed, thrown 30 ft or Stunned",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "the called condition"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "In Play",
+        "description": "You put them in the game, where they are allowed to be good at things.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target may take one extra reaction each round, and adds your Verum Modifier to initiative.",
+            "card": "1 min: an extra reaction each round · +{VM} initiative",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "initiative": "+VM",
+                "reactions": "+1 a round"
+              }
+            }
+          },
+          {
+            "text": "Once each round, when the target is hit by an attack, it may make one weapon attack or cantrip in reply as part of that reaction. Turnabout is the rule.",
+            "card": "1/round: hit it, and it answers in kind as a reaction"
+          },
+          {
+            "text": "The target may swap its place in the initiative order with any willing ally at the start of any round, and can't be surprised.",
+            "card": "Trade initiative places with a willing ally each round · can't be surprised"
+          },
+          {
+            "text": "The Winning Line. Once while this lasts, the target may take an entire extra turn immediately after its own — and afterward it must tell the truth about one thing, because those were the terms.",
+            "card": "THE WINNING LINE — one extra turn, once · then it owes one honest answer"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "House Rules",
+        "description": "You declare the terms. Everyone is playing now, whether they agreed or not.",
+        "tiers": [
+          {
+            "text": "Declare one rule for the area as you draw it — no ranged attacks, no moving twice, nobody may target the smallest creature present. A creature that fails is bound by it until the end of its next turn; breaking it ends the creature's turn immediately.",
+            "card": "Declare a rule — those who fail are bound by it, and breaking it ends their turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "conditions": [
+                {
+                  "name": "Bound by the rule",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The rule lasts 1 minute, repeating the save at the end of each of its turns, and a creature that breaks it takes force damage equal to Five Times your Verum Modifier.",
+            "card": "1 min (Cha save each turn) · breaking the rule costs 5×VM force",
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "force",
+                "when": "it breaks the rule"
+              }
+            }
+          },
+          {
+            "text": "Turn order is yours: at the start of each round you may move one creature that failed to the end of the initiative order.",
+            "card": "Each round, send one who failed to the back of the initiative order"
+          },
+          {
+            "text": "The Only Game. Creatures that failed can't act outside the terms at all: an action the rule forbids simply does not happen, and the resource it would have cost is spent anyway.",
+            "card": "THE ONLY GAME — forbidden actions don't happen, and still cost what they'd have cost",
+            "mech": {
+              "deny": [
+                "actions against the rule"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Pieces and Boards",
+        "description": "Everything you make has rules, and the rules are yours.",
+        "tiers": [
+          {
+            "text": "Your creations come with terms: name one thing that cannot happen to or on them — no lies told, no weapons drawn, no cheating — and it cannot, while they last.",
+            "card": "Each creation carries one rule that simply holds while it lasts"
+          },
+          {
+            "text": "Your Constructs are pieces: you may move one 30 feet as a bonus action without using its action, anywhere on the board you can see.",
+            "card": "Move a Construct 30 ft as a bonus action"
+          },
+          {
+            "text": "Your Structures are boards: you always know where every creature inside one stands, and you may swap the positions of any two willing creatures in it once per round.",
+            "card": "You see every position inside a Structure and may swap two willing creatures a round"
+          },
+          {
+            "text": "Set a Great Game: a permanent Structure in which a contest may be held under binding terms — the winner takes what was wagered, and the Cognition itself enforces the outcome.",
+            "card": "A GREAT GAME — a permanent board where wagers are enforced by the Cognition"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Wager",
+        "description": "Everything is a game if you can get the other side to agree on what winning means.",
+        "tiers": [
+          {
+            "text": "Conjure any game and its pieces, know the rules of any game you see played, and never lose track of a score, a hand or a count.",
+            "card": "Any game, its rules and its score — instantly, perfectly",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Propose a contest to a creature that can understand you. If it accepts, both of you are bound to the terms until it is decided — and both of you know it.",
+            "card": "Propose a contest — if accepted, the terms bind you both",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Read a player: know what a creature wants out of this exchange, what it is prepared to lose, and whether it is cheating.",
+            "card": "Know what they want, what they'll risk, and whether they're cheating",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Stake something real: wager a memory, a name, a year, or a Cognition's use against another creature's equivalent. The winner takes it, and the Cognition makes the transfer.",
+            "card": "Wager a memory, a name, a year or a Cognition — the winner truly takes it",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Gambit",
+      "type": "Offensive",
+      "description": "The seal was a setup, and they walked into it.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has already attacked you this combat.",
+        "card": "+1 die force — +2 dice if they've already attacked you",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four, and it can't take reactions until the start of your next turn.",
+          "card": "+2 dice (4) · no reactions until your turn"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and you may move it 10 feet as it stumbles into position.",
+          "card": "+3 dice (6) · shove them 10 ft into place"
+        }
+      ]
+    },
+    {
+      "name": "Your Turn",
+      "type": "Supportive",
+      "description": "The seal hands everyone it touched the initiative.",
+      "effect": {
+        "text": "Each of the seal's targets gains one extra reaction before the start of your next turn, and adds your Verum Modifier to its next initiative roll.",
+        "card": "The seal's targets: an extra reaction · +{VM} next initiative",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "reactions": "+1"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute and the extra reaction refreshes each round.",
+          "card": "1 min, refreshing each round"
+        },
+        {
+          "text": "Level 11+: Once each, a target may answer an attack that hits it with a weapon attack of its own.",
+          "card": "Once each: answer a hit with a hit"
+        }
+      ]
+    },
+    {
+      "name": "Penalty",
+      "type": "Control",
+      "description": "They did something the seal decided was against the rules.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't take reactions until the end of its next turn, and has disadvantage on the first attack roll it makes on that turn.",
+        "card": "No reactions · disadvantage on their first attack next turn",
+        "mech": {
+          "deny": [
+            "reactions"
+          ],
+          "penalty": {
+            "disadvantage": "its first attack roll"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also loses its bonus action on its next turn.",
+          "card": "It loses its bonus action too"
+        },
+        {
+          "text": "Level 11+: You may move it to the end of the initiative order for the rest of the fight.",
+          "card": "Send them to the back of the order for the fight"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

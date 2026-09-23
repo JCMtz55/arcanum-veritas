@@ -5,7 +5,7 @@
   --ember:#C0553F; --verdant:#4E8C6A; --indigo:#6274B8; --brass:#B08842; --steel:#6E8B97;
   --accent:var(--brass);
   /* one hue per Cognition domain — muted enough to sit beside each other in the rail */
-  --d-elemental:#C0553F; --d-corporeal:#A8556B; --d-vital:#4E8C6A; --d-psychic:#6274B8;
+  --d-elemental:#C0553F; --d-corporeal:#A8556B; --d-vital:#4E8C6A; --d-reason:#6274B8;  --d-mores:#B5746A;
   --d-umbral:#7A6EA8;    --d-fate:#B08842;     --d-dominion:#6E8B97;
   --d-cosmical:#4FA4C4;
   --sans:'Space Grotesk',system-ui,sans-serif;
@@ -100,7 +100,8 @@ button,input{font:inherit;color:inherit}
 .pick.elemental{border-color:var(--d-elemental); color:var(--d-elemental)}
 .pick.corporeal{border-color:var(--d-corporeal); color:var(--d-corporeal)}
 .pick.vital{border-color:var(--d-vital);         color:var(--d-vital)}
-.pick.psychic{border-color:var(--d-psychic);     color:var(--d-psychic)}
+.pick.reason{border-color:var(--d-reason);       color:var(--d-reason)}
+.pick.mores{border-color:var(--d-mores);         color:var(--d-mores)}
 .pick.umbral{border-color:var(--d-umbral);       color:var(--d-umbral)}
 .pick.fate{border-color:var(--d-fate);           color:var(--d-fate)}
 .pick.dominion{border-color:var(--d-dominion);   color:var(--d-dominion)}
@@ -110,7 +111,8 @@ button,input{font:inherit;color:inherit}
 .cogs>.grp:first-child{padding-top:2px}
 .grp i{flex:1;height:1px;margin-left:8px;background:currentColor;opacity:.25;font-style:normal}
 .grp.elemental{color:var(--d-elemental)} .grp.corporeal{color:var(--d-corporeal)}
-.grp.vital{color:var(--d-vital)}         .grp.psychic{color:var(--d-psychic)}
+.grp.vital{color:var(--d-vital)}         .grp.reason{color:var(--d-reason)}
+.grp.mores{color:var(--d-mores)}
 .grp.umbral{color:var(--d-umbral)}       .grp.fate{color:var(--d-fate)}
 .grp.dominion{color:var(--d-dominion)}
 .grp.cosmical{color:var(--d-cosmical)}
@@ -118,7 +120,8 @@ button,input{font:inherit;color:inherit}
 /* Font Awesome glyphs take their domain's colour */
 .ico i, .cdx-ico i{color:var(--bone2)}
 i.dom-elemental{color:var(--d-elemental)} i.dom-corporeal{color:var(--d-corporeal)}
-i.dom-vital{color:var(--d-vital)}         i.dom-psychic{color:var(--d-psychic)}
+i.dom-vital{color:var(--d-vital)}         i.dom-reason{color:var(--d-reason)}
+i.dom-mores{color:var(--d-mores)}
 i.dom-umbral{color:var(--d-umbral)}       i.dom-fate{color:var(--d-fate)}
 i.dom-dominion{color:var(--d-dominion)}
 i.dom-cosmical{color:var(--d-cosmical)}
@@ -127,7 +130,8 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .t.dom.elemental{color:var(--d-elemental);border-color:var(--d-elemental)}
 .t.dom.corporeal{color:var(--d-corporeal);border-color:var(--d-corporeal)}
 .t.dom.vital{color:var(--d-vital);border-color:var(--d-vital)}
-.t.dom.psychic{color:var(--d-psychic);border-color:var(--d-psychic)}
+.t.dom.reason{color:var(--d-reason);border-color:var(--d-reason)}
+.t.dom.mores{color:var(--d-mores);border-color:var(--d-mores)}
 .t.dom.umbral{color:var(--d-umbral);border-color:var(--d-umbral)}
 .t.dom.fate{color:var(--d-fate);border-color:var(--d-fate)}
 .t.dom.dominion{color:var(--d-dominion);border-color:var(--d-dominion)}

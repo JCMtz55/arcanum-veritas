@@ -1,0 +1,321 @@
+{
+  "id": "will",
+  "name": "Will",
+  "icon": "✊",
+  "opposing": "apathy",
+  "description": "Resolve, Intent, The Refusal to Stop. Will is the plainest force a mind can exert on the world: the decision to continue, held past the point where continuing made sense. It is the foundation beneath Hope and Faith and Determination, and on its own it is simply the thing that gets up again. Its wielders lend that to others, break it in enemies, and spend their own to buy one more round.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Wavering",
+        "card": "can't take reactions"
+      },
+      "major": {
+        "name": "Broken-willed",
+        "card": "Frightened of you, and can't take the Dash action"
+      },
+      "severe": {
+        "name": "Given up",
+        "card": "Incapacitated — it has stopped trying"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Break",
+        "description": "You do not harm the body. You go for the part that decided to be here.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails can't take reactions until the end of its next turn.",
+            "card": "Damage becomes Psychic · no reactions until the end of their next turn",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "It has disadvantage on the next saving throw it makes to keep doing something — Concentration, a grapple, an effect it is sustaining — and if it fails, that thing ends.",
+            "card": "Disadvantage on their next save to sustain anything — and it ends if they fail",
+            "mech": {
+              "penalty": {
+                "disadvantage": "saves to sustain an effect"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails loses one resource it was holding back: a Legendary Resistance, an unused once-per-rest feature, or its highest remaining spell slot.",
+            "card": "They lose a Legendary Resistance, an unused feature, or their best slot",
+            "mech": {
+              "deny": [
+                "one held resource"
+              ]
+            }
+          },
+          {
+            "text": "Nothing Left. A creature reduced below half its hit points by this seal stops: it is Incapacitated for 1 minute, repeating the Wisdom save at the end of each of its turns, and an ally may spend an action to rally it out of this.",
+            "card": "NOTHING LEFT — under half HP: Incapacitated 1 min (Wis save each turn, or an ally rallies it)",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "1 minute",
+                  "escape": "Wisdom save each turn, or an ally's action"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Hold the Line",
+        "description": "You lend them yours. They will give it back, if they can.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target has advantage on saving throws against being Charmed, Frightened or Incapacitated, and can't be forced to move against its intent.",
+            "card": "1 min: advantage vs charm, fear, incapacitation · can't be moved against its will",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "saves against charm, fear and incapacitation"
+              }
+            }
+          },
+          {
+            "text": "It gains temporary hit points equal to Five Times the slot level, and while any remain it automatically succeeds on Concentration checks against damage of 10 or less.",
+            "card": "5 × {SLOT} temp HP · auto-passes Concentration against small hits while they last",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "tempHP": "5 × slot level"
+              }
+            }
+          },
+          {
+            "text": "Once while it lasts, when the target would drop to 0 hit points, it drops to 1 instead and may immediately take one action.",
+            "card": "Once: the drop to 0 leaves it at 1 — and it takes an action at once"
+          },
+          {
+            "text": "Unbending. For the minute the target can't be Charmed, Frightened, Stunned, Paralysed or Incapacitated by anything, and each time an effect would end its turn early it instead loses only its bonus action.",
+            "card": "UNBENDING — immune to charm, fear, stun, paralysis, incapacitation · turn-enders cost only its bonus action",
+            "mech": {
+              "deny": [
+                "charm",
+                "fear",
+                "stun",
+                "paralysis",
+                "incapacitation"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Imposition",
+        "description": "You put your intent where theirs was and wait to see which one holds.",
+        "tiers": [
+          {
+            "text": "Name one simple thing: drop that, stay there, stop talking. A creature that fails obeys until the end of its next turn, unless obeying would obviously harm it.",
+            "card": "Name one simple command — those who fail obey until the end of their next turn",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "conditions": [
+                {
+                  "name": "Compelled",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The command may last 1 minute, repeating the save at the end of each of its turns, and a creature that breaks it takes psychic damage equal to Five Times your Verum Modifier.",
+            "card": "1 min (Wis save each turn) · breaking it costs 5×VM psychic",
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "psychic",
+                "when": "if it breaks the command"
+              }
+            }
+          },
+          {
+            "text": "The command may be a prohibition of any complexity — never draw that blade, do not cross this line, say nothing of what you saw — and while it holds the creature can't take the Help action for anyone who defies you.",
+            "card": "Any complex prohibition · they can't Help anyone defying you",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Compelled",
+                  "duration": "1 minute"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Overruled. A creature that fails spends its next turn as you direct — move, act, speak — though it will not harm itself and may repeat the save if commanded to harm someone it loves.",
+            "card": "OVERRULED — you take their next turn · not self-harm, and love grants another save",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Dominated",
+                  "duration": "one turn"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Sheer Insistence",
+        "description": "It exists because you decided it does, and it keeps existing for the same reason.",
+        "tiers": [
+          {
+            "text": "Your creations hold together on intent alone: they can't be dispelled by anything of the slot level or lower, and repairing them takes only a moment of your attention.",
+            "card": "Creations resist dispelling (≤ slot) and you repair them with a thought"
+          },
+          {
+            "text": "Your Constructs never rout, never flee, and can't be Charmed or Frightened. They keep their last order even if you are unconscious.",
+            "card": "Constructs never break, never flee, keep their orders even if you fall"
+          },
+          {
+            "text": "Your Structures stand while you are standing: as long as you are conscious and within a mile, one of them cannot be destroyed, only damaged.",
+            "card": "While you stand and are within a mile, one Structure cannot be destroyed"
+          },
+          {
+            "text": "Declare a Standing Thing: one creation persists until you die or release it, with no upkeep, no concentration and no duration. You may hold one at a time.",
+            "card": "A STANDING THING — one creation lasts until you die or release it"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Resolve",
+        "description": "Small, stubborn refusals, applied to the world.",
+        "tiers": [
+          {
+            "text": "Refuse one thing your body is doing to you for 1 hour: bleeding, pain, exhaustion's effects, sleep, hunger or fear. It waits.",
+            "card": "Refuse pain, bleeding, exhaustion, sleep, hunger or fear for 1 hr",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Hold a door, a rope, a promise or a grip that should have failed: any check to maintain something succeeds automatically for as long as you concentrate on nothing else.",
+            "card": "Hold anything — the check to maintain it auto-succeeds while you focus",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Lend your resolve: a creature you touch may borrow your Wisdom save modifier for 8 hours, and knows you are the reason it has not folded.",
+            "card": "Lend your Wisdom save modifier to someone for 8 hrs",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Refuse an ending: once per long rest, decide that something which just happened to you did not stop you — you may continue an action that was interrupted, finish a sentence you were silenced mid-way through, or take one more step after you should have fallen.",
+            "card": "1/long rest: refuse an ending — finish what was interrupted anyway",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Wearing Down",
+      "type": "Offensive",
+      "description": "The seal takes something out of them that isn't hit points.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6) and can't take reactions until the start of your next turn.",
+        "card": "+1 die psychic · no reactions until your next turn",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "deny": [
+            "reactions"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and disadvantage on its next Concentration check.",
+          "card": "+2 dice · disadvantage on their next Concentration"
+        },
+        {
+          "text": "Level 11+: Three dice, and it can't take the Dash action on its next turn.",
+          "card": "+3 dice · no Dash next turn"
+        }
+      ]
+    },
+    {
+      "name": "Steady",
+      "type": "Supportive",
+      "description": "Whatever the seal did, it also told them to keep going.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level and advantage on its next saving throw against being Frightened, Charmed or Incapacitated.",
+        "card": "The seal's targets: {VM} + {SLOT} temp HP · advantage on their next save vs fear, charm or incapacitation",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM + slot level"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: They also automatically succeed on their next Concentration check.",
+          "card": "Their next Concentration check auto-succeeds"
+        },
+        {
+          "text": "Level 11+: Once each, when one would drop to 0 hit points it drops to 1 instead.",
+          "card": "Once each: the drop to 0 leaves them at 1"
+        }
+      ]
+    },
+    {
+      "name": "Second Thoughts",
+      "type": "Control",
+      "description": "The seal plants a hesitation exactly where it will cost the most.",
+      "effect": {
+        "text": "A creature hit by or failing the seal must choose on its next turn: it may attack, or it may move its full speed, but not both.",
+        "card": "Next turn they may attack OR move fully, not both",
+        "mech": {
+          "deny": [
+            "attacking and moving in the same turn"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't take reactions until the end of its next turn.",
+          "card": "No reactions either"
+        },
+        {
+          "text": "Level 11+: If it is below half its hit points, it must also succeed on a Wisdom save or take the Dodge action instead of attacking.",
+          "card": "Under half HP: Wis save or it Dodges instead"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

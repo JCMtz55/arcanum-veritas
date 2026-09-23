@@ -8,9 +8,18 @@
   "damageType": "Psychic",
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Dream-dazed", "card": "disadvantage on its next attack roll or ability check" },
-      "major":  { "name": "Night-blind", "card": "Blinded by overlapping dream-imagery" },
-      "severe": { "name": "Between layers", "card": "Incapacitated, lost between waking and dreaming" }
+      "minor": {
+        "name": "Dream-dazed",
+        "card": "disadvantage on its next attack roll or ability check"
+      },
+      "major": {
+        "name": "Night-blind",
+        "card": "Blinded by overlapping dream-imagery"
+      },
+      "severe": {
+        "name": "Between layers",
+        "card": "Incapacitated, lost between waking and dreaming"
+      }
     }
   },
   "verumEffects": {
@@ -19,18 +28,51 @@
         "name": "Refinery Overload",
         "description": "You do not burn the target. You fill them — past capacity, past coherence.",
         "tiers": [
-          { "text": "The damage becomes psychic — unprocessed imaginative energy floods the target — and increases by 2 additional dice. A creature hit or that fails has disadvantage on Concentration checks until the end of its next turn.",
-            "card": "+2 dice · damage becomes Psychic · disadvantage on Concentration until the end of their next turn",
-            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "penalty": { "disadvantage": "Concentration checks" } } },
-          { "text": "Overflow. The damage increases by 4 additional dice. A creature hit or that fails can't take reactions, and on its next turn it can take an action or a bonus action, not both — too many half-formed visions to act on at once.",
-            "card": "+4 dice · no reactions, and only an action OR a bonus action next turn",
-            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "deny": [ "reactions" ] } },
-          { "text": "Residue. The damage increases by 6 additional dice. A creature hit or that fails gains 1 level of Dream Exhaustion; one that already had Dream Exhaustion is Incapacitated until the end of its next turn instead.",
-            "card": "+6 dice · 1 Dream Exhaustion — already exhausted: Incapacitated until the end of their next turn",
-            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "Dream Exhaustion" } ] } },
-          { "text": "Total Overload. The damage increases by 8 additional dice. A creature hit or that fails is Incapacitated for 1 minute, repeating the Dream save at the end of each of its turns, and while it lasts any Cognition or imagination-based effect it attempts fails.",
-            "card": "+8 dice · TOTAL OVERLOAD — Incapacitated 1 min (Dream save each turn) · its Cognition effects fail meanwhile",
-            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Incapacitated", "duration": "1 minute", "escape": "Dream save at the end of each of its turns" } ] } }
+          {
+            "text": "The damage becomes psychic — unprocessed imaginative energy floods the target. A creature hit or that fails has disadvantage on Concentration checks until the end of its next turn.",
+            "card": "Damage becomes Psychic · disadvantage on Concentration until the end of their next turn",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "penalty": {
+                "disadvantage": "Concentration checks"
+              }
+            }
+          },
+          {
+            "text": "Overflow. A creature hit or that fails can't take reactions, and on its next turn it can take an action or a bonus action, not both — too many half-formed visions to act on at once.",
+            "card": "No reactions, and only an action OR a bonus action next turn",
+            "mech": {
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "The overflow spills to every creature within 10 feet of the target that can dream: each takes a quarter of the damage, and any creature that fails gains 1 level of Dream Exhaustion.",
+            "card": "A quarter to every dreamer within 10 ft · 1 Dream Exhaustion on a failed save",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Dream Exhaustion"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Total Overload. A creature hit or that fails is Incapacitated for 1 minute, repeating the Dream save at the end of each of its turns, and while it lasts any Cognition or imagination-based effect it attempts simply fails.",
+            "card": "TOTAL OVERLOAD — Incapacitated 1 min (Dream save each turn) · its Cognition effects fail meanwhile",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "1 minute",
+                  "escape": "Dream save at the end of each of its turns"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -39,47 +81,98 @@
         "name": "Nocturnal Infusion",
         "description": "You give a mind what the Night gives all minds — the state in which dreaming becomes possible.",
         "tiers": [
-          { "text": "The target gains Inspiration and advantage on Dream saving throws and imagination-linked checks until the end of its next turn. If it already has Inspiration, it may use it and regain it at once.",
+          {
+            "text": "The target gains Inspiration and advantage on Dream saving throws and imagination-linked checks until the end of its next turn. If it already has Inspiration, it may use it and regain it at once.",
             "card": "Inspiration · advantage on Dream saves and imagination checks until the end of its next turn",
-            "mech": { "buff": { "who": "target", "advantage": "Dream saves and imagination-linked checks" } } },
-          { "text": "On its next turn it may slip into a brief Insomnia transit as a bonus action, until the end of that turn: it perceives Denizens and dream-architecture nearby, and its next Dream save is made as though from within Insomnia.",
-            "card": "Next turn, a bonus-action Insomnia transit — sees Denizens and dream-architecture · its next Dream save counts as made in Insomnia" },
-          { "text": "While infused it may take the Help action as a free action once, and any Grimm it bears regains one expended Grimm Slot.",
-            "card": "One free Help action · its Grimm regains an expended Grimm Slot" },
-          { "text": "The infusion becomes architectural, for 1 minute: advantage on saves against Vile-emotion effects, +2 to its Verum Modifier for Night, Dream, or Nightmare effects, and the first Vile condition laid on it each round is stripped to a lesser one (Frightened becomes Shaken, Charmed becomes Suggestible).",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "Dream saves and imagination-linked checks"
+              }
+            }
+          },
+          {
+            "text": "On its next turn it may slip into a brief Insomnia transit as a bonus action, until the end of that turn: it perceives Denizens and dream-architecture nearby, and its next Dream save is made as though from within Insomnia.",
+            "card": "Next turn, a bonus-action Insomnia transit — sees Denizens and dream-architecture · its next Dream save counts as made in Insomnia"
+          },
+          {
+            "text": "While infused it may take the Help action as a free action once, and any Grimm it bears regains one expended Grimm Slot.",
+            "card": "One free Help action · its Grimm regains an expended Grimm Slot"
+          },
+          {
+            "text": "The infusion becomes architectural, for 1 minute: advantage on saves against Vile-emotion effects, +2 to its Verum Modifier for Night, Dream, or Nightmare effects, and the first Vile condition laid on it each round is stripped to a lesser one (Frightened becomes Shaken, Charmed becomes Suggestible).",
             "card": "1 min: advantage vs Vile effects · +2 Verum Mod for Night, Dream, Nightmare · the first Vile condition each round steps down",
-            "mech": { "buff": { "who": "target", "advantage": "saves against Vile-emotion effects", "verumMod": "+2 for Night, Dream and Nightmare" } } }
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "saves against Vile-emotion effects",
+                "verumMod": "+2 for Night, Dream and Nightmare"
+              }
+            }
+          }
         ]
       },
       {
         "name": "Transmutation Veil",
         "description": "What harms you does not have to stay harmful. The Night has always known this.",
         "tiers": [
-          { "text": "For the buff's duration, when the target takes damage from a fear, hatred, despair, or grief effect, reduce it by your Verum Modifier, and the target gains temporary hit points equal to half the reduction.",
+          {
+            "text": "For the buff's duration, when the target takes damage from a fear, hatred, despair, or grief effect, reduce it by your Verum Modifier, and the target gains temporary hit points equal to half the reduction.",
             "card": "While it lasts: damage from fear, hate, despair or grief is reduced by {VM}, half of it returning as temp HP",
-            "mech": { "buff": { "who": "target", "reduce": "VM, from Vile-emotion effects" } } },
-          { "text": "The reduction becomes Twice your Verum Modifier, and the converted energy is usable: each time it triggers, the target gains Inspiration and advantage on its next attack roll or saving throw.",
-            "card": "Reduction 2×VM · each time, Inspiration and advantage on its next attack or save" },
-          { "text": "Once while this lasts, when the target would be Cursed, take a Vile condition, or gain Dream Exhaustion, it doesn't — the veil catches it and converts it, and the target gains Inspiration.",
-            "card": "Once: a Curse, Vile condition or Dream Exhaustion aimed at it is caught and converted instead" },
-          { "text": "Transmutation Field. For the duration, a 30-foot field around the target steps every Vile condition on its allies down one tier (Terrified to Frightened to Shaken to nothing), holds any Curse aimed at them in abeyance until the field ends, and once per round lets you hand one ally temporary hit points equal to Three Times your Verum Modifier.",
-            "card": "TRANSMUTATION FIELD, 30 ft — Vile conditions on allies step down · Curses on them wait until it ends · 1/round an ally gains 3×VM temp HP" }
+            "mech": {
+              "buff": {
+                "who": "target",
+                "reduce": "VM, from Vile-emotion effects"
+              }
+            }
+          },
+          {
+            "text": "The reduction becomes Twice your Verum Modifier, and the converted energy is usable: each time it triggers, the target gains Inspiration and advantage on its next attack roll or saving throw.",
+            "card": "Reduction 2×VM · each time, Inspiration and advantage on its next attack or save"
+          },
+          {
+            "text": "Once while this lasts, when the target would be Cursed, take a Vile condition, or gain Dream Exhaustion, it doesn't — the veil catches it and converts it, and the target gains Inspiration.",
+            "card": "Once: a Curse, Vile condition or Dream Exhaustion aimed at it is caught and converted instead"
+          },
+          {
+            "text": "Transmutation Field. For the duration, a 30-foot field around the target steps every Vile condition on its allies down one tier (Terrified to Frightened to Shaken to nothing), holds any Curse aimed at them in abeyance until the field ends, and once per round lets you hand one ally temporary hit points equal to Three Times your Verum Modifier.",
+            "card": "TRANSMUTATION FIELD, 30 ft — Vile conditions on allies step down · Curses on them wait until it ends · 1/round an ally gains 3×VM temp HP"
+          }
         ]
       },
       {
         "name": "The Refinery",
         "description": "Catch what the day broke, convert it, return it as something that can be used.",
         "tiers": [
-          { "text": "For the buff's duration, you and allies within 30 feet cannot gain Dream Exhaustion from outside sources, and any save against a Vile emotion you'd make at disadvantage is made normally.",
+          {
+            "text": "For the buff's duration, you and allies within 30 feet cannot gain Dream Exhaustion from outside sources, and any save against a Vile emotion you'd make at disadvantage is made normally.",
             "card": "While it lasts, allies within 30 ft: no Dream Exhaustion from outside · no disadvantage on saves vs Vile emotion",
-            "mech": { "deny": [ "outside Dream Exhaustion" ] } },
-          { "text": "At the start of each of your turns, you may remove one Vile condition or one level of Dream Exhaustion from one ally within 30 feet; that ally gains Inspiration.",
-            "card": "Each of your turns: strip one Vile condition or Dream Exhaustion from an ally in 30 ft — it gains Inspiration" },
-          { "text": "Full conversion: allies within 30 feet have resistance to psychic damage and can't be Frightened, and once per round, when one fails a save against a Vile effect, it may reroll.",
+            "mech": {
+              "deny": [
+                "outside Dream Exhaustion"
+              ]
+            }
+          },
+          {
+            "text": "At the start of each of your turns, you may remove one Vile condition or one level of Dream Exhaustion from one ally within 30 feet; that ally gains Inspiration.",
+            "card": "Each of your turns: strip one Vile condition or Dream Exhaustion from an ally in 30 ft — it gains Inspiration"
+          },
+          {
+            "text": "Full conversion: allies within 30 feet have resistance to psychic damage and can't be Frightened, and once per round, when one fails a save against a Vile effect, it may reroll.",
             "card": "Allies within 30 ft: resistance to psychic, can't be Frightened · 1/round reroll a failed save vs a Vile effect",
-            "mech": { "deny": [ "fear" ], "buff": { "resist": "psychic" } } },
-          { "text": "Mythic scale: the range becomes 60 feet, allies within it are immune to Vile conditions and outside Dream Exhaustion and gain +3 to Dream saves, and at the start of each of their turns each regains one expended Grimm Slot.",
-            "card": "60 ft · allies immune to Vile conditions and outside Dream Exhaustion · +3 Dream saves · a Grimm Slot back each turn" }
+            "mech": {
+              "deny": [
+                "fear"
+              ],
+              "buff": {
+                "resist": "psychic"
+              }
+            }
+          },
+          {
+            "text": "Mythic scale: the range becomes 60 feet, allies within it are immune to Vile conditions and outside Dream Exhaustion and gain +3 to Dream saves, and at the start of each of their turns each regains one expended Grimm Slot.",
+            "card": "60 ft · allies immune to Vile conditions and outside Dream Exhaustion · +3 Dream saves · a Grimm Slot back each turn"
+          }
         ]
       }
     ],
@@ -88,50 +181,124 @@
         "name": "Dream Bleed",
         "description": "The membrane does not break. It simply stops insisting the two worlds are separate.",
         "tiers": [
-          { "text": "Insomnia bleeds into the waking senses of a creature that fails: until the end of its next turn it has disadvantage on Perception and Investigation checks and on attack rolls against creatures more than 30 feet away.",
+          {
+            "text": "Insomnia bleeds into the waking senses of a creature that fails: until the end of its next turn it has disadvantage on Perception and Investigation checks and on attack rolls against creatures more than 30 feet away.",
             "card": "Fail: disadvantage on Perception, Investigation, and attacks past 30 ft until the end of their next turn",
-            "mech": { "save": { "ability": "Dream" }, "penalty": { "disadvantage": "Perception and Investigation, and attacks beyond 30 ft" } } },
-          { "text": "The bleed overwhelms: a creature that fails is Confused (as the spell) until the end of its next turn.",
+            "mech": {
+              "save": {
+                "ability": "Dream"
+              },
+              "penalty": {
+                "disadvantage": "Perception and Investigation, and attacks beyond 30 ft"
+              }
+            }
+          },
+          {
+            "text": "The bleed overwhelms: a creature that fails is Confused (as the spell) until the end of its next turn.",
             "card": "Confused (as the spell) until the end of their next turn",
-            "mech": { "conditions": [ { "name": "Confused", "duration": "until the end of its next turn" } ] } },
-          { "text": "You shape the bleed. A creature that fails sees a dream-construct of your design overlaid on the world for 1 minute — not an illusion but a real fragment of Insomnia, which it treats as physically real. It repeats the save at the end of each of its turns; two successes in a row end it.",
-            "card": "A dream-construct of your design, real to them, for 1 min — two successful saves in a row end it" },
-          { "text": "Full Bleed. The area becomes a Waking Insomnia Zone for 1 minute: Denizens and Nightmares of the matching Insomnia region may cross; a creature that fails, and every one that starts its turn inside and fails its repeat save, gains 1 level of Dream Exhaustion; you and allied Night, Dream, or Nightmare wielders count as being in Insomnia; and creatures without dream-affinity can't teleport out.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Confused",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "You shape the bleed. A creature that fails sees a dream-construct of your design overlaid on the world for 1 minute — not an illusion but a real fragment of Insomnia, which it treats as physically real. It repeats the save at the end of each of its turns; two successes in a row end it.",
+            "card": "A dream-construct of your design, real to them, for 1 min — two successful saves in a row end it"
+          },
+          {
+            "text": "Full Bleed. The area becomes a Waking Insomnia Zone for 1 minute: Denizens and Nightmares of the matching Insomnia region may cross; a creature that fails, and every one that starts its turn inside and fails its repeat save, gains 1 level of Dream Exhaustion; you and allied Night, Dream, or Nightmare wielders count as being in Insomnia; and creatures without dream-affinity can't teleport out.",
             "card": "FULL BLEED — a Waking Insomnia Zone 1 min · Dream Exhaustion on each failed save · you count as in Insomnia · no teleporting out",
-            "mech": { "conditions": [ { "name": "Dream Exhaustion" } ], "deny": [ "teleporting out" ] } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Dream Exhaustion"
+                }
+              ],
+              "deny": [
+                "teleporting out"
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Threshold Collapse",
         "description": "You do not open the door between worlds. You remind it that it was always open.",
         "tiers": [
-          { "text": "The area becomes Night-state. Enemies without dream-affinity inside have disadvantage on saves against Dream effects; allies with Night, Dream, or Nightmare have advantage on their Verum effects there.",
+          {
+            "text": "The area becomes Night-state. Enemies without dream-affinity inside have disadvantage on saves against Dream effects; allies with Night, Dream, or Nightmare have advantage on their Verum effects there.",
             "card": "Night-state — enemies inside: disadvantage vs Dream effects · Night, Dream, Nightmare allies: advantage on Verum effects",
-            "mech": { "save": { "ability": "Dream" }, "penalty": { "disadvantage": "saves against Dream effects" } } },
-          { "text": "Enemies that fail are disoriented — every creature is lightly obscured to them — and allies inside gain +2 to Dream saves.",
-            "card": "Those who fail: everything is lightly obscured to them · allies +2 Dream saves" },
-          { "text": "Once per round, as a bonus action, pull one Denizen (CR up to half your level) through the membrane. It acts on your initiative, follows your intent, can't leave the zone, and dissolves when it ends.",
-            "card": "Bonus action, 1/round: pull a Denizen (CR ≤ half your level) through — it fights for you inside the zone" },
-          { "text": "The threshold gives way on a grand scale: up to three Denizens per round — but at the end of each of your turns one Nightmare from the adjacent region crosses as well, acting on its own. The Night opens for wonder and horror alike.",
-            "card": "Up to 3 Denizens a round · but a Nightmare crosses each of your turns, on its own side" }
+            "mech": {
+              "save": {
+                "ability": "Dream"
+              },
+              "penalty": {
+                "disadvantage": "saves against Dream effects"
+              }
+            }
+          },
+          {
+            "text": "Enemies that fail are disoriented — every creature is lightly obscured to them — and allies inside gain +2 to Dream saves.",
+            "card": "Those who fail: everything is lightly obscured to them · allies +2 Dream saves"
+          },
+          {
+            "text": "Once per round, as a bonus action, pull one Denizen (CR up to half your level) through the membrane. It acts on your initiative, follows your intent, can't leave the zone, and dissolves when it ends.",
+            "card": "Bonus action, 1/round: pull a Denizen (CR ≤ half your level) through — it fights for you inside the zone"
+          },
+          {
+            "text": "The threshold gives way on a grand scale: up to three Denizens per round — but at the end of each of your turns one Nightmare from the adjacent region crosses as well, acting on its own. The Night opens for wonder and horror alike.",
+            "card": "Up to 3 Denizens a round · but a Nightmare crosses each of your turns, on its own side"
+          }
         ]
       },
       {
         "name": "Membrane Tear",
         "description": "You open the door. What comes through was always there, waiting for a gap.",
         "tiers": [
-          { "text": "You tear the membrane in the area for 1 minute. At the start of each of your turns, one Demi Nightmare (CR 1) bleeds through, attacking the nearest creature regardless of side. You may close the tear as a bonus action.",
+          {
+            "text": "You tear the membrane in the area for 1 minute. At the start of each of your turns, one Demi Nightmare (CR 1) bleeds through, attacking the nearest creature regardless of side. You may close the tear as a bonus action.",
             "card": "1 min: a CR 1 Nightmare crosses each of your turns and attacks the nearest creature · close it as a bonus action",
-            "mech": { "save": { "ability": "Dream" } } },
-          { "text": "Nightmares of CR up to half your level may cross, and enemies inside have disadvantage on saves against Dream effects.",
+            "mech": {
+              "save": {
+                "ability": "Dream"
+              }
+            }
+          },
+          {
+            "text": "Nightmares of CR up to half your level may cross, and enemies inside have disadvantage on saves against Dream effects.",
             "card": "Nightmares up to CR half your level · enemies inside: disadvantage vs Dream effects",
-            "mech": { "penalty": { "disadvantage": "saves against Dream effects" } } },
-          { "text": "The tear is selective: you choose whom each crossing Nightmare hunts. A creature that fails is partly pulled through — Restrained until the end of its next turn.",
+            "mech": {
+              "penalty": {
+                "disadvantage": "saves against Dream effects"
+              }
+            }
+          },
+          {
+            "text": "The tear is selective: you choose whom each crossing Nightmare hunts. A creature that fails is partly pulled through — Restrained until the end of its next turn.",
             "card": "You choose each Nightmare's prey · those who fail are Restrained, half-pulled through",
-            "mech": { "conditions": [ { "name": "Restrained" } ] } },
-          { "text": "Major Tear. Nightmares of CR up to your level cross, you may hold one crossing a round for the right moment, and they treat you and your Night, Dream, or Nightmare allies as neutral. Enemies inside that fail gain 1 Dream Exhaustion, repeating the save each turn they start inside.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Major Tear. Nightmares of CR up to your level cross, you may hold one crossing a round for the right moment, and they treat you and your Night, Dream, or Nightmare allies as neutral. Enemies inside that fail gain 1 Dream Exhaustion, repeating the save each turn they start inside.",
             "card": "MAJOR TEAR — Nightmares up to your CR, neutral to you · hold a crossing · enemies gain Dream Exhaustion each failed save",
-            "mech": { "conditions": [ { "name": "Dream Exhaustion" } ] } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Dream Exhaustion"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -140,14 +307,22 @@
         "name": "Dusk-Forged",
         "description": "What you build is Insomnia, pulled into the waking world and told to stay.",
         "tiers": [
-          { "text": "Your creations are dream-matter made real, shedding dim twilight. A creature that strikes one has disadvantage on its next Dream save. Constructs are Denizens of the listed CR.",
-            "card": "Creations are dream-matter in twilight · striking one: disadvantage on your next Dream save · Constructs are Denizens" },
-          { "text": "Your Constructs step through the membrane — once per turn, teleport 30 feet between areas of dim light or darkness. Creatures of your choice pass through your Structures as though they weren't there.",
-            "card": "Constructs teleport 30 ft through dimness · your chosen creatures pass through your Structures" },
-          { "text": "Your Structures refine: allies within 10 feet of one can't gain Dream Exhaustion. An Object can hold a dream — a memory of up to 1 minute — replayed for whoever holds it.",
-            "card": "Allies within 10 ft of a Structure: no Dream Exhaustion · Objects hold a 1-minute dream" },
-          { "text": "Architecture of Insomnia. A Structure made with a 7th-level slot or higher can hold a room of Insomnia — far larger inside than out, shaped as you choose — for as long as it stands.",
-            "card": "A 7th+ Structure holds a room of Insomnia, larger inside than out" }
+          {
+            "text": "Your creations are dream-matter made real, shedding dim twilight. A creature that strikes one has disadvantage on its next Dream save. Constructs are Denizens of the listed CR.",
+            "card": "Creations are dream-matter in twilight · striking one: disadvantage on your next Dream save · Constructs are Denizens"
+          },
+          {
+            "text": "Your Constructs step through the membrane — once per turn, teleport 30 feet between areas of dim light or darkness. Creatures of your choice pass through your Structures as though they weren't there.",
+            "card": "Constructs teleport 30 ft through dimness · your chosen creatures pass through your Structures"
+          },
+          {
+            "text": "Your Structures refine: allies within 10 feet of one can't gain Dream Exhaustion. An Object can hold a dream — a memory of up to 1 minute — replayed for whoever holds it.",
+            "card": "Allies within 10 ft of a Structure: no Dream Exhaustion · Objects hold a 1-minute dream"
+          },
+          {
+            "text": "Architecture of Insomnia. A Structure made with a 7th-level slot or higher can hold a room of Insomnia — far larger inside than out, shaped as you choose — for as long as it stands.",
+            "card": "A 7th+ Structure holds a room of Insomnia, larger inside than out"
+          }
         ]
       }
     ],
@@ -156,18 +331,34 @@
         "name": "Nightwork",
         "description": "The quiet work every dusk does, done by hand.",
         "tiers": [
-          { "text": "Send a sleeping creature a dream you choose — a message, a warning, a memory. Know whether a creature within 60 feet is dreaming, and how deeply.",
+          {
+            "text": "Send a sleeping creature a dream you choose — a message, a warning, a memory. Know whether a creature within 60 feet is dreaming, and how deeply.",
             "card": "Send a sleeper a dream of your choosing · know who within 60 ft is dreaming, and how deep",
-            "mech": { "utility": true } },
-          { "text": "Guide a transit: you and willing sleepers enter Insomnia together and arrive in the same place. A creature that wakes from a nightmare under your watch wakes rested instead.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Guide a transit: you and willing sleepers enter Insomnia together and arrive in the same place. A creature that wakes from a nightmare under your watch wakes rested instead.",
             "card": "Lead willing sleepers into Insomnia together · nightmares under your watch end rested",
-            "mech": { "utility": true } },
-          { "text": "Thin the membrane at a place for 8 hours: everyone who sleeps there shares one dream. Or follow the echo of a Node to where it anchors in the waking world.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Thin the membrane at a place for 8 hours: everyone who sleeps there shares one dream. Or follow the echo of a Node to where it anchors in the waking world.",
             "card": "8 hrs: all who sleep in a place share one dream · or trace a Node to its waking anchor",
-            "mech": { "utility": true } },
-          { "text": "Call the Night early: for 1 hour, a mile around you falls into true night, whatever the hour — every sleeper in it dreams deeply and safely, and the day's harm is refined out of it.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Call the Night early: for 1 hour, a mile around you falls into true night, whatever the hour — every sleeper in it dreams deeply and safely, and the day's harm is refined out of it.",
             "card": "Call true night over 1 mile for 1 hr — every sleeper dreams deep and safe",
-            "mech": { "utility": true } }
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -177,35 +368,69 @@
       "name": "Nocturnal Edge",
       "type": "Offensive",
       "description": "Too much elevated Cognitivity, too fast, for the target to metabolise.",
-      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next Dream saving throw before the end of your next turn.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next Dream saving throw before the end of your next turn.",
         "card": "+1 die psychic · disadvantage on their next Dream save",
-        "mech": { "damage": { "dice": "1d6", "type": "psychic" } } },
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: The bonus damage increases to two dice.", "card": "+2 dice" },
-        { "text": "Level 11+: The bonus damage increases to three dice, and the target can't enter Insomnia by any means until the end of its next turn.", "card": "+3 dice · they can't enter Insomnia until the end of their next turn" }
+        {
+          "text": "Level 5+: The bonus damage increases to two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: The bonus damage increases to three dice, and the target can't enter Insomnia by any means until the end of its next turn.",
+          "card": "+3 dice · they can't enter Insomnia until the end of their next turn"
+        }
       ]
     },
     {
       "name": "Veil of Passage",
       "type": "Supportive",
       "description": "A small Night-state around the seal's targets — just enough for the next step to be easier.",
-      "effect": { "text": "When the primary effect resolves, each of its targets gains advantage on its next Dream saving throw before the start of your next turn, and if it wields Night, Dream, or Nightmare, its next Verum effect counts as one tier higher.",
+      "effect": {
+        "text": "When the primary effect resolves, each of its targets gains advantage on its next Dream saving throw before the start of your next turn, and if it wields Night, Dream, or Nightmare, its next Verum effect counts as one tier higher.",
         "card": "The seal's targets: advantage on their next Dream save · Night, Dream, Nightmare wielders: their next Verum is one tier higher",
-        "mech": { "buff": { "who": "the seal's targets", "advantage": "the next Dream save" } } },
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "advantage": "the next Dream save"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: The veil lasts 1 minute, and each target has advantage on Concentration checks while it does.", "card": "Lasts 1 min · advantage on Concentration" },
-        { "text": "Level 11+: Each target may ignore the Dream Exhaustion cost of one Night, Dream, or Nightmare effect while the veil lasts.", "card": "Each may ignore one Night, Dream or Nightmare Dream Exhaustion cost" }
+        {
+          "text": "Level 5+: The veil lasts 1 minute, and each target has advantage on Concentration checks while it does.",
+          "card": "Lasts 1 min · advantage on Concentration"
+        },
+        {
+          "text": "Level 11+: Each target may ignore the Dream Exhaustion cost of one Night, Dream, or Nightmare effect while the veil lasts.",
+          "card": "Each may ignore one Night, Dream or Nightmare Dream Exhaustion cost"
+        }
       ]
     },
     {
       "name": "Overflow Touch",
       "type": "Control",
       "description": "The seal lands and leaves a bruise on the membrane.",
-      "effect": { "text": "The 15 feet around the point of impact becomes an overflow site for 1 minute — dream-texture seeping into the world. Creatures without dream-affinity inside have disadvantage on Perception checks.",
-        "card": "15-ft overflow site, 1 min — disadvantage on Perception for anyone without dream-affinity" },
+      "effect": {
+        "text": "The 15 feet around the point of impact becomes an overflow site for 1 minute — dream-texture seeping into the world. Creatures without dream-affinity inside have disadvantage on Perception checks.",
+        "card": "15-ft overflow site, 1 min — disadvantage on Perception for anyone without dream-affinity"
+      },
       "upgrades": [
-        { "text": "Level 5+: Creatures that failed the seal's save can't speak until the end of their next turn as dream-sounds crowd out their words.", "card": "Those who failed can't speak until the end of their next turn" },
-        { "text": "Level 11+: A Denizen manifests at the heart of the site and acts on its own nature, and a creature that enters the site can't take the Dash action that turn.", "card": "A Denizen manifests there · no Dashing through it" }
+        {
+          "text": "Level 5+: Creatures that failed the seal's save can't speak until the end of their next turn as dream-sounds crowd out their words.",
+          "card": "Those who failed can't speak until the end of their next turn"
+        },
+        {
+          "text": "Level 11+: A Denizen manifests at the heart of the site and acts on its own nature, and a creature that enters the site can't take the Dash action that turn.",
+          "card": "A Denizen manifests there · no Dashing through it"
+        }
       ]
     }
   ],

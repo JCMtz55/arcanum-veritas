@@ -1,0 +1,298 @@
+{
+  "id": "fate",
+  "name": "Fate",
+  "icon": "🧿",
+  "opposing": "freedom",
+  "description": "Destiny, The Thread Already Spun, What Was Always Going To Happen. Built from Fortune and Misfortune together — because Fate does not care which — this is the Cognition of outcomes that are not up for negotiation. Its wielders do not change the odds like Luck does; they read what is already written and, at the height of it, write a line themselves. It is the natural enemy of Freedom, and the two have an old argument that neither has won.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+  "cost": {
+    "text": "What Is Written. Each time you fix an outcome with a Fate seal, the Cognition writes something of yours in return: the DM notes one future moment, unspecified, that is now also fixed. You will find out when you get there.",
+    "card": "WHAT IS WRITTEN — fix an outcome and the DM fixes one of yours, for later"
+  },
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Ill-starred",
+        "card": "disadvantage on its next saving throw"
+      },
+      "major": {
+        "name": "Doomed",
+        "card": "the next attack against it is a critical hit"
+      },
+      "severe": {
+        "name": "Written out",
+        "card": "Incapacitated — this was always how this went"
+      }
+    }
+  },
+  "verumEffects": {
+    "control": [
+      {
+        "name": "The Thread",
+        "description": "You take hold of the thread and hold it still. Nothing on it moves without you.",
+        "tiers": [
+          {
+            "text": "Name a die roll type as you draw — attack, save or check. A creature that fails rolls that type at disadvantage until the end of its next turn.",
+            "card": "Name attack, save or check — those who fail roll it at disadvantage",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "penalty": {
+                "disadvantage": "one named roll type"
+              }
+            }
+          },
+          {
+            "text": "Once while the effect lasts you may declare one roll a creature that failed is about to make to be a failure, before it is rolled. It happens as you said.",
+            "card": "Once: declare a roll they are about to make a failure — it is",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Fated",
+                  "duration": "1 minute"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The effect lasts 1 minute, repeating the save at the end of each of its turns. While it holds, the creature can't reroll dice, gain advantage, or benefit from Luck, Fortune or any effect that changes an outcome after the fact.",
+            "card": "1 min (Cha save each turn) · no rerolls, no advantage, no luck of any kind",
+            "mech": {
+              "deny": [
+                "rerolls",
+                "advantage",
+                "luck effects"
+              ]
+            }
+          },
+          {
+            "text": "As It Was Always Going To Be. Declare the outcome of one exchange between the target and a creature you name — who strikes, who falls, who walks away — and within the next minute, it happens that way. The DM decides the route; you have decided the destination.",
+            "card": "AS IT WAS ALWAYS GOING TO BE — declare how one exchange ends; within a minute, it ends that way"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Meant For This",
+        "description": "They were always going to be standing here. You simply tell them so.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target may, once, replace a d20 roll with a 15 — declared before rolling. It was always going to be enough.",
+            "card": "1 min: once, take a 15 instead of rolling",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "bonus": "replace one d20 with a 15"
+              }
+            }
+          },
+          {
+            "text": "It may do so twice, and can't be surprised, caught flat-footed, or removed from the fight by banishment, imprisonment or teleportation.",
+            "card": "Twice · never surprised, banished, imprisoned or teleported away"
+          },
+          {
+            "text": "Once while this lasts, when the target would be reduced to 0 hit points, the blow simply does not land — it was not the moment.",
+            "card": "Once: the killing blow does not land. It wasn't the moment."
+          },
+          {
+            "text": "Destined. The target may replace any d20 roll with a 20, once, and until it does, all attacks against it have disadvantage. Everyone present understands that something is going to happen here.",
+            "card": "DESTINED — one roll becomes a 20 · until it spends it, attacks against it have disadvantage"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "The Appointed Hour",
+        "description": "You are not killing them. You are keeping an appointment.",
+        "tiers": [
+          {
+            "text": "The damage becomes force, and the target can't reroll its saving throw against this seal or gain advantage on it.",
+            "card": "Damage becomes Force · no rerolls or advantage on its save",
+            "mech": {
+              "damage": {
+                "type": "force"
+              },
+              "deny": [
+                "rerolls",
+                "advantage"
+              ]
+            }
+          },
+          {
+            "text": "Against a creature already below half its hit points, the seal deals 4 additional dice — the thread is fraying and it shows.",
+            "card": "+4 dice against anyone already below half"
+          },
+          {
+            "text": "A creature that fails is Doomed until the end of your next turn: the next attack roll made against it is a critical hit.",
+            "card": "DOOMED — the next attack on them is a critical hit",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Doomed"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Written. A creature reduced below a quarter of its hit points by this seal can't be healed, stabilised, raised or saved by any means until the end of the encounter — this is the part that was already decided.",
+            "card": "WRITTEN — under a quarter HP: no healing, stabilising or raising, for the rest of the fight",
+            "mech": {
+              "deny": [
+                "healing",
+                "stabilising",
+                "raising"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Spun Into It",
+        "description": "You make the thing that was always going to be found at the right moment.",
+        "tiers": [
+          {
+            "text": "Your creations are found rather than made: each turns up exactly when it is needed, and nobody quite remembers you producing it.",
+            "card": "Creations are found at the right moment, not seen being made"
+          },
+          {
+            "text": "Your Objects carry an appointed use: name one circumstance when you make it, and in that circumstance it cannot fail.",
+            "card": "Name the moment an Object is for — in that moment it cannot fail"
+          },
+          {
+            "text": "Your Structures stand until their purpose is served, and cannot be destroyed before it is — though afterwards they tend to fall quickly.",
+            "card": "Structures cannot fall until their purpose is served — and then they do"
+          },
+          {
+            "text": "Weave a Thread: a permanent Object bound to one creature's destiny. While it exists, that creature cannot die anywhere but the place and manner written into it — and you are the one who wrote it.",
+            "card": "A THREAD — its bearer can only die in the place and manner you wrote"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Reading the Weave",
+        "description": "Most of Fate is knowing what is already decided and not wasting effort on it.",
+        "tiers": [
+          {
+            "text": "Know whether a course of action is fated, likely, contested or already lost — one word, always true.",
+            "card": "One true word on any plan: fated, likely, contested or lost",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "See one significant thing that will happen to a creature you touch within the next month, without context and without comfort.",
+            "card": "See one thing that will happen to them within the month",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Learn what a creature is fated for, if anything: the role it will play, not the outcome. Most creatures are fated for nothing, and that is worth knowing too.",
+            "card": "Learn what someone is fated for — the role, never the ending",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Write a line: declare a single event that will occur within the year. It does. The DM chooses when, how, and what else it drags along with it.",
+            "card": "Write one event into the year — it happens, on the world's terms",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Foregone",
+      "type": "Offensive",
+      "description": "The seal was always going to land.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6), and can't reroll its save against the seal.",
+        "card": "+1 die force · no reroll on their save",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          },
+          "deny": [
+            "rerolls"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four against a creature below half its hit points.",
+          "card": "+2 dice (4 under half HP)"
+        },
+        {
+          "text": "Level 11+: Three dice, and the next attack roll against it has advantage.",
+          "card": "+3 dice · the next attack on them has advantage"
+        }
+      ]
+    },
+    {
+      "name": "Meant To Be",
+      "type": "Supportive",
+      "description": "The seal leaves its targets standing exactly where they need to be.",
+      "effect": {
+        "text": "Each of the seal's targets may, once before the end of your next turn, replace a d20 roll with a 12, declared before rolling.",
+        "card": "The seal's targets: once, take a 12 instead of rolling",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "bonus": "replace one d20 with a 12"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The number becomes 15, and it lasts 1 minute.",
+          "card": "Take a 15 · 1 min"
+        },
+        {
+          "text": "Level 11+: Each also can't be surprised or banished while it lasts.",
+          "card": "None can be surprised or banished"
+        }
+      ]
+    },
+    {
+      "name": "Ill Omen",
+      "type": "Control",
+      "description": "The seal writes something small and unlucky into their next few seconds.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next saving throw and can't reroll any die until the end of its next turn.",
+        "card": "Disadvantage on their next save · no rerolls until their next turn",
+        "mech": {
+          "penalty": {
+            "disadvantage": "the next saving throw"
+          },
+          "deny": [
+            "rerolls"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't gain advantage from any source while it lasts.",
+          "card": "No advantage from anywhere"
+        },
+        {
+          "text": "Level 11+: The next critical hit scored against it before your next turn deals its dice three times instead of twice.",
+          "card": "The next crit on them rolls triple dice"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

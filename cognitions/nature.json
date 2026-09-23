@@ -1,0 +1,330 @@
+{
+  "id": "nature",
+  "name": "Nature",
+  "icon": "🌾",
+  "opposing": "civilization",
+  "description": "Root, Weather, Season, The World Left To Itself. Nature is not Growth, which is increase, nor Beast, which is appetite — it is the whole arrangement: the balance of a wood, the turn of a season, the fact that rain falls on everyone. Its wielders call on what is already around them, which makes them unpredictable indoors and very hard to fight outdoors.",
+  "savingThrow": "Wisdom",
+  "damageType": "Piercing",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Snared",
+        "card": "its speed is halved by root and bramble"
+      },
+      "major": {
+        "name": "Overgrown",
+        "card": "Restrained by the growth around it"
+      },
+      "severe": {
+        "name": "Reclaimed",
+        "card": "Incapacitated as the wild closes over it"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Thorn and Weather",
+        "description": "You do not summon anything. You point at what is already here and let it answer.",
+        "tiers": [
+          {
+            "text": "The damage becomes piercing as root, thorn, hail or grit finds them. In a natural setting — forest, moor, coast, cavern, storm — the seal deals 2 additional dice.",
+            "card": "Damage becomes Piercing · +2 dice outdoors or underground",
+            "mech": {
+              "damage": {
+                "type": "piercing"
+              }
+            }
+          },
+          {
+            "text": "The ground takes an interest: a creature hit or that fails has its speed halved until the end of its next turn, and the 10 feet around it becomes difficult terrain for 1 minute.",
+            "card": "Half speed · 10 ft of difficult terrain for a minute",
+            "mech": {
+              "penalty": {
+                "speed": "half"
+              },
+              "terrain": {
+                "radius": 10,
+                "difficult": true
+              }
+            }
+          },
+          {
+            "text": "A creature that fails is Restrained until it breaks free with a Strength check against your DC, and the growth spreads to one other creature within 10 feet, which must make the save as well.",
+            "card": "Restrained (Str check vs {DC}) · and it spreads to one creature within 10 ft",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained",
+                  "escape": "Strength check vs Verum DC"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Season's Turn. The weather answers: choose lashing rain, hail, gale or freezing fog across the area for 1 minute. Ranged attacks there have disadvantage, and every creature that failed takes Three Times your Verum Modifier at the start of each of its turns inside.",
+            "card": "SEASON'S TURN — 1 min of weather: ranged attacks at disadvantage, 3×VM a turn to those who failed",
+            "mech": {
+              "rider": {
+                "damage": "3×VM",
+                "when": "start of each of their turns in the weather"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Of the Country",
+        "description": "The land stops being an obstacle and starts being on their side.",
+        "tiers": [
+          {
+            "text": "For 1 hour the target ignores difficult terrain of natural origin, can't be tracked by non-magical means, and has advantage on checks to forage, navigate or find shelter.",
+            "card": "1 hr: natural terrain is easy, no tracking, advantage to forage, navigate and shelter",
+            "mech": {
+              "deny": [
+                "natural difficult terrain"
+              ],
+              "buff": {
+                "who": "target",
+                "advantage": "foraging, navigation and shelter checks"
+              }
+            }
+          },
+          {
+            "text": "Beasts and plants will not willingly harm it, and it may speak with either, simply and honestly.",
+            "card": "Beasts and plants won't harm it, and will talk",
+            "mech": {
+              "deny": [
+                "harm from beasts and plants"
+              ]
+            }
+          },
+          {
+            "text": "The land closes around it: it gains half cover wherever any natural material stands, and heals your Verum Modifier at the start of each of its turns while outdoors.",
+            "card": "Half cover from any natural material · heals {VM} a turn outdoors",
+            "mech": {
+              "heal": {
+                "amount": "VM a turn outdoors",
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "Untamed. The target counts as being in its favoured terrain anywhere: it can't be Restrained or slowed by natural effects, breathes anywhere, needs no food or water, and any beast or plant it meets treats it as one of its own.",
+            "card": "UNTAMED — every land is its home · breathes anywhere, needs nothing, and the wild claims it as kin"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Wild Comes In",
+        "description": "Root through flagstone, vine through window, moss over everything. It takes about four seconds.",
+        "tiers": [
+          {
+            "text": "The area becomes overgrown for 1 minute: difficult terrain, lightly obscured. A creature that fails is Snared — half speed and no Dash — while it remains.",
+            "card": "1 min overgrown: difficult, obscured · those who fail are at half speed with no Dash",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "terrain": {
+                "difficult": true
+              },
+              "penalty": {
+                "speed": "half"
+              },
+              "deny": [
+                "Dash"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails is Restrained by root and bramble until it escapes with a Strength check against your DC; the growth regrows at the start of each of your turns.",
+            "card": "Fail: Restrained (Str check vs {DC}) — and it grows back each of your turns",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained",
+                  "escape": "Strength check vs Verum DC"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The growth turns hostile: a creature that starts its turn in the area takes Three Times your Verum Modifier in piercing damage, and worked stone, metal and timber inside begin to crack and green over.",
+            "card": "3×VM piercing a turn inside · worked stone and metal start to fail",
+            "mech": {
+              "rider": {
+                "damage": "3×VM",
+                "type": "piercing",
+                "when": "start of each turn inside"
+              }
+            }
+          },
+          {
+            "text": "Reclamation. The area becomes true wilderness for 10 minutes: structures are rendered useless, doors and walls are breached by root, and creatures that failed are Restrained and Blinded by growth until they escape. Beasts nearby arrive, and they are not on their side.",
+            "card": "RECLAMATION — 10 min: walls and doors fail, failures are Restrained and Blinded, and the local beasts come",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                },
+                {
+                  "name": "Blinded"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Grown, Not Built",
+        "description": "You do not assemble it. You tell it what to be and wait four seconds.",
+        "tiers": [
+          {
+            "text": "Your creations are living wood, stone and thorn: they repair themselves fully each dawn and can't be burned by ordinary fire.",
+            "card": "Living creations — they mend each dawn and don't burn"
+          },
+          {
+            "text": "Your Structures are alive: they grow to suit their use, shelter those inside from weather, and quietly feed them.",
+            "card": "Structures grow to fit, shelter from weather, and feed those inside"
+          },
+          {
+            "text": "Your Constructs may be beasts of the local country, with their statistics, loyal and tireless.",
+            "card": "Constructs may be real local beasts — loyal and tireless"
+          },
+          {
+            "text": "Plant a Grove: a permanent Structure that spreads a mile of healthy country around it over a year, remembers everyone who sheltered there, and will not admit anyone who has burned a wood.",
+            "card": "A GROVE — permanent, greens a mile over a year, and remembers"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Country Knows",
+        "description": "Ask the land. It has been paying attention.",
+        "tiers": [
+          {
+            "text": "Know the weather to come for the next day, the season's state, and whether water, food and shelter lie within a mile.",
+            "card": "Tomorrow's weather · water, food and shelter within a mile",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ask the land what has passed through: every creature of note in the last week, which way they went, and how many.",
+            "card": "Ask the land who passed this week, and where they went",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Turn the season in a small place for a day — bring spring to a frozen field or winter to a burning one — or make a mile of country hostile to one kind of creature you name.",
+            "card": "Turn the season in a small place for a day · or set a mile against one kind of creature",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Heal a country: undo a blight, a poisoning, a salted field or a burned wood, over the following month. Nothing you do brings back what died in it.",
+            "card": "Heal a blighted country over a month — though the dead stay dead",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Bramble",
+      "type": "Offensive",
+      "description": "Something with thorns on it gets involved.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus piercing damage equal to one damage die of the primary effect's type (min 1d6), and its speed is reduced by 10 feet until the end of its next turn.",
+        "card": "+1 die piercing · −10 ft speed",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "piercing"
+          },
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the ground beneath it becomes difficult terrain in a 10-foot radius.",
+          "card": "+2 dice · 10 ft of difficult terrain"
+        },
+        {
+          "text": "Level 11+: Three dice, and a creature that fails is Restrained until it breaks free.",
+          "card": "+3 dice · Restrained until they break out"
+        }
+      ]
+    },
+    {
+      "name": "Green Shelter",
+      "type": "Supportive",
+      "description": "The country closes protectively around everyone the seal touched.",
+      "effect": {
+        "text": "Each of the seal's targets gains half cover from growing earth until the end of its next turn and ignores natural difficult terrain while it lasts.",
+        "card": "The seal's targets: half cover · natural terrain doesn't slow them",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "cover": "half"
+          },
+          "deny": [
+            "natural difficult terrain"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and each regains your Verum Modifier in hit points at the start of its turns while outdoors.",
+          "card": "1 min · {VM} healing a turn outdoors"
+        },
+        {
+          "text": "Level 11+: Beasts and plants won't willingly harm them while it lasts.",
+          "card": "Beasts and plants won't touch them"
+        }
+      ]
+    },
+    {
+      "name": "Undergrowth",
+      "type": "Control",
+      "description": "Where the seal landed, something starts growing immediately.",
+      "effect": {
+        "text": "The 15 feet around the point of impact becomes difficult, lightly obscured undergrowth for 1 minute.",
+        "card": "15 ft of undergrowth, 1 min — difficult and obscured",
+        "mech": {
+          "terrain": {
+            "radius": 15,
+            "difficult": true
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Creatures that failed the seal's save have their speed halved while inside it.",
+          "card": "Half speed inside for those who failed"
+        },
+        {
+          "text": "Level 11+: A creature that starts its turn inside takes piercing damage equal to your Verum Modifier.",
+          "card": "{VM} piercing a turn inside"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

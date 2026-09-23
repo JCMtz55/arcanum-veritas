@@ -1,0 +1,305 @@
+{
+  "id": "faith",
+  "name": "Faith",
+  "icon": "🕯",
+  "opposing": "despair",
+  "description": "Belief Held Without Proof, Trust Placed Somewhere Larger. Built from Hope and Will, Faith is not piety and does not require a god — it is the decision to act as though something is true, and the strange fact that in Ephemer this sometimes makes it so. Its wielders draw strength from a conviction rather than a source, which makes them very hard to disarm: you cannot take away what nobody gave them.",
+  "savingThrow": "Wisdom",
+  "damageType": "Radiant",
+  "cost": {
+    "text": "The Article. Name what you have faith in when you first attune — a god, a person, an idea, a promise. Your seals work because you believe it. If you act against it knowingly, your Faith seals grant no Verum effect until you have made it right.",
+    "card": "THE ARTICLE — name what you believe in · act against it and your Verums fail until you atone"
+  },
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Shaken",
+        "card": "disadvantage on its next saving throw"
+      },
+      "major": {
+        "name": "Faithless",
+        "card": "it gains no benefit from allies, auras or divine effects"
+      },
+      "severe": {
+        "name": "Abandoned",
+        "card": "Incapacitated — whatever it trusted is not answering"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Sustained",
+        "description": "They are held up by something. It does not matter to the mechanism what.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target adds your Verum Modifier to saving throws and can't be Frightened or Charmed.",
+            "card": "1 min: +{VM} to all saves · no fear, no charm",
+            "mech": {
+              "deny": [
+                "fear",
+                "charm"
+              ],
+              "buff": {
+                "who": "target",
+                "save": "+VM"
+              }
+            }
+          },
+          {
+            "text": "It regains hit points equal to Fifteen Times the slot level, and while any remain above half it is immune to disease, poison and Vile-emotion effects.",
+            "card": "Heals 15 × {SLOT} · above half HP: immune to disease, poison and Vile effects",
+            "mech": {
+              "heal": {
+                "perSlot": 15,
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, the target may treat a failed saving throw as a success, declaring that this is not how it ends.",
+            "card": "Once: a failed save simply becomes a success"
+          },
+          {
+            "text": "Unfaltering. The target can't be reduced below 1 hit point while it still has something to do, can't be Stunned, Paralysed, Petrified or banished, and every creature that can see it adds your Verum Modifier to its own saving throws.",
+            "card": "UNFALTERING — it will not fall while work remains · no stun, paralysis or banishment · everyone watching saves at +{VM}"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Conviction",
+        "description": "You are not casting a spell at them. You are telling them they are wrong.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and deals Three Times your Verum Modifier more against a creature that has broken a vow, a faith or a trust.",
+            "card": "Damage becomes Radiant · +3×VM against the faithless",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "against a creature that broke a vow or trust"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails gains no benefit from divine, pact or Vile-emotion effects until the end of its next turn.",
+            "card": "No divine, pact or Vile benefits until their next turn",
+            "mech": {
+              "deny": [
+                "divine, pact and Vile benefits"
+              ]
+            }
+          },
+          {
+            "text": "The seal's damage can't be reduced by resistance, immunity or any effect that would lessen it — conviction does not negotiate.",
+            "card": "The damage can't be reduced by anything",
+            "mech": {
+              "pierce": "all reduction"
+            }
+          },
+          {
+            "text": "Apostasy. A creature that fails is cut off for 1 minute: no god, patron, pact, master or Vile Emotion answers it, none of its abilities that draw on one function, and it repeats the save at the end of each of its turns.",
+            "card": "APOSTASY — cut off from every god, patron and pact for 1 min",
+            "mech": {
+              "deny": [
+                "all borrowed power"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Hallowed",
+        "description": "You declare the ground to be something. It agrees with you.",
+        "tiers": [
+          {
+            "text": "The area is hallowed for 1 minute: your allies inside add your Verum Modifier to saving throws, and creatures that failed can't regain hit points from Vile or necrotic sources there.",
+            "card": "1 min hallowed: allies +{VM} to saves · no Vile or necrotic healing inside",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "deny": [
+                "Vile and necrotic healing"
+              ]
+            }
+          },
+          {
+            "text": "Undead, Nightmares and fiends that failed can't willingly enter the area, and take radiant damage equal to Three Times your Verum Modifier at the start of each turn they remain.",
+            "card": "The undead and Nightmares can't enter · 3×VM radiant a turn if they stay",
+            "mech": {
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "start of each of their turns inside"
+              }
+            }
+          },
+          {
+            "text": "No effect inside the area may Charm, Frighten or possess your allies, and any such effect already on them ends.",
+            "card": "No charm, fear or possession works on your allies inside — existing ones end",
+            "mech": {
+              "deny": [
+                "charm",
+                "fear",
+                "possession"
+              ]
+            }
+          },
+          {
+            "text": "Consecrated. The area lasts 10 minutes and answers: once per round, one ally inside regains hit points equal to Ten Times the slot level, and any creature that failed and dies inside cannot be raised by anything that does not share your faith.",
+            "card": "CONSECRATED — 10 min · an ally healed 10 × {SLOT} each round · the enemy dead stay dead"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Raised In Its Name",
+        "description": "You build it for the thing you believe in, and the thing you believe in shows up.",
+        "tiers": [
+          {
+            "text": "Your creations bear your Article openly, and cannot be used, entered or wielded by anyone who has knowingly acted against it.",
+            "card": "Creations refuse anyone who has acted against your Article"
+          },
+          {
+            "text": "Your Structures are sanctuary: nothing hostile may enter without succeeding on the seal's save, and those sheltering inside regain hit points as though resting.",
+            "card": "Structures are sanctuary — hostiles must save to enter, the sheltering heal"
+          },
+          {
+            "text": "Your Objects hold a blessing: once per day, whoever carries one may treat a failed saving throw as a success.",
+            "card": "Objects hold a blessing: one failed save becomes a success, daily"
+          },
+          {
+            "text": "Found a Shrine: a permanent Structure at which your Article is real — prayers made there are heard by whatever you named, and answered at least sometimes, in ways you may not like.",
+            "card": "A SHRINE — permanent, and what you named actually hears what is said there"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Article of Faith",
+        "description": "Believing something hard enough to lean your weight on it.",
+        "tiers": [
+          {
+            "text": "Know whether a creature before you keeps faith with anything at all, and whether it has broken faith recently.",
+            "card": "Know whether they keep faith with anything, and whether they've broken it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ask your Article one question at dawn. You receive an answer, or a silence — and the silence means something too.",
+            "card": "One question of your Article at dawn — an answer, or a meaningful silence",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Lend your certainty: a creature who accepts it is immune to despair, doubt and Vile persuasion for 24 hours, and knows exactly why.",
+            "card": "Lend certainty — 24 hrs proof against despair, doubt and Vile persuasion",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Act on faith: declare an impossible thing you believe will hold — a bridge that is out, a poison that will not take, a promise that will be kept. For one hour, it holds. Afterwards you learn what it cost.",
+            "card": "Declare an impossible thing true for an hour — and learn afterwards what it cost",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Certain",
+      "type": "Offensive",
+      "description": "The seal is delivered with no doubt whatsoever.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6), which can't be reduced by resistance.",
+        "card": "+1 die radiant, unreducible by resistance",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          },
+          "pierce": "resistance"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target gains no benefit from divine or pact effects until the end of its next turn.",
+          "card": "+2 dice · no divine or pact benefits"
+        },
+        {
+          "text": "Level 11+: Three dice, or six against a creature that has broken a vow or trust.",
+          "card": "+3 dice (6 against the faithless)"
+        }
+      ]
+    },
+    {
+      "name": "Upheld",
+      "type": "Supportive",
+      "description": "Whatever the seal did, its targets feel held up.",
+      "effect": {
+        "text": "Each of the seal's targets adds your Verum Modifier to its next saving throw and can't be Frightened until the end of its next turn.",
+        "card": "The seal's targets: +{VM} on their next save · no fear",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "save": "+VM"
+          },
+          "deny": [
+            "fear"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and applies to all their saving throws.",
+          "card": "1 min · all saves"
+        },
+        {
+          "text": "Level 11+: Once each, a target may treat a failed save as a success.",
+          "card": "Once each: a failed save becomes a success"
+        }
+      ]
+    },
+    {
+      "name": "Cut Off",
+      "type": "Control",
+      "description": "Whatever they were drawing on does not answer this round.",
+      "effect": {
+        "text": "A creature hit by or failing the seal gains no benefit from divine, pact or Vile-emotion effects until the end of its next turn.",
+        "card": "No divine, pact or Vile benefits until their next turn",
+        "mech": {
+          "deny": [
+            "divine, pact and Vile benefits"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't be healed by such a source while it lasts.",
+          "card": "And no healing from those sources"
+        },
+        {
+          "text": "Level 11+: An undead, fiend or Nightmare that fails also takes radiant damage equal to Five Times your Verum Modifier.",
+          "card": "Undead, fiends and Nightmares take 5×VM radiant"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

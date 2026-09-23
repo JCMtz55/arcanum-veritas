@@ -1,0 +1,280 @@
+{
+  "id": "luck",
+  "name": "Luck",
+  "icon": "🍀",
+  "opposing": "misfortune",
+  "description": "Chance, Coincidence, The Break That Goes Your Way. Where Fortune is destiny at the scale of empires, Luck is the small stuff: the loose stone that holds, the guard who looks the other way, the arrow that goes wide by a finger's width. It cannot be relied on, which is the entire point — and its wielders spend their lives learning exactly how much of it they can get away with.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+  "cost": {
+    "text": "Pressing It. Each time you draw a second or later Luck seal before you finish a long rest, roll a d6. On a 1, the luck turns: the next d20 you roll before your next turn is made at disadvantage, and someone nearby notices how long your streak was.",
+    "card": "PRESSING IT — 2nd+ Luck seal in a day: d6, on a 1 your next d20 is at disadvantage"
+  },
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Off-stride",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Cursed footing",
+        "card": "Prone, and its next save is at disadvantage"
+      },
+      "severe": {
+        "name": "Nothing goes right",
+        "card": "Incapacitated as everything it tries fails at once"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Break",
+        "description": "Nothing about this should have hit. It hit.",
+        "tiers": [
+          {
+            "text": "The damage becomes force. If the seal's attack roll or the target's save came within 2 of the number needed, it deals 2 additional dice — the margin was luck, and luck is yours.",
+            "card": "Damage becomes Force · +2 dice when the roll was within 2 either way",
+            "mech": {
+              "damage": {
+                "type": "force"
+              }
+            }
+          },
+          {
+            "text": "Reroll any damage dice that come up 1 or 2, once.",
+            "card": "Reroll the 1s and 2s once"
+          },
+          {
+            "text": "The seal scores a critical hit on a 19 or 20 — and on a save, a natural 1 from the target counts as failing by 10 for anything that cares how badly it failed.",
+            "card": "Crits on 19–20 · their natural 1 counts as failing by 10"
+          },
+          {
+            "text": "Absurd. Something ridiculous happens in your favour: the DM names a coincidence that costs the target its reaction, its footing, its weapon or its cover — and it was going to happen anyway.",
+            "card": "ABSURD — a coincidence costs them their reaction, footing, weapon or cover"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Riding It",
+        "description": "For the next little while, things simply go their way.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target may roll a d4 once and add it to any attack roll, ability check or saving throw, after seeing the result.",
+            "card": "1 min: once, +1d4 to any d20 — after seeing the roll",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "bonus": "+1d4 once, after the roll"
+              }
+            }
+          },
+          {
+            "text": "The die becomes a d6, and the target may use it twice. The first time it rolls a natural 1 while this lasts, treat the roll as a 10 instead.",
+            "card": "d6, twice · the first natural 1 becomes a 10",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "bonus": "+1d6 twice, after the roll"
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, the target may turn a hit against it into a miss, or a failed saving throw into a success. Nobody will be able to say quite how.",
+            "card": "Once: a hit becomes a miss, or a failed save becomes a success"
+          },
+          {
+            "text": "Golden. The die becomes a d8 and may be used any number of times, the target's critical hits land on 19 or 20, and the first time each round it would suffer a random effect, you choose the result instead.",
+            "card": "GOLDEN — +1d8 at will · crits on 19–20 · you choose any random result against it, 1/round"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Streak Ends",
+        "description": "You take the small mercies away and let the odds do the work.",
+        "tiers": [
+          {
+            "text": "A creature that fails loses its luck: it can't gain advantage from any source until the end of its next turn, and rerolls no dice.",
+            "card": "Fail: no advantage from any source, no rerolls, until the end of their next turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "advantage",
+                "rerolls"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails scores a critical hit only on a natural 20 that it then confirms with a second attack roll, and treats its natural 20s on saving throws as ordinary successes.",
+            "card": "Their crits need confirming · their nat 20s on saves are just successes"
+          },
+          {
+            "text": "The effect lasts 1 minute, repeating the save at the end of each of its turns, and while it holds the creature suffers a complication each round: the DM names something small that goes wrong — a strap, a footing, a torch, a spooked horse.",
+            "card": "1 min (Cha save each turn) · something small goes wrong for them each round",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Luckless",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The Long Odds. While the effect holds, any natural 1 the creature rolls is a catastrophe of the DM's design, and any ally who lends it advantage, a reroll, or a shared bonus must succeed on the save or lose that ability until the effect ends.",
+            "card": "THE LONG ODDS — their natural 1s become catastrophes · helping them costs the helper too",
+            "mech": {
+              "deny": [
+                "outside help"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Happenstance",
+        "description": "You ask the world for a small favour, and it is usually in a good mood.",
+        "tiers": [
+          {
+            "text": "Find something small you need but did not pack — a coin, a candle, a key that fits well enough, the right name to drop — as long as it could plausibly be nearby.",
+            "card": "Find the small thing you needed but didn't pack",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Arrive at the right moment: once per day, declare that you turned up exactly when something was about to happen, and you did.",
+            "card": "1/day: you arrived exactly when it mattered, and you did",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Nudge a coincidence for 8 hours: a guard is drunk, a ship is delayed, a door was left unbarred, a rival is out of town. Nothing that directly harms anyone.",
+            "card": "Nudge a coincidence for 8 hrs — a lax guard, a late ship, an open door",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Spend a piece of it: once per long rest, an event of the DM's design that would have gone badly for you goes well instead, and someone else's luck is quietly worse for it.",
+            "card": "1/long rest: a bad event turns good — and somebody else pays for it",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Charms",
+        "description": "Things you make have a habit of being exactly where they are wanted.",
+        "tiers": [
+          {
+            "text": "Your creations turn up conveniently: each is found, placed or positioned exactly where it is most useful within its range.",
+            "card": "Creations land exactly where they'd be most useful"
+          },
+          {
+            "text": "Your Objects are charms — whoever carries one may reroll one d20 per day.",
+            "card": "Objects are charms: one reroll a day for whoever carries them"
+          },
+          {
+            "text": "Your Structures are never quite hit: the first attack or effect that would damage one each round misses or fizzles.",
+            "card": "1/round, the first hit on a Structure simply misses"
+          },
+          {
+            "text": "Make a Talisman: a permanent Object that gives its bearer one reroll per short rest, and cannot be lost — when misplaced, it turns up again within a day, usually somewhere absurd.",
+            "card": "A TALISMAN — a reroll per short rest, and it always comes back"
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Fluke",
+      "type": "Offensive",
+      "description": "Something went right that had no business going right.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6). If the seal's roll succeeded by 2 or less, roll that die twice.",
+        "card": "+1 die force — twice if the roll succeeded by 2 or less",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and you may reroll any 1s on the seal's damage.",
+          "card": "+2 dice · reroll the 1s"
+        },
+        {
+          "text": "Level 11+: Three dice, and the seal crits on a 19 as well as a 20.",
+          "card": "+3 dice · crits on 19–20"
+        }
+      ]
+    },
+    {
+      "name": "Fair Winds",
+      "type": "Supportive",
+      "description": "Everything is about to go slightly better for everyone the seal touched.",
+      "effect": {
+        "text": "Each of the seal's targets may roll a d4 once before the end of your next turn and add it to one attack roll, check or saving throw, after seeing the result.",
+        "card": "The seal's targets: +1d4 once, after seeing the roll",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "bonus": "+1d4 once, after the roll"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The die becomes a d6 and lasts 1 minute.",
+          "card": "d6 · 1 min"
+        },
+        {
+          "text": "Level 11+: Each target's first natural 1 while it lasts is treated as a 10.",
+          "card": "Their first natural 1 becomes a 10"
+        }
+      ]
+    },
+    {
+      "name": "Bad Break",
+      "type": "Control",
+      "description": "The seal lands, and then their footing goes.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't gain advantage from any source until the end of its next turn.",
+        "card": "No advantage from any source until the end of their next turn",
+        "mech": {
+          "deny": [
+            "advantage"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't reroll any die until then.",
+          "card": "No rerolls either"
+        },
+        {
+          "text": "Level 11+: The next attack roll made against it has advantage, as something gives way underfoot.",
+          "card": "The next attack on them has advantage"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

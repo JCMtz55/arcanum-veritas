@@ -10,19 +10,34 @@
     "title": "Primal Harvest",
     "text": "A Primal seal leaves raw emotion behind it, and you are standing right there.",
     "traits": [
-      { "name": "Harvest", "level": 1,
+      {
+        "name": "Harvest",
+        "level": 1,
         "text": "Once per seal, when your Fear seal damages a creature or a creature fails its save, you may fill one empty Emotion Vessel you carry with Fear — no Extraction check, no attunement to Emotion required.",
-        "card": "1/seal: fill an empty vessel with Fear, no check" },
-      { "name": "Deep Harvest", "level": 11,
+        "card": "1/seal: fill an empty vessel with Fear, no check"
+      },
+      {
+        "name": "Deep Harvest",
+        "level": 11,
         "text": "The harvest yields two Fear instead of one, or, if the creature's dominant feeling is a Complex Emotion built on Fear, that emotion whole.",
-        "card": "Harvest 2 Fear — or the whole Complex Emotion if Fear is at its root" }
+        "card": "Harvest 2 Fear — or the whole Complex Emotion if Fear is at its root"
+      }
     ]
   },
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Unnerved", "card": "disadvantage on its next attack roll" },
-      "major":  { "name": "Terrified", "card": "Frightened of you" },
-      "severe": { "name": "Panicked", "card": "Frightened, and must use its action to flee" }
+      "minor": {
+        "name": "Unnerved",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Terrified",
+        "card": "Frightened of you"
+      },
+      "severe": {
+        "name": "Panicked",
+        "card": "Frightened, and must use its action to flee"
+      }
     }
   },
   "verumEffects": {
@@ -31,18 +46,42 @@
         "name": "The Worst Thing",
         "description": "You do not show them a monster. You show them the one they already keep.",
         "tiers": [
-          { "text": "The damage becomes psychic and increases by 2 additional dice. A creature hit or that fails is Frightened of you until the end of its next turn.",
-            "card": "+2 dice · damage becomes Psychic · Frightened of you until the end of their next turn",
-            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "conditions": [ { "name": "Frightened", "duration": "until the end of its next turn" } ] } },
-          { "text": "The damage increases by 4 additional dice, and a Frightened creature must spend its movement getting away from you if it can.",
-            "card": "+4 dice · the Frightened must move away from you",
-            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "conditions": [ { "name": "Frightened" } ] } },
-          { "text": "The damage increases by 6 additional dice, and the fear lasts 1 minute, repeating the Wisdom save at the end of each of its turns. A creature already Frightened by anything when the seal lands takes one extra die.",
-            "card": "+6 dice · Frightened 1 min (Wis save each turn) · +1 die against the already Frightened",
-            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "Frightened", "duration": "1 minute", "escape": "Wisdom save at the end of each of its turns" } ] } },
-          { "text": "Terror. The damage increases by 8 additional dice. A creature hit or that fails is Frightened of you and, on each of its turns while the fear holds, must use its action to flee, hide or cower. A creature it flees past feels the fear too and is Frightened until the end of its next turn.",
-            "card": "+8 dice · TERROR — it flees, hides or cowers each turn · the fear spreads to whoever it runs past",
-            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Frightened", "duration": "1 minute", "escape": "Wisdom save at the end of each of its turns" } ] } }
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails is Frightened of you until the end of its next turn.",
+            "card": "Damage becomes Psychic · Frightened of you until the end of their next turn",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Against a creature already Frightened by anything, the seal deals 4 additional dice, and a Frightened creature must spend its movement getting away from you if it can.",
+            "card": "+4 dice against the already Frightened · and the Frightened must run"
+          },
+          {
+            "text": "The fear lasts 1 minute, repeating the Wisdom save at the end of each of its turns, and while it holds the creature can't take the Ready, Help or Search actions.",
+            "card": "Frightened 1 min (Wis save each turn) · no Ready, Help or Search",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "1 minute",
+                  "escape": "Wisdom save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Terror. On each of its turns while the fear holds, the creature must use its action to flee, hide or cower — and any creature it flees past is Frightened until the end of its next turn.",
+            "card": "TERROR — it flees, hides or cowers each turn · and the fear spreads to whoever it runs past"
+          }
         ]
       }
     ],
@@ -51,17 +90,40 @@
         "name": "Useful Fear",
         "description": "Not the absence of it. The clean, cold use of it.",
         "tiers": [
-          { "text": "For 1 minute the target can't be surprised and adds your Verum Modifier to initiative and to Dexterity saving throws.",
+          {
+            "text": "For 1 minute the target can't be surprised and adds your Verum Modifier to initiative and to Dexterity saving throws.",
             "card": "1 min: can't be surprised · +{VM} initiative and Dex saves",
-            "mech": { "buff": { "who": "target", "save": "+VM Dexterity", "initiative": "+VM" } } },
-          { "text": "Its speed increases by 10 feet and it may Disengage as a bonus action — the body knows the way out before the mind asks.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "save": "+VM Dexterity",
+                "initiative": "+VM"
+              }
+            }
+          },
+          {
+            "text": "Its speed increases by 10 feet and it may Disengage as a bonus action — the body knows the way out before the mind asks.",
             "card": "+10 ft speed · Disengage as a bonus action",
-            "mech": { "buff": { "who": "target", "speed": 10 } } },
-          { "text": "Once while this lasts, when the target is hit by an attack it can see coming, it may halve the damage as its fear moves it first.",
-            "card": "Once: halve the damage of an attack it saw coming" },
-          { "text": "The Edge. The target has advantage on every saving throw against being surprised, grappled, restrained or caught in an area it can see, can't be Frightened, and takes no damage on a successful Dexterity save that would halve it.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "speed": 10
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, when the target is hit by an attack it can see coming, it may halve the damage as its fear moves it first.",
+            "card": "Once: halve the damage of an attack it saw coming"
+          },
+          {
+            "text": "The Edge. The target has advantage on every saving throw against being surprised, grappled, restrained or caught in an area it can see, can't be Frightened, and takes no damage on a successful Dexterity save that would halve it.",
             "card": "THE EDGE — can't be Frightened · no damage at all on a made Dex save",
-            "mech": { "deny": [ "fear" ] } }
+            "mech": {
+              "deny": [
+                "fear"
+              ]
+            }
+          }
         ]
       }
     ],
@@ -70,18 +132,59 @@
         "name": "The Pulse of Preservation",
         "description": "Every creature has a door in it marked run. You knock.",
         "tiers": [
-          { "text": "A creature that fails is Frightened of a point you choose until the end of its next turn, and can't willingly move closer to it.",
+          {
+            "text": "A creature that fails is Frightened of a point you choose until the end of its next turn, and can't willingly move closer to it.",
             "card": "Fail: Frightened of a point you name — can't move closer",
-            "mech": { "save": { "ability": "Wisdom" }, "conditions": [ { "name": "Frightened", "duration": "until the end of its next turn" } ] } },
-          { "text": "A creature that fails by 5 or more freezes instead: its speed is 0 and it can't take reactions until the end of its next turn.",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails by 5 or more freezes instead: its speed is 0 and it can't take reactions until the end of its next turn.",
             "card": "Fail by 5+: frozen — speed 0, no reactions until their next turn",
-            "mech": { "penalty": { "speed": 0 }, "deny": [ "reactions" ] } },
-          { "text": "The fear lasts 1 minute, repeating the save at the end of each of its turns, and a Frightened creature can't take the Ready, Help, or Search actions — nothing seems worth the exposure.",
+            "mech": {
+              "penalty": {
+                "speed": 0
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "The fear lasts 1 minute, repeating the save at the end of each of its turns, and a Frightened creature can't take the Ready, Help, or Search actions — nothing seems worth the exposure.",
             "card": "1 min (Wis save each turn) · no Ready, Help or Search while Frightened",
-            "mech": { "deny": [ "Ready", "Help", "Search" ] } },
-          { "text": "Rout. Every creature that fails flees the area by the shortest route on its turn, dropping anything it holds that isn't a weapon, and can't return while the fear lasts. Allies of a fleeing creature that see it run make the save themselves or join it.",
+            "mech": {
+              "deny": [
+                "Ready",
+                "Help",
+                "Search"
+              ]
+            }
+          },
+          {
+            "text": "Rout. Every creature that fails flees the area by the shortest route on its turn, dropping anything it holds that isn't a weapon, and can't return while the fear lasts. Allies of a fleeing creature that see it run make the save themselves or join it.",
             "card": "ROUT — they flee by the shortest way, dropping what they carry · watching allies save or run too",
-            "mech": { "conditions": [ { "name": "Frightened", "duration": "1 minute" } ], "deny": [ "returning to the area" ] } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "1 minute"
+                }
+              ],
+              "deny": [
+                "returning to the area"
+              ]
+            }
+          }
         ]
       }
     ],
@@ -90,14 +193,22 @@
         "name": "Effigies",
         "description": "Something you build to be feared, and it works.",
         "tiers": [
-          { "text": "Your creations are wrong to look at: a creature that starts its turn within 10 feet of one and can see it has disadvantage on its next attack roll.",
-            "card": "Creations unsettle — disadvantage on the next attack of anyone starting a turn within 10 ft" },
-          { "text": "Your Structures are shunned: a creature that would enter one must first spend its reaction, and beasts and unintelligent creatures won't enter at all.",
-            "card": "Structures are shunned — entering costs a reaction; animals won't enter" },
-          { "text": "Your Constructs take the shape of what the creature looking at them fears most — each foe sees a different thing — and their attacks Frighten until the end of the target's next turn.",
-            "card": "Constructs wear each viewer's own fear · their hits Frighten" },
-          { "text": "A Dread Effigy. One creation becomes a landmark of fear: creatures within 60 feet of it that aren't yours have disadvantage on saves against Fear, and the countryside learns to route around it.",
-            "card": "A DREAD EFFIGY — disadvantage on Fear saves within 60 ft, and the land avoids it" }
+          {
+            "text": "Your creations are wrong to look at: a creature that starts its turn within 10 feet of one and can see it has disadvantage on its next attack roll.",
+            "card": "Creations unsettle — disadvantage on the next attack of anyone starting a turn within 10 ft"
+          },
+          {
+            "text": "Your Structures are shunned: a creature that would enter one must first spend its reaction, and beasts and unintelligent creatures won't enter at all.",
+            "card": "Structures are shunned — entering costs a reaction; animals won't enter"
+          },
+          {
+            "text": "Your Constructs take the shape of what the creature looking at them fears most — each foe sees a different thing — and their attacks Frighten until the end of the target's next turn.",
+            "card": "Constructs wear each viewer's own fear · their hits Frighten"
+          },
+          {
+            "text": "A Dread Effigy. One creation becomes a landmark of fear: creatures within 60 feet of it that aren't yours have disadvantage on saves against Fear, and the countryside learns to route around it.",
+            "card": "A DREAD EFFIGY — disadvantage on Fear saves within 60 ft, and the land avoids it"
+          }
         ]
       }
     ],
@@ -106,18 +217,34 @@
         "name": "What They Fear",
         "description": "The oldest question, and the one everyone answers honestly.",
         "tiers": [
-          { "text": "Learn the surface fear of a creature you can see — what it does not want to happen in the next hour.",
+          {
+            "text": "Learn the surface fear of a creature you can see — what it does not want to happen in the next hour.",
             "card": "Learn what a creature is afraid of right now",
-            "mech": { "utility": true } },
-          { "text": "Learn its deepest fear, the one it would not say aloud, and gain advantage on Intimidation and Insight checks against it for the day.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Learn its deepest fear, the one it would not say aloud, and gain advantage on Intimidation and Insight checks against it for the day.",
             "card": "Learn its deepest fear · advantage on Intimidation and Insight against it",
-            "mech": { "utility": true } },
-          { "text": "Mark a place, object or name as a thing to be feared for 24 hours: creatures encountering it feel dread and instinctively avoid it unless they have reason not to.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Mark a place, object or name as a thing to be feared for 24 hours: creatures encountering it feel dread and instinctively avoid it unless they have reason not to.",
             "card": "Make a place, object or name dreaded for 24 hrs",
-            "mech": { "utility": true } },
-          { "text": "Take a fear away — a phobia, a trauma, a dread laid by a curse or a Nightmare — and carry it yourself until your next long rest.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Take a fear away — a phobia, a trauma, a dread laid by a curse or a Nightmare — and carry it yourself until your next long rest.",
             "card": "Take someone's fear from them and carry it until your next long rest",
-            "mech": { "utility": true } }
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -127,36 +254,83 @@
       "name": "Cold Sweat",
       "type": "Offensive",
       "description": "Something in the seal reminds them that they can die.",
-      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next saving throw.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and has disadvantage on its next saving throw.",
         "card": "+1 die psychic · disadvantage on their next save",
-        "mech": { "damage": { "dice": "1d6", "type": "psychic" }, "penalty": { "disadvantage": "the next saving throw" } } },
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "penalty": {
+            "disadvantage": "the next saving throw"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Two dice, and the target is Frightened of you until the end of its next turn.", "card": "+2 dice · Frightened of you until their next turn" },
-        { "text": "Level 11+: Three dice, and a Frightened target can't take reactions.", "card": "+3 dice · the Frightened take no reactions" }
+        {
+          "text": "Level 5+: Two dice, and the target is Frightened of you until the end of its next turn.",
+          "card": "+2 dice · Frightened of you until their next turn"
+        },
+        {
+          "text": "Level 11+: Three dice, and a Frightened target can't take reactions.",
+          "card": "+3 dice · the Frightened take no reactions"
+        }
       ]
     },
     {
       "name": "Braced",
       "type": "Supportive",
       "description": "Fear, handed to the seal's targets pointed the right way.",
-      "effect": { "text": "Each of the seal's targets can't be Frightened until the end of its next turn and gains temporary hit points equal to your Verum Modifier + the slot level.",
+      "effect": {
+        "text": "Each of the seal's targets can't be Frightened until the end of its next turn and gains temporary hit points equal to your Verum Modifier + the slot level.",
         "card": "The seal's targets: can't be Frightened until their next turn · {VM} + {SLOT} temp HP",
-        "mech": { "deny": [ "fear" ], "buff": { "who": "the seal's targets", "tempHP": "VM + slot level" } } },
+        "mech": {
+          "deny": [
+            "fear"
+          ],
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM + slot level"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: They also add your Verum Modifier to initiative and can't be surprised for 1 minute.", "card": "+{VM} initiative · can't be surprised, 1 min" },
-        { "text": "Level 11+: Each may also Disengage as a bonus action while it lasts.", "card": "Disengage as a bonus action" }
+        {
+          "text": "Level 5+: They also add your Verum Modifier to initiative and can't be surprised for 1 minute.",
+          "card": "+{VM} initiative · can't be surprised, 1 min"
+        },
+        {
+          "text": "Level 11+: Each may also Disengage as a bonus action while it lasts.",
+          "card": "Disengage as a bonus action"
+        }
       ]
     },
     {
       "name": "Flinch",
       "type": "Control",
       "description": "The body answers before the mind gets a say.",
-      "effect": { "text": "A creature hit by or failing the seal can't take reactions until the start of its next turn, and its speed is reduced by 10 feet.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't take reactions until the start of its next turn, and its speed is reduced by 10 feet.",
         "card": "No reactions until their next turn · −10 ft speed",
-        "mech": { "deny": [ "reactions" ], "penalty": { "speed": -10 } } },
+        "mech": {
+          "deny": [
+            "reactions"
+          ],
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: It can't willingly move closer to you until the end of its next turn.", "card": "Can't move closer to you" },
-        { "text": "Level 11+: It is Frightened of you until the end of its next turn.", "card": "Frightened of you until their next turn" }
+        {
+          "text": "Level 5+: It can't willingly move closer to you until the end of its next turn.",
+          "card": "Can't move closer to you"
+        },
+        {
+          "text": "Level 11+: It is Frightened of you until the end of its next turn.",
+          "card": "Frightened of you until their next turn"
+        }
       ]
     }
   ],

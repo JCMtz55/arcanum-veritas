@@ -1,0 +1,308 @@
+{
+  "id": "love",
+  "name": "Love",
+  "icon": "💗",
+  "opposing": "hate",
+  "description": "Devotion, Care, The Choice To Put Someone Before Yourself. Built from Joy twice over carrying Sadness, Love is the Complex Emotion that Ephemer's alchemists rate most dangerous to work with, because it does not behave. It shields what it loves past the point of sense, it will not be reasoned with, and it is the answer to Apathy — the only thing that reliably brings a hollowed soul back.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Softened",
+        "card": "disadvantage on attacks against your allies"
+      },
+      "major": {
+        "name": "Devoted",
+        "card": "Charmed — it cannot bring itself to harm you"
+      },
+      "severe": {
+        "name": "Undone",
+        "card": "Incapacitated by what it is suddenly feeling"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Held",
+        "description": "Nothing gets to them while you are standing there, and you are always standing there.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target gains temporary hit points equal to Ten Times the slot level, and you always know its condition and direction, at any distance.",
+            "card": "1 min: 10 × {SLOT} temp HP · you always know how it is and where",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "tempHP": "10 × slot level"
+              }
+            }
+          },
+          {
+            "text": "While you can see it, you may use your reaction to take the damage of an attack that hits it, halved, however far away you are.",
+            "card": "Reaction: take a hit meant for it, halved, at any distance you can see",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "reduce": "half, transferred to you"
+              }
+            }
+          },
+          {
+            "text": "It can't be Charmed or Frightened, and once while this lasts, when it would drop to 0 hit points, it drops to 1 instead and you take the remaining damage.",
+            "card": "No charm or fear · once, its drop to 0 becomes 1 — and you take the rest",
+            "mech": {
+              "deny": [
+                "charm",
+                "fear"
+              ]
+            }
+          },
+          {
+            "text": "Nothing Takes Them. For the minute the target cannot die while you live: any damage that would kill it is dealt to you instead, ignoring resistance and immunity. You may end this at any time, and both of you will know you did.",
+            "card": "NOTHING TAKES THEM — it cannot die while you live; the killing damage comes to you instead"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "For Their Sake",
+        "description": "You are not angry. You simply will not let this happen to them.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and deals Three Times your Verum Modifier more against a creature that has harmed someone you love this fight.",
+            "card": "Damage becomes Radiant · +3×VM against whoever hurt someone you love",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "against a creature that harmed someone you love"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails has disadvantage on attacks against anyone but you until the end of its next turn — you have its attention now.",
+            "card": "Disadvantage attacking anyone but you",
+            "mech": {
+              "penalty": {
+                "disadvantage": "attacks against anyone but you"
+              }
+            }
+          },
+          {
+            "text": "An ally within 30 feet of you regains hit points equal to half the damage the seal dealt.",
+            "card": "An ally within 30 ft heals half the damage dealt",
+            "mech": {
+              "heal": {
+                "amount": "half the damage",
+                "who": "an ally within 30 ft"
+              }
+            }
+          },
+          {
+            "text": "Unforgivable. Against a creature that has reduced someone you love to 0 hit points, the seal deals maximum damage, and none of it — nor any of its effects — can be resisted, halved or reduced.",
+            "card": "UNFORGIVABLE — maximum damage, nothing resisted, against whoever dropped someone you love",
+            "mech": {
+              "pierce": "all reduction"
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Softening",
+        "description": "You remind them of someone. It is very hard to swing at someone who reminds you of someone.",
+        "tiers": [
+          {
+            "text": "A creature that fails has disadvantage on attack rolls against you and your allies until the end of its next turn.",
+            "card": "Fail: disadvantage attacking you and yours until their next turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "penalty": {
+                "disadvantage": "attacks against you and your allies"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails is Charmed by you until the end of its next turn and can't take reactions against you while it lasts.",
+            "card": "Charmed by you until their next turn · no reactions against you",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The charm lasts 1 minute, repeating the save at the end of each of its turns, and while it holds the creature will not willingly let you come to harm — it will interpose, warn, and argue for you.",
+            "card": "1 min (Cha save each turn) · it will not let you be harmed",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Disarmed. A creature that fails lays down its weapon and cannot take a hostile action against you or your allies for 1 minute. Any damage you deal it ends this at once, and it will remember the moment either way.",
+            "card": "DISARMED — it puts the weapon down and cannot attack you for 1 min · your damage ends it",
+            "mech": {
+              "deny": [
+                "hostile actions against you"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Made For Someone",
+        "description": "Everything you make is made for a particular person, and it knows them.",
+        "tiers": [
+          {
+            "text": "Name someone as you make it: your creation recognises them, protects them by preference, and will never harm them.",
+            "card": "Each creation is made for one named person and will never harm them"
+          },
+          {
+            "text": "Your Objects carry warmth: whoever holds one has advantage on saves against fear, despair and Vile emotion, and knows the maker meant it.",
+            "card": "Objects ward against fear, despair and Vile emotion"
+          },
+          {
+            "text": "Your Structures shelter: within one, your named person can't be located, scried, or harmed by anything you could have prevented.",
+            "card": "Inside a Structure, your named person can't be found or reached"
+          },
+          {
+            "text": "Make a Keepsake: a permanent Object that holds one use of your Held, ready for the person it was made for, whether or not you are alive to cast it.",
+            "card": "A KEEPSAKE — permanent, holds one Held for its person, even after you're gone"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "What You Would Do For Them",
+        "description": "The most useful thing about love is how much it tells you.",
+        "tiers": [
+          {
+            "text": "Know who a creature loves, and what it would give up for them. It will feel you asking.",
+            "card": "Know who they love and what they'd give up for them",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Send your feeling across any distance to one person: they know you are alive, roughly where, and that you meant it.",
+            "card": "Reach one person anywhere — they know you live, and where, and that you meant it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ease a grief, an estrangement or a hatred between two willing creatures, enough that they can speak to each other honestly for an hour.",
+            "card": "Make two willing people able to speak honestly for an hour",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Call someone back: a creature sunk in Apathy, hollowed by a Vile Emotion, or lost to a dream wakes and remembers who it is — if there is someone present it loves.",
+            "card": "Wake the hollowed and the lost — if someone they love is standing there",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Protective",
+      "type": "Offensive",
+      "description": "They hurt someone. The seal knows.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has damaged one of your allies this combat.",
+        "card": "+1 die radiant — +2 dice if they've hurt one of your allies",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four, and an ally within 30 feet regains your Verum Modifier in hit points.",
+          "card": "+2 dice (4) · an ally heals {VM}"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and the target has disadvantage on its next attack against anyone but you.",
+          "card": "+3 dice (6) · disadvantage attacking anyone but you"
+        }
+      ]
+    },
+    {
+      "name": "Cherished",
+      "type": "Supportive",
+      "description": "The seal leaves everyone it touched harder to lose.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to Twice your Verum Modifier + the slot level and advantage on its next saving throw against fear or despair.",
+        "card": "The seal's targets: 2×VM + {SLOT} temp HP · advantage on their next save vs fear or despair",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "2×VM + slot level"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: While any temporary hit points remain, they can't be Charmed or Frightened.",
+          "card": "No charm or fear while the temp HP lasts"
+        },
+        {
+          "text": "Level 11+: The first time each drops below half its hit points, it regains Ten Times the slot level.",
+          "card": "First drop below half: heal 10 × {SLOT}"
+        }
+      ]
+    },
+    {
+      "name": "Hesitation",
+      "type": "Control",
+      "description": "For a moment the seal made them think of someone.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next attack roll against you or the seal's targets.",
+        "card": "Disadvantage on their next attack against you or the seal's targets",
+        "mech": {
+          "penalty": {
+            "disadvantage": "the next attack against you or the seal's targets"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't take reactions against them until the end of its next turn.",
+          "card": "No reactions against them either"
+        },
+        {
+          "text": "Level 11+: If it is below half its hit points, it is Charmed by you until the end of its next turn.",
+          "card": "Under half HP: Charmed until their next turn"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -1,0 +1,288 @@
+{
+  "id": "loyalty",
+  "name": "Loyalty",
+  "icon": "🛡️",
+  "opposing": "betrayal",
+  "description": "Fidelity, Service, Standing Where You Said You Would. Loyalty is the smallest of the binding concepts and the most common: not an oath enforced by law, not a contract with terms, just the decision to keep faith with someone and keep making it. Its wielders fight better beside people they have chosen, know infallibly who is about to break faith with them, and can lend that certainty to a whole line of frightened strangers.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Doubted",
+        "card": "can't take reactions to help its allies"
+      },
+      "major": {
+        "name": "Forsaken",
+        "card": "Frightened while any ally is within 10 feet of it"
+      },
+      "severe": {
+        "name": "Abandoned",
+        "card": "Incapacitated — nobody is coming, and it knows"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Held Faith",
+        "description": "You hit harder for the people standing beside you. Everyone always has.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and deals Twice your Verum Modifier more if an ally is within 5 feet of the target or of you.",
+            "card": "Damage becomes Radiant · +2×VM if an ally stands close",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "rider": {
+                "damage": "2×VM",
+                "type": "radiant",
+                "when": "an ally is adjacent to you or the target"
+              }
+            }
+          },
+          {
+            "text": "The seal deals one additional die for each ally within 30 feet of you, to a maximum of your Verum Modifier — you are not doing this alone, and it shows.",
+            "card": "+1 die per ally within 30 ft (max {VM})"
+          },
+          {
+            "text": "An ally within 30 feet of the target may use its reaction to strike it as well, adding your Verum Modifier to that attack.",
+            "card": "An ally within 30 ft may strike it too, +{VM} to hit"
+          },
+          {
+            "text": "Nobody Left Behind. Every ally within 30 feet may use its reaction to move up to its speed toward the target without provoking, striking it if it can reach.",
+            "card": "NOBODY LEFT BEHIND — every ally within 30 ft may close and strike as a reaction"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "At Your Side",
+        "description": "You are not going to be standing there alone. That is all this is.",
+        "tiers": [
+          {
+            "text": "For 1 minute, while the target is within 30 feet of an ally, it has advantage on saving throws against being Frightened or Charmed and adds your Verum Modifier to its Armour Class against opportunity attacks.",
+            "card": "1 min, near an ally: advantage vs fear and charm · +{VM} AC vs opportunity attacks",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "saves against Frightened and Charmed"
+              }
+            }
+          },
+          {
+            "text": "When the target is hit while an ally is within 5 feet, it may use its reaction to halve the damage — the ally took the other half, and neither of them will mention it.",
+            "card": "Reaction: halve a hit, an adjacent ally takes the rest",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "reduce": "half, shared with an adjacent ally"
+              }
+            }
+          },
+          {
+            "text": "The target and one ally it names share their fortune: while within 60 feet of each other, either may use the other's saving throw modifier, and neither can be surprised while the other is awake.",
+            "card": "The target and one named ally share save modifiers within 60 ft"
+          },
+          {
+            "text": "Shieldwall. Every ally within 30 feet of the target gains the whole of this effect, may use its reaction to swap places with another, and while two or more of them are adjacent, each has resistance to the first instance of damage it takes each round.",
+            "card": "SHIELDWALL — all allies within 30 ft share it · swap places as a reaction · adjacent allies resist the first hit each round"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Break of Faith",
+        "description": "You show them what it looks like when nobody comes.",
+        "tiers": [
+          {
+            "text": "A creature that fails can't take reactions on behalf of its allies until the end of its next turn — no shielding, no counterspells for someone else, no interception.",
+            "card": "Fail: no reactions to help their allies until their next turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "reactions that aid allies"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails treats its allies as strangers: it gains nothing from their auras, Help or shared effects, and they gain nothing from its.",
+            "card": "Their allies are strangers — no auras, Help or shared effects, either way",
+            "mech": {
+              "deny": [
+                "shared benefits"
+              ]
+            }
+          },
+          {
+            "text": "The effect lasts 1 minute, repeating the save at the end of each of its turns. While it holds, the first ally to move within 10 feet of the creature must succeed on the save or be caught by it too.",
+            "card": "1 min (Cha save each turn) · it spreads to the first ally that comes close",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Forsaken",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Every Man for Himself. Creatures that failed will not aid one another at all: they can't heal each other, can't take the Help action, can't follow a commander's orders, and if one is reduced to 0 hit points the others must save again or flee.",
+            "card": "EVERY MAN FOR HIMSELF — no healing, Help or orders between them · one falls and the rest may rout",
+            "mech": {
+              "deny": [
+                "healing allies",
+                "Help",
+                "orders"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Sworn Make",
+        "description": "You build things that know whose side they are on.",
+        "tiers": [
+          {
+            "text": "Each creation is sworn to a creature you name when you make it: it cannot be used against that creature, and it knows where they are.",
+            "card": "Each creation is sworn to someone — it can't be turned on them, and knows where they are"
+          },
+          {
+            "text": "Your Constructs interpose: as a reaction, one may move to an ally within 30 feet and take an attack meant for them.",
+            "card": "Constructs take hits for your allies as a reaction"
+          },
+          {
+            "text": "Your Structures admit only those your sworn creature trusts, and warn you the instant someone crosses that line.",
+            "card": "Structures admit only the trusted, and tell you when that changes"
+          },
+          {
+            "text": "Forge a Retainer: a permanent Construct sworn to one creature, which cannot be commanded, bribed, charmed or destroyed by anyone that creature considers an enemy.",
+            "card": "A RETAINER — permanent, sworn, and unturnable by its ward's enemies"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Kept Faith",
+        "description": "Knowing who is with you, and who has stopped being.",
+        "tiers": [
+          {
+            "text": "Know whether a creature you can see intends to keep faith with you — not its plans, only whether it means to stand by you if it costs something.",
+            "card": "Know whether someone means to stand by you when it costs",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Know the direction and rough distance to anyone who has sworn loyalty to you, or you to them, anywhere on this plane.",
+            "card": "Always know where your sworn are, anywhere on the plane",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Send a call: everyone loyal to you within a mile knows you need them, where you are, and roughly how bad it is.",
+            "card": "Call everyone loyal to you within a mile",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Learn a betrayal before it happens: name a creature and know whether anyone has been paid, pressured or persuaded to break faith with it in the last month, and by whom.",
+            "card": "Learn who has been turned against someone this month, and by whom",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Shoulder to Shoulder",
+      "type": "Offensive",
+      "description": "The seal hits harder because someone is standing beside you.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) — two dice if an ally is within 5 feet of it.",
+        "card": "+1 die radiant — +2 dice if an ally stands next to them",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four beside an ally.",
+          "card": "+2 dice (4 beside an ally)"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and an ally adjacent to the target may use its reaction to strike it.",
+          "card": "+3 dice (6) · an adjacent ally may strike as a reaction"
+        }
+      ]
+    },
+    {
+      "name": "Covering",
+      "type": "Supportive",
+      "description": "The seal's targets close ranks without being asked.",
+      "effect": {
+        "text": "Each of the seal's targets may use its reaction before the end of your next turn to halve the damage of one attack against an ally within 30 feet, taking the rest itself.",
+        "card": "The seal's targets may each take half a hit meant for an ally within 30 ft",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "reduce": "half of one ally's hit, taken instead"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and they can't be Frightened while an ally is within 30 feet.",
+          "card": "1 min · no fear while an ally is near"
+        },
+        {
+          "text": "Level 11+: Each may also swap places with the ally as part of that reaction.",
+          "card": "They may swap places doing it"
+        }
+      ]
+    },
+    {
+      "name": "Isolate",
+      "type": "Control",
+      "description": "The seal cuts one of them out of the pack.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't take reactions on behalf of its allies, and gains no benefit from their Help, until the end of its next turn.",
+        "card": "No helping their allies, no help from them, until their next turn",
+        "mech": {
+          "deny": [
+            "reactions that aid allies",
+            "allied Help"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also gains no benefit from allied auras or shared effects while it lasts.",
+          "card": "No allied auras either"
+        },
+        {
+          "text": "Level 11+: If it is alone — no ally within 15 feet — it has disadvantage on all saving throws until the end of its next turn.",
+          "card": "Alone: disadvantage on all its saves"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -6,16 +6,27 @@
   "description": "Craving, Consumption, Appetite, The Empty Belly, Devouring. Hunger is the Beast's first instinct married to the Void's endless mouth: the want that is never filled. Its wielders drain what they strike to keep themselves standing, lay an escalating craving on their foes until they turn on anything within reach, and devour what they kill to take its strength. It is kin to Carnage, but where Carnage revels in the wound, Hunger only wants what the wound lets out. It is the opposite of Apathy — no one who hungers is indifferent — and it is never, ever satisfied.",
   "savingThrow": "Constitution",
   "damageType": "Necrotic",
-  "incompatible": [ "creation" ],
+  "incompatible": [
+    "creation"
+  ],
   "cost": {
     "text": "The Craving. Hunger must feed. If a Hunger seal neither deals damage nor drains anything, you gain one level of exhaustion that ends the next time one of your Hunger seals damages a creature.",
     "card": "THE CRAVING — a seal that damages and drains nothing gives you 1 exhaustion, until your next seal draws blood"
   },
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Peckish", "card": "can't regain hit points" },
-      "major":  { "name": "Ravenous", "card": "must move toward and attack the nearest creature" },
-      "severe": { "name": "Self-devouring", "card": "Incapacitated, gnawing at itself" }
+      "minor": {
+        "name": "Peckish",
+        "card": "can't regain hit points"
+      },
+      "major": {
+        "name": "Ravenous",
+        "card": "must move toward and attack the nearest creature"
+      },
+      "severe": {
+        "name": "Self-devouring",
+        "card": "Incapacitated, gnawing at itself"
+      }
     }
   },
   "verumEffects": {
@@ -24,18 +35,34 @@
         "name": "Devour",
         "description": "Every wound is a mouth, and every mouth is yours.",
         "tiers": [
-          { "text": "The damage becomes necrotic and increases by 2 additional dice. You regain hit points equal to half the damage the seal deals to one creature of your choice.",
-            "card": "+2 dice · damage becomes Necrotic · you regain HALF the damage dealt to one creature",
-            "mech": { "damage": { "bonusDice": 2, "type": "necrotic" }, "drain": "half of one creature's damage" } },
-          { "text": "The damage increases by 4 additional dice. You drain from every creature the seal damages, and healing past your maximum becomes temporary hit points (up to Five Times the slot level).",
-            "card": "+4 dice · drain half from EVERY creature · overflow becomes temp HP (max 5 × {SLOT})",
-            "mech": { "damage": { "bonusDice": 4, "type": "necrotic" }, "drain": "half of all damage" } },
-          { "text": "The damage increases by 6 additional dice. A creature the seal drops is devoured: for 1 hour you gain one of its damage resistances, senses, or movement modes, and your next seal deals one extra die.",
-            "card": "+6 dice · a creature dropped is devoured — take one of its resistances, senses or speeds for 1 hr, +1 die next seal",
-            "mech": { "damage": { "bonusDice": 6, "type": "necrotic" }, "drain": "half of all damage" } },
-          { "text": "Consume. The damage increases by 8 additional dice and you drain the full amount. A creature the seal drops is consumed utterly — nothing is left to raise short of a Wish — and you take one of its traits, actions or Cognitions' Verums until the next dawn.",
-            "card": "+8 dice · drain the FULL damage · a creature dropped is CONSUMED, no raising · take one trait, action or Verum until dawn",
-            "mech": { "damage": { "bonusDice": 8, "type": "necrotic" }, "drain": "all damage" } }
+          {
+            "text": "The damage becomes necrotic, and you regain hit points equal to half the damage the seal deals to one creature of your choice.",
+            "card": "Damage becomes Necrotic · you regain HALF the damage dealt to one creature",
+            "mech": {
+              "damage": {
+                "type": "necrotic"
+              },
+              "drain": "half of one creature's damage"
+            }
+          },
+          {
+            "text": "You drain from every creature the seal damages, and healing past your maximum becomes temporary hit points, up to Five Times the slot level.",
+            "card": "Drain half from EVERY creature · overflow becomes temp HP (max 5 × {SLOT})",
+            "mech": {
+              "drain": "half of all damage"
+            }
+          },
+          {
+            "text": "A creature the seal drops is devoured: for 1 hour you gain one of its damage resistances, senses or movement modes, and your next seal deals one extra die.",
+            "card": "A creature dropped is devoured — take a resistance, sense or speed for 1 hr"
+          },
+          {
+            "text": "Consume. You drain the full damage rather than half. A creature the seal drops is consumed utterly — nothing is left to raise short of a Wish — and you take one of its traits, actions or Verums until the next dawn.",
+            "card": "CONSUME — drain the FULL damage · what it drops is gone for good, and you keep a piece of it",
+            "mech": {
+              "drain": "all damage"
+            }
+          }
         ]
       }
     ],
@@ -44,18 +71,45 @@
         "name": "Fed",
         "description": "You share the meal. It never tastes like enough.",
         "tiers": [
-          { "text": "For 1 minute, when the target hits with an attack or its seal damages a creature, it regains hit points equal to your Verum Modifier, once per turn.",
+          {
+            "text": "For 1 minute, when the target hits with an attack or its seal damages a creature, it regains hit points equal to your Verum Modifier, once per turn.",
             "card": "1 min: when it hits, it regains {VM} HP (once a turn)",
-            "mech": { "buff": { "who": "target", "drain": "VM per hit, once a turn" } } },
-          { "text": "It regains your Verum Modifier + the slot level instead, and its hits deal an extra 1d6 necrotic damage.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "drain": "VM per hit, once a turn"
+              }
+            }
+          },
+          {
+            "text": "It regains your Verum Modifier + the slot level instead, and its hits deal an extra 1d6 necrotic damage.",
             "card": "Regains {VM} + {SLOT} per hit · +1d6 necrotic on its hits",
-            "mech": { "buff": { "who": "target", "damage": "+1d6 necrotic" } } },
-          { "text": "When it drops a creature, it may make one weapon attack as a bonus action, and gains temporary hit points equal to Five Times the slot level.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "damage": "+1d6 necrotic"
+              }
+            }
+          },
+          {
+            "text": "When it drops a creature, it may make one weapon attack as a bonus action, and gains temporary hit points equal to Five Times the slot level.",
             "card": "Dropping a creature: a bonus-action attack and 5 × {SLOT} temp HP",
-            "mech": { "buff": { "who": "target", "tempHP": "5 × slot level on a kill" } } },
-          { "text": "The Feast. It regains Twice your Verum Modifier + the slot level per hit, its hits deal an extra 2d6 necrotic, and creatures it damages can't regain hit points until the start of its next turn — every scrap goes to it.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "tempHP": "5 × slot level on a kill"
+              }
+            }
+          },
+          {
+            "text": "The Feast. It regains Twice your Verum Modifier + the slot level per hit, its hits deal an extra 2d6 necrotic, and creatures it damages can't regain hit points until the start of its next turn — every scrap goes to it.",
             "card": "THE FEAST — regains 2×VM + {SLOT} per hit · +2d6 necrotic · its victims can't heal until its next turn",
-            "mech": { "deny": [ "healing on its victims" ] } }
+            "mech": {
+              "deny": [
+                "healing on its victims"
+              ]
+            }
+          }
         ]
       }
     ],
@@ -64,36 +118,113 @@
         "name": "Ravenous",
         "description": "You lend them your appetite. They find out how much it weighs.",
         "tiers": [
-          { "text": "A creature that fails is Starving until the end of its next turn: it can't regain hit points and has disadvantage on Constitution saves, including Concentration.",
+          {
+            "text": "A creature that fails is Starving until the end of its next turn: it can't regain hit points and has disadvantage on Constitution saves, including Concentration.",
             "card": "STARVING until their next turn — no healing · disadvantage on Con saves and Concentration",
-            "mech": { "save": { "ability": "Constitution" }, "conditions": [ { "name": "Starving", "duration": "until the end of its next turn" } ], "deny": [ "healing" ] } },
-          { "text": "The craving escalates. A Starving creature must spend its movement getting closer to the nearest other creature or to food, and the condition lasts 1 minute, repeating the Constitution save at the end of each of its turns.",
+            "mech": {
+              "save": {
+                "ability": "Constitution"
+              },
+              "conditions": [
+                {
+                  "name": "Starving",
+                  "duration": "until the end of its next turn"
+                }
+              ],
+              "deny": [
+                "healing"
+              ]
+            }
+          },
+          {
+            "text": "The craving escalates. A Starving creature must spend its movement getting closer to the nearest other creature or to food, and the condition lasts 1 minute, repeating the Constitution save at the end of each of its turns.",
             "card": "1 min (Con save each turn) · must move toward the nearest creature or food",
-            "mech": { "conditions": [ { "name": "Starving", "duration": "1 minute", "escape": "Constitution save at the end of each of its turns" } ] } },
-          { "text": "A Starving creature is Ravenous: on each of its turns it uses its action to attack the nearest creature, friend or foe, with its bite or whatever it holds.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Starving",
+                  "duration": "1 minute",
+                  "escape": "Constitution save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "A Starving creature is Ravenous: on each of its turns it uses its action to attack the nearest creature, friend or foe, with its bite or whatever it holds.",
             "card": "RAVENOUS — each turn it attacks the nearest creature, friend or foe",
-            "mech": { "conditions": [ { "name": "Ravenous" } ] } },
-          { "text": "Self-Devouring. A Ravenous creature with no creature within its reach turns on itself: Incapacitated, it takes necrotic damage equal to Five Times your Verum Modifier at the start of each of its turns, and you regain half of it.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Ravenous"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Self-Devouring. A Ravenous creature with no creature within its reach turns on itself: Incapacitated, it takes necrotic damage equal to Five Times your Verum Modifier at the start of each of its turns, and you regain half of it.",
             "card": "SELF-DEVOURING — nothing in reach: Incapacitated, 5×VM necrotic each turn · you regain half",
-            "mech": { "conditions": [ { "name": "Incapacitated", "tick": "5×VM necrotic" } ] } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "tick": "5×VM necrotic"
+                }
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Famine Ground",
         "description": "Where you stand, the land forgets how to feed anything but you.",
         "tiers": [
-          { "text": "The area becomes Famine Ground for 1 minute. Creatures inside can't regain hit points except by your Hunger, and a creature that fails loses any temporary hit points it has.",
+          {
+            "text": "The area becomes Famine Ground for 1 minute. Creatures inside can't regain hit points except by your Hunger, and a creature that fails loses any temporary hit points it has.",
             "card": "1 min: nothing heals inside but you · fail: lose all temp HP",
-            "mech": { "save": { "ability": "Constitution" }, "deny": [ "healing inside", "temporary hit points" ] } },
-          { "text": "A creature that fails takes necrotic damage equal to Twice your Verum Modifier at the start of each of its turns inside, and you regain the total.",
+            "mech": {
+              "save": {
+                "ability": "Constitution"
+              },
+              "deny": [
+                "healing inside",
+                "temporary hit points"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails takes necrotic damage equal to Twice your Verum Modifier at the start of each of its turns inside, and you regain the total.",
             "card": "Those who failed: 2×VM necrotic each turn inside — you regain it all",
-            "mech": { "rider": { "damage": "2×VM", "type": "necrotic", "when": "start of each of their turns inside" } } },
-          { "text": "Plants inside wither, food rots, and a creature that failed has its speed halved and can't take the Dash action — the ground pulls at it with a thousand small mouths.",
+            "mech": {
+              "rider": {
+                "damage": "2×VM",
+                "type": "necrotic",
+                "when": "start of each of their turns inside"
+              }
+            }
+          },
+          {
+            "text": "Plants inside wither, food rots, and a creature that failed has its speed halved and can't take the Dash action — the ground pulls at it with a thousand small mouths.",
             "card": "Those who failed: half speed, no Dash",
-            "mech": { "penalty": { "speed": "half" }, "deny": [ "Dash" ] } },
-          { "text": "The Barren. The ground spreads to 60 feet and lasts 10 minutes, the drain becomes Five Times your Verum Modifier, and anything that drops inside is consumed utterly.",
+            "mech": {
+              "penalty": {
+                "speed": "half"
+              },
+              "deny": [
+                "Dash"
+              ]
+            }
+          },
+          {
+            "text": "The Barren. The ground spreads to 60 feet and lasts 10 minutes, the drain becomes Five Times your Verum Modifier, and anything that drops inside is consumed utterly.",
             "card": "THE BARREN — 60 ft, 10 min · 5×VM drain · what drops inside is consumed",
-            "mech": { "rider": { "damage": "5×VM", "type": "necrotic", "when": "start of each of their turns inside" } } }
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "necrotic",
+                "when": "start of each of their turns inside"
+              }
+            }
+          }
         ]
       }
     ],
@@ -102,18 +233,34 @@
         "name": "Scavenger's Sense",
         "description": "The belly knows things the mind never learned.",
         "tiers": [
-          { "text": "Smell food, blood and the wounded within a mile. Eat anything organic — spoiled, poisoned, raw — without harm, and a single mouthful sustains you for a day.",
+          {
+            "text": "Smell food, blood and the wounded within a mile. Eat anything organic — spoiled, poisoned, raw — without harm, and a single mouthful sustains you for a day.",
             "card": "Smell food, blood and the wounded for a mile · eat anything safely, a mouthful lasts a day",
-            "mech": { "utility": true } },
-          { "text": "Taste a trace of blood, flesh or spit and learn what creature it came from and what it last ate.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Taste a trace of blood, flesh or spit and learn what creature it came from and what it last ate.",
             "card": "Taste a trace — learn its creature and its last meal",
-            "mech": { "utility": true } },
-          { "text": "Devour a potion, scroll or consumable magic item: you learn exactly what it does, and may keep its effect stored in you for 24 hours to trigger when you choose.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Devour a potion, scroll or consumable magic item: you learn exactly what it does, and may keep its effect stored in you for 24 hours to trigger when you choose.",
             "card": "Devour a potion or scroll — learn it and keep its effect for 24 hrs",
-            "mech": { "utility": true } },
-          { "text": "Eat a memory: consume something a creature owned and loved, and live one hour of its past as if it were yours.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Eat a memory: consume something a creature owned and loved, and live one hour of its past as if it were yours.",
             "card": "Eat a cherished belonging — live an hour of its owner's past",
-            "mech": { "utility": true } }
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -123,36 +270,79 @@
       "name": "Bite",
       "type": "Offensive",
       "description": "The seal takes a mouthful on the way through.",
-      "effect": { "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), and you regain hit points equal to that bonus damage.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus necrotic damage equal to one damage die of the primary effect's type (min 1d6), and you regain hit points equal to that bonus damage.",
         "card": "+1 die necrotic · you regain what it deals",
-        "mech": { "damage": { "dice": "1d6", "type": "necrotic" }, "drain": "the bonus damage" } },
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "necrotic"
+          },
+          "drain": "the bonus damage"
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Two dice.", "card": "+2 dice" },
-        { "text": "Level 11+: Three dice, and the target can't regain hit points until the start of your next turn.", "card": "+3 dice · they can't heal until your next turn" }
+        {
+          "text": "Level 5+: Two dice.",
+          "card": "+2 dice"
+        },
+        {
+          "text": "Level 11+: Three dice, and the target can't regain hit points until the start of your next turn.",
+          "card": "+3 dice · they can't heal until your next turn"
+        }
       ]
     },
     {
       "name": "Shared Meal",
       "type": "Supportive",
       "description": "What the seal takes, it passes around the table.",
-      "effect": { "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and for 1 minute its first hit each turn deals an extra 1d4 necrotic damage.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and for 1 minute its first hit each turn deals an extra 1d4 necrotic damage.",
         "card": "The seal's targets: {VM} + {SLOT} temp HP · +1d4 necrotic on their first hit each turn, 1 min",
-        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "damage": "+1d4 necrotic" } } },
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM + slot level",
+            "damage": "+1d4 necrotic"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: The temporary hit points become Twice your Verum Modifier + the slot level, and the extra damage 1d6.", "card": "2×VM + {SLOT} temp HP · +1d6" },
-        { "text": "Level 11+: Each target regains hit points equal to the extra damage it deals.", "card": "Each regains what its extra damage deals" }
+        {
+          "text": "Level 5+: The temporary hit points become Twice your Verum Modifier + the slot level, and the extra damage 1d6.",
+          "card": "2×VM + {SLOT} temp HP · +1d6"
+        },
+        {
+          "text": "Level 11+: Each target regains hit points equal to the extra damage it deals.",
+          "card": "Each regains what its extra damage deals"
+        }
       ]
     },
     {
       "name": "Gnawing",
       "type": "Control",
       "description": "Hunger lingers in them after the seal is gone.",
-      "effect": { "text": "A creature hit by or failing the seal can't regain hit points until the end of its next turn, and has disadvantage on Concentration checks until then.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't regain hit points until the end of its next turn, and has disadvantage on Concentration checks until then.",
         "card": "No healing and disadvantage on Concentration until the end of their next turn",
-        "mech": { "deny": [ "healing" ], "penalty": { "disadvantage": "Concentration checks" } } },
+        "mech": {
+          "deny": [
+            "healing"
+          ],
+          "penalty": {
+            "disadvantage": "Concentration checks"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Its speed is also reduced by 10 feet, and it loses any temporary hit points.", "card": "−10 ft speed · temp HP lost" },
-        { "text": "Level 11+: It must spend its movement moving toward the nearest other creature on its next turn.", "card": "Must move toward the nearest creature next turn" }
+        {
+          "text": "Level 5+: Its speed is also reduced by 10 feet, and it loses any temporary hit points.",
+          "card": "−10 ft speed · temp HP lost"
+        },
+        {
+          "text": "Level 11+: It must spend its movement moving toward the nearest other creature on its next turn.",
+          "card": "Must move toward the nearest creature next turn"
+        }
       ]
     }
   ],

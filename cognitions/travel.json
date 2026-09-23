@@ -1,0 +1,300 @@
+{
+  "id": "travel",
+  "name": "Travel",
+  "icon": "🧭",
+  "opposing": "stagnation",
+  "description": "Roads, Distance, Departure, The Space Between Where You Were and Where You Are Going. Travel is not Space — it does not fold the world. It walks it, and it walks it better than anyone: the road that is shorter than it was, the pass that stays open, the party that arrives rested. It is the humble foundation beneath Space and Time both, and the one Cognition every caravan master in Ephemer wishes somebody in the company had.",
+  "savingThrow": "Dexterity",
+  "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Footsore",
+        "card": "its speed is reduced by 15 feet"
+      },
+      "major": {
+        "name": "Turned around",
+        "card": "it can't approach you, and moves away each turn"
+      },
+      "severe": {
+        "name": "Lost",
+        "card": "Incapacitated — it has no idea where it is"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Momentum",
+        "description": "Everything you have covered getting here arrives with you.",
+        "tiers": [
+          {
+            "text": "The damage becomes force, and deals Twice your Verum Modifier more if you moved 20 feet or more before drawing the seal.",
+            "card": "Damage becomes Force · +2×VM if you moved 20 ft first",
+            "mech": {
+              "damage": {
+                "type": "force"
+              },
+              "rider": {
+                "damage": "2×VM",
+                "type": "force",
+                "when": "you moved 20+ feet this turn"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails is pushed 10 feet and has its speed reduced by 15 feet until the end of its next turn.",
+            "card": "Pushed 10 ft · −15 ft speed until their next turn",
+            "mech": {
+              "movement": {
+                "push": 10
+              },
+              "penalty": {
+                "speed": -15
+              }
+            }
+          },
+          {
+            "text": "The seal also strikes every creature along the line between where you began your turn and where you now stand, dealing half the damage to each.",
+            "card": "Half damage to everything along the path you walked this turn"
+          },
+          {
+            "text": "The Long Road. After the seal resolves you may teleport up to 60 feet to any space you can see — and the line of your arrival strikes as well, for half.",
+            "card": "THE LONG ROAD — teleport 60 ft, and the path you take strikes for half too"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Good Road",
+        "description": "The ground cooperates, the weather holds, and the distance is less than it was.",
+        "tiers": [
+          {
+            "text": "For 1 hour the target's speed increases by 15 feet, it ignores difficult terrain, and it can't be slowed below its normal speed by any effect of the slot level or lower.",
+            "card": "1 hr: +15 ft speed · ignores difficult terrain · can't be slowed (≤ slot)",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "speed": 15
+              },
+              "deny": [
+                "difficult terrain"
+              ]
+            }
+          },
+          {
+            "text": "It may Dash as a bonus action, and its overland travel pace doubles without fatigue.",
+            "card": "Dash as a bonus action · double overland pace, no fatigue"
+          },
+          {
+            "text": "It gains a teleport of 30 feet as a bonus action each turn, and always knows the shortest route to any place it has been.",
+            "card": "30 ft bonus-action teleport each turn · always knows the shortest way back"
+          },
+          {
+            "text": "Wayfarer. The target's speed doubles, it can move across liquid, air and vertical surfaces as easily as road, and once per turn it may move without provoking, being stopped, or being slowed by anything at all.",
+            "card": "WAYFARER — double speed · walks water, air and walls · once a turn, nothing stops it"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Road Turns",
+        "description": "The way they came is not where they left it.",
+        "tiers": [
+          {
+            "text": "The area becomes long: for 1 minute every 5 feet of movement inside it costs 15. A creature that fails also can't take the Dash action while it remains.",
+            "card": "1 min: every 5 ft inside costs 15 · those who fail can't Dash",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "terrain": {
+                "difficult": true
+              },
+              "deny": [
+                "Dash"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails is turned around: it can't willingly move closer to you, and must spend at least half its movement each turn going somewhere else.",
+            "card": "Fail: can't approach you, and must keep moving away",
+            "mech": {
+              "deny": [
+                "approaching you"
+              ]
+            }
+          },
+          {
+            "text": "No exit is where it was: creatures inside can't leave by teleport, door or portal without succeeding on the save, and those who fail arrive back where they started.",
+            "card": "No teleport, door or portal out without the save — failures arrive back inside",
+            "mech": {
+              "deny": [
+                "teleporting out"
+              ]
+            }
+          },
+          {
+            "text": "Lost. A creature that fails is Lost for 1 minute, repeating the save at the end of each of its turns: it can't find you, its allies, or any exit, and on each of its turns it moves in a direction you choose instead of its own.",
+            "card": "LOST — 1 min: it finds nothing and nobody, and you choose where it wanders",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Lost",
+                  "duration": "1 minute",
+                  "escape": "Dexterity save at the end of each of its turns"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Ways Made",
+        "description": "You build the route, and the route is better than the country it crosses.",
+        "tiers": [
+          {
+            "text": "Your Structures may be roads, bridges, stairs or fords: anything crossing them ignores difficult terrain and moves at double pace.",
+            "card": "Structures are ways — double pace, no difficult terrain"
+          },
+          {
+            "text": "Your creations can carry: an Object may be a cart, boat, sledge or pack beast that never tires and needs no feeding.",
+            "card": "Objects may be tireless carts, boats or pack beasts"
+          },
+          {
+            "text": "A Structure may link two points you have both visited within a mile, so that crossing it takes a single step.",
+            "card": "A Structure joins two places you've been within a mile — one step across"
+          },
+          {
+            "text": "Lay a Waystone: a permanent Structure that any creature attuned to it can travel to from anywhere on the plane, once per day, arriving on foot as though they had walked.",
+            "card": "A WAYSTONE — the attuned can reach it from anywhere, once a day"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Wayfinding",
+        "description": "Every road, and how long it really takes.",
+        "tiers": [
+          {
+            "text": "Know the direction, distance and condition of the route to any place you can name, and whether it is passable today.",
+            "card": "Know the way, the distance and whether it's passable, to anywhere named",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "You and up to eight companions travel without leaving tracks, without fatigue, and at double overland pace for 24 hours.",
+            "card": "You and 8 others: no tracks, no fatigue, double pace, 24 hrs",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Follow anything that moved: a road, a caravan, a fleeing creature, a ship's wake — for up to a month after it passed.",
+            "card": "Follow any trail up to a month old",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Take a shortcut the map does not have: once per long rest, the party's journey takes half the time it should, and the way back is remembered forever.",
+            "card": "1/long rest: the journey takes half as long, and you never forget the way",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Impact",
+      "type": "Offensive",
+      "description": "The seal arrives with the distance behind it.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6) — two dice if you moved 20 feet or more this turn.",
+        "card": "+1 die force — +2 dice if you moved 20 ft this turn",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four after moving, and the target is pushed 5 feet.",
+          "card": "+2 dice (4 after moving) · pushed 5 ft"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and you may teleport 15 feet after it resolves.",
+          "card": "+3 dice (6) · teleport 15 ft after"
+        }
+      ]
+    },
+    {
+      "name": "Fleet",
+      "type": "Supportive",
+      "description": "Everyone the seal touched finds the ground easier than it was.",
+      "effect": {
+        "text": "Each of the seal's targets gains 15 feet of speed and ignores difficult terrain until the end of its next turn.",
+        "card": "The seal's targets: +15 ft speed, no difficult terrain, until their next turn",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "speed": 15
+          },
+          "deny": [
+            "difficult terrain"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and each may Dash as a bonus action.",
+          "card": "1 min · Dash as a bonus action"
+        },
+        {
+          "text": "Level 11+: Each may teleport 20 feet as part of its movement, once.",
+          "card": "One 20 ft teleport each"
+        }
+      ]
+    },
+    {
+      "name": "Long Ground",
+      "type": "Control",
+      "description": "The distance where the seal landed stopped being reasonable.",
+      "effect": {
+        "text": "The 15 feet around the point of impact becomes difficult terrain for 1 minute, and a creature hit by or failing the seal has its speed reduced by 10 feet until the end of its next turn.",
+        "card": "15 ft difficult terrain, 1 min · those who failed: −10 ft speed",
+        "mech": {
+          "terrain": {
+            "radius": 15,
+            "difficult": true
+          },
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Creatures that failed can't take the Dash action while inside.",
+          "card": "No Dashing inside for those who failed"
+        },
+        {
+          "text": "Level 11+: They also can't teleport out of the area.",
+          "card": "And no teleporting out"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

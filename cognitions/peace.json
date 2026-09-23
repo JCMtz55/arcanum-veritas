@@ -1,0 +1,347 @@
+{
+  "id": "peace",
+  "name": "Peace",
+  "icon": "🕊",
+  "opposing": "war",
+  "description": "Quiet, Truce, The Decision To Stop. Peace is not the absence of conflict but the active, effortful holding of it at bay: the hand raised, the weapons set down, the hour in which nobody dies. Its wielders end fights — sometimes by agreement, sometimes by making violence simply impossible — and they are the reason a great many arguments in Ephemer have survivors.",
+  "savingThrow": "Charisma",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Calmed",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Truced",
+        "card": "Charmed — it will not strike first"
+      },
+      "severe": {
+        "name": "Stilled",
+        "card": "Incapacitated — it has stopped, entirely"
+      }
+    }
+  },
+  "verumEffects": {
+    "control": [
+      {
+        "name": "The Truce",
+        "description": "You put your hand up. Remarkably, it works.",
+        "tiers": [
+          {
+            "text": "A creature that fails can't take a hostile action against anyone who has not harmed it this round, until the end of its next turn.",
+            "card": "Fail: no hostile action against anyone who hasn't hurt them this round",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "hostile actions"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails must also spend its movement getting no closer to anyone it intends to harm, and can't make opportunity attacks.",
+            "card": "They can't close on anyone they mean to hurt · no opportunity attacks",
+            "mech": {
+              "deny": [
+                "opportunity attacks"
+              ]
+            }
+          },
+          {
+            "text": "The truce lasts 1 minute, repeating the save at the end of each of its turns; taking damage from a creature ends it with respect to that creature only.",
+            "card": "1 min (Cha save each turn) · hurting them frees them, but only against the one who did",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Truced",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "No More Of This. For 1 minute, no creature that failed can deal damage to another creature at all. Weapons turn, spells falter, and everyone present understands exactly who did this.",
+            "card": "NO MORE OF THIS — 1 min: those who failed cannot deal damage to anyone",
+            "mech": {
+              "deny": [
+                "dealing damage"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Quiet Ground",
+        "description": "This place declines to host your fight.",
+        "tiers": [
+          {
+            "text": "The area is quiet for 1 minute: no sound carries beyond it, and creatures that fail have disadvantage on attack rolls while inside.",
+            "card": "1 min: no sound leaves · those who fail attack at disadvantage inside",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "penalty": {
+                "disadvantage": "attack rolls inside"
+              }
+            }
+          },
+          {
+            "text": "Damage dealt inside is halved, and creatures inside can't be Frightened or made to rage.",
+            "card": "All damage inside is halved · no fear, no rage",
+            "mech": {
+              "deny": [
+                "fear",
+                "rage"
+              ]
+            }
+          },
+          {
+            "text": "The first attack each creature makes inside each round simply doesn't happen — the moment passes, the swing goes wide, and nobody can quite say why.",
+            "card": "1/round, each creature's first attack inside just doesn't happen"
+          },
+          {
+            "text": "Sanctuary. For 10 minutes, no creature inside may deal damage, and any creature that enters must succeed on the save or lay down what it is holding. Those who shelter here heal as though resting.",
+            "card": "SANCTUARY — 10 min: no damage may be dealt inside, weapons are set down, and the hurt heal as if resting"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Composed",
+        "description": "You give them the steadiness of someone who is not about to be hit.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target can't be Frightened or goaded, and adds your Verum Modifier to Charisma checks made to calm, negotiate or de-escalate.",
+            "card": "1 min: no fear, no goading · +{VM} to calm and negotiate",
+            "mech": {
+              "deny": [
+                "fear"
+              ],
+              "buff": {
+                "who": "target",
+                "check": "+VM to de-escalate"
+              }
+            }
+          },
+          {
+            "text": "It regains hit points equal to Ten Times the slot level and sheds one condition caused by fear, rage, grief or pain.",
+            "card": "Heals 10 × {SLOT} · sheds a condition born of fear, rage, grief or pain",
+            "mech": {
+              "heal": {
+                "perSlot": 10,
+                "who": "target"
+              }
+            }
+          },
+          {
+            "text": "While this lasts, the first attack made against it each round is made at disadvantage — striking someone that calm is strangely difficult.",
+            "card": "The first attack on it each round has disadvantage"
+          },
+          {
+            "text": "Unhurried. The target cannot be surprised, rushed, Frightened, Charmed, Stunned or provoked; it always acts on its own terms, and no effect can force it to act out of turn.",
+            "card": "UNHURRIED — never surprised, rushed, frightened, charmed, stunned or provoked",
+            "mech": {
+              "deny": [
+                "surprise",
+                "fear",
+                "charm",
+                "stun",
+                "provocation"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Enough",
+        "description": "You are not fighting them. You are ending it, and it hurts to be stopped.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails has disadvantage on its next attack roll.",
+            "card": "Damage becomes Psychic · disadvantage on their next attack",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "penalty": {
+                "disadvantage": "the next attack roll"
+              }
+            }
+          },
+          {
+            "text": "Against a creature that has already dealt damage this round, the seal deals 2 additional dice — it is spending what it swung with.",
+            "card": "+2 dice against anyone who has already hurt someone this round"
+          },
+          {
+            "text": "A creature that fails can't take the Attack action on its next turn.",
+            "card": "No Attack action on their next turn",
+            "mech": {
+              "deny": [
+                "the Attack action"
+              ]
+            }
+          },
+          {
+            "text": "Stop. A creature reduced below half its hit points by this seal is Incapacitated until the end of its next turn, and when it comes back to itself it is entirely willing to talk.",
+            "card": "STOP — under half HP: Incapacitated, and willing to talk afterwards",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Common Ground",
+        "description": "You build the table everyone can sit at.",
+        "tiers": [
+          {
+            "text": "No creature may draw a weapon or begin a fight within 10 feet of your creations without first succeeding on the seal's save.",
+            "card": "No weapon is drawn within 10 ft of your creations without a save"
+          },
+          {
+            "text": "Your Structures shelter without favour: they cannot be used as cover to attack from, and nobody inside may be attacked from outside.",
+            "card": "Structures can't be shot from, or shot into"
+          },
+          {
+            "text": "Your Objects carry the truce: whoever holds one can't be attacked by a creature that has agreed to parley, and knows the instant that agreement is abandoned.",
+            "card": "Objects hold a parley, and warn the moment it's broken"
+          },
+          {
+            "text": "Found a Peace House: a permanent Structure in which violence is impossible — no creature inside can deal damage to another, and anything agreed there is remembered by the building itself.",
+            "card": "A PEACE HOUSE — permanent, violence impossible inside, and it remembers what was agreed"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Parley",
+        "description": "Getting people to stop is a skill, and this is that skill made real.",
+        "tiers": [
+          {
+            "text": "Call a parley: every creature that can hear you knows you are offering one, what the terms are, and that you mean them.",
+            "card": "Call a parley — everyone hears the offer and knows you mean it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Calm a crowd, a riot, a spooked herd or a frightened room for an hour; nobody there will start anything, though they may still finish it if pressed.",
+            "card": "Calm a crowd, riot or herd for an hour",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Know what each side of a dispute actually wants, as distinct from what they are demanding, and what each would settle for.",
+            "card": "Know what each side truly wants, and what they'd settle for",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Broker a peace: two parties who agree terms under this effect are held to them for a year and a day — and both know that breaking it will be obvious to everyone.",
+            "card": "Broker a peace held for a year and a day, publicly and obviously",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Enough of That",
+      "type": "Offensive",
+      "description": "The seal carries a full stop.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6) and has disadvantage on its next attack roll.",
+        "card": "+1 die psychic · disadvantage on their next attack",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "penalty": {
+            "disadvantage": "the next attack roll"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and it can't make opportunity attacks until the end of its next turn.",
+          "card": "+2 dice · no opportunity attacks"
+        },
+        {
+          "text": "Level 11+: Three dice, and if it is below half its hit points it can't take the Attack action on its next turn.",
+          "card": "+3 dice · under half HP: no Attack action"
+        }
+      ]
+    },
+    {
+      "name": "Steadied",
+      "type": "Supportive",
+      "description": "The seal leaves its targets calm in a way that is hard to shift.",
+      "effect": {
+        "text": "Each of the seal's targets can't be Frightened or provoked until the end of its next turn, and the first attack against each before then is made at disadvantage.",
+        "card": "The seal's targets: no fear or goading · the first attack on each has disadvantage",
+        "mech": {
+          "deny": [
+            "fear",
+            "provocation"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and each regains Five Times the slot level in hit points.",
+          "card": "1 min · heal 5 × {SLOT} each"
+        },
+        {
+          "text": "Level 11+: They also can't be Stunned or forced to act out of turn.",
+          "card": "No stunning, no acting out of turn"
+        }
+      ]
+    },
+    {
+      "name": "Cooling",
+      "type": "Control",
+      "description": "Where the seal landed, the fight briefly goes out of everyone.",
+      "effect": {
+        "text": "For 1 minute, damage dealt within 15 feet of the point of impact by creatures that failed the seal's save is halved.",
+        "card": "15 ft, 1 min: those who failed deal half damage inside",
+        "mech": {
+          "penalty": {
+            "damage": "half"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: They also can't make opportunity attacks in the area.",
+          "card": "No opportunity attacks inside"
+        },
+        {
+          "text": "Level 11+: The first attack each of them makes inside each round does not happen at all.",
+          "card": "1/round, their first attack inside doesn't happen"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -8,9 +8,18 @@
   "damageType": "Psychic",
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Doubting", "card": "loses one proficiency of your choice" },
-      "major":  { "name": "Mistaken", "card": "can't tell friend from foe — attacks the nearest creature" },
-      "severe": { "name": "Unnamed", "card": "Incapacitated, unable to remember who it is" }
+      "minor": {
+        "name": "Doubting",
+        "card": "loses one proficiency of your choice"
+      },
+      "major": {
+        "name": "Mistaken",
+        "card": "can't tell friend from foe — attacks the nearest creature"
+      },
+      "severe": {
+        "name": "Unnamed",
+        "card": "Incapacitated, unable to remember who it is"
+      }
     }
   },
   "verumEffects": {
@@ -19,18 +28,52 @@
         "name": "Self-Doubt",
         "description": "You ask them who they are. They can't answer fast enough.",
         "tiers": [
-          { "text": "The damage becomes psychic and increases by 2 additional dice. A creature hit or that fails forgets one proficiency of your choice (a skill, weapon, armor or saving throw) until the end of its next turn.",
-            "card": "+2 dice · damage becomes Psychic · they forget one proficiency until the end of their next turn",
-            "mech": { "damage": { "bonusDice": 2, "type": "psychic" }, "deny": [ "one proficiency" ] } },
-          { "text": "The damage increases by 4 additional dice. It also can't use one class feature, Grimm ability or Cognition of your choice until the end of its next turn — it no longer remembers being someone who could.",
-            "card": "+4 dice · also no use of one class feature, Grimm ability or Cognition until their next turn",
-            "mech": { "damage": { "bonusDice": 4, "type": "psychic" }, "deny": [ "one class feature, Grimm ability or Cognition" ] } },
-          { "text": "The damage increases by 6 additional dice. A creature hit or that fails is Mistaken until the end of its next turn: it can't tell friend from foe, and uses its action to attack the nearest creature.",
-            "card": "+6 dice · MISTAKEN until their next turn — attacks the nearest creature, friend or foe",
-            "mech": { "damage": { "bonusDice": 6, "type": "psychic" }, "conditions": [ { "name": "Mistaken", "duration": "until the end of its next turn" } ] } },
-          { "text": "Unnamed. The damage increases by 8 additional dice. A creature hit or that fails loses its name for 1 minute: it can't use class features, Grimm abilities or Cognitions, can't benefit from its allies' spells or Help, and is Incapacitated on any turn it starts at half its hit points or fewer. It repeats the Charisma save at the end of each of its turns.",
-            "card": "+8 dice · UNNAMED 1 min — no class features, Grimm or Cognitions, no help from allies · Incapacitated at half HP (Cha save each turn)",
-            "mech": { "damage": { "bonusDice": 8, "type": "psychic" }, "conditions": [ { "name": "Unnamed", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } }
+          {
+            "text": "The damage becomes psychic. A creature hit or that fails forgets one proficiency of your choice — a skill, weapon, armour or saving throw — until the end of its next turn.",
+            "card": "Damage becomes Psychic · they forget one proficiency until their next turn",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "deny": [
+                "one proficiency"
+              ]
+            }
+          },
+          {
+            "text": "It also can't use one class feature, Grimm ability or Cognition of your choice until the end of its next turn — it no longer remembers being someone who could.",
+            "card": "Also no use of one class feature, Grimm ability or Cognition",
+            "mech": {
+              "deny": [
+                "one class feature, Grimm ability or Cognition"
+              ]
+            }
+          },
+          {
+            "text": "A creature hit or that fails is Mistaken until the end of its next turn: it can't tell friend from foe, and uses its action to attack the nearest creature.",
+            "card": "MISTAKEN — attacks the nearest creature, friend or foe",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Mistaken",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Unnamed. A creature hit or that fails loses its name for 1 minute: no class features, Grimm abilities or Cognitions, no benefit from its allies' spells or Help, and it is Incapacitated on any turn it starts at half its hit points or fewer. It repeats the Charisma save at the end of each of its turns.",
+            "card": "UNNAMED 1 min — no features, no allies' help · Incapacitated at half HP (Cha save each turn)",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Unnamed",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -39,18 +82,49 @@
         "name": "I Am",
         "description": "You say their name back to them until it holds like stone.",
         "tiers": [
-          { "text": "For 1 minute the target can't be Charmed or possessed, and adds your Verum Modifier to Charisma saving throws.",
+          {
+            "text": "For 1 minute the target can't be Charmed or possessed, and adds your Verum Modifier to Charisma saving throws.",
             "card": "1 min: can't be Charmed or possessed · +{VM} to Charisma saves",
-            "mech": { "deny": [ "charm", "possession" ], "buff": { "who": "target", "save": "+VM Charisma" } } },
-          { "text": "It can't be transformed against its will — polymorph, petrification, lycanthropy and curses that change what it is fail against it — and it ignores the effects of Dream Exhaustion on its checks.",
+            "mech": {
+              "deny": [
+                "charm",
+                "possession"
+              ],
+              "buff": {
+                "who": "target",
+                "save": "+VM Charisma"
+              }
+            }
+          },
+          {
+            "text": "It can't be transformed against its will — polymorph, petrification, lycanthropy and curses that change what it is fail against it — and it ignores the effects of Dream Exhaustion on its checks.",
             "card": "Can't be transformed against its will · ignores Dream Exhaustion on its checks",
-            "mech": { "deny": [ "unwilling transformation" ] } },
-          { "text": "At the start of each of its turns, it may end one condition on itself that changed who it was: Charmed, Frightened, Mistaken, Confused, or a curse of the slot level or lower.",
+            "mech": {
+              "deny": [
+                "unwilling transformation"
+              ]
+            }
+          },
+          {
+            "text": "At the start of each of its turns, it may end one condition on itself that changed who it was: Charmed, Frightened, Mistaken, Confused, or a curse of the slot level or lower.",
             "card": "At the start of each turn, end one identity-changing condition on itself",
-            "mech": { "buff": { "who": "target", "cleanse": "one identity-changing condition a turn" } } },
-          { "text": "The Unbreakable Self. For the minute, the target has advantage on every saving throw, and its attacks and seals are made as if it were at its best: it ignores exhaustion, Dream Exhaustion, and any penalty to its rolls from another creature's effect.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "cleanse": "one identity-changing condition a turn"
+              }
+            }
+          },
+          {
+            "text": "The Unbreakable Self. For the minute, the target has advantage on every saving throw, and its attacks and seals are made as if it were at its best: it ignores exhaustion, Dream Exhaustion, and any penalty to its rolls from another creature's effect.",
             "card": "THE UNBREAKABLE SELF — advantage on EVERY save · ignores exhaustion and every penalty others lay on its rolls",
-            "mech": { "buff": { "who": "target", "advantage": "all saving throws" } } }
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "all saving throws"
+              }
+            }
+          }
         ]
       }
     ],
@@ -59,35 +133,93 @@
         "name": "Stranger in the Mirror",
         "description": "They look at their friends and see no one they know.",
         "tiers": [
-          { "text": "A creature that fails treats its allies as strangers until the end of its next turn: it can't benefit from their spells, Help or features, and can't take reactions on their behalf.",
+          {
+            "text": "A creature that fails treats its allies as strangers until the end of its next turn: it can't benefit from their spells, Help or features, and can't take reactions on their behalf.",
             "card": "Fail: its allies are strangers until their next turn — no help from them, no reactions for them",
-            "mech": { "save": { "ability": "Charisma" }, "deny": [ "benefits from its allies" ] } },
-          { "text": "A creature that fails is Mistaken until the end of its next turn, attacking the nearest creature.",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "benefits from its allies"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails is Mistaken until the end of its next turn, attacking the nearest creature.",
             "card": "MISTAKEN until their next turn — attacks the nearest creature",
-            "mech": { "conditions": [ { "name": "Mistaken", "duration": "until the end of its next turn" } ] } },
-          { "text": "The confusion lasts 1 minute, repeating the Charisma save at the end of each of its turns, and you choose whom it believes it is fighting for.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Mistaken",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The confusion lasts 1 minute, repeating the Charisma save at the end of each of its turns, and you choose whom it believes it is fighting for.",
             "card": "1 min (Cha save each turn) · you decide whose side it thinks it's on",
-            "mech": { "conditions": [ { "name": "Mistaken", "duration": "1 minute", "escape": "Charisma save at the end of each of its turns" } ] } },
-          { "text": "The Exchange. A creature that fails takes your side for 1 minute: it is Charmed by you and treats its former allies as enemies, repeating the save each time one of them damages it.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Mistaken",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The Exchange. A creature that fails takes your side for 1 minute: it is Charmed by you and treats its former allies as enemies, repeating the save each time one of them damages it.",
             "card": "THE EXCHANGE — 1 min: Charmed by you, fighting its former allies (repeat when they hurt it)",
-            "mech": { "conditions": [ { "name": "Charmed", "duration": "1 minute", "escape": "Charisma save when an ally damages it" } ] } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed",
+                  "duration": "1 minute",
+                  "escape": "Charisma save when an ally damages it"
+                }
+              ]
+            }
+          }
         ]
       },
       {
         "name": "Stolen Face",
         "description": "You take what makes them recognisable, and wear it better.",
         "tiers": [
-          { "text": "Choose one creature that fails: for 1 hour you may take on its face, voice and mannerisms perfectly. Only Truesight or a creature that knows it intimately can tell, with an Insight check against your DC.",
+          {
+            "text": "Choose one creature that fails: for 1 hour you may take on its face, voice and mannerisms perfectly. Only Truesight or a creature that knows it intimately can tell, with an Insight check against your DC.",
             "card": "Wear the face, voice and manner of one who failed for 1 hr (Insight vs {DC} to tell)",
-            "mech": { "save": { "ability": "Charisma" } } },
-          { "text": "While you wear it, the creature's own allies are uncertain which of you is real: they have disadvantage on attack rolls against either of you.",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              }
+            }
+          },
+          {
+            "text": "While you wear it, the creature's own allies are uncertain which of you is real: they have disadvantage on attack rolls against either of you.",
             "card": "Its allies have disadvantage on attacks against either of you",
-            "mech": { "penalty": { "disadvantage": "its allies' attacks against either of you" } } },
-          { "text": "You take one of its proficiencies, senses or movement modes along with the face, and it loses it for the duration.",
+            "mech": {
+              "penalty": {
+                "disadvantage": "its allies' attacks against either of you"
+              }
+            }
+          },
+          {
+            "text": "You take one of its proficiencies, senses or movement modes along with the face, and it loses it for the duration.",
             "card": "Take one of its proficiencies, senses or speeds — it loses it meanwhile",
-            "mech": { "deny": [ "one proficiency, sense or speed" ] } },
-          { "text": "You take its name. For the hour, oaths, wards, pacts and doors that know it recognise you instead, and not it.",
-            "card": "Take its NAME — oaths, wards, pacts and doors know you as it, and not it" }
+            "mech": {
+              "deny": [
+                "one proficiency, sense or speed"
+              ]
+            }
+          },
+          {
+            "text": "You take its name. For the hour, oaths, wards, pacts and doors that know it recognise you instead, and not it.",
+            "card": "Take its NAME — oaths, wards, pacts and doors know you as it, and not it"
+          }
         ]
       }
     ],
@@ -96,14 +228,22 @@
         "name": "Mirror-Made",
         "description": "Everything you make knows exactly what it is — and who it belongs to.",
         "tiers": [
-          { "text": "Your Constructs may wear your likeness or that of any creature you know well, speaking with its voice. Your Objects bear an identity: a crest, seal or signature no forgery can match.",
-            "card": "Constructs wear a likeness you know · Objects bear an unforgeable seal" },
-          { "text": "Your Structures know who belongs: creatures you name may pass freely; anyone else is known to you the moment they enter.",
-            "card": "Structures admit whoever you name, and tell you of anyone else" },
-          { "text": "A Construct made in someone's likeness carries one of their memories or skills, as a proficiency they have.",
-            "card": "A likeness-Construct carries one of its model's skills or memories" },
-          { "text": "Make a true Echo of yourself, lasting 1 hour: it shares your mind, can cast one seal of the slot level or lower, and knows everything you know.",
-            "card": "A true ECHO of you, 1 hr — shares your mind, casts one seal" }
+          {
+            "text": "Your Constructs may wear your likeness or that of any creature you know well, speaking with its voice. Your Objects bear an identity: a crest, seal or signature no forgery can match.",
+            "card": "Constructs wear a likeness you know · Objects bear an unforgeable seal"
+          },
+          {
+            "text": "Your Structures know who belongs: creatures you name may pass freely; anyone else is known to you the moment they enter.",
+            "card": "Structures admit whoever you name, and tell you of anyone else"
+          },
+          {
+            "text": "A Construct made in someone's likeness carries one of their memories or skills, as a proficiency they have.",
+            "card": "A likeness-Construct carries one of its model's skills or memories"
+          },
+          {
+            "text": "Make a true Echo of yourself, lasting 1 hour: it shares your mind, can cast one seal of the slot level or lower, and knows everything you know.",
+            "card": "A true ECHO of you, 1 hr — shares your mind, casts one seal"
+          }
         ]
       }
     ],
@@ -112,18 +252,34 @@
         "name": "Clarity of Self",
         "description": "Who are you, really? You can always tell.",
         "tiers": [
-          { "text": "Know whether a creature you see is disguised, shapechanged, possessed, or not what it claims to be. Or take on the look of anyone you have seen, for 1 hour.",
+          {
+            "text": "Know whether a creature you see is disguised, shapechanged, possessed, or not what it claims to be. Or take on the look of anyone you have seen, for 1 hour.",
             "card": "See through disguise, shapechange and possession · or wear any seen face for 1 hr",
-            "mech": { "utility": true } },
-          { "text": "Hold an object and learn the identity of the last three people who owned it, and one thing each did with it.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Hold an object and learn the identity of the last three people who owned it, and one thing each did with it.",
             "card": "Learn an object's last three owners and one thing each did",
-            "mech": { "utility": true } },
-          { "text": "Restore a lost memory, a forgotten name, or the mind of a creature suffering amnesia or a magical change of identity.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Restore a lost memory, a forgotten name, or the mind of a creature suffering amnesia or a magical change of identity.",
             "card": "Restore a lost memory, name, or a stolen identity",
-            "mech": { "utility": true } },
-          { "text": "Read the whole history of a creature you touch — birthplace, true name, the turning points of its life — in an instant.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Read the whole history of a creature you touch — birthplace, true name, the turning points of its life — in an instant.",
             "card": "Read a touched creature's whole history and true name",
-            "mech": { "utility": true } }
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -133,36 +289,76 @@
       "name": "Doubt",
       "type": "Offensive",
       "description": "A small voice asks whether they are really who they think.",
-      "effect": { "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6).",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6).",
         "card": "+1 die psychic",
-        "mech": { "damage": { "dice": "1d6", "type": "psychic" } } },
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Two dice, and it forgets one proficiency of your choice until the end of its next turn.", "card": "+2 dice · they forget one proficiency until their next turn" },
-        { "text": "Level 11+: Three dice.", "card": "+3 dice" }
+        {
+          "text": "Level 5+: Two dice, and it forgets one proficiency of your choice until the end of its next turn.",
+          "card": "+2 dice · they forget one proficiency until their next turn"
+        },
+        {
+          "text": "Level 11+: Three dice.",
+          "card": "+3 dice"
+        }
       ]
     },
     {
       "name": "Remember Yourself",
       "type": "Supportive",
       "description": "The seal reminds each of them who they are.",
-      "effect": { "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and advantage on saves against being Charmed or possessed until the end of its next turn.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and advantage on saves against being Charmed or possessed until the end of its next turn.",
         "card": "The seal's targets: {VM} + {SLOT} temp HP · advantage vs charm and possession until their next turn",
-        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "advantage": "saves against Charmed or possession" } } },
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM + slot level",
+            "advantage": "saves against Charmed or possession"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Each may also end one Charmed, Frightened or Mistaken condition on itself.", "card": "Each may end Charmed, Frightened or Mistaken on itself" },
-        { "text": "Level 11+: The advantage lasts 1 minute and covers transformation too.", "card": "1 min · covers transformation" }
+        {
+          "text": "Level 5+: Each may also end one Charmed, Frightened or Mistaken condition on itself.",
+          "card": "Each may end Charmed, Frightened or Mistaken on itself"
+        },
+        {
+          "text": "Level 11+: The advantage lasts 1 minute and covers transformation too.",
+          "card": "1 min · covers transformation"
+        }
       ]
     },
     {
       "name": "Misplaced",
       "type": "Control",
       "description": "For a moment they don't remember whose side they are on.",
-      "effect": { "text": "A creature hit by or failing the seal can't take reactions and can't benefit from its allies' Help until the start of its next turn.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't take reactions and can't benefit from its allies' Help until the start of its next turn.",
         "card": "No reactions and no help from its allies until their next turn",
-        "mech": { "deny": [ "reactions", "its allies' Help" ] } },
+        "mech": {
+          "deny": [
+            "reactions",
+            "its allies' Help"
+          ]
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: It has disadvantage on its next attack roll against you or the seal's targets.", "card": "Disadvantage on its next attack against you or the seal's targets" },
-        { "text": "Level 11+: It is Mistaken until the end of its next turn.", "card": "Mistaken until the end of their next turn" }
+        {
+          "text": "Level 5+: It has disadvantage on its next attack roll against you or the seal's targets.",
+          "card": "Disadvantage on its next attack against you or the seal's targets"
+        },
+        {
+          "text": "Level 11+: It is Mistaken until the end of its next turn.",
+          "card": "Mistaken until the end of their next turn"
+        }
       ]
     }
   ],

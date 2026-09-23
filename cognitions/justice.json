@@ -1,0 +1,292 @@
+{
+  "id": "justice",
+  "name": "Justice",
+  "icon": "⚔",
+  "opposing": "corruption",
+  "description": "Desert, Redress, The Balancing Of What Was Done. Built from Law and Truth, Justice is not vengeance — Revenge is its Vile shadow, and the two look identical for about a minute. It is the insistence that harm be answered proportionally and publicly, and its wielders hit hardest when they are in the right, which they are usually careful to be.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Answerable",
+        "card": "its next attack against your allies has disadvantage"
+      },
+      "major": {
+        "name": "Condemned",
+        "card": "Restrained, and taking the weight of what it did"
+      },
+      "severe": {
+        "name": "Judged",
+        "card": "Incapacitated by the measure of its own actions"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Measure",
+        "description": "The seal weighs what they have done and returns it, in full, with interest.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and deals Twice your Verum Modifier more for each ally of yours the target has damaged this combat, to a maximum of Ten Times your Verum Modifier.",
+            "card": "Damage becomes Radiant · +2×VM per ally they've hurt (max 10×VM)",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "rider": {
+                "damage": "2×VM per ally harmed",
+                "type": "radiant"
+              }
+            }
+          },
+          {
+            "text": "The seal's damage can't be reduced below the total harm the target has dealt this round — what it gave, it gets.",
+            "card": "Never less than the harm they dealt this round"
+          },
+          {
+            "text": "A creature that fails can't take a hostile action against any creature it has already wronged, until the end of its next turn.",
+            "card": "They can't act against anyone they've already wronged",
+            "mech": {
+              "deny": [
+                "hostile actions against those it wronged"
+              ]
+            }
+          },
+          {
+            "text": "Redress. An ally the target has harmed this combat regains hit points equal to half the damage dealt — the balance is not restored by the wrongdoer suffering, but by the wronged being made whole.",
+            "card": "REDRESS — an ally they harmed regains half the damage dealt",
+            "mech": {
+              "heal": {
+                "amount": "half the damage",
+                "who": "an ally the target harmed"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Held to Account",
+        "description": "You do not stop them. You make them answer for it while they continue.",
+        "tiers": [
+          {
+            "text": "A creature that fails takes radiant damage equal to Three Times your Verum Modifier each time it damages a creature that has not harmed it first, until the end of its next turn.",
+            "card": "Fail: 3×VM radiant each time they strike someone who hasn't hurt them",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "it harms the unoffending"
+              }
+            }
+          },
+          {
+            "text": "The accounting lasts 1 minute, repeating the save at the end of each of its turns, and the damage rises to Five Times your Verum Modifier.",
+            "card": "1 min (Cha save each turn) · 5×VM each time",
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "radiant",
+                "when": "it harms the unoffending"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails can't benefit from cover, invisibility or concealment against anyone it has wronged — they always know where it is.",
+            "card": "No cover or concealment against those they wronged",
+            "mech": {
+              "deny": [
+                "cover and concealment from the wronged"
+              ]
+            }
+          },
+          {
+            "text": "Verdict. A creature that fails is Restrained for 1 minute while everything it has done this fight is spoken aloud by the Cognition, in the voice of whoever it did it to. It repeats the save only after the account is finished.",
+            "card": "VERDICT — Restrained 1 min while its deeds are read aloud in the voices of its victims",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained",
+                  "duration": "1 minute"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "In the Right",
+        "description": "They are owed something, and while this lasts, the world is settling up.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target adds your Verum Modifier to attack rolls and saving throws against any creature that has harmed it or its allies.",
+            "card": "1 min: +{VM} against anyone who has harmed it or its own",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "check": "+VM against those who harmed it"
+              }
+            }
+          },
+          {
+            "text": "The first time each round it is damaged, it regains hit points equal to Twice your Verum Modifier as the wrong is partly answered.",
+            "card": "1/round when harmed: regain 2×VM"
+          },
+          {
+            "text": "Attacks against it by a creature that has wronged it have disadvantage, and it can't be Charmed or Frightened by such a creature at all.",
+            "card": "Those who wronged it attack at disadvantage and can't charm or frighten it"
+          },
+          {
+            "text": "Vindicated. While this lasts, any creature that has wronged the target and attacks it takes radiant damage equal to the damage it deals, and the target's critical hits against such creatures land on 18 or higher.",
+            "card": "VINDICATED — its wrongdoers take back what they deal · crits on 18+ against them"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Scales",
+        "description": "You build the thing that settles it, and the thing does not take bribes.",
+        "tiers": [
+          {
+            "text": "Your creations cannot be used to harm anyone who has not wronged their maker or bearer.",
+            "card": "Creations cannot harm the innocent"
+          },
+          {
+            "text": "Your Objects weigh a claim: hold one between two disputing parties and it indicates, plainly, which has the better right.",
+            "card": "Objects weigh a dispute and show who has the better right"
+          },
+          {
+            "text": "Your Structures cannot be entered by a creature carrying an unanswered wrong against someone inside, unless it consents to answer for it.",
+            "card": "Wrongdoers can't enter unless they agree to answer for it"
+          },
+          {
+            "text": "Raise a Court of Redress: a permanent Structure where a wrong proven against a creature binds it to make restitution, enforced by the Cognition until the debt is paid.",
+            "card": "A COURT OF REDRESS — proven wrongs bind the wrongdoer to restitution until paid"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Case",
+        "description": "Establishing what happened, who did it, and what is owed.",
+        "tiers": [
+          {
+            "text": "Know whether a creature before you has wronged another and left it unanswered, and roughly how badly.",
+            "card": "Know who carries an unanswered wrong, and how heavy",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Reconstruct a wrong: see the harm done at a place or to a person, who did it, and whether they knew what they were doing.",
+            "card": "See the wrong done here — by whom, and whether they knew",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Name a restitution that would settle a wrong. All parties know it is fair, whether or not they accept it — and refusing publicly costs them.",
+            "card": "Name a fair restitution — everyone knows it's fair, and refusing it costs",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Summon the answerable: name a creature that has wronged another and is hiding from it. For a week, it cannot rest, cannot be concealed from those it wronged, and every road it takes tends toward them.",
+            "card": "A week in which the guilty cannot rest, hide, or avoid the road back",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Answerable",
+      "type": "Offensive",
+      "description": "The seal adds up what they have done today.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has damaged one of your allies this combat.",
+        "card": "+1 die radiant — +2 dice if they've hurt one of your allies",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four, and the damage can't be reduced by resistance.",
+          "card": "+2 dice (4) · unreducible by resistance"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and an ally it harmed regains your Verum Modifier in hit points.",
+          "card": "+3 dice (6) · an ally it hurt heals {VM}"
+        }
+      ]
+    },
+    {
+      "name": "Owed",
+      "type": "Supportive",
+      "description": "The seal's targets have a claim, and the claim has weight.",
+      "effect": {
+        "text": "Each of the seal's targets adds your Verum Modifier to its next attack roll or saving throw against a creature that has harmed it this combat.",
+        "card": "The seal's targets: +{VM} against whoever has harmed them",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "check": "+VM against those who harmed them"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and they regain Twice your Verum Modifier the first time each is damaged.",
+          "card": "1 min · 2×VM back on the first hit each takes"
+        },
+        {
+          "text": "Level 11+: Attacks against them by a creature that wronged them have disadvantage.",
+          "card": "Their wrongdoers attack at disadvantage"
+        }
+      ]
+    },
+    {
+      "name": "Called Out",
+      "type": "Control",
+      "description": "The seal names, aloud, what they just did.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next attack against any creature it has already harmed this combat, and cannot hide from that creature until the end of its next turn.",
+        "card": "Disadvantage against anyone they've already hurt · and no hiding from them",
+        "mech": {
+          "penalty": {
+            "disadvantage": "attacks against those it has harmed"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also takes radiant damage equal to Three Times your Verum Modifier the next time it harms an unoffending creature.",
+          "card": "3×VM the next time they strike the unoffending"
+        },
+        {
+          "text": "Level 11+: It can't take a hostile action against a creature it has wronged until the end of its next turn.",
+          "card": "It can't act against those it wronged at all"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

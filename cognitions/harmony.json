@@ -1,0 +1,288 @@
+{
+  "id": "harmony",
+  "name": "Harmony",
+  "icon": "🎼",
+  "opposing": "carnage",
+  "description": "Consonance, Fit, The Arrangement In Which Nothing Is Fighting Anything Else. Built from Balance and Peace, Harmony is the Cognition of things working together — bodies, voices, a company, a spell. It heals by restoring a system to its proper relation, it fights by making an enemy's parts disagree with each other, and it is the direct opposite of Carnage, which is the state of everything coming apart at once.",
+  "savingThrow": "Charisma",
+  "damageType": "Thunder",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Discordant",
+        "card": "disadvantage on Concentration checks"
+      },
+      "major": {
+        "name": "Out of tune",
+        "card": "its attacks and abilities work against each other — disadvantage on attacks"
+      },
+      "severe": {
+        "name": "Shattered chord",
+        "card": "Incapacitated as nothing about it agrees with anything else"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "In Concert",
+        "description": "You put the company in tune. They stop working against each other and start compounding.",
+        "tiers": [
+          {
+            "text": "For 1 minute, while the target is within 30 feet of an ally, both add your Verum Modifier to damage rolls and to saving throws.",
+            "card": "1 min: within 30 ft of an ally, both get +{VM} damage and saves",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "damage": "+VM near an ally",
+                "save": "+VM near an ally"
+              }
+            }
+          },
+          {
+            "text": "When the target and an ally attack the same creature in the same round, the second attack has advantage.",
+            "card": "Two of them on one target: the second attack has advantage"
+          },
+          {
+            "text": "Once per round, when any ally within 30 feet of the target is healed, the target is healed for the same amount, and the reverse is true.",
+            "card": "1/round: healing one of them heals the other for the same"
+          },
+          {
+            "text": "One Chord. Every ally within 30 feet of the target shares its senses, cannot be surprised, may use its reaction to act on any of the others' turns, and rolls all saving throws with advantage while at least three of them remain standing.",
+            "card": "ONE CHORD — shared senses, reactions on each other's turns, advantage on saves while three still stand"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Dissonance",
+        "description": "Everything in them was agreeing with everything else. You stop that.",
+        "tiers": [
+          {
+            "text": "The damage becomes thunder, and deals Twice your Verum Modifier more for each other enemy within 10 feet of the target — the closer they stand, the worse they resonate.",
+            "card": "Damage becomes Thunder · +2×VM per enemy standing within 10 ft of them",
+            "mech": {
+              "damage": {
+                "type": "thunder"
+              },
+              "rider": {
+                "damage": "2×VM per crowded enemy",
+                "type": "thunder"
+              }
+            }
+          },
+          {
+            "text": "The note carries: every other enemy within 10 feet of the target takes a quarter of the damage, and all of them have disadvantage on Concentration until the end of their next turn.",
+            "card": "Everyone crowded around them takes a quarter · all at disadvantage on Concentration",
+            "mech": {
+              "penalty": {
+                "disadvantage": "Concentration checks"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails can't benefit from an ally's aura, Help or shared effect until the end of its next turn — the chord has broken between them.",
+            "card": "Cut off from allied auras, Help and shared effects",
+            "mech": {
+              "deny": [
+                "shared effects"
+              ]
+            }
+          },
+          {
+            "text": "Breaking the Chord. A creature that fails comes apart from itself for 1 minute, repeating the save each turn: it may take an action, a bonus action or a reaction on its turn — one of the three, not several.",
+            "card": "BREAKING THE CHORD — one action, bonus action OR reaction a turn, for 1 min",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Discordant",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Common Key",
+        "description": "The area picks a key. Everything in it has to play along or be heard failing to.",
+        "tiers": [
+          {
+            "text": "For 1 minute the area rings softly. A creature that fails has disadvantage on attack rolls against a creature it is not already engaged with — it cannot find the beat.",
+            "card": "1 min: those who fail can't switch targets cleanly — disadvantage on new ones",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "penalty": {
+                "disadvantage": "attacks on new targets"
+              }
+            }
+          },
+          {
+            "text": "Creatures that failed can't take reactions, and any effect inside that requires two or more of them to cooperate simply fails.",
+            "card": "No reactions · nothing that needs two of them working together functions",
+            "mech": {
+              "deny": [
+                "reactions",
+                "cooperative effects"
+              ]
+            }
+          },
+          {
+            "text": "Your allies inside act as one: each may use another's initiative count, and none of them can be caught flanked, surrounded or separated while two remain.",
+            "card": "Your allies share initiative and can't be flanked or split while two stand"
+          },
+          {
+            "text": "Resolution. At the end of the minute, everything in the area returns to concord: all ongoing effects of the slot level or lower end, every creature is returned to its true form, and all temporary conditions on your allies are cleared at once.",
+            "card": "RESOLUTION — at the end, everything ≤ slot ends, true forms return, and your allies are cleared"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Well-Tuned",
+        "description": "Your creations fit their place so precisely that the place is better for them.",
+        "tiers": [
+          {
+            "text": "Your creations never interfere with one another or with your allies: they grant no cover to enemies, never block a line of effect you want, and always stand where they are needed.",
+            "card": "Creations never get in your way, and always stand where they're needed"
+          },
+          {
+            "text": "Two or more of your creations within 30 feet of each other each gain +2 Armour Class and your Verum Modifier to damage.",
+            "card": "Creations near each other: +2 AC and +{VM} damage apiece"
+          },
+          {
+            "text": "Your Structures resonate: allies inside regain your Verum Modifier in hit points at the start of each of their turns, and enemies inside have disadvantage on Concentration.",
+            "card": "Structures heal your allies {VM} a turn and spoil enemy Concentration"
+          },
+          {
+            "text": "Raise a Consonance: a permanent Structure in which no two things can work against each other — no ambush, no betrayal, no spell that turns one creature on another functions inside it.",
+            "card": "A CONSONANCE — permanent · no ambush, betrayal or turning works inside"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Concord",
+        "description": "Finding the arrangement in which everything fits, including people.",
+        "tiers": [
+          {
+            "text": "Know what is out of joint here: the failing part of a mechanism, the sick tree in the orchard, the person in the room who does not want this to work.",
+            "card": "Know what's out of joint — the broken part, or the person spoiling it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Tune a thing back into working order: an instrument, a mechanism, a spell that has begun to fail, a body's rhythm — restored for a day.",
+            "card": "Tune anything back into working order for a day",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Set a company in concord for 24 hours: they cannot be turned against each other, misunderstand one another, or be separated by illusion or deception.",
+            "card": "24 hrs in which your company cannot be turned or divided",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Resolve a discord that has stood for years: a feud, a curse laid in anger, a haunting, a land that will not grow — given a day's work and the willing presence of both sides.",
+            "card": "Resolve a years-old feud, curse or haunting — with both sides willing",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Off Key",
+      "type": "Offensive",
+      "description": "The seal introduces a note that does not belong.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus thunder damage equal to one damage die of the primary effect's type (min 1d6) and has disadvantage on its next Concentration check.",
+        "card": "+1 die thunder · disadvantage on their next Concentration check",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "thunder"
+          },
+          "penalty": {
+            "disadvantage": "the next Concentration check"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and it can't benefit from an ally's aura or Help until the end of its next turn.",
+          "card": "+2 dice · cut off from allied auras and Help"
+        },
+        {
+          "text": "Level 11+: Three dice, and a further die for each other enemy within 10 feet of it.",
+          "card": "+3 dice · +1 more per enemy crowded around it"
+        }
+      ]
+    },
+    {
+      "name": "In Tune",
+      "type": "Supportive",
+      "description": "The seal leaves its targets working as one thing.",
+      "effect": {
+        "text": "While within 30 feet of one another, each of the seal's targets adds your Verum Modifier to damage rolls until the end of its next turn.",
+        "card": "The seal's targets: +{VM} damage while they stay within 30 ft of each other",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "damage": "+VM near one another"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and the second of them to attack a given creature each round has advantage.",
+          "card": "1 min · the second attacker on a target has advantage"
+        },
+        {
+          "text": "Level 11+: Healing one of them heals another within 30 feet for the same amount, once per round.",
+          "card": "1/round: healing one heals another"
+        }
+      ]
+    },
+    {
+      "name": "Discord",
+      "type": "Control",
+      "description": "The seal leaves them slightly out of step with each other.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't benefit from an ally's aura, Help or shared effect until the end of its next turn.",
+        "card": "No allied auras, Help or shared effects until their next turn",
+        "mech": {
+          "deny": [
+            "shared effects"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't take reactions while it lasts.",
+          "card": "No reactions either"
+        },
+        {
+          "text": "Level 11+: If two or more creatures that failed are within 10 feet of each other, each has disadvantage on attack rolls.",
+          "card": "Crowded failures all attack at disadvantage"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

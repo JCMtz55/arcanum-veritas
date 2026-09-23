@@ -1,0 +1,281 @@
+{
+  "id": "knowledge",
+  "name": "Knowledge",
+  "icon": "📚",
+  "opposing": "ignorance",
+  "description": "Learning, Method, The Accumulated Answer. Built from Clarity and History, Knowledge is what a mind has actually got: facts held, methods practised, weaknesses catalogued. It is not Wisdom, which is judgment, nor Secrets, which is what is withheld — it is the plain advantage of having found out first. Its wielders know the thing they are fighting better than it knows itself, and that is usually the whole battle.",
+  "savingThrow": "Intelligence",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Outthought",
+        "card": "disadvantage on its next saving throw"
+      },
+      "major": {
+        "name": "Catalogued",
+        "card": "its resistances and immunities are suppressed"
+      },
+      "severe": {
+        "name": "Solved",
+        "card": "Incapacitated — you already know what it was going to do"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Weak Point",
+        "description": "You read about this. There is a seam behind the left shoulder.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic, and the target's resistance to it does not apply — you know what it is made of.",
+            "card": "Damage becomes Psychic · its resistance doesn't apply",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "pierce": "resistance"
+            }
+          },
+          {
+            "text": "You learn one of the target's immunities, vulnerabilities, legendary defences or hidden features. Against a creature whose kind you have already studied, the seal deals 3 additional dice.",
+            "card": "Learn a hidden defence · +3 dice against a kind you've studied"
+          },
+          {
+            "text": "The target's immunity to the seal's damage counts only as resistance, and its vulnerabilities apply twice over.",
+            "card": "Immunity counts as resistance · vulnerabilities count double",
+            "mech": {
+              "pierce": "immunity"
+            }
+          },
+          {
+            "text": "Solved. Against a creature whose kind you have studied, the seal deals maximum damage, ignores resistance and immunity entirely, and the creature can't spend a Legendary Resistance against it.",
+            "card": "SOLVED — maximum damage, nothing resisted, no Legendary Resistance, against a studied kind",
+            "mech": {
+              "pierce": "resistance and immunity"
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Briefed",
+        "description": "You tell them the three things that matter. It saves lives.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target adds your Verum Modifier to attack rolls and saving throws against one kind of creature you name as you draw.",
+            "card": "1 min: +{VM} to attacks and saves against one named kind of creature",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "check": "+VM against a named kind"
+              }
+            }
+          },
+          {
+            "text": "The target gains proficiency in one skill, tool or saving throw of your choice while this lasts, as though it had studied for years.",
+            "card": "Borrowed proficiency in a skill, tool or save"
+          },
+          {
+            "text": "The target ignores the resistances of the named creature type, and knows its tactics one step ahead: it can't be surprised by that kind, and takes no damage from any of its abilities on a successful save.",
+            "card": "Ignores that kind's resistances · never surprised by them · no damage on a made save"
+          },
+          {
+            "text": "Expert. The target has advantage on every roll made against the named kind of creature, and once per round may declare that it knows exactly what one of them is about to do — that creature's next action has disadvantage.",
+            "card": "EXPERT — advantage on everything against that kind · 1/round, call their move and impose disadvantage"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Outmatched",
+        "description": "You demonstrate, at length, that you have thought about this more than they have.",
+        "tiers": [
+          {
+            "text": "A creature that fails has disadvantage on its next saving throw, as you name the exact thing it was relying on.",
+            "card": "Fail: disadvantage on their next save",
+            "mech": {
+              "save": {
+                "ability": "Intelligence"
+              },
+              "penalty": {
+                "disadvantage": "the next saving throw"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails loses the benefit of one of its resistances or immunities of your choice until the end of its next turn.",
+            "card": "One of its resistances or immunities switched off until its next turn",
+            "mech": {
+              "deny": [
+                "one resistance or immunity"
+              ]
+            }
+          },
+          {
+            "text": "The area is studied ground for 1 minute: you and your allies know the position, remaining strength and intentions of every creature that failed while they remain inside it.",
+            "card": "1 min: you and yours see their position, strength and intent",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Catalogued",
+                  "duration": "1 minute"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Nothing You Have Not Seen. Creatures that failed can't use the same ability, spell or tactic twice while the effect lasts — the second attempt simply doesn't work, and they can feel you expecting it.",
+            "card": "NOTHING YOU HAVE NOT SEEN — no ability, spell or tactic works twice on you",
+            "mech": {
+              "deny": [
+                "repeating an ability"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Apparatus",
+        "description": "Built from the literature, and it shows.",
+        "tiers": [
+          {
+            "text": "Your creations are made to a proven design: they have +2 Armour Class, and you may name one damage type each is immune to.",
+            "card": "Creations: +2 AC and one named immunity apiece"
+          },
+          {
+            "text": "Your Objects may be a reference: consulting one for a minute gives the answer to any question a scholar could reasonably have written down.",
+            "card": "Objects answer anything a scholar could have written down"
+          },
+          {
+            "text": "Your Constructs learn: each time one is damaged by a kind of attack, it gains resistance to that kind for the rest of the encounter.",
+            "card": "Constructs gain resistance to whatever hits them, as it hits them"
+          },
+          {
+            "text": "Found a Library: a permanent Structure that answers one question a day about anything recorded anywhere in Ephemer, and quietly makes copies of everything brought inside.",
+            "card": "A LIBRARY — one answered question a day about anything ever recorded"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Recall",
+        "description": "You know this. You have always known this.",
+        "tiers": [
+          {
+            "text": "Know one true fact about anything you can see or name — a creature's kind and traits, an object's making, a symbol's meaning.",
+            "card": "One true fact about anything you can see or name",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Read, speak and write any language for an hour, and understand any code, cipher or notation you examine.",
+            "card": "Any language for an hour · any cipher understood",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Study a creature for a minute and learn its full capabilities: resistances, immunities, legendary defences, and the thing it does not want you to know it can do.",
+            "card": "A minute's study reveals a creature's whole sheet, including the hidden part",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Learn a discipline: gain proficiency, or expertise where already proficient, in any skill, tool, language or weapon for a week, as though you had trained in it for years.",
+            "card": "A week of genuine expertise in any skill, tool, language or weapon",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Studied",
+      "type": "Offensive",
+      "description": "The seal is aimed at something you know about.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and the seal ignores its resistance to that damage.",
+        "card": "+1 die psychic · ignores its resistance",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "pierce": "resistance"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and you learn one of the target's immunities or hidden defences.",
+          "card": "+2 dice · learn a hidden defence"
+        },
+        {
+          "text": "Level 11+: Three dice, and its immunity to the seal's damage counts only as resistance.",
+          "card": "+3 dice · immunity counts as resistance"
+        }
+      ]
+    },
+    {
+      "name": "Told Them",
+      "type": "Supportive",
+      "description": "The seal comes with instructions.",
+      "effect": {
+        "text": "Each of the seal's targets adds your Verum Modifier to its next attack roll or saving throw against the creature the seal affected.",
+        "card": "The seal's targets: +{VM} on their next roll against it",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "check": "+VM against that creature"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It becomes advantage, and lasts 1 minute.",
+          "card": "Advantage instead · 1 min"
+        },
+        {
+          "text": "Level 11+: They also ignore that creature's resistances while it lasts.",
+          "card": "They ignore its resistances"
+        }
+      ]
+    },
+    {
+      "name": "Catalogued",
+      "type": "Control",
+      "description": "The seal writes them down, and being written down is a disadvantage.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has one resistance or immunity of your choice suppressed until the end of its next turn, and you learn what else it has.",
+        "card": "One resistance or immunity off until their next turn · you learn the rest",
+        "mech": {
+          "deny": [
+            "one resistance or immunity"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and the suppression applies to two of them.",
+          "card": "1 min · two of them"
+        },
+        {
+          "text": "Level 11+: It can't use the same ability twice while it lasts.",
+          "card": "No ability works twice"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

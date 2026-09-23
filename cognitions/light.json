@@ -1,0 +1,316 @@
+{
+  "id": "light",
+  "name": "Light",
+  "icon": "🔆",
+  "opposing": "shadow",
+  "description": "Illumination, Revelation, Clarity of Sight, The Thing That Cannot Hide. Light is the simplest of the Cognitions and the hardest to lie in front of. It does not judge as the Sun does, nor burn as Fire does — it only insists that what is there can be seen. Its wielders throw it as a weapon, hang it where it is needed, and take it away from those who were relying on the dark.",
+  "savingThrow": "Dexterity",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Dazzled",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Seared",
+        "card": "Blinded"
+      },
+      "severe": {
+        "name": "Overexposed",
+        "card": "Blinded and Incapacitated by the glare"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Lance",
+        "description": "You give light an edge, and it turns out to have had one all along.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and the beam does not stop at the target: it carries on in a line to the end of its range, dealing half the damage to everything in the way.",
+            "card": "Damage becomes Radiant · the beam carries on for half to everything behind",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails is Dazzled until the end of its next turn — disadvantage on attack rolls and on Perception checks that rely on sight — and sheds bright light in a 10-foot radius, so nothing near it is hidden either.",
+            "card": "DAZZLED and glowing — disadvantage on attacks and sight, and nothing near them hides",
+            "mech": {
+              "penalty": {
+                "disadvantage": "attack rolls and sight-based Perception"
+              }
+            }
+          },
+          {
+            "text": "The beam bends: choose up to your Verum Modifier in additional creatures within 15 feet of the line, and it reaches them too, for the same half damage.",
+            "card": "The beam bends to {VM} more creatures within 15 ft of the line"
+          },
+          {
+            "text": "Daybreak. Every creature the beam touches that fails is Blinded for 1 minute, repeating the save at the end of each of its turns, and creatures of shadow or darkness take the full damage rather than half.",
+            "card": "DAYBREAK — everyone it touches is Blinded 1 min · shadow-things take the full damage",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Blinded",
+                  "duration": "1 minute",
+                  "escape": "save at the end of each of its turns"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Kindled",
+        "description": "You hang a light on someone, and things stop being able to reach them unseen.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target sheds bright light in a 20-foot radius, can't be surprised, and has advantage on Perception checks that rely on sight.",
+            "card": "1 min: bright light 20 ft · can't be surprised · advantage on sight-based Perception",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "sight-based Perception checks"
+              }
+            }
+          },
+          {
+            "text": "It also sees normally in magical darkness, and creatures have disadvantage on attack rolls against it while hidden or invisible.",
+            "card": "Sees through magical darkness · the hidden and invisible attack it at disadvantage",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "sight": "through magical darkness"
+              }
+            }
+          },
+          {
+            "text": "The light answers: the first time each round a creature within 20 feet of the target attacks it, that creature takes radiant damage equal to Three Times your Verum Modifier.",
+            "card": "1/round, an attacker within 20 ft takes 3×VM radiant",
+            "mech": {
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "the first attacker each round"
+              }
+            }
+          },
+          {
+            "text": "Unhidden. Nothing within 60 feet of the target can be invisible, hidden, disguised, or shapechanged into something it is not — not to the target, and not to anyone standing in its light.",
+            "card": "UNHIDDEN — within 60 ft nothing stays invisible, hidden, disguised or shapechanged",
+            "mech": {
+              "deny": [
+                "invisibility",
+                "hiding",
+                "disguise",
+                "shapechange"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Glare",
+        "description": "There is nowhere in the room that is not lit, and they have nowhere to put their eyes.",
+        "tiers": [
+          {
+            "text": "The area fills with bright light for 1 minute — no darkness of any kind can exist inside it, magical or otherwise. A creature that fails has disadvantage on attack rolls while it remains.",
+            "card": "1 min of bright light, no darkness survives · those who fail attack at disadvantage inside",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "deny": [
+                "darkness"
+              ],
+              "penalty": {
+                "disadvantage": "attack rolls inside"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails is Blinded until the end of its next turn, and any creature that enters the light or starts its turn inside repeats the save.",
+            "card": "Fail: Blinded until the end of their next turn · entering or starting a turn inside saves again",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Blinded",
+                  "escape": "Dexterity save on entering or starting its turn inside"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Creatures inside cast no useful shadow: they can't hide, take the Hide action, or benefit from cover granted by anything less than a solid wall.",
+            "card": "No hiding, no Hide action, no cover but solid walls",
+            "mech": {
+              "deny": [
+                "hiding",
+                "Hide",
+                "partial cover"
+              ]
+            }
+          },
+          {
+            "text": "Noon. The light becomes punishing: a creature that failed takes radiant damage equal to Five Times your Verum Modifier at the start of each of its turns inside, and creatures of shadow, undead, or things that shun the sun have disadvantage on every saving throw while they remain.",
+            "card": "NOON — 5×VM radiant each turn to those who failed · shadow-things save at disadvantage inside",
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "radiant",
+                "when": "start of each of their turns inside"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Made of Light",
+        "description": "You build with it, and it holds — which surprises people every time.",
+        "tiers": [
+          {
+            "text": "Your creations are made of solid light: they shed bright light in a 20-foot radius, weigh nothing, and can be made transparent or opaque at will.",
+            "card": "Creations are solid light — 20 ft bright, weightless, clear or solid at will"
+          },
+          {
+            "text": "Your Structures can't be passed by creatures of shadow or darkness, and a creature that touches one takes radiant damage equal to Twice your Verum Modifier.",
+            "card": "Shadow can't pass your Structures · touching one: 2×VM radiant"
+          },
+          {
+            "text": "Your Constructs are beings of light: they are immune to poison and disease, can't be Blinded, and their attacks deal radiant damage that ignores resistance to it.",
+            "card": "Light Constructs — immune to poison and disease, unblindable, radiant that ignores resistance"
+          },
+          {
+            "text": "A Structure made with a 7th-level slot or higher becomes a Beacon: permanent while it stands, visible from any distance to those who know to look, and no illusion, invisibility or disguise functions within 100 feet of it.",
+            "card": "A BEACON — permanent, visible from anywhere · no illusion or disguise within 100 ft"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Illumination",
+        "description": "The oldest and most useful trick anyone ever learned.",
+        "tiers": [
+          {
+            "text": "Light or extinguish anything you can see within 60 feet, at any brightness, in any colour. The light needs no fuel and does not heat what it touches.",
+            "card": "Light or douse anything within 60 ft — any brightness, any colour, no heat",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Send light where your eye cannot go: a mote you steer through gaps, keyholes and water, seeing what it sees, up to 500 feet away.",
+            "card": "Steer a mote of light through gaps and see what it sees, 500 ft",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Bend it: make a thing or a creature you touch invisible by carrying light around it for 1 hour, or throw an image of something you have seen, life-sized and silent.",
+            "card": "Bend light to hide a thing for 1 hr — or cast a life-sized silent image",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Show the room as it was: replay the last hour that light fell on this place, in silence, for everyone present to watch.",
+            "card": "Replay the last hour this place was lit, for everyone to see",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Flare",
+      "type": "Offensive",
+      "description": "The seal arrives brighter than it needed to be.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) and sheds bright light in a 10-foot radius until the end of your next turn.",
+        "card": "+1 die radiant · they glow, 10 ft",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target has disadvantage on its next attack roll.",
+          "card": "+2 dice · disadvantage on their next attack"
+        },
+        {
+          "text": "Level 11+: Three dice, and a creature that fails is Blinded until the end of its next turn.",
+          "card": "+3 dice · Blinded until the end of their next turn"
+        }
+      ]
+    },
+    {
+      "name": "Lantern",
+      "type": "Supportive",
+      "description": "The seal leaves its targets lit, and harder to sneak up on.",
+      "effect": {
+        "text": "Each of the seal's targets sheds bright light in a 20-foot radius for 1 minute and can't be surprised while it lasts.",
+        "card": "The seal's targets: bright light 20 ft, 1 min · can't be surprised",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "light": "20 ft bright"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: They also have advantage on Perception checks relying on sight, and see normally in magical darkness.",
+          "card": "Advantage on sight Perception · sees magical darkness"
+        },
+        {
+          "text": "Level 11+: Attacks made against them by hidden or invisible creatures have disadvantage.",
+          "card": "The hidden attack them at disadvantage"
+        }
+      ]
+    },
+    {
+      "name": "No Dark Corners",
+      "type": "Control",
+      "description": "Wherever the seal lands, the dark gets out of the way.",
+      "effect": {
+        "text": "The 20 feet around the point of impact fills with bright light for 1 minute, ending any darkness of 3rd level or lower there. Creatures inside can't take the Hide action.",
+        "card": "20 ft of bright light, 1 min — darkness ends, nobody Hides",
+        "mech": {
+          "deny": [
+            "darkness",
+            "Hide"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Creatures that failed the seal's save have disadvantage on attack rolls while inside.",
+          "card": "Those who failed attack at disadvantage inside"
+        },
+        {
+          "text": "Level 11+: Creatures of shadow or darkness that start their turn inside take radiant damage equal to Twice your Verum Modifier.",
+          "card": "Shadow-things take 2×VM radiant each turn inside"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

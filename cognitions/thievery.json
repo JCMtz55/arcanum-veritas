@@ -1,0 +1,268 @@
+{
+  "id": "thievery",
+  "name": "Thievery",
+  "icon": "🗝️",
+  "opposing": "protection",
+  "description": "Taking, Opening, The Quiet Transfer of Ownership. Thievery is the applied art of things ending up somewhere else. It is not Freedom, which unbinds on principle, nor Trickery, which misleads — it simply moves what was held into a hand that was not meant to hold it, and it is very good at not being noticed doing so. Wards, locks and pockets are, to a Thievery wielder, all the same kind of problem.",
+  "savingThrow": "Dexterity",
+  "damageType": "Piercing",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Lightened",
+        "card": "one thing it was carrying is gone"
+      },
+      "major": {
+        "name": "Disarmed",
+        "card": "its weapon is in your hand"
+      },
+      "severe": {
+        "name": "Stripped",
+        "card": "Incapacitated — everything it relied on is missing"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Lift",
+        "description": "The wound is incidental. You came for what they were carrying.",
+        "tiers": [
+          {
+            "text": "The damage becomes piercing. A creature hit or that fails loses one object it carries — your choice, and it is in your hand.",
+            "card": "Damage becomes Piercing · take one thing it carries, into your hand",
+            "mech": {
+              "damage": {
+                "type": "piercing"
+              },
+              "disarm": 1
+            }
+          },
+          {
+            "text": "Against a creature that did not see you coming, the seal deals 4 additional dice.",
+            "card": "+4 dice if it never saw you coming"
+          },
+          {
+            "text": "What you take may be immaterial: one prepared spell, one use of a feature, or the attack it had readied — you hold it, and may spend it before your next long rest.",
+            "card": "Steal a prepared spell, a feature use, or its readied attack — and spend it yourself"
+          },
+          {
+            "text": "Cleaned Out. A creature that fails loses every object it is holding and one it is wearing, all of which land wherever you like within 30 feet.",
+            "card": "CLEANED OUT — everything held and one thing worn, dropped where you choose",
+            "mech": {
+              "disarm": "all held"
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Light Fingers",
+        "description": "Everything they touch comes away easier than it should.",
+        "tiers": [
+          {
+            "text": "For 1 hour the target has advantage on Sleight of Hand and Stealth checks, and can pick any non-magical lock or pocket without tools.",
+            "card": "1 hr: advantage on Sleight of Hand and Stealth · no tools needed",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "Sleight of Hand and Stealth"
+              }
+            }
+          },
+          {
+            "text": "It may Disengage and Hide as one bonus action, and moving through an enemy's space costs it nothing.",
+            "card": "Disengage and Hide as one bonus action · enemies' spaces cost nothing"
+          },
+          {
+            "text": "Once per turn when it hits a creature, it may take one object that creature carries, without a check.",
+            "card": "Once a turn on a hit: take something they're carrying, no check"
+          },
+          {
+            "text": "Nothing Is Nailed Down. The target may steal what cannot be picked up: a sound, a shadow, a handful of fire, the light from a lantern, the weight of a thing — each held for 1 minute and usable once.",
+            "card": "NOTHING IS NAILED DOWN — steal a sound, a shadow, a flame, a weight · hold it a minute"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Lockless Room",
+        "description": "Nothing here is secured, including the things people are holding.",
+        "tiers": [
+          {
+            "text": "For 1 minute, every lock, latch, buckle and clasp in the area is open, and creatures that fail drop one object they are holding.",
+            "card": "1 min: every lock and buckle opens · those who fail drop something",
+            "mech": {
+              "save": {
+                "ability": "Dexterity"
+              },
+              "disarm": 1
+            }
+          },
+          {
+            "text": "Creatures that failed can't don, draw or retrieve anything: no swapping weapons, no drinking a potion, no reaching for a component pouch, while they remain.",
+            "card": "Those who failed can't draw, don or retrieve anything inside",
+            "mech": {
+              "deny": [
+                "drawing or retrieving items"
+              ]
+            }
+          },
+          {
+            "text": "Wards fail too: any magical seal, alarm, glyph or ward of the slot level or lower in the area is suppressed while the effect lasts.",
+            "card": "Wards, glyphs and alarms (≤ slot) are suppressed inside",
+            "mech": {
+              "deny": [
+                "wards and alarms"
+              ]
+            }
+          },
+          {
+            "text": "Everything Moves. At the start of each of your turns you may move one unattended object in the area, or one object held by a creature that failed, to anywhere else in the area — including into your hand.",
+            "card": "EVERYTHING MOVES — each turn, relocate any object in the area, held or not"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Tools",
+        "description": "Made to open things, and to be found on nobody.",
+        "tiers": [
+          {
+            "text": "Your creations are never found on you: they can be hidden about your person undetectably and produced as a free action.",
+            "card": "Creations hide undetectably on you and appear as a free action"
+          },
+          {
+            "text": "Your Objects open things: any one lock, ward, seal or container of the slot level or lower, once each, without a sound.",
+            "card": "Objects open one lock, ward or seal (≤ slot) each, silently"
+          },
+          {
+            "text": "Your Constructs steal: once per turn, one may take an object from a creature within its reach on a hit, and bring it to you.",
+            "card": "Constructs lift things on a hit and bring them to you"
+          },
+          {
+            "text": "Make a Ghost Key: a permanent Object that opens any lock, ward or door its bearer has previously seen opened by someone else — once per such door, per day.",
+            "card": "A GHOST KEY — opens any door you've watched somebody else open"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Job",
+        "description": "Ninety percent of a theft is knowing what is where, and who is looking.",
+        "tiers": [
+          {
+            "text": "Know where the valuables are within 60 feet, what is trapped, and which way people are facing.",
+            "card": "Know what's valuable, what's trapped, and who's looking, within 60 ft",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Open any lock, ward or container you can touch of the slot level or lower, leaving no trace it was opened.",
+            "card": "Open any lock or ward (≤ slot), leaving no trace",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Take something you can see within 60 feet into your hand, silently, if nobody is holding it — and leave behind something of the same size and weight so it is not missed.",
+            "card": "Take an unheld thing within 60 ft, and leave a convincing weight in its place",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Steal the fact of it: for a week, nobody remembers the thing you took existed, including whoever owned it. The gap in the ledger balances itself.",
+            "card": "For a week, nobody remembers the thing you took ever existed",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Pickpocket",
+      "type": "Offensive",
+      "description": "Something came away with the seal.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus piercing damage equal to one damage die of the primary effect's type (min 1d6) and drops one object it is holding.",
+        "card": "+1 die piercing · they drop something",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "piercing"
+          },
+          "disarm": 1
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the object lands in your hand instead of the ground.",
+          "card": "+2 dice · it lands in your hand"
+        },
+        {
+          "text": "Level 11+: Three dice, and against an unaware target the seal deals its damage dice twice.",
+          "card": "+3 dice · double dice if it never saw you"
+        }
+      ]
+    },
+    {
+      "name": "Quick Hands",
+      "type": "Supportive",
+      "description": "The seal leaves its targets faster with their hands than they were.",
+      "effect": {
+        "text": "Each of the seal's targets may draw, stow or retrieve any number of objects as a free action, and has advantage on its next Sleight of Hand or Stealth check.",
+        "card": "The seal's targets: free item handling · advantage on their next Sleight of Hand or Stealth",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "advantage": "the next Sleight of Hand or Stealth check"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and each may Disengage as a bonus action.",
+          "card": "1 min · Disengage as a bonus action"
+        },
+        {
+          "text": "Level 11+: Once each, on a hit, a target may take an object the creature carries.",
+          "card": "Once each: lift something on a hit"
+        }
+      ]
+    },
+    {
+      "name": "Unlatched",
+      "type": "Control",
+      "description": "Everything around where it landed is suddenly not secured.",
+      "effect": {
+        "text": "Every lock, latch and buckle within 15 feet of the point of impact opens, and creatures that failed the seal's save can't retrieve or draw a stowed item until the end of their next turn.",
+        "card": "15 ft: everything unlocks · those who failed can't draw or retrieve",
+        "mech": {
+          "deny": [
+            "drawing or retrieving items"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Wards and alarms of 3rd level or lower in the area are suppressed for 1 minute.",
+          "card": "Wards and alarms (≤ 3rd) suppressed 1 min"
+        },
+        {
+          "text": "Level 11+: You may move one unattended object in the area to your hand.",
+          "card": "Pull one unattended object to your hand"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -1,0 +1,307 @@
+{
+  "id": "hope",
+  "name": "Hope",
+  "icon": "🌅",
+  "opposing": "despair",
+  "description": "Expectation Against Evidence, The Light Kept Burning, The Refusal To Concede The Ending. Crafted from Fear twice over, lit by Joy — hope is not optimism, which is easy, but the deliberate act of holding a better outcome open when nothing supports it. It is the direct answer to Despair, the thing that cures it, and the single most contested emotion in Ephemer: every Nightmare fears it, and every ruin was somewhere hope ran out.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Unsettled",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Doubting",
+        "card": "Frightened — it has begun to think it might lose"
+      },
+      "severe": {
+        "name": "Outmatched",
+        "card": "Incapacitated by the certainty that it cannot win"
+      }
+    }
+  },
+  "verumEffects": {
+    "supportive": [
+      {
+        "name": "Kept Burning",
+        "description": "You give them the thing that makes people get up. It is remarkably load-bearing.",
+        "tiers": [
+          {
+            "text": "The target gains Inspiration, temporary hit points equal to Ten Times the slot level, and can't be Frightened for 1 minute.",
+            "card": "Inspiration · 10 × {SLOT} temp HP · can't be Frightened, 1 min",
+            "mech": {
+              "deny": [
+                "fear"
+              ],
+              "buff": {
+                "who": "target",
+                "tempHP": "10 × slot level"
+              }
+            }
+          },
+          {
+            "text": "It also sheds one condition born of fear, grief, despair or apathy, and adds your Verum Modifier to every saving throw while this lasts.",
+            "card": "Sheds a fear, grief, despair or apathy condition · +{VM} to all saves",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "save": "+VM"
+              }
+            }
+          },
+          {
+            "text": "Once while this lasts, when the target fails a roll that would end something it cares about, it may reroll and take the second result.",
+            "card": "Once: reroll a failure that would have ended something it cares about"
+          },
+          {
+            "text": "The Last Light. The first time the target drops to 0 hit points while this lasts, it stands instead at half its hit points, and every ally who can see it gains Inspiration and temporary hit points equal to Ten Times the slot level.",
+            "card": "THE LAST LIGHT — its first drop to 0 becomes half HP, and every ally who saw it takes heart",
+            "mech": {
+              "heal": {
+                "perSlot": 10,
+                "who": "allies who can see it"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Dawn",
+        "description": "Hope is a weapon against exactly one kind of thing, and it is devastating to it.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant, and deals Three Times your Verum Modifier more against undead, Nightmares, and creatures rooted in a Vile Emotion.",
+            "card": "Damage becomes Radiant · +3×VM against undead, Nightmares and the Vile-rooted",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "rider": {
+                "damage": "3×VM",
+                "type": "radiant",
+                "when": "against undead, Nightmares and Vile-rooted creatures"
+              }
+            }
+          },
+          {
+            "text": "A creature hit or that fails can't impose the Frightened condition until the end of its next turn, and an ally within 30 feet of it gains Inspiration.",
+            "card": "They can't Frighten anyone · an ally who sees it gains Inspiration",
+            "mech": {
+              "deny": [
+                "imposing Frightened"
+              ]
+            }
+          },
+          {
+            "text": "Against undead, Nightmares and the Vile-rooted the seal deals 4 additional dice, and its damage can't be reduced by their resistances.",
+            "card": "+4 dice against the undead, Nightmares and Vile-rooted, ignoring their resistance",
+            "mech": {
+              "pierce": "resistance"
+            }
+          },
+          {
+            "text": "Sunrise. A creature that fails can't regain hit points, can't be raised by Vile means, and a Nightmare loses one Root Vile Emotion outright — hope is what Nightmares are cured with, and this is the unkind version.",
+            "card": "SUNRISE — no healing, no Vile resurrection · a Nightmare loses a Root outright",
+            "mech": {
+              "deny": [
+                "healing"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "They Might Lose",
+        "description": "You introduce a possibility they had not been entertaining.",
+        "tiers": [
+          {
+            "text": "A creature that fails has disadvantage on attack rolls against any creature that has not yet been reduced below half its hit points, until the end of its next turn.",
+            "card": "Fail: disadvantage against anyone still above half HP",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "penalty": {
+                "disadvantage": "attacks against creatures above half hit points"
+              }
+            }
+          },
+          {
+            "text": "A creature that fails is Frightened until the end of its next turn, and can't benefit from an ally's morale, aura or command while Frightened.",
+            "card": "Frightened until their next turn · no morale or orders while it lasts",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The fear lasts 1 minute, repeating the save at the end of each of its turns, and every ally of yours reduced below half hit points is treated by the creature as more dangerous than it is — it can't ignore them.",
+            "card": "1 min (Cha save each turn) · your wounded look like the greater threat",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Frightened",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The Turning Point. While the effect holds, if any ally of yours would drop to 0 hit points within sight of a creature that failed, it drops to 1 instead — and the creature that failed makes its next save at disadvantage, because that was not supposed to happen.",
+            "card": "THE TURNING POINT — your people don't fall in front of them, and the failure shakes them further"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Something To Come Back To",
+        "description": "You build the thing people are trying to get home to.",
+        "tiers": [
+          {
+            "text": "Your creations are a comfort to see: an ally that starts its turn within 30 feet of one gains temporary hit points equal to your Verum Modifier.",
+            "card": "Allies starting a turn within 30 ft of a creation gain {VM} temp HP"
+          },
+          {
+            "text": "Your Structures cannot be entered by a creature rooted in a Vile Emotion without succeeding on the seal's save.",
+            "card": "The Vile-rooted can't enter your Structures without a save"
+          },
+          {
+            "text": "Your Objects hold a light that cannot be put out by any means short of destroying them, and an ally carrying one can't be Frightened.",
+            "card": "Objects hold an unquenchable light · their bearer can't be Frightened"
+          },
+          {
+            "text": "Raise a Beacon: a permanent Structure visible for miles, at which no ally can be reduced below 1 hit point, and toward which the lost, the hunted and the despairing find their way without knowing why.",
+            "card": "A BEACON — permanent · nobody falls below 1 HP there, and the lost find it"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Still Possible",
+        "description": "Knowing what has not been lost yet is a practical skill.",
+        "tiers": [
+          {
+            "text": "Know whether a thing you name is still possible — the person still alive, the door not yet shut, the plan not yet ruined. Not how, only whether.",
+            "card": "Know whether it's still possible — not how, just whether",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Lift a room, a company or a town for a day: no one there can be driven to despair, panic or surrender while they can still see you.",
+            "card": "A day in which nobody around you can be driven to despair or panic",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Give someone a reason: a creature sunk in Despair, Apathy or a Vile Emotion is freed of it for 24 hours, and may act as itself.",
+            "card": "Free someone from Despair, Apathy or a Vile Emotion for 24 hrs",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Hold the line open: name an outcome that is all but lost. For one week, it stays possible — the ship is not yet sunk, the heir is not yet found dead, the city has not yet fallen — however unlikely the world makes it.",
+            "card": "Name a nearly-lost outcome — for a week, it stays possible",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "First Light",
+      "type": "Offensive",
+      "description": "The seal carries something the dark does not like.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6) — two dice against undead, Nightmares or the Vile-rooted.",
+        "card": "+1 die radiant — +2 dice against undead, Nightmares and the Vile-rooted",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four, and it can't impose Frightened until the end of its next turn.",
+          "card": "+2 dice (4) · it can't Frighten anyone"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and an ally within 30 feet gains Inspiration.",
+          "card": "+3 dice (6) · an ally gains Inspiration"
+        }
+      ]
+    },
+    {
+      "name": "Take Heart",
+      "type": "Supportive",
+      "description": "Everyone the seal touched finds a reason to keep standing.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to Five Times the slot level and can't be Frightened until the end of its next turn.",
+        "card": "The seal's targets: 5 × {SLOT} temp HP · no fear until their next turn",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "5 × slot level"
+          },
+          "deny": [
+            "fear"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: One of them also gains Inspiration, and the immunity lasts 1 minute.",
+          "card": "One gains Inspiration · 1 min"
+        },
+        {
+          "text": "Level 11+: Each may also shed one condition caused by fear, grief or despair.",
+          "card": "Each sheds a fear, grief or despair condition"
+        }
+      ]
+    },
+    {
+      "name": "Second Wind",
+      "type": "Control",
+      "description": "The seal makes the odds look different than they did a moment ago.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next attack roll against an ally of yours that is below half its hit points.",
+        "card": "Disadvantage on their next attack against your wounded",
+        "mech": {
+          "penalty": {
+            "disadvantage": "attacks against your wounded allies"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't impose the Frightened condition until the end of its next turn.",
+          "card": "It can't Frighten anyone"
+        },
+        {
+          "text": "Level 11+: If it is below half its hit points, it is Frightened of you until the end of its next turn.",
+          "card": "Under half HP: Frightened of you"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

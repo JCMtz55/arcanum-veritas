@@ -1,0 +1,302 @@
+{
+  "id": "law",
+  "name": "Law",
+  "icon": "⚖",
+  "opposing": "freedom",
+  "description": "Rule, Statute, The Line Somebody Drew And Everybody Agreed To. Law is not Justice, which is moral, nor Order, which is cosmic — it is the human invention of the binding rule: written, enforced, and true because enough people behave as though it is. Its wielders declare terms and make them hold, and they are found wherever Ephemer has courts, contracts or a city watch.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Cautioned",
+        "card": "can't take reactions"
+      },
+      "major": {
+        "name": "Bound over",
+        "card": "Restrained by the terms laid on it"
+      },
+      "severe": {
+        "name": "Condemned",
+        "card": "Incapacitated — the sentence is being carried out"
+      }
+    }
+  },
+  "verumEffects": {
+    "control": [
+      {
+        "name": "The Statute",
+        "description": "You say what the rule is. Afterwards it is the rule.",
+        "tiers": [
+          {
+            "text": "Declare one prohibition over the area as you draw. A creature that fails is bound by it until the end of its next turn; the moment it breaks the term, its turn ends.",
+            "card": "Declare a prohibition — those who fail are bound, and breaking it ends their turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "conditions": [
+                {
+                  "name": "Bound",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The statute lasts 1 minute, repeating the save at the end of each of its turns, and breaking it deals force damage equal to Five Times your Verum Modifier.",
+            "card": "1 min (Cha save each turn) · breaking it costs 5×VM force",
+            "mech": {
+              "rider": {
+                "damage": "5×VM",
+                "type": "force",
+                "when": "it breaks the term"
+              }
+            }
+          },
+          {
+            "text": "The statute binds objects and magic too: a named kind of effect — teleportation, summoning, invisibility, healing — simply does not function inside the area.",
+            "card": "Name an effect — teleportation, summoning, invisibility, healing — it doesn't work inside",
+            "mech": {
+              "deny": [
+                "one named category of effect"
+              ]
+            }
+          },
+          {
+            "text": "The Letter. Creatures that failed cannot act against the statute at all: the forbidden action does not occur, the resource it would have cost is spent, and the creature knows precisely which clause stopped it.",
+            "card": "THE LETTER — the forbidden action doesn't happen, still costs what it would, and they know why",
+            "mech": {
+              "deny": [
+                "actions against the statute"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Enforcement",
+        "description": "The rule has consequences. You are the consequence.",
+        "tiers": [
+          {
+            "text": "The damage becomes force. A creature hit or that fails can't take reactions until the end of its next turn.",
+            "card": "Damage becomes Force · no reactions until their next turn",
+            "mech": {
+              "damage": {
+                "type": "force"
+              },
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "Against a creature that has broken a law, oath or stated term in your presence, the seal deals 2 additional dice and its damage can't be reduced.",
+            "card": "+2 dice against a rule-breaker, and the damage can't be reduced",
+            "mech": {
+              "pierce": "all reduction"
+            }
+          },
+          {
+            "text": "A creature that fails is Restrained until the end of its next turn — bound over, and aware of the charge.",
+            "card": "Restrained until the end of their next turn",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Restrained"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Sentence. Name the offence aloud: a creature that fails is Paralysed until the end of its next turn, and for 1 minute afterwards it cannot use the ability, weapon or magic it committed the offence with.",
+            "card": "SENTENCE — Paralysed a turn, then barred from the thing it did it with for 1 min",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Paralysed",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Standing",
+        "description": "They are acting within their rights, and the world can tell.",
+        "tiers": [
+          {
+            "text": "For 1 hour the target's word carries weight: advantage on Persuasion and Intimidation checks with anyone who recognises an authority, and nobody may lie to it without you knowing.",
+            "card": "1 hr: advantage on Persuasion and Intimidation with the law-abiding · you catch every lie to it",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "Persuasion and Intimidation"
+              }
+            }
+          },
+          {
+            "text": "It gains immunity to being Charmed or compelled by anything that would make it break its duty, and adds your Verum Modifier to saves against being moved, bound or silenced.",
+            "card": "No charm or compulsion against its duty · +{VM} against being moved, bound or silenced",
+            "mech": {
+              "deny": [
+                "charm",
+                "compulsion"
+              ]
+            }
+          },
+          {
+            "text": "Once while this lasts the target may declare one action taken against it unlawful: that action fails, and its resource is spent.",
+            "card": "Once: declare an action against it unlawful — it fails and is wasted"
+          },
+          {
+            "text": "Above Reproach. Contracts, curses, geasa, bindings and compulsions laid on the target without its consent simply do not take, and anyone who tries is known to you both by name.",
+            "card": "ABOVE REPROACH — no unconsented contract, curse or binding takes · you both learn who tried"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Instrument",
+        "description": "You do not build things. You execute documents.",
+        "tiers": [
+          {
+            "text": "Each creation is made under terms you state: what it is for, who may use it, and what happens if it is misused. Those terms hold.",
+            "card": "Each creation carries stated terms of use, and they hold"
+          },
+          {
+            "text": "Your Objects may be writs, warrants, seals or contracts that are recognised as genuine by anyone who would know, because they are.",
+            "card": "Writs, warrants and seals that are genuinely genuine"
+          },
+          {
+            "text": "Your Structures have jurisdiction: name one rule that applies inside, and it binds everyone who enters, including you.",
+            "card": "Structures carry one rule that binds everyone inside — you included"
+          },
+          {
+            "text": "Raise a Court: a permanent Structure in which any agreement made is binding on all parties, enforced by the Cognition, and no one inside can lie about a matter under judgment.",
+            "card": "A COURT — permanent · agreements made inside bind, and nobody may lie under judgment"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Code",
+        "description": "Knowing the rule is most of enforcing it, and all of evading it.",
+        "tiers": [
+          {
+            "text": "Know the law of wherever you stand: what is forbidden, what it costs, who enforces it, and which rules are dead letters.",
+            "card": "Know the local law — what's forbidden, the penalty, and which rules nobody enforces",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Draft a binding agreement between willing parties: its terms are enforced by the Cognition, and all parties know exactly what they have agreed to.",
+            "card": "Draft an agreement the Cognition itself enforces",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Determine whether a creature has broken a law in the last month, which one, and whether anyone knows.",
+            "card": "Know what laws someone broke this month, and who knows",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Find the loophole: name any rule, contract, curse or binding, and learn the one legitimate way out of it — if there is one, and there usually is.",
+            "card": "Find the one legitimate way out of any rule, contract or binding",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "In Contempt",
+      "type": "Offensive",
+      "description": "The seal cites them for it on the way past.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6) — two dice if it has broken a stated rule, oath or law in your presence.",
+        "card": "+1 die force — +2 dice against a rule-breaker",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, or four, and it can't take reactions until the start of your next turn.",
+          "card": "+2 dice (4) · no reactions"
+        },
+        {
+          "text": "Level 11+: Three dice, or six, and it is Restrained until the end of its next turn.",
+          "card": "+3 dice (6) · Restrained"
+        }
+      ]
+    },
+    {
+      "name": "Warranted",
+      "type": "Supportive",
+      "description": "Whatever the seal's targets do next, they are entitled to do it.",
+      "effect": {
+        "text": "Each of the seal's targets adds your Verum Modifier to saving throws against being bound, silenced, moved or compelled until the end of its next turn.",
+        "card": "The seal's targets: +{VM} against binding, silencing, forced movement and compulsion",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "save": "+VM against binding and compulsion"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, and they can't be Charmed while it does.",
+          "card": "1 min · no charm"
+        },
+        {
+          "text": "Level 11+: Once each, they may refuse one effect that would bind or compel them outright.",
+          "card": "Once each: refuse a binding outright"
+        }
+      ]
+    },
+    {
+      "name": "Injunction",
+      "type": "Control",
+      "description": "The seal attaches a condition they did not agree to.",
+      "effect": {
+        "text": "Name one action as the seal lands. A creature hit by or failing it can't take that action until the end of its next turn.",
+        "card": "Name an action — those hit or failing can't take it until their next turn",
+        "mech": {
+          "deny": [
+            "one named action"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 minute, with a save at the end of each of its turns.",
+          "card": "1 min, save each turn"
+        },
+        {
+          "text": "Level 11+: Breaking the injunction deals force damage equal to Five Times your Verum Modifier.",
+          "card": "Breaking it costs 5×VM force"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

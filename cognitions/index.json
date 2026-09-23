@@ -25,7 +25,7 @@
       "name": "Anger",
       "icon": "🔴",
       "fa": "fire-flame-curved",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "peace",
       "ready": false
@@ -35,7 +35,7 @@
       "name": "Apathy",
       "icon": "🌫️",
       "fa": "face-meh-blank",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "passion",
       "ready": true
@@ -102,6 +102,16 @@
       "tier": "I",
       "opposing": "beast",
       "ready": true
+    },
+    {
+      "id": "clarity",
+      "name": "Clarity",
+      "icon": "🔍",
+      "fa": "magnifying-glass",
+      "category": "reason",
+      "tier": "I",
+      "opposing": "ignorance",
+      "ready": false
     },
     {
       "id": "control",
@@ -172,7 +182,7 @@
       "name": "Despair",
       "icon": "🥀",
       "fa": "face-sad-tear",
-      "category": "psychic",
+      "category": "mores",
       "tier": "III",
       "requires": [ "Grief", "Apathy" ],
       "opposing": "hope",
@@ -193,7 +203,7 @@
       "name": "Disgust",
       "icon": "🟢",
       "fa": "face-frown-open",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "love",
       "ready": false
@@ -224,7 +234,7 @@
       "name": "Emotion",
       "icon": "❤️‍🔥",
       "fa": "heart",
-      "category": "psychic",
+      "category": "mores",
       "tier": "III",
       "requires": [ "Joy", "Fear" ],
       "divineLaw": "The Honest Law of Emotions",
@@ -232,11 +242,33 @@
       "ready": true
     },
     {
+      "id": "faith",
+      "name": "Faith",
+      "icon": "🕯",
+      "fa": "hands-praying",
+      "category": "mores",
+      "tier": "III",
+      "requires": [ "Hope", "Will" ],
+      "opposing": "despair",
+      "ready": false
+    },
+    {
+      "id": "fate",
+      "name": "Fate",
+      "icon": "🧿",
+      "fa": "infinity",
+      "category": "fate",
+      "tier": "III",
+      "requires": [ "Fortune", "Misfortune" ],
+      "opposing": "freedom",
+      "ready": false
+    },
+    {
       "id": "fear",
       "name": "Fear",
       "icon": "⚫",
       "fa": "eye",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "heroism",
       "ready": false
@@ -272,6 +304,26 @@
       "ready": true
     },
     {
+      "id": "freedom",
+      "name": "Freedom",
+      "icon": "🕊️",
+      "fa": "feather",
+      "category": "dominion",
+      "tier": "I",
+      "opposing": "control",
+      "ready": false
+    },
+    {
+      "id": "games",
+      "name": "Games",
+      "icon": "🎲",
+      "fa": "chess",
+      "category": "dominion",
+      "tier": "I",
+      "opposing": "carnage",
+      "ready": false
+    },
+    {
       "id": "gravity",
       "name": "Gravity",
       "icon": "🪐",
@@ -292,24 +344,55 @@
       "ready": true
     },
     {
+      "id": "harmony",
+      "name": "Harmony",
+      "icon": "🎼",
+      "fa": "music",
+      "category": "fate",
+      "tier": "III",
+      "requires": [ "Balance", "Peace" ],
+      "opposing": "carnage",
+      "ready": false
+    },
+    {
       "id": "hate",
       "name": "Hate",
       "icon": "🔥",
       "fa": "heart-crack",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "love",
-      "ready": true
+      "ready": false
+    },
+    {
+      "id": "healing",
+      "name": "Healing",
+      "icon": "✚",
+      "fa": "kit-medical",
+      "category": "vital",
+      "tier": "II",
+      "opposing": "pain",
+      "ready": false
     },
     {
       "id": "heroism",
       "name": "Heroism",
       "icon": "⚔️",
       "fa": "chess-knight",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "vileness",
       "ready": true
+    },
+    {
+      "id": "history",
+      "name": "History",
+      "icon": "📜",
+      "fa": "scroll",
+      "category": "reason",
+      "tier": "II",
+      "opposing": "lies",
+      "ready": false
     },
     {
       "id": "hollowing",
@@ -320,6 +403,17 @@
       "tier": "IV",
       "requires": [ "Soul", "Void" ],
       "opposing": "night",
+      "ready": false
+    },
+    {
+      "id": "hope",
+      "name": "Hope",
+      "icon": "🌅",
+      "fa": "star",
+      "category": "mores",
+      "tier": "III",
+      "requires": [ "Joy", "Will" ],
+      "opposing": "despair",
       "ready": false
     },
     {
@@ -348,7 +442,7 @@
       "name": "Identity",
       "icon": "🎭",
       "fa": "masks-theater",
-      "category": "psychic",
+      "category": "reason",
       "tier": "IV",
       "requires": [ "History", "Clarity" ],
       "opposing": "oblivion",
@@ -359,7 +453,7 @@
       "name": "Isolation",
       "icon": "🫧",
       "fa": "user-slash",
-      "category": "psychic",
+      "category": "mores",
       "tier": "I",
       "opposing": "civilization",
       "ready": true
@@ -369,9 +463,41 @@
       "name": "Joy",
       "icon": "🟡",
       "fa": "face-laugh",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "despair",
+      "ready": false
+    },
+    {
+      "id": "justice",
+      "name": "Justice",
+      "icon": "⚔",
+      "fa": "scale-unbalanced",
+      "category": "mores",
+      "tier": "III",
+      "requires": [ "Law", "Truth" ],
+      "opposing": "corruption",
+      "ready": false
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "icon": "📚",
+      "fa": "book",
+      "category": "reason",
+      "tier": "III",
+      "requires": [ "Clarity", "History" ],
+      "opposing": "ignorance",
+      "ready": false
+    },
+    {
+      "id": "law",
+      "name": "Law",
+      "icon": "⚖",
+      "fa": "gavel",
+      "category": "dominion",
+      "tier": "I",
+      "opposing": "freedom",
       "ready": false
     },
     {
@@ -388,6 +514,16 @@
       "ready": true
     },
     {
+      "id": "light",
+      "name": "Light",
+      "icon": "🔆",
+      "fa": "lightbulb",
+      "category": "elemental",
+      "tier": "I",
+      "opposing": "shadow",
+      "ready": false
+    },
+    {
       "id": "lightning",
       "name": "Lightning",
       "icon": "⚡",
@@ -396,6 +532,36 @@
       "tier": "II",
       "opposing": "earth",
       "ready": true
+    },
+    {
+      "id": "love",
+      "name": "Love",
+      "icon": "💗",
+      "fa": "hand-holding-heart",
+      "category": "mores",
+      "tier": "II",
+      "opposing": "hate",
+      "ready": false
+    },
+    {
+      "id": "loyalty",
+      "name": "Loyalty",
+      "icon": "🛡️",
+      "fa": "hands-holding",
+      "category": "mores",
+      "tier": "I",
+      "opposing": "betrayal",
+      "ready": false
+    },
+    {
+      "id": "luck",
+      "name": "Luck",
+      "icon": "🍀",
+      "fa": "clover",
+      "category": "fate",
+      "tier": "I",
+      "opposing": "misfortune",
+      "ready": false
     },
     {
       "id": "lunar",
@@ -428,6 +594,16 @@
       "tier": "I",
       "opposing": "fortune",
       "ready": true
+    },
+    {
+      "id": "nature",
+      "name": "Nature",
+      "icon": "🌾",
+      "fa": "leaf",
+      "category": "vital",
+      "tier": "I",
+      "opposing": "civilization",
+      "ready": false
     },
     {
       "id": "night",
@@ -475,6 +651,16 @@
       "ready": true
     },
     {
+      "id": "peace",
+      "name": "Peace",
+      "icon": "🕊",
+      "fa": "dove",
+      "category": "mores",
+      "tier": "II",
+      "opposing": "war",
+      "ready": false
+    },
+    {
       "id": "power",
       "name": "Power",
       "icon": "👊",
@@ -511,9 +697,19 @@
       "name": "Sadness",
       "icon": "🔵",
       "fa": "cloud-rain",
-      "category": "psychic",
+      "category": "mores",
       "tier": "II",
       "opposing": "joy",
+      "ready": false
+    },
+    {
+      "id": "secrets",
+      "name": "Secrets",
+      "icon": "🤫",
+      "fa": "user-secret",
+      "category": "umbral",
+      "tier": "II",
+      "opposing": "truth",
       "ready": false
     },
     {
@@ -583,6 +779,16 @@
       "ready": false
     },
     {
+      "id": "thievery",
+      "name": "Thievery",
+      "icon": "🗝️",
+      "fa": "key",
+      "category": "dominion",
+      "tier": "II",
+      "opposing": "protection",
+      "ready": false
+    },
+    {
       "id": "time",
       "name": "Time",
       "icon": "⏳",
@@ -605,6 +811,37 @@
       "ready": false
     },
     {
+      "id": "travel",
+      "name": "Travel",
+      "icon": "🧭",
+      "fa": "compass",
+      "category": "dominion",
+      "tier": "I",
+      "opposing": "stagnation",
+      "ready": false
+    },
+    {
+      "id": "trickery",
+      "name": "Trickery",
+      "icon": "🃏",
+      "fa": "hat-wizard",
+      "category": "dominion",
+      "tier": "II",
+      "opposing": "truth",
+      "ready": false
+    },
+    {
+      "id": "truth",
+      "name": "Truth",
+      "icon": "👁",
+      "fa": "fingerprint",
+      "category": "reason",
+      "tier": "III",
+      "requires": [ "Clarity", "Light" ],
+      "opposing": "lies",
+      "ready": false
+    },
+    {
       "id": "void",
       "name": "Void",
       "icon": "🌀",
@@ -623,6 +860,37 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "toxin",
+      "ready": false
+    },
+    {
+      "id": "wilderness",
+      "name": "Wilderness",
+      "icon": "🏔️",
+      "fa": "tree",
+      "category": "vital",
+      "tier": "II",
+      "opposing": "civilization",
+      "ready": false
+    },
+    {
+      "id": "will",
+      "name": "Will",
+      "icon": "✊",
+      "fa": "anchor",
+      "category": "reason",
+      "tier": "I",
+      "opposing": "apathy",
+      "ready": false
+    },
+    {
+      "id": "wisdom",
+      "name": "Wisdom",
+      "icon": "🦉",
+      "fa": "brain",
+      "category": "reason",
+      "tier": "III",
+      "requires": [ "Knowledge", "Clarity" ],
+      "opposing": "ignorance",
       "ready": false
     }
   ]

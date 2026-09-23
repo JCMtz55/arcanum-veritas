@@ -1,0 +1,315 @@
+{
+  "id": "freedom",
+  "name": "Freedom",
+  "icon": "🕊️",
+  "opposing": "control",
+  "description": "Release, Escape, The Unbinding of What Was Held. Freedom is the Cognition of the open door and the cut rope. It has no interest in what a creature does once released — only that nothing holds it that it did not choose. Its wielders slip every grip, break every binding, and are very difficult to keep anywhere. It is the direct answer to Control, and the two have never once agreed on anything.",
+  "savingThrow": "Charisma",
+  "damageType": "Force",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Loosed",
+        "card": "drops whatever it is holding"
+      },
+      "major": {
+        "name": "Unmoored",
+        "card": "pushed 15 feet and knocked Prone"
+      },
+      "severe": {
+        "name": "Scattered",
+        "card": "Incapacitated — nothing it holds will stay held"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Cut Loose",
+        "description": "Everything that was holding together stops holding together.",
+        "tiers": [
+          {
+            "text": "The damage becomes force. A creature hit or that fails drops one object it is holding, and any grapple or restraint it was maintaining ends.",
+            "card": "Damage becomes Force · they drop something · their grapples end",
+            "mech": {
+              "damage": {
+                "type": "force"
+              },
+              "disarm": 1
+            }
+          },
+          {
+            "text": "It is pushed 15 feet away from you — through cover, over edges, out of formation — and can't be moved back by an ally's effect this round.",
+            "card": "Pushed 15 ft, wherever that takes them",
+            "mech": {
+              "movement": {
+                "push": 15
+              }
+            }
+          },
+          {
+            "text": "Every binding on the target breaks: grapples, restraints, shackles, and one ongoing effect of the slot level or lower that was holding it — helpful ones included.",
+            "card": "Every binding breaks, helpful ones too (≤ slot)",
+            "mech": {
+              "deny": [
+                "restraints",
+                "one ongoing effect"
+              ]
+            }
+          },
+          {
+            "text": "Everything Unheld. Within 20 feet of the target nothing stays fastened: doors open, knots slip, buckles part, held spells end, and every creature there drops one thing it was holding.",
+            "card": "EVERYTHING UNHELD — 20 ft: doors, knots, buckles, held spells and grips all give way",
+            "mech": {
+              "disarm": 1
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Unbound",
+        "description": "Nothing holds them. Try it and see.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target automatically escapes grapples and restraints at the start of its turn, ignores difficult terrain, and has advantage on saves against being Paralysed or Restrained.",
+            "card": "1 min: auto-escapes grapples and restraints · ignores difficult terrain · advantage vs paralysis and restraint",
+            "mech": {
+              "deny": [
+                "grapples",
+                "restraints"
+              ],
+              "buff": {
+                "who": "target",
+                "advantage": "saves against Paralysed and Restrained"
+              }
+            }
+          },
+          {
+            "text": "It can't be Charmed, and may use its reaction to end one effect on itself that is telling it what to do.",
+            "card": "Can't be Charmed · reaction: end one effect that's commanding it",
+            "mech": {
+              "deny": [
+                "charm"
+              ]
+            }
+          },
+          {
+            "text": "It gains a teleport of 30 feet as a bonus action, usable each turn, which no barrier of the slot level or lower can prevent.",
+            "card": "Bonus-action 30 ft teleport each turn — barriers ≤ slot don't stop it"
+          },
+          {
+            "text": "Unstoppable. The target can't be Grappled, Restrained, Paralysed, Petrified, Stunned, imprisoned or banished, its movement can't be reduced, and no wall, ward or binding of any level can hold it in a place it wants to leave.",
+            "card": "UNSTOPPABLE — nothing grapples, holds, stuns, banishes or walls it in",
+            "mech": {
+              "deny": [
+                "grapple",
+                "restraint",
+                "paralysis",
+                "petrification",
+                "stun",
+                "imprisonment",
+                "banishment"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "No Ranks",
+        "description": "You do not stop them. You make it impossible for them to be organised.",
+        "tiers": [
+          {
+            "text": "A creature that fails can't benefit from any ally's Help, aura, formation or order until the end of its next turn, and any effect that lets an ally move or command it ends.",
+            "card": "Fail: no allied Help, auras, formations or orders until their next turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "allied Help",
+                "auras",
+                "being commanded"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails also drops what it holds and is pushed 10 feet in a direction of your choice.",
+            "card": "They drop what they hold and are pushed 10 ft",
+            "mech": {
+              "disarm": 1,
+              "movement": {
+                "push": 10
+              }
+            }
+          },
+          {
+            "text": "The area becomes unbindable for 1 minute: no effect there can Grapple, Restrain, Paralyse or otherwise hold a creature in place, including yours.",
+            "card": "1 min: nothing inside can grapple, restrain or hold anyone — yours included",
+            "mech": {
+              "deny": [
+                "grapples",
+                "restraints",
+                "holds"
+              ]
+            }
+          },
+          {
+            "text": "Mutiny. A creature that fails will not follow an order for 1 minute, repeating the save at the end of each of its turns — not from a commander, not from a spell, not from a contract, and not from you.",
+            "card": "MUTINY — 1 min, they follow no order from anyone, you included (Cha save each turn)",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Ungovernable",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Open Door",
+        "description": "Locks are a kind of opinion.",
+        "tiers": [
+          {
+            "text": "Open anything that is closed against you: a lock, a knot, a stuck lid, a shackle. Magical seals of the slot level or lower open too.",
+            "card": "Open any lock, knot, lid or shackle — magical ones up to the slot level",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Free a creature from a binding, a cell, a contract's physical terms, or a compulsion of the slot level or lower, at touch.",
+            "card": "Free someone from a binding, a cell, or a compulsion (≤ slot)",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Walk out: for 1 hour you and up to your Verum Modifier companions cannot be confined — walls have doors when you need them, and pursuit loses you.",
+            "card": "1 hr: you and {VM} companions can't be confined, and pursuit loses you",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Break a hold that was never physical: end a curse, an oath, a geas, a debt magically enforced, or a bond of service — though what the other party does about it is their business.",
+            "card": "End a curse, oath, geas or enforced debt — and deal with the consequences",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Nothing Holds",
+        "description": "You build things that refuse to be anyone's but their user's.",
+        "tiers": [
+          {
+            "text": "Your creations cannot be stolen, disarmed or taken: they return to your hand, or their bearer's, at the start of your next turn.",
+            "card": "Creations can't be stolen or disarmed — they come back"
+          },
+          {
+            "text": "Your Structures have no locks that work against those you name, and always have a way out that nobody else can close.",
+            "card": "Your Structures always have a way out only yours can use"
+          },
+          {
+            "text": "Your Constructs cannot be commanded, charmed or compelled by anyone but you, and they ignore difficult terrain and restraints entirely.",
+            "card": "Constructs answer only to you, and nothing slows or holds them"
+          },
+          {
+            "text": "Raise a Free Ground: a Structure inside which no compulsion, charm, contract, geas or binding functions at all, for as long as it stands.",
+            "card": "FREE GROUND — inside it, no compulsion, contract or binding works at all"
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Slip",
+      "type": "Offensive",
+      "description": "The seal takes their grip along with everything else.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus force damage equal to one damage die of the primary effect's type (min 1d6) and drops one object it is holding.",
+        "card": "+1 die force · they drop something",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "force"
+          },
+          "disarm": 1
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target is pushed 10 feet.",
+          "card": "+2 dice · pushed 10 ft"
+        },
+        {
+          "text": "Level 11+: Three dice, and any grapple or restraint it was maintaining ends.",
+          "card": "+3 dice · its grapples end"
+        }
+      ]
+    },
+    {
+      "name": "Loosed",
+      "type": "Supportive",
+      "description": "Whatever was holding the seal's targets isn't any more.",
+      "effect": {
+        "text": "Each of the seal's targets escapes any grapple or restraint at once and ignores difficult terrain until the end of its next turn.",
+        "card": "The seal's targets: free of grapples and restraints · ignore difficult terrain",
+        "mech": {
+          "deny": [
+            "grapples",
+            "restraints"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Each may also end one effect on itself that reduces its speed or forces its movement.",
+          "card": "Each ends one slow or forced movement"
+        },
+        {
+          "text": "Level 11+: Each gains a 20-foot teleport as a bonus action on its next turn.",
+          "card": "A 20 ft bonus-action teleport next turn"
+        }
+      ]
+    },
+    {
+      "name": "Unfastened",
+      "type": "Control",
+      "description": "Small things come undone all around where it landed.",
+      "effect": {
+        "text": "Within 15 feet of the point of impact, doors unlatch, knots slip and buckles part. A creature hit by or failing the seal can't benefit from an ally's Help until the end of its next turn.",
+        "card": "15 ft: latches, knots and buckles give · no allied Help for those who failed",
+        "mech": {
+          "deny": [
+            "allied Help"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Restraints and grapples in the area end, whoever made them.",
+          "card": "All grapples and restraints in the area end"
+        },
+        {
+          "text": "Level 11+: Creatures that failed can't be given orders they must obey until the end of their next turn.",
+          "card": "Those who failed can't be commanded"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

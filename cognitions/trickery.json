@@ -1,0 +1,284 @@
+{
+  "id": "trickery",
+  "name": "Trickery",
+  "icon": "🃏",
+  "opposing": "truth",
+  "description": "Misdirection, The Feint, The Thing That Was Never Where You Looked. Trickery is not illusion and it is not lying — it is the craft of making someone wrong about the world for exactly as long as you need them to be. Its wielders are never quite where they appear, hand out false certainties, and are exceptionally annoying to fight, which is most of the point.",
+  "savingThrow": "Charisma",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Fooled",
+        "card": "disadvantage on its next attack roll"
+      },
+      "major": {
+        "name": "Misled",
+        "card": "it attacks a creature of your choosing instead"
+      },
+      "severe": {
+        "name": "Utterly had",
+        "card": "Incapacitated, acting on something that was never true"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "The Feint",
+        "description": "You were never going for the thing they defended.",
+        "tiers": [
+          {
+            "text": "The damage becomes psychic, and the target's cover, shield and any spell bonus to its Armour Class do not apply — you were never going for the part it defended.",
+            "card": "Damage becomes Psychic · ignores cover, shields and AC spells",
+            "mech": {
+              "damage": {
+                "type": "psychic"
+              },
+              "pierce": "cover and AC bonuses"
+            }
+          },
+          {
+            "text": "Against a creature that has not yet acted this round, or has already spent its reaction, the seal deals 4 additional dice.",
+            "card": "+4 dice against anyone who hasn't acted yet, or has spent their reaction"
+          },
+          {
+            "text": "A creature hit or that fails has disadvantage on its next attack roll — it is still defending against something you are not doing.",
+            "card": "Disadvantage on their next attack",
+            "mech": {
+              "penalty": {
+                "disadvantage": "the next attack roll"
+              }
+            }
+          },
+          {
+            "text": "Never There. After the seal resolves you swap places with an illusory double that has been standing in your spot the whole time: teleport up to 60 feet, and the first attack against you before your next turn automatically misses.",
+            "card": "NEVER THERE — teleport 60 ft, and the next attack on you simply misses"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Sleight",
+        "description": "Nobody watching is going to be able to say what just happened.",
+        "tiers": [
+          {
+            "text": "For 1 minute the target has advantage on Deception, Sleight of Hand and Stealth checks, and attacks against it from creatures that have never seen it fight have disadvantage.",
+            "card": "1 min: advantage on Deception, Sleight of Hand and Stealth · strangers attack it at disadvantage",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "Deception, Sleight of Hand and Stealth"
+              }
+            }
+          },
+          {
+            "text": "A double walks beside it: once while this lasts, an attack that hits the target instead hits the double, which pops, and the target may move 10 feet without provoking.",
+            "card": "A double takes one hit for it — and it slips 10 ft free"
+          },
+          {
+            "text": "The target may swap places with any willing creature within 30 feet as a bonus action, and each time it does, both gain half cover until the start of its next turn.",
+            "card": "Bonus action: swap with a willing ally within 30 ft, both gaining half cover"
+          },
+          {
+            "text": "Three Cards. Two more doubles appear, moving as the target does. Attacks against it have a one in three chance of striking a double instead, which pops harmlessly. They re-form at the start of each of the target's turns.",
+            "card": "THREE CARDS — two doubles, re-forming each turn · attacks may hit the wrong one"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Wrong Thing",
+        "description": "You give them a certainty. It is not true, but it is very convincing.",
+        "tiers": [
+          {
+            "text": "A creature that fails believes one simple false thing until the end of its next turn — an ally is somewhere else, a door is locked, its weapon is broken, you are behind it.",
+            "card": "Fail: it believes one simple false thing until the end of its next turn",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "conditions": [
+                {
+                  "name": "Fooled",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails attacks a target of your choice within its reach instead of the one it intended, once, and is not sure afterwards why it did.",
+            "card": "It swings at whoever you pick instead, once",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Misled"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The confusion lasts 1 minute, repeating the save at the end of each of its turns. While it holds, the creature can't tell your illusions from real things at all, and treats each as whichever is worse for it.",
+            "card": "1 min (Cha save each turn) · it can't tell your illusions from real, and always guesses wrong",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Fooled",
+                  "duration": "1 minute",
+                  "escape": "Charisma save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Had. A creature that fails acts for 1 minute on a false picture of the battlefield that you describe once, quietly, to the DM: where its allies are, what it is standing on, who is winning.",
+            "card": "HAD — for 1 min it acts on a false battlefield you described to the DM"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Prop",
+        "description": "Everything you make is slightly more than it appears, or slightly less.",
+        "tiers": [
+          {
+            "text": "Your creations may look like anything of similar size: a door as a wall, a construct as a servant, a weapon as a walking stick.",
+            "card": "Creations can look like anything of their size"
+          },
+          {
+            "text": "Your Objects have a second function you name when you make them, invisible until used, and undetectable by magic of the slot level or lower.",
+            "card": "Objects hide a second purpose nobody can detect (≤ slot)"
+          },
+          {
+            "text": "Your Structures are never quite the shape they appear: rooms are elsewhere, doors lead somewhere else, and only those you name find the true layout.",
+            "card": "Structures lie about their own layout to everyone but yours"
+          },
+          {
+            "text": "Build a False Front: a permanent Structure that reads to every sense, spell and divination as something entirely ordinary and of no interest whatsoever.",
+            "card": "A FALSE FRONT — permanently reads as something dull and unremarkable to every sense and spell"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Con",
+        "description": "Ninety percent of this is confidence and knowing what they expect.",
+        "tiers": [
+          {
+            "text": "Take on any face, voice, uniform or manner you have seen, for 1 hour. Nobody who does not know the real person can tell.",
+            "card": "Wear any face, voice or uniform you've seen, 1 hr",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Know what a creature expects to see in this situation — and become it, or plant it: a forged document, a seal, a note in someone else's hand, a body that is not the body.",
+            "card": "Know what they expect — then be it, or plant it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Make one creature certain of a single false fact for a day: where you went, who you are, what was in the box. It resists only if the fact costs it something dear.",
+            "card": "One creature is certain of one false fact for a day",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Run a whole confidence: for a week, a place and everyone in it accepts you as whatever you claim to be, so long as no one who truly knows better is standing there.",
+            "card": "A week where a whole place accepts who you claim to be",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Misdirection",
+      "type": "Offensive",
+      "description": "They were watching the other hand.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus psychic damage equal to one damage die of the primary effect's type (min 1d6), and the seal ignores any cover it had.",
+        "card": "+1 die psychic · ignores their cover",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "psychic"
+          },
+          "pierce": "cover"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target has disadvantage on its next attack roll.",
+          "card": "+2 dice · disadvantage on their next attack"
+        },
+        {
+          "text": "Level 11+: Three dice, and you may move 10 feet without provoking after it resolves.",
+          "card": "+3 dice · slip 10 ft free afterwards"
+        }
+      ]
+    },
+    {
+      "name": "Now You Don't",
+      "type": "Supportive",
+      "description": "The seal leaves everyone it touched harder to pin down.",
+      "effect": {
+        "text": "Each of the seal's targets becomes lightly obscured to its enemies until the end of its next turn, and may move 10 feet without provoking opportunity attacks.",
+        "card": "The seal's targets: obscured until their next turn · 10 ft free movement",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "obscured": true
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The first attack against each of them before your next turn has disadvantage.",
+          "card": "The first attack on each has disadvantage"
+        },
+        {
+          "text": "Level 11+: Once each, an attack that hits instead strikes a double and pops it.",
+          "card": "Once each: a hit strikes a double instead"
+        }
+      ]
+    },
+    {
+      "name": "Wrong Foot",
+      "type": "Control",
+      "description": "The seal leaves them sure of something that isn't so.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has disadvantage on its next attack roll and can't take opportunity attacks until the end of its next turn.",
+        "card": "Disadvantage on their next attack · no opportunity attacks",
+        "mech": {
+          "penalty": {
+            "disadvantage": "the next attack roll"
+          },
+          "deny": [
+            "opportunity attacks"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't tell which of your creatures or illusions is real until the end of its next turn.",
+          "card": "It can't tell your real from your false"
+        },
+        {
+          "text": "Level 11+: Once, it attacks a creature of your choice within reach instead of the one it meant to.",
+          "card": "Once: it swings at whoever you pick"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

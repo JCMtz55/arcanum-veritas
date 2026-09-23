@@ -1,0 +1,301 @@
+{
+  "id": "wilderness",
+  "name": "Wilderness",
+  "icon": "🏔️",
+  "opposing": "civilization",
+  "description": "Distance, Exposure, The Country That Does Not Care About You. Nature is the world's arrangement; Wilderness is its indifference — the miles without a road, the cold that does not relent, the fact that nobody is coming. Its wielders are at home in it and can bring it indoors: the sudden sense that help is very far away, and that you are not equipped for this.",
+  "savingThrow": "Wisdom",
+  "damageType": "Cold",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Exposed",
+        "card": "disadvantage on its next Constitution save"
+      },
+      "major": {
+        "name": "Stranded",
+        "card": "Restrained by the country itself"
+      },
+      "severe": {
+        "name": "Lost to it",
+        "card": "Incapacitated — it cannot find its way or its people"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Exposure",
+        "description": "Not an attack. Just the distance, the cold, and how long it has been.",
+        "tiers": [
+          {
+            "text": "The damage becomes cold. A creature hit or that fails has disadvantage on its next Constitution saving throw.",
+            "card": "Damage becomes Cold · disadvantage on their next Con save",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "penalty": {
+                "disadvantage": "the next Constitution save"
+              }
+            }
+          },
+          {
+            "text": "The country turns against it: its speed is reduced by 15 feet until the end of its next turn, and it can't take the Dash action.",
+            "card": "−15 ft speed · no Dash",
+            "mech": {
+              "penalty": {
+                "speed": -15
+              },
+              "deny": [
+                "Dash"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails gains 1 level of exhaustion — it has been out here far longer than it was a moment ago.",
+            "card": "1 level of exhaustion",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Exhaustion"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Nobody Is Coming. A creature hit or that fails can't be healed, helped, reached or rescued by its allies until the end of its next turn — they are, as far as everyone involved is concerned, very far away.",
+            "card": "NOBODY IS COMING — no healing, help or rescue reaches them until their next turn",
+            "mech": {
+              "deny": [
+                "being healed or helped"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "At Home Out Here",
+        "description": "The country stops being a problem and starts being an advantage.",
+        "tiers": [
+          {
+            "text": "For 8 hours the target ignores extreme heat, cold and altitude, needs half the food and water, and has advantage on checks to forage, track or navigate.",
+            "card": "8 hrs: no weather, half rations · advantage to forage, track and navigate",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "advantage": "foraging, tracking and navigation"
+              }
+            }
+          },
+          {
+            "text": "It moves at full speed through any natural terrain, leaves no trail, and can't be tracked by anything that is not itself Wilderness.",
+            "card": "Full speed anywhere natural · leaves no trail at all"
+          },
+          {
+            "text": "It takes no damage from environmental hazards of the slot level or lower, and gains half cover in any natural terrain.",
+            "card": "Immune to natural hazards (≤ slot) · half cover in wild country"
+          },
+          {
+            "text": "Of the Country. The target can't be Lost, Exhausted by travel, starved, frozen or drowned; it always knows the way to the nearest shelter, water and living thing; and the wild will not be the thing that kills it.",
+            "card": "OF THE COUNTRY — it can't be lost, starved, frozen or drowned · the wild will not kill it"
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Miles",
+        "description": "You put distance into a room. Everything is suddenly much further away.",
+        "tiers": [
+          {
+            "text": "The area becomes trackless for 1 minute: it is difficult terrain, and a creature that fails can't tell which way it came in.",
+            "card": "1 min trackless: difficult terrain · those who fail can't find the way back",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "terrain": {
+                "difficult": true
+              }
+            }
+          },
+          {
+            "text": "Weather comes in: choose cold, wind or fog. The area is heavily obscured or halves movement, and creatures that failed take Twice your Verum Modifier in cold damage at the start of each of their turns.",
+            "card": "Weather: obscured or halved movement · 2×VM cold a turn to those who failed",
+            "mech": {
+              "rider": {
+                "damage": "2×VM",
+                "type": "cold",
+                "when": "start of each of their turns inside"
+              }
+            }
+          },
+          {
+            "text": "Distance stretches: creatures inside can't reach each other's positions in one move, can't be healed from outside the area, and shouted orders do not carry.",
+            "card": "Nobody crosses it in one move · no healing from outside · no orders carry",
+            "mech": {
+              "deny": [
+                "healing from outside",
+                "shouted orders"
+              ]
+            }
+          },
+          {
+            "text": "The Long Cold. The area lasts 10 minutes. Creatures that failed gain 1 level of exhaustion for every 2 rounds they remain, can't take long or short rests there, and if reduced to 0 hit points inside, they are simply not found.",
+            "card": "THE LONG COLD — 10 min: exhaustion every 2 rounds inside · no rests · the fallen are not found",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Exhaustion"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Shelter and Cairn",
+        "description": "You build the things the country demands: a windbreak, a marker, a fire that holds.",
+        "tiers": [
+          {
+            "text": "Your creations are weatherproof and self-sustaining: a shelter, a fire, a cache or a bridge that needs no tending and lasts twice as long.",
+            "card": "Creations need no tending and last twice as long"
+          },
+          {
+            "text": "Your Structures grant a full long rest's benefit in half the time to anyone sheltering in them, whatever the weather.",
+            "card": "A long rest in half the time, in any weather"
+          },
+          {
+            "text": "Your Objects are trail-marks only those you name can see — visible across miles, through fog, snow and night.",
+            "card": "Trail-marks across miles, visible only to your named"
+          },
+          {
+            "text": "Raise a Waystation: a permanent Structure that cannot be found by anyone hostile to those sheltering there, and is always stocked with exactly enough.",
+            "card": "A WAYSTATION — permanent, hidden from the hostile, always stocked with enough"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Out There",
+        "description": "Everything the country will tell you, if you know how to be quiet.",
+        "tiers": [
+          {
+            "text": "Know where water, shelter, food and the nearest people are within ten miles, and what the weather will do for three days.",
+            "card": "Water, shelter, food and people within 10 miles · three days of weather",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Travel with your companions at double pace for a week without fatigue, rations or a road — and nobody follows you unless they have Wilderness too.",
+            "card": "A week at double pace, no rations, no road, and no one follows",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Read the country for a month back: who crossed it, how many, how heavy, and whether they came out the other side.",
+            "card": "Read a month of crossings — who, how many, and whether they made it",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Make a place remote: for a season, a location becomes genuinely hard to reach — roads wash out, guides refuse, and those who set out mostly turn back.",
+            "card": "Make a place genuinely remote for a season — roads fail and guides refuse",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Bitter Cold",
+      "type": "Offensive",
+      "description": "The seal brings the weather with it.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus cold damage equal to one damage die of the primary effect's type (min 1d6) and has its speed reduced by 10 feet until the end of its next turn.",
+        "card": "+1 die cold · −10 ft speed",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "cold"
+          },
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and disadvantage on its next Constitution saving throw.",
+          "card": "+2 dice · disadvantage on their next Con save"
+        },
+        {
+          "text": "Level 11+: Three dice, and a creature already suffering exhaustion gains another level.",
+          "card": "+3 dice · the already-exhausted gain a level"
+        }
+      ]
+    },
+    {
+      "name": "Hardy",
+      "type": "Supportive",
+      "description": "The seal's targets stop noticing the weather.",
+      "effect": {
+        "text": "Each of the seal's targets ignores extreme weather, natural difficult terrain and environmental cold until the end of its next turn, and has advantage on its next Constitution saving throw.",
+        "card": "The seal's targets: ignore weather and rough ground · advantage on their next Con save",
+        "mech": {
+          "deny": [
+            "natural difficult terrain",
+            "extreme weather"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 8 hours, and they need half rations while it does.",
+          "card": "8 hrs · half rations"
+        },
+        {
+          "text": "Level 11+: They also take no damage from natural hazards of 3rd level or lower.",
+          "card": "No damage from natural hazards (≤ 3rd)"
+        }
+      ]
+    },
+    {
+      "name": "Far From Help",
+      "type": "Control",
+      "description": "The seal lands, and the walls feel a long way off.",
+      "effect": {
+        "text": "A creature hit by or failing the seal can't be healed or helped by its allies until the end of its next turn.",
+        "card": "No healing or Help from their allies until their next turn",
+        "mech": {
+          "deny": [
+            "being healed or helped"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The 15 feet around it also becomes difficult terrain for 1 minute.",
+          "card": "15 ft of difficult terrain, 1 min"
+        },
+        {
+          "text": "Level 11+: It also can't take the Dash action or be teleported to while it lasts.",
+          "card": "No Dash, and nobody can teleport to them"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

@@ -1,0 +1,297 @@
+{
+  "id": "truth",
+  "name": "Truth",
+  "icon": "👁",
+  "opposing": "lies",
+  "description": "What Is The Case, Whether Or Not Anyone Wants It To Be. Built from Clarity and Light, Truth is the Cognition of the unarguable: it strips illusion, compels honesty, and makes a fact impossible to deny in the room where it is spoken. It is a prerequisite of Naming and of Justice, and it is feared out of all proportion to its damage, because most power in Ephemer rests on something not being said.",
+  "savingThrow": "Charisma",
+  "damageType": "Radiant",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Exposed",
+        "card": "can't lie or conceal its intentions"
+      },
+      "major": {
+        "name": "Unveiled",
+        "card": "its disguises and illusions end, and it can't remake them"
+      },
+      "severe": {
+        "name": "Laid bare",
+        "card": "Incapacitated — everything about it is visible to everyone"
+      }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Undeniable",
+        "description": "You say the thing that is so. It lands like a weight, because it is one.",
+        "tiers": [
+          {
+            "text": "The damage becomes radiant and ignores illusion, disguise, mirror image and any miss chance — you struck the thing itself, not the version on offer.",
+            "card": "Damage becomes Radiant · ignores illusions, disguises and miss chances",
+            "mech": {
+              "damage": {
+                "type": "radiant"
+              },
+              "pierce": "illusion and miss chance"
+            }
+          },
+          {
+            "text": "A creature hit or that fails can't lie, disguise itself or conceal its intentions until the end of its next turn.",
+            "card": "No lying, disguising or concealing until their next turn",
+            "mech": {
+              "deny": [
+                "lying",
+                "disguise"
+              ]
+            }
+          },
+          {
+            "text": "Against a creature that is not what it appears to be — a shapechanger, an impostor, a possessing spirit, a thing wearing a name it was not given — the seal deals 4 additional dice.",
+            "card": "+4 dice against anything pretending to be something else"
+          },
+          {
+            "text": "As It Is. A creature that fails is returned to its true form and held there for 1 minute, its every disguise, illusion, false name and borrowed shape ending at once — and everyone present sees what it actually is.",
+            "card": "AS IT IS — true form, held 1 min, in front of everyone",
+            "mech": {
+              "deny": [
+                "shapechange",
+                "disguise",
+                "illusion"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Nothing But",
+        "description": "In this space, people say what is so. Some of them have never done that.",
+        "tiers": [
+          {
+            "text": "For 1 minute no creature that failed can speak a deliberate falsehood inside the area, though it may refuse to answer.",
+            "card": "1 min: those who failed can't lie inside — though they may stay silent",
+            "mech": {
+              "save": {
+                "ability": "Charisma"
+              },
+              "deny": [
+                "lying"
+              ]
+            }
+          },
+          {
+            "text": "Illusions, disguises and invisibility of the slot level or lower end inside the area and cannot be remade there.",
+            "card": "Illusions, disguises and invisibility (≤ slot) end inside and stay ended",
+            "mech": {
+              "deny": [
+                "illusion",
+                "disguise",
+                "invisibility"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails must answer one question truthfully when directly asked, once per round, though it chooses how much to say.",
+            "card": "1/round, a creature that failed must answer one question truthfully",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Compelled to answer"
+                }
+              ]
+            }
+          },
+          {
+            "text": "The Whole Truth. Creatures that failed cannot mislead at all: not by silence, omission, gesture, forged document or proxy. Anything false stated in the area is heard by everyone present as false, in the speaker's own voice.",
+            "card": "THE WHOLE TRUTH — no lies, no omissions, no proxies · falsehoods are heard as false by all",
+            "mech": {
+              "deny": [
+                "deception of any kind"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Clear-Eyed",
+        "description": "They see what is there. It is a surprisingly rare condition.",
+        "tiers": [
+          {
+            "text": "For 1 hour the target sees through illusions and disguises it can see clearly, and knows when it is being lied to, though not what the truth is.",
+            "card": "1 hr: sees through illusion and disguise · knows when it's being lied to",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "sight": "through illusion and disguise"
+              }
+            }
+          },
+          {
+            "text": "It can't be Charmed or Frightened by anything that relies on a false impression, and has advantage on Insight and Investigation checks.",
+            "card": "No charm or fear built on a lie · advantage on Insight and Investigation",
+            "mech": {
+              "deny": [
+                "charm and fear from false impressions"
+              ]
+            }
+          },
+          {
+            "text": "Once while this lasts, the target may ask one creature it can see a single question, and that creature must answer truthfully or say nothing at all.",
+            "card": "Once: ask anyone one question — truth or silence, nothing else"
+          },
+          {
+            "text": "Truesight. For the hour the target has truesight to 60 feet, cannot be deceived by magic of any level, and always knows the true name and nature of anything it looks at directly.",
+            "card": "TRUESIGHT 60 ft · no magical deception at any level · true names on sight"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Plain Make",
+        "description": "Everything you build is exactly what it looks like, and cannot be made to look otherwise.",
+        "tiers": [
+          {
+            "text": "Your creations can't be disguised, illusioned, forged or misrepresented by any means, and everyone can see precisely what they are for.",
+            "card": "Creations can't be disguised, forged or misrepresented"
+          },
+          {
+            "text": "Your Objects reveal: anything held near one is shown as it truly is, and no false document, seal or coin can pass beside it.",
+            "card": "Objects reveal what's near them — no forgery passes"
+          },
+          {
+            "text": "Your Structures cannot be entered invisibly, in disguise, or under a false name, and those inside can see each other's true forms.",
+            "card": "Nobody enters your Structures hidden, disguised or under a false name"
+          },
+          {
+            "text": "Raise a Witness Stone: a permanent Structure at which nothing false can be spoken, and every statement made is preserved exactly as said, for anyone to hear afterwards.",
+            "card": "A WITNESS STONE — no falsehood may be spoken, and every word is kept"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Fact of the Matter",
+        "description": "Finding out, which is more dangerous than most people expect.",
+        "tiers": [
+          {
+            "text": "Ask one creature one question. It must answer truthfully, refuse aloud, or be visibly unable to speak — and everyone present sees which.",
+            "card": "One question: answered truly, refused aloud, or visibly choked on",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Determine whether any statement, document, seal or claim you can examine is true, false, or true-but-misleading.",
+            "card": "Judge any statement or document: true, false, or true-but-misleading",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Strip a deception from a place or a person: an illusion of any level, a false identity, an assumed shape, a planted memory — revealed, and unable to reassert itself for a day.",
+            "card": "Strip any illusion or false identity — it can't come back for a day",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Make a thing known: state one true fact aloud, and every creature within a mile who has a stake in it learns it, in their own language, with the certainty that it is so.",
+            "card": "Speak one true fact — everyone within a mile who has a stake learns it, and believes it",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Cuts Through",
+      "type": "Offensive",
+      "description": "The seal goes to the real thing, not the presented one.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus radiant damage equal to one damage die of the primary effect's type (min 1d6), and the seal ignores illusions, disguises and miss chances.",
+        "card": "+1 die radiant · ignores illusion, disguise and miss chance",
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "radiant"
+          },
+          "pierce": "illusion and miss chance"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Two dice, and the target can't lie or disguise itself until the end of its next turn.",
+          "card": "+2 dice · no lying or disguises"
+        },
+        {
+          "text": "Level 11+: Three dice, or six against a shapechanger, impostor or possessed creature.",
+          "card": "+3 dice (6 against impostors)"
+        }
+      ]
+    },
+    {
+      "name": "Seen Plainly",
+      "type": "Supportive",
+      "description": "The seal leaves its targets hard to fool.",
+      "effect": {
+        "text": "Each of the seal's targets sees through illusions and disguises, and knows when it is being lied to, until the end of its next turn.",
+        "card": "The seal's targets: see through illusion and disguise · catch every lie",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "sight": "through illusion and disguise"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It lasts 1 hour, and they can't be Charmed by anything built on a false impression.",
+          "card": "1 hr · no charm built on a lie"
+        },
+        {
+          "text": "Level 11+: Each gains truesight to 30 feet while it lasts.",
+          "card": "Truesight 30 ft"
+        }
+      ]
+    },
+    {
+      "name": "Unveiled",
+      "type": "Control",
+      "description": "Whatever the seal touched stops being able to pretend.",
+      "effect": {
+        "text": "A creature hit by or failing the seal loses any illusion, disguise or invisibility of 3rd level or lower, and can't lie until the end of its next turn.",
+        "card": "Their disguise or invisibility (≤ 3rd) ends · no lying until their next turn",
+        "mech": {
+          "deny": [
+            "illusion",
+            "disguise",
+            "invisibility",
+            "lying"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It applies to effects of the slot level or lower, and they can't be remade for 1 minute.",
+          "card": "Up to the slot level · can't be remade for 1 min"
+        },
+        {
+          "text": "Level 11+: A shapechanger that fails is forced into its true form until the end of its next turn.",
+          "card": "Shapechangers snap back to true form"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

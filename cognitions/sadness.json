@@ -10,19 +10,34 @@
     "title": "Primal Harvest",
     "text": "A Primal seal leaves raw emotion behind it, and you are standing right there.",
     "traits": [
-      { "name": "Harvest", "level": 1,
+      {
+        "name": "Harvest",
+        "level": 1,
         "text": "Once per seal, when your Sadness seal damages a creature or a creature fails its save, you may fill one empty Emotion Vessel you carry with Sadness — no Extraction check, no attunement to Emotion required.",
-        "card": "1/seal: fill an empty vessel with Sadness, no check" },
-      { "name": "Deep Harvest", "level": 11,
+        "card": "1/seal: fill an empty vessel with Sadness, no check"
+      },
+      {
+        "name": "Deep Harvest",
+        "level": 11,
         "text": "The harvest yields two Sadness instead of one, or, if the creature's dominant feeling is a Complex Emotion built on Sadness, that emotion whole.",
-        "card": "Harvest 2 Sadness — or the whole Complex Emotion if Sadness is at its root" }
+        "card": "Harvest 2 Sadness — or the whole Complex Emotion if Sadness is at its root"
+      }
     ]
   },
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Heavy", "card": "its speed is halved" },
-      "major":  { "name": "Grieving", "card": "Charmed — it cannot bring itself to strike you" },
-      "severe": { "name": "Bereft", "card": "Incapacitated, weeping" }
+      "minor": {
+        "name": "Heavy",
+        "card": "its speed is halved"
+      },
+      "major": {
+        "name": "Grieving",
+        "card": "Charmed — it cannot bring itself to strike you"
+      },
+      "severe": {
+        "name": "Bereft",
+        "card": "Incapacitated, weeping"
+      }
     }
   },
   "verumEffects": {
@@ -31,18 +46,52 @@
         "name": "The Ache",
         "description": "You give them the weight of everything they have lost, all at once, in the middle of a fight.",
         "tiers": [
-          { "text": "The damage becomes cold and increases by 2 additional dice. A creature hit or that fails has its speed halved until the end of its next turn.",
-            "card": "+2 dice · damage becomes Cold · speed halved until the end of their next turn",
-            "mech": { "damage": { "bonusDice": 2, "type": "cold" }, "penalty": { "speed": "half" } } },
-          { "text": "The damage increases by 4 additional dice, and a creature hit or that fails can't take reactions and loses any temporary hit points and Inspiration it has.",
-            "card": "+4 dice · no reactions · temp HP and Inspiration lost",
-            "mech": { "damage": { "bonusDice": 4, "type": "cold" }, "deny": [ "reactions", "temporary hit points", "Inspiration" ] } },
-          { "text": "The damage increases by 6 additional dice, and the ache stays for 1 minute, repeating the Wisdom save at the end of each of its turns. While it holds, the creature deals one die less damage with its own attacks.",
-            "card": "+6 dice · the ache holds 1 min (Wis save each turn) · −1 damage die on its own attacks",
-            "mech": { "damage": { "bonusDice": 6, "type": "cold" }, "penalty": { "damage": "−1 die" } } },
-          { "text": "Grief. The damage increases by 8 additional dice. A creature hit or that fails is Incapacitated with grief until the end of its next turn, and for the minute after it can't attack the creature it cares most about — which, briefly, it will remember.",
-            "card": "+8 dice · GRIEF — Incapacitated until their next turn · then can't attack what they love most",
-            "mech": { "damage": { "bonusDice": 8, "type": "cold" }, "conditions": [ { "name": "Incapacitated", "duration": "until the end of its next turn" } ] } }
+          {
+            "text": "The damage becomes cold. A creature hit or that fails has its speed halved until the end of its next turn.",
+            "card": "Damage becomes Cold · half speed until the end of their next turn",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "penalty": {
+                "speed": "half"
+              }
+            }
+          },
+          {
+            "text": "The ache carries to everyone who sees it fall: each other enemy within 15 feet takes a quarter of the damage and loses any temporary hit points and Inspiration.",
+            "card": "A quarter to every enemy within 15 ft · their temp HP and Inspiration lost",
+            "mech": {
+              "deny": [
+                "temporary hit points",
+                "Inspiration"
+              ]
+            }
+          },
+          {
+            "text": "A creature hit or that fails can't take reactions, and deals one die less damage with its own attacks, until the end of its next turn.",
+            "card": "No reactions · −1 damage die on their own attacks",
+            "mech": {
+              "deny": [
+                "reactions"
+              ],
+              "penalty": {
+                "damage": "−1 die"
+              }
+            }
+          },
+          {
+            "text": "Grief. A creature hit or that fails is Incapacitated with grief until the end of its next turn, and for the minute after it can't attack the creature it cares most about — which, briefly, it will remember.",
+            "card": "GRIEF — Incapacitated a turn · then it can't attack what it loves",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "duration": "until the end of its next turn"
+                }
+              ]
+            }
+          }
         ]
       }
     ],
@@ -51,18 +100,46 @@
         "name": "Shared Weight",
         "description": "Sorrow's one mercy: it is lighter split between people.",
         "tiers": [
-          { "text": "For 1 minute, when the target takes damage, you may take half of it instead as cold damage — and while you share it, the target has advantage on saves against Vile-emotion effects.",
+          {
+            "text": "For 1 minute, when the target takes damage, you may take half of it instead as cold damage — and while you share it, the target has advantage on saves against Vile-emotion effects.",
             "card": "1 min: take half the target's damage yourself as cold · it gains advantage vs Vile effects",
-            "mech": { "buff": { "who": "target", "reduce": "half, transferred to you" } } },
-          { "text": "The seal's targets are bound to one another: each may use its reaction to grant another advantage on a roll, at any distance, so long as both can be seen by you.",
+            "mech": {
+              "buff": {
+                "who": "target",
+                "reduce": "half, transferred to you"
+              }
+            }
+          },
+          {
+            "text": "The seal's targets are bound to one another: each may use its reaction to grant another advantage on a roll, at any distance, so long as both can be seen by you.",
             "card": "The targets are bound — each may spend a reaction to grant another advantage, at any range",
-            "mech": { "buff": { "who": "the seal's targets", "advantage": "granted to one another as a reaction" } } },
-          { "text": "Any damage you take through the bond is halved again, and each bound creature regains hit points equal to Five Times the slot level the first time another of them drops below half.",
+            "mech": {
+              "buff": {
+                "who": "the seal's targets",
+                "advantage": "granted to one another as a reaction"
+              }
+            }
+          },
+          {
+            "text": "Any damage you take through the bond is halved again, and each bound creature regains hit points equal to Five Times the slot level the first time another of them drops below half.",
             "card": "Shared damage is halved again · 5 × {SLOT} HP when one of them falls below half",
-            "mech": { "heal": { "perSlot": 5, "who": "the bound creatures, once each" } } },
-          { "text": "Nothing Alone. While the bond lasts, no bound creature can be Frightened, Charmed or made to act against the others, and if one drops to 0 hit points the rest may each spend their reaction to give it hit points equal to Twice your Verum Modifier, bringing it back to its feet.",
+            "mech": {
+              "heal": {
+                "perSlot": 5,
+                "who": "the bound creatures, once each"
+              }
+            }
+          },
+          {
+            "text": "Nothing Alone. While the bond lasts, no bound creature can be Frightened, Charmed or made to act against the others, and if one drops to 0 hit points the rest may each spend their reaction to give it hit points equal to Twice your Verum Modifier, bringing it back to its feet.",
             "card": "NOTHING ALONE — no fear, charm or turning on each other · when one falls, the others can each give 2×VM to raise it",
-            "mech": { "deny": [ "fear", "charm" ] } }
+            "mech": {
+              "deny": [
+                "fear",
+                "charm"
+              ]
+            }
+          }
         ]
       }
     ],
@@ -71,18 +148,57 @@
         "name": "The Long Winter",
         "description": "Everything slows. Everything is further away than it was.",
         "tiers": [
-          { "text": "The area is heavy for 1 minute. A creature that fails has its speed halved and can't take the Dash action while it remains inside.",
+          {
+            "text": "The area is heavy for 1 minute. A creature that fails has its speed halved and can't take the Dash action while it remains inside.",
             "card": "1 min: those who fail move at half speed and can't Dash inside",
-            "mech": { "save": { "ability": "Wisdom" }, "penalty": { "speed": "half" }, "deny": [ "Dash" ] } },
-          { "text": "A creature that fails also can't take reactions, and its attacks against anyone but the creature that last wounded it are made at disadvantage.",
+            "mech": {
+              "save": {
+                "ability": "Wisdom"
+              },
+              "penalty": {
+                "speed": "half"
+              },
+              "deny": [
+                "Dash"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails also can't take reactions, and its attacks against anyone but the creature that last wounded it are made at disadvantage.",
             "card": "No reactions · disadvantage attacking anyone but whoever last hurt them",
-            "mech": { "deny": [ "reactions" ] } },
-          { "text": "A creature that fails is Charmed by you while it stays inside, repeating the save at the end of each of its turns: it cannot bring itself to strike you, though it will defend itself from others.",
+            "mech": {
+              "deny": [
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "A creature that fails is Charmed by you while it stays inside, repeating the save at the end of each of its turns: it cannot bring itself to strike you, though it will defend itself from others.",
             "card": "Charmed inside (Wis save each turn) — it can't bring itself to strike you",
-            "mech": { "conditions": [ { "name": "Charmed", "escape": "Wisdom save at the end of each of its turns" } ] } },
-          { "text": "Stillness. For 1 minute the area is silent and slow: no creature inside that failed can take more than one action or bonus action on its turn, healing inside is halved, and any creature that begins two consecutive turns inside is Incapacitated until it leaves.",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed",
+                  "escape": "Wisdom save at the end of each of its turns"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Stillness. For 1 minute the area is silent and slow: no creature inside that failed can take more than one action or bonus action on its turn, healing inside is halved, and any creature that begins two consecutive turns inside is Incapacitated until it leaves.",
             "card": "STILLNESS — one action OR bonus action a turn · healing halved · two turns inside: Incapacitated until they leave",
-            "mech": { "conditions": [ { "name": "Incapacitated", "escape": "leaving the area" } ], "penalty": { "healing": "half" } } }
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated",
+                  "escape": "leaving the area"
+                }
+              ],
+              "penalty": {
+                "healing": "half"
+              }
+            }
+          }
         ]
       }
     ],
@@ -91,14 +207,22 @@
         "name": "Memorial",
         "description": "You build the thing that remembers, so the living don't have to carry all of it.",
         "tiers": [
-          { "text": "Your creations hold a sorrow you name. Anyone who touches one feels it exactly as you did, and knows it is not theirs.",
-            "card": "Creations hold a grief — touch one and feel it, knowing it isn't yours" },
-          { "text": "Your Structures are places of mourning: a creature that spends 10 minutes at one sheds one Vile condition or a level of exhaustion, and nothing hostile to the dead can enter.",
-            "card": "10 minutes at a Structure sheds a Vile condition or exhaustion · the dead's enemies can't enter" },
-          { "text": "An Object you make can carry a grief out of a living creature and hold it instead — the creature remembers what it lost without being crushed by it, for as long as the Object stands.",
-            "card": "An Object can take a grief out of someone and hold it for them" },
-          { "text": "A Cairn. One Structure becomes permanent and known: the dead remembered there cannot be raised as undead or bound as Nightmares, and those who mourn there are answered — you may ask the memorial one question about the dead it holds, and it answers truly.",
-            "card": "A CAIRN — its dead can't be raised or bound · ask it one true question of them" }
+          {
+            "text": "Your creations hold a sorrow you name. Anyone who touches one feels it exactly as you did, and knows it is not theirs.",
+            "card": "Creations hold a grief — touch one and feel it, knowing it isn't yours"
+          },
+          {
+            "text": "Your Structures are places of mourning: a creature that spends 10 minutes at one sheds one Vile condition or a level of exhaustion, and nothing hostile to the dead can enter.",
+            "card": "10 minutes at a Structure sheds a Vile condition or exhaustion · the dead's enemies can't enter"
+          },
+          {
+            "text": "An Object you make can carry a grief out of a living creature and hold it instead — the creature remembers what it lost without being crushed by it, for as long as the Object stands.",
+            "card": "An Object can take a grief out of someone and hold it for them"
+          },
+          {
+            "text": "A Cairn. One Structure becomes permanent and known: the dead remembered there cannot be raised as undead or bound as Nightmares, and those who mourn there are answered — you may ask the memorial one question about the dead it holds, and it answers truly.",
+            "card": "A CAIRN — its dead can't be raised or bound · ask it one true question of them"
+          }
         ]
       }
     ],
@@ -107,18 +231,34 @@
         "name": "Condolence",
         "description": "Knowing what was lost is most of knowing a person.",
         "tiers": [
-          { "text": "Know what a creature you can see has lost, and how recently. It knows you know, and takes it as kindness unless it has reason not to.",
+          {
+            "text": "Know what a creature you can see has lost, and how recently. It knows you know, and takes it as kindness unless it has reason not to.",
             "card": "Know what someone has lost, and when",
-            "mech": { "utility": true } },
-          { "text": "Ease a grief for 24 hours: the target is not numbed, but can function — no penalties from mourning, and advantage on saves against Vile-emotion effects that use its loss.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Ease a grief for 24 hours: the target is not numbed, but can function — no penalties from mourning, and advantage on saves against Vile-emotion effects that use its loss.",
             "card": "Ease a grief for 24 hrs — able to function, warded against what would use it",
-            "mech": { "utility": true } },
-          { "text": "Stand where something terrible happened and see it: the last hour before a death, a ruin, or a place that mourns, as though you had been there.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Stand where something terrible happened and see it: the last hour before a death, a ruin, or a place that mourns, as though you had been there.",
             "card": "See the last hour before a death or a ruin, as if you'd been there",
-            "mech": { "utility": true } },
-          { "text": "Weep for someone properly: a creature dead no more than a day that is mourned by you can answer three questions, and a soul held by an unfinished sorrow is released by the answering.",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Weep for someone properly: a creature dead no more than a day that is mourned by you can answer three questions, and a soul held by an unfinished sorrow is released by the answering.",
             "card": "Mourn the day-dead for three answers — and release a soul held by unfinished sorrow",
-            "mech": { "utility": true } }
+            "mech": {
+              "utility": true
+            }
+          }
         ]
       }
     ]
@@ -128,36 +268,81 @@
       "name": "Heavy Blow",
       "type": "Offensive",
       "description": "The seal lands, and so does everything else they were carrying.",
-      "effect": { "text": "On a hit or failed saving throw, the target takes bonus cold damage equal to one damage die of the primary effect's type (min 1d6), and its speed is reduced by 10 feet until the end of its next turn.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus cold damage equal to one damage die of the primary effect's type (min 1d6), and its speed is reduced by 10 feet until the end of its next turn.",
         "card": "+1 die cold · −10 ft speed until the end of their next turn",
-        "mech": { "damage": { "dice": "1d6", "type": "cold" }, "penalty": { "speed": -10 } } },
+        "mech": {
+          "damage": {
+            "dice": "1d6",
+            "type": "cold"
+          },
+          "penalty": {
+            "speed": -10
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Two dice, and the target loses any temporary hit points and Inspiration.", "card": "+2 dice · temp HP and Inspiration lost" },
-        { "text": "Level 11+: Three dice, and the target can't take reactions until the start of your next turn.", "card": "+3 dice · no reactions until your next turn" }
+        {
+          "text": "Level 5+: Two dice, and the target loses any temporary hit points and Inspiration.",
+          "card": "+2 dice · temp HP and Inspiration lost"
+        },
+        {
+          "text": "Level 11+: Three dice, and the target can't take reactions until the start of your next turn.",
+          "card": "+3 dice · no reactions until your next turn"
+        }
       ]
     },
     {
       "name": "Kinship",
       "type": "Supportive",
       "description": "The seal reminds each of them that the others are there.",
-      "effect": { "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and while any of them is within 30 feet of another, each has advantage on saves against Frightened and Charmed.",
+      "effect": {
+        "text": "Each of the seal's targets gains temporary hit points equal to your Verum Modifier + the slot level, and while any of them is within 30 feet of another, each has advantage on saves against Frightened and Charmed.",
         "card": "The seal's targets: {VM} + {SLOT} temp HP · within 30 ft of each other, advantage vs fear and charm",
-        "mech": { "buff": { "who": "the seal's targets", "tempHP": "VM + slot level", "advantage": "saves against Frightened and Charmed while near one another" } } },
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM + slot level",
+            "advantage": "saves against Frightened and Charmed while near one another"
+          }
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: Once, one target may take the damage of an attack aimed at another within 30 feet, halved.", "card": "Once: a target takes a hit meant for another, halved" },
-        { "text": "Level 11+: While within 30 feet of one another, each may use its reaction to grant another advantage on a roll.", "card": "Spend a reaction to give another advantage" }
+        {
+          "text": "Level 5+: Once, one target may take the damage of an attack aimed at another within 30 feet, halved.",
+          "card": "Once: a target takes a hit meant for another, halved"
+        },
+        {
+          "text": "Level 11+: While within 30 feet of one another, each may use its reaction to grant another advantage on a roll.",
+          "card": "Spend a reaction to give another advantage"
+        }
       ]
     },
     {
       "name": "Sorrow's Drag",
       "type": "Control",
       "description": "It is all suddenly very far to walk.",
-      "effect": { "text": "A creature hit by or failing the seal has its speed halved and can't take the Dash action until the end of its next turn.",
+      "effect": {
+        "text": "A creature hit by or failing the seal has its speed halved and can't take the Dash action until the end of its next turn.",
         "card": "Half speed, no Dash until the end of their next turn",
-        "mech": { "penalty": { "speed": "half" }, "deny": [ "Dash" ] } },
+        "mech": {
+          "penalty": {
+            "speed": "half"
+          },
+          "deny": [
+            "Dash"
+          ]
+        }
+      },
       "upgrades": [
-        { "text": "Level 5+: It also can't take reactions while slowed.", "card": "No reactions either" },
-        { "text": "Level 11+: If it is already suffering a Vile condition, it is Incapacitated until the end of its next turn instead.", "card": "Already Vile-afflicted: Incapacitated instead" }
+        {
+          "text": "Level 5+: It also can't take reactions while slowed.",
+          "card": "No reactions either"
+        },
+        {
+          "text": "Level 11+: If it is already suffering a Vile condition, it is Incapacitated until the end of its next turn instead.",
+          "card": "Already Vile-afflicted: Incapacitated instead"
+        }
       ]
     }
   ],
