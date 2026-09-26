@@ -111,7 +111,7 @@
       "category": "reason",
       "tier": "I",
       "opposing": "ignorance",
-      "ready": false
+      "ready": true
     },
     {
       "id": "control",
@@ -311,7 +311,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "control",
-      "ready": false
+      "ready": true
     },
     {
       "id": "games",
@@ -818,7 +818,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "stagnation",
-      "ready": false
+      "ready": true
     },
     {
       "id": "trickery",
@@ -880,7 +880,7 @@
       "category": "reason",
       "tier": "I",
       "opposing": "apathy",
-      "ready": false
+      "ready": true
     },
     {
       "id": "wisdom",
