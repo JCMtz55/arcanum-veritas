@@ -18,7 +18,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "earth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "anger",
@@ -227,7 +227,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "air",
-      "ready": false
+      "ready": true
     },
     {
       "id": "emotion",
@@ -860,7 +860,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "toxin",
-      "ready": false
+      "ready": true
     },
     {
       "id": "wilderness",
