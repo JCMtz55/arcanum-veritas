@@ -163,7 +163,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "decay",
-      "ready": false
+      "ready": true
     },
     {
       "id": "death",
