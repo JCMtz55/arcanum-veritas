@@ -603,7 +603,7 @@
       "category": "vital",
       "tier": "I",
       "opposing": "civilization",
-      "ready": false
+      "ready": true
     },
     {
       "id": "night",
