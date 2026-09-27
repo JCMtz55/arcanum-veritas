@@ -392,7 +392,7 @@
       "category": "reason",
       "tier": "II",
       "opposing": "lies",
-      "ready": false
+      "ready": true
     },
     {
       "id": "hollowing",
@@ -658,7 +658,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "war",
-      "ready": false
+      "ready": true
     },
     {
       "id": "power",
@@ -710,7 +710,7 @@
       "category": "umbral",
       "tier": "II",
       "opposing": "truth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "shadow",
@@ -786,7 +786,7 @@
       "category": "dominion",
       "tier": "II",
       "opposing": "protection",
-      "ready": false
+      "ready": true
     },
     {
       "id": "time",
@@ -870,7 +870,7 @@
       "category": "vital",
       "tier": "II",
       "opposing": "civilization",
-      "ready": false
+      "ready": true
     },
     {
       "id": "will",
