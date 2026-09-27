@@ -521,7 +521,7 @@
       "category": "elemental",
       "tier": "I",
       "opposing": "shadow",
-      "ready": false
+      "ready": true
     },
     {
       "id": "lightning",
@@ -730,7 +730,7 @@
       "category": "umbral",
       "tier": "I",
       "opposing": "sound",
-      "ready": false
+      "ready": true
     },
     {
       "id": "soul",
