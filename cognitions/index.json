@@ -776,7 +776,7 @@
       "requires": [ "Fire", "Life" ],
       "opposing": "night",
       "coreOnly": true,
-      "ready": false
+      "ready": true
     },
     {
       "id": "thievery",
