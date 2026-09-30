@@ -16,9 +16,11 @@ function renderCodex() {
       </div>
       ${mine ? `<p class="hint">Numbers are shown for <b>your</b> level ${mine.level} (PB ${pbOf(mine.level)}).</p>` : ''}
       ${groups.map(([st, label]) => {
-        const list = g.abilities.filter(a => a.stage === st);
+        const list = abilitiesOf(g).filter(a => a.stage === st);
         return list.length ? `<div class="stagehead">${label}</div>` + list.map(a => abilityHtml(a, mine, false)).join('') : '';
       }).join('')}
+      ${g.shift && shiftOn(g.id) ? `<div class="stagehead">Reality Shift</div>
+        <div class="ab super"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')"><span class="nm">${esc(g.shift.name)}</span><span class="tag k">Unveiled</span><span class="car">▶</span></div><div class="ab-b">${prose(g.shift.text, mine)}</div></div>` : ''}
       ${g.stances.length ? `<div class="stagehead">Stances</div>` + g.stances.map(s => `<div class="ab passive"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')"><span class="nm">${esc(s.name)}</span><span class="car">▶</span></div><div class="ab-b">${prose(s.text)}</div></div>`).join('') : ''}
       ${g.id === 'ouroboros-vigil' ? `<div class="stagehead">Known Soul Stones</div>` + D.soulStones.map(s => `<div class="ab core"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')"><span class="nm">${esc(s.name)}</span>${s.cr ? `<span class="tag">CR ${s.cr}</span>` : ''}<span class="hint">${esc(s.traits.join(' · '))}</span><span class="car">▶</span></div><div class="ab-b">${prose(s.text)}${s.spiritText ? `<div class="stagehead">${esc(s.spirit)}</div>${prose(s.spiritText)}` : ''}</div></div>`).join('') : ''}
       ${g.servants.length ? `<div class="stagehead">Servants</div>` + g.servants.map(s => `<div class="ab core"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')"><span class="nm">${esc(s.name)}</span><span class="car">▶</span></div><div class="ab-b">${prose(s.text)}</div></div>`).join('') : ''}

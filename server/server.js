@@ -278,9 +278,40 @@ app.delete("/api/saves/:id", requireUser, async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Grimm Companion: the Three Chains, and what the DM has switched on or off for each Grimm.
+// Everyone at the table reads this; only the DM writes it.
+app.get("/api/grimms/state", requireUser, async (req, res) => {
+  const chains = (await db.query("SELECT grimm_id, chains FROM grimm_chains")).rows;
+  const toggles = (await db.query("SELECT grimm_id, key, enabled FROM grimm_toggles")).rows;
+  const out = {};
+  for (const t of toggles) (out[t.grimm_id] = out[t.grimm_id] || {})[t.key] = !!t.enabled;
+  res.json({ chains: Object.fromEntries(chains.map(r => [r.grimm_id, r.chains])), toggles: out });
+});
+
 // ── Admin: players and what each may read ──────────────────
 const admin = express.Router();
 admin.use(requireUser, requireDm);
+
+admin.put("/grimms/:grimm/chains", async (req, res) => {
+  const chains = req.body?.chains;
+  if (!/^[a-z0-9_-]{1,40}$/.test(req.params.grimm) || !Number.isInteger(chains) || chains < 0 || chains > 3)
+    return res.status(400).json({ error: "A Grimm holds 0 to 3 chains." });
+  await db.query(
+    `INSERT INTO grimm_chains (grimm_id, chains) VALUES ($1, $2)
+     ON CONFLICT (grimm_id) DO UPDATE SET chains = EXCLUDED.chains`, [req.params.grimm, chains]);
+  res.json({ ok: true });
+});
+
+// Reveal or hide a Grimm's Reality Shift ("shift"), or allow or deny one ability ("a:<id>")
+admin.put("/grimms/:grimm/toggles/:key", async (req, res) => {
+  const { grimm, key } = req.params;
+  if (!/^[a-z0-9_-]{1,40}$/.test(grimm) || !/^(shift|a:[a-z0-9-]{1,60})$/.test(key) || typeof req.body?.enabled !== "boolean")
+    return res.status(400).json({ error: "That isn't something the DM can switch." });
+  await db.query(
+    `INSERT INTO grimm_toggles (grimm_id, key, enabled) VALUES ($1, $2, $3)
+     ON CONFLICT (grimm_id, key) DO UPDATE SET enabled = EXCLUDED.enabled`, [grimm, key, req.body.enabled]);
+  res.json({ ok: true });
+});
 
 admin.get("/users", async (req, res) => {
   const users = (await db.query(
@@ -360,8 +391,38 @@ app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 // ── The builder itself. Only these folders are public — cognitions/ and server/ never are.
 app.use("/css", express.static(path.join(ROOT, "css")));
 app.use("/js", express.static(path.join(ROOT, "js")));
+// The front page (index.html) is where everyone signs in; the Grimm Companion has no sign-in of its
+// own, so without a session it sends you back there.
+app.use("/grimms", async (req, res, next) => (await currentUser(req)) ? next() : res.redirect("/"));
+
+// The Grimm data carries every Reality Shift, so a player is served a copy with the ones the DM
+// hasn't revealed cut out — hiding them in the page would leave the text a click away in the file.
+const GRIMM_DATA_FILE = path.join(ROOT, "grimms", "js", "data.js");
+const GRIMM_DATA = JSON.parse((await readFile(GRIMM_DATA_FILE, "utf8")).replace(/^[^{]*/, "").replace(/;\s*$/, ""));
+const dataCache = new Map();
+function grimmDataFor(revealed) {
+  const key = [...revealed].sort().join(",");
+  if (!dataCache.has(key)) {
+    const data = { ...GRIMM_DATA, grimms: GRIMM_DATA.grimms.map(g => revealed.has(g.id) ? g : { ...g, shift: null }) };
+    if (dataCache.size > 32) dataCache.clear();
+    dataCache.set(key, "window.GRIMM_DATA = " + JSON.stringify(data) + ";\n");
+  }
+  return dataCache.get(key);
+}
+app.get("/grimms/js/data.js", async (req, res) => {
+  const user = await currentUser(req);
+  let revealed;
+  if (user.role === "dm") revealed = new Set(GRIMM_DATA.grimms.map(g => g.id));
+  else {
+    const { rows } = await db.query("SELECT grimm_id FROM grimm_toggles WHERE key = 'shift' AND enabled");
+    revealed = new Set(rows.map(r => r.grimm_id));
+  }
+  res.type("application/javascript").set("Cache-Control", "no-store").send(grimmDataFor(revealed));
+});
+
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
 app.get("/", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
+app.get("/arcanum.html", (req, res) => res.sendFile(path.join(ROOT, "arcanum.html")));
 
 app.use((err, req, res, next) => {
   if (!err.status || err.status >= 500) console.error(err);

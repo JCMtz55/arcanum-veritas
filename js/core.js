@@ -205,6 +205,8 @@ async function boot() {
     renderMain();
     if (API) { if (ME.role === "dm") setDmView(true, true); }
     else try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
+    // The Ephemer front page links straight to a view: arcanum.html#learn, #admin
+    if (API && VIEWS[location.hash.slice(1)]) setView(location.hash.slice(1));
     try { if (localStorage.getItem("av-mode") === "ign") setMode("ign", true); } catch (e) {}
     const fa = document.getElementById("faCss");
     if (fa?.sheet) initIcons(); else fa?.addEventListener("load", initIcons);

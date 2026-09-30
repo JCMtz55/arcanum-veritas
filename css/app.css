@@ -523,6 +523,25 @@ i.dom-cosmical{color:var(--d-cosmical)}
   font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--mute)}
 .saved-m:hover{color:var(--bone)}
 
+/* ── Ephemer front page (index.html), and the way back to it ── */
+.home{margin-right:11px;color:var(--brass);text-decoration:none;font-size:15px;line-height:1}
+.home:hover{color:#E0B050}
+.hub{max-width:860px;margin:0 auto;padding:54px 22px 60px}
+.hub h1{margin:0;font-size:34px;font-weight:600;letter-spacing:-.015em;line-height:1.1}
+.hub-sub{margin:6px 0 28px;color:var(--mute);font-style:italic}
+.hub-grid{display:flex;flex-wrap:wrap;gap:14px}
+.hub-card{flex:1 1 300px;display:block;padding:22px 22px 24px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;color:inherit;text-decoration:none;transition:border-color .12s,background .12s}
+.hub-card:hover{background:var(--panel2);border-color:var(--mute)}
+.hub-card b{display:block;font-family:var(--sans);font-size:17px;font-weight:700;letter-spacing:-.01em;margin-bottom:5px}
+.hub-card span{display:block;color:var(--bone2);font-size:14px;line-height:1.5}
+.hub-card .hub-mark{font-size:24px;line-height:1;margin-bottom:14px}
+.hub-card.av:hover{border-color:var(--brass)}   .hub-card.av .hub-mark,.hub-card.av b{color:var(--brass)}
+.hub-card.grimm:hover{border-color:var(--d-umbral)} .hub-card.grimm .hub-mark,.hub-card.grimm b{color:#9A8FCB}
+.hub-card.small{flex-basis:100%;padding:15px 22px 16px}
+.hub-card.small b{font-size:14px;margin-bottom:2px}
+.hub-card.small span{font-size:13px;color:var(--mute)}
+
 /* ── Learning tracker and saved builds ────────────────────── */
 .cdx-def.lrn{align-items:center}
 .pips{display:inline-flex;vertical-align:middle;margin-right:10px}

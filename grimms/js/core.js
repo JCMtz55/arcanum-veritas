@@ -6,25 +6,18 @@ const KEY = 'grimm-companion:v1';
 
 const STAGES = ['dormant', 'invoked', 'chained', 'awakened', 'unveiled'];
 const STAGE_NAME = { dormant:'Dormant', invoked:'Invoked', chained:'Chained', awakened:'Awakened', unveiled:'Unveiled' };
-// Grimm Slots and ability slots by stage (Grimm Slots.md, Grimm Abilities.md)
+// Grimm Slots and ability slots by stage (Grimm Slots.md, Grimm Abilities.md).
+// Unveiled adds nothing to either (Juan's ruling, 2026-09-30): it is Awakened plus the Reality Shift.
 const SLOTS_BY_STAGE = { dormant:0, invoked:3, chained:6, awakened:6, unveiled:6 };
 const ABILITY_SLOTS = {
   dormant:  { passive:0, active:0, super:0 },
   invoked:  { passive:1, active:2, super:0 },
   chained:  { passive:1, active:2, super:1 },
   awakened: { passive:2, active:2, super:1 },
-  unveiled: { passive:3, active:3, super:2 },
+  unveiled: { passive:2, active:2, super:1 },
 };
 const KIND_NAME = { passive:'Passive', active:'Active', super:'Special', core:'Core', shackle:'Shackle Break', other:'Other' };
 const CHAIN_STATE = ['Unchained', 'Fraying', 'Loosened', 'Bound'];
-const HARMONY = [
-  [91, 'Soulbound', 'Full synchronization. +1 Grimm Slot. Shared initiative during Reality Shift.'],
-  [71, 'Attuned',   'No conflict. Grimm saves boosted. Grimm can assist or warn proactively.'],
-  [51, 'Stable',    'Standard behavior. Abilities function as designed.'],
-  [31, 'Fractured', 'Grimm may withhold abilities, resist being summoned, or misfire effects.'],
-  [11, 'Hostile',   'Grimm acts independently. Risks partial takeover during high stress.'],
-  [0,  'Unbound',   'Grimm breaks free. Immediate Unchained Risk. Initiates willpower contest.'],
-];
 const DAMAGE_TYPES = ['Acid','Bludgeoning','Cold','Fire','Force','Lightning','Necrotic','Piercing','Poison','Psychic','Radiant','Slashing','Thunder'];
 
 const grimmById = id => D.grimms.find(g => g.id === id);
@@ -36,10 +29,9 @@ function blankSheet(g) {
     used: 0, temp: 0, tempUsed: 0,
     exhaustion: 0, dreamExhaustion: 0, inCombat: false, familiar: false,
     loadout: null,
-    chains: g.chains, chainLog: [], aggrieved: '', bleed: '',
-    harmonyOn: false, harmony: 60,
-    deaths: 0, unchainedDeath: false,
-    effects: [], round: 1, notes: '',
+    chains: g.chains,
+    effects: [], round: 1,
+    rs: { on: false, crits: 0, lair: 0 },   // a Reality Shift while it is running
     x: {},                               // Grimm-specific trackers
   };
 }
@@ -70,19 +62,35 @@ function sheet(id = S.current) {
 // ── the numbers ────────────────────────────────────────────────────────
 const pbOf = lvl => 2 + Math.floor((Math.max(1, lvl) - 1) / 4);
 const stageIdx = st => STAGES.indexOf(st);
-function harmonyStatus(v) { return HARMONY.find(h => v >= h[0]); }
+
+// The chains, each Grimm's Reality Shift and which abilities it may use are the DM's to keep.
+// Opened through the Ephemer server, ROLE says who is looking and the server's answer wins; on a
+// plain static host nothing is fetched, so abilities are all open and no Reality Shift is shown.
+let ROLE = null, TOGGLES = {};
+async function syncGrimms() {
+  try {
+    const me = await fetch('../api/me');
+    if (!me.ok) return;
+    ROLE = (await me.json()).user.role;
+    const { chains, toggles } = await (await fetch('../api/grimms/state')).json();
+    TOGGLES = toggles || {};
+    for (const g of D.grimms) sheet(g.id).chains = chains[g.id] ?? g.chains;
+    save();
+  } catch (e) {}
+}
+// Abilities are open unless the DM has switched one off; a Reality Shift stays hidden until revealed.
+const abilityOn = (gid, aid) => TOGGLES[gid]?.['a:' + aid] !== false;
+const shiftOn = gid => TOGGLES[gid]?.shift === true;
+const abilitiesOf = g => g.abilities.filter(a => abilityOn(g.id, a.id));
 
 function derived(sh = sheet()) {
   const pb = pbOf(sh.level);
-  const soul = sh.harmonyOn && sh.harmony >= 91 ? 1 : 0;
-  const base = SLOTS_BY_STAGE[sh.stage] + soul;
+  const base = SLOTS_BY_STAGE[sh.stage];
   const left = Math.max(0, base - sh.used) + Math.max(0, sh.temp - sh.tempUsed);
   return {
-    pb, base, soul, left,
+    pb, base, left,
     total: base + sh.temp,
     dreamDC: 8 + pb + sh.dreamMod,          // Shackle Break end, Dream saves vs self
-    reviveDC: 10 + sh.deaths,
-    revivePenalty: sh.unchainedDeath ? -20 : 0,
     chainState: CHAIN_STATE[sh.chains],
     abilitySlots: ABILITY_SLOTS[sh.stage],
   };
@@ -102,11 +110,11 @@ const slotKind = a => a.kind === 'passive' ? 'passive' : a.kind === 'super' ? 's
 
 function defaultLoadout(g, stage) {
   const n = ABILITY_SLOTS[stage], out = { passive:[], active:[], super:[] };
-  for (const a of g.abilities) {
+  for (const a of abilitiesOf(g)) {
     const k = slotKind(a);
     if (k && unlocked(a, stage) && a.stage !== 'additional' && out[k].length < n[k]) out[k].push(a.id);
   }
-  for (const a of g.abilities) {                 // top up with additional abilities
+  for (const a of abilitiesOf(g)) {              // top up with additional abilities
     const k = slotKind(a);
     if (k && unlocked(a, stage) && !out[k].includes(a.id) && out[k].length < n[k]) out[k].push(a.id);
   }
@@ -116,7 +124,7 @@ function defaultLoadout(g, stage) {
 function fitLoadout(g, sh) {
   const n = ABILITY_SLOTS[sh.stage], def = defaultLoadout(g, sh.stage);
   for (const k of ['passive', 'active', 'super']) {
-    let arr = (sh.loadout[k] || []).filter(id => { const a = g.abilities.find(x => x.id === id); return a && unlocked(a, sh.stage); });
+    let arr = (sh.loadout[k] || []).filter(id => { const a = g.abilities.find(x => x.id === id); return a && unlocked(a, sh.stage) && abilityOn(g.id, id); });
     arr = arr.slice(0, n[k]);
     for (const id of def[k]) if (arr.length < n[k] && !arr.includes(id)) arr.push(id);
     while (arr.length < n[k]) arr.push('');

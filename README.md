@@ -9,6 +9,8 @@ The **Arcanum Veritas Builder** is a browser tool for drawing seals — spells c
 
 It also has an **Ignition mode** (the ⇄ switch in the header) for the martial side of magic: Burning Cognitions, Blaze Points, and the Eidon Forge — see [Ignition Mode](#ignition-mode).
 
+It is one of two tools in the **Ephemer** app. `index.html` is the front page: one sign-in, then a choice between this builder (`arcanum.html`) and the **Grimm Companion** (`grimms/`, with its own README). Players also get a Learning shortcut there, and the DM an Admin one that shows how many reminders are waiting. The ★ at the left of either tool's bar goes back to the front page.
+
 The builder itself is plain browser code with no build step. It is hosted on **Railway** behind a small server that signs players in and hands each of them only the Cognitions the DM has granted — see [Accounts and Hosting](#accounts-and-hosting). For a quick local look with no accounts, it still runs from any static server (VS Code Live Server, or `python -m http.server`), where every Cognition is open.
 
 ---
@@ -27,7 +29,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 **Character numbers.** Level, Verum mod and Dream mod are remembered with the account: change them on the bar and they are there at the next sign-in, on any device. The slot is not remembered — it belongs to the seal being drawn, and is kept in a saved seal.
 
-**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds accounts, grants, trackers and saved builds (`users`, `user_cognitions`, `learning`, `saves`, `sessions`). The server serves `index.html`, `css/`, `js/` and `grimms/`; `cognitions/` is only reachable through the signed-in API.
+**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds accounts, grants, trackers and saved builds (`users`, `user_cognitions`, `learning`, `saves`, `sessions`). The server serves `index.html`, `arcanum.html`, `css/`, `js/` and — only to someone signed in — `grimms/`; `cognitions/` is only reachable through the signed-in API. The Grimm Companion still keeps what a player tracks in their own browser, not in the database. What the DM controls there — each Grimm's chains, which of its abilities may be composed, and whether its Reality Shift is revealed — is in the database, and the Grimm data is filtered per reader so an unrevealed Reality Shift never reaches a player's browser.
 
 **Deploying on Railway.**
 1. New project → *Deploy from GitHub repo* → this repo. Railway runs `npm start`.
@@ -46,7 +48,9 @@ Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then 
 ## File Structure
 
 ```
-index.html          ← The page: header, boards, and the script tags (open this)
+index.html          ← The Ephemer front page: sign-in and the choice of tools (js/hub.js)
+arcanum.html        ← The builder: header, boards, and the script tags
+grimms/             ← The Grimm Companion (see grimms/README.md)
 css/
   app.css           ← Every style
 js/                 ← Plain scripts sharing one global scope, loaded in this order:
@@ -61,6 +65,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   dice.js           ← The dice tray: rolls the numbers the card already printed
+  hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
   account.js        ← Sign-in, the account menu, the DM's Admin tab
   journal.js        ← The Learning tab and saved seals / Eidons
   events.js         ← Copy/toast, keyboard, start-up — must load last
@@ -76,7 +81,7 @@ package.json        ← Server dependencies and the start command
 README.md           ← This file
 ```
 
-The scripts are ordinary `<script>` tags, not modules, so inline `onclick` handlers keep working and any file can call any other's functions. Order matters only for code that runs at load: `events.js` goes last because it registers the listeners and calls `boot()`. Keep `index.html`, `css/`, `js/` and `cognitions/` together.
+The scripts are ordinary `<script>` tags, not modules, so inline `onclick` handlers keep working and any file can call any other's functions. Order matters only for code that runs at load: `events.js` goes last because it registers the listeners and calls `boot()`. Keep `index.html`, `arcanum.html`, `css/`, `js/` and `cognitions/` together.
 
 ---
 

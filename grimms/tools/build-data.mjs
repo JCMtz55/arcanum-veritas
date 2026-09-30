@@ -37,13 +37,27 @@ const GRIMMS = [
 // Supporting pages a player's sheet can open (statblocks for summons and stones).
 const SERVANTS = { 'gate-of-caelum': ['Gate of Caelum/Servants/Silence.md'] };
 
+// Each Grimm's Reality Shift, from Reality Shifts/Players/. These are built into the data but
+// stay hidden in the app until the DM reveals one — see the DM view. Only these files are read:
+// the NPC shifts and "Solemn Temperance - Mad King Mode" (a secret oath) are never opened.
+const SHIFTS = {
+  'gate-of-caelum':    'End of Haven.md',
+  'ouroboros-vigil':   'Solar Eclipse.md',
+  'vidarr':            'Purgatory.md',
+  'white-rabbit':      'Hollownest.md',
+  'makoa':             'Eden.md',
+  'thanatos':          'Memento Mori.md',
+  'rage-of-the-tiger': 'Solemn Temperance.md',
+  'peco':              'Final Step.md',
+};
+
 const RULES = [
   ['grimms',    'Rules of the Grimm',  'Grimms.md'],
   ['types',     'Grimm Stages',        'Lore/Types of Grimm.md'],
   ['slots',     'Grimm Slots',         'Lore/Grimm Slots.md'],
   ['abilities', 'Grimm Abilities',     'Lore/Grimm Abilities.md'],
   ['chains',    'The Three Chains',    'Grimm Chains.md'],
-  ['harmony',   'Harmony',             'Lore/Grimm Harmony.md'],
+  // Harmony ('Lore/Grimm Harmony.md') is left out — the table doesn't use it.
   ['fate',      'Grimm Fate & Tokens', 'Lore/Grimm Fate.md'],
   ['vinculum',  'Vinculum Pair Actions','Vinculum Grimm Actions.md'],
   ['shards',    'Soul Shards',         'Grimm Appendix/Soul Shards Table.md'],
@@ -160,6 +174,100 @@ function servants(id) {
     name: path.basename(f, '.md'), text: clean(read(path.join(PG, f))),
   }));
 }
+// A Shift's page is cut into the beats the sheet's helper card runs: what happens when it opens,
+// what holds while it lasts, what you can spend an action on, the Lair Action, and the collapse.
+// Newer pages say "On Activation / Passive Effects / Reality Actions / Lair Action / On Collapse";
+// the older three say "Domain Effects / Lair Action (Initiative 20) / Collapse Effect". Anything
+// else on the page (Environment, trap libraries, appendices) is kept as reference.
+const PART_OF = h => /^on activation/i.test(h) ? 'activation'
+  : /^(passive effects|domain effects)/i.test(h) ? 'passives'
+  : /^reality actions/i.test(h) ? 'actions'
+  : /^lair action/i.test(h) ? 'lair'
+  : /^(on collapse|collapse effect)/i.test(h) ? 'collapse' : null;
+const PART_TITLE = { activation:'On Activation', passives:'Passive Effects', actions:'Reality Actions', lair:'Lair Action', collapse:'On Collapse' };
+const unbold = s => s.replace(/\*\*/g, '').replace(/^Option\s*\d+\s*[:.]\s*/i, '').replace(/[.:]$/, '').trim();
+// A bullet that names something — "- **Absolution.** …" or "- **Mass Summon** *(Action).* …" — is an
+// entry of its own. A bullet that merely starts in bold ("- **cannot be turned** by any effect") is not.
+const NAMED_BULLET = /^[-*]\s+\*\*[^*]+?(?:\.\*\*|\*\*\s*\*\()/;
+
+// One section's body → its own note, then an entry per "**Name.** …" or per sub-heading.
+function shiftEntries(body) {
+  const lines = body.split('\n');
+  if (lines.some(l => /^#{3,4} /.test(l))) {
+    const out = [];
+    let cur = null, note = [];
+    for (const l of lines) {
+      const h = l.match(/^#{3,4} (.+)$/);
+      if (h) { cur = { name: unbold(h[1]), tag: '', text: [] }; out.push(cur); continue; }
+      (cur ? cur.text : note).push(l);
+    }
+    return { note: note.join('\n').trim(), entries: out.map(e => ({ ...e, text: e.text.join('\n').trim() })) };
+  }
+  const out = [];
+  let cur = null, note = [];
+  // A list of named bullets reads as a list of entries, so each one starts its own block.
+  const blocks = [];
+  for (const b of body.split(/\n{2,}/)) {
+    if (!NAMED_BULLET.test(b.trim())) { blocks.push(b); continue; }
+    let acc = [];
+    for (const line of b.split('\n')) {
+      if (NAMED_BULLET.test(line)) { if (acc.length) blocks.push(acc.join('\n')); acc = [line.replace(/^[-*]\s+/, '')]; }
+      else acc.push(line);
+    }
+    if (acc.length) blocks.push(acc.join('\n'));
+  }
+  for (const block of blocks) {
+    const m = block.match(/^\*\*([^*]+?)[.:]?\*\*\s*(?:\*\(([^)]+)\)\*)?[.:]?\s*/);
+    if (m) {
+      cur = { name: unbold(m[1]), tag: (m[2] || '').trim(), text: [block.slice(m[0].length).trim()] };
+      out.push(cur);
+    } else (cur ? cur.text : note).push(block.trim());
+  }
+  return { note: note.join('\n\n').trim(), entries: out.map(e => ({ ...e, text: e.text.filter(Boolean).join('\n\n') })) };
+}
+
+function shift(id) {
+  const f = SHIFTS[id] && path.join(G, 'Reality Shifts/Players', SHIFTS[id]);
+  if (!f || !exists(f)) return null;
+  // The page often opens with its own title and a "*Grimm: … · Owner: …*" line; the card states both.
+  const text = clean(read(f))
+    .replace(/^#\s+.*\n+/, '')
+    .replace(/^\*Grimm:[^\n]*\n+/, '')
+    .replace(/^_[^\n_]*Exclusive_\s*\n+/i, '')
+    .replace(/^-{3,}\s*\n+/, '')
+    .trim();
+
+  const chunks = text.split(/^## /m);
+  const parts = {}, extra = [];
+  for (const c of chunks.slice(1)) {
+    const nl = c.indexOf('\n');
+    const head = c.slice(0, nl).trim(), body = c.slice(nl + 1).trim();
+    // "While Active" is only a wrapper: its ### sections are the real parts.
+    if (/^while active/i.test(head)) {
+      for (const s of body.split(/^### /m).slice(1)) {
+        const i = s.indexOf('\n');
+        const h = s.slice(0, i).trim(), key = PART_OF(h);
+        if (key) parts[key] = { title: h.replace(/\s*\*\(.*/, '').trim(), ...shiftEntries(s.slice(i + 1).trim()) };
+      }
+      continue;
+    }
+    const key = PART_OF(head);
+    if (key) parts[key] = { title: head.replace(/\s*\(.*/, '').replace(/\s*\*\(.*/, '').trim(), ...shiftEntries(body) };
+    else extra.push({ title: head, text: body });
+  }
+  const order = ['activation', 'passives', 'actions', 'lair', 'collapse'];
+  return {
+    name: path.basename(f, '.md'),
+    intro: chunks[0].trim(),
+    parts: order.filter(k => parts[k]).map(k => ({ key: k, title: PART_TITLE[k], ...parts[k] })),
+    extra, text,
+  };
+}
+// The rules every Reality Shift shares. Kept out of the Rules tab: it rides with a revealed Shift.
+function shiftRules() {
+  const f = path.join(G, 'Lore/Reality Shift.md');
+  return exists(f) ? clean(read(f)) : '';
+}
 function soulStones() {
   const dir = path.join(PG, 'Ouroboros Vigil/Soul Stones');
   const sdir = path.join(PG, 'Ouroboros Vigil/Spirits');
@@ -212,7 +320,8 @@ function rules() {
 // ── write ────────────────────────────────────────────────────────────────
 const data = {
   built: new Date().toISOString().slice(0, 10),
-  grimms: GRIMMS.map(m => ({ ...parseGrimm(m), servants: servants(m.id) })),
+  grimms: GRIMMS.map(m => ({ ...parseGrimm(m), servants: servants(m.id), shift: shift(m.id) })),
+  realityShift: shiftRules(),
   soulStones: soulStones(),
   pairs: pairs(),
   rules: rules(),
@@ -223,6 +332,6 @@ fs.writeFileSync(OUT,
   'window.GRIMM_DATA = ' + JSON.stringify(data, null, 1) + ';\n');
 
 for (const g of data.grimms)
-  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, forms: ${Object.values(g.forms).join(' → ')}`);
+  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, shift: ${g.shift ? g.shift.name : '—'}`);
 console.log(`${data.soulStones.length} soul stones · ${Object.keys(data.pairs.actions).length} pair actions · ${data.rules.length} rule pages`);
 console.log('→', path.relative(process.cwd(), OUT));

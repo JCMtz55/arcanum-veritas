@@ -57,6 +57,21 @@ const SCHEMA = [
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
   `CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
+  // Grimm Companion: how many of a Grimm's Three Chains still hold. The DM's to set; a Grimm with
+  // no row here has whatever its data file says.
+  `CREATE TABLE IF NOT EXISTS grimm_chains (
+     grimm_id TEXT PRIMARY KEY,
+     chains   SMALLINT NOT NULL CHECK (chains BETWEEN 0 AND 3)
+   )`,
+  // What the DM has switched on or off for one Grimm: `key` is "shift" for its Reality Shift, or
+  // "a:<ability id>" for one ability. A Grimm with no row for a key keeps that key's default —
+  // abilities are on, the Reality Shift is off.
+  `CREATE TABLE IF NOT EXISTS grimm_toggles (
+     grimm_id TEXT NOT NULL,
+     key      TEXT NOT NULL,
+     enabled  BOOLEAN NOT NULL,
+     PRIMARY KEY (grimm_id, key)
+   )`,
   // The character's own numbers on the command bar, remembered per account (defaults = the builder's)
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verum_mod  SMALLINT NOT NULL DEFAULT 4`,

@@ -1,4 +1,4 @@
-// The Sheet: slots, exhaustion, chains, loadout, abilities, effects, harmony, revive.
+// The Sheet: slots, exhaustion, the chains (shown only), loadout, abilities, effects — and the DM's Chains view.
 
 function renderSheet() {
   const g = grimmById(S.current), sh = sheet(), v = derived(sh);
@@ -12,17 +12,18 @@ function renderSheet() {
     <div class="portrait" style="background-image:url('${attr(img)}')"></div>
     <div>
       <h1>${esc(g.name)}</h1>
-      <div class="sub">Grimm of <b>${esc(g.user)}</b> · ${esc(form)} · ${STAGE_NAME[sh.stage]}${sh.familiar ? ' · <b>Familiar form</b>' : ''}</div>
+      <div class="sub">Grimm of <b>${esc(g.user)}</b> · ${esc(form)} · ${STAGE_NAME[sh.stage]}${sh.stage === 'unveiled' ? ' · <b title="Unveiled grants the Reality Shift and nothing else — your DM has its page">Reality Shift</b>' : ''}${sh.familiar ? ' · <b>Familiar form</b>' : ''}</div>
     </div>
+    <div class="chains shown" title="The Three Chains — ${v.chainState}. Your DM keeps them.">${chainIcons(sh.chains)}</div>
   </div>
-  <div class="grid">
-    ${slotsCard(g, sh, v)}
-    ${chainsCard(g, sh, v)}
-    ${loadoutCard(g, sh, v)}
-    ${PANELS[g.id] ? `<section class="card span7">${PANELS[g.id](g, sh, v)}</section>` : ''}
-    ${effectsCard(g, sh, v)}
-    ${harmonyCard(g, sh, v)}
-    ${reviveCard(g, sh, v)}
+  <div class="sheet-cols">
+    <div class="grid">
+      ${PANELS[g.id] ? `<section class="card span12">${PANELS[g.id](g, sh, v)}</section>` : ''}
+      ${EXTRA[g.id] ? `<section class="card span12">${EXTRA[g.id](g, sh, v)}</section>` : ''}
+      ${loadoutCard(g, sh, v)}
+      ${shiftCard(g, sh)}
+    </div>
+    <aside class="rounds">${slotsCard(g, sh, v)}${effectsCard(g, sh)}</aside>
   </div>
   <p class="foot">Saved in this browser only · <button class="btn sm" onclick="exportSheet()">Export backup</button> <button class="btn sm" onclick="importSheet()">Import</button> <button class="btn sm warn" onclick="resetSheet()">Reset this sheet</button></p>`;
 }
@@ -32,13 +33,14 @@ function slotsCard(g, sh, v) {
   let pips = '';
   for (let i = 0; i < v.base; i++) pips += `<button class="pip ${i < sh.used ? 'used' : ''}" title="${i < sh.used ? 'Spent — click to restore' : 'Click to spend'}" onclick="pipClick(${i},false)"></button>`;
   for (let i = 0; i < sh.temp; i++) pips += `<button class="pip temp ${i < sh.tempUsed ? 'used' : ''}" title="Temporary slot bought with Exhaustion" onclick="pipClick(${i},true)"></button>`;
-  return `<section class="card span5">
+  return `<section class="card slots">
     <h2>Grimm Slots <span class="r"><button class="btn sm" onclick="longRest()" title="Only if you dreamt — a disrupted rest restores nothing">Long rest</button></span></h2>
+    <div class="slots-h">
     <div class="row"><div class="pips">${pips || '<span class="hint">A Dormant Grimm has no slots.</span>'}</div></div>
     <div class="row">
       <div class="stats">
         <div class="stat"><b>${v.left}</b><i>left</i></div>
-        <div class="stat"><b>${v.base}</b><i>${STAGE_NAME[sh.stage]}${v.soul ? ' +1 Soulbound' : ''}</i></div>
+        <div class="stat"><b>${v.base}</b><i>${STAGE_NAME[sh.stage]}</i></div>
         ${sh.temp ? `<div class="stat"><b style="color:var(--ember)">${sh.temp - sh.tempUsed}</b><i>temporary</i></div>` : ''}
       </div>
     </div>
@@ -48,8 +50,9 @@ function slotsCard(g, sh, v) {
       <button class="btn ${sh.familiar ? 'on' : ''}" onclick="toggle('familiar')" title="In Familiar form, abilities that need a Grimm Slot can't be used">Familiar form</button>
     </div>
     <div class="row">
-      <span class="lbl">Exhaustion</span><div class="step"><button onclick="bump('exhaustion',-1)">–</button><span>${sh.exhaustion}</span><button onclick="bump('exhaustion',1)">+</button></div>
-      <span class="lbl">Dream exh.</span><div class="step"><button onclick="bump('dreamExhaustion',-1)">–</button><span>${sh.dreamExhaustion}</span><button onclick="bump('dreamExhaustion',1)">+</button></div>
+      <span class="pair"><span class="lbl">Exhaustion</span><div class="step"><button onclick="bump('exhaustion',-1)">–</button><span>${sh.exhaustion}</span><button onclick="bump('exhaustion',1)">+</button></div></span>
+      <span class="pair"><span class="lbl">Dream exh.</span><div class="step"><button onclick="bump('dreamExhaustion',-1)">–</button><span>${sh.dreamExhaustion}</span><button onclick="bump('dreamExhaustion',1)">+</button></div></span>
+    </div>
     </div>
     <p class="hint">Exhaustion from forcing the Grimm or an Exhausting Exchange <b>can't be removed by magic</b> like <i>Greater Restoration</i> — only by resting in a Safe Haven or divine intervention. Slots come back only after a Long Rest in which you <b>dream</b>.</p>
   </section>`;
@@ -89,75 +92,66 @@ function setNum(k, val) { const sh = sheet(); sh[k] = +val || 0; save(); render(
 function setStr(k, val) { const sh = sheet(); sh[k] = val; save(); }
 
 // ── Chains ──────────────────────────────────────────────────────────────
+// A player's sheet only shows the chains. The DM keeps them, for every Grimm, in the Chains view.
 const CHAIN_FX = {
   3: 'The pact is whole. The Grimm behaves per its stage.',
   2: 'The Grimm\'s voice grows more independent — it speaks unprompted, hesitates a half-beat, watches you when it thinks itself unobserved.',
   1: 'The Grimm may act on its own once per session (DM). Its abilities run hot. Every Dream Saving Throw to hold the last chain is +2 to +5 DC.',
   0: 'The user dies and the Grimm Unchains.',
 };
-function chainsCard(g, sh, v) {
-  const st = v.chainState.toLowerCase();
-  let icons = '';
-  for (let i = 0; i < 3; i++) icons += `<button class="chain ${i >= sh.chains ? 'broken' : ''}" onclick="chainClick(${i})" title="${i < sh.chains ? 'Record a break' : 'Broken — chains never restore'}">⛓</button>`;
-  const pre = stageIdx(sh.stage) < 3;
-  const log = sh.chainLog.map((e, i) => `<div class="item"><span class="tag">${esc(e.type)}</span><span class="nm">${esc(e.note || '—')}</span><span class="hint">${e.session ? 'Session ' + esc(e.session) : ''}</span>${i === sh.chainLog.length - 1 ? `<span class="sp"></span><button class="x" title="Undo — only to fix a mis-click" onclick="undoBreak()">↺</button>` : ''}</div>`).join('');
-  return `<section class="card span7">
-    <h2>The Three Chains <span class="r"><span class="state st-${st}">${v.chainState}</span></span></h2>
-    <div class="row"><div class="chains">${icons}</div><p class="hint" style="margin:0;flex:1;min-width:200px">${CHAIN_FX[sh.chains]}</p></div>
-    ${sh.chainLog.length ? `<h3>Breaks</h3><div class="items">${log}</div>` : ''}
-    <div class="row" style="margin-top:10px">
-      <input class="txt" style="flex:1" placeholder="Aggrieved ability" value="${attr(sh.aggrieved)}" onchange="setStr('aggrieved',this.value)">
-      <input class="txt" style="flex:1" placeholder="Bleed (from a ⟨Scar⟩)" value="${attr(sh.bleed)}" onchange="setStr('bleed',this.value)">
-    </div>
-    <h3>Dream Saving Throw — holding a chain</h3>
-    <div class="row">
-      <select class="pick" id="dsSev">
-        <option value="12">Minor contradiction · 12</option><option value="16">Serious act · 16</option>
-        <option value="20">Direct betrayal / defining reinvention · 20</option><option value="24">Profound rupture · 24</option>
-      </select>
-      <span class="lbl">Held before (same theme)</span><input class="num" id="dsHeld" type="number" min="0" value="0">
-      ${sh.chains === 1 ? `<span class="lbl">Fraying +</span><input class="num" id="dsFray" type="number" min="2" max="5" value="2">` : ''}
-      <label class="lbl"><input type="checkbox" id="dsProf"> add PB</label>
-      <button class="btn pri" onclick="rollDreamSave()">Roll${pre ? ' (adv.)' : ''}</button>
-    </div>
-    <div id="dsOut"></div>
-    <p class="hint">Players never break their own chains — the DM calls these saves. ${pre ? 'Before Awakened the bond is slack: <b>advantage</b>.' : 'From Awakened on, every contradiction lands like a blade.'} Each chain that survives the same theme of offense raises the next DC by +2.</p>
-  </section>`;
+function chainIcons(n) {
+  let h = '';
+  for (let i = 0; i < 3; i++) h += `<span class="chain ${i >= n ? 'broken' : ''}">⛓</span>`;
+  return h;
 }
-function chainClick(i) {
-  const sh = sheet();
-  if (i >= sh.chains) return toast('A bond, once broken, is broken forever.');
-  openDialog('Record a broken chain', `
-    <p class="hint">Only record what the DM has ruled. What matters is <b>who</b> broke it and <b>why</b>.</p>
-    <div class="row"><select class="pick" id="brType">
-      <option>Grievance</option><option>⟨Molt⟩</option><option>⟨Scar⟩</option></select>
-      <input class="txt" id="brSess" placeholder="Session" style="width:90px"></div>
-    <div class="row"><input class="txt" id="brNote" placeholder="What happened / what it changed" style="flex:1"></div>
-    <div class="prose">
-      <p><b>Grievance</b> — the Grimm let go. One ability becomes Aggrieved; trust, not power, is lost.</p>
-      <p><b>⟨Molt⟩</b> — you outgrew the Wish. One ability transforms into a new one of equal weight.</p>
-      <p><b>⟨Scar⟩</b> — something cut it. An unstable new power surfaces, and the cut end bleeds.</p>
-    </div>
-    <div class="row"><span class="sp"></span><button class="btn warn" onclick="confirmBreak()">Break the chain</button></div>`);
+// The DM's view: every Grimm's chains, which of its abilities the player may compose, and whether
+// its Reality Shift is revealed. A hidden Shift's text is never sent to that player's browser.
+function renderGrimmsAdmin() {
+  $('#view').innerHTML = `
+  <div class="hero"><div><h1 style="color:var(--bone)">The Grimms</h1>
+    <div class="sub">Yours to keep. Players see the chains on their sheet, compose only the abilities you leave on, and read a Reality Shift only once you reveal it.</div></div></div>
+  <div class="grid">${D.grimms.map(g => {
+    const n = sheet(g.id).chains, sh = shiftOn(g.id);
+    return `<section class="card span12" style="--hue:${g.hue}">
+      <h2><span style="color:${g.hue}">${esc(g.name)}</span> <span class="hint" style="text-transform:none;letter-spacing:0">${esc(g.user)}</span>
+        <span class="r">
+          <div class="step"><button onclick="setChains('${g.id}',${n - 1})" aria-label="Break a chain">–</button><span>${n}</span><button onclick="setChains('${g.id}',${n + 1})" aria-label="Restore a chain">+</button></div>
+          <span class="chains shown">${chainIcons(n)}</span>
+          <span class="state st-${CHAIN_STATE[n].toLowerCase()}">${CHAIN_STATE[n]}</span>
+        </span></h2>
+      <p class="hint" style="margin-top:0">${CHAIN_FX[n]}</p>
+      ${g.shift ? `<div class="row" style="margin-top:10px">
+        <span class="lbl">Reality Shift</span><b style="font-family:var(--sans);font-size:14px">${esc(g.shift.name)}</b>
+        <button class="btn sm ${sh ? 'on' : ''}" onclick="setToggle('${g.id}','shift',${!sh})">${sh ? 'Revealed' : 'Hidden'}</button>
+        <button class="btn sm" onclick="openDialog('${attr(g.shift.name)}', prose(grimmById('${g.id}').shift.text))">Read it</button>
+      </div>` : ''}
+      <h3>Abilities</h3>
+      <div class="chips">${g.abilities.map(a => {
+        const on = abilityOn(g.id, a.id);
+        return `<button class="chip ${on ? 'on' : ''}" title="${on ? 'On — click to take it away' : 'Off — click to give it back'}" onclick="setToggle('${g.id}','a:${attr(a.id)}',${!on})">${esc(a.name)}</button>`;
+      }).join('')}</div>
+      <p class="hint">An ability switched off leaves that player's loadout and ability pool at once.</p>
+    </section>`; }).join('')}</div>`;
 }
-function confirmBreak() {
-  const sh = sheet();
-  sh.chainLog.push({ type: $('#brType').value, note: $('#brNote').value, session: $('#brSess').value });
-  sh.chains = Math.max(0, sh.chains - 1);
-  $('#dlg').close(); save(); render();
-  if (sh.chains === 0) toast('The third chain is broken. The Grimm is Unchained.');
+async function setToggle(gid, key, enabled) {
+  try {
+    const r = await fetch(`../api/admin/grimms/${gid}/toggles/${encodeURIComponent(key)}`,
+      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) });
+    if (!r.ok) throw 0;
+    (TOGGLES[gid] = TOGGLES[gid] || {})[key] = enabled;
+    const sh = S.sheets[gid];
+    if (sh && key !== 'shift') fitLoadout(grimmById(gid), sh);   // a denied ability leaves the loadout
+    save(); render();
+  } catch (e) { toast("Couldn't save — are you still signed in as the DM?"); }
 }
-function undoBreak() {
-  if (!confirm('Undo the last recorded break? Use this only to fix a mistake — in the story, chains never restore.')) return;
-  const sh = sheet(); sh.chainLog.pop(); sh.chains = Math.min(3, sh.chains + 1); save(); render();
-}
-function rollDreamSave() {
-  const sh = sheet(), v = derived(sh);
-  const dc = +$('#dsSev').value + 2 * (+$('#dsHeld').value || 0) + (sh.chains === 1 ? (+($('#dsFray') || {}).value || 2) : 0);
-  const adv = stageIdx(sh.stage) < 3;
-  const a = d(20), b = d(20), nat = adv ? Math.max(a, b) : a;
-  const mod = sh.dreamMod + ($('#dsProf').checked ? v.pb : 0), tot = nat + mod;
-  $('#dsOut').innerHTML = `<div class="roll">d20 ${adv ? `[${a}, ${b}] → ` : ''}${nat} ${sign(mod)} = <b>${tot}</b> vs DC ${dc} — ${tot >= dc ? '<b class="ok">the chain holds</b>' : '<b class="bad">the chain strains…</b> tell your DM'}</div>`;
+async function setChains(id, n) {
+  n = Math.max(0, Math.min(3, n));
+  if (n === sheet(id).chains) return;
+  try {
+    const r = await fetch(`../api/admin/grimms/${id}/chains`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chains: n }) });
+    if (!r.ok) throw 0;
+    sheet(id).chains = n; save(); render();
+  } catch (e) { toast("Couldn't save — are you still signed in as the DM?"); }
 }
 
 // ── Loadout & abilities ─────────────────────────────────────────────────
@@ -165,7 +159,7 @@ function loadoutCard(g, sh, v) {
   const n = v.abilitySlots;
   const col = k => {
     if (!n[k]) return `<div class="slotcol"><span class="lbl">${KIND_NAME[k]}</span><p class="hint">No ${KIND_NAME[k].toLowerCase()} slots at ${STAGE_NAME[sh.stage]}.</p></div>`;
-    const pool = g.abilities.filter(a => slotKind(a) === k);
+    const pool = abilitiesOf(g).filter(a => slotKind(a) === k);
     const lines = sh.loadout[k].map((id, i) => `<div class="slotline"><select class="pick" onchange="setLoad('${k}',${i},this.value)">
       <option value="">— empty —</option>
       ${pool.map(a => `<option value="${a.id}" ${a.id === id ? 'selected' : ''} ${!unlocked(a, sh.stage) || (sh.loadout[k].includes(a.id) && a.id !== id) ? 'disabled' : ''}>${esc(a.name)}${a.stage === 'additional' ? ' ✦' : ''}</option>`).join('')}
@@ -173,7 +167,7 @@ function loadoutCard(g, sh, v) {
     return `<div class="slotcol"><span class="lbl" style="color:var(--k-${k})">${KIND_NAME[k]} · ${n[k]}</span>${lines}</div>`;
   };
   const loaded = new Set([...sh.loadout.passive, ...sh.loadout.active, ...sh.loadout.super]);
-  const show = g.abilities.filter(a => a.kind === 'core' || loaded.has(a.id) || (a.kind === 'shackle' && unlocked(a, sh.stage)));
+  const show = abilitiesOf(g).filter(a => a.kind === 'core' || loaded.has(a.id) || (a.kind === 'shackle' && unlocked(a, sh.stage)));
   return `<section class="card span12">
     <h2>Abilities <span class="r">
       <button class="btn sm ${sh.inCombat ? 'on' : ''}" onclick="toggle('inCombat')" title="In combat, swapping an ability is an Exhausting Exchange">${sh.inCombat ? 'In combat — swaps cost Exhaustion' : 'Out of combat'}</button>
@@ -213,11 +207,114 @@ function useAbility(id) {
   toast(`${a.name} — ${a.cost} slot${a.cost > 1 ? 's' : ''} spent${mins ? `, tracking ${mins} rounds` : ''}.`);
 }
 
+// ── Reality Shift ───────────────────────────────────────────────────────
+// Unveiled grants this and nothing else. The card only exists once the DM reveals it, and it runs
+// the Shift beat by beat: what it does when it opens, what holds while it lasts, the actions and
+// the Lair Action you spend your turns on, and what it costs when it collapses.
+const RS_KIND = { activation:'core', passives:'passive', actions:'active', lair:'super', collapse:'core' };
+const RS_NOTE = {
+  activation: 'The moment it opens — resolve these once.',
+  passives:   'True the whole time it lasts.',
+  actions:    'What you can spend a turn on inside the domain.',
+  lair:       'Initiative 20, losing ties. Solo Shift only, and it can be traded for an Action or Bonus Action.',
+  collapse:   'When it ends, or the moment you drop to 0 HP.',
+};
+const rsState = sh => (sh.rs = sh.rs || { on: false, crits: 0, lair: 0 });
+
+function shiftCard(g, sh) {
+  if (!g.shift || !shiftOn(g.id)) return '';
+  const s = g.shift, rs = rsState(sh), v = derived(sh);
+  const left = (sh.effects.find(e => e.name === s.name) || {}).rounds;
+  const escDC = Math.max(1, 20 + sh.dreamMod + v.pb - 2 * rs.crits);
+  const lairReady = rs.lair !== sh.round;
+  const parts = (s.parts || []).filter(p => rs.on || p.key !== 'collapse');
+
+  const entry = (e, p) => `<div class="ab ${RS_KIND[p.key] || ''} ${rs.on && (p.key === 'actions' || p.key === 'lair') ? 'open' : ''}">
+    <div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
+      <span class="nm">${esc(e.name)}</span>${e.tag ? `<span class="tag">${esc(e.tag)}</span>` : ''}<span class="car">▶</span></div>
+    <div class="ab-b">${prose(e.text, sh)}</div></div>`;
+
+  return `<section class="card span12 shift">
+    <h2>Reality Shift <span class="r">
+      <span class="state" style="color:${g.hue};border-color:${g.hue}">${esc(s.name)}</span>
+      ${rs.on ? `<button class="btn sm warn" onclick="shiftEnd()">End the Shift</button>`
+              : `<button class="btn sm pri" onclick="shiftStart()">Activate</button>`}</span></h2>
+
+    ${rs.on ? `<div class="stats">
+        <div class="stat"><b>${left ?? '—'}</b><i>rounds left</i></div>
+        <div class="stat"><b>${escDC}</b><i>Escape DC${rs.crits ? ` · −${2 * rs.crits}` : ''}</i></div>
+        <div class="stat"><b>${sign(sh.dreamMod)}</b><i>to your save DCs</i></div>
+        <div class="stat"><b>${v.left}/${v.total}</b><i>Grimm Slots</i></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" onclick="shiftSlots()" title="Rule 7 — at the start of your turn">Start of turn · +2 Grimm Slots</button>
+        <button class="btn ${lairReady ? 'pri' : 'on'}" onclick="shiftLair()" title="Initiative 20">${lairReady ? 'Lair Action ready' : `Lair Action used · round ${rs.lair}`}</button>
+        <span class="lbl">Crits taken</span><div class="step"><button onclick="shiftCrit(-1)">–</button><span>${rs.crits}</span><button onclick="shiftCrit(1)">+</button></div>
+      </div>
+      <p class="hint">Your attacks <b>hit automatically</b> in here if you can reach — still roll for crits. Every creature in initiative is trapped; escaping is an Incept Check vs the Escape DC, and each crit against you lowers it by 2.</p>
+      ${SHIFT_PANEL[g.id] ? SHIFT_PANEL[g.id](g, sh, rs) : ''}`
+    : `<p class="hint" style="margin-top:0">Unveiled, a Natural Turn Action that can't be downgraded, Dream Affinity 1+, not restrained, and <b>no Dream Exhaustion</b>. It lasts 1 minute, then costs <b>3 Exhaustion</b> and <b>5 Dream Exhaustion</b> — and it can't be called again for 30 days.</p>`}
+
+    ${parts.map(p => `<h3>${esc(p.title)} <span class="hint" style="font-family:var(--serif);font-weight:400">${RS_NOTE[p.key] || ''}</span></h3>
+      ${p.note ? `<div class="hint" style="margin-bottom:6px">${prose(p.note, sh)}</div>` : ''}
+      ${p.entries.map(e => entry(e, p)).join('')}`).join('')}
+
+    ${!parts.length ? `<div class="ab"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
+      <span class="nm">${esc(s.name)}</span><span class="car">▶</span></div><div class="ab-b">${prose(s.text, sh)}</div></div>` : ''}
+
+    <h3>Reference</h3>
+    ${(s.extra || []).map(x => `<div class="ab"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
+      <span class="nm">${esc(x.title)}</span><span class="car">▶</span></div><div class="ab-b">${prose(x.text, sh)}</div></div>`).join('')}
+    ${s.intro ? `<div class="ab"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
+      <span class="nm">The domain</span><span class="tag">what it looks like</span><span class="car">▶</span></div><div class="ab-b">${prose(s.intro, sh)}</div></div>` : ''}
+    ${D.realityShift ? `<div class="ab"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
+      <span class="nm">The rules of a Reality Shift</span><span class="tag">shared by every Shift</span><span class="car">▶</span></div>
+      <div class="ab-b">${prose(D.realityShift, sh)}</div></div>` : ''}
+  </section>`;
+}
+// Opening one: the domain rises, the clock starts, and its On Activation beats are put in front of you.
+function shiftStart() {
+  const g = grimmById(S.current), sh = sheet(), s = g.shift, rs = rsState(sh);
+  if (sh.dreamExhaustion > 0) return toast(`You carry ${sh.dreamExhaustion} Dream Exhaustion — a Reality Shift needs none.`);
+  rs.on = true; rs.crits = 0; rs.lair = 0;
+  rs.banner = 'king'; rs.acclaim = 0; rs.labors = {};   // Solemn Temperance
+  rs.traps = []; rs.placed = {};                        // Hollownest
+  sh.inCombat = true;
+  sh.effects = sh.effects.filter(e => e.name !== s.name);
+  sh.effects.push({ name: s.name, rounds: 10 });
+  save(); render();
+  const act = (s.parts || []).find(p => p.key === 'activation');
+  openDialog(`${s.name} rises`, act
+    ? act.entries.map(e => `<div class="stagehead">${esc(e.name)}</div>${prose(e.text, sh)}`).join('')
+    : `<div class="prose"><p>The domain is yours for 10 rounds.</p></div>`);
+}
+// Ending it: the collapse, and what it takes out of you.
+function shiftEnd() {
+  const g = grimmById(S.current), sh = sheet(), s = g.shift, rs = rsState(sh);
+  rs.on = false; rs.crits = 0; rs.lair = 0; rs.acclaim = 0; rs.labors = {}; rs.traps = []; rs.placed = {};
+  sh.exhaustion += 3; sh.dreamExhaustion += 5;
+  sh.effects = sh.effects.filter(e => e.name !== s.name);
+  save(); render();
+  const col = (s.parts || []).find(p => p.key === 'collapse');
+  openDialog(`${s.name} collapses`, (col
+    ? col.entries.map(e => `<div class="stagehead">${esc(e.name)}</div>${prose(e.text, sh)}`).join('')
+    : '') + `<div class="prose"><p><b>+3 Exhaustion</b> and <b>+5 Dream Exhaustion</b> applied. You can't call it again for <b>30 days</b>.</p></div>`);
+}
+function shiftCrit(n) { const rs = rsState(sheet()); rs.crits = Math.max(0, rs.crits + n); save(); render(); }
+function shiftLair() { const sh = sheet(), rs = rsState(sh); rs.lair = rs.lair === sh.round ? 0 : sh.round; save(); render(); }
+function shiftSlots() {
+  const sh = sheet(), v = derived(sh);
+  if (!sh.used && !sh.tempUsed) return toast('Your Grimm Slots are already full.');
+  for (let i = 0; i < 2; i++) { if (sh.tempUsed > 0 && !sh.used) sh.tempUsed--; else if (sh.used > 0) sh.used--; }
+  save(); render(); toast('The domain gives back 2 Grimm Slots.');
+}
+
 // ── Effects & rounds ────────────────────────────────────────────────────
+// The round tracker is the sheet's side bar: it stays in view while the rest scrolls.
 function effectsCard(g, sh) {
   const list = sh.effects.map((e, i) => `<div class="item"><span class="nm">${esc(e.name)}</span><span class="sp"></span>
     <span class="hint">${e.rounds} round${e.rounds === 1 ? '' : 's'}</span><button class="x" onclick="dropEffect(${i})">×</button></div>`).join('');
-  return `<section class="card span5 effects">
+  return `<section class="card effects">
     <h2>Round tracker <span class="r"><button class="btn sm" onclick="endCombat()">End combat</button></span></h2>
     <div class="row"><div class="stat"><b>${sh.round}</b><i>round</i></div><button class="btn pri" onclick="nextRound()">Next round</button></div>
     <div class="items" style="margin-top:10px">${list || '<p class="hint">Durations you start with <b>Use</b> land here (1 minute = 10 rounds).</p>'}</div>
@@ -234,51 +331,6 @@ function nextRound() {
 function endCombat() { const sh = sheet(); sh.round = 1; sh.effects = []; sh.inCombat = false; save(); render(); }
 function addEffect() { const sh = sheet(); const n = $('#efName').value.trim(); if (!n) return; sh.effects.push({ name: n, rounds: +$('#efRounds').value || 10 }); save(); render(); }
 function dropEffect(i) { const sh = sheet(); sh.effects.splice(i, 1); save(); render(); }
-
-// ── Harmony ─────────────────────────────────────────────────────────────
-const HARMONY_EVENTS = [
-  ['Shared Ideal / protected the Grimm', 7], ['Named it / crafted its anchor', 5], ["Did the Grimm's will unprompted", 3],
-  ['Bonding ritual (1/week)', 10], ["Ignored its voice / morality", -5], ['Forced Familiar against its will', -3],
-  ['Used an ability against its Cognition', -5], ['Let an ally die despite its protest', -10], ['Lost an inner conflict', -10],
-];
-function harmonyCard(g, sh) {
-  if (!sh.harmonyOn) return `<section class="card span6"><h2>Harmony <span class="r"><button class="btn sm" onclick="toggle('harmonyOn')">Track Harmony</button></span></h2>
-    <p class="hint">Optional gauge (0–100) of your bond. Turn it on if your table uses it — Soulbound adds a Grimm Slot.</p></section>`;
-  const st = harmonyStatus(sh.harmony);
-  const dc = { Stable:40, Fractured:60, Hostile:80 }[st[1]];
-  return `<section class="card span6">
-    <h2>Harmony <span class="r"><span class="state">${st[1]}</span><button class="btn sm" onclick="toggle('harmonyOn')">Hide</button></span></h2>
-    <div class="row"><input type="range" min="0" max="100" value="${sh.harmony}" style="flex:1" oninput="this.nextElementSibling.textContent=this.value" onchange="setNum('harmony',this.value)"><b style="font-family:var(--sans);min-width:30px">${sh.harmony}</b></div>
-    <p class="hint">${st[2]}</p>
-    <div class="chips">${HARMONY_EVENTS.map(([t, n]) => `<button class="chip" onclick="harmonyShift(${n})">${sign(n)} ${esc(t)}</button>`).join('')}</div>
-    <h3>Harmony Check</h3>
-    <div class="row"><span class="lbl">Dream score</span><input class="num" id="hcDream" type="number" value="10"><span class="lbl">Slot tier / other</span><input class="num" id="hcTier" type="number" value="0">
-      <button class="btn pri" onclick="rollHarmony(${dc || 0})" ${st[1] === 'Unbound' ? 'disabled' : ''}>Roll d100</button></div>
-    <div id="hcOut"></div>
-    <p class="hint">Called for Reality Shift, Familiar Form, an Unveiled Super, or deep conflict. ${dc ? `DC ${dc} at ${st[1]}.` : st[1] === 'Unbound' ? 'Unbound: no check — the Grimm acts.' : 'DC 40 at Stable; your DM sets it above that.'}</p>
-  </section>`;
-}
-function harmonyShift(n) { const sh = sheet(); sh.harmony = Math.max(0, Math.min(100, sh.harmony + n)); save(); render(); }
-function rollHarmony(dc) {
-  dc = dc || 40;
-  const r = d(100), tot = r + (+$('#hcDream').value || 0) + (+$('#hcTier').value || 0);
-  $('#hcOut').innerHTML = `<div class="roll">d100 ${r} → <b>${tot}</b> vs DC ${dc} — ${tot >= dc ? '<b class="ok">in harmony</b>' : '<b class="bad">the Grimm resists</b>'}</div>`;
-}
-
-// ── Revive & notes ──────────────────────────────────────────────────────
-function reviveCard(g, sh, v) {
-  return `<section class="card span6">
-    <h2>Revive ledger & notes</h2>
-    <div class="row">
-      <span class="lbl">Deaths</span><div class="step"><button onclick="bump('deaths',-1)">–</button><span>${sh.deaths}</span><button onclick="bump('deaths',1)">+</button></div>
-      <div class="stat"><b>${v.reviveDC}</b><i>Revive DC</i></div>
-      ${sh.unchainedDeath ? `<div class="stat"><b style="color:var(--ember)">−20</b><i>Unchained, forever</i></div>` : ''}
-      <label class="lbl"><input type="checkbox" ${sh.unchainedDeath ? 'checked' : ''} onchange="toggle('unchainedDeath')"> died via Unchaining</label>
-    </div>
-    <p class="hint">Every revival is a d20 Revive Roll against 10 + 1 per previous death.</p>
-    <textarea class="txt" placeholder="Notes — what your Grimm said, what it wants…" onchange="setStr('notes',this.value)">${esc(sh.notes)}</textarea>
-  </section>`;
-}
 
 // ── backup ──────────────────────────────────────────────────────────────
 function exportSheet() {

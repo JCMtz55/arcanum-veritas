@@ -3,54 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Arcanum Veritas — Seal Composer</title>
+<title>Ephemer — Once Upon a Star ★</title>
+<meta name="description" content="Once Upon a Star ★ — the table's tools for Ephemer: the Arcanum Veritas seal composer and the Grimm Companion.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- Cognition icons. If this can't load, the emoji in index.json are used instead. -->
-<link id="faCss" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
 <div class="bar">
-  <div class="brand">Arcanum Veritas<em>seal composer</em></div>
-  <button class="mode" id="modeBtn" onclick="toggleMode()" title="Switch between Arcanum Veritas and the Ignition system">⇄ Ignition</button>
-  <div class="tabs">
-    <button class="tab on" id="tabComposer" onclick="setView('composer')">Composer</button>
-    <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
-    <!-- The rulebook views sit behind one button; they keep their tab ids so setView marks the open one -->
-    <details class="more" id="refMenu">
-      <summary class="tab" id="refBtn">Reference ▾</summary>
-      <div class="more-menu" onclick="this.parentNode.open = false">
-        <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
-        <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
-        <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
-      </div>
-    </details>
-  </div>
-  <div class="dials">
-    <div class="dial" id="slotDial"><label for="slotDn">Slot</label>
-      <div class="step"><button id="slotDn" onclick="bumpSlot(-1)" aria-label="Lower slot">–</button><span id="slotVal">1st</span><button onclick="bumpSlot(1)" aria-label="Raise slot">+</button></div>
-    </div>
-    <div class="dial"><label for="lvlDn">Level</label>
-      <div class="step"><button id="lvlDn" onclick="bumpLvl(-1)" aria-label="Lower level">–</button><span id="lvlVal">1</span><button onclick="bumpLvl(1)" aria-label="Raise level">+</button></div>
-    </div>
-    <div class="dial" id="vmDial"><label for="vmInput">Verum mod</label><input class="num" type="number" id="vmInput" value="4" min="-2" max="12"></div>
-    <div class="dial"><label for="dsInput">Dream mod</label><input class="num" type="number" id="dsInput" value="0" min="-2" max="12"></div>
-  </div>
+  <div class="brand">Ephemer<em>once upon a star ★</em></div>
   <div class="live">
-    <span class="lv atk"><b id="atkOut">+3</b><i>to hit</i></span>
-    <span class="lv dc"><b id="dcOut">13</b><i>Verum DC</i></span>
-    <span class="lv"><b id="capOut">1</b><i id="capLbl">cognition</i></span>
-    <span class="status" id="statusEl">Loading…</span>
-    <!-- The account menu: everything that is yours rather than the builder's. Learning and Admin are
-         views like the tabs, so they keep their tab ids — setView marks the one that is open. -->
     <details class="more" id="who" hidden>
       <summary class="mini" id="whoBtn" title="Your account"></summary>
       <div class="more-menu" onclick="this.parentNode.open = false">
-        <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
-        <button class="tab" id="tabAdmin" onclick="setView('admin')" hidden>Admin</button>
         <button onclick="openAccount()">Change password</button>
         <button onclick="signOut()">Sign out</button>
       </div>
@@ -58,94 +25,36 @@
   </div>
 </div>
 
-<div class="board" id="boardComposer">
-  <aside class="rail">
-    <div class="rail-top">
-      <select class="pick" id="cogFilter" aria-label="Filter by domain" onchange="setFilter(this.value || null)"></select>
-      <input class="search" id="cogSearch" type="search" placeholder="Search cognitions" oninput="renderCogList()">
-    </div>
-    <div class="cogs" id="cogList"></div>
-    <div class="rail-foot"><button class="ghost" onclick="clearAll()">Clear selection</button></div>
-  </aside>
+<main class="hub" id="hub" hidden>
+  <h1 id="hubHello">Where to?</h1>
+  <p class="hub-sub">The table's tools for Ephemer.</p>
+  <div class="hub-grid">
+    <a class="hub-card av" href="arcanum.html">
+      <span class="hub-mark">✦</span>
+      <b>Arcanum Veritas &amp; Ignition</b>
+      <span>Compose seals from your Cognitions and forge Eidons. Your saved builds and your Codex live here.</span>
+    </a>
+    <a class="hub-card grimm" href="grimms/">
+      <span class="hub-mark">⛓</span>
+      <b>Grimm Companion</b>
+      <span>Your Grimm's sheet — slots, chains, abilities and trackers — with the compendium, party tools and rules.</span>
+    </a>
+    <a class="hub-card small" id="hubLearn" href="arcanum.html#learn" hidden>
+      <b>Learning</b>
+      <span>Track the Cognitions you are working toward.</span>
+    </a>
+    <a class="hub-card small" id="hubAdmin" href="arcanum.html#admin" hidden>
+      <b id="hubAdminName">Admin</b>
+      <span>Players, their Cognitions, and reminders.</span>
+    </a>
+  </div>
+</main>
 
-  <section class="composer" id="composer"></section>
-
-  <section class="seal">
-    <div class="seal-h">
-      <h2 id="sealTitle">The seal</h2>
-      <button class="mini on" id="mPlay" onclick="setSumMode('play')">Play</button>
-      <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
-      <button class="mini" onclick="rollSeal()" title="Roll the seal's dice — every damage and healing number, added up (R)">Roll</button>
-      <button class="mini" onclick="rollSeal(true)" title="Roll it as a critical hit — double dice (shift+R, or shift-click a chip)">Crit</button>
-      <button class="mini" id="saveBtn" onclick="saveBuild()" title="Keep this build on your account — it appears in the rail" hidden>Save</button>
-      <details class="more">
-        <summary class="mini" title="Copy, image, print" aria-label="More actions">⋯</summary>
-        <div class="more-menu" onclick="this.parentNode.open = false">
-          <button id="savedItem" onclick="openSaves()" hidden>Saved builds…</button>
-          <button onclick="copySum()">Copy as text</button>
-          <button onclick="saveImage()" title="Save this card as a PNG — on a phone, it opens the share sheet">Save as image</button>
-          <button onclick="window.print()">Print</button>
-        </div>
-      </details>
-    </div>
-    <div id="sumBody"></div>
-    <div id="tray" class="tray" hidden></div>
-  </section>
-</div>
-
-<div class="board" id="boardCodex" hidden>
-  <aside class="rail">
-    <div class="rail-top">
-      <select class="pick" id="codexFilter" aria-label="Filter by domain" onchange="setFilter(this.value || null)"></select>
-      <input class="search" id="codexSearch" type="search" placeholder="Search cognitions" oninput="renderCodexList()">
-    </div>
-    <div class="cogs" id="codexList"></div>
-    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print entry</button></div>
-  </aside>
-  <section class="codex" id="codexBody"></section>
-</div>
-
-<div class="board" id="boardDamage" hidden>
-  <aside class="rail">
-    <div class="cogs" id="damageList" style="padding-top:11px"></div>
-    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print</button></div>
-  </aside>
-  <section class="codex" id="damageBody"></section>
-</div>
-
-<div class="board" id="boardEmotion" hidden>
-  <aside class="rail">
-    <div class="cogs" id="emoList" style="padding-top:11px"></div>
-    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print</button></div>
-  </aside>
-  <section class="codex" id="emoBody"></section>
-</div>
-
-<div class="board" id="boardRings" hidden>
-  <aside class="rail">
-    <div class="cogs" id="ringList" style="padding-top:11px"></div>
-    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print ring</button></div>
-  </aside>
-  <section class="codex" id="ringBody"></section>
-</div>
-
-<div class="board" id="boardLearn" hidden>
-  <section class="codex" id="learnBody"></section>
-</div>
-
-<div class="board" id="boardAdmin" hidden>
-  <aside class="rail">
-    <div class="cogs" id="adminList" style="padding-top:11px"></div>
-    <div class="rail-foot"><button class="ghost" onclick="openAdminUser('new')">New player</button></div>
-  </aside>
-  <section class="codex" id="adminBody"></section>
-</div>
-
-<!-- Sign-in: only shown when the builder is served by its own server and nobody is signed in -->
+<!-- Sign-in: only shown when the app is served by its own server and nobody is signed in -->
 <div class="gate" id="gate" hidden>
   <form class="gate-box" onsubmit="return signIn(event)">
-    <h1>Arcanum Veritas</h1>
-    <p>Sign in to open your Cognitions.</p>
+    <h1>Ephemer</h1>
+    <p>Sign in to open your tools.</p>
     <label for="gateUser">Name</label>
     <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
     <label for="gatePass">Password</label>
@@ -165,33 +74,13 @@
     <p class="gate-err" id="acctErr" hidden></p>
     <div class="acct-row">
       <button class="mini on" type="submit">Change password</button>
-      <button class="mini" type="button" onclick="signOut()">Sign out</button>
       <button class="mini" type="button" onclick="document.getElementById('acct').close()">Close</button>
     </div>
   </form>
 </dialog>
 
-<dialog class="acct saves" id="savesDlg">
-  <h2>Saved builds</h2>
-  <div id="savesBody"></div>
-  <div class="acct-row"><button class="mini" type="button" onclick="document.getElementById('savesDlg').close()">Close</button></div>
-</dialog>
-
 <div class="toast" id="toast"></div>
 
-<script src="js/data.js"></script>
-<script src="js/core.js"></script>
-<script src="js/rail.js"></script>
-<script src="js/composer.js"></script>
-<script src="js/card.js"></script>
-<script src="js/codex.js"></script>
-<script src="js/rings.js"></script>
-<script src="js/damage.js"></script>
-<script src="js/emotion.js"></script>
-<script src="js/ignition.js"></script>
-<script src="js/dice.js"></script>
-<script src="js/account.js"></script>
-<script src="js/journal.js"></script>
-<script src="js/events.js"></script>
+<script src="js/hub.js"></script>
 </body>
 </html>
