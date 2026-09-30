@@ -152,10 +152,10 @@ const EIDON_TEMPLATES = {
   bind: {
     label: "Bind", epithet: "the seal on the body", roll: "save", acts: ["action", "bonus"], out: "damage",
     pools: ["control"],
-    use: "Seize a body and hold it — escape is a check against your Eidon DC.",
+    use: "Seize a body and hold it — escape is a check against your Verum DC.",
     scale: (t, sp) => `${t >= 1 ? 30 + 30 * (sp.range || 0) + " ft" : sp.range ? 30 * sp.range + " ft" : "reach"}` + ` · ${t >= 3 ? "up to your Proficiency Bonus in creatures" : 1 + (sp.extra || 0) + " creature" + ((sp.extra || 0) ? "s" : "")}`,
     tiers: [
-      "Restrain one creature within reach; it takes the unspent dice (half on a save) and escapes with a check against your Eidon DC.",
+      "Restrain one creature within reach; it takes the unspent dice (half on a save) and escapes with a check against your Verum DC.",
       "Tether — bind it from 30 ft away.",
       "Crush — half the dice every time it tries to break free and fails.",
       "Bind up to your Proficiency Bonus in creatures.",
@@ -187,7 +187,7 @@ const EIDON_TEMPLATES = {
 };
 
 state.mode    = "av";      // "av" — Arcanum Veritas · "ign" — Ignition
-state.physMod = 3;         // highest physical ability modifier, for the Eidon save DC
+// Eidon saves use the Verum DC (8 + PB + Verum mod + Dream mod), shared by every Cognitive Art
 state.ign = {
   burning: [],             // [{ id, rounds, inEidon }] — the first is the primary
   template: null, act: null, spend: {},
@@ -220,9 +220,8 @@ function applyMode() {
   set("tabRings", ign ? "Ignitions" : "Rings");
   set("sealTitle", ign ? "The Eidon" : "The seal");
   document.querySelector(".lv.atk i").textContent = ign ? "Eidon check" : "to hit";
-  document.querySelector(".lv.dc i").textContent  = ign ? "Eidon DC" : "Verum DC";
-  ["slotDial", "vmDial"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = ign; });
-  const pd = document.getElementById("physDial"); if (pd) pd.hidden = !ign;
+  document.querySelector(".lv.dc i").textContent  = "Verum DC";
+  ["slotDial"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = ign; });
   document.title = ign ? "Ignition — Eidon Forge" : "Arcanum Veritas — Seal Composer";
   syncBar();
 }
@@ -233,11 +232,7 @@ function syncIgnBar() {
   document.getElementById("capOut").textContent = `${blazeNow()}/${blazeMax()}`;
   document.getElementById("capLbl").textContent = "Blaze";
 }
-document.getElementById("pmInput")?.addEventListener("input", e => {
-  const v = parseInt(e.target.value, 10);
-  state.physMod = isNaN(v) ? 0 : v;
-  syncBar(); renderMain();
-});
+// (The Physical mod dial is gone — Eidons use the Verum DC like every Cognitive Art.)
 
 // ═══════════════════════════════════════════════════════════
 //  BLAZE & BURNING
@@ -245,7 +240,7 @@ document.getElementById("pmInput")?.addEventListener("input", e => {
 function blazeMax() { return profBonus(); }
 function blazeNow() { const I = state.ign; return I.blaze === null ? blazeMax() : Math.min(I.blaze, blazeMax()); }
 function spendBlaze(n) { state.ign.blaze = Math.max(0, blazeNow() - n); }
-function eidonSaveDC() { return 8 + state.physMod + profBonus() + state.dreamMod; }
+function eidonSaveDC() { return verumDC(); }
 
 // Clicking a Cognition in the rail Burns it (or puts it out)
 async function toggleBurn(id) {
@@ -524,11 +519,13 @@ function ignRules() {
     <h3>Numbers</h3><ul>
       <li><strong>Blaze Points</strong> — equal to your Proficiency Bonus. A long rest restores them; on a short rest you may spend a Hit Die for 1.</li>
       <li><strong>Burning a Cognition</strong> — free action, once per turn, no Blaze; it Burns for 1 minute. Burn as many as you like; an Eidon draws on the primary and up to two more.</li>
-      <li><strong>Power dice</strong> — 4d12 / 6d12 / 8d12 / 10d12 by character tier. Spend them on the Template's options; what's left is its output.</li>
+      <li><strong>Power dice</strong> — 4d12 / 6d12 / 8d12 / 10d12 by Rank. Spend them on the Template's options; what's left is its output.</li>
       <li><strong>Eidon Check</strong> — d20 + Dream mod against DC 6, +1 per die you spend, +3 per extra Cognition. The same odds at every level.</li>
-      <li><strong>Eidon save DC</strong> — 8 + your highest physical modifier + Proficiency Bonus + Dream mod.</li>
+      <li><strong>Save DC</strong> — your Verum DC: 8 + Proficiency Bonus + Verum mod + Dream mod.</li>
+      <li><strong>Cognition depth</strong> — every Cognition in an Eidon or Ignition must be known at Learn Full.</li>
       <li><strong>Ignitions you can know</strong> — equal to your Dream mod (minimum 1).</li>
-      <li><strong>Arcanum Veritas</strong> — a creature that knows Arcanum Veritas can't learn Ignitions or manifest Eidons.</li>
+      <li><strong>Arcanum Veritas / Paragon</strong> — a creature that knows Arcanum Veritas or walks the Paragon path can't learn Ignitions or manifest Eidons.</li>
+      <li><strong>Blaze</strong> — manifesting an Eidon or using an Ignition costs 1 Blaze Point.</li>
     </ul>
     <h3>Eidons</h3><ul>
       <li>Need a Dream Score of 13+, at least one Burning Cognition, the Template's activation, and 1 Blaze Point to manifest.</li>
@@ -720,8 +717,8 @@ function renderBurnRail(box, q) {
 // One reference page per Template, read the way the Rings tab reads a Ring
 function templateRef(k) {
   const t = EIDON_TEMPLATES[k];
-  const rollTxt = t.roll === "attack" ? "Your weapon attack roll." : t.roll === "save" ? "A save against your Eidon save DC — the primary Cognition's save."
-    : t.roll === "path" ? "None for you; creatures in your path make a Dexterity save against your Eidon save DC." : "None.";
+  const rollTxt = t.roll === "attack" ? "Your weapon attack roll." : t.roll === "save" ? "A save against your Verum DC — the primary Cognition's save."
+    : t.roll === "path" ? "None for you; creatures in your path make a Dexterity save against your Verum DC." : "None.";
   const outTxt = t.out === "temp" ? "The unspent dice become temporary hit points." : t.out === "reduce" ? "The unspent dice come off the damage you take."
     : "The unspent dice deal the primary Cognition's damage type.";
   return `<p class="cdx-desc">${t.use}</p>
@@ -731,12 +728,12 @@ function templateRef(k) {
       <div class="cdx-def"><b>Output</b><span>${outTxt}</span></div>
       <div class="cdx-def"><b>Borrows</b><span>The primary Cognition's ${t.pools.map(p => COMP_DATA[p].label).join(" Verum, falling back to ")}${t.pools.length ? " Verum" : ""}; each other Cognition in the Eidon lends that Sigil.</span></div>
     </div></div>
-    <div class="cdx-sec"><h2>By tier</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th></th>${TIERS.map(x => `<th>${x.label}</th>`).join("")}</tr></thead><tbody>
+    <div class="cdx-sec"><h2>By Rank</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th></th>${TIERS.map(x => `<th>${x.label}</th>`).join("")}</tr></thead><tbody>
       <tr><td>Power dice</td>${TIERS.map((_, i) => `<td>${EIDON_POOL[i]}d12</td>`).join("")}</tr>
       <tr><td>Reach</td>${TIERS.map((_, i) => `<td class="wrap">${t.scale(i, {})}</td>`).join("")}</tr>
       <tr><td>Counts as slot</td>${TIERS.map((_, i) => `<td>${ORDINALS[EIDON_SLOT[i]]}</td>`).join("")}</tr>
     </tbody></table></div></div>
-    <div class="cdx-sec"><h2>Tier features — every tier reached applies</h2><div class="ladder">` +
+    <div class="cdx-sec"><h2>Rank features — every Rank reached applies</h2><div class="ladder">` +
       t.tiers.map((tx, i) => `<div class="rung"><span class="lv">${TIERS[i].label}</span><span>${tx}</span></div>`).join("") + `</div></div>
     <div class="cdx-sec"><h2>Spend power dice on</h2><div class="cdx-defs">` +
       t.spends.map(o => `<div class="cdx-def"><b>${o.dice}d12${o.max > 1 ? ` · ×${o.max}` : ""}</b><span>${o.label}${o.cond ? ` — the Cognition's ${EIDON_CONDITIONS.find(c => c.v === o.cond).label.toLowerCase()} condition` : ""}${o.minTier ? ` (from ${TIERS[o.minTier].label})` : ""}${o.needs ? " (only once the condition has been raised)" : ""}${o.halves ? " — the output is halved" : ""}.</span></div>`).join("") +
@@ -751,16 +748,17 @@ const IGN_REF = [
       <div class="cdx-def"><b>Learn limit</b><span>Equal to your Dream Score modifier (minimum 1).</span></div>
       <div class="cdx-def"><b>Activation cost</b><span>The Cognitions it needs must be Burning.</span></div>
       <div class="cdx-def"><b>Burning</b><span>Free action, once per turn, lasts 1 minute. It costs no Blaze.</span></div>
-      <div class="cdx-def"><b>Blaze Points</b><span>Equal to your Proficiency Bonus — spent only to activate Eidons.</span></div>
+      <div class="cdx-def"><b>Blaze Points</b><span>Equal to your Proficiency Bonus — 1 to manifest an Eidon or use an Ignition.</span></div>
       <div class="cdx-def"><b>Multiple Cognitions</b><span>Every Cognition a multi-Cognition Ignition names must be Burning.</span></div>
       <div class="cdx-def"><b>Ignition actions</b><span>Set by each Ignition: Action, Bonus Action, Reaction, or triggered.</span></div>
-      <div class="cdx-def"><b>Arcanum Veritas</b><span>A creature that knows Arcanum Veritas can't learn Ignitions or manifest Eidons — the two ways of channelling a Cognition don't share a body.</span></div>
+      <div class="cdx-def"><b>Cognition depth</b><span>Every Cognition an Ignition calls on must be known at Learn Full.</span></div>
+      <div class="cdx-def"><b>Arcanum Veritas / Paragon</b><span>A creature that knows Arcanum Veritas or walks the Paragon path can't learn Ignitions or manifest Eidons — the Cognitive Arts don't share a body.</span></div>
       <div class="cdx-def"><b>Other spellcasters</b><span>Can learn them — rarely optimal unless they fight up close.</span></div>
     </div></div>` },
   { key: "blaze", label: "Blaze &amp; Burning", grp: "The system", body: () => `
-    <div class="cdx-sec"><h2>Blaze Points</h2><div class="cdx-note"><p>You have Blaze Points equal to your Proficiency Bonus — your capacity to turn channelled power into an Eidon. Activating an Eidon is the only thing that spends them. A long rest restores them; on a short rest you may spend a Hit Die to regain 1 (up to your maximum).</p></div></div>
+    <div class="cdx-sec"><h2>Blaze Points</h2><div class="cdx-note"><p>You have Blaze Points equal to your Proficiency Bonus — your capacity to turn channelled power into an Eidon or Ignition. Manifesting an Eidon or using an Ignition costs 1. A long rest restores them; on a short rest you may spend a Hit Die to regain 1 (up to your maximum).</p></div></div>
     <div class="cdx-sec"><h2>Burning a Cognition</h2><div class="cdx-note">
-      <p>To use an Ignition you channel a Cognition you know into your body — you <strong>Burn</strong> it. Burning is a free action you can take once per turn, costs nothing, and the Cognition stays channelled for the next minute. Burn as many as you like; an Eidon draws on the primary and up to two more you choose.</p>
+      <p>To use an Ignition you channel a Cognition you know at Learn Full into your body — you <strong>Burn</strong> it. Burning is a free action you can take once per turn, costs nothing, and the Cognition stays channelled for the next minute. Burn as many as you like; an Eidon draws on the primary and up to two more you choose.</p>
       <p>Each Ignition says what activates it and which Cognition must be Burning. The strongest need several Burning at once.</p></div></div>
     <div class="cdx-sec"><h2>In the forge</h2><div class="cdx-note"><p>Click a Cognition in the rail to Burn it and again to put it out — Burning is free. <strong>Next round</strong> ticks every Burn down and lets you Burn and manifest again; the rest buttons restore Blaze.</p></div></div>` },
   { key: "inherit", label: "Inheriting", grp: "The system", body: () => `
@@ -773,11 +771,11 @@ const IGN_REF = [
   { key: "eidons", label: "Eidons", grp: "Eidons", body: () => `
     <p class="cdx-desc">Improvised martial manifestations of conceptual power — forged on the spot through pure imagination, fuelled by Blaze and a Burning Cognition.</p>
     <div class="cdx-sec"><h2>Manifesting</h2><div class="cdx-defs">
-      <div class="cdx-def"><b>Requirement</b><span>A Dream Score of 13 or higher, and not knowing Arcanum Veritas.</span></div>
-      <div class="cdx-def"><b>Template</b><span>One per Eidon — its shape, the way a Ring is a seal's. Each has its own roll, reach, tier features and dice options.</span></div>
-      <div class="cdx-def"><b>Power dice</b><span>4d12 / 6d12 / 8d12 / 10d12 by character tier. Spend them on the Template's options; what's left is its output. Dice a borrowed Verum adds always join the output.</span></div>
+      <div class="cdx-def"><b>Requirement</b><span>A Dream Score of 13 or higher, every Cognition in it known at Learn Full, and not knowing Arcanum Veritas or walking the Paragon path.</span></div>
+      <div class="cdx-def"><b>Template</b><span>One per Eidon — its shape, the way a Ring is a seal's. Each has its own roll, reach, Rank features and dice options.</span></div>
+      <div class="cdx-def"><b>Power dice</b><span>4d12 / 6d12 / 8d12 / 10d12 by Rank. Spend them on the Template's options; what's left is its output. Dice a borrowed Verum adds always join the output.</span></div>
       <div class="cdx-def"><b>Its Cognition</b><span>The primary Burning Cognition's own rules bind the Eidon as they would a seal's Core — Blood's toll, Sun's Corruption and Reckoning, Nightmare's Dream save, Lunar's phase — and its conditions are the ones the Eidon inflicts. The others lend Sigils and don't pay.</span></div>
-      <div class="cdx-def"><b>As a slot</b><span>For anything a borrowed Verum scales by slot level, an Eidon counts as a ${EIDON_SLOT.map(s => ORDINALS[s]).join(" / ")}-level slot by character tier — always a step below a seal.</span></div>
+      <div class="cdx-def"><b>As a slot</b><span>For anything a borrowed Verum scales by slot level, an Eidon counts as a ${EIDON_SLOT.map(s => ORDINALS[s]).join(" / ")}-level slot by Rank — always a step below a seal.</span></div>
       <div class="cdx-def"><b>Cognitions</b><span>Burn as many as you like, once per turn. An Eidon draws on the primary and up to two more you choose — each one +3 to the check.</span></div>
       <div class="cdx-def"><b>Bonus Action</b><span>Any Template but Reversal can be manifested as a Bonus Action instead — at half its output (damage, temp HP, damage reduced), and half Mobility's distance.</span></div>
       <div class="cdx-def"><b>Cost</b><span>The Template's activation and 1 Blaze Point to manifest. Burning the Cognition beforehand is free.</span></div>
@@ -801,7 +799,7 @@ const IGN_REF = [
        ["3 Cognitions, 4 dice spent", 16], ["3 Cognitions, 8 dice spent", 20]].map(([l, dc]) =>
         `<tr><td class="wrap">${l}</td><td>${dc}</td>` + [1,2,3,4,5].map(m => `<td>${Math.round(Math.max(0, Math.min(20, 21 - (dc - m))) * 5)}%</td>`).join("") + `</tr>`).join("") +
     `</tbody></table></div></div>
-    <div class="cdx-sec"><h2>Eidon save DC</h2><div class="cdx-note"><p>When an Eidon makes a creature save: <strong>8 + your highest physical modifier + Proficiency Bonus + Dream mod</strong>. The save it asks for is the primary Cognition's (Dexterity for a Mobility path).</p></div></div>` },
+    <div class="cdx-sec"><h2>Save DC</h2><div class="cdx-note"><p>When an Eidon makes a creature save, the DC is your <strong>Verum DC: 8 + Proficiency Bonus + Verum mod + Dream mod</strong>, the same as every Cognitive Art. The save it asks for is the primary Cognition's (Dexterity for a Mobility path).</p></div></div>` },
   { key: "convert", label: "Becoming an Ignition", grp: "The roll", body: () => `
     <div class="cdx-note"><p>In the forge of repetition, inspiration becomes technique. Manifest the <strong>same Eidon successfully 3 times</strong> and meet the Ignition requirements (Dream Score, a Burning Cognition, and a narrative trigger), and you may learn it as a permanent Ignition at your next long rest.</p>
       <p>It costs 1 Ignition slot. The DM may ask for a related dream epiphany, a bond with (or the defeat of) a Cognition-linked creature, or a climactic event to finish the change. Once converted it needs no Eidon Check — it becomes a standard ability with its own activation.</p></div>` },

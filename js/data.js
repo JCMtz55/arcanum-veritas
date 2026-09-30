@@ -213,12 +213,12 @@ const RULES = {
     ["Seal attack bonus","Proficiency Bonus + Verum Modifier"],
     ["Verum DC","8 + Proficiency Bonus + Verum Modifier + Dream Score modifier"],
     ["Saving throw type","set by the Core (its Main Saving Throw)"],
-    ["Absolute damage","from Tier III (level 11+), all of a seal's damage — Verum, Sigils, ticks and riders — turns into its type's Absolute form: fire becomes Infernal, force Astral, necrotic Doom… Some Verums get there sooner. Absolute damage is never halved or negated: a creature resistant to the ordinary type reduces it by 2 × its Proficiency Bonus, an immune one by 4 × its Proficiency Bonus (once per damage roll, never below 0). Vulnerability still doubles it. Where a Verum or Sigil ignores resistance or immunity, against Absolute damage it ignores that reduction. Void and All-Mighty are born at their zenith: nothing resists, reduces or absorbs them, at any level."],
+    ["Absolute damage","from Rank III (level 11+), all of a seal's damage — Verum, Sigils, ticks and riders — turns into its type's Absolute form: fire becomes Infernal, force Astral, necrotic Doom… Some Verums get there sooner. Absolute damage is never halved or negated: a creature resistant to the ordinary type reduces it by 2 × its Proficiency Bonus, an immune one by 4 × its Proficiency Bonus (once per damage roll, never below 0). Vulnerability still doubles it. Where a Verum or Sigil ignores resistance or immunity, against Absolute damage it ignores that reduction. Void and All-Mighty are born at their zenith: nothing resists, reduces or absorbs them, at any level."],
   ],
   premium: "The Premium Rule — a seal of slot N should perform like the best spell of slot N+1, before its Verum Effect and Sigils. It costs a slot AND a use; you get Proficiency Bonus uses per long rest; no cantrips.",
   limits: [
     "Uses: Proficiency Bonus seals per long rest. Nothing restores uses unless it says so.",
-    "Verum Effects scale by CHARACTER LEVEL, never by slot. The slot sets the Ring; your level sets the Core's tier.",
+    "Verum Effects scale by CHARACTER LEVEL, never by slot. The slot sets the Ring; your Rank sets the Core's Verum tier.",
     "Budget: one Core + (slot level − 1) Complements. Coven Drawing may add up to three more.",
     "Timing: your action, once per turn, never a bonus action. Ward is a reaction. Rite and Inscribed take longer by design.",
     "Concentration: Aura, Field, Control zones, and Constructs. Self, Ally, Infusion, Structures, and Objects do not.",
@@ -273,8 +273,8 @@ function initIcons() {
 const ORDINALS = ["","1st","2nd","3rd","4th","5th","6th","7th","8th","9th"];
 
 const TIERS = [
-  { label:"Lv 1–4",   min:1,  max:4  },
-  { label:"Lv 5–10",  min:5,  max:10 },
-  { label:"Lv 11–16", min:11, max:16 },
-  { label:"Lv 17+",   min:17, max:20 },
+  { label:"Rank I · Lv 1–4",    min:1,  max:4  },
+  { label:"Rank II · Lv 5–10",  min:5,  max:10 },
+  { label:"Rank III · Lv 11–16", min:11, max:16 },
+  { label:"Rank IV · Lv 17+",    min:17, max:20 },
 ];

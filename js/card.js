@@ -471,7 +471,7 @@ function buildFullRef(coreCog, tier) {
       : ""}`,
     `Saving Throw : ${coreCog?.savingThrow || "—"}`,
     `Damage Type  : ${coreCog?.damageType  || "—"}${isAbsolute(coreCog, tier) && absoluteName(coreCog?.damageType) ? ` → ${absoluteName(coreCog.damageType)} (Absolute)` : ""}`,
-    `Tier         : ${TIERS[tier].label}`,
+    `Rank         : ${TIERS[tier].label}`,
     `Numbers      : Prof ${sgn(profBonus())} · Attack ${sgn(sealAttack())} · Verum DC ${verumDC()}`,
     ``,
     `── SCALING (${ORDINALS[state.slotLevel]}) ──`,
