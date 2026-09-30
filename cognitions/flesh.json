@@ -56,6 +56,7 @@
     "supportive": [
       {
         "name": "Regenerative Twist",
+        "duration": "instant",
         "description": "Accelerate or hijack the body's repair process — closing wounds and regrowing limbs with the same motion that, pointed differently, turns regeneration cancerous.",
         "tiers": [
           {

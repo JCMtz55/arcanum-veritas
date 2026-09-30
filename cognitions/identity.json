@@ -80,11 +80,12 @@
     "supportive": [
       {
         "name": "I Am",
+        "duration": "ring",
         "description": "You say their name back to them until it holds like stone.",
         "tiers": [
           {
-            "text": "For 1 minute the target can't be Charmed or possessed, and adds your Verum Modifier to Charisma saving throws.",
-            "card": "1 min: can't be Charmed or possessed · +{VM} to Charisma saves",
+            "text": "The target can't be Charmed or possessed, and adds your Verum Modifier to Charisma saving throws.",
+            "card": "Can't be Charmed or possessed · +{VM} to Charisma saves",
             "mech": {
               "deny": [
                 "charm",
@@ -116,7 +117,7 @@
             }
           },
           {
-            "text": "The Unbreakable Self. For the minute, the target has advantage on every saving throw, and its attacks and seals are made as if it were at its best: it ignores exhaustion, Dream Exhaustion, and any penalty to its rolls from another creature's effect.",
+            "text": "The Unbreakable Self. While the seal lasts, the target has advantage on every saving throw, and its attacks and seals are made as if it were at its best: it ignores exhaustion, Dream Exhaustion, and any penalty to its rolls from another creature's effect.",
             "card": "THE UNBREAKABLE SELF — advantage on EVERY save · ignores exhaustion and every penalty others lay on its rolls",
             "mech": {
               "buff": {

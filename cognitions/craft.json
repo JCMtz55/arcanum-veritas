@@ -60,6 +60,7 @@
     "supportive": [
       {
         "name": "Master's Reinforcement",
+        "duration": "ring",
         "description": "A thing made well does not fail when it is asked to matter. You make things well.",
         "tiers": [
           {
@@ -79,6 +80,7 @@
           },
           {
             "text": "Perfect the Work on one willing creature for 1 minute: it gains temporary hit points equal to your Verum DC, its weapons and armor count as magical and +2, and it cannot be Disarmed, nor its gear Sundered or broken, by any effect below the level of Wish or Destruction.",
+            "duration": "1 minute",
             "card": "Perfect the Work 1 min — temp HP equal to your DC · weapons and armor magical +2 · can't be disarmed or sundered",
             "mech": {
               "heal": { "temp": "your Verum DC" },

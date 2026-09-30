@@ -123,6 +123,7 @@
     "supportive": [
       {
         "name": "Life-Bringer",
+        "duration": "instant",
         "description": "Fire is not only death. It is the light that holds back the dark.",
         "tiers": [
           {
@@ -158,6 +159,7 @@
           },
           {
             "text": "Choose up to 5 allies touched by the flame. Each regains 6d10 hit points, removes one condition (except Petrified or Unconscious), and is wreathed in fire for 1 minute, dealing 1d8 fire damage on melee hits.",
+            "duration": "1 minute",
             "card": "5 allies: 6d10 each · each drops a condition · wreathed in fire 1 min, 1d8 on their melee hits",
             "mech": {
               "heal": {
@@ -175,6 +177,7 @@
       },
       {
         "name": "Unrelenting Heat",
+        "duration": "instant",
         "description": "Your flame cannot be denied by resistance or resilience.",
         "tiers": [
           {
@@ -210,10 +213,12 @@
       },
       {
         "name": "Infernal Passion",
+        "duration": "ring",
         "description": "You do not merely draw fire — you become it.",
         "tiers": [
           {
             "text": "Gain advantage on your next Charisma check or saving throw before the end of your next turn.",
+            "duration": "until the end of your next turn",
             "card": "Advantage on your next Cha check or save",
             "mech": {
               "buff": {
@@ -223,8 +228,8 @@
             }
           },
           {
-            "text": "For 1 minute, you and allies within 30 feet gain +2 to attack rolls while the fire persists.",
-            "card": "1 min: you and allies within 30 ft get +2 to attack",
+            "text": "While the seal lasts, you and allies within 30 feet gain +2 to attack rolls.",
+            "card": "You and allies within 30 ft get +2 to attack",
             "mech": {
               "buff": {
                 "attack": "+2",

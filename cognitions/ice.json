@@ -74,23 +74,27 @@
     "supportive": [
       {
         "name": "Frozen Moment",
+        "duration": "instant",
         "description": "Stillness can defy time.",
         "tiers": [
           {
             "text": "Suspend a dying creature (at 0 HP but not dead) in magical ice. They do not make death saving throws until the ice thaws at the end of your next turn.",
+            "duration": "until the end of your next turn",
             "card": "Suspend a dying creature in ice — no death saves until it thaws end of your next turn"
           },
           {
             "text": "Use this effect as a reaction when a creature drops to 0 HP — encasing them for up to 1 minute. They are stable and cannot be targeted while frozen.",
+            "duration": "up to 1 minute",
             "card": "Reaction when a creature hits 0 HP: encase 1 min, stable and untargetable"
           },
           {
             "text": "A willing creature may be frozen in time for up to 1 hour. While encased they are immune to all effects but also cannot act, speak, or be detected by magical means.",
+            "duration": "up to 1 hour",
             "card": "Willing creature in stasis up to 1 hr — immune to everything, can't act or be found"
           },
           {
-            "text": "Once per long rest, cast this effect on yourself — while frozen you are invulnerable and regain 1d4 hit dice per hour spent in stasis. You may set a condition to thaw automatically (a specific sound, time elapsed, or touch from a named creature).",
-            "card": "1/long rest on yourself: invulnerable, regain 1d4 hit dice per hour, set your own thaw trigger",
+            "text": "You may draw this effect on yourself — while frozen you are invulnerable and regain 1d4 hit dice per hour spent in stasis. You may set a condition to thaw automatically (a specific sound, time elapsed, or touch from a named creature).",
+            "card": "On yourself: invulnerable, regain 1d4 hit dice per hour, set your own thaw trigger",
             "mech": {
               "damage": {
                 "dice": "1d4"
@@ -104,11 +108,12 @@
       },
       {
         "name": "Iceheart",
+        "duration": "ring",
         "description": "Let the chill protect you.",
         "tiers": [
           {
-            "text": "Gain resistance to cold damage for 1 minute. While active, your Concentration cannot be broken by cold damage.",
-            "card": "Cold resistance 1 min · cold can't break your Concentration",
+            "text": "Gain resistance to cold damage. While the seal lasts, your Concentration cannot be broken by cold damage.",
+            "card": "Cold resistance · cold can't break your Concentration",
             "mech": {
               "damage": {
                 "type": "cold"
@@ -116,8 +121,8 @@
             }
           },
           {
-            "text": "Once per long rest, when you are hit by cold damage, you may instead gain temporary HP equal to the damage that would have been dealt.",
-            "card": "1/long rest: turn incoming cold damage into that much temp HP",
+            "text": "Once while the seal lasts, when you are hit by cold damage, you may instead gain temporary HP equal to the damage that would have been dealt.",
+            "card": "Once per seal: turn incoming cold damage into that much temp HP",
             "mech": {
               "damage": {
                 "type": "cold"

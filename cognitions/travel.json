@@ -68,6 +68,7 @@
     "supportive": [
       {
         "name": "Good Road",
+        "duration": "1 hour",
         "description": "The ground cooperates, the weather holds, and the distance is less than it was.",
         "tiers": [
           {

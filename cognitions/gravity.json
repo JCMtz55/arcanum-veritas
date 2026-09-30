@@ -108,6 +108,7 @@
     "supportive": [
       {
         "name": "Local Gravity",
+        "duration": "ring",
         "description": "Down is a suggestion you have stopped taking.",
         "tiers": [
           {

@@ -3,10 +3,14 @@
   "name": "Hollowing",
   "icon": "🫥",
   "opposing": "night",
-  "description": "Erasure, Stasis, Anti-Imagination, Termination, The Uncreated. Hollowing is not a weapon — it is the absence of argument. Before Rhea was broken there was only this: the perfect Hollowness the One Above All intended as its masterwork, possibility answered once and for all with no. Those attuned reach into the gap beneath all things and pull that design forward. Dreams do not shatter in its presence; they cease to have occurred. Magic does not fail; it forgets what it was trying to become. It is the only Cognition that does not express — it unexpresses — and the only one that strikes at a creature's Cognitions themselves.",
+  "description": "Erasure, Stasis, Anti-Imagination, Termination, The Uncreated. Hollowing is not a weapon — it is the absence of argument. Before Rhea was broken there was only this: the perfect Hollowness the One Above All intended as its masterwork, possibility answered once and for all with no. Those attuned reach into the gap beneath all things and pull that design forward. Dreams do not shatter in its presence; they cease to have occurred. Magic does not fail; it forgets what it was trying to become. It is the only Cognition that does not express — it unexpresses — and the only one that strikes at a creature's Cognitions themselves. It is Primordial: the fourth root force beside Chaos, Order and Imagination, and it answers its wielder as readily as it answers the world.",
   "savingThrow": "Cognition",
   "damageType": "Void",
   "incompatible": [ "creation" ],
+  "cost": {
+    "text": "Hollowness answers its wielder too. Each time you draw a seal with Hollowing as its Core you gain 1 Hollow Mark; a Hollowing Sigil costs nothing. Marks measure how much of you has already been answered. With 1 or more you can't gain Inspiration. With 3 or more you can't be Charmed or Frightened, you have advantage on Cognition saves, and you gain nothing from emotion-based effects, friendly ones included. At 6 your Marks clear and you suffer Stage One Hollowing Insomnia, or advance one stage. Two Marks fade when you finish a long rest, and one fades whenever you act on your Greatest Wish at a real cost to yourself (the DM's call).",
+    "card": "+1 Hollow Mark per Hollowing Core · 1+: no Inspiration · 3+: no charm or fear, advantage on Cognition saves, no emotion-based benefits · 6: Marks clear and Hollowing Insomnia advances · a long rest fades 2"
+  },
   "eidon": {
     "conditions": {
       "minor":  { "name": "Flattened", "card": "can't gain advantage or Inspiration" },
@@ -27,6 +31,21 @@
       { "name": "Shattered", "level": 5,
         "text": "A Cognition Fractured again is Shattered: fully inert until its wielder finishes a short rest and expends a spell slot of 3rd level or higher to rebuild it.",
         "card": "Fractured twice = Shattered: inert until a short rest and a 3rd+ slot" },
+      { "name": "Unexpression", "level": 1,
+        "text": "A creature with no attuned Cognitions still has something to take. Each Fracture it would suffer instead unexpresses one line of what it is, your choice, until the end of your next turn: one damage resistance, its reaction, one attack of its Multiattack, or the recharge of one ability. Each Shatter instead unexpresses one for 1 minute: a damage immunity becomes resistance, one named trait stops working (Regeneration, Magic Resistance, Pack Tactics — never Legendary Resistance), or it loses one legendary action each round. A creature can have at most your Proficiency Bonus lines unexpressed at once.",
+        "card": "No Cognitions? A Fracture unexpresses a resistance, its reaction, one Multiattack attack or a recharge until your next turn ends · a Shatter: an immunity, a named trait or a legendary action for 1 min · max {PB} at once" },
+      { "name": "Stillness", "level": 1,
+        "text": "You hold a pool of Stillness, up to your Proficiency Bonus. You gain 1 the first time on each turn that a seal or Sigil of yours Fractures, Shatters or unexpresses something, and 1 at the start of your turn if you have not moved since the start of your last turn. Stillness empties when you finish a rest.",
+        "card": "Stillness (max {PB}): +1 the first time each turn you Fracture, Shatter or unexpress · +1 at the start of your turn if you haven't moved · empties on a rest" },
+      { "name": "The Answer Is No", "level": 5,
+        "text": "As a reaction, spend 1 Stillness when a creature you can see within 60 feet would gain advantage, use Inspiration, reroll a die, or gain temporary hit points: it doesn't. Whatever it spent to try is spent.",
+        "card": "Reaction, 1 Stillness: a creature within 60 ft doesn't get its advantage, Inspiration, reroll or temp HP — the cost is still paid" },
+      { "name": "Foreclosure", "level": 11,
+        "text": "When you draw a seal with Hollowing as its Core, you may spend 2 Stillness to name one kind of becoming: teleportation, healing, flight, summoning, shapechanging or invisibility. Until the start of your next turn it cannot begin within 30 feet of you. A creature that tries makes a Cognition save against {DC}; on a failure the attempt is spent and nothing happens. This binds you and your allies as well.",
+        "card": "2 Stillness as you draw: name teleportation, healing, flight, summoning, shapechanging or invisibility — within 30 ft, Cognition save vs {DC} or it doesn't happen (allies too)" },
+      { "name": "Chaos in Zero", "level": 17,
+        "text": "As an action, spend 5 Stillness. Until the start of your next turn, within 30 feet of you nothing becomes: hit points can't be gained or lost, conditions can't be applied or ended, and nothing can be summoned, created, teleported or transformed. It binds every creature inside, you included, and there is no save. You gain 2 Hollow Marks.",
+        "card": "Action, 5 Stillness: 30 ft, until your next turn — no HP gained or lost, no conditions applied or ended, nothing summoned, made, teleported or changed · everyone, no save · +2 Hollow Marks" },
       { "name": "Hollowing Insomnia", "level": 17,
         "text": "A creature whose every Cognition is Shattered at once by your seal suffers Stage One Hollowing Insomnia (or advances one stage) — the collapse of its imaginative architecture does real cosmological damage. This happens at most once per seal.",
         "card": "Every Cognition Shattered at once = Stage One Hollowing Insomnia (once per seal)" }
@@ -38,18 +57,18 @@
         "name": "The Quiet Erasure",
         "description": "You do not silence the dream. You make it so the dream was never, in that moment, something that could have been.",
         "tiers": [
-          { "text": "The damage becomes Void. A creature that fails loses any Inspiration it carries, and one Cognition of your choice is Fractured until the end of your next turn. On a success it loses only its Inspiration.",
-            "card": "Damage becomes Void · fail: lose Inspiration, 1 Cognition Fractured until the end of your next turn · success: lose Inspiration",
-            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
-          { "text": "A creature that fails has two Cognitions of your choice Fractured — now until mended — and can't gain Inspiration or advantage on Dream-linked checks until the end of your next turn. On a success, one Cognition is Fractured.",
-            "card": "Fail: 2 Cognitions Fractured, no Inspiration or Dream advantage · success: 1 Fractured",
-            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Fractured", "count": 2 } ], "deny": [ "Inspiration" ] } },
-          { "text": "A creature that fails has one Cognition of your choice Shattered and up to two others Fractured. On a success, two are Fractured. A creature with no Cognitions that fails is Stunned until the end of its next turn instead — there was nothing to take, so the Hollowness takes the moment.",
-            "card": "Fail: 1 Cognition Shattered + 2 Fractured (none attuned: Stunned) · success: 2 Fractured",
-            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Shattered", "count": 1 }, { "name": "Fractured", "count": 2 } ] } },
-          { "text": "The Complete Erasure. A creature that fails has every attuned Cognition Shattered, and restoration below a divine miracle can't mend them sooner than a long rest. Even on a success, one is Shattered and two are Fractured.",
-            "card": "THE COMPLETE ERASURE — fail: EVERY Cognition Shattered · success: 1 Shattered + 2 Fractured",
-            "mech": { "damage": { "type": "void" }, "conditions": [ { "name": "Shattered", "count": "all" } ] } }
+          { "text": "The damage becomes Void and increases by 1 additional die. A creature that fails loses any Inspiration it carries, and one Cognition of your choice is Fractured until the end of your next turn. On a success it loses only its Inspiration.",
+            "card": "+1 die · damage becomes Void · fail: lose Inspiration, 1 Cognition Fractured until the end of your next turn · success: lose Inspiration",
+            "mech": { "damage": { "bonusDice": 1, "type": "void" }, "conditions": [ { "name": "Fractured", "count": 1 } ] } },
+          { "text": "The damage increases by 2 additional dice. A creature that fails has two Cognitions of your choice Fractured — now until mended — and can't gain Inspiration or advantage on Dream-linked checks until the end of your next turn. On a success, one Cognition is Fractured.",
+            "card": "+2 dice · fail: 2 Cognitions Fractured, no Inspiration or Dream advantage · success: 1 Fractured",
+            "mech": { "damage": { "bonusDice": 2, "type": "void" }, "conditions": [ { "name": "Fractured", "count": 2 } ], "deny": [ "Inspiration" ] } },
+          { "text": "The damage increases by 3 additional dice. A creature that fails has one Cognition of your choice Shattered and up to two others Fractured. On a success, two are Fractured. A creature with no Cognitions that fails is unexpressed as usual and is also Stunned until the end of its next turn — there was nothing to take, so the Hollowness takes the moment.",
+            "card": "+3 dice · fail: 1 Cognition Shattered + 2 Fractured (none attuned: Stunned) · success: 2 Fractured",
+            "mech": { "damage": { "bonusDice": 3, "type": "void" }, "conditions": [ { "name": "Shattered", "count": 1 }, { "name": "Fractured", "count": 2 } ] } },
+          { "text": "The Complete Erasure. The damage increases by 4 additional dice. A creature that fails has every attuned Cognition Shattered, and restoration below a divine miracle can't mend them sooner than a long rest. Even on a success, one is Shattered and two are Fractured.",
+            "card": "+4 dice · THE COMPLETE ERASURE — fail: EVERY Cognition Shattered · success: 1 Shattered + 2 Fractured",
+            "mech": { "damage": { "bonusDice": 4, "type": "void" }, "conditions": [ { "name": "Shattered", "count": "all" } ] } }
         ]
       },
       {
@@ -92,6 +111,7 @@
     "supportive": [
       {
         "name": "Uncreated Armor",
+        "duration": "ring",
         "description": "You wrap the target in the logic of Hollowness: it is already what it will be. There is no imaginative gap for change to enter.",
         "tiers": [
           { "text": "The target gains resistance to psychic damage and advantage on Cognition saves. Illusions, charms and dream-sourced attacks that would need to imagine it as a target fail to register it unless their source succeeds on a Cognition save against your DC.",
@@ -101,9 +121,11 @@
             "card": "Can't be Frightened · advantage vs Vile effects · curses, polymorphs, compulsions foreclosed (source's Cognition Fractured)",
             "mech": { "deny": [ "fear" ], "buff": { "who": "target", "advantage": "saves against Vile-emotion effects" } } },
           { "text": "For 1 hour, the target is immune to outside Dream Exhaustion and to Cognition effects from creatures with fewer attuned Cognitions than it. The first time each turn a creature targets it with a spell or ability, that creature makes a Cognition save — failing, the targeting fails, the action is wasted, and its Cognition Fractures.",
+            "duration": "1 hour",
             "card": "1 hr: immune to outside Dream Exhaustion and to lesser Cognition-bearers · 1st targeting each turn: Cognition save or wasted + Fractured",
             "mech": { "deny": [ "outside Dream Exhaustion" ] } },
           { "text": "Fixed Point. For 1 minute (Concentration) the target is resolved into exactly what it is: immune to the first four magical damage instances, conditions and effects it would receive each round. A creature that seals Arcanum Veritas against it makes a Cognition save — failing, the whole seal fails, every Cognition in it Fractures, and its caster suffers the Arcanum Veritas debuff.",
+            "duration": "1 minute",
             "card": "FIXED POINT — 1 min: ignores the first 4 magical effects each round · an AV seal against it: Cognition save or the seal fails, Fractured, debuffed" }
         ]
       }

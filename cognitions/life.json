@@ -59,6 +59,7 @@
     "supportive": [
       {
         "name": "Overriding Vitality",
+        "duration": "instant",
         "description": "You do not close the wound. You make it irrelevant.",
         "tiers": [
           {
@@ -96,6 +97,7 @@
       },
       {
         "name": "Regeneration",
+        "duration": "ring",
         "description": "You do not mend flesh — you return it to what it was meant to be.",
         "tiers": [
           {
@@ -133,6 +135,7 @@
       },
       {
         "name": "Overflowing Vitality",
+        "duration": "ring",
         "description": "You surge with living force, and it spills over into everyone near you.",
         "tiers": [
           {
@@ -151,6 +154,7 @@
           },
           {
             "text": "The spill becomes a tide. For 1 minute, you and allies within 60 feet regain your Verum Modifier + your Proficiency Bonus in hit points at the start of each of their turns, and automatically succeed on death saving throws.",
+            "duration": "1 minute",
             "card": "1 min: you and allies within 60 ft regain {VM}+{PB} at the start of each turn and auto-succeed on death saves",
             "mech": {
               "heal": { "perTurn": "VM + PB", "radius": "60 ft", "duration": "1 minute" },
@@ -159,6 +163,7 @@
           },
           {
             "text": "You become a Font of Life for 1 minute. You and allies within 60 feet regain 20 hit points at the start of each of their turns, and an ally who dies inside the Font rises again at the start of your next turn with half its hit points — unless its body was destroyed.",
+            "duration": "1 minute",
             "card": "FONT OF LIFE, 1 min — you and allies within 60 ft regain 20/turn · allies who die inside rise at your next turn with half their HP",
             "mech": {
               "heal": { "perTurn": 20, "radius": "60 ft", "duration": "1 minute" },
@@ -169,6 +174,7 @@
       },
       {
         "name": "Undying",
+        "duration": "ring",
         "description": "Life does not agree to end.",
         "tiers": [
           {

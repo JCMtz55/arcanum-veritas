@@ -69,11 +69,12 @@
     "supportive": [
       {
         "name": "Fed",
+        "duration": "ring",
         "description": "You share the meal. It never tastes like enough.",
         "tiers": [
           {
-            "text": "For 1 minute, when the target hits with an attack or its seal damages a creature, it regains hit points equal to your Verum Modifier, once per turn.",
-            "card": "1 min: when it hits, it regains {VM} HP (once a turn)",
+            "text": "When the target hits with an attack or its seal damages a creature, it regains hit points equal to your Verum Modifier, once per turn.",
+            "card": "When it hits, it regains {VM} HP (once a turn)",
             "mech": {
               "buff": {
                 "who": "target",

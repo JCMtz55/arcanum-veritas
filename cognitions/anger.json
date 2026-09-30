@@ -87,11 +87,12 @@
     "supportive": [
       {
         "name": "Righteous",
+        "duration": "ring",
         "description": "You do not calm them down. You aim them.",
         "tiers": [
           {
-            "text": "For 1 minute the target adds your Verum Modifier to its damage rolls and can't be Charmed or Frightened.",
-            "card": "1 min: +{VM} damage · can't be Charmed or Frightened",
+            "text": "The target adds your Verum Modifier to its damage rolls and can't be Charmed or Frightened.",
+            "card": "+{VM} damage · can't be Charmed or Frightened",
             "mech": {
               "deny": [
                 "charm",

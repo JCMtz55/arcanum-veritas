@@ -30,11 +30,12 @@
     "supportive": [
       {
         "name": "Sustained",
+        "duration": "ring",
         "description": "They are held up by something. It does not matter to the mechanism what.",
         "tiers": [
           {
-            "text": "For 1 minute the target adds your Verum Modifier to saving throws and can't be Frightened or Charmed.",
-            "card": "1 min: +{VM} to all saves · no fear, no charm",
+            "text": "The target adds your Verum Modifier to saving throws and can't be Frightened or Charmed.",
+            "card": "+{VM} to all saves · no fear, no charm",
             "mech": {
               "deny": [
                 "fear",

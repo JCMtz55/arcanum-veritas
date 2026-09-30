@@ -106,6 +106,14 @@ function foldSigilSave(t) {
     .replace(/([.!?]\s+)(on the failed save)/g, (m, p, r) => p + r.charAt(0).toUpperCase() + r.slice(1));
 }
 
+// The Ring's Buff Duration as the chosen Verum runs it — one resolved time, and what governs it
+function buffClock(v, coreCog) {
+  const k = verumClock(coreVerumOf(coreCog));
+  const note = !k || k.kind === "ring" ? "" : k.kind === "charges" ? "or until spent"
+             : k.kind === "instant" ? "the verum itself is instant" : "the verum's own clock";
+  return { v: k?.kind === "fixed" ? k.time : v, note, lab: note ? `duration · ${note}` : "duration" };
+}
+
 function buildPlayCard(coreCog, tier) {
   const coreEntry = INDEX.find(c => c.id === state.core);
   const cd  = COMP_DATA[state.compType];
@@ -146,9 +154,14 @@ function buildPlayCard(coreCog, tier) {
     if (roll) stat.push(`Doom ${roll} ${doom.type ? liveType(doom.type, coreCog, tier) : kind} (${doom.when || "later"})`);
   }
   ["Range","Radius","Targets","Duration","Buff Duration","Zone Duration","Weapon Die","CR cap","Size","AC","HP / segment","Max size","Quality","Tier","Scope"]
-    .forEach(c => { const v = cell(c); if (v) stat.push(`${c}: ${v}`); });
+    .forEach(c => {
+      const v = cell(c); if (!v) return;
+      if (c !== "Buff Duration") { stat.push(`${c}: ${v}`); return; }
+      const b = buffClock(v, coreCog);
+      stat.push(`Duration: ${b.v}${b.note ? ` (${b.note})` : ""}`);
+    });
   if (coreCog?.savingThrow && state.compSub !== "Direct Attack")
-    stat.push(`${coreCog.savingThrow} save DC ${verumDC()}`);
+    stat.push(sealRoll() ? `${coreCog.savingThrow} save DC ${verumDC()}` : `No roll · Verum DC ${verumDC()}`);
   L.push(stat.join(" · "));
   if (coreCog?.cost) L.push(`COST — ${cardLine(coreCog.cost)}`);
   masteryOf(coreCog).forEach(tr => L.push(`${tr.name.toUpperCase()} — ${resolve(tr.card)}`));
@@ -168,7 +181,7 @@ function buildPlayCard(coreCog, tier) {
   const activeVerum = coreVerums.find(v => v.name === state.coreVerum) || coreVerums[0];
   if (activeVerum) {
     L.push(`CORE — ${(activeVerum.name || "").toUpperCase()}${tier > 0 ? "  (tiers stack; a bigger number replaces a smaller one)" : ""}`);
-    coreLadder(activeVerum, tier).forEach(r => L.push(`  ${r.now ? "▸" : "·"} ${r.label}: ${r.line}`));
+    coreLadder(activeVerum, tier).forEach(r => L.push(`  ${r.now ? "▸" : "·"} ${r.label}: ${r.line}${r.clock ? ` [own clock: ${r.clock}]` : ""}`));
     L.push("");
   }
 
@@ -176,8 +189,9 @@ function buildPlayCard(coreCog, tier) {
   const { riders, missing } = gatherRiders(tier);
   const isAttack = state.compSub === "Direct Attack";
   if (riders.length) {
-    L.push(isAttack
-      ? "ON HIT — the attack roll is the only d20"
+    L.push(isAttack ? "ON HIT — the attack roll is the only d20"
+      : sealRoll() === "weapon" ? "ON A HIT WITH THE INFUSED WEAPON"
+      : !sealRoll() ? "WHEN THE SEAL RESOLVES — no roll"
       : `ON A FAILED ${(coreCog?.savingThrow || "—").toUpperCase()} SAVE — DC ${verumDC()}, the only d20`);
     riders.forEach(e => {
       L.push(`  [${e.name}] ${cardLine(e.parts[0])}`);
@@ -290,10 +304,10 @@ function doomRoll(head, d) {
 }
 
 // The damage types that exist, each with its Absolute form — the type at its zenith.
-// A Cognition's damageType is the ordinary type. From Tier III (Lv 11+) every seal's damage
+// A Cognition's damageType is the ordinary type. From Rank IV (Lv 17+) every seal's damage
 // turns Absolute; a Verum tier with mech.absolute: true gets there earlier. Against Absolute
 // damage, resistance and immunity don't halve or negate — they reduce by 2× / 4× the target's PB.
-const ABSOLUTE_FROM_TIER = 2;   // index into TIERS — Tier III
+const ABSOLUTE_FROM_TIER = 3;   // index into TIERS — Rank IV
 const DAMAGE_TYPES = {
   "Acid": "Corrosive", "Bludgeoning": "Tectonic", "Cold": "Everfrost", "Fire": "Infernal",
   "Force": "Astral", "Lightning": "Voltaic", "Necrotic": "Doom", "Piercing": "Impale",
@@ -311,7 +325,7 @@ function absoluteName(type) {
   const b = Object.keys(DAMAGE_TYPES).find(t => t.toLowerCase() === baseType(type));
   return b ? DAMAGE_TYPES[b] : null;
 }
-// Is the seal's damage Absolute at this tier? Tier III and up always; earlier only if a
+// Is the seal's damage Absolute at this tier? Rank IV always; earlier only if a
 // live tier of the chosen Verum says so.
 function isAbsolute(coreCog, tier) {
   if (IRRESISTIBLE.has(baseType(coreCog?.damageType))) return true;   // Void and All-Mighty are born Absolute
@@ -366,7 +380,7 @@ function buildPlayCardHTML(coreCog, tier) {
   let nums = "";
   if (isAttack) nums += `<span class="n atk"><b>${sgn(sealAttack())}</b><i>to hit</i></span>`;
   if (coreCog?.savingThrow)
-    nums += `<span class="n dc"><b>${verumDC()}</b><i>${esc(coreCog.savingThrow)} save</i></span>`;
+    nums += `<span class="n dc"><b>${verumDC()}</b><i>${sealRoll() || isAttack ? esc(coreCog.savingThrow) + " save" : "verum DC · no roll"}</i></span>`;
   const dmgCell = cell("Damage") || cell("Damage / turn") || cell("Healing") || cell("Healing / Target") || cell("Absorb");
   if (dmgCell) {
     const kind = (cell("Healing") || cell("Healing / Target")) ? "healing"
@@ -389,7 +403,11 @@ function buildPlayCardHTML(coreCog, tier) {
   [["Range","range"],["Radius","radius"],["Targets","targets"],["Duration","duration"],
    ["Buff Duration","duration"],["Zone Duration","zone"],["Weapon Die","weapon die"],
    ["CR cap","CR"],["Size","size"],["HP / segment","HP each"],["Max size","size"],["Tier","tier"]]
-   .forEach(([c,lab]) => { const v = cell(c); if (v) nums += `<span class="n"><b>${esc(v)}</b><i>${lab}</i></span>`; });
+   .forEach(([c,lab]) => {
+     let v = cell(c); if (!v) return;
+     if (c === "Buff Duration") ({ v, lab } = buffClock(v, coreCog));
+     nums += `<span class="n"><b>${esc(v)}</b><i>${lab}</i></span>`;
+   });
 
   const { conds, denies, resource } = collectTags(coreCog, tier);
   let tags = "";
@@ -423,14 +441,15 @@ function buildPlayCardHTML(coreCog, tier) {
     const lbl = tier > 0 ? "Core verum — every tier reached applies; a bigger number replaces a smaller one" : "Core verum";
     h += `<div class="c-sec"><div class="c-lbl">${lbl}</div><div class="c-core"><b>${esc(av.name)}</b>` +
       coreLadder(av, tier).map(r =>
-        `<div class="c-tier${r.now ? " now" : ""}"><span class="c-tl">${esc(r.label)}</span><span>${esc(r.line)}</span></div>`
+        `<div class="c-tier${r.now ? " now" : ""}"><span class="c-tl">${esc(r.label)}</span><span>${esc(r.line)}${r.clock ? `<em class="c-clk">own clock · ${esc(r.clock)}</em>` : ""}</span></div>`
       ).join("") + `</div></div>`;
   }
 
   const { riders, missing } = gatherRiders(tier);
   if (riders.length) {
-    const lbl = isAttack
-      ? "On a hit — the attack roll is the only d20"
+    const lbl = isAttack ? "On a hit — the attack roll is the only d20"
+      : sealRoll() === "weapon" ? "On a hit with the infused weapon"
+      : !sealRoll() ? "When the seal resolves — no roll"
       : `On a failed ${esc((coreCog?.savingThrow || "").toLowerCase())} save — the only d20`;
     h += `<div class="c-sec"><div class="c-lbl">${lbl}</div>`;
     riders.forEach(e => {
@@ -469,7 +488,7 @@ function buildFullRef(coreCog, tier) {
     `Core         : ${coreEntry?.name}${state.complements.length
       ? `   |   Complements: ${state.complements.map(x=>INDEX.find(c=>c.id===x.id)?.name||x.id).join(", ")}`
       : ""}`,
-    `Saving Throw : ${coreCog?.savingThrow || "—"}`,
+    `Saving Throw : ${sealRoll() ? (coreCog?.savingThrow || "—") : "none — this Ring resolves on cast"}`,
     `Damage Type  : ${coreCog?.damageType  || "—"}${isAbsolute(coreCog, tier) && absoluteName(coreCog?.damageType) ? ` → ${absoluteName(coreCog.damageType)} (Absolute)` : ""}`,
     `Rank         : ${TIERS[tier].label}`,
     `Numbers      : Prof ${sgn(profBonus())} · Attack ${sgn(sealAttack())} · Verum DC ${verumDC()}`,
@@ -504,8 +523,10 @@ function buildFullRef(coreCog, tier) {
 
   if (activeVerum) {
     lines.push(`── CORE VERUM: ${(state.coreVerum || activeVerum.name).toUpperCase()} ──`);
+    if (verumClock(activeVerum)) lines.push(`Clock: ${verumClock(activeVerum).label}`);
     for (let i = 0; i <= tier; i++) {
-      lines.push(`[${TIERS[i].label}] ${resolve(partText(activeVerum.tiers[i]))}`);
+      const own = partClock(activeVerum.tiers[i]);
+      lines.push(`[${TIERS[i].label}] ${resolve(partText(activeVerum.tiers[i]))}${own ? ` (own clock: ${own})` : ""}`);
     }
     lines.push(``);
   }

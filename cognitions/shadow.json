@@ -61,6 +61,7 @@
     "supportive": [
       {
         "name": "Cloak of Veils",
+        "duration": "until the start of your next turn",
         "description": "You do not hide — you revise the answer to whether you were there, becoming lightly obscured, then heavily obscured, then invisible, then utterly undetectable by any magical or mundane means.",
         "tiers": [
           {
@@ -85,6 +86,7 @@
           },
           {
             "text": "You may become fully invisible until the end of your next turn, until you take damage, or until you cast another spell — whichever occurs first.",
+            "duration": "until the end of your next turn",
             "card": "Fully invisible until your next turn, or until you take damage or cast again",
             "mech": {
               "conditions": [
@@ -96,12 +98,14 @@
           },
           {
             "text": "You enter Perfect Obscurity for 1 minute. While active: you leave no trace of passage; you cannot be detected by divination magic or magical sensors; and you are immune to Scrying, Truesight, and Faerie Fire — the Shadow Cognition contesting even the most thorough attempts to confirm your existence.",
+            "duration": "1 minute",
             "card": "Perfect Obscurity 1 min — no trace, no divination, immune to Scrying, Truesight and Faerie Fire"
           }
         ]
       },
       {
         "name": "Shadow Step",
+        "duration": "ring",
         "description": "The space between shadows is not distance — teleporting silently between dark places and eventually dragging an unwilling creature through the dark alongside you.",
         "tiers": [
           {
@@ -142,10 +146,12 @@
       },
       {
         "name": "Flicker Illusion",
+        "duration": "ring",
         "description": "Your shadow has always been slightly ahead of you — a duplicate mimicking your silhouette that intercepts attacks, gains autonomy, and eventually becomes indistinguishable from you by anything short of Truesight.",
         "tiers": [
           {
             "text": "A shadow duplicate appears within 10 feet of you, mimicking your silhouette. All attack rolls against you are made at disadvantage until the start of your next turn.",
+            "duration": "until the start of your next turn",
             "card": "A shadow double appears within 10 ft — attacks against you at disadvantage until your next turn"
           },
           {

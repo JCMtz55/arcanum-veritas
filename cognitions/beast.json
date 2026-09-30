@@ -89,10 +89,12 @@
     "supportive": [
       {
         "name": "Instinctive Resilience",
+        "duration": "ring",
         "description": "You do not dodge — you survive.",
         "tiers": [
           {
             "text": "Gain advantage on saving throws against being Grappled, Restrained, or Frightened for 1 round.",
+            "duration": "1 round",
             "card": "Advantage against Grappled, Restrained and Frightened, 1 round",
             "mech": {
               "conditions": [
@@ -129,6 +131,7 @@
           },
           {
             "text": "For 1 minute, enter the Primal State — you are immune to all movement-restricting conditions, gain resistance to bludgeoning, piercing, and slashing damage, and cannot be Charmed, Stunned, or Frightened.",
+            "duration": "1 minute",
             "card": "Primal State 1 min — immune to movement conditions, resist b/p/s, no Charm, Stun or Fear",
             "mech": {
               "damage": {
@@ -151,6 +154,7 @@
       },
       {
         "name": "Pack Instinct",
+        "duration": "ring",
         "description": "You are not alone — you are the leader of the wild.",
         "tiers": [
           {
@@ -167,8 +171,8 @@
             "card": "An ally within 10 ft may react to attack when you hit"
           },
           {
-            "text": "Grant Pack Tactics to up to 3 allies for 1 minute — they roll attacks with advantage when adjacent to at least one ally.",
-            "card": "Pack Tactics for up to 3 allies, 1 min"
+            "text": "Grant Pack Tactics to up to 3 allies while the seal lasts — they roll attacks with advantage when adjacent to at least one ally.",
+            "card": "Pack Tactics for up to 3 allies"
           },
           {
             "text": "Forge a Pack Bond with up to 5 allies within 60 feet — all gain +2 AC, advantage on Strength saving throws, and +1d8 damage on their first hit each round if an ally is within 5 feet of the target. If you drop to 0 HP, one bonded ally may take a full turn immediately as a reaction.",
@@ -190,6 +194,7 @@
       },
       {
         "name": "Feral Hunger",
+        "duration": "ring",
         "description": "The hunt sustains. The kill restores.",
         "tiers": [
           {
@@ -221,7 +226,8 @@
             }
           },
           {
-            "text": "For 1 minute, enter Bloodthirst — each time you hit a creature you regain 1d8 HP, and each time you reduce a creature to 0 HP you gain +1 to attack rolls (stacks up to +5) until combat ends.",
+            "text": "For 1 minute, enter Bloodthirst — each time you hit a creature you regain 1d8 HP, and each time you reduce a creature to 0 HP you gain +1 to attack rolls (stacks up to +5) until Bloodthirst ends.",
+            "duration": "1 minute",
             "card": "Bloodthirst 1 min — 1d8 HP per hit, +1 attack per kill stacking to +5 until combat ends",
             "mech": {
               "damage": {

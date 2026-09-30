@@ -77,10 +77,11 @@
     "supportive": [
       {
         "name": "Butcher's Vigor",
+        "duration": "ring",
         "description": "The arena does not feed its champions. Its champions feed on the arena.",
         "tiers": [
           {
-            "text": "Whenever a creature within 30 feet of you dies, you gain temporary hit points equal to your Verum Modifier.",
+            "text": "While the seal lasts, whenever a creature within 30 feet of you dies, you gain temporary hit points equal to your Verum Modifier.",
             "card": "Any death within 30 ft gives you {VM} temp HP",
             "mech": {
               "heal": {

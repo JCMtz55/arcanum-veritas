@@ -96,6 +96,7 @@
     "supportive": [
       {
         "name": "Breaking Point",
+        "duration": "instant",
         "description": "Whatever holds them was made. It can be unmade.",
         "tiers": [
           {
@@ -114,6 +115,7 @@
           },
           {
             "text": "Until the end of each target's next turn, its weapon attacks deal triple damage to objects and structures, and its first hit Cracks the target's armor or shield (−1 AC, as Ruin).",
+            "duration": "until the end of each target's next turn",
             "card": "Until their next turn: their weapons deal triple to objects, and their first hit Cracks armor −1 AC",
             "mech": {
               "buff": { "who": "the seal's targets", "rider": "first hit Cracks armor −1 AC" }
@@ -121,6 +123,7 @@
           },
           {
             "text": "For 1 minute, the targets can't be Grappled, Restrained or Petrified, and no binding, wall or ward of 8th level or lower can hold them in place.",
+            "duration": "1 minute",
             "card": "1 min — can't be Grappled, Restrained or Petrified · nothing ≤8th can hold them",
             "mech": {
               "deny": [ "grappled", "restrained", "petrified" ]
@@ -130,11 +133,12 @@
       },
       {
         "name": "Wrath",
+        "duration": "ring",
         "description": "The oldest thing in you is the part that wants to break.",
         "tiers": [
           {
-            "text": "Self only. For 1 minute you have advantage on Strength checks and saving throws, your melee attacks deal an extra amount of Force damage equal to your Verum Modifier, and they deal triple damage to objects and structures.",
-            "card": "Self · 1 min: advantage on Str checks and saves · melee +{VM} force, triple to objects",
+            "text": "Self only. You have advantage on Strength checks and saving throws, your melee attacks deal an extra amount of Force damage equal to your Verum Modifier, and they deal triple damage to objects and structures.",
+            "card": "Self · advantage on Str checks and saves · melee +{VM} force, triple to objects",
             "mech": {
               "buff": { "who": "you", "advantage": "Strength checks and saving throws" }
             }
@@ -154,8 +158,9 @@
             }
           },
           {
-            "text": "Once per long rest: Cataclysm. For 1 minute the damage of your seals and attacks is doubled. When it ends, you gain 3 levels of Exhaustion.",
-            "card": "1/long rest CATACLYSM — 1 min, your seals and attacks deal double damage · then 3 levels of Exhaustion",
+            "text": "Cataclysm. For 1 minute the damage of your seals and attacks is doubled. When it ends, you gain 3 levels of Exhaustion.",
+            "duration": "1 minute",
+            "card": "CATACLYSM — 1 min, your seals and attacks deal double damage · then 3 levels of Exhaustion",
             "mech": {
               "conditions": [ { "name": "Exhaustion" } ]
             }

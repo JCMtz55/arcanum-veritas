@@ -105,6 +105,7 @@
     "supportive": [
       {
         "name": "Featherstep",
+        "duration": "ring",
         "description": "Air becomes a cradle. Gravity becomes a suggestion.",
         "tiers": [
           {
@@ -143,6 +144,7 @@
       },
       {
         "name": "Slipstream",
+        "duration": "instant",
         "description": "The wind does not ask the wall for permission.",
         "tiers": [
           {
@@ -171,6 +173,7 @@
       },
       {
         "name": "Breath of the World",
+        "duration": "ring",
         "description": "Every breath the world has ever taken — you offer it all at once.",
         "tiers": [
           {

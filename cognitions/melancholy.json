@@ -78,7 +78,7 @@
             }
           },
           {
-            "text": "The cold turns Absolute Everfrost a tier early. A creature the seal kills leaves you its Echo at once, frozen where it fell. When you spend an Echo on the seal, its damage also ignores resistance.",
+            "text": "The cold turns Absolute Everfrost early, from Rank II. A creature the seal kills leaves you its Echo at once, frozen where it fell. When you spend an Echo on the seal, its damage also ignores resistance.",
             "card": "Damage becomes ABSOLUTE EVERFROST · what it kills leaves you an Echo · spending one also makes it ignore resistance",
             "mech": {
               "damage": {
@@ -182,6 +182,7 @@
     "supportive": [
       {
         "name": "Spirit Guardian",
+        "duration": "instant",
         "description": "Someone who loved you is still standing behind you.",
         "tiers": [
           {
@@ -210,6 +211,7 @@
           },
           {
             "text": "The spirits stay for 1 minute. The first time each target takes damage in a round, the spirit takes half of it.",
+            "duration": "1 minute",
             "card": "The spirits stay 1 min · the first hit on each target each round is halved",
             "mech": {
               "buff": {
@@ -234,6 +236,7 @@
       },
       {
         "name": "The Great Purge",
+        "duration": "instant",
         "description": "Your people were made to take the filth from other souls. You still can.",
         "tiers": [
           {

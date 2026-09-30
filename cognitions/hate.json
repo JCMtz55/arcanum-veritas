@@ -157,6 +157,7 @@
     "supportive": [
       {
         "name": "Apex of Loathing",
+        "duration": "ring",
         "description": "Hatred becomes shield and sword — converting fear into power, feeding you temporary HP from dealt damage, and eventually entering Absolute Hatred that stuns and silences those who wronged you.",
         "tiers": [
           {
@@ -175,8 +176,8 @@
             "card": "1/turn gain temp HP equal to the damage you dealt the object of your hatred"
           },
           {
-            "text": "Once per long rest, for 1 turn you may convert fire, necrotic, or psychic damage you take into HP restoration — up to a maximum of your level × your proficiency bonus.",
-            "card": "1/long rest turn fire, necrotic and psychic damage you take into healing, up to level × {PB}",
+            "text": "Once while the seal lasts, for 1 turn you may convert fire, necrotic, or psychic damage you take into HP restoration — up to a maximum of your level × your proficiency bonus.",
+            "card": "Once per seal turn fire, necrotic and psychic damage you take into healing, up to level × {PB}",
             "mech": {
               "damage": {
                 "type": "psychic"
@@ -184,8 +185,9 @@
             }
           },
           {
-            "text": "Once per day, enter a state of Absolute Hatred for 1 minute — enemies within 30 feet who have harmed you or your allies this combat must succeed on a Charisma save or be Stunned for 1 round, you gain +2 to all saving throws and immunity to fear, charm, and mind-reading, and enemies who die during this time cannot be resurrected except by True Resurrection or higher.",
-            "card": "1/day Absolute Hatred 1 min — enemies who hurt you save or are Stunned · +2 saves · immune to fear and charm",
+            "text": "Enter a state of Absolute Hatred for 1 minute — enemies within 30 feet who have harmed you or your allies this combat must succeed on a Charisma save or be Stunned for 1 round, you gain +2 to all saving throws and immunity to fear, charm, and mind-reading, and enemies who die during this time cannot be resurrected except by True Resurrection or higher.",
+            "duration": "1 minute",
+            "card": "Absolute Hatred 1 min — enemies who hurt you save or are Stunned · +2 saves · immune to fear and charm",
             "mech": {
               "save": {
                 "ability": "Charisma"

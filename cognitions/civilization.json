@@ -17,6 +17,7 @@
     "supportive": [
       {
         "name": "Communal Resonance",
+        "duration": "instant",
         "description": "You bind effects into the lattice of a society's presence.",
         "tiers": [
           {
@@ -33,12 +34,14 @@
           },
           {
             "text": "Create a Civic Aura — for 1 minute, all allies within 60 feet of the focal creature are treated as if under the original spell's full effect, even if they leave and return. If the focal creature dies, the aura transfers to the nearest ally automatically.",
+            "duration": "1 minute",
             "card": "Civic Aura 1 min — every ally within 60 ft of the focus counts as fully affected, coming and going"
           }
         ]
       },
       {
         "name": "Structured Weave",
+        "duration": "instant",
         "description": "Law gives the spell its spine — and law does not expire. (Complement effect used as Core)",
         "tiers": [
           {

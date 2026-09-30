@@ -136,6 +136,7 @@
     "supportive": [
       {
         "name": "Blood-Healing",
+        "duration": "instant",
         "description": "Blood remembers the shape the body was before it broke — and, given a sample, it will return there.",
         "tiers": [
           {
@@ -173,6 +174,7 @@
       },
       {
         "name": "Crimson Veil",
+        "duration": "ring",
         "description": "A veil of glimmering blood-mist, and blood that violently refuses intrusion.",
         "tiers": [
           {
@@ -211,6 +213,7 @@
       },
       {
         "name": "Blood-Bond",
+        "duration": "instant",
         "description": "The red thread of lineage cuts across realms and mortality.",
         "tiers": [
           {
@@ -227,6 +230,7 @@
           },
           {
             "text": "Choose one member of the bloodline, living or dead, and take up its power for 1 hour — one feature it had in life: a racial trait, a class feature, a spell, or a Cognition affinity. The seal may reach every member of that bloodline at once, whatever their state, realm, or condition.",
+            "duration": "1 hour",
             "card": "Take up one feature of any bloodline member for 1 hr · the seal may reach the whole line at once"
           }
         ]

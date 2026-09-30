@@ -121,11 +121,11 @@ async function renderDamage() {
     let h = `<div class="cdx"><div class="cdx-hd"><div><h1>Damage &amp; the Absolute</h1>
       <p class="cdx-desc">Every damage type has a zenith. A seal starts in the ordinary form and grows into the Absolute one.</p></div></div>`;
     h += `<div class="cdx-sec"><h2>How it works</h2><div class="cdx-defs">
-      <div class="cdx-def"><b>The progression</b><span>A Cognition deals its ordinary type through Ranks I–II. From <strong>Rank III (level 11)</strong> every point of its seal damage — Verum, Sigils, ticks and riders — turns Absolute. Some get there sooner: a Cognition can set its own threshold (Sun is Holy from level 1), and a single Verum can reach it early (Nightmare's Void-Bleed).</span></div>
+      <div class="cdx-def"><b>The progression</b><span>A Cognition deals its ordinary type through Ranks I–III. From <strong>Rank IV (level 17)</strong> every point of its seal damage — Verum, Sigils, ticks and riders — turns Absolute. Some get there sooner: a Cognition can set its own threshold (Sun is Holy from level 1), and a single Verum can reach it early (Nightmare's Void-Bleed).</span></div>
       <div class="cdx-def"><b>Resistance</b><span>Against Absolute damage it doesn't halve — it <strong>reduces</strong> the damage by <strong>2 × the target's Proficiency Bonus</strong>, once per damage roll, never below 0.</span></div>
       <div class="cdx-def"><b>Immunity</b><span>Doesn't negate — it reduces by <strong>4 × the target's Proficiency Bonus</strong>.</span></div>
       <div class="cdx-def"><b>Vulnerability</b><span>Still doubles it.</span></div>
-      <div class="cdx-def"><b>“Ignores resistance”</b><span>Below Rank III: ignores the halving or negation. Against Absolute damage: ignores the reduction. “Immunity counts only as resistance” means half damage before, the 2× reduction after.</span></div>
+      <div class="cdx-def"><b>“Ignores resistance”</b><span>Against ordinary damage: ignores the halving or negation. Against Absolute damage: ignores the reduction. “Immunity counts only as resistance” means half damage before, the 2× reduction after.</span></div>
       <div class="cdx-def"><b>Born Absolute</b><span><strong>Void</strong> and <strong>All-Mighty</strong> have no gentler form. Nothing resists, reduces, or absorbs them, at any level.</span></div>
       <div class="cdx-def"><b>Protection</b><span>Text that <em>protects</em> — “resistance to fire damage” — keeps the ordinary name. Against a seal it grants the reduction; against everything else it works as usual.</span></div>
     </div></div>`;
@@ -146,7 +146,7 @@ async function renderDamage() {
   let h = `<div class="cdx"><div class="cdx-hd"><div>
     <div class="dmg-fam dmg-${fam?.color}">${fam?.label || ""}</div>
     <h1>${ty} <span class="dmg-to">→</span> <span class="dmg-abs">${abs}</span></h1>
-    <p class="cdx-desc">${info.born ? "Born at its zenith — irresistible at every level." : "Ordinary through Rank II · Absolute from Rank III (level 11), or sooner where a Cognition says so."}</p></div></div>`;
+    <p class="cdx-desc">${info.born ? "Born at its zenith — irresistible at every level." : "Ordinary through Rank III · Absolute from Rank IV (level 17), or sooner where a Cognition says so."}</p></div></div>`;
   h += `<div class="cdx-sec"><div class="dmg-evo">
     <div class="dmg-step"><b>${ty}</b><em>${info.born ? "as it arrives" : "ordinary"}</em><p>${esc(info.ord || "")}</p>
       <span>${info.born ? "Nothing resists, reduces, or absorbs it." : "Resistance halves it · immunity negates it"}</span></div>

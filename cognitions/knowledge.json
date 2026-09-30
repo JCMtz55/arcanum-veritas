@@ -62,11 +62,12 @@
     "supportive": [
       {
         "name": "Briefed",
+        "duration": "ring",
         "description": "You tell them the three things that matter. It saves lives.",
         "tiers": [
           {
-            "text": "For 1 minute the target adds your Verum Modifier to attack rolls and saving throws against one kind of creature you name as you draw.",
-            "card": "1 min: +{VM} to attacks and saves against one named kind of creature",
+            "text": "The target adds your Verum Modifier to attack rolls and saving throws against one kind of creature you name as you draw.",
+            "card": "+{VM} to attacks and saves against one named kind of creature",
             "mech": {
               "buff": {
                 "who": "target",

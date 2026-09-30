@@ -26,11 +26,12 @@
     "supportive": [
       {
         "name": "Held",
+        "duration": "ring",
         "description": "Nothing gets to them while you are standing there, and you are always standing there.",
         "tiers": [
           {
-            "text": "For 1 minute the target gains temporary hit points equal to Ten Times the slot level, and you always know its condition and direction, at any distance.",
-            "card": "1 min: 10 × {SLOT} temp HP · you always know how it is and where",
+            "text": "The target gains temporary hit points equal to Ten Times the slot level, and you always know its condition and direction, at any distance.",
+            "card": "10 × {SLOT} temp HP · you always know how it is and where",
             "mech": {
               "buff": {
                 "who": "target",
@@ -59,7 +60,7 @@
             }
           },
           {
-            "text": "Nothing Takes Them. For the minute the target cannot die while you live: any damage that would kill it is dealt to you instead, ignoring resistance and immunity. You may end this at any time, and both of you will know you did.",
+            "text": "Nothing Takes Them. While the seal lasts the target cannot die while you live: any damage that would kill it is dealt to you instead, ignoring resistance and immunity. You may end this at any time, and both of you will know you did.",
             "card": "NOTHING TAKES THEM — it cannot die while you live; the killing damage comes to you instead"
           }
         ]

@@ -96,11 +96,12 @@
     "supportive": [
       {
         "name": "Sovereign Aura",
+        "duration": "ring",
         "description": "Power does not ask to be felt — it radiates outward as a Declaration of Sovereignty, bolstering allies and pressing enemies into difficult terrain and fear.",
         "tiers": [
           {
-            "text": "For 1 minute, allies within 15 feet gain +1 to attack rolls, and enemies that start their turn within 15 feet must succeed on a Strength save or have disadvantage on their first attack roll that turn.",
-            "card": "1 min: allies within 15 ft +1 attack · enemies starting there Str save or disadvantage on their first attack",
+            "text": "Allies within 15 feet gain +1 to attack rolls, and enemies that start their turn within 15 feet must succeed on a Strength save or have disadvantage on their first attack roll that turn.",
+            "card": "Allies within 15 ft +1 attack · enemies starting there Str save or disadvantage on their first attack",
             "mech": {
               "save": {
                 "ability": "Strength"
@@ -130,8 +131,8 @@
             "card": "Allies also +2 to saves · failures can't take reactions"
           },
           {
-            "text": "The aura becomes a Declaration of Sovereignty for 1 minute. Allies within range gain advantage on all attack rolls and saving throws. Enemies that fail their save are Frightened for 1 round and treat the entire aura radius as difficult terrain.",
-            "card": "Declaration of Sovereignty 1 min — allies get advantage on everything, failures are Frightened",
+            "text": "The aura becomes a Declaration of Sovereignty. Allies within range gain advantage on all attack rolls and saving throws. Enemies that fail their save are Frightened for 1 round and treat the entire aura radius as difficult terrain.",
+            "card": "Declaration of Sovereignty — allies get advantage on everything, failures are Frightened",
             "mech": {
               "conditions": [
                 {

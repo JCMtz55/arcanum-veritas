@@ -22,6 +22,7 @@
     <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
     <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
     <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
+    <button class="tab" id="tabAdmin" onclick="setView('admin')" hidden>Admin</button>
   </div>
   <div class="dials">
     <div class="dial" id="slotDial"><label for="slotDn">Slot</label>
@@ -38,6 +39,7 @@
     <span class="lv dc"><b id="dcOut">13</b><i>Verum DC</i></span>
     <span class="lv"><b id="capOut">1</b><i id="capLbl">cognition</i></span>
     <span class="status" id="statusEl">Loading…</span>
+    <button class="mini" id="whoBtn" onclick="openAccount()" title="Your account" hidden></button>
   </div>
 </div>
 
@@ -105,6 +107,44 @@
   <section class="codex" id="ringBody"></section>
 </div>
 
+<div class="board" id="boardAdmin" hidden>
+  <aside class="rail">
+    <div class="cogs" id="adminList" style="padding-top:11px"></div>
+    <div class="rail-foot"><button class="ghost" onclick="openAdminUser('new')">New player</button></div>
+  </aside>
+  <section class="codex" id="adminBody"></section>
+</div>
+
+<!-- Sign-in: only shown when the builder is served by its own server and nobody is signed in -->
+<div class="gate" id="gate" hidden>
+  <form class="gate-box" onsubmit="return signIn(event)">
+    <h1>Arcanum Veritas</h1>
+    <p>Sign in to open your Cognitions.</p>
+    <label for="gateUser">Name</label>
+    <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="gatePass">Password</label>
+    <input class="search" id="gatePass" type="password" autocomplete="current-password" required>
+    <p class="gate-err" id="gateErr" hidden></p>
+    <button class="gate-go" type="submit">Sign in</button>
+  </form>
+</div>
+
+<dialog class="acct" id="acct">
+  <form onsubmit="return changePassword(event)">
+    <h2 id="acctName"></h2>
+    <label for="acctCur">Current password</label>
+    <input class="search" id="acctCur" type="password" autocomplete="current-password" required>
+    <label for="acctNew">New password</label>
+    <input class="search" id="acctNew" type="password" autocomplete="new-password" minlength="8" required>
+    <p class="gate-err" id="acctErr" hidden></p>
+    <div class="acct-row">
+      <button class="mini on" type="submit">Change password</button>
+      <button class="mini" type="button" onclick="signOut()">Sign out</button>
+      <button class="mini" type="button" onclick="document.getElementById('acct').close()">Close</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/data.js"></script>
@@ -118,6 +158,7 @@
 <script src="js/emotion.js"></script>
 <script src="js/ignition.js"></script>
 <script src="js/dice.js"></script>
+<script src="js/account.js"></script>
 <script src="js/events.js"></script>
 </body>
 </html>

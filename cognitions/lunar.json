@@ -75,6 +75,7 @@
     "supportive": [
       {
         "name": "Moon Silver",
+        "duration": "ring",
         "description": "What fell from Selaris still remembers how to keep the weave from harming what it holds.",
         "tiers": [
           {
@@ -107,6 +108,7 @@
       },
       {
         "name": "Lucid Night",
+        "duration": "ring",
         "description": "Under the full Moon, every dream is awake.",
         "tiers": [
           {

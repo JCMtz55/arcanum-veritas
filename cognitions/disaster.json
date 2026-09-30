@@ -103,11 +103,12 @@
     "supportive": [
       {
         "name": "Herald of Collapse",
+        "duration": "ring",
         "description": "You do not cause the disaster — you are the announcement that it has arrived, radiating ruin outward until the ground itself becomes hostile to everything around you.",
         "tiers": [
           {
-            "text": "Gain advantage on Intimidation checks and resistance to environmental damage (nonmagical fire, cold, lightning, and thunder) for 1 minute.",
-            "card": "Advantage on Intimidation and resistance to environmental damage, 1 min",
+            "text": "Gain advantage on Intimidation checks and resistance to environmental damage (nonmagical fire, cold, lightning, and thunder).",
+            "card": "Advantage on Intimidation and resistance to environmental damage",
             "mech": {
               "buff": {
                 "advantage": "Intimidation checks and resistance to environmenta"
@@ -138,8 +139,9 @@
             }
           },
           {
-            "text": "Once per long rest, become the Epicenter of Disaster for 1 minute — the area within 30 feet becomes Chaotic Terrain, all hostile creatures have disadvantage on Dexterity saving throws, and when you cast a spell of 5th level or higher, you may apply it to a second target or zone simultaneously at no additional cost.",
-            "card": "1/long rest Epicenter of Disaster 1 min — Chaotic Terrain 30 ft, enemies at disadvantage on Dex saves",
+            "text": "Become the Epicenter of Disaster for 1 minute — the area within 30 feet becomes Chaotic Terrain, all hostile creatures have disadvantage on Dexterity saving throws, and when you cast a spell of 5th level or higher, you may apply it to a second target or zone simultaneously at no additional cost.",
+            "duration": "1 minute",
+            "card": "Epicenter of Disaster 1 min — Chaotic Terrain 30 ft, enemies at disadvantage on Dex saves",
             "mech": {
               "save": {
                 "ability": "Dexterity"

@@ -70,11 +70,12 @@
     "supportive": [
       {
         "name": "Unbound",
+        "duration": "ring",
         "description": "Nothing holds them. Try it and see.",
         "tiers": [
           {
-            "text": "For 1 minute the target automatically escapes grapples and restraints at the start of its turn, ignores difficult terrain, and has advantage on saves against being Paralysed or Restrained.",
-            "card": "1 min: auto-escapes grapples and restraints · ignores difficult terrain · advantage vs paralysis and restraint",
+            "text": "The target automatically escapes grapples and restraints at the start of its turn, ignores difficult terrain, and has advantage on saves against being Paralysed or Restrained.",
+            "card": "Auto-escapes grapples and restraints · ignores difficult terrain · advantage vs paralysis and restraint",
             "mech": {
               "deny": [
                 "grapples",

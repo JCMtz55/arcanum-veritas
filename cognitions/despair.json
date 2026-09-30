@@ -88,11 +88,12 @@
     "supportive": [
       {
         "name": "Nothing Left to Lose",
+        "duration": "ring",
         "description": "Past hope there is a strange floor, and people who stand on it do not flinch.",
         "tiers": [
           {
-            "text": "For 1 minute the target can't be Frightened, and while it is at half its hit points or fewer its weapon and seal damage rolls gain a bonus equal to your Verum Modifier.",
-            "card": "1 min: can't be Frightened · at half HP or less, +{VM} to its damage rolls",
+            "text": "The target can't be Frightened, and while it is at half its hit points or fewer its weapon and seal damage rolls gain a bonus equal to your Verum Modifier.",
+            "card": "Can't be Frightened · at half HP or less, +{VM} to its damage rolls",
             "mech": {
               "deny": [
                 "fear"

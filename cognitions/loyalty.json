@@ -60,11 +60,12 @@
     "supportive": [
       {
         "name": "At Your Side",
+        "duration": "ring",
         "description": "You are not going to be standing there alone. That is all this is.",
         "tiers": [
           {
-            "text": "For 1 minute, while the target is within 30 feet of an ally, it has advantage on saving throws against being Frightened or Charmed and adds your Verum Modifier to its Armour Class against opportunity attacks.",
-            "card": "1 min, near an ally: advantage vs fear and charm · +{VM} AC vs opportunity attacks",
+            "text": "While the target is within 30 feet of an ally, it has advantage on saving throws against being Frightened or Charmed and adds your Verum Modifier to its Armour Class against opportunity attacks.",
+            "card": "Near an ally: advantage vs fear and charm · +{VM} AC vs opportunity attacks",
             "mech": {
               "buff": {
                 "who": "target",

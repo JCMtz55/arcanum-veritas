@@ -69,11 +69,12 @@
     "supportive": [
       {
         "name": "Kindled",
+        "duration": "ring",
         "description": "You hang a light on someone, and things stop being able to reach them unseen.",
         "tiers": [
           {
-            "text": "For 1 minute the target sheds bright light in a 20-foot radius, can't be surprised, and has advantage on Perception checks that rely on sight.",
-            "card": "1 min: bright light 20 ft · can't be surprised · advantage on sight-based Perception",
+            "text": "The target sheds bright light in a 20-foot radius, can't be surprised, and has advantage on Perception checks that rely on sight.",
+            "card": "Bright light 20 ft · can't be surprised · advantage on sight-based Perception",
             "mech": {
               "buff": {
                 "who": "target",

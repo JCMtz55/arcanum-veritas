@@ -9,7 +9,27 @@ The **Arcanum Veritas Builder** is a browser tool for drawing seals — spells c
 
 It also has an **Ignition mode** (the ⇄ switch in the header) for the martial side of magic: Burning Cognitions, Blaze Points, and the Eidon Forge — see [Ignition Mode](#ignition-mode).
 
-The tool runs entirely in the browser — no install and no build step. It needs to be served (GitHub Pages, VS Code Live Server, or `python -m http.server`) because it reads the `cognitions/` folder with `fetch()`.
+The builder itself is plain browser code with no build step. It is hosted on **Railway** behind a small server that signs players in and hands each of them only the Cognitions the DM has granted — see [Accounts and Hosting](#accounts-and-hosting). For a quick local look with no accounts, it still runs from any static server (VS Code Live Server, or `python -m http.server`), where every Cognition is open.
+
+---
+
+## Accounts and Hosting
+
+**Who sees what.** Each player has an account and sees only the Cognitions granted to it; nothing else reaches their browser. The **DM** account reads every Cognition, held-back ones included, and has an **Admin** tab: pick a player, click Cognitions to grant or take them away (saved at once), set or reset passwords, add and delete players. `ready` in `index.json` is still the global gate — a granted Cognition that isn't `ready` shows greyed out and its text is not served.
+
+**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds only accounts and grants (`users`, `user_cognitions`, `sessions`). The server serves `index.html`, `css/`, `js/` and `grimms/`; `cognitions/` is only reachable through the signed-in API.
+
+**Deploying on Railway.**
+1. New project → *Deploy from GitHub repo* → this repo. Railway runs `npm start`.
+2. Add a **PostgreSQL** database to the project, and on the app service add the variable `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`.
+3. Add `DM_PASSWORD` (and optionally `DM_USERNAME`, default `dm`) before the first deploy. Without it a random DM password is printed once in the deploy log.
+4. Under the service's Networking settings, generate a domain.
+
+On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each in the Admin tab and pass it on; they can change it from the button with their name. After that first start the database is the truth and `seed.json` is never read again.
+
+Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then remove the variable.
+
+**Running the server locally.** `npm install`, then `npm start` → http://localhost:3000. With no `DATABASE_URL` it uses an embedded database in `.data/` (git-ignored).
 
 ---
 
@@ -31,10 +51,17 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   dice.js           ← The dice tray: rolls the numbers the card already printed
+  account.js        ← Sign-in, the account menu, the DM's Admin tab
   events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
   index.json        ← Master list of all cognitions + ready status
   fire.json, ice.json, … (one .json per cognition)
+server/
+  server.js         ← The server: sign-in, per-player Cognition access, the admin API
+  db.js             ← Database connection and tables
+  auth.js           ← Password hashing and session tokens
+  seed.json         ← First-run players and their mastered Cognitions
+package.json        ← Server dependencies and the start command
 README.md           ← This file
 ```
 
@@ -190,7 +217,7 @@ Place a new `.json` file in `cognitions/` following this structure:
 - **`coreOnly: true`** (on the Cognition and its `index.json` entry) means it can never be a Sigil — the rail disables it once a Core is set, and it is never added as a complement. Give it `"complementEffects": []`. Sun is the only one.
 - **`incompatible`** lists Rings the Cognition declares it cannot fill, e.g. `["creation"]`. A declared incompatibility beats the fallback map, so those Rings are never offered. Sun, Despair, Hollowing and Hunger use it; the eleven Cognitions the vault lists as Creation-incompatible don't yet.
 - **`damageType` is an ordinary damage type** — Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Sanguine, Slashing, Thunder, Void, All-Mighty — and so are `mech.damage.type` values (lower-case) and the damage words in Verum and Sigil text ("1d6 fire", "5×VM force"). Don't invent new ones (no "Moonlight", "Undertow", "Gravitic"); a Cognition's flavour belongs in its Verums. The builder warns in the console if a `damageType` isn't on the list.
-- **Absolute damage is a progression.** From **Rank III (level 11+)** every seal's damage — the Verum's, the Sigils', ticks and riders — turns into its type's Absolute form, the type at its zenith:
+- **Absolute damage is a progression.** From **Rank IV (level 17+)** every seal's damage — the Verum's, the Sigils', ticks and riders — turns into its type's Absolute form, the type at its zenith:
 
   | Ordinary | Absolute | Ordinary | Absolute | Ordinary | Absolute | Ordinary | Absolute |
   |---|---|---|---|---|---|---|---|
@@ -199,8 +226,8 @@ Place a new `.json` file in `cognitions/` following this structure:
   | Cold | **Everfrost** | Lightning | **Voltaic** | Poison | **Toxin** | Slashing | **Severe** |
   | Psychic | **Neural** | Thunder | **Sonic** | Void | **Void** | All-Mighty | **All-Mighty** |
 
-  The text keeps the ordinary names; the builder does the swap — from Rank III the damage chip reads *infernal · absolute*, Sigil and Doom chips follow, and the Codex shows "→ Infernal from Lv 11". A Verum built around piercing can get there sooner: mark the tier with `mech.absolute: true` and say so in the text (Nightmare *Void-Bleed* from Rank I, Nullity *Erasure* from Rank II). The threshold is `ABSOLUTE_FROM_TIER` in index.html; a Cognition can set its own with `"absoluteTier"` (an index into the tiers — `0` means from level 1). Sun uses `0`: its damage is Holy from the first dawn, and its text says holy outright.
-- **Against Absolute damage, resistance and immunity only reduce it.** A creature resistant to the matching ordinary type (fire for Infernal, force for Astral…) reduces it by **2 × its Proficiency Bonus**; an immune one by **4 × its Proficiency Bonus** — once per damage roll, never below 0. Vulnerability still doubles it. Against ordinary damage they work as usual. So "ignores resistance / immunity" in a Verum means: ignore the halving or negation below Rank III, ignore the reduction from Rank III on; "immunity counts only as resistance" means half damage below Rank III and the 2× reduction after. The numbers keep Absolute ahead of resisted ordinary damage (2d8+3 against a resistant CR 1 creature: 13 − 4 = 9, where halving gives 6) while protection still matters.
+  The text keeps the ordinary names; the builder does the swap — from Rank IV the damage chip reads *infernal · absolute*, Sigil and Doom chips follow, and the Codex shows "→ Infernal from Lv 17". A Verum built around piercing can get there sooner: mark the tier with `mech.absolute: true` and say so in the text (Nightmare *Void-Bleed* from Rank I, Nullity *Erasure* and Melancholy *Requiem* from Rank II). The threshold is `ABSOLUTE_FROM_TIER` in js/card.js; a Cognition can set its own with `"absoluteTier"` (an index into the tiers — `0` means from level 1). Sun uses `0`: its damage is Holy from the first dawn, and its text says holy outright.
+- **Against Absolute damage, resistance and immunity only reduce it.** A creature resistant to the matching ordinary type (fire for Infernal, force for Astral…) reduces it by **2 × its Proficiency Bonus**; an immune one by **4 × its Proficiency Bonus** — once per damage roll, never below 0. Vulnerability still doubles it. Against ordinary damage they work as usual. So "ignores resistance / immunity" in a Verum means: ignore the halving or negation below Rank IV, ignore the reduction from Rank IV on; "immunity counts only as resistance" means half damage below Rank IV and the 2× reduction after. The numbers keep Absolute ahead of resisted ordinary damage (2d8+3 against a resistant CR 1 creature: 13 − 4 = 9, where halving gives 6) while protection still matters.
 - **Healing that scales with the slot** goes in `mech.heal.perSlot` (a number). Life's Overriding Vitality uses 10 / 20 / 30, the same yardstick as Protection's Guardian's Shell, but as real hit points on top of the Ring's dice rather than temp HP. Like `bonusDice`, later tiers restate the value rather than stack it, and the PLAY card folds it into the healing total (`5d8 + 64` on a 3rd slot at Rank II with VM 4). In card text, `10 × {SLOT}` resolves to the number and `{SLOT}` alone to the slot level.
 - **Supportive Sigils buff the seal's own targets.** A Supportive complement lands on *the seal's targets* (you, on a Self seal; each target, on an Ally seal) — not on "one ally within 30 ft". The Ring already decides how many targets there are, so upgrades add power, not headcount. Two exceptions share instead of repeating: big flat heals (Life's *Vital Surge*, Blood's *Transfusion*) are split among the targets as you choose. Sigils that only affect you, fields, and triggers on damage or death keep their own wording.
 - **`mech.targets`** on a complement (effect or upgrade) adds that many targets to the seal — Civilization's *Civic Ward* (+1, +2 at level 5, +3 at level 11; later parts restate the number). The card's **Targets** reads `4 (2 +2 Sigil)`.
@@ -279,7 +306,7 @@ Opening the tab lands on whatever Ring the composer is currently building, so th
 
 The **Damage** tab is the reference for the sixteen damage types and their **Absolute** evolution — the type at its zenith.
 
-- **Overview** — how the progression works (ordinary through Rank II, Absolute from Rank III, sooner where a Cognition or Verum says so), what resistance, immunity and vulnerability do against Absolute damage, how "ignores resistance" reads, and a table of all sixteen: ordinary → Absolute, and which Cognitions deal each. Click a row to open that type.
+- **Overview** — how the progression works (ordinary through Rank III, Absolute from Rank IV, sooner where a Cognition or Verum says so), what resistance, immunity and vulnerability do against Absolute damage, how "ignores resistance" reads, and a table of all sixteen: ordinary → Absolute, and which Cognitions deal each. Click a row to open that type.
 - **One type** — its family (Physical, Elemental, Arcane & Spirit, Beyond), the ordinary form beside its Absolute form with what each means at the table, any **special rules** from the vault's damage-type notes (Sanguine, Void, All-Mighty), the Cognitions that deal it as their own type with the level each turns it Absolute (and the Verum, if one gets there early), and the ones whose Verums, Sigils or riders deal it too. Click a Cognition to open it in the Codex.
 - **Born Absolute** — Void and All-Mighty have no gentler form: nothing resists, reduces or absorbs them at any level (per the vault's *Void Damage* and *All-Mighty Damage* notes). The builder treats both as Absolute from level 1, and the Codex tags them *born Absolute*.
 

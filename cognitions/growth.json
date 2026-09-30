@@ -17,6 +17,7 @@
     "supportive": [
       {
         "name": "Accelerate",
+        "duration": "instant",
         "description": "You fast-forward nature's rhythm — granting short rest benefits, additional features, and eventually an Evolved State that pushes the body past its natural ceiling.",
         "tiers": [
           {
@@ -25,6 +26,7 @@
           },
           {
             "text": "The target gains one additional Hit Die, one additional attack, or a temporary feature (climb speed, resistance to one damage type, or enhanced reach +5 ft) for 1 minute.",
+            "duration": "1 minute",
             "card": "One extra Hit Die, one extra attack, or a temporary feature for 1 min"
           },
           {
@@ -33,6 +35,7 @@
           },
           {
             "text": "The target enters an Evolved State for 1 minute — gaining +2 to one ability score, +1 AC, and one chosen mutation: climbing limbs, hardened skin (resistance to one physical damage type), one extra attack, or darkvision 60 feet.",
+            "duration": "1 minute",
             "card": "Evolved State 1 min — +2 to an ability, +1 AC, and one mutation of your choice",
             "mech": {
               "buff": {
@@ -44,6 +47,7 @@
       },
       {
         "name": "Proliferate",
+        "duration": "instant",
         "description": "What thrives expands — spreading effects to additional targets and eventually chaining vital force to every ally within range.",
         "tiers": [
           {
@@ -60,12 +64,14 @@
           },
           {
             "text": "Trigger a Chain of Growth — the effect spreads to every ally within 60 feet with diminishing potency (−1 tier per jump). The chain lasts 1 minute.",
+            "duration": "1 minute",
             "card": "Chain of Growth 1 min — spreads to every ally within 60 ft, one tier weaker per jump"
           }
         ]
       },
       {
         "name": "Reinforce",
+        "duration": "ring",
         "description": "You strengthen what already exists — layering temporary HP and AC until the target becomes something that does not move, does not yield, and does not fall.",
         "tiers": [
           {
@@ -79,6 +85,7 @@
           },
           {
             "text": "The target also gains +2 AC for 1 round and is immune to being shoved or grappled.",
+            "duration": "1 round",
             "card": "Also +2 AC for 1 round and immune to shove and grapple",
             "mech": {
               "conditions": [
@@ -92,7 +99,7 @@
             }
           },
           {
-            "text": "While Reinforced, the target has advantage on Constitution saving throws and their weapons count as magical.",
+            "text": "While the seal lasts, the target has advantage on Constitution saving throws and their weapons count as magical.",
             "card": "Advantage on Con saves · their weapons count as magical",
             "mech": {
               "save": {
@@ -105,20 +112,24 @@
           },
           {
             "text": "The target becomes Fortified for 1 minute — immune to forced movement effects and critical hits, and automatically ends one negative condition of their choice at the start of each of their turns.",
+            "duration": "1 minute",
             "card": "Fortified 1 min — immune to forced movement and crits, sheds one condition each turn"
           }
         ]
       },
       {
         "name": "Adaptive Bloom",
+        "duration": "ring",
         "description": "You trigger latent evolution to meet the threat — granting resistance, condition immunity, and environment-based features as the body adapts faster than the danger can keep up.",
         "tiers": [
           {
             "text": "The target gains resistance to the last damage type they took for 1 round.",
+            "duration": "1 round",
             "card": "Resistance to the last damage type they took, 1 round"
           },
           {
             "text": "Choose one condition (Frightened, Blinded, Poisoned, etc.) — the target gains immunity to it for 1 minute as their body adapts.",
+            "duration": "1 minute",
             "card": "Immunity to one condition of your choice for 1 min",
             "mech": {
               "conditions": [
@@ -147,6 +158,7 @@
           },
           {
             "text": "The target undergoes a Mythic Bloom — choose two environmental features from above and additionally grant a Cognition-level mutation for 1 hour: an extra limb, temporary immunity to one spell school, or regeneration 5.",
+            "duration": "1 hour",
             "card": "Mythic Bloom 1 hr — two environmental features plus a Cognition-level mutation"
           }
         ]

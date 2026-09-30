@@ -1,0 +1,20 @@
+{
+  "players": [
+    { "username": "grizzly", "displayName": "Grizzly",
+      "cognitions": ["corruption", "fire", "fortune", "growth", "hate", "isolation", "lightning", "metal", "pain", "shadow"] },
+    { "username": "khaled", "displayName": "Khaled",
+      "cognitions": ["bones", "civilization", "fire", "fortune", "hate", "power"] },
+    { "username": "richard", "displayName": "Richard",
+      "cognitions": ["beast", "civilization", "death", "fire", "fortune"] },
+    { "username": "rory", "displayName": "Rory",
+      "cognitions": ["civilization", "corruption", "death", "fire", "flesh", "fortune", "lightning", "misfortune", "pain", "emotion"] },
+    { "username": "salomon", "displayName": "Salomon",
+      "cognitions": ["apathy", "blood", "bones", "civilization", "corruption", "death", "fire", "flesh", "fortune", "hate", "ice", "isolation", "life", "lightning", "metal", "misfortune", "pain", "power", "protection", "soul", "craft"] },
+    { "username": "solomon", "displayName": "Solomon",
+      "cognitions": ["apathy", "blood", "bones", "corruption", "death", "fire", "flesh", "fortune", "hate", "isolation", "life", "metal", "misfortune", "pain", "power", "protection", "craft"] },
+    { "username": "zariel", "displayName": "Zariel",
+      "cognitions": ["apathy", "beast", "blood", "civilization", "fire", "flesh", "fortune", "isolation", "misfortune", "nullity", "pain", "power"] },
+    { "username": "zeke", "displayName": "Zeke",
+      "cognitions": ["apathy", "blood", "civilization", "fire", "flesh", "fortune", "growth", "ice", "isolation", "life", "metal", "pain", "power", "toxin", "protection"] }
+  ]
+}

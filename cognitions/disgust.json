@@ -92,6 +92,7 @@
     "supportive": [
       {
         "name": "What Does Not Belong",
+        "duration": "1 hour",
         "description": "A healthy soul knows what is not part of it, and expels it.",
         "tiers": [
           {
@@ -126,6 +127,7 @@
           },
           {
             "text": "Nothing Gets In. For 1 minute the target is immune to poison and disease, can't be Charmed, possessed or transformed against its will, and the first curse or Vile Emotion laid on it each round simply fails.",
+            "duration": "1 minute",
             "card": "NOTHING GETS IN — immune to poison and disease · no charm, possession or transformation · the first curse each round fails",
             "mech": {
               "deny": [

@@ -58,10 +58,12 @@
     "supportive": [
       {
         "name": "Marrowforge",
+        "duration": "ring",
         "description": "You reinforce yourself with calcified will — building layers of bone over flesh until strikes shatter against you and enemies bleed for daring to try.",
         "tiers": [
           {
             "text": "Gain temporary hit points equal to your proficiency bonus and +1 to AC for 1 round.",
+            "duration": "1 round",
             "card": "{PB} temp HP and +1 AC for 1 round",
             "mech": {
               "heal": {
@@ -73,7 +75,7 @@
             }
           },
           {
-            "text": "While active, gain resistance to bludgeoning damage, and your melee attacks deal +1d4 piercing or necrotic damage (your choice) as bone fragments extend from your strikes.",
+            "text": "While the seal lasts, gain resistance to bludgeoning damage, and your melee attacks deal +1d4 piercing or necrotic damage (your choice) as bone fragments extend from your strikes.",
             "card": "Resist bludgeoning · melee attacks +1d4 piercing or necrotic from bone spurs",
             "mech": {
               "damage": {
@@ -88,6 +90,7 @@
           },
           {
             "text": "Enter Bone Bastion for 1 minute — you gain immunity to nonmagical weapons, enemies that strike you with melee weapons must succeed on a Dexterity save or take 2d8 slashing damage as bone shards erupt outward, and you may reattach or regenerate broken limbs as a bonus action.",
+            "duration": "1 minute",
             "card": "Bone Bastion 1 min — immune to nonmagical weapons, melee attackers Dex save or 2d8 slashing",
             "mech": {
               "damage": {
@@ -103,6 +106,7 @@
       },
       {
         "name": "Ossuary Invocation",
+        "duration": "instant",
         "description": "You summon the memory of the dead through bone — speaking to what remains, raising skeletal champions, and eventually erupting a cathedral of the dead from the earth itself.",
         "tiers": [
           {
@@ -111,10 +115,12 @@
           },
           {
             "text": "Revive a skeleton with limited autonomy for 10 minutes — useful for scouting, triggering traps, or operating mechanisms.",
+            "duration": "10 minutes",
             "card": "Raise a skeleton with limited autonomy 10 min — scouting, traps, mechanisms"
           },
           {
             "text": "Call forth an ancestral skeleton of a slain warrior or beast — it appears for 1 minute as a CR 10 undead construct under your complete control.",
+            "duration": "1 minute",
             "card": "Call an ancestral skeleton — CR 10 undead under full control, 1 min",
             "mech": {
               "summon": {
@@ -123,8 +129,9 @@
             }
           },
           {
-            "text": "Once per long rest, invoke a Bone Cathedral — within a 30-foot radius, bones erupt from the earth, all necrotic spells are empowered (+1 die), you may resurrect up to three skeletal champions (CR 10 each), and the cathedral persists for 1 hour, granting resistance to radiant damage and immunity to Turn Undead for all creatures you summon within it.",
-            "card": "1/long rest Bone Cathedral 30 ft — necrotic effects +1 die, raise three CR 10 champions",
+            "text": "Invoke a Bone Cathedral — within a 30-foot radius, bones erupt from the earth, all necrotic spells are empowered (+1 die), you may resurrect up to three skeletal champions (CR 10 each), and the cathedral persists for 1 hour, granting resistance to radiant damage and immunity to Turn Undead for all creatures you summon within it.",
+            "duration": "1 hour",
+            "card": "Bone Cathedral 30 ft — necrotic effects +1 die, raise three CR 10 champions",
             "mech": {
               "damage": {
                 "type": "radiant"

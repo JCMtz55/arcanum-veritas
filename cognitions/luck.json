@@ -59,11 +59,12 @@
     "supportive": [
       {
         "name": "Riding It",
+        "duration": "charges",
         "description": "For the next little while, things simply go their way.",
         "tiers": [
           {
-            "text": "For 1 minute the target may roll a d4 once and add it to any attack roll, ability check or saving throw, after seeing the result.",
-            "card": "1 min: once, +1d4 to any d20 — after seeing the roll",
+            "text": "The target may roll a d4 once and add it to any attack roll, ability check or saving throw, after seeing the result.",
+            "card": "Once, +1d4 to any d20 — after seeing the roll",
             "mech": {
               "buff": {
                 "who": "target",

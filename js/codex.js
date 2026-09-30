@@ -3,8 +3,8 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", admin: "boardAdmin" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", admin: "tabAdmin" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
@@ -26,6 +26,7 @@ function setView(v) {
   }
   if (v === "damage") { renderDamageList(); renderDamage(); }
   if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
+  if (v === "admin") openAdmin();
 }
 
 function renderCodexList() {
@@ -127,10 +128,11 @@ function renderCodex() {
     fx.forEach(e => {
       h += `<div class="cdx-fx"><div class="cdx-fx-h"><b>${esc(e.name)}</b>` +
            (e.fuel ? `<span class="t hot" style="margin:0 0 0 8px">Cost ${e.fuel} Corruption</span>` : "") +
+           (verumClock(e) ? `<span class="t" style="margin:0 8px 4px 0;font-style:normal">${esc(verumClock(e).label)}</span>` : "") +
            (e.description ? `<span>${esc(e.description)}</span>` : "") + `</div><div class="ladder">` +
         (e.tiers || []).map((t, i) =>
           `<div class="rung ${i === tier ? "now" : ""}"><span class="lv">${TIERS[i]?.label || ""}</span>
-           <span>${esc(resolve(partText(t)))}</span></div>`).join("") + `</div>` +
+           <span>${esc(resolve(partText(t)))}${partClock(t) ? `<em class="c-clk">own clock · ${esc(partClock(t))}</em>` : ""}</span></div>`).join("") + `</div>` +
         (e.corona ? `<div class="cdx-corona"><b>☀ Corona — ${esc(e.corona.name)}</b><span>${esc(resolve(e.corona.text))}</span></div>` : "") + `</div>`;
     });
     h += `</div>`;

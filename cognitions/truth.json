@@ -120,6 +120,7 @@
     "supportive": [
       {
         "name": "Clear-Eyed",
+        "duration": "1 hour",
         "description": "They see what is there. It is a surprisingly rare condition.",
         "tiers": [
           {

@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════
 //  COMPOSITION TABLES
 // ═══════════════════════════════════════════════════════════
+// One clock for a Supportive seal — appended to the Self and Ally notes. Each Supportive Verum
+// says which kind it is in its JSON (`duration`), and a Rank may carry a time of its own.
+const SUP_CLOCK = "\n\nOne clock. The Verum Effect lasts this Ring's Buff Duration, and a Verum that states no time of its own always does. A Charge Verum ends early once it is spent. An Instant Verum resolves when the seal is drawn and leaves nothing running. A Verum or Rank marked with its own clock keeps that stated time instead, shorter or longer.\n\nA gain that repeats every turn or on a trigger happens at most once per round, and temporary hit points from it don't stack. \"Once while the seal lasts\" is once per seal — a Verum never recharges on a rest.";
+
 const COMP_DATA = {
   offensive: {
     label: "Offensive", icon: "⚔️", desc: "Damage & harm", color: "off",
@@ -58,7 +62,7 @@ const COMP_DATA = {
     subtypes: {
       "Self": {
         columns: ["Slot","Healing","Buff Duration"],
-        notes: "Inward. No roll; resolves on cast. All Verum Effects apply at full potency — the only Ring that can touch your own body, mind, or soul.\n\nSelf concentrates what Ally divides. It heals half again what Ally gives any one target, and its buff runs two slots longer. Ally wins on total output from the 3rd slot up, once it has more than one body to reach — Self wins on any single body, always.",
+        notes: "Inward. No roll; resolves on cast. All Verum Effects apply at full potency — the only Ring that can touch your own body, mind, or soul.\n\nSelf concentrates what Ally divides. It heals half again what Ally gives any one target, and its buff runs two slots longer. Ally wins on total output from the 3rd slot up, once it has more than one body to reach — Self wins on any single body, always." + SUP_CLOCK,
         rows: [
           ["1st","2d8 + VM","1 minute"],["2nd","3d8 + VM","10 minutes"],
           ["3rd","5d8 + VM","10 minutes"],["4th","6d8 + VM","1 hour"],
@@ -69,7 +73,7 @@ const COMP_DATA = {
       },
       "Ally": {
         columns: ["Slot","Healing / Target","Range","Targets","Buff Duration"],
-        notes: "Delivered to willing creatures. No roll. Full healing and Verum Effect to each target. Internal-state Verum Effects do not transfer.\n\nYou may be one of the targets, but you heal as a target of Ally — the Self table is only for a seal drawn inward.",
+        notes: "Delivered to willing creatures. No roll. Full healing and Verum Effect to each target. Internal-state Verum Effects do not transfer.\n\nYou may be one of the targets, but you heal as a target of Ally — the Self table is only for a seal drawn inward." + SUP_CLOCK,
         rows: [
           ["1st","1d8 + VM","30 ft","1","1 round"],["2nd","2d8 + VM","30 ft","1","3 rounds"],
           ["3rd","3d8 + VM","60 ft","2","1 minute"],["4th","4d8 + VM","60 ft","2","10 minutes"],
@@ -213,7 +217,7 @@ const RULES = {
     ["Seal attack bonus","Proficiency Bonus + Verum Modifier"],
     ["Verum DC","8 + Proficiency Bonus + Verum Modifier + Dream Score modifier"],
     ["Saving throw type","set by the Core (its Main Saving Throw)"],
-    ["Absolute damage","from Rank III (level 11+), all of a seal's damage — Verum, Sigils, ticks and riders — turns into its type's Absolute form: fire becomes Infernal, force Astral, necrotic Doom… Some Verums get there sooner. Absolute damage is never halved or negated: a creature resistant to the ordinary type reduces it by 2 × its Proficiency Bonus, an immune one by 4 × its Proficiency Bonus (once per damage roll, never below 0). Vulnerability still doubles it. Where a Verum or Sigil ignores resistance or immunity, against Absolute damage it ignores that reduction. Void and All-Mighty are born at their zenith: nothing resists, reduces or absorbs them, at any level."],
+    ["Absolute damage","from Rank IV (level 17+), all of a seal's damage — Verum, Sigils, ticks and riders — turns into its type's Absolute form: fire becomes Infernal, force Astral, necrotic Doom… Some Verums get there sooner. Absolute damage is never halved or negated: a creature resistant to the ordinary type reduces it by 2 × its Proficiency Bonus, an immune one by 4 × its Proficiency Bonus (once per damage roll, never below 0). Vulnerability still doubles it. Where a Verum or Sigil ignores resistance or immunity, against Absolute damage it ignores that reduction. Void and All-Mighty are born at their zenith: nothing resists, reduces or absorbs them, at any level."],
   ],
   premium: "The Premium Rule — a seal of slot N should perform like the best spell of slot N+1, before its Verum Effect and Sigils. It costs a slot AND a use; you get Proficiency Bonus uses per long rest; no cantrips.",
   limits: [
@@ -222,6 +226,7 @@ const RULES = {
     "Budget: one Core + (slot level − 1) Complements. Coven Drawing may add up to three more.",
     "Timing: your action, once per turn, never a bonus action. Ward is a reaction. Rite and Inscribed take longer by design.",
     "Concentration: Aura, Field, Control zones, and Constructs. Self, Ally, Infusion, Structures, and Objects do not.",
+    "One clock: a Supportive Verum lasts the Ring's Buff Duration unless it is a Charge (until spent), an Instant, or marked with its own clock. Nothing in a Verum recharges on a rest.",
     "Countered, not dispelled: immune to Counterspell and Dispel Magic; suppressed by Antimagic Field. Only an opposing seal unmakes a seal early.",
   ],
   countering: [

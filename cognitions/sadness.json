@@ -98,11 +98,12 @@
     "supportive": [
       {
         "name": "Shared Weight",
+        "duration": "ring",
         "description": "Sorrow's one mercy: it is lighter split between people.",
         "tiers": [
           {
-            "text": "For 1 minute, when the target takes damage, you may take half of it instead as cold damage — and while you share it, the target has advantage on saves against Vile-emotion effects.",
-            "card": "1 min: take half the target's damage yourself as cold · it gains advantage vs Vile effects",
+            "text": "When the target takes damage, you may take half of it instead as cold damage — and while you share it, the target has advantage on saves against Vile-emotion effects.",
+            "card": "Take half the target's damage yourself as cold · it gains advantage vs Vile effects",
             "mech": {
               "buff": {
                 "who": "target",

@@ -122,6 +122,7 @@
     "supportive": [
       {
         "name": "Virtuous Infusion",
+        "duration": "10 minutes",
         "description": "The Infuse action, done properly — no check, no cap, and enough of it to go round.",
         "tiers": [
           {

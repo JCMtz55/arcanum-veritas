@@ -17,6 +17,7 @@
     "supportive": [
       {
         "name": "Withdraw",
+        "duration": "ring",
         "description": "You retreat fully from the reach of the world — gaining cover, invisibility, and eventually Total Withdrawal where damage and targeting simply cannot find you.",
         "tiers": [
           {
@@ -24,8 +25,8 @@
             "card": "React when targeted: half cover and immune to opportunity attacks this turn"
           },
           {
-            "text": "Once per short rest, as a bonus action you may teleport up to 30 feet to an unoccupied space and become invisible until the start of your next turn or until you attack or cast a spell.",
-            "card": "1/short rest bonus-action teleport 30 ft and turn invisible until you act",
+            "text": "Once while the seal lasts, as a bonus action you may teleport up to 30 feet to an unoccupied space and become invisible until the start of your next turn or until you attack or cast a spell.",
+            "card": "Once per seal bonus-action teleport 30 ft and turn invisible until you act",
             "mech": {
               "conditions": [
                 {
@@ -47,17 +48,20 @@
             }
           },
           {
-            "text": "Once per long rest, for 1 minute you may enter a state of Total Withdrawal — you gain resistance to all damage, cannot be targeted by spells or effects that require you to be seen or sensed, and leave no magical trace. This state ends early if you deal damage or cast an offensive spell.",
-            "card": "1/long rest Total Withdrawal 1 min — resist all damage, untargetable by anything needing to sense you"
+            "text": "For 1 minute you enter a state of Total Withdrawal — you gain resistance to all damage, cannot be targeted by spells or effects that require you to be seen or sensed, and leave no magical trace. This state ends early if you deal damage or cast an offensive spell.",
+            "duration": "1 minute",
+            "card": "Total Withdrawal 1 min — resist all damage, untargetable by anything needing to sense you"
           }
         ]
       },
       {
         "name": "Quiet Mind",
+        "duration": "ring",
         "description": "You silence the noise of emotion, expectation, and memory — sealing a creature's mind against enchantment, psychic damage, and eventually any divination short of divine will.",
         "tiers": [
           {
             "text": "You or one creature within 30 feet gains immunity to being Charmed or Frightened until the end of their next turn.",
+            "duration": "until the end of their next turn",
             "card": "You or a creature within 30 ft: immune to Charmed and Frightened until end of their next turn",
             "mech": {
               "conditions": [
@@ -72,10 +76,12 @@
           },
           {
             "text": "The target cannot be affected by enchantment magic for 1 minute — including Suggestion, Dominate, Command, and similar effects.",
+            "duration": "1 minute",
             "card": "Immune to enchantment for 1 min — Suggestion, Dominate, Command, all of it"
           },
           {
             "text": "The target becomes immune to psychic damage and telepathic intrusion for 1 minute, and has advantage on all Intelligence and Wisdom saving throws for the same duration.",
+            "duration": "1 minute",
             "card": "Immune to psychic damage and telepathy 1 min · advantage on Int and Wis saves",
             "mech": {
               "damage": {
@@ -91,6 +97,7 @@
           },
           {
             "text": "For 1 hour the target's mind becomes a sealed vault — their thoughts cannot be read or modified, they cannot be targeted by Dream, Geas, or Detect Thoughts, and they have advantage on saves against any divination or mind-affecting effect of 8th level or lower.",
+            "duration": "1 hour",
             "card": "1 hr sealed vault — thoughts unreadable and unmodifiable, untouchable by Dream, Geas or Detect Thoughts",
             "mech": {
               "buff": {

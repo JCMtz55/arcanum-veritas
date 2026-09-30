@@ -96,11 +96,12 @@
     "supportive": [
       {
         "name": "Warmth",
+        "duration": "ring",
         "description": "The oldest medicine there is: someone is glad you are here.",
         "tiers": [
           {
-            "text": "The target gains Inspiration and temporary hit points equal to Five Times the slot level, and can't be Frightened for 1 minute.",
-            "card": "Inspiration · 5 × {SLOT} temp HP · can't be Frightened, 1 min",
+            "text": "The target gains Inspiration and temporary hit points equal to Five Times the slot level, and can't be Frightened.",
+            "card": "Inspiration · 5 × {SLOT} temp HP · can't be Frightened",
             "mech": {
               "deny": [
                 "fear"
@@ -132,7 +133,7 @@
             }
           },
           {
-            "text": "Gladhearted. For 1 minute the target and every ally within 30 feet of it are immune to Frightened and Charmed, can't have disadvantage from fear, grief or despair, and each regains hit points equal to Ten Times the slot level the first time they drop below half.",
+            "text": "Gladhearted. While the seal lasts the target and every ally within 30 feet of it are immune to Frightened and Charmed, can't have disadvantage from fear, grief or despair, and each regains hit points equal to Ten Times the slot level the first time they drop below half.",
             "card": "GLADHEARTED — the target and allies within 30 ft: immune to fear and charm · 10 × {SLOT} HP the first time each drops below half",
             "mech": {
               "deny": [

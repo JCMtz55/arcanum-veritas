@@ -94,6 +94,8 @@ document.addEventListener("keydown", e => {
 
 // ── DM view: the Konami code (↑ ↑ ↓ ↓ ← → ← → B A) unlocks every Cognition, held-back ones
 // included; the same code turns it off. Remembered in this browser only.
+// Signed in, the DM account starts in DM view and the code is the DM's alone — for a player
+// there is nothing to unlock: the server never sent the rest.
 const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
 let konamiAt = 0, konamiSnap = null;
 function setDmView(on, quiet) {
@@ -124,6 +126,7 @@ document.addEventListener("keydown", e => {
   if (++konamiAt < KONAMI.length) return;
   konamiAt = 0;
   if (konamiSnap) { state.slotLevel = konamiSnap.slot; state.charLevel = konamiSnap.lvl; }
+  if (API && ME?.role !== "dm") { syncBar(); renderMain(); return; }
   setDmView(!state.dm);
 });
 

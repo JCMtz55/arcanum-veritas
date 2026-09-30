@@ -73,11 +73,12 @@
     "supportive": [
       {
         "name": "Living Alloy",
+        "duration": "ring",
         "description": "Metal becomes part of you — granting AC, temporary HP each turn, and eventually the Ironborn State where your skin becomes steel and your strikes pierce anything.",
         "tiers": [
           {
-            "text": "While wielding or wearing metal, gain +1 to AC and resistance to bludgeoning damage for 1 minute.",
-            "card": "Wearing/wielding metal: +1 AC and bludgeoning resistance, 1 min",
+            "text": "While wielding or wearing metal, gain +1 to AC and resistance to bludgeoning damage.",
+            "card": "Wearing/wielding metal: +1 AC and bludgeoning resistance",
             "mech": {
               "damage": {
                 "type": "bludgeoning"
@@ -88,8 +89,8 @@
             }
           },
           {
-            "text": "Absorb a piece of armor or weapon into your form for 1 minute — while doing so, you gain temporary hit points equal to your spellcasting modifier at the start of each of your turns.",
-            "card": "Absorb armour or a weapon 1 min — {VM} temp HP at the start of each of your turns",
+            "text": "Absorb a piece of armor or weapon into your form — while the seal lasts, you gain temporary hit points equal to your spellcasting modifier at the start of each of your turns.",
+            "card": "Absorb armour or a weapon — {VM} temp HP at the start of each of your turns",
             "mech": {
               "heal": {
                 "tempHP": true
@@ -97,8 +98,8 @@
             }
           },
           {
-            "text": "Once per short rest, gain immunity to critical hits and nonmagical slashing damage for 1 minute while wearing metal armor.",
-            "card": "1/short rest: immune to crits and nonmagical slashing 1 min in metal armour",
+            "text": "While wearing metal armor, you are immune to critical hits and nonmagical slashing damage.",
+            "card": "In metal armour: immune to crits and nonmagical slashing",
             "mech": {
               "damage": {
                 "type": "slashing"
@@ -107,6 +108,7 @@
           },
           {
             "text": "Enter the Ironborn State for 1 minute — your skin becomes steel-like, granting +3 AC and resistance to all physical damage. Your melee attacks count as adamantine and magical. You can sense all metallic objects within 60 feet through obstacles.",
+            "duration": "1 minute",
             "card": "Ironborn 1 min — +3 AC, resist all physical, adamantine magical melee, sense metal 60 ft through walls",
             "mech": {
               "buff": {
@@ -118,6 +120,7 @@
       },
       {
         "name": "Forgemind Invocation",
+        "duration": "ring",
         "description": "Honor the essence of forged intent — enhancing crafted tools, reading the history of metal objects, and eventually summoning a sentient construct that obeys your every command.",
         "tiers": [
           {
@@ -125,8 +128,8 @@
             "card": "+1 to checks and attacks with a metal weapon or tool · can't be disarmed"
           },
           {
-            "text": "While holding a crafted metal object, gain advantage on Insight and Investigation checks related to its history, purpose, or creator. Once per short rest, you may identify a metal item's magical properties without a spell.",
-            "card": "Advantage on Insight/Investigation about a crafted object · 1/short rest identify a metal item free",
+            "text": "While holding a crafted metal object, gain advantage on Insight and Investigation checks related to its history, purpose, or creator. Once while the seal lasts, you may identify a metal item's magical properties without a spell.",
+            "card": "Advantage on Insight/Investigation about a crafted object · once per seal identify a metal item free",
             "mech": {
               "buff": {
                 "advantage": "Insight and Investigation checks related to its hi"
@@ -144,8 +147,9 @@
             }
           },
           {
-            "text": "Once per long rest, invoke the Origin Forge — summon a sentient metal construct (CR 10–12) for 10 minutes that acts as a guardian, smith, or warform at your direction. It shares your initiative, obeys your commands, and dissolves into raw ore when dismissed.",
-            "card": "1/long rest Origin Forge — a sentient CR 10–12 metal construct for 10 min on your initiative",
+            "text": "Invoke the Origin Forge — summon a sentient metal construct (CR 10–12) for 10 minutes that acts as a guardian, smith, or warform at your direction. It shares your initiative, obeys your commands, and dissolves into raw ore when dismissed.",
+            "duration": "10 minutes",
+            "card": "Origin Forge — a sentient CR 10–12 metal construct for 10 min on your initiative",
             "mech": {
               "summon": {
                 "cr": "10–12"

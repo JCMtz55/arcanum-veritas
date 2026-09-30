@@ -99,6 +99,7 @@
     "supportive": [
       {
         "name": "Blink",
+        "duration": "ring",
         "description": "You were never where they thought you were.",
         "tiers": [
           {
@@ -131,6 +132,7 @@
       },
       {
         "name": "Elsewhere",
+        "duration": "ring",
         "description": "You keep a small place with you that is not here.",
         "tiers": [
           {

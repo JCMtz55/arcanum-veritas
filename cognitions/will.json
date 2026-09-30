@@ -77,11 +77,12 @@
     "supportive": [
       {
         "name": "Hold the Line",
+        "duration": "ring",
         "description": "You lend them yours. They will give it back, if they can.",
         "tiers": [
           {
-            "text": "For 1 minute the target has advantage on saving throws against being Charmed, Frightened or Incapacitated, and can't be forced to move against its intent.",
-            "card": "1 min: advantage vs charm, fear, incapacitation · can't be moved against its will",
+            "text": "The target has advantage on saving throws against being Charmed, Frightened or Incapacitated, and can't be forced to move against its intent.",
+            "card": "Advantage vs charm, fear, incapacitation · can't be moved against its will",
             "mech": {
               "buff": {
                 "who": "target",
@@ -104,7 +105,7 @@
             "card": "Once: the drop to 0 leaves it at 1 — and it takes an action at once"
           },
           {
-            "text": "Unbending. For the minute the target can't be Charmed, Frightened, Stunned, Paralysed or Incapacitated by anything, and each time an effect would end its turn early it instead loses only its bonus action.",
+            "text": "Unbending. While the seal lasts the target can't be Charmed, Frightened, Stunned, Paralysed or Incapacitated by anything, and each time an effect would end its turn early it instead loses only its bonus action.",
             "card": "UNBENDING — immune to charm, fear, stun, paralysis, incapacitation · turn-enders cost only its bonus action",
             "mech": {
               "deny": [

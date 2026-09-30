@@ -72,11 +72,12 @@
     "supportive": [
       {
         "name": "Sharpened",
+        "duration": "ring",
         "description": "Everything the target was struggling to hold suddenly sits still.",
         "tiers": [
           {
-            "text": "For 1 minute the target has advantage on Intelligence checks and on Concentration checks, and can't be Confused or made to lose track of what it was doing.",
-            "card": "1 min: advantage on Int and Concentration · can't be Confused",
+            "text": "The target has advantage on Intelligence checks and on Concentration checks, and can't be Confused or made to lose track of what it was doing.",
+            "card": "Advantage on Int and Concentration · can't be Confused",
             "mech": {
               "buff": {
                 "who": "target",

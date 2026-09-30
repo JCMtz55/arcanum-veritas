@@ -103,6 +103,7 @@
     "supportive": [
       {
         "name": "Swallow",
+        "duration": "charges",
         "description": "Everything that is thrown at you has to land somewhere. You give it somewhere.",
         "tiers": [
           {

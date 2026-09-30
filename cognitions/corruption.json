@@ -200,11 +200,12 @@
     "supportive": [
       {
         "name": "The Bargain",
+        "duration": "ring",
         "description": "It never takes. It offers, and lets you do the taking.",
         "tiers": [
           {
-            "text": "A willing creature gains +1d4 to attack rolls and saving throws for 1 minute. When the effect ends it gains 1 Corruption Point.",
-            "card": "A willing creature: +1d4 attacks and saves 1 min · 1 Corruption Point when it ends",
+            "text": "A willing creature gains +1d4 to attack rolls and saving throws while the seal lasts. When the effect ends it gains 1 Corruption Point.",
+            "card": "A willing creature: +1d4 attacks and saves · 1 Corruption Point when it ends",
             "mech": {
               "damage": {
                 "dice": "1d4"

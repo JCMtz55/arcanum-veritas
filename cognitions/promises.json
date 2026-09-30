@@ -82,11 +82,12 @@
     "supportive": [
       {
         "name": "The Vow Made Flesh",
+        "duration": "ring",
         "description": "Say what you will do. The world will make room.",
         "tiers": [
           {
-            "text": "The target swears a vow of one sentence — to reach a place, protect a person, defeat a foe. For 1 minute, while acting toward it, it has advantage on saves against effects that would stop it and +10 feet of speed.",
-            "card": "The target swears a vow · 1 min, acting toward it: advantage vs being stopped · +10 ft speed",
+            "text": "The target swears a vow of one sentence — to reach a place, protect a person, defeat a foe. While the seal lasts and it acts toward the vow, it has advantage on saves against effects that would stop it and +10 feet of speed.",
+            "card": "The target swears a vow · acting toward it: advantage vs being stopped · +10 ft speed",
             "mech": {
               "buff": {
                 "who": "target",
@@ -117,6 +118,7 @@
           },
           {
             "text": "Possibility bends. Once while the vow lasts, when the target fails a roll that would keep it from its vow, it succeeds instead. The vow lasts until kept — but if the target abandons it, it is Forsworn as you would be.",
+            "duration": "until the vow is kept",
             "card": "Once, a failed roll toward the vow becomes a success · lasts until kept — abandoning it makes the target Forsworn"
           }
         ]

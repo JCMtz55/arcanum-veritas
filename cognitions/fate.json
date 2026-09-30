@@ -77,11 +77,12 @@
     "supportive": [
       {
         "name": "Meant For This",
+        "duration": "charges",
         "description": "They were always going to be standing here. You simply tell them so.",
         "tiers": [
           {
-            "text": "For 1 minute the target may, once, replace a d20 roll with a 15 — declared before rolling. It was always going to be enough.",
-            "card": "1 min: once, take a 15 instead of rolling",
+            "text": "The target may, once, replace a d20 roll with a 15 — declared before rolling. It was always going to be enough.",
+            "card": "Once, take a 15 instead of rolling",
             "mech": {
               "buff": {
                 "who": "target",

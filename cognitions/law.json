@@ -128,6 +128,7 @@
     "supportive": [
       {
         "name": "Standing",
+        "duration": "1 hour",
         "description": "They are acting within their rights, and the world can tell.",
         "tiers": [
           {

@@ -102,6 +102,7 @@
     "supportive": [
       {
         "name": "Not Yet",
+        "duration": "ring",
         "description": "Death is standing in the doorway. For you, it has decided to wait.",
         "tiers": [
           {
@@ -128,6 +129,7 @@
       },
       {
         "name": "Pale Walker",
+        "duration": "ring",
         "description": "You have one foot on the other side. It turns out the dead have their advantages.",
         "tiers": [
           {

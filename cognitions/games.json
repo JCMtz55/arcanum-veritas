@@ -70,11 +70,12 @@
     "supportive": [
       {
         "name": "In Play",
+        "duration": "ring",
         "description": "You put them in the game, where they are allowed to be good at things.",
         "tiers": [
           {
-            "text": "For 1 minute the target may take one extra reaction each round, and adds your Verum Modifier to initiative.",
-            "card": "1 min: an extra reaction each round · +{VM} initiative",
+            "text": "The target may take one extra reaction each round, and adds your Verum Modifier to initiative.",
+            "card": "An extra reaction each round · +{VM} initiative",
             "mech": {
               "buff": {
                 "who": "target",

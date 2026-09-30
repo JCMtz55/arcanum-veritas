@@ -67,10 +67,26 @@ function complementPool(cog) {
 // Complement budget: slot − 1, plus up to three from Coven Drawing
 function maxComps() { return state.slotLevel - 1 + (state.manner === "coven" ? 3 : 0); }
 function currentSub() { return COMP_DATA[state.compType]?.subtypes?.[state.compSub]; }
+// What the seal itself asks anyone to roll: the seal "attack", a "weapon" hit (Infusion), the Core's
+// "save" (offensive Area / Field, Control) — or nothing: Supportive, Creation and Utility Rings resolve on cast.
+function sealRoll() {
+  if (state.compSub === "Direct Attack") return "attack";
+  if (state.compSub === "Infusion") return "weapon";
+  return (state.compType === "offensive" || state.compType === "control") ? "save" : null;
+}
 // ── Schema tolerance: a tier / effect may be a plain string (v1) or {text, card, mech} (v2)
 function partText(p) { return (p && typeof p === "object") ? (p.text || "") : (p || ""); }
 function partCard(p) { return (p && typeof p === "object") ? (p.card || null) : null; }
 function partMech(p) { return (p && typeof p === "object") ? (p.mech || null) : null; }
+// A Verum's clock. `duration` on the Verum is "ring" (the Ring's Buff Duration), "charges" (until
+// spent, or the Ring's duration), "instant" (resolves when drawn), or a stated time of its own.
+// A tier may carry its own `duration` — that Rank's part runs on that clock instead.
+const CLOCKS = { ring: "lasts the Ring's duration", charges: "until spent, or the Ring's duration", instant: "resolves when drawn" };
+function verumClock(av) {
+  const d = av?.duration; if (!d) return null;
+  return CLOCKS[d] ? { kind: d, label: CLOCKS[d] } : { kind: "fixed", label: `own clock · ${d}`, time: d };
+}
+function partClock(p) { return (p && typeof p === "object" && p.duration) || null; }
 // PLAY card prefers the authored card line; falls back to compressing the prose
 function cardLine(p) {
   const c = partCard(p);
@@ -86,7 +102,7 @@ function coreLadder(av, tier) {
     const restated = av.tiers.slice(i + 1, top + 1)
       .some(t => typeof partMech(t)?.damage?.bonusDice === "number");
     if (restated) line = line.replace(/^\s*\+\s*\d+\s*(?:dice|die)\b\s*(?:·\s*)?/i, "");
-    if (line.trim()) out.push({ label: TIERS[i].label, line, now: i === top });
+    if (line.trim()) out.push({ label: TIERS[i].label, line, now: i === top, clock: partClock(av.tiers[i]) });
   }
   return out;
 }
@@ -162,9 +178,22 @@ function escAttr(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
 // ═══════════════════════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════════════════════
+// Served by its own server (server/server.js), the builder signs you in and is handed only the
+// Cognitions your account may read: API is true and ME is {id, username, displayName, role}.
+// On a plain static host (Live Server, python -m http.server) there is no api/ — every Cognition
+// file is simply public, as it always was, and the Konami code is the only DM switch.
+let API = false, ME = null;
+
 async function boot() {
   try {
-    const r = await fetch("cognitions/index.json");
+    const me = await fetch("api/me");
+    API = me.status !== 404;
+    if (API) {
+      if (!me.ok) return showGate();
+      ME = (await me.json()).user;
+      showAccount();
+    }
+    const r = await fetch(API ? "api/cognitions" : "cognitions/index.json");
     if (!r.ok) throw new Error(r.status);
     INDEX = (await r.json()).cognitions;
     const ready = INDEX.filter(c => c.ready).length;
@@ -173,7 +202,8 @@ async function boot() {
     renderCodexList();
     syncBar();
     renderMain();
-    try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
+    if (API) { if (ME.role === "dm") setDmView(true, true); }
+    else try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
     try { if (localStorage.getItem("av-mode") === "ign") setMode("ign", true); } catch (e) {}
     const fa = document.getElementById("faCss");
     if (fa?.sheet) initIcons(); else fa?.addEventListener("load", initIcons);
@@ -201,7 +231,7 @@ async function boot() {
 async function loadCognition(id) {
   if (LOADED[id]) return LOADED[id];
   try {
-    const r = await fetch(`cognitions/${id}.json`);
+    const r = await fetch(API ? `api/cognitions/${id}` : `cognitions/${id}.json`);
     if (!r.ok) throw new Error(r.status);
     LOADED[id] = await r.json();
     const dt = LOADED[id].damageType;

@@ -61,11 +61,12 @@
     "supportive": [
       {
         "name": "Sleight",
+        "duration": "ring",
         "description": "Nobody watching is going to be able to say what just happened.",
         "tiers": [
           {
-            "text": "For 1 minute the target has advantage on Deception, Sleight of Hand and Stealth checks, and attacks against it from creatures that have never seen it fight have disadvantage.",
-            "card": "1 min: advantage on Deception, Sleight of Hand and Stealth · strangers attack it at disadvantage",
+            "text": "The target has advantage on Deception, Sleight of Hand and Stealth checks, and attacks against it from creatures that have never seen it fight have disadvantage.",
+            "card": "Advantage on Deception, Sleight of Hand and Stealth · strangers attack it at disadvantage",
             "mech": {
               "buff": {
                 "who": "target",

@@ -59,6 +59,7 @@
     "supportive": [
       {
         "name": "Agony Echo",
+        "duration": "ring",
         "description": "The more they hurt you, the more they hurt themselves.",
         "tiers": [
           {
@@ -96,6 +97,7 @@
       },
       {
         "name": "Suffering Sustains",
+        "duration": "ring",
         "description": "Past a certain threshold, a body stops being afraid and starts being present.",
         "tiers": [
           {
@@ -131,6 +133,7 @@
       },
       {
         "name": "Transference",
+        "duration": "ring",
         "description": "Pain can be carried for someone. It has to be carried by someone.",
         "tiers": [
           {

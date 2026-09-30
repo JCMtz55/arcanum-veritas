@@ -124,11 +124,12 @@
     "supportive": [
       {
         "name": "In the Right",
+        "duration": "ring",
         "description": "They are owed something, and while this lasts, the world is settling up.",
         "tiers": [
           {
-            "text": "For 1 minute the target adds your Verum Modifier to attack rolls and saving throws against any creature that has harmed it or its allies.",
-            "card": "1 min: +{VM} against anyone who has harmed it or its own",
+            "text": "The target adds your Verum Modifier to attack rolls and saving throws against any creature that has harmed it or its allies.",
+            "card": "+{VM} against anyone who has harmed it or its own",
             "mech": {
               "buff": {
                 "who": "target",

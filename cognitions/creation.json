@@ -77,11 +77,12 @@
     "supportive": [
       {
         "name": "Soulbinder's Will",
+        "duration": "charges",
         "description": "Forge a fragment of soul, memory or spirit into a keepsake, and put it in their hand.",
         "tiers": [
           {
-            "text": "You bind a fragment of your memory into a keepsake the target carries for 1 hour. It adds your Verum Modifier to one ability check or saving throw of its choice, and may reroll one d20 of its own.",
-            "card": "1 hr keepsake: +{VM} to one check or save · one reroll",
+            "text": "You bind a fragment of your memory into a keepsake the target carries while the seal lasts. It adds your Verum Modifier to one ability check or saving throw of its choice, and may reroll one d20 of its own.",
+            "card": "Keepsake: +{VM} to one check or save · one reroll",
             "mech": {
               "buff": {
                 "who": "target",
@@ -111,7 +112,7 @@
             }
           },
           {
-            "text": "Cognition-bound Keepsake. The keepsake carries one Cognition you know; for the hour the target may cast one seal with it as its Core using your numbers, then the keepsake falls silent.",
+            "text": "Cognition-bound Keepsake. The keepsake carries one Cognition you know; while the seal lasts the target may cast one seal with it as its Core using your numbers, then the keepsake falls silent.",
             "card": "The keepsake carries one of your Cognitions — the target casts ONE seal with it at your numbers"
           }
         ]

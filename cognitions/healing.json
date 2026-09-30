@@ -26,6 +26,7 @@
     "supportive": [
       {
         "name": "Mend",
+        "duration": "instant",
         "description": "The straightforward miracle. Most of what a healer does is this, done fast.",
         "tiers": [
           {
@@ -72,11 +73,12 @@
       },
       {
         "name": "The Healer's Hand",
+        "duration": "ring",
         "description": "You do not close the wound. You make them the kind of person whose wounds close.",
         "tiers": [
           {
-            "text": "For 1 minute the target regains hit points equal to Twice your Verum Modifier at the start of each of its turns.",
-            "card": "1 min: 2×VM healing at the start of each of its turns",
+            "text": "The target regains hit points equal to Twice your Verum Modifier at the start of each of its turns.",
+            "card": "2×VM healing at the start of each of its turns",
             "mech": {
               "heal": {
                 "amount": "2×VM a turn",

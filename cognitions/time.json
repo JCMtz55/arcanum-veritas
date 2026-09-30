@@ -103,6 +103,7 @@
     "supportive": [
       {
         "name": "Rewind",
+        "duration": "charges",
         "description": "Not yet. Again.",
         "tiers": [
           {
@@ -132,6 +133,7 @@
       },
       {
         "name": "Foresight",
+        "duration": "ring",
         "description": "You have already seen this part.",
         "tiers": [
           {

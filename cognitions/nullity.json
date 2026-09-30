@@ -31,7 +31,7 @@
             }
           },
           {
-            "text": "The erasure turns Absolute Void a tier early, and it ignores immunity as well as resistance. It strips the target's temporary hit points away before it lands. One spell or magical effect of 4th level or lower on the target ends.",
+            "text": "The erasure turns Absolute Void early, from Rank II, and it ignores immunity as well as resistance. It strips the target's temporary hit points away before it lands. One spell or magical effect of 4th level or lower on the target ends.",
             "card": "Damage becomes ABSOLUTE VOID · ignores immunity too · strips their temp HP first · ends one magical effect ≤4th (not a seal)",
             "mech": {
               "absolute": true,
@@ -80,6 +80,7 @@
     "supportive": [
       {
         "name": "Excision",
+        "duration": "instant",
         "description": "The cleanest cure is for the affliction to never have been.",
         "tiers": [
           {

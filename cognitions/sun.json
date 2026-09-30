@@ -117,6 +117,7 @@
     "supportive": [
       {
         "name": "Enlight",
+        "duration": "ring",
         "description": "Every night that ever was ended the same way.",
         "fuel": 1,
         "tiers": [

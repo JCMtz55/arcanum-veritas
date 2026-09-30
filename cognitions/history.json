@@ -73,11 +73,12 @@
     "supportive": [
       {
         "name": "Precedent",
+        "duration": "ring",
         "description": "It has been done before, and you know exactly how.",
         "tiers": [
           {
-            "text": "For 1 minute, the first time the target attempts something each round that it, or anyone it knows of, has done before, it adds your Verum Modifier to the roll.",
-            "card": "1 min: +{VM} on the first attempt each round at anything ever done before",
+            "text": "The first time the target attempts something each round that it, or anyone it knows of, has done before, it adds your Verum Modifier to the roll.",
+            "card": "+{VM} on the first attempt each round at anything ever done before",
             "mech": {
               "buff": {
                 "who": "target",

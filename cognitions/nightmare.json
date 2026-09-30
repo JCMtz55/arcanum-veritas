@@ -112,6 +112,7 @@
     "supportive": [
       {
         "name": "Dreamborn",
+        "duration": "ring",
         "description": "Only what is dreamed can harm what dreams.",
         "tiers": [
           {

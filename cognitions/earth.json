@@ -107,6 +107,7 @@
     "supportive": [
       {
         "name": "Rooted",
+        "duration": "ring",
         "description": "You are not standing on the ground. You are part of it, and it has opinions about being moved.",
         "tiers": [
           {
@@ -145,6 +146,7 @@
       },
       {
         "name": "Bedrock",
+        "duration": "ring",
         "description": "\"You cannot be moved\" is a thing that can be true about a mind.",
         "tiers": [
           {
@@ -169,8 +171,8 @@
             }
           },
           {
-            "text": "Nothing reaches the foundation. You are immune to being Frightened, Charmed, Stunned, or Paralyzed, and once per long rest you may simply refuse one effect that would move you, transform you, or take you out of where you are standing.",
-            "card": "Immune to Frightened, Charmed, Stunned, Paralyzed · 1/long rest, refuse one effect that would move or unmake you",
+            "text": "Nothing reaches the foundation. You are immune to being Frightened, Charmed, Stunned, or Paralyzed, and once while the seal lasts you may simply refuse one effect that would move you, transform you, or take you out of where you are standing.",
+            "card": "Immune to Frightened, Charmed, Stunned, Paralyzed · once per seal, refuse one effect that would move or unmake you",
             "mech": {
               "deny": [ "fear", "charm", "stunning", "paralysis" ],
               "resource": { "name": "Refusal", "uses": "1 per long rest" }

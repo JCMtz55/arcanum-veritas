@@ -411,7 +411,7 @@
       "icon": "🫥",
       "fa": "circle-notch",
       "category": "umbral",
-      "tier": "IV",
+      "tier": "V",
       "requires": [ "Soul", "Void" ],
       "opposing": "night",
       "ready": false

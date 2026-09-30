@@ -17,6 +17,7 @@
     "supportive": [
       {
         "name": "Valiant Stand",
+        "duration": "ring",
         "description": "You rise against fate and refuse to fall — surviving at 1 HP, resisting critical hits, and entering a Heroic Surge when death itself would claim you.",
         "tiers": [
           {
@@ -39,17 +40,19 @@
             }
           },
           {
-            "text": "Once per long rest, if you would die, you may instead enter a Heroic Surge for 1 minute — all damage you take is halved, your movement speed is doubled, and you are considered under the effects of Heroism, Freedom of Movement, and Death Ward simultaneously.",
-            "card": "1/long rest instead of dying: Heroic Surge 1 min — half damage taken, double speed"
+            "text": "Once while the seal lasts, if you would die, you may instead enter a Heroic Surge for 1 minute — all damage you take is halved, your movement speed is doubled, and you are considered under the effects of Heroism, Freedom of Movement, and Death Ward simultaneously.",
+            "card": "Once per seal instead of dying: Heroic Surge 1 min — half damage taken, double speed"
           }
         ]
       },
       {
         "name": "Inspiring Aura",
+        "duration": "ring",
         "description": "Your presence commands hope — radiating save bonuses and condition immunity until allies within range fight with the certainty that this moment will be remembered.",
         "tiers": [
           {
             "text": "Allies within 10 feet gain +1 to saving throws for 1 round.",
+            "duration": "1 round",
             "card": "Allies within 10 ft: +1 to saves, 1 round"
           },
           {
@@ -58,6 +61,7 @@
           },
           {
             "text": "Allies within 30 feet are immune to the Frightened condition and gain 2d8 temporary HP at the start of each of their turns for 1 minute.",
+            "duration": "1 minute",
             "card": "Allies within 30 ft immune to Frightened and gain 2d8 temp HP each turn, 1 min",
             "mech": {
               "damage": {
@@ -87,6 +91,7 @@
       },
       {
         "name": "Shield of Sacrifice",
+        "duration": "ring",
         "description": "You take the blow meant for another — redirecting damage, gaining resistance, and eventually standing between multiple allies and everything that would end them.",
         "tiers": [
           {
@@ -103,12 +108,14 @@
           },
           {
             "text": "While this effect is active, you may absorb damage for up to three allies within 30 feet simultaneously, taking half from each. Any attack that would reduce you to 0 HP instead drops you to 1 HP — once per round for 1 minute.",
+            "duration": "1 minute",
             "card": "Cover three allies within 30 ft at once · a killing blow leaves you at 1 HP instead"
           }
         ]
       },
       {
         "name": "Hero's Command",
+        "duration": "ring",
         "description": "Your words become the will of the battlefield — granting bonus actions, commanding reactions, and eventually declaring a Heroic Formation that moves the entire party at once.",
         "tiers": [
           {
@@ -120,8 +127,8 @@
             "card": "1/turn command two allies to each react with an attack or half their movement"
           },
           {
-            "text": "Allies under your effect may take one additional action on your turn — once per long rest per creature.",
-            "card": "Allies may take one extra action on your turn, once per long rest each",
+            "text": "Allies under your effect may take one additional action on your turn — once per seal per creature.",
+            "card": "Allies may take one extra action on your turn, once per seal each",
             "mech": {
               "actionEconomy": {
                 "action": 1

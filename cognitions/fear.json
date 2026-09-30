@@ -88,11 +88,12 @@
     "supportive": [
       {
         "name": "Useful Fear",
+        "duration": "ring",
         "description": "Not the absence of it. The clean, cold use of it.",
         "tiers": [
           {
-            "text": "For 1 minute the target can't be surprised and adds your Verum Modifier to initiative and to Dexterity saving throws.",
-            "card": "1 min: can't be surprised · +{VM} initiative and Dex saves",
+            "text": "The target can't be surprised and adds your Verum Modifier to initiative and to Dexterity saving throws.",
+            "card": "Can't be surprised · +{VM} initiative and Dex saves",
             "mech": {
               "buff": {
                 "who": "target",

@@ -98,6 +98,7 @@
     "supportive": [
       {
         "name": "Yielding",
+        "duration": "ring",
         "description": "Nothing that gives way can be broken. This is the oldest argument water has ever won.",
         "tiers": [
           {
@@ -136,6 +137,7 @@
       },
       {
         "name": "The Tide Returns",
+        "duration": "ring",
         "description": "Everything the sea takes, it puts back somewhere. Not always where you left it.",
         "tiers": [
           {
@@ -150,12 +152,13 @@
           },
           {
             "text": "The tide keeps coming in. For 1 minute, the target regains hit points equal to your Verum Modifier at the start of each of its turns.",
+            "duration": "1 minute",
             "card": "1 min: they regain {VM} at the start of each of their turns",
             "mech": { "heal": { "amount": "VM", "tick": "start of each of their turns", "duration": "1 minute" } }
           },
           {
-            "text": "Death is a tide as well. Once per long rest, a creature carrying this effect that drops to 0 hit points and dies returns at the start of your next turn with hit points equal to Five Times your Verum Modifier, soaked through and colder than it was.",
-            "card": "1/long rest — a creature that dies carrying this returns next turn at 5×VM hit points",
+            "text": "Death is a tide as well. Once while the seal lasts, a creature carrying this effect that drops to 0 hit points and dies returns at the start of your next turn with hit points equal to Five Times your Verum Modifier, soaked through and colder than it was.",
+            "card": "Once per seal — a creature that dies carrying this returns next turn at 5×VM hit points",
             "mech": {
               "revive": { "hp": "5×VM", "window": "start of your next turn" },
               "resource": { "name": "The Tide Returns", "uses": "1 per long rest" }

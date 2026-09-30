@@ -55,6 +55,7 @@
     "supportive": [
       {
         "name": "Scales of Reckoning",
+        "duration": "ring",
         "description": "Someone must carry it — Balance simply decides who, tethering conditions between creatures and shifting suffering where the math demands.",
         "tiers": [
           {
@@ -80,18 +81,20 @@
             "card": "Bidirectional — shift a condition either way once a round as a bonus action"
           },
           {
-            "text": "The tether persists for 1 hour. When a tethered creature dies, their remaining HP — even if 0 — is redistributed across all surviving tethered creatures as if through Equalize, and the dead creature's next death saving throw is made by the creature with the highest current HP in the tether instead.",
+            "text": "The tether lasts 1 hour, or the Ring's duration if that is longer. When a tethered creature dies, their remaining HP — even if 0 — is redistributed across all surviving tethered creatures as if through Equalize, and the dead creature's next death saving throw is made by the creature with the highest current HP in the tether instead.",
+            "duration": "1 hour",
             "card": "Lasts 1 hr · a tethered death redistributes their remaining HP across the survivors"
           }
         ]
       },
       {
         "name": "The Fulcrum",
+        "duration": "ring",
         "description": "Stand at the center and let everything flow through you — damage, healing, and fate itself distributed evenly among those you hold in tether.",
         "tiers": [
           {
-            "text": "For 1 minute, you become a tether point for up to two creatures within 30 feet. Whenever any tethered creature (including you) takes damage, it is split equally among all tethered creatures, rounded up to the nearest whole number.",
-            "card": "1 min: damage to any tethered creature (up to two, plus you) splits evenly among all"
+            "text": "You become a tether point for up to two creatures within 30 feet. Whenever any tethered creature (including you) takes damage, it is split equally among all tethered creatures, rounded up to the nearest whole number.",
+            "card": "Damage to any tethered creature (up to two, plus you) splits evenly among all"
           },
           {
             "text": "The tether expands to four creatures and also applies to healing — any healing received by a tethered creature is distributed evenly among all tethered creatures.",

@@ -78,6 +78,7 @@
     "supportive": [
       {
         "name": "Guardian's Shell",
+        "duration": "instant",
         "description": "Create an arcane barrier to absorb damage — granting scaling temporary HP, damage resistance, and eventually reflecting resisted damage back at attackers as force.",
         "tiers": [
           {
@@ -91,6 +92,7 @@
           },
           {
             "text": "The target instead gains temp HP equal to 20 × the spell slot level, and resistance to one damage type of your choice for 1 round.",
+            "duration": "1 round",
             "card": "Temp HP = 20 × slot · plus resistance to one damage type, 1 round",
             "mech": {
               "heal": {
@@ -125,11 +127,12 @@
       },
       {
         "name": "Impenetrable Will",
+        "duration": "ring",
         "description": "Your protection weaves into the mind and soul — granting condition advantage, then immunity, and eventually a once-per-rest Legendary Resistance for one chosen ally.",
         "tiers": [
           {
-            "text": "Choose one condition (Frightened, Charmed, or Stunned) — the target gains advantage on saving throws against it for 1 minute.",
-            "card": "Advantage against Frightened, Charmed or Stunned — pick one — for 1 min",
+            "text": "Choose one condition (Frightened, Charmed, or Stunned) — the target gains advantage on saving throws against it.",
+            "card": "Advantage against Frightened, Charmed or Stunned — pick one",
             "mech": {
               "conditions": [
                 {
@@ -149,21 +152,22 @@
             }
           },
           {
-            "text": "The target is immune to the chosen condition for 1 minute.",
-            "card": "Immune to that condition for 1 min instead"
+            "text": "The target is immune to the chosen condition.",
+            "card": "Immune to that condition instead"
           },
           {
-            "text": "You may target two conditions — immunity applies to both for 1 minute.",
-            "card": "Two conditions, immune to both, 1 min"
+            "text": "You may target two conditions — immunity applies to both.",
+            "card": "Two conditions, immune to both"
           },
           {
-            "text": "Once per long rest, you may grant one affected ally Legendary Resistance — they may choose to automatically succeed on one saving throw before the effect ends.",
-            "card": "1/long rest: grant an ally one Legendary Resistance before it ends"
+            "text": "Once while the seal lasts, you may grant one affected ally Legendary Resistance — they may choose to automatically succeed on one saving throw before the effect ends.",
+            "card": "Once per seal: grant an ally one Legendary Resistance before it ends"
           }
         ]
       },
       {
         "name": "Ward of the Guardian",
+        "duration": "until the start of your next turn",
         "description": "Mark an ally for divine protection — imposing disadvantage on attackers, halving damage on hits, and eventually granting critical hit immunity and automatic save successes each round.",
         "tiers": [
           {

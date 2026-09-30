@@ -98,6 +98,7 @@
     "supportive": [
       {
         "name": "Know Thyself",
+        "duration": "ring",
         "description": "Whatever else is taken, the self is not.",
         "tiers": [
           {
@@ -132,6 +133,7 @@
       },
       {
         "name": "Lend the Self",
+        "duration": "ring",
         "description": "You are more than you use. Lend some of it out.",
         "tiers": [
           {

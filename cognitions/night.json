@@ -79,10 +79,12 @@
     "supportive": [
       {
         "name": "Nocturnal Infusion",
+        "duration": "instant",
         "description": "You give a mind what the Night gives all minds — the state in which dreaming becomes possible.",
         "tiers": [
           {
             "text": "The target gains Inspiration and advantage on Dream saving throws and imagination-linked checks until the end of its next turn. If it already has Inspiration, it may use it and regain it at once.",
+            "duration": "until the end of its next turn",
             "card": "Inspiration · advantage on Dream saves and imagination checks until the end of its next turn",
             "mech": {
               "buff": {
@@ -101,6 +103,7 @@
           },
           {
             "text": "The infusion becomes architectural, for 1 minute: advantage on saves against Vile-emotion effects, +2 to its Verum Modifier for Night, Dream, or Nightmare effects, and the first Vile condition laid on it each round is stripped to a lesser one (Frightened becomes Shaken, Charmed becomes Suggestible).",
+            "duration": "1 minute",
             "card": "1 min: advantage vs Vile effects · +2 Verum Mod for Night, Dream, Nightmare · the first Vile condition each round steps down",
             "mech": {
               "buff": {
@@ -114,6 +117,7 @@
       },
       {
         "name": "Transmutation Veil",
+        "duration": "ring",
         "description": "What harms you does not have to stay harmful. The Night has always known this.",
         "tiers": [
           {
@@ -142,6 +146,7 @@
       },
       {
         "name": "The Refinery",
+        "duration": "ring",
         "description": "Catch what the day broke, convert it, return it as something that can be used.",
         "tiers": [
           {

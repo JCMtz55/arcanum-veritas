@@ -54,6 +54,7 @@
     "supportive": [
       {
         "name": "Fated Outcome",
+        "duration": "ring",
         "description": "You rewrite the moment fate would have failed.",
         "tiers": [
           {
@@ -74,13 +75,14 @@
             "card": "Reroll one failed roll entirely, once per effect"
           },
           {
-            "text": "Once per long rest, declare a critical hit or automatic success on any roll made by you or a creature within 60 feet. Must be declared before the roll is made.",
-            "card": "1/long rest declare an auto-success or crit for you or anyone within 60 ft — before the roll"
+            "text": "Once while the seal lasts, declare a critical hit or automatic success on any roll made by you or a creature within 60 feet. Must be declared before the roll is made.",
+            "card": "Once per seal declare an auto-success or crit for you or anyone within 60 ft — before the roll"
           }
         ]
       },
       {
         "name": "Serendipitous Casting",
+        "duration": "instant",
         "description": "Chaos still dances — but it dances toward you.",
         "tiers": [
           {

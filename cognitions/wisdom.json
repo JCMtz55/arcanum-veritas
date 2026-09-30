@@ -26,11 +26,12 @@
     "supportive": [
       {
         "name": "Counsel",
+        "duration": "ring",
         "description": "You tell them the one thing that will matter in a minute's time.",
         "tiers": [
           {
-            "text": "For 1 minute the target may add your Verum Modifier to one roll each round, declared after the roll but before the result is known.",
-            "card": "1 min: +{VM} on one roll a round — declared after the die lands",
+            "text": "The target may add your Verum Modifier to one roll each round, declared after the roll but before the result is known.",
+            "card": "+{VM} on one roll a round — declared after the die lands",
             "mech": {
               "buff": {
                 "who": "target",
@@ -47,8 +48,8 @@
             "card": "Once: take the action back, unspent, and do something else"
           },
           {
-            "text": "Foresight. The target has advantage on all attack rolls, ability checks and saving throws for the minute, and attacks against it have disadvantage: it is simply never where the mistake is.",
-            "card": "FORESIGHT — advantage on everything, and attacks against it at disadvantage, 1 min"
+            "text": "Foresight. The target has advantage on all attack rolls, ability checks and saving throws while the seal lasts, and attacks against it have disadvantage: it is simply never where the mistake is.",
+            "card": "FORESIGHT — advantage on everything, and attacks against it at disadvantage"
           }
         ]
       }

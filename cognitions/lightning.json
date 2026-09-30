@@ -181,6 +181,7 @@
     "supportive": [
       {
         "name": "Voltstride",
+        "duration": "instant",
         "description": "You move as fast as thought.",
         "tiers": [
           {
@@ -210,6 +211,7 @@
           },
           {
             "text": "For 1 minute, you may divide yourself into afterimages — gaining +5 AC against one attack per turn, and teleporting up to 60 feet as a reaction whenever you are targeted by an attack or spell.",
+            "duration": "1 minute",
             "card": "1 min of afterimages — +5 AC vs one attack per turn, teleport 60 ft as a reaction when targeted",
             "mech": {
               "movement": {

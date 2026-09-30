@@ -26,11 +26,12 @@
     "supportive": [
       {
         "name": "Kept Burning",
+        "duration": "ring",
         "description": "You give them the thing that makes people get up. It is remarkably load-bearing.",
         "tiers": [
           {
-            "text": "The target gains Inspiration, temporary hit points equal to Ten Times the slot level, and can't be Frightened for 1 minute.",
-            "card": "Inspiration · 10 × {SLOT} temp HP · can't be Frightened, 1 min",
+            "text": "The target gains Inspiration, temporary hit points equal to Ten Times the slot level, and can't be Frightened.",
+            "card": "Inspiration · 10 × {SLOT} temp HP · can't be Frightened",
             "mech": {
               "deny": [
                 "fear"

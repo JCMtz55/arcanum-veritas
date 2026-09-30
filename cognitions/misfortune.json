@@ -17,11 +17,12 @@
     "supportive": [
       {
         "name": "Borrowed Luck",
+        "duration": "ring",
         "description": "Your bad day, aimed somewhere useful.",
         "tiers": [
           {
-            "text": "For 1 minute, any creature attacking the target subtracts 1d4 from the roll.",
-            "card": "1 min: anyone attacking them subtracts 1d4",
+            "text": "Any creature attacking the target subtracts 1d4 from the roll.",
+            "card": "Anyone attacking them subtracts 1d4",
             "mech": {
               "damage": {
                 "dice": "1d4"

@@ -26,11 +26,12 @@
     "supportive": [
       {
         "name": "In Concert",
+        "duration": "ring",
         "description": "You put the company in tune. They stop working against each other and start compounding.",
         "tiers": [
           {
-            "text": "For 1 minute, while the target is within 30 feet of an ally, both add your Verum Modifier to damage rolls and to saving throws.",
-            "card": "1 min: within 30 ft of an ally, both get +{VM} damage and saves",
+            "text": "While the target is within 30 feet of an ally, both add your Verum Modifier to damage rolls and to saving throws.",
+            "card": "Within 30 ft of an ally, both get +{VM} damage and saves",
             "mech": {
               "buff": {
                 "who": "target",

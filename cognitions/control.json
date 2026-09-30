@@ -17,15 +17,16 @@
     "supportive": [
       {
         "name": "Chain of Authority",
+        "duration": "ring",
         "description": "You do not command them to obey — you make obedience feel like a choice they are making, linking allies into a command chain that amplifies their every response.",
         "tiers": [
           {
-            "text": "One willing creature becomes Linked to you. You may issue mental instructions to them as a bonus action. While Linked, they add your proficiency bonus to Initiative rolls.",
+            "text": "One willing creature becomes Linked to you while the seal lasts. You may issue mental instructions to them as a bonus action. While Linked, they add your proficiency bonus to Initiative rolls.",
             "card": "Link one willing creature — mental orders as a bonus action, and they add {PB} to initiative"
           },
           {
-            "text": "Up to three creatures may be Linked simultaneously. Once per short rest, you may grant one Linked creature an extra bonus action on their turn.",
-            "card": "Link up to three · 1/short rest grant one an extra bonus action",
+            "text": "Up to three creatures may be Linked simultaneously. Once while the seal lasts, you may grant one Linked creature an extra bonus action on their turn.",
+            "card": "Link up to three · once per seal grant one an extra bonus action",
             "mech": {
               "actionEconomy": {
                 "bonusAction": 1
@@ -50,18 +51,20 @@
             }
           },
           {
-            "text": "You forge a Control Chain Nexus for 1 hour — up to six creatures are Linked within 120 feet. Any spell you cast that targets only yourself may simultaneously affect all Linked allies (once per long rest). If a Linked creature would be reduced to 0 HP by a single blow, you may use your reaction to redirect that blow to yourself or another Linked creature — the original target is reduced to 1 HP instead.",
+            "text": "You forge a Control Chain Nexus for 1 hour — up to six creatures are Linked within 120 feet. Any spell you cast that targets only yourself may simultaneously affect all Linked allies (once while the Nexus lasts). If a Linked creature would be reduced to 0 HP by a single blow, you may use your reaction to redirect that blow to yourself or another Linked creature — the original target is reduced to 1 HP instead.",
+            "duration": "1 hour",
             "card": "Control Chain Nexus 1 hr — six Linked within 120 ft · self-targeted spells hit them all"
           }
         ]
       },
       {
         "name": "Monarch's Immunity",
+        "duration": "ring",
         "description": "The world must obey your rules — starting with you, made exempt from compulsion, displacement, and the kind of damage that breaks lesser minds mid-cast.",
         "tiers": [
           {
-            "text": "Once per long rest, you may ignore one source of forced movement or one condition that would be applied to you — the effect simply does not take hold.",
-            "card": "1/long rest ignore one forced movement or one condition — it simply doesn't take hold"
+            "text": "Once while the seal lasts, you may ignore one source of forced movement or one condition that would be applied to you — the effect simply does not take hold.",
+            "card": "Once per seal ignore one forced movement or one condition — it simply doesn't take hold"
           },
           {
             "text": "You are unaffected by effects that alter time, gravity, or compulsion unless you choose to be. This includes magical aging, slow effects, and enchantment-school compulsions.",
@@ -79,8 +82,8 @@
             }
           },
           {
-            "text": "As a reaction, once per long rest, you may nullify a single condition or effect on yourself or one ally within 30 feet — this functions as Greater Restoration without requiring components. The effect is immediate and does not require an action.",
-            "card": "1/long rest react to nullify a condition on you or an ally as Greater Restoration, no components"
+            "text": "As a reaction, once while the seal lasts, you may nullify a single condition or effect on yourself or one ally within 30 feet — this functions as Greater Restoration without requiring components. The effect is immediate and does not require an action.",
+            "card": "Once per seal react to nullify a condition on you or an ally as Greater Restoration, no components"
           }
         ]
       }

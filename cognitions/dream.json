@@ -81,11 +81,12 @@
     "supportive": [
       {
         "name": "Reverie",
+        "duration": "ring",
         "description": "You let them dream they win. The dream takes it seriously.",
         "tiers": [
           {
-            "text": "For 1 minute the target is lucid: it can't be Frightened by illusions or dreams, and once it may roll a d4 and add it to an attack roll, ability check or saving throw.",
-            "card": "1 min, lucid: illusions and dreams can't frighten it · once, +1d4 to a roll",
+            "text": "The target is lucid: it can't be Frightened by illusions or dreams, and once it may roll a d4 and add it to an attack roll, ability check or saving throw.",
+            "card": "Lucid: illusions and dreams can't frighten it · once, +1d4 to a roll",
             "mech": {
               "buff": {
                 "who": "target",
@@ -113,7 +114,7 @@
             }
           },
           {
-            "text": "Dream Lord. For the minute the target counts as being in Insomnia: once per round it may rewrite one small fact about itself — its position within 30 feet, one condition it has, or a weapon in its hand.",
+            "text": "Dream Lord. While the seal lasts the target counts as being in Insomnia: once per round it may rewrite one small fact about itself — its position within 30 feet, one condition it has, or a weapon in its hand.",
             "card": "DREAM LORD — it counts as in Insomnia · once a round, rewrite its position (30 ft), one condition, or its weapon"
           }
         ]

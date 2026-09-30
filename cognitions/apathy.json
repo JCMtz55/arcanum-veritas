@@ -17,11 +17,12 @@
     "supportive": [
       {
         "name": "Nothing Reaches You",
+        "duration": "ring",
         "description": "Armor made of not caring.",
         "tiers": [
           {
-            "text": "The target gains resistance to psychic damage and immunity to Frightened for 1 minute.",
-            "card": "Resist psychic and immune to Frightened, 1 min",
+            "text": "The target gains resistance to psychic damage and immunity to Frightened.",
+            "card": "Resist psychic and immune to Frightened",
             "mech": {
               "damage": {
                 "type": "psychic"

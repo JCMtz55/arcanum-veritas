@@ -113,11 +113,12 @@
     "supportive": [
       {
         "name": "Composed",
+        "duration": "ring",
         "description": "You give them the steadiness of someone who is not about to be hit.",
         "tiers": [
           {
-            "text": "For 1 minute the target can't be Frightened or goaded, and adds your Verum Modifier to Charisma checks made to calm, negotiate or de-escalate.",
-            "card": "1 min: no fear, no goading · +{VM} to calm and negotiate",
+            "text": "The target can't be Frightened or goaded, and adds your Verum Modifier to Charisma checks made to calm, negotiate or de-escalate.",
+            "card": "No fear, no goading · +{VM} to calm and negotiate",
             "mech": {
               "deny": [
                 "fear"
