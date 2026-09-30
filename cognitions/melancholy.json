@@ -1,0 +1,611 @@
+{
+  "id": "melancholy",
+  "name": "Melancholy",
+  "icon": "🩵",
+  "opposing": "hope",
+  "description": "Mourning, Remembrance, Deep Cold, The Mourning Azure, Limbo.",
+  "savingThrow": "Charisma",
+  "damageType": "Cold",
+  "eidon": {
+    "conditions": {
+      "minor": {
+        "name": "Downcast",
+        "card": "disadvantage on its next attack roll, and no bonus action"
+      },
+      "major": {
+        "name": "Weeping",
+        "card": "Blinded by tears that freeze on the face"
+      },
+      "severe": {
+        "name": "Drowned in Sorrow",
+        "card": "Incapacitated, frozen and sinking toward Limbo"
+      }
+    }
+  },
+  "cost": {
+    "text": "Sorrow shared is still carried. Until the end of your next turn after you draw a Melancholy seal, you can't gain temporary hit points or Inspiration, and you gain nothing from Bless, Bardic Inspiration or any other morale effect. A Melancholy seal of 6th level or higher also costs an Echo; with none to give, you gain 1 level of Dream Exhaustion instead.",
+    "card": "Until the end of your next turn: no temp HP, Inspiration or morale effects for you · 6th+ slot: spend an Echo or gain 1 Dream Exhaustion"
+  },
+  "mastery": {
+    "title": "The Mourning Azure",
+    "text": "Melancholy is the Cognition of the Azurians — the filters of Vuitheus who learned to remember instead of cleanse, and who now drift in Limbo remembering without rest. Only one with Azurian blood, or one the Mourning Azure have named, can learn it. These abilities are yours whether or not a seal is drawn; the level beside each is when it wakes.",
+    "traits": [
+      {
+        "name": "Echoes",
+        "level": 1,
+        "text": "When a creature you can see within 60 feet dies, or when you speak a dead person's name aloud through a 10-minute Ritual of Mourning, you may take its Echo — its name, held in your light. You hold up to your Proficiency Bonus in Echoes; they last until spent. Melancholy's Verums grow stronger when you spend one.",
+        "card": "A creature dies within 60 ft, or you mourn a name for 10 min: take its Echo · hold up to {PB}"
+      },
+      {
+        "name": "Weeping Light",
+        "level": 1,
+        "text": "Your light runs blue and cold, like light seen from deep under water. You have resistance to cold damage, and freezing water and bitter weather never harm you. You can speak telepathically with spirits and the dead within 30 feet, and you always know whether a creature within 30 feet is living, dead, undead, or without a soul.",
+        "card": "Resist cold · freezing water and weather can't hurt you · speak with spirits and the dead within 30 ft · know if a creature within 30 ft is living, dead, undead or soulless"
+      },
+      {
+        "name": "Remember Without Rest",
+        "level": 5,
+        "text": "Once per long rest, when you would drop to 0 hit points, you may spend an Echo to drop to 1 instead. The dead hold you up.",
+        "card": "1/long rest: dropping to 0, spend an Echo to drop to 1 instead"
+      },
+      {
+        "name": "The Breath Between Heartbeats",
+        "level": 11,
+        "text": "Once per long rest, as a bonus action, spend 2 Echoes to slip halfway into Vaelym'Ruun until the end of your next turn: you have resistance to all damage, and you can move through creatures and objects as if they were difficult terrain.",
+        "card": "1/long rest bonus action — spend 2 Echoes: half in Limbo until the end of your next turn · resist all damage · move through creatures and objects"
+      },
+      {
+        "name": "The Unforgotten",
+        "level": 17,
+        "text": "Once per long rest, spend an Echo of a creature that died within the last minute: its spirit stands beside you for 1 minute, using its own statistics at half its hit point maximum. It acts on your initiative, obeys you, and goes back to Limbo when it drops to 0 or the minute ends.",
+        "card": "1/long rest spend the Echo of something dead within a minute — its spirit fights for you 1 min at half its max HP"
+      }
+    ]
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Requiem",
+        "description": "Every name you carry sings with you, and the song is cold.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Cold damage. You may spend an Echo as you draw: the dead sing through the seal, and each creature that is hit or fails takes an extra Twice your Verum Modifier in cold damage and has disadvantage on its next saving throw.",
+            "card": "Damage becomes Cold · spend an Echo: +2×VM cold and disadvantage on their next save",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              }
+            }
+          },
+          {
+            "text": "The cold turns Absolute Everfrost a tier early. A creature the seal kills leaves you its Echo at once, frozen where it fell. When you spend an Echo on the seal, its damage also ignores resistance.",
+            "card": "Damage becomes ABSOLUTE EVERFROST · what it kills leaves you an Echo · spending one also makes it ignore resistance",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "pierce": "resistance",
+              "absolute": true
+            }
+          },
+          {
+            "text": "The choir grows. You may spend up to your Proficiency Bonus in Echoes on one seal; each one past the first adds three damage dice of the seal's type.",
+            "card": "Spend up to {PB} Echoes — each past the first adds 3 dice",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "pierce": "resistance"
+            }
+          },
+          {
+            "text": "Once per long rest: The Chorus of Adfayl. Spend every Echo you hold (at least 3). The seal's damage is doubled, and for the rest of the encounter you may hold Echoes beyond your limit.",
+            "card": "1/long rest CHORUS OF ADFAYL — spend all Echoes (3+): double damage · no Echo limit for the rest of the fight",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "pierce": "resistance"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Blue Drowning",
+        "description": "Grief is heavy, and the water is deep and very cold.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Cold damage. A creature that is hit or fails is weighed down by the cold: it can't take a bonus action on its next turn.",
+            "card": "Damage becomes Cold · no bonus action on their next turn",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "deny": [
+                "bonus action"
+              ]
+            }
+          },
+          {
+            "text": "Its speed is also halved, and it can't take reactions, until the end of its next turn.",
+            "card": "Also half speed and no reactions until the end of their next turn",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "deny": [
+                "bonus action",
+                "reactions"
+              ]
+            }
+          },
+          {
+            "text": "The freezing water stays in its lungs. For 1 minute, it takes Three Times your Verum Modifier in cold damage at the start of each of its turns and has disadvantage on Charisma saving throws. It repeats the Charisma save at the end of each of its turns, ending the drowning on a success.",
+            "card": "1 min: 3×VM cold at the start of each of their turns · disadvantage on Cha saves · Cha save {DC} at the end of each turn ends it",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "deny": [
+                "bonus action",
+                "reactions"
+              ],
+              "conditions": [
+                {
+                  "name": "Drowning",
+                  "tick": "3×VM cold"
+                }
+              ]
+            }
+          },
+          {
+            "text": "Sink into Limbo. A creature below half its hit points that fails is pulled halfway into Vaelym'Ruun until the end of its next turn: it is Incapacitated, and no healing can reach it. If it dies there, it can't be returned to life short of Wish or a god — its name joins the Mourning Azure, and you take its Echo.",
+            "card": "Below half HP: half in Limbo until their next turn — Incapacitated, no healing · dies there: no revival short of Wish or a god, and you take its Echo",
+            "mech": {
+              "damage": {
+                "type": "cold"
+              },
+              "conditions": [
+                {
+                  "name": "Incapacitated"
+                }
+              ],
+              "deny": [
+                "healing",
+                "revival"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Spirit Guardian",
+        "description": "Someone who loved you is still standing behind you.",
+        "tiers": [
+          {
+            "text": "A spirit stands with each target. Each gains temporary hit points equal to Twice your Verum Modifier + the slot level.",
+            "card": "Each target: 2×VM + {SLOT} temp HP",
+            "mech": {
+              "buff": {
+                "who": "the seal's targets",
+                "tempHP": "2×VM + slot"
+              }
+            }
+          },
+          {
+            "text": "You may spend an Echo: its spirit is the one that stands with them, and each target also ends the Charmed and Frightened conditions on itself.",
+            "card": "Spend an Echo: each target also ends Charmed and Frightened",
+            "mech": {
+              "deny": [
+                "charmed",
+                "frightened"
+              ],
+              "buff": {
+                "who": "the seal's targets",
+                "tempHP": "2×VM + slot"
+              }
+            }
+          },
+          {
+            "text": "The spirits stay for 1 minute. The first time each target takes damage in a round, the spirit takes half of it.",
+            "card": "The spirits stay 1 min · the first hit on each target each round is halved",
+            "mech": {
+              "buff": {
+                "who": "the seal's targets",
+                "duration": "1 minute",
+                "tempHP": "2×VM + slot"
+              }
+            }
+          },
+          {
+            "text": "The Whisper of Aenis. A guarded target that would drop to 0 hit points drops to 1 instead, and slips halfway into Limbo until the end of its next turn — resistant to all damage.",
+            "card": "A guarded target dropping to 0 drops to 1 and is half in Limbo until their next turn — resist all damage",
+            "mech": {
+              "buff": {
+                "who": "the seal's targets",
+                "duration": "1 minute",
+                "tempHP": "2×VM + slot"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Great Purge",
+        "description": "Your people were made to take the filth from other souls. You still can.",
+        "tiers": [
+          {
+            "text": "Each target ends one condition of your choice on itself — Blinded, Charmed, Deafened, Frightened or Poisoned. You take cold damage equal to your Verum Modifier for each condition you end, which can't be reduced.",
+            "card": "Each target ends Blinded, Charmed, Deafened, Frightened or Poisoned · you take {VM} cold per condition ended",
+            "mech": {
+              "deny": [
+                "blinded",
+                "charmed",
+                "deafened",
+                "frightened",
+                "poisoned"
+              ]
+            }
+          },
+          {
+            "text": "You may instead end a curse, or an emotion or Vile effect, of 5th level or lower on each target.",
+            "card": "Or end a curse, emotion or Vile effect ≤5th on each",
+            "mech": {
+              "deny": [
+                "blinded",
+                "charmed",
+                "deafened",
+                "frightened",
+                "poisoned"
+              ]
+            }
+          },
+          {
+            "text": "Each target also loses one level of Exhaustion or Dream Exhaustion, or one Wound.",
+            "card": "Each also loses 1 Exhaustion, Dream Exhaustion or Wound",
+            "mech": {
+              "deny": [
+                "blinded",
+                "charmed",
+                "deafened",
+                "frightened",
+                "poisoned"
+              ]
+            }
+          },
+          {
+            "text": "The Cleansing Tide. Each target is freed of every condition, curse and possession of 8th level or lower. Your damage from the Purge is halved, and each curse or possession you take from them leaves you an Echo.",
+            "card": "Every condition, curse and possession ≤8th washed away · your cost halved · each curse or possession you lift gives an Echo",
+            "mech": {
+              "deny": [
+                "blinded",
+                "charmed",
+                "deafened",
+                "frightened",
+                "poisoned"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Stillmoon",
+        "description": "She came without light, and wore the silence like a crown.",
+        "tiers": [
+          {
+            "text": "A creature that fails can't benefit from advantage, temporary hit points or Inspiration until the end of its next turn.",
+            "card": "Fail: no advantage, temp HP or Inspiration until the end of their next turn",
+            "mech": {
+              "deny": [
+                "advantage",
+                "temporary hit points",
+                "inspiration"
+              ]
+            }
+          },
+          {
+            "text": "For the effect's duration it is Downcast: on each of its turns it can take an action or a bonus action, not both, and its speed is halved. It repeats the Charisma save at the end of each of its turns.",
+            "card": "Downcast for the duration — an action OR a bonus action each turn · half speed · Cha save {DC} each turn to end",
+            "mech": {
+              "deny": [
+                "advantage",
+                "temporary hit points",
+                "inspiration"
+              ],
+              "penalty": {
+                "speed": "halved"
+              }
+            }
+          },
+          {
+            "text": "The moon fails to rise around it. Magical light within 30 feet of a Downcast creature goes out, and its allies within 15 feet of it have disadvantage on saving throws against your seals.",
+            "card": "Magical light within 30 ft of them goes out · their allies within 15 ft save at disadvantage against your seals",
+            "mech": {
+              "deny": [
+                "advantage",
+                "temporary hit points",
+                "inspiration"
+              ],
+              "penalty": {
+                "speed": "halved"
+              }
+            }
+          },
+          {
+            "text": "Once per long rest: The Crown of Silence. The target and every creature of your choice within 30 feet of it that fails is Incapacitated by grief for 1 minute, repeating the Charisma save at the end of each of its turns. You take an Echo from each one that is still Incapacitated when the minute ends.",
+            "card": "1/long rest CROWN OF SILENCE — target and chosen creatures within 30 ft: Incapacitated 1 min (Cha save each turn) · an Echo from each still held at the end",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Incapacitated"
+                }
+              ],
+              "save": {
+                "ability": "Charisma"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Kin of the Drowned",
+        "description": "The dead were always your people.",
+        "tiers": [
+          {
+            "text": "An undead creature or spirit that fails is Charmed by you for the effect's duration. It won't attack you, and it will listen.",
+            "card": "Undead or spirit that fails: Charmed by you for the duration",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed"
+                }
+              ]
+            }
+          },
+          {
+            "text": "A Charmed undead or spirit also obeys one command you give it each turn (no action required), so long as the command doesn't harm it.",
+            "card": "It also obeys one harmless command a turn",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed"
+                }
+              ]
+            }
+          },
+          {
+            "text": "An incorporeal creature that fails becomes solid until the end of its next turn — it can't pass through creatures or objects, and it loses any resistance it had from being incorporeal.",
+            "card": "Incorporeal things that fail turn solid until their next turn — no passing through, no incorporeal resistances",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed"
+                }
+              ],
+              "deny": [
+                "incorporeal"
+              ]
+            }
+          },
+          {
+            "text": "The Mourning Azure. You may command up to your Proficiency Bonus in undead and spirits at once, each obeying you fully for the duration — even those bound to another master, whose hold is broken.",
+            "card": "Command up to {PB} undead and spirits fully for the duration — even ones bound to another master",
+            "mech": {
+              "conditions": [
+                {
+                  "name": "Charmed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Silver Root",
+        "description": "Aenis planted a tree, and a kingdom grew on it.",
+        "tiers": [
+          {
+            "text": "Your creations glow with blue spirit-light. Allies within 10 feet of one of your Structures or Constructs have advantage on saving throws against being Frightened.",
+            "card": "Your creations glow blue · allies within 10 ft of them have advantage against Fear",
+            "mech": {
+              "buff": {
+                "who": "allies within 10 ft of your creations",
+                "advantage": "saving throws against being Frightened"
+              }
+            }
+          },
+          {
+            "text": "A Construct you make may be shaped from an Echo you spend — the dead person's spirit. It is incorporeal: it moves through creatures and objects, and has resistance to nonmagical damage.",
+            "card": "Spend an Echo: your Construct is that spirit — incorporeal, resists nonmagical damage",
+            "mech": {
+              "summon": {
+                "construct": "incorporeal Echo-spirit"
+              }
+            }
+          },
+          {
+            "text": "An Object you make is a relic of Adfayl. It can hold one Echo, and whoever carries it may spend that Echo as if they were you.",
+            "card": "Your Objects hold an Echo — whoever carries one can spend it as you would",
+            "mech": {
+              "summon": {
+                "construct": "incorporeal Echo-spirit"
+              }
+            }
+          },
+          {
+            "text": "Plant a Silver Root: a Structure that lasts until destroyed. Within 30 feet of it the dead can't rise as undead, and anyone who dies there leaves their Echo in the tree for you or your allies to take.",
+            "card": "A Silver Root that lasts until destroyed — no undead rise within 30 ft, and the dead leave their Echoes in it",
+            "mech": {
+              "summon": {
+                "structure": "Silver Root, until destroyed"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Speak With the Lost",
+        "description": "Nobody is gone while someone still says their name.",
+        "tiers": [
+          {
+            "text": "Speak with a dead creature for 10 minutes, asking as many questions as you like. If you hold its Echo, its body doesn't need to be present.",
+            "card": "Talk with the dead for 10 min, no question limit · with its Echo, no body needed",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Know the resting place of anyone whose Echo you hold or whose true name you know, and the manner of their death.",
+            "card": "Know where anyone whose Echo or true name you hold is buried, and how they died",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Open a window to Limbo for 1 minute: see into Vaelym'Ruun and speak with any soul trapped there, the Mourning Azure among them.",
+            "card": "Open a window into Limbo for 1 min — speak with any soul trapped there",
+            "mech": {
+              "utility": true
+            }
+          },
+          {
+            "text": "Once per long rest, step through Vaelym'Ruun with up to eight willing creatures and come out anywhere on this plane where you have mourned someone.",
+            "card": "1/long rest walk through Limbo with up to 8 creatures to anywhere you've mourned someone",
+            "mech": {
+              "utility": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Lament",
+      "type": "Offensive",
+      "description": "A little of every loss rides the seal, cold as deep water.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus cold damage equal to one damage die of the primary effect's type (min 1d6), and can't gain temporary hit points until the end of its next turn.",
+        "card": "+1 die cold · no temp HP until the end of their next turn",
+        "mech": {
+          "damage": {
+            "dice": [
+              "1d6"
+            ],
+            "type": "cold"
+          },
+          "deny": [
+            "temporary hit points"
+          ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and the target also has disadvantage on Charisma saving throws until the end of its next turn.",
+          "card": "+2 dice · disadvantage on Cha saves",
+          "mech": {
+            "penalty": {
+              "disadvantage": "Charisma saving throws until the end of its next turn"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and if the seal kills the target you take its Echo, even without Melancholy of your own.",
+          "card": "+3 dice · a kill gives you its Echo",
+          "mech": {
+            "penalty": {
+              "disadvantage": "Charisma saving throws until the end of its next turn"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blue Light",
+      "type": "Supportive",
+      "description": "A soft light that remembers you.",
+      "effect": {
+        "text": "When the primary effect resolves, each of its targets glows with dim blue light in a 10-foot radius and gains temporary hit points equal to your Verum Modifier.",
+        "card": "The seal's targets glow blue · {VM} temp HP each",
+        "mech": {
+          "buff": {
+            "who": "the seal's targets",
+            "tempHP": "VM"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The temporary hit points become Twice your Verum Modifier, and each target has advantage on its next saving throw against being Frightened or Charmed.",
+          "card": "2×VM temp HP · advantage on their next save against Fear or Charm",
+          "mech": {
+            "buff": {
+              "who": "the seal's targets",
+              "tempHP": "2×VM"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: The temporary hit points become Twice your Verum Modifier + the slot level, and the spirits whisper warnings: each target can't be surprised for 1 hour.",
+          "card": "2×VM + {SLOT} temp HP · can't be surprised for 1 hr",
+          "mech": {
+            "buff": {
+              "who": "the seal's targets",
+              "tempHP": "2×VM + slot"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Frozen Tide",
+      "type": "Control",
+      "description": "Sorrow pulls like freezing water.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails its saving throw, that target's speed is halved until the end of its next turn.",
+        "card": "Half speed until the end of their next turn",
+        "mech": {
+          "penalty": {
+            "speed": "halved"
+          }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: It also can't take reactions until the end of its next turn.",
+          "card": "Also no reactions",
+          "mech": {
+            "deny": [
+              "reactions"
+            ],
+            "penalty": {
+              "speed": "halved"
+            }
+          }
+        },
+        {
+          "text": "Level 11+: It also can't take bonus actions until the end of its next turn, and it gains 1 Frost Stack (as Ice's Deep Freeze).",
+          "card": "Also no bonus actions · +1 Frost Stack",
+          "mech": {
+            "deny": [
+              "reactions",
+              "bonus action"
+            ],
+            "penalty": {
+              "speed": "halved"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

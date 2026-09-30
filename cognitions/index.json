@@ -189,6 +189,17 @@
       "ready": false
     },
     {
+      "id": "destruction",
+      "name": "Destruction",
+      "icon": "💥",
+      "fa": "house-crack",
+      "category": "dominion",
+      "tier": "IV",
+      "requires": [ "Carnage", "Disaster" ],
+      "opposing": "creation",
+      "ready": true
+    },
+    {
       "id": "disaster",
       "name": "Disaster",
       "icon": "🌪️",
@@ -521,7 +532,7 @@
       "category": "elemental",
       "tier": "I",
       "opposing": "shadow",
-      "ready": false
+      "ready": true
     },
     {
       "id": "lightning",
@@ -574,6 +585,18 @@
       "requires": [ "Night", "Water" ],
       "opposing": "chaos",
       "ready": false
+    },
+    {
+      "id": "melancholy",
+      "name": "Melancholy",
+      "icon": "🩵",
+      "fa": "hand-holding-droplet",
+      "category": "mores",
+      "favorite": true,
+      "tier": "IV",
+      "requires": [ "Sadness", "Soul" ],
+      "opposing": "hope",
+      "ready": true
     },
     {
       "id": "metal",
@@ -730,7 +753,7 @@
       "category": "umbral",
       "tier": "I",
       "opposing": "sound",
-      "ready": false
+      "ready": true
     },
     {
       "id": "soul",
