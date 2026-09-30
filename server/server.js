@@ -240,6 +240,9 @@ app.delete("/api/learning/:name", requireUser, async (req, res) => {
 
 // ── Saved seals and Eidons: private to the account, the DM included ─────────────
 const SAVES_MAX = 200, SAVE_BYTES = 8000;
+// The three Cognitive Arts a build can come from — the same list the saves table checks.
+const SAVE_KINDS = ["seal", "eidon", "paragon"];
+
 function cleanSave(body) {
   const name = String(body?.name || "").trim().slice(0, 60);
   const data = body?.data && typeof body.data === "object" ? JSON.stringify(body.data) : "";
@@ -256,7 +259,7 @@ app.get("/api/saves", requireUser, async (req, res) => {
 app.post("/api/saves", requireUser, async (req, res) => {
   const s = cleanSave(req.body), kind = req.body?.kind;
   if (s.error) return res.status(400).json({ error: s.error });
-  if (kind !== "seal" && kind !== "eidon") return res.status(400).json({ error: "That build can't be saved." });
+  if (!SAVE_KINDS.includes(kind)) return res.status(400).json({ error: "That build can't be saved." });
   if ((await db.query("SELECT id FROM saves WHERE user_id = $1", [req.user.id])).rows.length >= SAVES_MAX)
     return res.status(400).json({ error: `You can keep ${SAVES_MAX} saved builds — delete one first.` });
   const { rows } = await db.query("INSERT INTO saves (user_id, kind, name, data) VALUES ($1, $2, $3, $4) RETURNING id",

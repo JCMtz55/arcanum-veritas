@@ -186,7 +186,6 @@ const EIDON_TEMPLATES = {
   },
 };
 
-state.mode    = "av";      // "av" — Arcanum Veritas · "ign" — Ignition
 // Eidon saves use the Verum DC (8 + PB + Verum mod + Dream mod), shared by every Cognitive Art
 state.ign = {
   burning: [],             // [{ id, rounds, inEidon }] — the first is the primary
@@ -198,33 +197,6 @@ state.ign = {
   forge: false,            // planning a forged recipe — lifts the three-Cognition cap
 };
 
-// ═══════════════════════════════════════════════════════════
-//  MODE SWITCH
-// ═══════════════════════════════════════════════════════════
-function setMode(m, quiet) {
-  state.mode = m === "ign" ? "ign" : "av";
-  try { localStorage.setItem("av-mode", state.mode); } catch (e) {}
-  applyMode();
-  renderCogList(); renderMain();
-  if (state.view === "rings") { renderRingList(); renderRing(); }
-  if (!quiet) toast(state.mode === "ign" ? "Ignition — the Eidon Forge" : "Arcanum Veritas — the seal composer");
-}
-function toggleMode() { setMode(state.mode === "ign" ? "av" : "ign"); }
-function applyMode() {
-  const ign = state.mode === "ign";
-  document.body.classList.toggle("ign", ign);
-  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-  document.querySelector(".brand").innerHTML = ign ? `Ignition<em>eidon forge</em>` : `Arcanum Veritas<em>seal composer</em>`;
-  set("modeBtn", ign ? "⇄ Arcanum Veritas" : "⇄ Ignition");
-  set("tabComposer", ign ? "Forge" : "Composer");
-  set("tabRings", ign ? "Ignitions" : "Rings");
-  set("sealTitle", ign ? "The Eidon" : "The seal");
-  document.querySelector(".lv.atk i").textContent = ign ? "Eidon check" : "to hit";
-  document.querySelector(".lv.dc i").textContent  = "Verum DC";
-  ["slotDial"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = ign; });
-  document.title = ign ? "Ignition — Eidon Forge" : "Arcanum Veritas — Seal Composer";
-  syncBar();
-}
 // Called at the end of syncBar
 function syncIgnBar() {
   document.getElementById("atkOut").textContent = sgn(state.dreamMod);

@@ -47,11 +47,11 @@ const SCHEMA = [
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
      PRIMARY KEY (user_id, key)
    )`,
-  // Saved seals and Eidons — private to the account that made them. `data` is the build as JSON text.
+  // Saved seals, Eidons and Paragons — private to the account that made them. `data` is the build as JSON text.
   `CREATE TABLE IF NOT EXISTS saves (
      id         SERIAL PRIMARY KEY,
      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-     kind       TEXT NOT NULL CHECK (kind IN ('seal', 'eidon')),
+     kind       TEXT NOT NULL CHECK (kind IN ('seal', 'eidon', 'paragon')),
      name       TEXT NOT NULL,
      data       TEXT NOT NULL,
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -76,6 +76,10 @@ const SCHEMA = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verum_mod  SMALLINT NOT NULL DEFAULT 4`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS dream_mod  SMALLINT NOT NULL DEFAULT 0`,
+  // The Paragon path arrived after the saves table did, so widen the kind constraint on any
+  // database already out there. DROP IF EXISTS then ADD keeps migrate() re-runnable.
+  `ALTER TABLE saves DROP CONSTRAINT IF EXISTS saves_kind_check`,
+  `ALTER TABLE saves ADD CONSTRAINT saves_kind_check CHECK (kind IN ('seal', 'eidon', 'paragon'))`,
 ];
 
 export async function migrate(db) {

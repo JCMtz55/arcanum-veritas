@@ -75,16 +75,19 @@ async function loadSaves(fresh) {
 }
 function saveAbout(s) {
   const nameOf = id => INDEX.find(c => c.id === id)?.name || id;
-  return s.kind === "seal"
-    ? `${nameOf(s.data.core)} · ${COMP_DATA[s.data.compType]?.label || ""} ${s.data.compSub || ""} · ${ORDINALS[s.data.slotLevel] || ""} slot`
-    : (s.data.burning || []).filter(b => b.inEidon).map(b => nameOf(b.id)).join(" + ");
+  if (s.kind === "seal")
+    return `${nameOf(s.data.core)} · ${COMP_DATA[s.data.compType]?.label || ""} ${s.data.compSub || ""} · ${ORDINALS[s.data.slotLevel] || ""} slot`;
+  // A Paragon is its three Devotions, the one in the Deeper Burn marked
+  if (s.kind === "paragon")
+    return (s.data.devotions || []).map(id => nameOf(id) + (id === s.data.paragon ? " ✦" : "")).join(" · ");
+  return (s.data.burning || []).filter(b => b.inEidon).map(b => nameOf(b.id)).join(" + ");
 }
 // The composer's opening screen, before anything is picked: this mode's saved builds as cards,
 // one click to load. Nothing at all until something is saved (or on a static host).
 function savedHome() {
-  const ign = state.mode === "ign", rows = (SAVES || []).filter(s => s.kind === (ign ? "eidon" : "seal"));
+  const M = mode(), rows = (SAVES || []).filter(s => s.kind === M.kind);
   if (!rows.length) return "";
-  return `<div class="blk saved-home"><div class="blk-h"><h2>Your saved ${ign ? "Eidons" : "seals"}</h2><div class="rule"></div>
+  return `<div class="blk saved-home"><div class="blk-h"><h2>Your saved ${esc(M.plural)}</h2><div class="rule"></div>
       <button class="saved-m" onclick="openSaves()" title="Delete saved builds">manage</button></div>
     <div class="rings">` + rows.map(s => `<button class="ring" onclick="loadSave(${s.id})">
       <b>${esc(s.name)}</b><span>${esc(saveAbout(s))}</span></button>`).join("") + `</div></div>`;
@@ -103,19 +106,19 @@ function eidonSnapshot() {
 }
 
 async function saveBuild() {
-  const ign = state.mode === "ign", kind = ign ? "eidon" : "seal";
-  const data = ign ? eidonSnapshot() : sealSnapshot();
-  if (!data) return toast(ign ? "Build an Eidon first" : "Draw a seal first");
-  let name = (ign ? state.ign.name : state.sealName || "").trim();
+  const M = mode(), kind = M.kind;
+  const data = M.snapshot();
+  if (!data) return toast(M.needCard);
+  let name = (M.name.get() || "").trim();
   if (!name) {
-    name = (prompt(`Name this ${ign ? "Eidon" : "seal"} to save it`) || "").trim();
+    name = (prompt(`Name this ${M.noun} to save it`) || "").trim();
     if (!name) return;
-    if (ign) state.ign.name = name; else state.sealName = name;
+    M.name.set(name);
     renderMain();
   }
   try {
     const old = (await loadSaves()).find(s => s.kind === kind && s.name.toLowerCase() === name.toLowerCase());
-    if (old && !confirm(`Replace your saved ${ign ? "Eidon" : "seal"} “${old.name}”?`)) return;
+    if (old && !confirm(`Replace your saved ${M.noun} “${old.name}”?`)) return;
     await (old ? api("PUT", `api/saves/${old.id}`, { name, data }) : api("POST", "api/saves", { kind, name, data }));
     await loadSaves(true);
     toast(`Saved “${name}”`);
@@ -137,33 +140,23 @@ function renderSaves() {
         <button class="mini" onclick="deleteSave(${s.id})">Delete</button></div>`).join("") + `</div>`
       : `<p class="hint">None saved yet — build one and press Save.</p>`);
   };
-  document.getElementById("savesBody").innerHTML = group("seal", "Seals") + group("eidon", "Eidons");
+  document.getElementById("savesBody").innerHTML =
+    MODE_ORDER.map(k => group(MODES[k].kind, MODES[k].plural)).join("");
 }
 
 async function loadSave(id) {
   const s = SAVES.find(x => x.id === id); if (!s) return;
   const d = s.data;
-  const ids = s.kind === "seal" ? [d.core, ...(d.complements || []).map(c => c.id)] : (d.burning || []).map(b => b.id);
+  const into = MODE_ORDER.find(k => MODES[k].kind === s.kind);
+  if (!into) return toast(`Can’t load “${s.name}” — it isn’t a build this builder knows`);
+  const ids = MODES[into].ids(d);
   const gone = ids.filter(cid => !INDEX.find(c => c.id === cid)?.ready);
   if (gone.length) return toast(`Can't load “${s.name}” — ${gone.join(", ")} isn't open to you`);
   await Promise.all(ids.map(loadCognition));
   if (ids.some(cid => !LOADED[cid])) return toast(`Couldn't load “${s.name}”`);
 
-  if (s.kind === "seal") {
-    Object.assign(state, {
-      slotLevel: Math.min(9, Math.max(1, d.slotLevel | 0)), core: d.core, coreVerum: d.coreVerum || null,
-      compType: d.compType, compSub: d.compSub, complements: d.complements || [],
-      shape: d.shape || "sphere", manner: d.manner || "standard", phase: d.phase || 0, sealName: s.name,
-    });
-    if (state.mode === "ign") setMode("av", true);
-  } else {
-    Object.assign(state.ign, {
-      burning: d.burning.map(b => ({ id: b.id, rounds: BURN_ROUNDS, inEidon: !!b.inEidon })),
-      template: d.template || null, act: d.act || null, spend: d.spend || {}, verums: d.verums || {},
-      forge: !!d.forge, successes: d.successes || 0, name: s.name, burnedRound: false, eidonRound: false, last: null,
-    });
-    if (state.mode !== "ign") setMode("ign", true);
-  }
+  MODES[into].load(d, s.name);
+  if (state.mode !== into) setMode(into, true);   // a save opens in the Art that made it
   document.getElementById("savesDlg").close();
   setView("composer");
   syncBar(); renderCogList(); renderMain();

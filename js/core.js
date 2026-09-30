@@ -207,7 +207,10 @@ async function boot() {
     else try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
     // The Ephemer front page links straight to a view: arcanum.html#learn, #admin
     if (API && VIEWS[location.hash.slice(1)]) setView(location.hash.slice(1));
-    try { if (localStorage.getItem("av-mode") === "ign") setMode("ign", true); } catch (e) {}
+    // Always through setMode, default included — it is what puts the right names on the chrome
+    let saved = "av";
+    try { saved = localStorage.getItem("av-mode") || "av"; } catch (e) {}
+    setMode(saved, true);
     const fa = document.getElementById("faCss");
     if (fa?.sheet) initIcons(); else fa?.addEventListener("load", initIcons);
   } catch(e) {
@@ -275,5 +278,5 @@ function syncBar() {
   document.getElementById("capOut").textContent = `${have}/${mc + 1}`;
   document.getElementById("capLbl").textContent =
     mc === 0 ? "core only" : (state.manner === "coven" ? "with coven" : "cognitions");
-  if (state.mode === "ign") syncIgnBar();
+  const sb = mode().syncBar; if (sb) sb();   // each mode restates the chips it owns
 }

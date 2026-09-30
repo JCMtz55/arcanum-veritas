@@ -64,10 +64,12 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   damage.js         ← The Damage tab
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
+  paragon.js        ← Paragon mode: Devotions, the Deeper Burn, the written ability sets, its reference
+  modes.js          ← The mode registry — what each Cognitive Art calls things and which renderers it owns
   dice.js           ← The dice tray: rolls the numbers the card already printed
   hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
   account.js        ← Sign-in, the account menu, the DM's Admin tab
-  journal.js        ← The Learning tab and saved seals / Eidons
+  journal.js        ← The Learning tab and saved seals / Eidons / Paragons
   events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
   index.json        ← Master list of all cognitions + ready status
@@ -355,6 +357,23 @@ The **⇄ Ignition** button in the header switches the builder from Arcanum Veri
 - **The Eidon card** — check DC and odds, the Template's roll (weapon attack or save and DC), the output (e.g. `6d12 infernal · absolute` with `8d12 pool − 2 spent`), the Burning Cognitions and the Template's reach, the Blaze cost and the primary Cognition's own rules, the Template's tier features up to your level with what the dice were spent on, the condition with its save, the borrowed Verum ladder with its Sigils, and any warnings. **Copy** gives the text version.
 - **Forge it in downtime** — under the Eidon Check, what forging the recipe on screen into a permanent Ignition would take (the vault's *Forging Ignitions*): its **Rank** (I–IV, by character level), **workweeks** (2 / 4 / 6 / 8, +1 for each of the second and third Cognitions), **Forge DC** (10 / 12 / 14 / 16, +2 per extra Cognition, +1 per 2 dice spent), the **Dream Catalyst** value, and your odds per week on a Forge roll of d20 + Dream + Proficiency. The **Forged recipe** toggle lifts the three-Cognition cap to **3 + Dream mod**: each Cognition beyond the third costs +2 workweeks, +2 DC and its own Catalyst, and such a recipe can't be manifested as an improvised Eidon (the Roll button refuses it). The card's footer and the copied text carry the plan too.
 - **Ignitions tab** — the rules from the vault's *Ignitions* and *Eidons* notes: Blaze and Burning, inheriting an Ignition, manifesting Eidons, **a page per Template** (roll, activation, output, what it borrows, power dice / reach / slot by Rank, its four Rank features and its spend menu — read the way the Rings tab reads a Ring), the Eidon Check and its odds, converting an Eidon into an Ignition, **Forging (downtime)**, and the example Eidons.
+
+## Paragon Mode
+
+The **⇄** button in the header cycles the builder through all three Cognitive Arts — **Arcanum Veritas → Ignition → The Paragon → back**. The Paragon path is the third: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. The rail, Codex, Damage tab and your level stay shared; the Composer becomes **The Path**, the card becomes **The Paragon**, and the Rings tab becomes the **Paragon** reference. The choice is remembered in the browser. The three don't mix at the table: **a Paragon can't use Arcanum Veritas or Ignitions, can't manifest Eidons, and has no Blaze Points.**
+
+Nothing is *built* here. Paragon Abilities are written for each player with their DM — "two Paragons of the same Cognition may resonate with different parts of it" — so they can't be generated from a Cognition's JSON the way a seal's Verum Effects are. Paragon mode is a character sheet and a round tracker.
+
+- **Header** — the Slot dial is hidden; Verum mod and Dream mod stay. The live chips show your **Paragon attack** (Proficiency + Verum mod), your **Verum DC** (the Paragon DC — the same one every Cognitive Art uses), and the **uses** you have left.
+- **Devotions** — click three Cognitions in the rail to swear yourself to them. A fourth is refused: replacing one is a **Pilgrimage**, a downtime ritual. A Devotion that isn't your Paragon grants nothing on its own, and the first one you swear lights itself.
+- **The Deeper Burn** — one Devotion at a time is your **Paragon**. **Rotate** is a Bonus Action that moves it to another Devotion and ends only the old one's **Passive** abilities — anything its Offensive or Supportive abilities set in motion keeps running. **Incapacitated** puts the Burn out; you relight any Devotion with a Bonus Action on a later turn.
+- **Uses** — the rules call activation costs a placeholder until the Paragon Ability guideline is finished, so the tracker pools them the way Zeke's sheet does: Offensive and Supportive abilities share **Proficiency Bonus uses per long rest** across all three Devotions. **Long rest** restores them.
+- **Abilities** — each is **Passive**, **Offensive** or **Supportive** (colour-coded on the edge), with its activation, its uses, its rule, and a **Rank I–IV ladder** with the Rank you're at lit. Every number resolves live against your Verum mod and Proficiency Bonus, the way a seal's do.
+- **Resonances** — a Cognition can have more than one written set. Fire has **The Kindled Heart** (fury) and **The Hearth-Keeper** (the hearth); Protection has **The Unbroken Oath** and Zeke's **The Stained Crescent**. Where there's a choice, the Devotion row offers it.
+- **Nature's wheel** — **The Turning Year** holds a Season (🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter) that decides what its Passive does and what Season's Blow and Season's Gift add. **Next round** turns it; on the turn it's lit the Season *arrives* instead of turning. From Rank IV it turns either way.
+- **Paragon tab** — the rules from the vault's *Paragon* note (the path, the Deeper Burn, Rotate, the three ability types, Pilgrimage), plus one page per written ability set.
+
+The ability sets live in `PARAGON_BUILDS` in `js/paragon.js`. A Devotion with no set written is still a Devotion — its card just says so, which is what a new player's Cognition looks like before they and their DM build it.
 
 ## Layout
 

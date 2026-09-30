@@ -16,7 +16,7 @@
 <div class="bar">
   <a class="home" href="./" title="Ephemer — back to the front page" aria-label="Ephemer home">★</a>
   <div class="brand">Arcanum Veritas<em>seal composer</em></div>
-  <button class="mode" id="modeBtn" onclick="toggleMode()" title="Switch between Arcanum Veritas and the Ignition system">⇄ Ignition</button>
+  <button class="mode" id="modeBtn" onclick="toggleMode()" title="Arcanum Veritas, Ignition and the Paragon path cycle in turn">⇄ Ignition</button>
   <div class="tabs">
     <button class="tab on" id="tabComposer" onclick="setView('composer')">Composer</button>
     <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
@@ -190,6 +190,9 @@
 <script src="js/damage.js"></script>
 <script src="js/emotion.js"></script>
 <script src="js/ignition.js"></script>
+<script src="js/paragon.js"></script>
+<!-- modes.js reads the renderers the two files above declare, so it comes after them -->
+<script src="js/modes.js"></script>
 <script src="js/dice.js"></script>
 <script src="js/account.js"></script>
 <script src="js/journal.js"></script>

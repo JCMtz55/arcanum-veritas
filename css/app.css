@@ -604,3 +604,29 @@ body.ign #mFull{display:none}
 .exporting .n b,.exporting .n i,.exporting .n u{display:inline-block;margin-right:6px;letter-spacing:0}
 .exporting .n.dmg.abs{box-shadow:none;outline:1px solid var(--ember);outline-offset:-1px}
 .exporting .t{letter-spacing:0}
+/* ── Paragon mode: the switch, the Devotions, and the ability sheet ──
+   Ignition is amber and Arcanum Veritas is brass, so the Paragon takes a jade —
+   the evergreen that doesn't fall, and plainly neither of the other two. */
+body.par .mode{border-color:#3f8065;color:#7BC2A4;background:rgba(123,194,164,.08)}
+body.par .mode:hover{border-color:#5da584;color:#9BD5BA}
+body.par .brand{color:#7BC2A4}
+body.par #mFull{display:none}            /* the Paragon card has no FULL reading */
+body.par .blaze .bp{border-color:#3f8065}
+body.par .blaze .bp.on{background:radial-gradient(circle at 40% 35%,#c8f0dc,#3f8065 70%);
+  border-color:#5da584;box-shadow:0 0 6px rgba(123,194,164,.4)}
+body.par .burn.prim{border-color:#3f8065;background:rgba(123,194,164,.07)}
+body.par .burn .rnd{color:#7BC2A4}
+body.par .chip.on{background:#7BC2A4;border-color:#7BC2A4;color:var(--slate)}
+body.par .rung.now{border-color:#3f8065}
+
+/* One Paragon Ability: its type on the edge, the live Rank called out under the rule */
+.par-ab{margin-top:9px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.par-ab.passive{border-left:3px solid var(--steel)}
+.par-ab.offensive{border-left:3px solid var(--ember)}
+.par-ab.supportive{border-left:3px solid var(--verdant)}
+.par-ab-h{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.par-ab-h b{font-family:var(--sans);font-size:13.5px;color:var(--bone)}
+.par-ab-t{margin:0 0 7px;font-size:13.5px;line-height:1.5;color:var(--bone2)}
+.par-ab-now{margin:0 0 7px;padding:6px 10px;border:1px solid #3f8065;border-radius:7px;
+  background:rgba(123,194,164,.08);font-family:var(--sans);font-size:12.5px;line-height:1.45;color:var(--bone)}
+.par-ab .ladder{margin-top:2px}

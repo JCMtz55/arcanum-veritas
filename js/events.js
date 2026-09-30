@@ -21,7 +21,7 @@ function loadScriptOnce(src, global) {
 // Render whatever the seal panel is showing (the PLAY card, or FULL's text) to a canvas
 async function cardCanvas() {
   const target = document.querySelector("#sumBody .card") || document.querySelector("#sumBody .raw");
-  if (!target) throw new Error(state.mode === "ign" ? "build an Eidon first" : "draw a seal first");
+  if (!target) throw new Error(mode().needCard.toLowerCase());
   await loadScriptOnce(H2C_SRC, "html2canvas");
   if (document.fonts?.ready) await document.fonts.ready;
   const bg = getComputedStyle(document.querySelector(".seal")).backgroundColor || "#1B1F26";
@@ -32,13 +32,13 @@ async function cardCanvas() {
       const t = doc.querySelector("#sumBody .card") || doc.querySelector("#sumBody .raw");
       const f = doc.createElement("div");
       f.className = "c-export";
-      f.textContent = `Once Upon a Star ★ · ${state.mode === "ign" ? "Ignition" : "Arcanum Veritas"} · ${new Date().toLocaleDateString()}`;
+      f.textContent = `Once Upon a Star ★ · ${mode().brand} · ${new Date().toLocaleDateString()}`;
       t.appendChild(f);
     },
   });
 }
 function imageName() {
-  const n = (document.querySelector("#sumBody .c-name")?.textContent || (state.mode === "ign" ? "eidon" : "seal")).trim();
+  const n = (document.querySelector("#sumBody .c-name")?.textContent || mode().noun).trim();
   return n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png";
 }
 async function saveImage() {
@@ -88,7 +88,7 @@ function toast(msg) {
 // Keyboard: arrows nudge slot, shift+arrows nudge level
 document.addEventListener("keydown", e => {
   if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
-  if (state.mode === "ign" && !e.shiftKey) return;   // no slots in Ignition mode — shift+arrows still move the level
+  if (!mode().slotDial && !e.shiftKey) return;   // no slots outside Arcanum Veritas — shift+arrows still move the level
   if (e.key === "ArrowRight") { e.shiftKey ? bumpLvl(1)  : bumpSlot(1);  }
   else if (e.key === "ArrowLeft") { e.shiftKey ? bumpLvl(-1) : bumpSlot(-1); }
 });
