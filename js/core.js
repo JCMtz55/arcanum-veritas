@@ -207,6 +207,7 @@ async function boot() {
     else try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
     // The Ephemer front page links straight to a view: arcanum.html#learn, #admin
     if (API && VIEWS[location.hash.slice(1)]) setView(location.hash.slice(1));
+    await loadParagon();   // whose Paragon sets these are, and whether the path is open at all
     // Always through setMode, default included — it is what puts the right names on the chrome
     let saved = "av";
     try { saved = localStorage.getItem("av-mode") || "av"; } catch (e) {}

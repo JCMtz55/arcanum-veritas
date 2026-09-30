@@ -630,3 +630,25 @@ body.par .rung.now{border-color:#3f8065}
 .par-ab-now{margin:0 0 7px;padding:6px 10px;border:1px solid #3f8065;border-radius:7px;
   background:rgba(123,194,164,.08);font-family:var(--sans);font-size:12.5px;line-height:1.45;color:var(--bone)}
 .par-ab .ladder{margin-top:2px}
+
+/* The note a Paragon sees on the two Arts their path closed off */
+.path-warn{margin:0 0 12px;padding:9px 13px;border:1px solid #3f8065;border-left-width:3px;border-radius:8px;
+  background:rgba(123,194,164,.07);font-family:var(--sans);font-size:12.5px;line-height:1.5;color:var(--bone2)}
+.path-warn strong{color:#7BC2A4}
+
+/* ── Admin: writing a player's Paragon Abilities ───────────── */
+.adm-sub{margin:16px 0 8px;font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--mute);letter-spacing:.02em}
+.par-edit{margin-top:12px;padding:14px 16px;border:1px solid #3f8065;border-radius:10px;background:rgba(123,194,164,.04)}
+.par-edit .adm-sub{margin-top:0}
+.par-edit label{display:block;margin:12px 0 5px;font-family:var(--sans);font-size:11px;color:var(--mute);letter-spacing:.02em}
+.par-edit label .search,.par-edit label .pick{margin-top:5px;width:100%}
+.par-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 14px}
+.par-ranks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px;margin-top:4px}
+.par-ta{width:100%;resize:vertical;font-family:var(--serif);line-height:1.45}
+.par-edit .par-ab-h{gap:6px}
+.par-edit .par-ab-h .search,.par-edit .par-ab-h .pick{margin-top:0;width:auto}
+.par-name{flex:1;min-width:130px}
+.par-pick{flex:none;width:auto}
+.par-uses{width:110px;flex:none}
+.par-note{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--mute)}
+.par-edit .mini.adm-del{margin-left:auto}

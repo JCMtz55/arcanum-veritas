@@ -414,7 +414,7 @@ function rollEidon() {
 function renderForge() { asEidonSlot(renderForgeNow); }
 function renderForgeNow() {
   const comp = document.getElementById("composer"), seal = document.getElementById("sumBody");
-  comp.innerHTML = ignRules() + buildForge() + (state.ign.burning.length ? "" : savedHome());
+  comp.innerHTML = pathWarning() + ignRules() + buildForge() + (state.ign.burning.length ? "" : savedHome());
   const e = eidon();
   if (!e.prim)      { seal.innerHTML = `<div class="empty">Burn a Cognition from the left to begin an Eidon.</div>`; seal.dataset.text = ""; }
   else if (!e.ok)   { seal.innerHTML = `<div class="empty">Choose a Template — what shape the Eidon takes.</div>`; seal.dataset.text = ""; }

@@ -205,6 +205,7 @@ function renderAdmin() {
           title="${escQ(c.name)}${c.written === false ? " — held back (not ready)" : ""}">${esc(c.name)}</button>`).join("") + `</div>`;
     });
     h += `</div>`;
+    h += renderParAdmin(u);
     // The player's own tracker, as they keep it — read-only here
     h += `<div class="cdx-sec"><h2>Learning — kept by ${esc(u.displayName)}</h2>` +
       (u.learning.length ? `<div class="cdx-defs">` + u.learning.map(l =>
@@ -255,4 +256,194 @@ function adminDelete(id) {
   if (!confirm(`Delete ${u.displayName}'s account and everything granted to it?`)) return;
   api("DELETE", `api/admin/users/${id}`)
     .then(() => { ADMIN.sel = null; toast("Player deleted"); return openAdmin(); }).catch(err => toast(err.message));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN — THE PARAGON PATH
+// ═══════════════════════════════════════════════════════════
+// The path is a choice of identity made with the DM, and a Paragon's abilities are written for
+// them, so both live here rather than anywhere a player can reach. `draft` is the set being
+// edited: text fields write straight into it so typing never costs the input its focus, and only
+// structural changes (adding an ability, changing its type) redraw.
+ADMIN.par = { draft: null, forUser: null };
+
+const PAR_ADMIN_TYPES = { passive: "Passive", offensive: "Offensive", supportive: "Supportive" };
+const PAR_ADMIN_ACTS  = { action: "Action", bonus: "Bonus Action", reaction: "Reaction" };
+const PAR_SAVES = ["—", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
+
+function parBlankAbility() {
+  return { name: "", type: "passive", act: null, uses: "", text: "", ranks: ["", "", "", ""] };
+}
+function parBlankSet(cog) {
+  return { cog: cog || "", name: "", flavor: "", save: "—", damage: "", warn: "", abilities: [parBlankAbility()] };
+}
+
+async function parAdminTogglePath(userId) {
+  const u = ADMIN.users.find(x => x.id === userId);
+  try {
+    await api("PUT", `api/admin/users/${userId}/paragon`, { enabled: !u.paragon });
+    u.paragon = !u.paragon;
+    toast(u.paragon ? `${u.displayName} walks the Paragon path` : `${u.displayName} leaves the Paragon path`);
+    renderAdmin();
+  } catch (err) { toast(err.message); }
+}
+
+// Editing loads the set from the server, so the draft is the stored shape and nothing is guessed
+async function parAdminEdit(userId, buildId) {
+  try {
+    const { builds } = await api("GET", `api/admin/users/${userId}/paragon`);
+    const b = builds.find(x => x.id === buildId);
+    if (!b) return toast("That ability set is gone — refresh.");
+    const { id, cog, name, ...rest } = b;
+    ADMIN.par = { forUser: userId, draft: { id, cog, name, warn: "", flavor: "", save: "—", damage: "", ...rest } };
+    renderAdmin();
+  } catch (err) { toast(err.message); }
+}
+function parAdminNew(userId, fromExample) {
+  const eg = fromExample && PARAGON_EXAMPLES.find(x => x.name === fromExample);
+  // Starting from an example copies its shape; the DM then makes it this character's own
+  ADMIN.par = { forUser: userId, draft: eg
+    ? JSON.parse(JSON.stringify({ cog: eg.cog, name: eg.name, flavor: eg.flavor, save: eg.save,
+        damage: eg.damage, warn: "", abilities: eg.abilities }))
+    : parBlankSet() };
+  renderAdmin();
+  document.getElementById("adminBody").scrollTop = 0;
+}
+function parAdminCancel() { ADMIN.par = { draft: null, forUser: null }; renderAdmin(); }
+
+// Text fields write into the draft without redrawing — "abilities.0.ranks.2" addresses one line
+function parAdminField(path, value) {
+  const keys = path.split("."), d = ADMIN.par.draft;
+  let o = d;
+  for (let i = 0; i < keys.length - 1; i++) o = o[keys[i]];
+  o[keys[keys.length - 1]] = value;
+}
+function parAdminStructural(path, value) { parAdminField(path, value); renderAdmin(); }
+function parAdminAddAbility() {
+  if (ADMIN.par.draft.abilities.length >= 6) return toast("Six abilities is the most a set can hold");
+  ADMIN.par.draft.abilities.push(parBlankAbility()); renderAdmin();
+}
+function parAdminRemoveAbility(i) {
+  if (ADMIN.par.draft.abilities.length <= 1) return toast("A set needs at least one ability");
+  ADMIN.par.draft.abilities.splice(i, 1); renderAdmin();
+}
+
+async function parAdminSave() {
+  const { forUser, draft } = ADMIN.par;
+  if (!draft.cog) return toast("Choose the Cognition this set belongs to");
+  try {
+    const { id, cog, name, ...data } = draft;
+    await api("PUT", `api/admin/users/${forUser}/paragon/builds`, { id, cognitionId: cog, name, data });
+    ADMIN.par = { draft: null, forUser: null };
+    await refreshAdmin();
+    toast(`Saved “${name}”`);
+    renderAdminList(); renderAdmin();
+  } catch (err) { toast(err.message); }
+}
+async function parAdminDelete(userId, buildId, label) {
+  if (!confirm(`Delete the ability set “${label}”? This can't be undone.`)) return;
+  try {
+    await api("DELETE", `api/admin/users/${userId}/paragon/builds/${buildId}`);
+    await refreshAdmin();
+    toast("Deleted");
+    renderAdminList(); renderAdmin();
+  } catch (err) { toast(err.message); }
+}
+
+// ── The section itself, on a player's Admin page
+function renderParAdmin(u) {
+  const editing = ADMIN.par.draft && ADMIN.par.forUser === u.id;
+  let h = `<div class="cdx-sec"><h2>Paragon path</h2>
+    <p class="cdx-rings">The Paragon path is a choice of identity, not a lesson — you open it.
+      While it's closed, ${esc(u.displayName)} can't reach Paragon mode at all. Their abilities are
+      written here: a Paragon's power is <strong>built for them</strong>, so nothing is generated
+      from a Cognition's JSON the way a seal's Verum Effects are.</p>
+    <div class="adm-line" style="gap:9px">
+      <button class="mini ${u.paragon ? "on" : ""}" onclick="parAdminTogglePath(${u.id})">
+        ${u.paragon ? "✓ Walks the Paragon path" : "Open the Paragon path"}</button>
+      ${u.paragon ? `<span class="hint" style="margin:0">Arcanum Veritas and Ignition stay reachable for them, with a note that the Arts don't share a body.</span>` : ""}
+    </div>`;
+
+  if (!u.paragon) return h + `</div>`;
+
+  // What is written for them today
+  const mine = u.paragonBuilds || [];
+  h += `<h3 class="adm-sub">Ability sets — ${mine.length || "none"} written</h3>`;
+  h += mine.length
+    ? `<div class="cdx-defs">` + mine.map(b => {
+        return `<div class="cdx-def"><b>${esc(b.name)}</b><span>Paragon of ${esc(INDEX.find(c => c.id === b.cog)?.name || b.cog)}</span>
+          <button class="mini" onclick="parAdminEdit(${u.id}, ${b.id || 0})" ${b.id ? "" : "disabled"}>Edit</button>
+          <button class="mini adm-del" onclick="parAdminDelete(${u.id}, ${b.id || 0}, '${escAttr(b.name)}')" ${b.id ? "" : "disabled"}>Delete</button></div>`;
+      }).join("") + `</div>`
+    : `<div class="cdx-note"><p>Nothing written yet. Until you write one, every Devotion ${esc(u.displayName)} swears will say so on its card.</p></div>`;
+
+  if (!editing) {
+    h += `<div class="chips" style="margin-top:10px">
+      <button class="chip on" onclick="parAdminNew(${u.id})">＋ New ability set</button>
+      <span class="chip-lbl">or start from an example</span>` +
+      PARAGON_EXAMPLES.map(eg => `<button class="chip" onclick="parAdminNew(${u.id}, '${escAttr(eg.name)}')">${esc(eg.name)}</button>`).join("") +
+      `</div>`;
+    return h + `</div>`;
+  }
+
+  // ── The editor
+  const d = ADMIN.par.draft;
+  const granted = INDEX.filter(c => u.cognitions.includes(c.id));
+  const cogs = granted.length ? granted : INDEX;
+  h += `<div class="par-edit">
+    <h3 class="adm-sub">${d.id ? "Editing" : "New ability set"}${d.wheel ? " · turns a wheel" : ""}</h3>
+    <div class="par-grid">
+      <label>Cognition
+        <select class="pick" onchange="parAdminStructural('cog', this.value)">
+          <option value="">— choose —</option>` +
+          cogs.map(c => `<option value="${escAttr(c.id)}" ${d.cog === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("") +
+        `</select>${granted.length ? "" : `<em class="par-note">This player has no Cognitions granted yet — the full list is shown.</em>`}</label>
+      <label>Resonance — what this reading of it is called
+        <input class="search" value="${escQ(d.name)}" placeholder="The Evergreen" oninput="parAdminField('name', this.value)"></label>
+      <label>Save
+        <select class="pick" onchange="parAdminField('save', this.value)">` +
+          PAR_SAVES.map(s => `<option ${d.save === s ? "selected" : ""}>${s}</option>`).join("") + `</select></label>
+      <label>Damage type
+        <input class="search" value="${escQ(d.damage || "")}" placeholder="Necrotic" oninput="parAdminField('damage', this.value)"></label>
+    </div>
+    <label>Flavour — what it looks like while it burns
+      <textarea class="search par-ta" rows="2" oninput="parAdminField('flavor', this.value)">${esc(d.flavor || "")}</textarea></label>
+    <label>Warning — optional, shown on the card (e.g. a Pilgrimage still to make)
+      <input class="search" value="${escQ(d.warn || "")}" oninput="parAdminField('warn', this.value)"></label>`;
+
+  d.abilities.forEach((a, i) => {
+    h += `<div class="par-ab ${a.type}" style="margin-top:14px">
+      <div class="par-ab-h">
+        <input class="search par-name" value="${escQ(a.name)}" placeholder="Ability name" oninput="parAdminField('abilities.${i}.name', this.value)">
+        <select class="pick par-pick" onchange="parAdminStructural('abilities.${i}.type', this.value)">` +
+          Object.entries(PAR_ADMIN_TYPES).map(([k, v]) => `<option value="${k}" ${a.type === k ? "selected" : ""}>${v}</option>`).join("") +
+        `</select>` +
+        (a.type === "passive"
+          ? `<span class="t">always on — ends when they Rotate</span>`
+          : `<select class="pick par-pick" onchange="parAdminField('abilities.${i}.act', this.value || null)">
+               <option value="">no activation</option>` +
+               Object.entries(PAR_ADMIN_ACTS).map(([k, v]) => `<option value="${k}" ${a.act === k ? "selected" : ""}>${v}</option>`).join("") +
+             `</select>
+             <input class="search par-uses" value="${escQ(a.uses || "")}" placeholder="uses, e.g. 1" oninput="parAdminField('abilities.${i}.uses', this.value)">`) +
+        `<button class="mini adm-del" onclick="parAdminRemoveAbility(${i})" title="Remove this ability">✕</button>
+      </div>
+      <label>The rule — what it does
+        <textarea class="search par-ta" rows="3" oninput="parAdminField('abilities.${i}.text', this.value)">${esc(a.text || "")}</textarea></label>
+      <div class="par-ranks">` +
+        [0, 1, 2, 3].map(r => `<label>${TIERS[r].label}
+          <textarea class="search par-ta" rows="2" oninput="parAdminField('abilities.${i}.ranks.${r}', this.value)">${esc(a.ranks?.[r] || "")}</textarea></label>`).join("") +
+      `</div></div>`;
+  });
+
+  h += `<div class="chips" style="margin-top:12px">
+      <button class="chip" onclick="parAdminAddAbility()">＋ Add an ability</button></div>
+    <p class="hint" style="font-style:normal;margin-top:10px">Write numbers as the rules do —
+      <code>your Verum Modifier</code>, <code>twice your Verum Modifier</code>, <code>your proficiency bonus</code>,
+      <code>5 × Proficiency Bonus</code>, <code>your Verum DC</code> — and the builder resolves them
+      to the player's real numbers on the card.</p>
+    <div class="acct-row" style="margin-top:12px">
+      <button class="mini on" onclick="parAdminSave()">Save ability set</button>
+      <button class="mini" onclick="parAdminCancel()">Cancel</button>
+    </div></div>`;
+  return h + `</div>`;
 }

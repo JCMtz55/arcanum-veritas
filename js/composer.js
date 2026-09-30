@@ -18,7 +18,7 @@ function renderMain() {
   if (main) return main();
 
   if (!state.core) {
-    comp.innerHTML = rulesDrawer() + `<div class="empty">
+    comp.innerHTML = pathWarning() + rulesDrawer() + `<div class="empty">
       Pick a cognition from the left to set your Keystone. Everything else follows from it.</div>` + savedHome();
     seal.innerHTML = `<div class="empty">No seal drawn yet.</div>`;
     return;
@@ -26,7 +26,7 @@ function renderMain() {
 
   const coreCog = LOADED[state.core];
   const tier    = getTier(state.charLevel);
-  comp.innerHTML = rulesDrawer() + buildComposer(coreCog, tier);
+  comp.innerHTML = pathWarning() + rulesDrawer() + buildComposer(coreCog, tier);
 
   if (!state.compType || !state.compSub || !currentSub()) {
     seal.innerHTML = `<div class="empty">Choose a Ring to draw the seal.</div>`;

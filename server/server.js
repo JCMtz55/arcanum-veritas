@@ -66,6 +66,25 @@ async function seed() {
     await db.query("INSERT INTO meta (key, value) VALUES ('learning_seeded', '1')");
     console.log("Learning trackers imported from seed.json.");
   }
+  // Zeke already walks the path in the campaign, and his three ability sets are written. Seed them
+  // so his account opens on them; every other player starts with the path off and nothing written.
+  if (!(await db.query("SELECT 1 FROM meta WHERE key = 'paragon_seeded'")).rows.length) {
+    const seed = JSON.parse(await readFile(path.join(ROOT, "server", "paragon-seed.json"), "utf8"));
+    for (const [username, builds] of Object.entries(seed)) {
+      const user = (await db.query("SELECT id FROM users WHERE username = $1", [username])).rows[0];
+      if (!user) continue;
+      await db.query("UPDATE users SET paragon = true WHERE id = $1", [user.id]);
+      for (const b of builds) {
+        const { id, cog, name, owner, ...data } = b;
+        await db.query(
+          `INSERT INTO paragon_builds (user_id, cognition_id, name, data) VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, cognition_id, name) DO NOTHING`,
+          [user.id, cog, name, JSON.stringify(data)]);
+      }
+      console.log(`Paragon path opened for ${username} with ${builds.length} ability sets.`);
+    }
+    await db.query("INSERT INTO meta (key, value) VALUES ('paragon_seeded', '1')");
+  }
   // A way back in for a DM who lost the password: set RESET_DM_PASSWORD, redeploy, then remove it.
   if (process.env.RESET_DM_PASSWORD) {
     await db.query("UPDATE users SET password_hash = $1 WHERE role = 'dm' AND username = $2",
@@ -81,7 +100,7 @@ async function currentUser(req) {
   const m = new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`).exec(req.headers.cookie || "");
   if (!m) return null;
   const { rows } = await db.query(
-    `SELECT u.id, u.username, u.display_name, u.role, u.char_level, u.verum_mod, u.dream_mod
+    `SELECT u.id, u.username, u.display_name, u.role, u.char_level, u.verum_mod, u.dream_mod, u.paragon
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > now()`, [tokenHash(m[1])]);
   return rows[0] || null;
@@ -127,8 +146,19 @@ app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next
 // ── Signing in and out ─────────────────────────────────────
 app.get("/api/me", requireUser, (req, res) => res.json({ user: {
   ...publicUser(req.user),
+  // Whether the Paragon path is open to this account — the DM's to set, in the Admin tab
+  paragon: !!req.user.paragon,
   sheet: { charLevel: req.user.char_level, verumMod: req.user.verum_mod, dreamMod: req.user.dream_mod },
 } }));
+
+// ── The Paragon path: the ability sets the DM has written for this player.
+// A player reads only their own; the sets themselves are authored under /api/admin.
+app.get("/api/paragon", requireUser, async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT id, cognition_id, name, data FROM paragon_builds WHERE user_id = $1 ORDER BY cognition_id, name",
+    [req.user.id]);
+  res.json({ enabled: !!req.user.paragon, builds: rows.map(parBuildRow) });
+});
 
 // The character's numbers on the command bar — level, Verum mod, Dream mod — kept with the account
 app.put("/api/sheet", requireUser, async (req, res) => {
@@ -243,6 +273,53 @@ const SAVES_MAX = 200, SAVE_BYTES = 8000;
 // The three Cognitive Arts a build can come from — the same list the saves table checks.
 const SAVE_KINDS = ["seal", "eidon", "paragon"];
 
+// ── A Paragon Ability set, as the DM writes it ─────────────
+const PAR_TYPES = ["passive", "offensive", "supportive"];
+const PAR_ACTS  = ["action", "bonus", "reaction"];
+const RANKS = 4;   // Ranks I-IV, at levels 1 / 5 / 11 / 17
+
+const parBuildRow = r => ({ id: r.id, cog: r.cognition_id, name: r.name, ...JSON.parse(r.data) });
+
+// Everything the DM types is checked here — the player's builder trusts whatever comes back.
+function cleanParagonBuild(body) {
+  const cog = String(body?.cognitionId || "");
+  if (!BY_ID.has(cog)) return { error: "No such Cognition." };
+  const name = String(body?.name || "").trim().slice(0, 60);
+  if (!name) return { error: "An ability set needs a name — the resonance, like “The Evergreen”." };
+
+  const d = body?.data && typeof body.data === "object" ? body.data : {};
+  const str = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
+  const abilities = Array.isArray(d.abilities) ? d.abilities : [];
+  if (!abilities.length) return { error: "An ability set needs at least one ability." };
+  if (abilities.length > 6) return { error: "Six abilities is the most a set can hold." };
+
+  const clean = [];
+  for (const a of abilities) {
+    const an = str(a?.name, 60);
+    if (!an) return { error: "Every ability needs a name." };
+    if (!PAR_TYPES.includes(a?.type)) return { error: `“${an}” needs to be Passive, Offensive or Supportive.` };
+    // A Passive is always on, so it has no activation and costs no use
+    const act = a.type === "passive" ? null : (PAR_ACTS.includes(a?.act) ? a.act : null);
+    const ranks = Array.isArray(a?.ranks) ? a.ranks : [];
+    clean.push({
+      name: an, type: a.type, act, uses: str(a?.uses, 60) || null,
+      text: str(a?.text, 1200),
+      ranks: Array.from({ length: RANKS }, (_, i) => str(ranks[i], 600)),
+      ...(a?.seasonal ? { seasonal: str(a.seasonal, 20) } : {}),
+    });
+  }
+
+  const data = {
+    flavor: str(d.flavor, 600), save: str(d.save, 20) || "—", damage: str(d.damage, 20) || "—",
+    warn: str(d.warn, 300) || undefined, source: str(d.source, 80) || "written by your DM",
+    ...(d.wheel ? { wheel: true, wheelRanks: Array.from({ length: RANKS }, (_, i) => str(d.wheelRanks?.[i], 600)) } : {}),
+    abilities: clean,
+  };
+  const json = JSON.stringify(data);
+  if (json.length > SAVE_BYTES) return { error: "That ability set is too long." };
+  return { cog, name, data: json };
+}
+
 function cleanSave(body) {
   const name = String(body?.name || "").trim().slice(0, 60);
   const data = body?.data && typeof body.data === "object" ? JSON.stringify(body.data) : "";
@@ -318,12 +395,14 @@ admin.put("/grimms/:grimm/toggles/:key", async (req, res) => {
 
 admin.get("/users", async (req, res) => {
   const users = (await db.query(
-    `SELECT id, username, display_name, role, password_hash <> '${LOCKED}' AS has_password
+    `SELECT id, username, display_name, role, paragon, password_hash <> '${LOCKED}' AS has_password
        FROM users ORDER BY role, display_name`)).rows;
   const grants = (await db.query("SELECT user_id, cognition_id FROM user_cognitions")).rows;
   const learning = (await db.query("SELECT user_id, key, name, depth FROM learning ORDER BY depth DESC, name")).rows;
+  const parBuilds = (await db.query("SELECT id, user_id, cognition_id, name FROM paragon_builds")).rows;
   res.json({ users: users.map(u => ({
-    ...publicUser(u), hasPassword: u.has_password,
+    ...publicUser(u), hasPassword: u.has_password, paragon: !!u.paragon,
+    paragonBuilds: parBuilds.filter(b => b.user_id === u.id).map(b => ({ id: b.id, cog: b.cognition_id, name: b.name })),
     cognitions: grants.filter(g => g.user_id === u.id).map(g => g.cognition_id),
     // cognitionId is null for a name the index doesn't know — nothing the DM can enable yet
     learning: learning.filter(l => l.user_id === u.id).map(l => ({ name: l.name, depth: l.depth, cognitionId: BY_NAME.get(l.key)?.id || null })),
@@ -385,6 +464,50 @@ admin.put("/users/:id/cognitions/:cog", async (req, res) => {
 
 admin.delete("/users/:id/cognitions/:cog", async (req, res) => {
   await db.query("DELETE FROM user_cognitions WHERE user_id = $1 AND cognition_id = $2", [req.target.id, req.params.cog]);
+  res.json({ ok: true });
+});
+
+// ── Admin: the Paragon path — who walks it, and the ability sets written for them
+admin.put("/users/:id/paragon", async (req, res) => {
+  if (typeof req.body?.enabled !== "boolean") return res.status(400).json({ error: "Set the path on or off." });
+  await db.query("UPDATE users SET paragon = $1 WHERE id = $2", [req.body.enabled, req.target.id]);
+  res.json({ ok: true });
+});
+
+admin.get("/users/:id/paragon", async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT id, cognition_id, name, data FROM paragon_builds WHERE user_id = $1 ORDER BY cognition_id, name",
+    [req.target.id]);
+  res.json({ builds: rows.map(parBuildRow) });
+});
+
+// Upsert. With an `id` the set is rewritten in place, so a resonance can be renamed;
+// without one, (player, Cognition, name) is the key.
+admin.put("/users/:id/paragon/builds", async (req, res) => {
+  const b = cleanParagonBuild(req.body);
+  if (b.error) return res.status(400).json({ error: b.error });
+  const editing = parseInt(req.body?.id, 10) || 0;
+  const clash = (await db.query(
+    "SELECT id FROM paragon_builds WHERE user_id = $1 AND cognition_id = $2 AND lower(name) = lower($3)",
+    [req.target.id, b.cog, b.name])).rows[0];
+  if (clash && clash.id !== editing)
+    return res.status(409).json({ error: `${req.target.display_name} already has a “${b.name}” for that Cognition.` });
+  if (editing) {
+    const { rowCount } = await db.query(
+      "UPDATE paragon_builds SET cognition_id = $1, name = $2, data = $3, updated_at = now() WHERE id = $4 AND user_id = $5",
+      [b.cog, b.name, b.data, editing, req.target.id]);
+    if (!rowCount) return res.status(404).json({ error: "No such ability set." });
+    return res.json({ id: editing });
+  }
+  const { rows } = await db.query(
+    "INSERT INTO paragon_builds (user_id, cognition_id, name, data) VALUES ($1, $2, $3, $4) RETURNING id",
+    [req.target.id, b.cog, b.name, b.data]);
+  res.status(201).json({ id: rows[0].id });
+});
+
+admin.delete("/users/:id/paragon/builds/:buildId", async (req, res) => {
+  await db.query("DELETE FROM paragon_builds WHERE id = $1 AND user_id = $2",
+    [parseInt(req.params.buildId, 10) || 0, req.target.id]);
   res.json({ ok: true });
 });
 

@@ -64,7 +64,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   damage.js         ← The Damage tab
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
-  paragon.js        ← Paragon mode: Devotions, the Deeper Burn, the written ability sets, its reference
+  paragon.js        ← Paragon mode: Devotions, the Deeper Burn, the ability sets the DM wrote, its reference
   modes.js          ← The mode registry — what each Cognitive Art calls things and which renderers it owns
   dice.js           ← The dice tray: rolls the numbers the card already printed
   hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
@@ -79,6 +79,7 @@ server/
   db.js             ← Database connection and tables
   auth.js           ← Password hashing and session tokens
   seed.json         ← First-run players and their mastered Cognitions
+  paragon-seed.json ← First-run Paragon paths and ability sets (Zeke's three)
 package.json        ← Server dependencies and the start command
 README.md           ← This file
 ```
@@ -360,7 +361,11 @@ The **⇄ Ignition** button in the header switches the builder from Arcanum Veri
 
 ## Paragon Mode
 
-The **⇄** button in the header cycles the builder through all three Cognitive Arts — **Arcanum Veritas → Ignition → The Paragon → back**. The Paragon path is the third: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. The rail, Codex, Damage tab and your level stay shared; the Composer becomes **The Path**, the card becomes **The Paragon**, and the Rings tab becomes the **Paragon** reference. The choice is remembered in the browser. The three don't mix at the table: **a Paragon can't use Arcanum Veritas or Ignitions, can't manifest Eidons, and has no Blaze Points.**
+The **⇄** button in the header cycles the builder through the Cognitive Arts — **Arcanum Veritas → Ignition → The Paragon → back**. The Paragon path is the third: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. The rail, Codex, Damage tab and your level stay shared; the Composer becomes **The Path**, the card becomes **The Paragon**, and the Rings tab becomes the **Paragon** reference. The choice is remembered in the browser.
+
+**The path is the DM's to open.** It's a choice of identity made with them, not a mode a player switches on, so Paragon mode is in the ⇄ cycle only for a player the DM has put on the path (and for the DM, who needs to see what they wrote). For everyone else it isn't there at all, and a remembered `av-mode` of `par` is refused.
+
+The three don't mix at the table — **a Paragon can't use Arcanum Veritas or Ignitions, can't manifest Eidons, and has no Blaze Points** — but the builder still lets a Paragon *open* the other two, with a note saying so. Planning a seal you can't draw is harmless; pretending the rules allow it isn't.
 
 Nothing is *built* here. Paragon Abilities are written for each player with their DM — "two Paragons of the same Cognition may resonate with different parts of it" — so they can't be generated from a Cognition's JSON the way a seal's Verum Effects are. Paragon mode is a character sheet and a round tracker.
 
@@ -373,7 +378,25 @@ Nothing is *built* here. Paragon Abilities are written for each player with thei
 - **Nature's wheel** — **The Turning Year** holds a Season (🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter) that decides what its Passive does and what Season's Blow and Season's Gift add. **Next round** turns it; on the turn it's lit the Season *arrives* instead of turning. From Rank IV it turns either way.
 - **Paragon tab** — the rules from the vault's *Paragon* note (the path, the Deeper Burn, Rotate, the three ability types, Pilgrimage), plus one page per written ability set.
 
-The ability sets live in `PARAGON_BUILDS` in `js/paragon.js`. A Devotion with no set written is still a Devotion — its card just says so, which is what a new player's Cognition looks like before they and their DM build it.
+### Where a player's abilities come from
+
+A player's ability sets belong to **them**, not to the Cognition, so they live in the `paragon_builds` table and arrive from `api/paragon`. A player only ever receives their own. `PARAGON_EXAMPLES` in `js/paragon.js` holds just the three worked examples from the rules — they're reading in the Paragon tab and a starting point for the DM, never something a player can use as their own resonance. On a plain static host there are no accounts, so the examples stand in and nothing is gated.
+
+A Devotion with no set written is still a Devotion — its card says so, which is what a new player's Cognition looks like before they and their DM build it.
+
+### The DM's side
+
+The **Admin** tab gains a **Paragon path** section on each player's page:
+
+- **Open the path** — one toggle. While it's closed the player can't reach Paragon mode at all.
+- **Ability sets** — everything written for that player, with Edit and Delete.
+- **The editor** — Cognition, the resonance's name, flavour, save and damage type, then one block per ability: its name, whether it's **Passive**, **Offensive** or **Supportive**, its activation and uses (a Passive has neither — it's always on and ends when they Rotate), the rule, and the four **Rank I–IV** lines. Up to six abilities per set.
+- **Start from an example** — copies one of the three worked examples into the editor so the DM can make it that character's own.
+- Numbers are written the way the rules write them — `your Verum Modifier`, `twice your Verum Modifier`, `your proficiency bonus`, `5 × Proficiency Bonus`, `your Verum DC` — and the builder resolves them to that player's real numbers on the card.
+
+Everything the DM types is validated server-side before it's stored, since the player's builder renders whatever comes back.
+
+**Zeke** is seeded on first run from `server/paragon-seed.json`: his path is opened and his three sets (The Evergreen, The Stained Crescent, The Turning Year) are written for his account.
 
 ## Layout
 

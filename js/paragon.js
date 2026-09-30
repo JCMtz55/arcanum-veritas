@@ -9,9 +9,10 @@
 //
 // Paragon Abilities are written for each character with their DM — "two Paragons of the same
 // Cognition may resonate with different parts of it" — so they can't be generated from a
-// Cognition's JSON the way a seal's Verum Effects are. PARAGON_BUILDS holds the sets that are
-// written today: the three worked examples from the Paragon rules, and Zeke's three. A Devotion
-// with no authored set is still a Devotion; its card just says nobody has written it yet.
+// Cognition's JSON the way a seal's Verum Effects are. They belong to the player: the DM writes
+// them in the Admin tab and they arrive from api/paragon. PARAGON_EXAMPLES below is only the
+// three worked examples from the rules, kept as reading. A Devotion with nothing written for it
+// is still a Devotion; its card just says so.
 //
 // So this file is a character sheet and a round tracker, not a composer.
 
@@ -59,7 +60,8 @@ const PAR_SEASONS = [
 // ── The authored ability sets ─────────────────────────────
 // `ranks` is the Rank I–IV ladder, read the way a Ring's and an Eidon's are: every Rank is
 // shown, the one you're at is lit. A rank line restates its ability rather than adding to it.
-const PARAGON_BUILDS = [
+// A set the DM writes has exactly this shape, so the same renderers draw both.
+const PARAGON_EXAMPLES = [
   // ── From the Paragon rules: two Paragons of Fire, to show the same Cognition resonating twice
   { id: "fire-kindled", cog: "fire", name: "The Kindled Heart",
     flavor: "For a player who hears Fire as fury and destruction. Built from Fierce and Wildfire.",
@@ -104,76 +106,6 @@ const PARAGON_BUILDS = [
                 "You take no damage if the attack's total is lower than your Verum DC."] },
     ] },
 
-  // ── Zeke's three
-  { id: "life-evergreen", cog: "life", name: "The Evergreen", owner: "Zeke",
-    flavor: "A leaf that doesn't fall in winter. While Life burns, green sap runs in the cracks of Zeke's scales, and flowers open where he stands.",
-    save: "Constitution", damage: "Necrotic", source: "Zeke's Paragons",
-    abilities: [
-      { name: "Evergreen Sap", type: "passive",
-        text: "At the start of each of your turns, you or one ally within 30 feet regains hit points equal to your Verum Modifier.",
-        ranks: ["One creature heals your Verum Modifier.",
-                "Healing past full becomes temporary hit points.",
-                "It heals your Verum Modifier + your proficiency bonus.",
-                "Two creatures heal each turn."] },
-      { name: "Sap the Wicked", type: "offensive", act: "action", uses: "1",
-        text: "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra necrotic damage. You and allies of your choice within 30 feet share hit points equal to half the necrotic damage, divided as you choose.",
-        ranks: ["+3d10 necrotic.",
-                "+5d10 necrotic. The target's hit point maximum drops by the necrotic damage until a long rest.",
-                "+7d10. The healing equals all the necrotic damage. The target can't regain hit points until the end of its next turn.",
-                "+9d10. If the attack drops the target to 0, one ally within 60 feet who is at 0 hit points (or who died within the last minute) rises with half its hit points."] },
-      { name: "Evergreen Oath", type: "supportive", act: "reaction", uses: "1",
-        text: "When a creature you can see within 60 feet drops to 0 hit points, it drops to 1 hit point instead and regains extra hit points.",
-        ranks: ["It regains 2d10 + your Verum Modifier.",
-                "It regains 10 × Proficiency Bonus, the excess as temporary hit points, and ends one condition.",
-                "For 1 minute its hit point maximum can't be reduced, and it holds on at 1 hit point once more if it drops again.",
-                "It can target a creature that died within the last minute, if its body is intact."] },
-    ] },
-  { id: "protection-crescent", cog: "protection", name: "The Stained Crescent", owner: "Zeke",
-    flavor: "The shell is a promise. While Protection burns, a pale silver crescent hangs at Zeke's back, and the air around him goes still and heavy.",
-    save: "Constitution", damage: "Force", source: "Zeke's Paragons",
-    abilities: [
-      { name: "Crescent Ward", type: "passive",
-        text: "Allies within 10 feet of you gain +1 AC.",
-        ranks: ["Allies within 10 feet gain +1 AC.",
-                "It reaches 15 feet, and a hit against a warded ally can't inflict Wounds.",
-                "The bonus becomes +2 AC.",
-                "Warded allies are immune to critical hits."] },
-      { name: "Answering Blow", type: "offensive", act: "action", uses: "1",
-        text: "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra force damage. The extra damage also adds your Verum Modifier for each ally within 30 feet who has taken damage since the end of your last turn.",
-        ranks: ["+2d10 force, counting up to 3 hurt allies.",
-                "+4d10, counting up to 5 hurt allies. Until the end of its next turn the target has disadvantage on attacks against anyone but you.",
-                "+6d10, and 2 × Verum Modifier per hurt ally. It ignores resistances and immunities if the target caused any of that damage.",
-                "+8d10. For 1 minute, when an ally within 30 feet is hit, you can use your reaction to deal half this damage to the attacker."] },
-      { name: "Guardian's Shell", type: "supportive", act: "reaction", uses: "1",
-        text: "When you or a creature within 30 feet is targeted by an attack or forced to make a saving throw, it gains temporary hit points before the attack or save resolves.",
-        ranks: ["5 × Proficiency Bonus temporary hit points.",
-                "10 × Proficiency Bonus temporary hit points, plus resistance to one damage type for 1 round.",
-                "15 × Proficiency Bonus temporary hit points, and resistance to two damage types.",
-                "Damage of a resisted type is answered: the attacker takes 1d6 force per point of Proficiency Bonus (Constitution save for half)."] },
-    ] },
-  { id: "nature-turning", cog: "nature", name: "The Turning Year", owner: "Zeke", wheel: true,
-    flavor: "The world, left to itself, doesn't stay still. It turns. While Nature burns, the air around Zeke smells of whatever season he's carrying: rain and blossom, dust and heat, leaf-rot, first frost.",
-    save: "Wisdom", damage: "Piercing", source: "Zeke's Paragons",
-    warn: "Zeke doesn't know Nature yet — it can't be his Paragon until he reaches Learn Full through a Pilgrimage.",
-    wheelRanks: [
-      "The wheel turns one Season forward at the start of each of your turns. Lit mid-fight, it starts in Spring.",
-      "When you light Nature, choose its starting Season. Once per long rest you can spend 1 minute in stillness to force the wheel to a different Season until your next long rest.",
-      "Once per Deeper Burn, when the Season would turn, you can hold it for one more turn.",
-      "Each turn the wheel turns either way — forward or back, your choice.",
-    ],
-    abilities: [
-      { name: "The Seasons", type: "passive", seasonal: "combat",
-        text: "While Nature is your Paragon it always holds one Season, and the Season decides what this Passive does. In combat a Season's effect starts when it arrives, at the start of your turn, and lasts until your next turn.",
-        ranks: ["Radius 15 feet.", "Radius 20 feet.", "Radius 30 feet. Spring's healing doubles and Summer's thorns become 2d8.",
-                "Autumn's enemies also can't take reactions, and Winter's cover becomes three-quarters."] },
-      { name: "Season's Blow", type: "offensive", act: "action", uses: "1", seasonal: "blow",
-        text: "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra piercing damage, and the current Season adds its effect.",
-        ranks: ["+3d8 piercing.", "+5d8 piercing.", "+7d8 piercing.", "+9d8 piercing."] },
-      { name: "Season's Gift", type: "supportive", act: "bonus", uses: "1", seasonal: "gift",
-        text: "Up to your Proficiency Bonus allies within 30 feet receive the current Season's gift.",
-        ranks: ["As written.", "As written.", "As written.",
-                "The Full Year — once per long rest, you can give all four gifts at once."] },
-    ] },
 ];
 
 // ── State ─────────────────────────────────────────────────
@@ -202,7 +134,32 @@ function parResolve(s) {
 }
 
 function parRank(tier) { return TIERS[tier].label.split(" · ")[0]; }
-function parBuildsFor(cogId) { return PARAGON_BUILDS.filter(b => b.cog === cogId); }
+// The sets the DM has written for this account — loaded once at boot, null until then.
+let PAR_MINE = null;
+// Served by its own server, what a player can use is what their DM wrote for them and nothing
+// else. On a plain static host there are no accounts, so the worked examples stand in.
+function parMyBuilds() { return PAR_MINE || (API ? [] : PARAGON_EXAMPLES); }
+function parBuildsFor(cogId) { return parMyBuilds().filter(b => b.cog === cogId); }
+
+async function loadParagon() {
+  if (!API) return;
+  try {
+    const r = await fetch("api/paragon");
+    if (r.ok) PAR_MINE = (await r.json()).builds || [];
+  } catch (e) { console.warn("Couldn't load your Paragon sets", e); }
+}
+
+// The path is the DM's to open. Signed out, or on a static host, nothing is gated.
+function parAllowed() { return !API || !ME ? true : (!!ME.paragon || ME.role === "dm"); }
+
+// The Arts don't share a body. The builder still lets a Paragon open the other two — planning a
+// seal you can't draw is harmless — but it says so rather than pretending the rules allow it.
+function pathWarning() {
+  if (state.mode === "par" || !API || !ME?.paragon) return "";
+  return `<p class="path-warn">You walk the <strong>Paragon path</strong> — a Paragon can't use
+    Arcanum Veritas or Ignitions, can't manifest Eidons, and has no Blaze Points.
+    This is here to read and plan with, not to draw at the table.</p>`;
+}
 function parBuild(cogId) {
   const all = parBuildsFor(cogId);
   if (!all.length) return null;
@@ -558,7 +515,7 @@ function parBuildRef(b) {
   return h;
 }
 
-const PAR_REF = [
+function parRefPages() { return [
   { key: "overview", label: "The Paragon path", grp: "The system", body: () => `
     <p class="cdx-desc">The sorcerer holds a thousand candles and tends none of them. The Paragon holds one, and the whole night bends toward it.</p>
     <div class="cdx-sec"><h2>Quick reference</h2><div class="cdx-defs">
@@ -607,18 +564,23 @@ const PAR_REF = [
       <p>Your Devotions can change, but not casually. To replace one with another Cognition you know at Learn Full you undertake a Pilgrimage: a personal ritual performed over downtime — a vigil at a burning shrine, a month of silence, retracing the road where you first felt the new Cognition stir.</p>
       <p>When it's complete the old Devotion leaves you and the new one takes its place. Give your DM advance notice, so they can prepare the new Cognition's abilities with you before you finish.</p>
     </div></div>` },
-  ...PARAGON_BUILDS.map(b => ({
-    key: b.id, label: `${b.name}`, grp: b.owner ? `${b.owner}'s Paragons` : "Worked examples",
-    title: `${b.name} — Paragon of ${b.cog.charAt(0).toUpperCase() + b.cog.slice(1)}`,
-    body: () => parBuildRef(b),
-  })),
-];
+  // Your own sets first — they're the ones you can actually use — then the rules' examples
+  ...parMyBuilds().map(refPage("Your Paragons")),
+  ...PARAGON_EXAMPLES.map(refPage("Worked examples")),
+  ];
+}
+const refPage = grp => b => ({
+  key: `${grp === "Worked examples" ? "eg" : "mine"}:${b.cog}:${b.name}`,
+  label: b.name, grp,
+  title: `${b.name} — Paragon of ${parEntry(b.cog).name}`,
+  body: () => parBuildRef(b),
+});
 
 function renderParRefList() {
   const box = document.getElementById("ringList"); if (!box) return;
   const on = state.parRef || "overview";
   let grp = "", h = "";
-  PAR_REF.forEach(s => {
+  parRefPages().forEach(s => {
     if (s.grp !== grp) { grp = s.grp; h += `<div class="rail-grp">${grp}</div>`; }
     h += `<button class="cog${s.key === on ? " core" : ""}" onclick="openParRef('${escAttr(s.key)}')"><span class="nm">${s.label}</span></button>`;
   });
@@ -626,7 +588,8 @@ function renderParRefList() {
 }
 function renderParRef() {
   const host = document.getElementById("ringBody"); if (!host) return;
-  const s = PAR_REF.find(x => x.key === (state.parRef || "overview")) || PAR_REF[0];
+  const pages = parRefPages();
+  const s = pages.find(x => x.key === (state.parRef || "overview")) || pages[0];
   host.innerHTML = `<div class="cdx"><div class="cdx-hd"><div><h1>${s.title || s.label}</h1></div></div>${s.body()}</div>`;
 }
 function openParRef(k) { state.parRef = k; renderParRefList(); renderParRef(); document.getElementById("ringBody").scrollTop = 0; }

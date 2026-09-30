@@ -85,12 +85,19 @@ const MODES = {
 // The mode in play, and the one the ⇄ button goes to next
 state.mode = "av";
 function mode()     { return MODES[state.mode] || MODES.av; }
-function nextMode() { return MODE_ORDER[(MODE_ORDER.indexOf(state.mode) + 1) % MODE_ORDER.length]; }
+// The Paragon path is the DM's to open, so it joins the cycle only for a player who walks it
+// (and for the DM, who needs to see what they wrote). The other two are always there.
+function modeOrder() { return MODE_ORDER.filter(k => k !== "par" || parAllowed()); }
+function nextMode()  { const o = modeOrder(); return o[(o.indexOf(state.mode) + 1) % o.length]; }
 
 // ═══════════════════════════════════════════════════════════
 //  MODE SWITCH
 // ═══════════════════════════════════════════════════════════
 function setMode(m, quiet) {
+  if (m === "par" && !parAllowed()) {            // a remembered mode the DM has since closed
+    if (!quiet) toast("The Paragon path isn't open to you — your DM opens it");
+    m = "av";
+  }
   state.mode = MODES[m] ? m : "av";
   try { localStorage.setItem("av-mode", state.mode); } catch (e) {}
   applyMode();

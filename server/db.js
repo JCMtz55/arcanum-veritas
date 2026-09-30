@@ -72,6 +72,21 @@ const SCHEMA = [
      enabled  BOOLEAN NOT NULL,
      PRIMARY KEY (grimm_id, key)
    )`,
+  // Who walks the Paragon path. The DM turns it on per player — the path is a choice of identity
+  // made with them, not something a player switches on for themselves.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS paragon BOOLEAN NOT NULL DEFAULT false`,
+  // A player's Paragon Ability sets. These are written for each character with their DM, so unlike
+  // a seal's Verum Effects they can't come from a Cognition's JSON — they belong to the player.
+  // `data` is the set as JSON text: flavour, save, damage, and the abilities with their Rank ladders.
+  `CREATE TABLE IF NOT EXISTS paragon_builds (
+     id           SERIAL PRIMARY KEY,
+     user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     cognition_id TEXT NOT NULL,
+     name         TEXT NOT NULL,
+     data         TEXT NOT NULL,
+     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+     UNIQUE (user_id, cognition_id, name)
+   )`,
   // The character's own numbers on the command bar, remembered per account (defaults = the builder's)
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verum_mod  SMALLINT NOT NULL DEFAULT 4`,
