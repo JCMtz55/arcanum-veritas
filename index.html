@@ -19,11 +19,15 @@
   <div class="tabs">
     <button class="tab on" id="tabComposer" onclick="setView('composer')">Composer</button>
     <button class="tab" id="tabCodex" onclick="setView('codex')">Codex</button>
-    <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
-    <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
-    <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
-    <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
-    <button class="tab" id="tabAdmin" onclick="setView('admin')" hidden>Admin</button>
+    <!-- The rulebook views sit behind one button; they keep their tab ids so setView marks the open one -->
+    <details class="more" id="refMenu">
+      <summary class="tab" id="refBtn">Reference ▾</summary>
+      <div class="more-menu" onclick="this.parentNode.open = false">
+        <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
+        <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
+        <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
+      </div>
+    </details>
   </div>
   <div class="dials">
     <div class="dial" id="slotDial"><label for="slotDn">Slot</label>
@@ -40,7 +44,17 @@
     <span class="lv dc"><b id="dcOut">13</b><i>Verum DC</i></span>
     <span class="lv"><b id="capOut">1</b><i id="capLbl">cognition</i></span>
     <span class="status" id="statusEl">Loading…</span>
-    <button class="mini" id="whoBtn" onclick="openAccount()" title="Your account" hidden></button>
+    <!-- The account menu: everything that is yours rather than the builder's. Learning and Admin are
+         views like the tabs, so they keep their tab ids — setView marks the one that is open. -->
+    <details class="more" id="who" hidden>
+      <summary class="mini" id="whoBtn" title="Your account"></summary>
+      <div class="more-menu" onclick="this.parentNode.open = false">
+        <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
+        <button class="tab" id="tabAdmin" onclick="setView('admin')" hidden>Admin</button>
+        <button onclick="openAccount()">Change password</button>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -63,11 +77,16 @@
       <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
       <button class="mini" onclick="rollSeal()" title="Roll the seal's dice — every damage and healing number, added up (R)">Roll</button>
       <button class="mini" onclick="rollSeal(true)" title="Roll it as a critical hit — double dice (shift+R, or shift-click a chip)">Crit</button>
-      <button class="mini" id="saveBtn" onclick="saveBuild()" title="Keep this build on your account" hidden>Save</button>
-      <button class="mini" id="savedBtn" onclick="openSaves()" title="Your saved seals and Eidons" hidden>Saved</button>
-      <button class="mini" onclick="copySum()">Copy</button>
-      <button class="mini" onclick="saveImage()" title="Save this card as a PNG — on a phone, it opens the share sheet">Image</button>
-      <button class="mini" onclick="window.print()">Print</button>
+      <button class="mini" id="saveBtn" onclick="saveBuild()" title="Keep this build on your account — it appears in the rail" hidden>Save</button>
+      <details class="more">
+        <summary class="mini" title="Copy, image, print" aria-label="More actions">⋯</summary>
+        <div class="more-menu" onclick="this.parentNode.open = false">
+          <button id="savedItem" onclick="openSaves()" hidden>Saved builds…</button>
+          <button onclick="copySum()">Copy as text</button>
+          <button onclick="saveImage()" title="Save this card as a PNG — on a phone, it opens the share sheet">Save as image</button>
+          <button onclick="window.print()">Print</button>
+        </div>
+      </details>
     </div>
     <div id="sumBody"></div>
     <div id="tray" class="tray" hidden></div>

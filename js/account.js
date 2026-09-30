@@ -39,11 +39,12 @@ function signIn(e) {
   return false;
 }
 function showAccount() {
-  const b = document.getElementById("whoBtn");
-  b.textContent = ME.displayName; b.hidden = false;
+  document.getElementById("whoBtn").textContent = ME.displayName;
+  document.getElementById("who").hidden = false;
   document.getElementById("tabAdmin").hidden = ME.role !== "dm";
   document.getElementById("tabLearn").hidden = ME.role === "dm";   // the DM has no character to track
-  document.getElementById("saveBtn").hidden = document.getElementById("savedBtn").hidden = false;
+  document.getElementById("saveBtn").hidden = document.getElementById("savedItem").hidden = false;
+  loadSaves().catch(() => {});                                     // fills the composer's opening screen
   if (ME.role === "dm") refreshAdmin().catch(() => {});            // so the Admin tab can show its reminders
 }
 // ── The character's numbers — level, Verum mod, Dream mod — are remembered with the account.
@@ -100,6 +101,7 @@ function adminPending(known = true) {
 function syncAdminTab() {
   const n = adminPending().length;
   document.getElementById("tabAdmin").textContent = n ? `Admin · ${n}` : "Admin";
+  document.getElementById("whoBtn").textContent = n ? `${ME.displayName} · ${n}` : ME.displayName;   // seen without opening the menu
 }
 async function refreshAdmin() {
   ADMIN.users = (await api("GET", "api/admin/users")).users;

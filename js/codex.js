@@ -10,6 +10,10 @@ function setView(v) {
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
   Object.entries(VIEW_TABS).forEach(([k, id]) =>
     document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
+  // Rings, Damage and Emotion live in the Reference menu — its button stands in for their tab
+  document.getElementById("refBtn").className = "tab" + (["rings", "damage", "emotion"].includes(v) ? " on" : "");
+  // Learning and Admin live in the account menu — its button stands in for their tab
+  document.getElementById("whoBtn").classList.toggle("on", v === "learn" || v === "admin");
   if (v === "codex") {
     if (!state.codexId) {
       const first = state.core || (INDEX.find(c => c.ready) || {}).id;

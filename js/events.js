@@ -131,6 +131,11 @@ document.addEventListener("keydown", e => {
   setDmView(!state.dm);
 });
 
+// The seal panel's ⋯ menu closes when you click anywhere else
+document.addEventListener("click", e => {
+  document.querySelectorAll("details.more[open]").forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
+
 // ═══════════════════════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════════════════════

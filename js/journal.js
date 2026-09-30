@@ -6,12 +6,15 @@
 // ═══════════════════════════════════════════════════════════
 // It opens nothing in the builder. At 4/4 the DM is reminded, and the DM enabling the Cognition
 // is what moves it from here into the rail.
-let LEARNING = [];
+let LEARNING = [], LEARN_NAMES = [];   // LEARN_NAMES: what the name field suggests — names only
 const DEPTH_NOTE = ["not begun", "Learn ¼ — rituals only", "Learn ½ — as a secondary Cognition", "past ½", "Learn Full"];
 
 async function openLearning() {
   if (!API || ME.role === "dm") return setView("composer");
-  try { LEARNING = (await api("GET", "api/learning")).learning; } catch (err) { toast(err.message); }
+  try {
+    LEARNING = (await api("GET", "api/learning")).learning;
+    LEARN_NAMES = (await api("GET", "api/learning/names")).names;
+  } catch (err) { toast(err.message); }
   renderLearning();
 }
 
@@ -20,7 +23,7 @@ function renderLearning() {
   const going = LEARNING.filter(l => l.depth < 4), done = LEARNING.filter(l => l.depth === 4);
   const row = l => `<div class="cdx-def lrn"><b>${esc(l.name)}</b>
       <span><span class="pips">${[1, 2, 3, 4].map(i =>
-        `<button class="pip ${i <= l.depth ? "on" : ""}" onclick="setDepth('${escAttr(l.name)}',${i === l.depth ? i - 1 : i})" aria-label="${esc(l.name)} ${i} of 4"></button>`).join("")}</span>
+        `<button class="lpip ${i <= l.depth ? "on" : ""}" onclick="setDepth('${escAttr(l.name)}',${i === l.depth ? i - 1 : i})" aria-label="${esc(l.name)} ${i} of 4"></button>`).join("")}</span>
         <em>${l.depth}/4 · ${l.depth === 4 ? "mastered — waiting for the DM to enable it" : DEPTH_NOTE[l.depth]}</em></span>
       <button class="mini" onclick="dropLearning('${escAttr(l.name)}')" title="Stop tracking ${escQ(l.name)}">Remove</button></div>`;
 
@@ -30,7 +33,9 @@ function renderLearning() {
     <div class="cdx-sec"><h2>In progress</h2>` +
       (going.length ? `<div class="cdx-defs">${going.map(row).join("")}</div>` : `<div class="cdx-note"><p>Nothing in progress.</p></div>`) + `
       <form class="adm-line" onsubmit="return addLearning(event)">
-        <input class="search" id="lrnName" maxlength="40" placeholder="A Cognition you have begun to learn" aria-label="Cognition name" required>
+        <input class="search" id="lrnName" list="lrnNames" autocomplete="off" maxlength="40" placeholder="A Cognition you have begun to learn" aria-label="Cognition name" required>
+        <datalist id="lrnNames">${LEARN_NAMES.filter(n => !LEARNING.some(l => l.name.toLowerCase() === n.toLowerCase()))
+          .map(n => `<option value="${escQ(n)}"></option>`).join("")}</datalist>
         <button class="mini" type="submit">Track</button>
       </form></div>` +
 
@@ -65,8 +70,24 @@ function dropLearning(name) {
 // saved build grows with you. An Eidon also keeps its count of successful manifestations.
 let SAVES = null;
 async function loadSaves(fresh) {
-  if (fresh || !SAVES) SAVES = (await api("GET", "api/saves")).saves;
+  if (fresh || !SAVES) { SAVES = (await api("GET", "api/saves")).saves; if (INDEX.length) renderMain(); }
   return SAVES;
+}
+function saveAbout(s) {
+  const nameOf = id => INDEX.find(c => c.id === id)?.name || id;
+  return s.kind === "seal"
+    ? `${nameOf(s.data.core)} · ${COMP_DATA[s.data.compType]?.label || ""} ${s.data.compSub || ""} · ${ORDINALS[s.data.slotLevel] || ""} slot`
+    : (s.data.burning || []).filter(b => b.inEidon).map(b => nameOf(b.id)).join(" + ");
+}
+// The composer's opening screen, before anything is picked: this mode's saved builds as cards,
+// one click to load. Nothing at all until something is saved (or on a static host).
+function savedHome() {
+  const ign = state.mode === "ign", rows = (SAVES || []).filter(s => s.kind === (ign ? "eidon" : "seal"));
+  if (!rows.length) return "";
+  return `<div class="blk saved-home"><div class="blk-h"><h2>Your saved ${ign ? "Eidons" : "seals"}</h2><div class="rule"></div>
+      <button class="saved-m" onclick="openSaves()" title="Delete saved builds">manage</button></div>
+    <div class="rings">` + rows.map(s => `<button class="ring" onclick="loadSave(${s.id})">
+      <b>${esc(s.name)}</b><span>${esc(saveAbout(s))}</span></button>`).join("") + `</div></div>`;
 }
 
 function sealSnapshot() {
@@ -108,14 +129,10 @@ async function openSaves() {
   if (!dlg.open) dlg.showModal();
 }
 function renderSaves() {
-  const nameOf = id => INDEX.find(c => c.id === id)?.name || id;
-  const about = s => s.kind === "seal"
-    ? `${nameOf(s.data.core)} · ${COMP_DATA[s.data.compType]?.label || ""} ${s.data.compSub || ""} · ${ORDINALS[s.data.slotLevel] || ""} slot`
-    : (s.data.burning || []).filter(b => b.inEidon).map(b => nameOf(b.id)).join(" + ");
   const group = (kind, title) => {
     const rows = SAVES.filter(s => s.kind === kind);
     return `<h3>${title}</h3>` + (rows.length ? `<div class="cdx-defs">` + rows.map(s =>
-      `<div class="cdx-def"><b>${esc(s.name)}</b><span>${esc(about(s))}</span>
+      `<div class="cdx-def"><b>${esc(s.name)}</b><span>${esc(saveAbout(s))}</span>
         <button class="mini on" onclick="loadSave(${s.id})">Load</button>
         <button class="mini" onclick="deleteSave(${s.id})">Delete</button></div>`).join("") + `</div>`
       : `<p class="hint">None saved yet — build one and press Save.</p>`);

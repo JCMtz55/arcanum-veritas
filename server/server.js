@@ -210,6 +210,13 @@ app.get("/api/learning", requireUser, async (req, res) => {
   res.json({ learning: rows });
 });
 
+// What the tracker's name field suggests: the names — and only the names — of the Cognitions this
+// player doesn't have yet. Nothing else about them leaves the server.
+app.get("/api/learning/names", requireUser, async (req, res) => {
+  const mine = await grantsOf(req.user.id);
+  res.json({ names: INDEX.filter(c => !mine.has(c.id)).map(c => c.name).sort() });
+});
+
 app.put("/api/learning", requireUser, async (req, res) => {
   const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").slice(0, 40), key = keyOf(name);
   const depth = Number(req.body?.depth);

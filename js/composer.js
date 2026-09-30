@@ -18,7 +18,7 @@ function renderMain() {
 
   if (!state.core) {
     comp.innerHTML = rulesDrawer() + `<div class="empty">
-      Pick a cognition from the left to set your Keystone. Everything else follows from it.</div>`;
+      Pick a cognition from the left to set your Keystone. Everything else follows from it.</div>` + savedHome();
     seal.innerHTML = `<div class="empty">No seal drawn yet.</div>`;
     return;
   }

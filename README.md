@@ -15,11 +15,15 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 ## Accounts and Hosting
 
+**The top bar.** Composer and Codex are tabs; the rulebook views — Rings (Ignitions in Ignition mode), Damage and Emotion — are under **Reference ▾**.
+
+**The account menu.** The button with your name, at the right of the bar, opens everything that is yours rather than the builder's: **Learning** (players), **Admin** (the DM), Change password and Sign out. For the DM the button itself reads `Name · n` while reminders are waiting.
+
 **Who sees what.** Each player has an account and sees only the Cognitions granted to it; nothing else reaches their browser. The **DM** account reads every Cognition, held-back ones included, and has an **Admin** tab: pick a player, click Cognitions to grant or take them away (saved at once), set or reset passwords, add and delete players. `ready` in `index.json` is still the global gate — a granted Cognition that isn't `ready` shows greyed out and its text is not served.
 
-**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** in the DM's Admin tab (the tab reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The tracker takes names as free text, so a player never sees the list of Cognitions they don't have — a name that matches nothing in `index.json` is listed apart, with nothing to enable.
+**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** in the DM's Admin tab (the tab reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The name field autocompletes from the Cognitions the player doesn't have yet — their **names only**; nothing else about them is sent. Any other name can still be typed; one that matches nothing in `index.json` is listed apart, with nothing to enable.
 
-**Saved builds.** Signed in, the seal panel has **Save** and **Saved**. A seal or an Eidon is saved under its name (saving the same name again replaces it) and loads back from the Saved list. A save holds the recipe, not the character — level and modifiers stay whatever the bar says — and an Eidon also keeps its count of successful manifestations. Saves are private to the account; the DM cannot see them.
+**Saved builds.** Signed in, the seal panel has **Save**. A seal or an Eidon is saved under its name (saving the same name again replaces it) and then shows as a card on the composer's opening screen — under "Pick a cognition…", seals in Arcanum Veritas, Eidons in Ignition — where one click loads it; **manage** there opens the full list for deleting. With a build already on the table, the same list is under the panel's **⋯** menu (*Saved builds…*), next to copy, image and print. A save holds the recipe, not the character — level and modifiers stay whatever the bar says — and an Eidon also keeps its count of successful manifestations. Saves are private to the account; the DM cannot see them.
 
 **Character numbers.** Level, Verum mod and Dream mod are remembered with the account: change them on the bar and they are there at the next sign-in, on any device. The slot is not remembered — it belongs to the seal being drawn, and is kept in a saved seal.
 
