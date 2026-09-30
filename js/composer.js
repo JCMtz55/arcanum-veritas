@@ -14,10 +14,11 @@ function renderMain() {
   // Codex and Rings resolve formulas off the same bar, so they re-read whenever it moves
   if (state.view === "codex") renderCodex();
   if (state.view === "rings") renderRing();
-  if (state.mode === "ign") return renderForge();
+  const main = mode().main;
+  if (main) return main();
 
   if (!state.core) {
-    comp.innerHTML = rulesDrawer() + `<div class="empty">
+    comp.innerHTML = pathWarning() + rulesDrawer() + `<div class="empty">
       Pick a cognition from the left to set your Keystone. Everything else follows from it.</div>` + savedHome();
     seal.innerHTML = `<div class="empty">No seal drawn yet.</div>`;
     return;
@@ -25,7 +26,7 @@ function renderMain() {
 
   const coreCog = LOADED[state.core];
   const tier    = getTier(state.charLevel);
-  comp.innerHTML = rulesDrawer() + buildComposer(coreCog, tier);
+  comp.innerHTML = pathWarning() + rulesDrawer() + buildComposer(coreCog, tier);
 
   if (!state.compType || !state.compSub || !currentSub()) {
     seal.innerHTML = `<div class="empty">Choose a Ring to draw the seal.</div>`;
@@ -186,7 +187,8 @@ function rulesDrawer() {
 //  SELECTION
 // ═══════════════════════════════════════════════════════════
 async function toggleCog(id) {
-  if (state.mode === "ign") return toggleBurn(id);
+  const pick = mode().pick;
+  if (pick) return pick(id);
   const entry = INDEX.find(c => c.id === id);
   if (!entry || !entry.ready) return;
 
@@ -224,7 +226,8 @@ function sealName(v) {
 }
 
 function clearAll() {
-  if (state.mode === "ign") { state.ign.burning = []; renderCogList(); renderMain(); return; }   // Ignition: put every Burn out
+  const clear = mode().clear;   // Ignition puts every Burn out; the Paragon lets its Devotions go
+  if (clear) { clear(); renderCogList(); renderMain(); return; }
   state.core = null; state.coreVerum = null; state.sealName = "";
   state.compType = null; state.compSub = null; state.complements = [];
   renderCogList(); renderMain();

@@ -92,66 +92,11 @@ function setNum(k, val) { const sh = sheet(); sh[k] = +val || 0; save(); render(
 function setStr(k, val) { const sh = sheet(); sh[k] = val; save(); }
 
 // ── Chains ──────────────────────────────────────────────────────────────
-// A player's sheet only shows the chains. The DM keeps them, for every Grimm, in the Chains view.
-const CHAIN_FX = {
-  3: 'The pact is whole. The Grimm behaves per its stage.',
-  2: 'The Grimm\'s voice grows more independent — it speaks unprompted, hesitates a half-beat, watches you when it thinks itself unobserved.',
-  1: 'The Grimm may act on its own once per session (DM). Its abilities run hot. Every Dream Saving Throw to hold the last chain is +2 to +5 DC.',
-  0: 'The user dies and the Grimm Unchains.',
-};
+// A player's sheet only shows the chains. The DM keeps them, for every Grimm, on the Admin page.
 function chainIcons(n) {
   let h = '';
   for (let i = 0; i < 3; i++) h += `<span class="chain ${i >= n ? 'broken' : ''}">⛓</span>`;
   return h;
-}
-// The DM's view: every Grimm's chains, which of its abilities the player may compose, and whether
-// its Reality Shift is revealed. A hidden Shift's text is never sent to that player's browser.
-function renderGrimmsAdmin() {
-  $('#view').innerHTML = `
-  <div class="hero"><div><h1 style="color:var(--bone)">The Grimms</h1>
-    <div class="sub">Yours to keep. Players see the chains on their sheet, compose only the abilities you leave on, and read a Reality Shift only once you reveal it.</div></div></div>
-  <div class="grid">${D.grimms.map(g => {
-    const n = sheet(g.id).chains, sh = shiftOn(g.id);
-    return `<section class="card span12" style="--hue:${g.hue}">
-      <h2><span style="color:${g.hue}">${esc(g.name)}</span> <span class="hint" style="text-transform:none;letter-spacing:0">${esc(g.user)}</span>
-        <span class="r">
-          <div class="step"><button onclick="setChains('${g.id}',${n - 1})" aria-label="Break a chain">–</button><span>${n}</span><button onclick="setChains('${g.id}',${n + 1})" aria-label="Restore a chain">+</button></div>
-          <span class="chains shown">${chainIcons(n)}</span>
-          <span class="state st-${CHAIN_STATE[n].toLowerCase()}">${CHAIN_STATE[n]}</span>
-        </span></h2>
-      <p class="hint" style="margin-top:0">${CHAIN_FX[n]}</p>
-      ${g.shift ? `<div class="row" style="margin-top:10px">
-        <span class="lbl">Reality Shift</span><b style="font-family:var(--sans);font-size:14px">${esc(g.shift.name)}</b>
-        <button class="btn sm ${sh ? 'on' : ''}" onclick="setToggle('${g.id}','shift',${!sh})">${sh ? 'Revealed' : 'Hidden'}</button>
-        <button class="btn sm" onclick="openDialog('${attr(g.shift.name)}', prose(grimmById('${g.id}').shift.text))">Read it</button>
-      </div>` : ''}
-      <h3>Abilities</h3>
-      <div class="chips">${g.abilities.map(a => {
-        const on = abilityOn(g.id, a.id);
-        return `<button class="chip ${on ? 'on' : ''}" title="${on ? 'On — click to take it away' : 'Off — click to give it back'}" onclick="setToggle('${g.id}','a:${attr(a.id)}',${!on})">${esc(a.name)}</button>`;
-      }).join('')}</div>
-      <p class="hint">An ability switched off leaves that player's loadout and ability pool at once.</p>
-    </section>`; }).join('')}</div>`;
-}
-async function setToggle(gid, key, enabled) {
-  try {
-    const r = await fetch(`../api/admin/grimms/${gid}/toggles/${encodeURIComponent(key)}`,
-      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) });
-    if (!r.ok) throw 0;
-    (TOGGLES[gid] = TOGGLES[gid] || {})[key] = enabled;
-    const sh = S.sheets[gid];
-    if (sh && key !== 'shift') fitLoadout(grimmById(gid), sh);   // a denied ability leaves the loadout
-    save(); render();
-  } catch (e) { toast("Couldn't save — are you still signed in as the DM?"); }
-}
-async function setChains(id, n) {
-  n = Math.max(0, Math.min(3, n));
-  if (n === sheet(id).chains) return;
-  try {
-    const r = await fetch(`../api/admin/grimms/${id}/chains`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chains: n }) });
-    if (!r.ok) throw 0;
-    sheet(id).chains = n; save(); render();
-  } catch (e) { toast("Couldn't save — are you still signed in as the DM?"); }
 }
 
 // ── Loadout & abilities ─────────────────────────────────────────────────

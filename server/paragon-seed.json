@@ -1,0 +1,162 @@
+{
+  "zeke": [
+    {
+      "id": "life-evergreen",
+      "cog": "life",
+      "name": "The Evergreen",
+      "owner": "Zeke",
+      "flavor": "A leaf that doesn't fall in winter. While Life burns, green sap runs in the cracks of Zeke's scales, and flowers open where he stands.",
+      "save": "Constitution",
+      "damage": "Necrotic",
+      "source": "Zeke's Paragons",
+      "abilities": [
+        {
+          "name": "Evergreen Sap",
+          "type": "passive",
+          "text": "At the start of each of your turns, you or one ally within 30 feet regains hit points equal to your Verum Modifier.",
+          "ranks": [
+            "One creature heals your Verum Modifier.",
+            "Healing past full becomes temporary hit points.",
+            "It heals your Verum Modifier + your proficiency bonus.",
+            "Two creatures heal each turn."
+          ]
+        },
+        {
+          "name": "Sap the Wicked",
+          "type": "offensive",
+          "act": "action",
+          "uses": "1",
+          "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra necrotic damage. You and allies of your choice within 30 feet share hit points equal to half the necrotic damage, divided as you choose.",
+          "ranks": [
+            "+3d10 necrotic.",
+            "+5d10 necrotic. The target's hit point maximum drops by the necrotic damage until a long rest.",
+            "+7d10. The healing equals all the necrotic damage. The target can't regain hit points until the end of its next turn.",
+            "+9d10. If the attack drops the target to 0, one ally within 60 feet who is at 0 hit points (or who died within the last minute) rises with half its hit points."
+          ]
+        },
+        {
+          "name": "Evergreen Oath",
+          "type": "supportive",
+          "act": "reaction",
+          "uses": "1",
+          "text": "When a creature you can see within 60 feet drops to 0 hit points, it drops to 1 hit point instead and regains extra hit points.",
+          "ranks": [
+            "It regains 2d10 + your Verum Modifier.",
+            "It regains 10 × Proficiency Bonus, the excess as temporary hit points, and ends one condition.",
+            "For 1 minute its hit point maximum can't be reduced, and it holds on at 1 hit point once more if it drops again.",
+            "It can target a creature that died within the last minute, if its body is intact."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "protection-crescent",
+      "cog": "protection",
+      "name": "The Stained Crescent",
+      "owner": "Zeke",
+      "flavor": "The shell is a promise. While Protection burns, a pale silver crescent hangs at Zeke's back, and the air around him goes still and heavy.",
+      "save": "Constitution",
+      "damage": "Force",
+      "source": "Zeke's Paragons",
+      "abilities": [
+        {
+          "name": "Crescent Ward",
+          "type": "passive",
+          "text": "Allies within 10 feet of you gain +1 AC.",
+          "ranks": [
+            "Allies within 10 feet gain +1 AC.",
+            "It reaches 15 feet, and a hit against a warded ally can't inflict Wounds.",
+            "The bonus becomes +2 AC.",
+            "Warded allies are immune to critical hits."
+          ]
+        },
+        {
+          "name": "Answering Blow",
+          "type": "offensive",
+          "act": "action",
+          "uses": "1",
+          "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra force damage. The extra damage also adds your Verum Modifier for each ally within 30 feet who has taken damage since the end of your last turn.",
+          "ranks": [
+            "+2d10 force, counting up to 3 hurt allies.",
+            "+4d10, counting up to 5 hurt allies. Until the end of its next turn the target has disadvantage on attacks against anyone but you.",
+            "+6d10, and 2 × Verum Modifier per hurt ally. It ignores resistances and immunities if the target caused any of that damage.",
+            "+8d10. For 1 minute, when an ally within 30 feet is hit, you can use your reaction to deal half this damage to the attacker."
+          ]
+        },
+        {
+          "name": "Guardian's Shell",
+          "type": "supportive",
+          "act": "reaction",
+          "uses": "1",
+          "text": "When you or a creature within 30 feet is targeted by an attack or forced to make a saving throw, it gains temporary hit points before the attack or save resolves.",
+          "ranks": [
+            "5 × Proficiency Bonus temporary hit points.",
+            "10 × Proficiency Bonus temporary hit points, plus resistance to one damage type for 1 round.",
+            "15 × Proficiency Bonus temporary hit points, and resistance to two damage types.",
+            "Damage of a resisted type is answered: the attacker takes 1d6 force per point of Proficiency Bonus (Constitution save for half)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-turning",
+      "cog": "nature",
+      "name": "The Turning Year",
+      "owner": "Zeke",
+      "wheel": true,
+      "flavor": "The world, left to itself, doesn't stay still. It turns. While Nature burns, the air around Zeke smells of whatever season he's carrying: rain and blossom, dust and heat, leaf-rot, first frost.",
+      "save": "Wisdom",
+      "damage": "Piercing",
+      "source": "Zeke's Paragons",
+      "warn": "Zeke doesn't know Nature yet — it can't be his Paragon until he reaches Learn Full through a Pilgrimage.",
+      "wheelRanks": [
+        "The wheel turns one Season forward at the start of each of your turns. Lit mid-fight, it starts in Spring.",
+        "When you light Nature, choose its starting Season. Once per long rest you can spend 1 minute in stillness to force the wheel to a different Season until your next long rest.",
+        "Once per Deeper Burn, when the Season would turn, you can hold it for one more turn.",
+        "Each turn the wheel turns either way — forward or back, your choice."
+      ],
+      "abilities": [
+        {
+          "name": "The Seasons",
+          "type": "passive",
+          "seasonal": "combat",
+          "text": "While Nature is your Paragon it always holds one Season, and the Season decides what this Passive does. In combat a Season's effect starts when it arrives, at the start of your turn, and lasts until your next turn.",
+          "ranks": [
+            "Radius 15 feet.",
+            "Radius 20 feet.",
+            "Radius 30 feet. Spring's healing doubles and Summer's thorns become 2d8.",
+            "Autumn's enemies also can't take reactions, and Winter's cover becomes three-quarters."
+          ]
+        },
+        {
+          "name": "Season's Blow",
+          "type": "offensive",
+          "act": "action",
+          "uses": "1",
+          "seasonal": "blow",
+          "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra piercing damage, and the current Season adds its effect.",
+          "ranks": [
+            "+3d8 piercing.",
+            "+5d8 piercing.",
+            "+7d8 piercing.",
+            "+9d8 piercing."
+          ]
+        },
+        {
+          "name": "Season's Gift",
+          "type": "supportive",
+          "act": "bonus",
+          "uses": "1",
+          "seasonal": "gift",
+          "text": "Up to your Proficiency Bonus allies within 30 feet receive the current Season's gift.",
+          "ranks": [
+            "As written.",
+            "As written.",
+            "As written.",
+            "The Full Year — once per long rest, you can give all four gifts at once."
+          ]
+        }
+      ]
+    }
+  ]
+}

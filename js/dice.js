@@ -91,7 +91,7 @@ function sealChips() {
   if (!chips.length) chips = [...(body?.querySelectorAll(".card .n") || [])]
     .filter(c => !c.classList.contains("atk") && !c.classList.contains("dc") && parseRoll(c.querySelector("b")?.textContent));
   if (!chips.length) toast(body?.querySelector(".raw") ? "The chips live on the PLAY card — switch back to roll them"
-      : state.core || state.mode === "ign" ? "Nothing on this card rolls dice" : "Draw a seal first");
+      : state.core || state.mode !== "av" ? "Nothing on this card rolls dice" : mode().needCard);
   return chips;
 }
 

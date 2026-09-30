@@ -5,8 +5,7 @@ const VIEWS = { sheet: 'Sheet', codex: 'Compendium', party: 'Party', rules: 'Rul
 function renderBar() {
   const g = S.current && grimmById(S.current);
   document.documentElement.style.setProperty('--hue', g ? g.hue : '#B08842');
-  // Signed in as the DM, one more view: every Grimm's chains, abilities and Reality Shift
-  $('#tabs').innerHTML = Object.entries(ROLE === 'dm' ? { ...VIEWS, dm: 'Grimms · DM' } : VIEWS).map(([k, n]) => `<button class="tab ${S.view === k ? 'on' : ''}" onclick="setView('${k}')">${n}</button>`).join('');
+  $('#tabs').innerHTML = Object.entries(VIEWS).map(([k, n]) => `<button class="tab ${S.view === k ? 'on' : ''}" onclick="setView('${k}')">${n}</button>`).join('');
   if (!g) { $('#dials').innerHTML = ''; $('#live').innerHTML = ''; return; }
   const sh = sheet(), v = derived(sh);
   $('#dials').innerHTML = `
@@ -21,11 +20,10 @@ function renderBar() {
 }
 
 function render() {
-  if (S.view === 'chains') S.view = 'dm';          // the view was called Chains before it held more
-  if (S.view === 'dm' && ROLE !== 'dm') S.view = 'sheet';
+  // The DM's controls live on admin.html now; a sheet saved while they were a tab here comes back to its own.
+  if (!VIEWS[S.view]) S.view = 'sheet';
   renderBar();
   if (S.view === 'sheet') S.current ? renderSheet() : renderChooser();
-  else if (S.view === 'dm') renderGrimmsAdmin();
   else if (S.view === 'codex') renderCodex();
   else if (S.view === 'party') renderParty();
   else renderRules();
@@ -81,6 +79,5 @@ document.addEventListener('keydown', e => {
 });
 
 $('#built').textContent = D.built;
-const openedOn = S.view;        // a DM reopening on the Chains view gets it back once the role is known
 render();
-syncGrimms().then(() => { if (openedOn === 'dm') S.view = 'dm'; render(); });
+syncGrimms().then(render);   // the chains and the DM's toggles, once the server answers

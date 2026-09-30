@@ -75,6 +75,8 @@ main{max-width:1320px;margin:0 auto;padding:22px 20px 80px}
 /* stance slots — one pick each, like the ability loadout */
 .stancerow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-bottom:9px}
 .stancerow .slotline{margin:0}
+/* a troop called up beyond the standing platoon */
+.item.reinf{border-style:dashed}
 /* Solemn Temperance's banner and Acclaim */
 .shift .pips{display:inline-flex;gap:3px;align-items:center}
 .shift .pips .pip{width:12px;height:12px;border-radius:50%;border:1px solid var(--line);background:var(--slate);cursor:default}

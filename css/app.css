@@ -604,3 +604,57 @@ body.ign #mFull{display:none}
 .exporting .n b,.exporting .n i,.exporting .n u{display:inline-block;margin-right:6px;letter-spacing:0}
 .exporting .n.dmg.abs{box-shadow:none;outline:1px solid var(--ember);outline-offset:-1px}
 .exporting .t{letter-spacing:0}
+/* ── Paragon mode: the switch, the Devotions, and the ability sheet ──
+   Ignition is amber and Arcanum Veritas is brass, so the Paragon takes a jade —
+   the evergreen that doesn't fall, and plainly neither of the other two. */
+body.par .mode{border-color:#3f8065;color:#7BC2A4;background:rgba(123,194,164,.08)}
+body.par .mode:hover{border-color:#5da584;color:#9BD5BA}
+body.par .brand{color:#7BC2A4}
+body.par #mFull{display:none}            /* the Paragon card has no FULL reading */
+body.par .blaze .bp{border-color:#3f8065}
+body.par .blaze .bp.on{background:radial-gradient(circle at 40% 35%,#c8f0dc,#3f8065 70%);
+  border-color:#5da584;box-shadow:0 0 6px rgba(123,194,164,.4)}
+body.par .burn.prim{border-color:#3f8065;background:rgba(123,194,164,.07)}
+body.par .burn .rnd{color:#7BC2A4}
+body.par .chip.on{background:#7BC2A4;border-color:#7BC2A4;color:var(--slate)}
+body.par .rung.now{border-color:#3f8065}
+
+/* One Paragon Ability: its type on the edge, the live Rank called out under the rule */
+.par-ab{margin-top:9px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.par-ab.passive{border-left:3px solid var(--steel)}
+.par-ab.offensive{border-left:3px solid var(--ember)}
+.par-ab.supportive{border-left:3px solid var(--verdant)}
+.par-ab-h{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.par-ab-h b{font-family:var(--sans);font-size:13.5px;color:var(--bone)}
+.par-ab-t{margin:0 0 7px;font-size:13.5px;line-height:1.5;color:var(--bone2)}
+.par-ab-now{margin:0 0 7px;padding:6px 10px;border:1px solid #3f8065;border-radius:7px;
+  background:rgba(123,194,164,.08);font-family:var(--sans);font-size:12.5px;line-height:1.45;color:var(--bone)}
+.par-ab .ladder{margin-top:2px}
+
+/* The note a Paragon sees on the two Arts their path closed off */
+.path-warn{margin:0 0 12px;padding:9px 13px;border:1px solid #3f8065;border-left-width:3px;border-radius:8px;
+  background:rgba(123,194,164,.07);font-family:var(--sans);font-size:12.5px;line-height:1.5;color:var(--bone2)}
+.path-warn strong{color:#7BC2A4}
+
+/* ── Admin: writing a player's Paragon Abilities ───────────── */
+.adm-sub{margin:16px 0 8px;font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--mute);letter-spacing:.02em}
+.par-edit{margin-top:12px;padding:14px 16px;border:1px solid #3f8065;border-radius:10px;background:rgba(123,194,164,.04)}
+.par-edit .adm-sub{margin-top:0}
+.par-edit label{display:block;margin:12px 0 5px;font-family:var(--sans);font-size:11px;color:var(--mute);letter-spacing:.02em}
+.par-edit label .search,.par-edit label .pick{margin-top:5px;width:100%}
+.par-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 14px}
+.par-ranks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px;margin-top:4px}
+.par-ta{width:100%;resize:vertical;font-family:var(--serif);line-height:1.45}
+.par-edit .par-ab-h{gap:6px}
+.par-edit .par-ab-h .search,.par-edit .par-ab-h .pick{margin-top:0;width:auto}
+.par-name{flex:1;min-width:130px}
+.par-pick{flex:none;width:auto}
+.par-uses{width:110px;flex:none}
+.par-note{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--mute)}
+.par-edit .mini.adm-del{margin-left:auto}
+
+/* ── Admin: the Grimms. The chain marks read the same here as on a player's sheet,
+   so these match grimms/css/app.css rather than inventing a second look. */
+.chains{display:flex;gap:6px;align-items:center}
+.chain{font-size:22px;line-height:1;filter:grayscale(.2)}
+.chain.broken{opacity:.18;filter:grayscale(1)}

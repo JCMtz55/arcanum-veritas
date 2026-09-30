@@ -23,7 +23,8 @@ const RING_ROLL = {
 };
 
 function renderRingList() {
-  if (state.mode === "ign") return renderIgnRefList();   // in Ignition mode this tab is the Ignition reference
+  const list = mode().refList;   // in Ignition and Paragon mode this tab is that Art's reference
+  if (list) return list();
   const box = document.getElementById("ringList");
   const ref = state.ringRef || {};
   box.innerHTML = Object.entries(COMP_DATA).map(([k, d]) =>
@@ -47,7 +48,8 @@ function openRing(type, sub) {
 function ringSlot(n) { bumpSlotTo(n); }
 
 function renderRing() {
-  if (state.mode === "ign") return renderIgnRef();
+  const page = mode().ref;   // Ignition and Paragon put their own reference here
+  if (page) return page();
   const host = document.getElementById("ringBody");
   if (!host) return;
   const ref = state.ringRef;

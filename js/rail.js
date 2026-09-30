@@ -52,7 +52,8 @@ function renderCogList() {
   if (!box) return;
   renderFilter("cogFilter");
   const q = (document.getElementById("cogSearch")?.value || "").trim().toLowerCase();
-  if (state.mode === "ign") return renderBurnRail(box, q);   // Ignition: the rail Burns Cognitions
+  const rail = mode().rail;                                  // Ignition Burns; the Paragon swears Devotions
+  if (rail) return rail(box, q);
   const atCap = state.complements.length >= maxComps() && state.core !== null;
   const { shown, h } = groupedRail(q, c => {
     const isCore = state.core === c.id;

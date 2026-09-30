@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ephemer — Once Upon a Star ★</title>
-<meta name="description" content="Once Upon a Star ★ — the table's tools for Ephemer: the Arcanum Veritas seal composer and the Grimm Companion.">
+<title>Admin — Ephemer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,11 +12,15 @@
 <body>
 
 <div class="bar">
-  <div class="brand">Ephemer<em>once upon a star ★</em></div>
+  <a class="home" href="./" title="Ephemer — back to the front page" aria-label="Ephemer home">★</a>
+  <div class="brand">Admin<em>the DM's own</em></div>
   <div class="live">
+    <span class="lv" id="pendingBox" hidden><b id="pendingOut">0</b><i>waiting</i></span>
     <details class="more" id="who" hidden>
       <summary class="mini" id="whoBtn" title="Your account"></summary>
       <div class="more-menu" onclick="this.parentNode.open = false">
+        <button onclick="location.href='arcanum.html'">Seal composer</button>
+        <button onclick="location.href='grimms/'">Grimm Companion</button>
         <button onclick="openAccount()">Change password</button>
         <button onclick="signOut()">Sign out</button>
       </div>
@@ -25,36 +28,32 @@
   </div>
 </div>
 
-<main class="hub" id="hub" hidden>
-  <h1 id="hubHello">Where to?</h1>
-  <p class="hub-sub">The table's tools for Ephemer.</p>
-  <div class="hub-grid">
-    <a class="hub-card av" href="arcanum.html">
-      <span class="hub-mark">✦</span>
-      <b>Arcanum Veritas &amp; Ignition</b>
-      <span>Compose seals from your Cognitions and forge Eidons. Your saved builds and your Codex live here.</span>
-    </a>
-    <a class="hub-card grimm" href="grimms/">
-      <span class="hub-mark">⛓</span>
-      <b>Grimm Companion</b>
-      <span>Your Grimm's sheet — slots, chains, abilities and trackers — with the compendium, party tools and rules.</span>
-    </a>
-    <a class="hub-card small" id="hubLearn" href="arcanum.html#learn" hidden>
-      <b>Learning</b>
-      <span>Track the Cognitions you are working toward.</span>
-    </a>
-    <a class="hub-card small" id="hubAdmin" href="admin.html" hidden>
-      <b id="hubAdminName">Admin</b>
-      <span>Players, their Cognitions, and reminders.</span>
-    </a>
-  </div>
-</main>
+<div class="board" id="board" hidden>
+  <aside class="rail">
+    <div class="cogs" id="adminList" style="padding-top:11px"></div>
+    <div class="rail-foot"><button class="ghost" onclick="openAdminUser('new')">New player</button></div>
+  </aside>
+  <section class="codex" id="adminBody"></section>
+</div>
 
-<!-- Sign-in: only shown when the app is served by its own server and nobody is signed in -->
+<!-- Shown to anyone who isn't the DM, instead of an interface that would fail on every click -->
+<div class="board" id="locked" hidden>
+  <section class="codex">
+    <div class="cdx"><div class="cdx-hd"><div>
+      <h1>Not yours to open</h1>
+      <p class="cdx-desc" id="lockedWhy"></p>
+    </div></div>
+    <div class="cdx-sec"><div class="cdx-note">
+      <p>The Admin page keeps the accounts, what each player may read, the Paragon paths and the Grimms.
+         If you came looking for your own tools, they're on <a href="./">the front page</a>.</p>
+    </div></div></div>
+  </section>
+</div>
+
 <div class="gate" id="gate" hidden>
   <form class="gate-box" onsubmit="return signIn(event)">
-    <h1>Ephemer</h1>
-    <p>Sign in to open your tools.</p>
+    <h1>Admin</h1>
+    <p>Sign in as the DM.</p>
     <label for="gateUser">Name</label>
     <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
     <label for="gatePass">Password</label>
@@ -81,6 +80,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/hub.js"></script>
+<!-- Only what the DM's work needs: the domain tables and Ranks, the Grimm book, the worked
+     Paragon sets. None of the builder — no composer, no card, no dice. -->
+<script src="js/data.js"></script>
+<script src="grimms/js/data.js"></script>
+<script src="js/paragon-examples.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>

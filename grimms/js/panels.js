@@ -514,16 +514,21 @@ const JOBS = {
   Magus:    { charges: { 'Magic Edge': 3, 'Arcane Nova': 2 } },
   Bulwark:  { charges: {} },
 };
+// Every troop gets a row of its own — the platoon proper, the reinforcements called up by the
+// ability, and any summoned past the limit by Hollownest's Reinforcement Surge. They all take jobs.
+const troopName = (i, base, reinf) =>
+  i < base ? `Troop ${i + 1}` : i < base + reinf ? `Reinf. ${i - base + 1}` : `Surge ${i - base - reinf + 1}`;
 PANELS['white-rabbit'] = (g, sh, v) => {
   const x = sh.x, base = awakened(sh) ? 3 : 2;
+  const maxT = 2 * v.pb, reinf = x.reinf || 0, surge = x.surge || 0, total = base + reinf + surge;
   x.troops = x.troops || [];
-  while (x.troops.length < base) x.troops.push({ job: '', used: {} });
-  const reinf = x.reinf || 0, total = base + reinf, maxT = 2 * v.pb;
-  const n = j => x.troops.slice(0, base).filter(t => t.job === j).length;
+  while (x.troops.length < total) x.troops.push({ job: '', used: {} });
+  if (x.troops.length > total) x.troops.length = total;
+  const n = j => x.troops.filter(t => t.job === j).length;
   const dex = +x.dex || 0, wis = +x.wis || 0, half = Math.floor(v.pb / 2);
-  const troopRows = x.troops.slice(0, base).map((t, i) => {
+  const troopRows = x.troops.map((t, i) => {
     const ch = JOBS[t.job] ? JOBS[t.job].charges : {};
-    return `<div class="item"><span class="nm">Troop ${i + 1}</span>
+    return `<div class="item ${i >= base ? 'reinf' : ''}"><span class="nm">${troopName(i, base, reinf)}</span>
       ${awakened(sh) ? `<select class="pick" onchange="troopJob(${i},this.value)"><option value="">— no job —</option>${Object.keys(JOBS).map(j => `<option ${t.job === j ? 'selected' : ''}>${j}</option>`).join('')}</select>` : ''}
       <span class="sp"></span>
       ${Object.entries(ch).map(([a, max]) => `<span class="lbl">${a}</span><span class="pips">${Array.from({ length: max }, (_, k) => `<button class="pip sm ${k < (t.used[a] || 0) ? 'used' : ''}" onclick="troopCharge(${i},'${a}',${k})"></button>`).join('')}</span>`).join('')}
@@ -531,7 +536,7 @@ PANELS['white-rabbit'] = (g, sh, v) => {
   }).join('');
   return `<h2>Umbra Platoon <span class="r"><button class="btn sm" onclick="troopRest()">Short rest</button></span></h2>
     <div class="stats">
-      ${stat(total, `troops${reinf ? ` (${reinf} reinf.)` : ''}`)}
+      ${stat(total, `troops${reinf || surge ? ` · ${base} + ${reinf}${surge ? ` + ${surge}` : ''}` : ''}`)}
       ${stat(`${40 * total} ft`, 'warding range')}
       ${stat(`${20 - n('Infantry')}–20`, 'crit range')}
       ${n('Scout') ? stat(`+${n('Scout')}`, 'atk & dmg, +' + 3 * n('Scout') + ' Perception') : ''}
@@ -540,7 +545,8 @@ PANELS['white-rabbit'] = (g, sh, v) => {
       ${n('Bulwark') ? stat(`+${n('Bulwark')}`, 'AC & saves') : ''}
     </div>
     <div class="row" style="margin-top:10px">${numIn('Dex mod', 'dex', 0)}${numIn('Wis mod', 'wis', 0)}
-      <span class="lbl">Reinforcements</span><div class="step"><button onclick="xbump('reinf',-1,0,${Math.max(0, maxT - base)})">–</button><span>${reinf}</span><button onclick="xbump('reinf',1,0,${Math.max(0, maxT - base)})">+</button></div></div>
+      <span class="pair"><span class="lbl">Reinforcements</span><div class="step"><button onclick="xbump('reinf',-1,0,${Math.max(0, maxT - base)})">–</button><span>${reinf}</span><button onclick="xbump('reinf',1,0,${Math.max(0, maxT - base)})">+</button></div></span>
+      ${surge ? `<span class="pair"><span class="lbl">Surge</span><div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${surge}</span><button onclick="xbump('surge',1,0,8)">+</button></div></span>` : ''}</div>
     <div class="items" style="margin-top:10px">${troopRows}</div>
     ${awakened(sh) ? `<div class="row" style="margin-top:9px">
       ${n('Infantry') ? rollBtn('Vorpal Slash', half, 6, dex) : ''}
@@ -549,15 +555,15 @@ PANELS['white-rabbit'] = (g, sh, v) => {
       ${n('Magus') ? rollBtn('Arcane Nova', 4, 8) : ''}
       ${n('Medic') ? rollBtn('Fluffy Paw', v.pb, 6, wis) : ''}
     </div>
-    <p class="hint">Troop attacks hit at <b>${sign(dex + v.pb)}</b>. Bonus Action: every troop moves and takes one action. Jobs change after a Short or Long Rest; charges refill on a Short Rest.</p>`
+    <p class="hint">Troop attacks hit at <b>${sign(dex + v.pb)}</b>. Bonus Action: every troop moves and takes one action. Jobs change after a Short or Long Rest; charges refill on a Short Rest. Reinforcements take jobs like any other troop, up to <b>${maxT}</b> in the platoon${surge ? ', and a Surge troop stands over that limit until the end of your next turn' : ''}.</p>`
     : '<p class="hint">Troop jobs open with <b>Troop Regiment</b> at Awakened.</p>'}
     <div id="pOut"></div>`;
 };
 function troopJob(i, j) { const t = X().troops[i]; t.job = j; t.used = {}; save(); render(); }
 function troopCharge(i, a, k) { const t = X().troops[i]; t.used[a] = k < (t.used[a] || 0) ? k : k + 1; save(); render(); }
-function troopRest() { (X().troops || []).forEach(t => t.used = {}); X().reinf = 0; save(); render(); toast('Troop charges restored.'); }
+function troopRest() { (X().troops || []).forEach(t => t.used = {}); X().reinf = 0; X().surge = 0; save(); render(); toast('Troop charges restored.'); }
 USE_HOOK['reinforcements'] = sh => { sh.x.reinf = (sh.x.reinf || 0) + 1; };
-LONG_REST['white-rabbit'] = sh => { (sh.x.troops || []).forEach(t => t.used = {}); sh.x.reinf = 0; };
+LONG_REST['white-rabbit'] = sh => { (sh.x.troops || []).forEach(t => t.used = {}); sh.x.reinf = 0; sh.x.surge = 0; };
 
 // ── Makoa — the shell ───────────────────────────────────────────────────
 PANELS['makoa'] = (g, sh, v) => {
@@ -674,7 +680,13 @@ SHIFT_PANEL['white-rabbit'] = (g, sh, rs) => {
         `<option value="${attr(t.name)}" ${left(t.tier) <= 0 ? 'disabled' : ''}>Tier ${t.tier} · ${esc(t.name)}${t.trigger ? ' · ' + esc(t.trigger) : ''}${left(t.tier) <= 0 ? ' — none left' : ''}</option>`).join('')}</select>
       <button class="btn ${full ? '' : 'pri'}" ${full ? 'disabled' : ''} onclick="setTrap()">${full ? 'No trap slot free' : 'Set a trap · Bonus Action'}</button>
     </div>
-    <p class="hint">One a turn. Enemies find them on a <b>DC ${35 + pbOf(sh.level)}</b> Investigation check; you always know where yours are and see 10 ft around each. Your troops cross them safely. <b>Write the place here and tell no one</b> — not even your DM. This list lives in your browser only.</p>`;
+    <p class="hint">One a turn. Enemies find them on a <b>DC ${35 + pbOf(sh.level)}</b> Investigation check; you always know where yours are and see 10 ft around each. Your troops cross them safely. <b>Write the place here and tell no one</b> — not even your DM. This list lives in your browser only.</p>
+    <h3>Reinforcement Surge</h3>
+    <div class="row">
+      <span class="lbl">Troops over the limit</span>
+      <div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${sh.x.surge || 0}</span><button onclick="xbump('surge',1,0,8)">+</button></div>
+      <span class="hint" style="flex:1;min-width:220px">The Lair Action calls a troop of any specialization past your normal limit, fully corporeal, acting at once. It takes a job in the platoon above like any other, and stands until the end of your next turn.</span>
+    </div>`;
 };
 function setTrap() {
   const g = grimmById(S.current), sh = sheet(), rs = rsState(sh);
