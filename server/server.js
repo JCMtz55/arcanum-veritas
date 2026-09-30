@@ -2,7 +2,7 @@
 // Cognitions the DM has granted. The Cognition JSON is never served as a static file.
 
 import express from "express";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,6 +17,57 @@ const LOCKED = "!";   // a password_hash nobody can sign in with — the DM sets
 
 const INDEX = JSON.parse(await readFile(path.join(ROOT, "cognitions", "index.json"), "utf8")).cognitions;
 const BY_ID = new Map(INDEX.map(c => [c.id, c]));
+// The Paragon path's Devotions: one player's reading of one Cognition, with the Paragon Abilities
+// written for them. One file each, in cognitions/devotions/, named <owner>_<cognition>_devotion.json
+// — so adding a Devotion is adding a file, and two people writing two Devotions never touch the
+// same one. Authored beside the Cognitions and served the same way: never as a static file, and
+// never anyone's but their own. A file with `example: true` belongs to nobody.
+const DEVOTIONS_DIR = path.join(ROOT, "cognitions", "devotions");
+const DEVOTIONS = await loadDevotions();
+
+// A byte-order mark is invisible in every editor and fatal to JSON.parse, and Windows PowerShell
+// writes one by default — so a Devotion saved from a shell would vanish with a baffling parse
+// error. Strip it rather than blame the author.
+async function readJson(file) {
+  return JSON.parse((await readFile(file, "utf8")).replace(/^﻿/, ""));
+}
+
+async function loadDevotions() {
+  let files = [];
+  try {
+    files = (await readdir(DEVOTIONS_DIR)).filter(f => f.endsWith("_devotion.json")).sort();
+  } catch (e) {
+    console.warn(`cognitions/devotions/ can't be read — the Paragon path will have nothing in it. ${e.message}`);
+    return [];
+  }
+  const out = [];
+  for (const file of files) {
+    let d;
+    try { d = await readJson(path.join(DEVOTIONS_DIR, file)); }
+    catch (e) { console.warn(`devotions/${file} isn't valid JSON — skipped. ${e.message}`); continue; }
+    // The file name is the id, so there is only ever one of them to keep right
+    const id = file.replace(/\.json$/, "");
+    const owner = d.player || (d.example ? "example" : null);
+    if (!owner) { console.warn(`devotions/${file}: needs a "player", or "example": true — skipped.`); continue; }
+    if (!BY_ID.has(d.cognition)) { console.warn(`devotions/${file}: unknown Cognition "${d.cognition}" — skipped.`); continue; }
+    // A lint, not a rule: a name that disagrees with what's inside is a rename half-done
+    if (!file.startsWith(`${owner}_`) || !file.includes(`_${d.cognition}_`))
+      console.warn(`devotions/${file}: the name doesn't match ${owner} + ${d.cognition} — expected ${owner}_${d.cognition}_devotion.json.`);
+    out.push({ ...d, id });
+  }
+  // The folder is the truth; index.json only exists so a static host can find these files at all
+  try {
+    const listed = ((await readJson(path.join(DEVOTIONS_DIR, "index.json"))).devotions || []).map(x => x.file);
+    const missing = files.filter(f => !listed.includes(f)), extra = listed.filter(f => !files.includes(f));
+    if (missing.length || extra.length)
+      console.warn(`devotions/index.json is out of date — ${missing.length ? `missing ${missing.join(", ")}` : ""}${missing.length && extra.length ? "; " : ""}${extra.length ? `lists ${extra.join(", ")} which isn't there` : ""}. The server is fine; a static host would be wrong.`);
+  } catch (e) { console.warn("devotions/index.json is missing or unreadable — a static host won't find the Devotions."); }
+  console.log(`Loaded ${out.length} Devotion${out.length === 1 ? "" : "s"} from cognitions/devotions/.`);
+  return out;
+}
+
+const devotionsOf = username => DEVOTIONS.filter(d => d.player && d.player.toLowerCase() === String(username).toLowerCase());
+const DEVOTION_EXAMPLES = DEVOTIONS.filter(d => d.example);
 // A player's tracker names a Cognition in free text — this is how a name finds its index entry
 const BY_NAME = new Map(INDEX.flatMap(c => [[c.id, c], [c.name.toLowerCase(), c]]));
 const keyOf = name => String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
@@ -66,24 +117,23 @@ async function seed() {
     await db.query("INSERT INTO meta (key, value) VALUES ('learning_seeded', '1')");
     console.log("Learning trackers imported from seed.json.");
   }
-  // Zeke already walks the path in the campaign, and his three ability sets are written. Seed them
-  // so his account opens on them; every other player starts with the path off and nothing written.
-  if (!(await db.query("SELECT 1 FROM meta WHERE key = 'paragon_seeded'")).rows.length) {
-    const seed = JSON.parse(await readFile(path.join(ROOT, "server", "paragon-seed.json"), "utf8"));
-    for (const [username, builds] of Object.entries(seed)) {
+  // Zeke already walks the path in the campaign. Open it for anyone the Devotion file writes sets
+  // for, and put the Devotions they have actually mastered into their pool — the rest waits on a
+  // Pilgrimage, which is exactly what Zeke's own sheet says about Nature. Everyone else starts
+  // with the path closed and an empty pool.
+  if (!(await db.query("SELECT 1 FROM meta WHERE key = 'paragon_pool_seeded'")).rows.length) {
+    for (const username of new Set(DEVOTIONS.filter(d => d.player).map(d => d.player.toLowerCase()))) {
       const user = (await db.query("SELECT id FROM users WHERE username = $1", [username])).rows[0];
       if (!user) continue;
       await db.query("UPDATE users SET paragon = true WHERE id = $1", [user.id]);
-      for (const b of builds) {
-        const { id, cog, name, owner, ...data } = b;
-        await db.query(
-          `INSERT INTO paragon_builds (user_id, cognition_id, name, data) VALUES ($1, $2, $3, $4)
-           ON CONFLICT (user_id, cognition_id, name) DO NOTHING`,
-          [user.id, cog, name, JSON.stringify(data)]);
-      }
-      console.log(`Paragon path opened for ${username} with ${builds.length} ability sets.`);
+      const mine = await grantsOf(user.id);
+      const open = devotionsOf(username).filter(d => mine.has(d.cognition));
+      for (const d of open)
+        await db.query("INSERT INTO paragon_devotions (user_id, cognition_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+          [user.id, d.cognition]);
+      console.log(`Paragon path opened for ${username} — ${open.length} of ${devotionsOf(username).length} Devotions mastered.`);
     }
-    await db.query("INSERT INTO meta (key, value) VALUES ('paragon_seeded', '1')");
+    await db.query("INSERT INTO meta (key, value) VALUES ('paragon_pool_seeded', '1')");
   }
   // A way back in for a DM who lost the password: set RESET_DM_PASSWORD, redeploy, then remove it.
   if (process.env.RESET_DM_PASSWORD) {
@@ -151,13 +201,129 @@ app.get("/api/me", requireUser, (req, res) => res.json({ user: {
   sheet: { charLevel: req.user.char_level, verumMod: req.user.verum_mod, dreamMod: req.user.dream_mod },
 } }));
 
-// ── The Paragon path: the ability sets the DM has written for this player.
-// A player reads only their own; the sets themselves are authored under /api/admin.
+// ═══════════════════════════════════════════════════════════
+//  THE PARAGON PATH
+// ═══════════════════════════════════════════════════════════
+// Three things make up a Paragon, and they come from three different places:
+//   · whether the path is open at all, and which Devotions are in the pool — the DM's, in Admin
+//   · the Paragon Abilities themselves — cognitions/devotions/<player>_<cognition>_devotion.json
+//   · which up-to-three are sworn, and which one burns — the player's, kept per account
+// A player is served only the sets written for them, and only for a Devotion the DM has opened.
+const DEVOTIONS_SWORN = 3;
+
+async function poolOf(userId) {
+  const { rows } = await db.query("SELECT cognition_id FROM paragon_devotions WHERE user_id = $1", [userId]);
+  return new Set(rows.map(r => r.cognition_id));
+}
+async function choiceOf(userId) {
+  const { rows } = await db.query("SELECT sworn, active FROM paragon_choice WHERE user_id = $1", [userId]);
+  let sworn = [];
+  try { sworn = JSON.parse(rows[0]?.sworn || "[]"); } catch (e) {}
+  return { sworn: Array.isArray(sworn) ? sworn : [], active: rows[0]?.active || null };
+}
+// A Devotion needs two things to agree: the DM opened it, and the player has mastered the
+// Cognition. The abilities are a third thing, and they can lag — the path is a choice of identity
+// that comes before anyone has written anything down — so a Devotion with no set yet is served as
+// a stub and says so on its own card, rather than vanishing from a pool the DM can see.
+async function openDevotionsOf(user) {
+  const pool = await poolOf(user.id), mastered = await grantsOf(user.id);
+  const mine = devotionsOf(user.username);
+  return [...pool].filter(id => mastered.has(id)).map(id => {
+    const d = mine.find(x => x.cognition === id);
+    // A `pilgrimage` note says the Cognition isn't reachable yet. Being in the pool means it is,
+    // so the note has served its purpose and would only contradict the card it sits on.
+    if (d) { const { pilgrimage, ...rest } = d; return rest; }
+    return { id: `${id}-unwritten`, player: user.username, cognition: id, unwritten: true,
+             name: BY_ID.get(id)?.name || id, icon: BY_ID.get(id)?.icon || "◆",
+             description: "", savingThrow: "—", damageType: "—", abilities: {} };
+  }).sort((a, b) => (a.unwritten ? 1 : 0) - (b.unwritten ? 1 : 0) || a.name.localeCompare(b.name));
+}
+// Sets written for this player that they can't reach yet — the Cognition isn't mastered, or the
+// DM hasn't opened it. Zeke's Nature was exactly this before his Pilgrimage.
+async function awaitingOf(user) {
+  const pool = await poolOf(user.id), mastered = await grantsOf(user.id);
+  return devotionsOf(user.username)
+    .filter(d => !(pool.has(d.cognition) && mastered.has(d.cognition)))
+    .map(d => ({ id: d.id, cognition: d.cognition, name: d.name, description: d.description,
+                 cognitionName: BY_ID.get(d.cognition)?.name || d.cognition,
+                 pilgrimage: d.pilgrimage || null, source: d.source || null,
+                 mastered: mastered.has(d.cognition) }));
+}
+// The names ride along: a Pilgrimage can reach for a Cognition the player hasn't mastered yet —
+// which is exactly Zeke's Nature — and their browser was never told that one's name.
+const pilgrimageRow = r => ({
+  id: r.id, leaving: r.leaving, arriving: r.arriving, note: r.note, status: r.status,
+  leavingName: r.leaving ? (BY_ID.get(r.leaving)?.name || r.leaving) : null,
+  arrivingName: BY_ID.get(r.arriving)?.name || r.arriving,
+  createdAt: r.created_at, decidedAt: r.decided_at,
+});
+
 app.get("/api/paragon", requireUser, async (req, res) => {
+  const devotions = await openDevotionsOf(req.user);
+  const ids = new Set(devotions.map(d => d.cognition));
+  const { sworn, active } = await choiceOf(req.user.id);
+  const kept = sworn.filter(id => ids.has(id)).slice(0, DEVOTIONS_SWORN);
   const { rows } = await db.query(
-    "SELECT id, cognition_id, name, data FROM paragon_builds WHERE user_id = $1 ORDER BY cognition_id, name",
-    [req.user.id]);
-  res.json({ enabled: !!req.user.paragon, builds: rows.map(parBuildRow) });
+    "SELECT * FROM paragon_pilgrimage WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10", [req.user.id]);
+  res.json({
+    enabled: !!req.user.paragon,
+    max: DEVOTIONS_SWORN,
+    devotions,                                       // the pool, with every ability written out
+    awaiting: await awaitingOf(req.user),            // written for them, not yet reachable
+    sworn: kept,
+    active: kept.includes(active) ? active : null,
+    // Cognitions mastered but with no Devotion open — the short road a Pilgrimage can take
+    reachable: [...(await grantsOf(req.user.id))].filter(id => !ids.has(id)),
+    // …and the long one: the names, and only the names, of the Cognitions they haven't mastered.
+    // The same list the Learning tracker suggests from, because a Pilgrimage is how Zeke's Nature
+    // reaches Learn Full in the first place.
+    names: INDEX.filter(c => !ids.has(c.id)).map(c => c.name).sort(),
+    examples: DEVOTION_EXAMPLES,
+    pilgrimage: rows.map(pilgrimageRow),
+  });
+});
+
+// Swear up to three, and say which one is held in the Deeper Burn.
+app.put("/api/paragon/choice", requireUser, async (req, res) => {
+  if (!req.user.paragon) return res.status(403).json({ error: "The Paragon path isn't open to you." });
+  const ids = new Set((await openDevotionsOf(req.user)).map(d => d.cognition));
+  const asked = Array.isArray(req.body?.sworn) ? req.body.sworn.map(String) : [];
+  const sworn = [...new Set(asked)].filter(id => ids.has(id));
+  if (sworn.length > DEVOTIONS_SWORN)
+    return res.status(400).json({ error: `Three Devotions is the limit — a Pilgrimage replaces one.` });
+  const active = sworn.includes(String(req.body?.active)) ? String(req.body.active) : null;
+  await db.query(
+    `INSERT INTO paragon_choice (user_id, sworn, active) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id) DO UPDATE SET sworn = EXCLUDED.sworn, active = EXCLUDED.active, updated_at = now()`,
+    [req.user.id, JSON.stringify(sworn), active]);
+  res.json({ sworn, active });
+});
+
+// A Pilgrimage is notice, not a switch: the player asks, the DM answers in Admin.
+app.post("/api/paragon/pilgrimage", requireUser, async (req, res) => {
+  if (!req.user.paragon) return res.status(403).json({ error: "The Paragon path isn't open to you." });
+  // `arriving` may be an id or the name the player typed — a Pilgrimage can reach for something
+  // they haven't mastered, and their browser only ever learned that one's name.
+  const asked = String(req.body?.arriving || "");
+  const arriving = BY_ID.has(asked) ? asked : BY_NAME.get(keyOf(asked))?.id;
+  const leaving = req.body?.leaving ? String(req.body.leaving) : null;
+  if (!arriving) return res.status(404).json({ error: "No such Cognition." });
+  const pool = await poolOf(req.user.id);
+  if (pool.has(arriving)) return res.status(409).json({ error: `${BY_ID.get(arriving).name} is already one of your Devotions.` });
+  if (leaving && !pool.has(leaving)) return res.status(400).json({ error: "That isn't one of your Devotions." });
+  if ((await db.query("SELECT 1 FROM paragon_pilgrimage WHERE user_id = $1 AND status = 'asked'", [req.user.id])).rows.length)
+    return res.status(409).json({ error: "You're already on a Pilgrimage — one road at a time." });
+  const note = String(req.body?.note || "").trim().slice(0, 600);
+  const { rows } = await db.query(
+    "INSERT INTO paragon_pilgrimage (user_id, leaving, arriving, note) VALUES ($1, $2, $3, $4) RETURNING id",
+    [req.user.id, leaving, arriving, note]);
+  res.status(201).json({ id: rows[0].id });
+});
+
+app.delete("/api/paragon/pilgrimage/:id", requireUser, async (req, res) => {
+  await db.query("DELETE FROM paragon_pilgrimage WHERE id = $1 AND user_id = $2 AND status = 'asked'",
+    [parseInt(req.params.id, 10) || 0, req.user.id]);
+  res.json({ ok: true });
 });
 
 // The character's numbers on the command bar — level, Verum mod, Dream mod — kept with the account
@@ -273,53 +439,6 @@ const SAVES_MAX = 200, SAVE_BYTES = 8000;
 // The three Cognitive Arts a build can come from — the same list the saves table checks.
 const SAVE_KINDS = ["seal", "eidon", "paragon"];
 
-// ── A Paragon Ability set, as the DM writes it ─────────────
-const PAR_TYPES = ["passive", "offensive", "supportive"];
-const PAR_ACTS  = ["action", "bonus", "reaction"];
-const RANKS = 4;   // Ranks I-IV, at levels 1 / 5 / 11 / 17
-
-const parBuildRow = r => ({ id: r.id, cog: r.cognition_id, name: r.name, ...JSON.parse(r.data) });
-
-// Everything the DM types is checked here — the player's builder trusts whatever comes back.
-function cleanParagonBuild(body) {
-  const cog = String(body?.cognitionId || "");
-  if (!BY_ID.has(cog)) return { error: "No such Cognition." };
-  const name = String(body?.name || "").trim().slice(0, 60);
-  if (!name) return { error: "An ability set needs a name — the resonance, like “The Evergreen”." };
-
-  const d = body?.data && typeof body.data === "object" ? body.data : {};
-  const str = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
-  const abilities = Array.isArray(d.abilities) ? d.abilities : [];
-  if (!abilities.length) return { error: "An ability set needs at least one ability." };
-  if (abilities.length > 6) return { error: "Six abilities is the most a set can hold." };
-
-  const clean = [];
-  for (const a of abilities) {
-    const an = str(a?.name, 60);
-    if (!an) return { error: "Every ability needs a name." };
-    if (!PAR_TYPES.includes(a?.type)) return { error: `“${an}” needs to be Passive, Offensive or Supportive.` };
-    // A Passive is always on, so it has no activation and costs no use
-    const act = a.type === "passive" ? null : (PAR_ACTS.includes(a?.act) ? a.act : null);
-    const ranks = Array.isArray(a?.ranks) ? a.ranks : [];
-    clean.push({
-      name: an, type: a.type, act, uses: str(a?.uses, 60) || null,
-      text: str(a?.text, 1200),
-      ranks: Array.from({ length: RANKS }, (_, i) => str(ranks[i], 600)),
-      ...(a?.seasonal ? { seasonal: str(a.seasonal, 20) } : {}),
-    });
-  }
-
-  const data = {
-    flavor: str(d.flavor, 600), save: str(d.save, 20) || "—", damage: str(d.damage, 20) || "—",
-    warn: str(d.warn, 300) || undefined, source: str(d.source, 80) || "written by your DM",
-    ...(d.wheel ? { wheel: true, wheelRanks: Array.from({ length: RANKS }, (_, i) => str(d.wheelRanks?.[i], 600)) } : {}),
-    abilities: clean,
-  };
-  const json = JSON.stringify(data);
-  if (json.length > SAVE_BYTES) return { error: "That ability set is too long." };
-  return { cog, name, data: json };
-}
-
 function cleanSave(body) {
   const name = String(body?.name || "").trim().slice(0, 60);
   const data = body?.data && typeof body.data === "object" ? JSON.stringify(body.data) : "";
@@ -399,10 +518,19 @@ admin.get("/users", async (req, res) => {
        FROM users ORDER BY role, display_name`)).rows;
   const grants = (await db.query("SELECT user_id, cognition_id FROM user_cognitions")).rows;
   const learning = (await db.query("SELECT user_id, key, name, depth FROM learning ORDER BY depth DESC, name")).rows;
-  const parBuilds = (await db.query("SELECT id, user_id, cognition_id, name FROM paragon_builds")).rows;
+  const opened = (await db.query("SELECT user_id, cognition_id FROM paragon_devotions")).rows;
+  const choices = (await db.query("SELECT user_id, sworn, active FROM paragon_choice")).rows;
+  const asked = (await db.query("SELECT * FROM paragon_pilgrimage WHERE status = 'asked' ORDER BY created_at")).rows;
+  const swornOf = id => { try { return JSON.parse(choices.find(c => c.user_id === id)?.sworn || "[]"); } catch (e) { return []; } };
   res.json({ users: users.map(u => ({
     ...publicUser(u), hasPassword: u.has_password, paragon: !!u.paragon,
-    paragonBuilds: parBuilds.filter(b => b.user_id === u.id).map(b => ({ id: b.id, cog: b.cognition_id, name: b.name })),
+    // Which Devotions the DM has opened, which of those the player swore, and which one burns.
+    // The Paragon Abilities live in the Devotion file, so the names of the sets come from there.
+    devotions: opened.filter(d => d.user_id === u.id).map(d => d.cognition_id),
+    sworn: swornOf(u.id),
+    burning: choices.find(c => c.user_id === u.id)?.active || null,
+    devotionSets: devotionsOf(u.username).map(d => ({ cog: d.cognition, name: d.name, id: d.id })),
+    pilgrimage: asked.filter(p => p.user_id === u.id).map(pilgrimageRow),
     cognitions: grants.filter(g => g.user_id === u.id).map(g => g.cognition_id),
     // cognitionId is null for a name the index doesn't know — nothing the DM can enable yet
     learning: learning.filter(l => l.user_id === u.id).map(l => ({ name: l.name, depth: l.depth, cognitionId: BY_NAME.get(l.key)?.id || null })),
@@ -464,50 +592,73 @@ admin.put("/users/:id/cognitions/:cog", async (req, res) => {
 
 admin.delete("/users/:id/cognitions/:cog", async (req, res) => {
   await db.query("DELETE FROM user_cognitions WHERE user_id = $1 AND cognition_id = $2", [req.target.id, req.params.cog]);
+  // A Devotion can only be a mastered Cognition, so taking the Cognition away closes the Devotion
+  await db.query("DELETE FROM paragon_devotions WHERE user_id = $1 AND cognition_id = $2", [req.target.id, req.params.cog]);
+  await unswear(req.target.id, req.params.cog);
   res.json({ ok: true });
 });
 
-// ── Admin: the Paragon path — who walks it, and the ability sets written for them
+// ── Admin: the Paragon path — who walks it, and which Devotions are open to them.
+// The abilities aren't here: they're authored in cognitions/devotions/<player>_<cognition>_devotion.json.
 admin.put("/users/:id/paragon", async (req, res) => {
   if (typeof req.body?.enabled !== "boolean") return res.status(400).json({ error: "Set the path on or off." });
   await db.query("UPDATE users SET paragon = $1 WHERE id = $2", [req.body.enabled, req.target.id]);
   res.json({ ok: true });
 });
 
-admin.get("/users/:id/paragon", async (req, res) => {
-  const { rows } = await db.query(
-    "SELECT id, cognition_id, name, data FROM paragon_builds WHERE user_id = $1 ORDER BY cognition_id, name",
-    [req.target.id]);
-  res.json({ builds: rows.map(parBuildRow) });
+// Open a Devotion. Only a Cognition this player has mastered — the rule the pool exists to keep.
+admin.put("/users/:id/devotions/:cog", async (req, res) => {
+  const cog = req.params.cog;
+  if (!BY_ID.has(cog)) return res.status(404).json({ error: "No such Cognition." });
+  if (!(await grantsOf(req.target.id)).has(cog))
+    return res.status(400).json({ error: `${req.target.display_name} hasn't mastered ${BY_ID.get(cog).name} — grant it first.` });
+  await db.query("INSERT INTO paragon_devotions (user_id, cognition_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    [req.target.id, cog]);
+  res.json({ ok: true });
 });
 
-// Upsert. With an `id` the set is rewritten in place, so a resonance can be renamed;
-// without one, (player, Cognition, name) is the key.
-admin.put("/users/:id/paragon/builds", async (req, res) => {
-  const b = cleanParagonBuild(req.body);
-  if (b.error) return res.status(400).json({ error: b.error });
-  const editing = parseInt(req.body?.id, 10) || 0;
-  const clash = (await db.query(
-    "SELECT id FROM paragon_builds WHERE user_id = $1 AND cognition_id = $2 AND lower(name) = lower($3)",
-    [req.target.id, b.cog, b.name])).rows[0];
-  if (clash && clash.id !== editing)
-    return res.status(409).json({ error: `${req.target.display_name} already has a “${b.name}” for that Cognition.` });
-  if (editing) {
-    const { rowCount } = await db.query(
-      "UPDATE paragon_builds SET cognition_id = $1, name = $2, data = $3, updated_at = now() WHERE id = $4 AND user_id = $5",
-      [b.cog, b.name, b.data, editing, req.target.id]);
-    if (!rowCount) return res.status(404).json({ error: "No such ability set." });
-    return res.json({ id: editing });
+admin.delete("/users/:id/devotions/:cog", async (req, res) => {
+  await db.query("DELETE FROM paragon_devotions WHERE user_id = $1 AND cognition_id = $2", [req.target.id, req.params.cog]);
+  await unswear(req.target.id, req.params.cog);
+  res.json({ ok: true });
+});
+
+// A Devotion taken away is unsworn too, and puts out the Burn if it was the one alight.
+async function unswear(userId, cog) {
+  const { sworn, active } = await choiceOf(userId);
+  if (!sworn.includes(cog)) return;
+  const kept = sworn.filter(id => id !== cog);
+  await db.query("UPDATE paragon_choice SET sworn = $1, active = $2, updated_at = now() WHERE user_id = $3",
+    [JSON.stringify(kept), active === cog ? null : active, userId]);
+}
+
+// Pilgrimages waiting on an answer, newest first — the advance notice the rule asks for.
+admin.get("/pilgrimages", async (req, res) => {
+  const { rows } = await db.query(
+    `SELECT p.*, u.display_name, u.username FROM paragon_pilgrimage p JOIN users u ON u.id = p.user_id
+      ORDER BY (p.status = 'asked') DESC, p.created_at DESC LIMIT 60`);
+  res.json({ pilgrimages: rows.map(r => ({ ...pilgrimageRow(r), userId: r.user_id, displayName: r.display_name, username: r.username })) });
+});
+
+// Walked: the old Devotion leaves and the new one takes its place, in one step.
+admin.put("/pilgrimages/:id", async (req, res) => {
+  const status = String(req.body?.status || "");
+  if (!["walked", "declined"].includes(status)) return res.status(400).json({ error: "A Pilgrimage is walked or declined." });
+  const { rows } = await db.query("SELECT * FROM paragon_pilgrimage WHERE id = $1", [parseInt(req.params.id, 10) || 0]);
+  const p = rows[0];
+  if (!p) return res.status(404).json({ error: "No such Pilgrimage." });
+  if (p.status !== "asked") return res.status(409).json({ error: "That Pilgrimage is already answered." });
+  if (status === "walked") {
+    if (!(await grantsOf(p.user_id)).has(p.arriving))
+      return res.status(400).json({ error: `${BY_ID.get(p.arriving)?.name || p.arriving} isn't mastered yet — grant it first, then let the Pilgrimage finish.` });
+    if (p.leaving) {
+      await db.query("DELETE FROM paragon_devotions WHERE user_id = $1 AND cognition_id = $2", [p.user_id, p.leaving]);
+      await unswear(p.user_id, p.leaving);
+    }
+    await db.query("INSERT INTO paragon_devotions (user_id, cognition_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      [p.user_id, p.arriving]);
   }
-  const { rows } = await db.query(
-    "INSERT INTO paragon_builds (user_id, cognition_id, name, data) VALUES ($1, $2, $3, $4) RETURNING id",
-    [req.target.id, b.cog, b.name, b.data]);
-  res.status(201).json({ id: rows[0].id });
-});
-
-admin.delete("/users/:id/paragon/builds/:buildId", async (req, res) => {
-  await db.query("DELETE FROM paragon_builds WHERE id = $1 AND user_id = $2",
-    [parseInt(req.params.buildId, 10) || 0, req.target.id]);
+  await db.query("UPDATE paragon_pilgrimage SET status = $1, decided_at = now() WHERE id = $2", [status, p.id]);
   res.json({ ok: true });
 });
 

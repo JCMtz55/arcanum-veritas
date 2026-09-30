@@ -3,13 +3,26 @@
 // All of it is inert on a static host: nothing here runs unless boot() found the server's api/.
 
 async function api(method, url, body) {
-  const r = await fetch(url, {
-    method,
-    headers: body ? { "Content-Type": "application/json" } : {},
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let r;
+  try {
+    r = await fetch(url, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    // fetch only throws when the request never reached a server at all — the browser's own words
+    // for that are "Failed to fetch", which tells nobody anything. Say what actually happened.
+    const err = new Error("Couldn't reach the server.");
+    err.offline = true;
+    throw err;
+  }
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(data.error || `Request failed (${r.status})`);
+  if (!r.ok) {
+    const err = new Error(data.error || `Request failed (${r.status})`);
+    err.status = r.status;
+    throw err;
+  }
   return data;
 }
 function escQ(t) { return esc(t).replace(/"/g, "&quot;"); }

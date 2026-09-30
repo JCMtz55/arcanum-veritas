@@ -199,6 +199,9 @@ async function boot() {
     INDEX = (await r.json()).cognitions;
     const ready = INDEX.filter(c => c.ready).length;
     setStatus("ok", `✓ ${ready} cognitions ready`);
+    // Whose Devotions these are, and whether the path is open at all. Before the first render,
+    // because for a Paragon it decides which Art the builder is — and there is only one.
+    await loadParagon();
     renderCogList();
     renderCodexList();
     syncBar();
@@ -207,11 +210,11 @@ async function boot() {
     else try { if (localStorage.getItem("av-dm")) setDmView(true, true); } catch (e) {}
     // The Ephemer front page links straight to a view: arcanum.html#learn
     if (API && VIEWS[location.hash.slice(1)]) setView(location.hash.slice(1));
-    await loadParagon();   // whose Paragon sets these are, and whether the path is open at all
-    // Always through setMode, default included — it is what puts the right names on the chrome
+    // Always through setMode, default included — it is what puts the right names on the chrome,
+    // and what closes the other two Arts behind a Paragon.
     let saved = "av";
     try { saved = localStorage.getItem("av-mode") || "av"; } catch (e) {}
-    setMode(saved, true);
+    setMode(parLocked() ? "par" : saved, true);
     const fa = document.getElementById("faCss");
     if (fa?.sheet) initIcons(); else fa?.addEventListener("load", initIcons);
   } catch(e) {

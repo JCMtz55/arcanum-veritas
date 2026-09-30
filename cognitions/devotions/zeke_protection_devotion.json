@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "player": "zeke",
+  "cognition": "protection",
+  "name": "The Stained Crescent",
+  "icon": "🛡️",
+  "description": "The shell is a promise. While Protection burns, a pale silver crescent hangs at Zeke's back, and the air around him goes still and heavy.",
+  "savingThrow": "Constitution",
+  "damageType": "Force",
+  "source": "Zeke's Paragons",
+  "art": "zekeParagonProtection.png",
+  "abilities": {
+    "passive": [
+      {
+        "name": "Crescent Ward",
+        "description": "Stand close enough and the stillness covers you too.",
+        "text": "Allies within 10 feet of you gain +1 AC.",
+        "tiers": [
+          {
+            "text": "Allies within 10 feet of you gain +1 AC.",
+            "card": "Allies within 10 ft: +1 AC"
+          },
+          {
+            "text": "It reaches 15 feet, and a hit against a warded ally can't inflict Wounds.",
+            "card": "Reaches 15 ft · no Wounds against a warded ally"
+          },
+          {
+            "text": "The bonus becomes +2 AC.",
+            "card": "+2 AC within 15 ft · no Wounds"
+          },
+          {
+            "text": "Warded allies are immune to critical hits.",
+            "card": "+2 AC within 15 ft · no Wounds · immune to critical hits"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Answering Blow",
+        "description": "Everything done to them is owed back.",
+        "activation": "action",
+        "uses": "1",
+        "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra force damage. The extra damage also adds your Verum Modifier for each ally within 30 feet who has taken damage since the end of your last turn.",
+        "tiers": [
+          {
+            "text": "An extra 2d10 force damage, counting up to 3 hurt allies.",
+            "card": "+2d10 force, +{VM} per hurt ally within 30 ft (up to 3)",
+            "mech": {
+              "damage": {
+                "dice": "2d10",
+                "type": "force"
+              }
+            }
+          },
+          {
+            "text": "An extra 4d10, counting up to 5 hurt allies. Until the end of its next turn the target has disadvantage on attacks against anyone but you.",
+            "card": "+4d10, up to 5 hurt allies · the target can only swing at you without disadvantage",
+            "mech": {
+              "damage": {
+                "dice": "4d10",
+                "type": "force"
+              }
+            }
+          },
+          {
+            "text": "An extra 6d10, and twice your Verum Modifier per hurt ally. It ignores resistances and immunities if the target caused any of that damage.",
+            "card": "+6d10, +{{2*VM}} per hurt ally · ignores resistance and immunity if it did the hurting",
+            "mech": {
+              "damage": {
+                "dice": "6d10",
+                "type": "force"
+              }
+            }
+          },
+          {
+            "text": "An extra 8d10. For 1 minute, when an ally within 30 feet is hit, you can use your reaction to deal half this damage to the attacker.",
+            "card": "+8d10 · for 1 min, a reaction answers any hit on an ally within 30 ft for half this damage",
+            "mech": {
+              "damage": {
+                "dice": "8d10",
+                "type": "force"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Guardian's Shell",
+        "description": "The house on his back was never only his.",
+        "activation": "reaction",
+        "uses": "1",
+        "text": "When you or a creature within 30 feet is targeted by an attack or forced to make a saving throw, it gains temporary hit points before the attack or save resolves.",
+        "tiers": [
+          {
+            "text": "5 × your Proficiency Bonus temporary hit points.",
+            "card": "{{5*PB}} temporary HP, before the attack or save resolves"
+          },
+          {
+            "text": "10 × your Proficiency Bonus temporary hit points, plus resistance to one damage type for 1 round.",
+            "card": "{{10*PB}} temp HP · resistance to one damage type for 1 round"
+          },
+          {
+            "text": "15 × your Proficiency Bonus temporary hit points, and resistance to two damage types.",
+            "card": "{{15*PB}} temp HP · resistance to two damage types"
+          },
+          {
+            "text": "Damage of a resisted type is answered: the attacker takes 1d6 force per point of Proficiency Bonus (Constitution save for half).",
+            "card": "{{15*PB}} temp HP · resisted damage answers back for {PB}d6 force (Con save for half)"
+          }
+        ]
+      }
+    ]
+  }
+}

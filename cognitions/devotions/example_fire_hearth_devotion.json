@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "example": true,
+  "cognition": "fire",
+  "name": "The Hearth-Keeper",
+  "icon": "🔥",
+  "description": "For a player who hears Fire as warmth and rebirth. Built from Life-Bringer and Hearthlight.",
+  "savingThrow": "—",
+  "damageType": "Fire",
+  "source": "Paragon rules — worked example",
+  "abilities": {
+    "passive": [
+      {
+        "name": "Hearthfire",
+        "text": "You shed bright light in a 20-foot radius. You and allies in that light can't be frozen, are warm in any cold, and gain temporary hit points equal to your Verum Modifier at the start of each of their turns.",
+        "tiers": [
+          {
+            "card": "Bright light in 20 ft · allies in it gain {VM} temp HP each turn and can't be frozen"
+          },
+          {
+            "card": "The light reaches 30 ft"
+          },
+          {
+            "card": "Once per turn, an ally healed in your light regains an extra {VM}"
+          },
+          {
+            "card": "Once per turn, an ally healed in your light regains an extra {VM}"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Pyre of Renewal",
+        "activation": "reaction",
+        "uses": "1",
+        "text": "When a creature you can see within 30 feet drops to 0 hit points, you wrap it in fire. It drops to 1 hit point instead and is wreathed in flame until the end of its next turn, which deals 1d8 fire damage to any creature that hits it with a melee attack.",
+        "tiers": [
+          {
+            "card": "Drops to 1 HP instead, wreathed in flame — 1d8 fire to anything that hits it in melee"
+          },
+          {
+            "card": "It also ends one condition on the creature"
+          },
+          {
+            "card": "It also ends one condition on the creature"
+          },
+          {
+            "card": "It can reach a creature that died within the last round"
+          }
+        ]
+      }
+    ]
+  }
+}

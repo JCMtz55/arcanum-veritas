@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "player": "zeke",
+  "cognition": "nature",
+  "name": "The Turning Year",
+  "icon": "🍃",
+  "description": "The world, left to itself, doesn't stay still. It turns. While Nature burns, the air around Zeke smells of whatever season he's carrying: rain and blossom, dust and heat, leaf-rot, first frost.",
+  "savingThrow": "Wisdom",
+  "damageType": "Piercing",
+  "source": "Zeke's Paragons",
+  "art": "zekeParagonNature.png",
+  "pilgrimage": "Zeke doesn't know Nature at Learn Full yet — it can't be his Paragon until a Pilgrimage brings it in.",
+  "engine": {
+    "title": "The Wheel",
+    "unit": "Season",
+    "text": "While Nature is your Paragon it always holds one Season, and you can't skip one — you can only turn the wheel. In combat, the Season turns one step forward at the start of each of your turns; on the turn a Season arrives it takes effect without advancing. Lit or relit mid-fight, the wheel starts in Spring. Out of combat the wheel mirrors the world: your Season matches the true season of the land you stand in, and the Passive gives flavour and minor utility but no healing, damage or cover.",
+    "card": "🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter → 🌱 · one step at the start of each of your turns",
+    "start": 0,
+    "arrives": true,
+    "tiers": [
+      "The wheel turns one Season forward at the start of each of your turns. Lit mid-fight, it starts in Spring.",
+      "When you light Nature, choose its starting Season. Once per long rest you can spend 1 minute in stillness to force the wheel to a different Season until your next long rest.",
+      "Once per Deeper Burn, when the Season would turn, you can hold it for one more turn.",
+      "Each turn the wheel turns either way — forward or back, your choice."
+    ],
+    "phases": [
+      {
+        "key": "spring",
+        "icon": "🌱",
+        "name": "Spring",
+        "epithet": "Renewal",
+        "calm": "Flowers open where you walk, and seeds you plant sprout within the hour.",
+        "tiers": [
+          "You and each ally within 15 feet regain {{VM+PB}} hit points.",
+          "You and each ally within 20 feet regain {{VM+PB}} hit points.",
+          "You and each ally within 30 feet regain {{2*(VM+PB)}} hit points.",
+          "You and each ally within 30 feet regain {{2*(VM+PB)}} hit points."
+        ],
+        "riders": {
+          "blow": [
+            "Blossoms burst from the wound — each ally within 10 feet of the target regains {VM} hit points.",
+            "Blossoms burst from the wound — each ally within 10 feet of the target regains {VM} hit points.",
+            "Blossoms burst from the wound — each ally within 10 feet of the target regains {VM} hit points.",
+            "Blossoms burst from the wound — each ally within 10 feet of the target regains {VM} hit points."
+          ],
+          "gift": [
+            "Each regains 2d8 + {VM} hit points.",
+            "Each regains 4d8 + {VM} hit points.",
+            "Each regains 4d8 + {VM} hit points.",
+            "Each regains 4d8 + {VM} hit points."
+          ]
+        }
+      },
+      {
+        "key": "summer",
+        "icon": "☀️",
+        "name": "Summer",
+        "epithet": "Thorns",
+        "calm": "You and your companions don't suffer from extreme heat, and fruit ripens at your touch.",
+        "tiers": [
+          "Your weapon attacks deal an extra 1d8 piercing. A creature that hits you with a melee attack takes {VM} piercing damage.",
+          "Your weapon attacks deal an extra 1d8 piercing. A creature that hits you with a melee attack takes {VM} piercing damage.",
+          "Your weapon attacks deal an extra 2d8 piercing. A creature that hits you with a melee attack takes {VM} piercing damage.",
+          "Your weapon attacks deal an extra 2d8 piercing. A creature that hits you with a melee attack takes {VM} piercing damage."
+        ],
+        "riders": {
+          "blow": [
+            "The blow deals 2 extra dice.",
+            "The blow deals 2 extra dice, and +1d8 piercing on top.",
+            "The blow deals 2 extra dice, and +1d8 piercing on top.",
+            "The blow deals 2 extra dice, and +1d8 piercing on top."
+          ],
+          "gift": [
+            "Each has advantage on its next attack roll before the start of your next turn.",
+            "Each has advantage on its next attack roll before the start of your next turn.",
+            "Each has advantage on its next attack roll before the start of your next turn.",
+            "Each has advantage on its next attack roll before the start of your next turn."
+          ]
+        }
+      },
+      {
+        "key": "autumn",
+        "icon": "🍂",
+        "name": "Autumn",
+        "epithet": "Decline",
+        "calm": "You can tell how long ago a plant, animal or trail began to decay.",
+        "tiers": [
+          "Enemies within 15 feet can't regain hit points, and their speed drops by 10 feet.",
+          "Enemies within 20 feet can't regain hit points, and their speed drops by 10 feet.",
+          "Enemies within 30 feet can't regain hit points, and their speed drops by 10 feet.",
+          "Enemies within 30 feet can't regain hit points, their speed drops by 10 feet, and they can't take reactions."
+        ],
+        "riders": {
+          "blow": [
+            "The target withers — disadvantage on its next attack roll, and its speed is halved until the end of its next turn.",
+            "The target withers — disadvantage on its next attack roll, and its speed is halved until the end of its next turn.",
+            "The target withers — disadvantage on its next attack roll, and its speed is halved until the end of its next turn.",
+            "The target withers — disadvantage on its next attack roll, and its speed is halved until the end of its next turn."
+          ],
+          "gift": [
+            "Each ends one condition affecting it — Frightened, Charmed, Poisoned, Blinded, Deafened.",
+            "Each ends one condition affecting it — Frightened, Charmed, Poisoned, Blinded, Deafened.",
+            "Each ends one condition, and removes one level of Exhaustion or Dream Exhaustion.",
+            "Each ends one condition, and removes one level of Exhaustion or Dream Exhaustion."
+          ]
+        }
+      },
+      {
+        "key": "winter",
+        "icon": "❄️",
+        "name": "Winter",
+        "epithet": "Stillness",
+        "calm": "You and your companions don't suffer from extreme cold, and your camp stays sheltered from the weather.",
+        "tiers": [
+          "You and allies within 15 feet have half cover, and the ground within 15 feet is difficult terrain for enemies.",
+          "You and allies within 20 feet have half cover, and the ground within 20 feet is difficult terrain for enemies.",
+          "You and allies within 30 feet have half cover, and the ground within 30 feet is difficult terrain for enemies.",
+          "You and allies within 30 feet have three-quarters cover, and the ground within 30 feet is difficult terrain for enemies."
+        ],
+        "riders": {
+          "blow": [
+            "Frost-hard roots seize the target. It's Restrained until the end of its next turn, or until it escapes with a Strength check against {DC}.",
+            "Frost-hard roots seize the target. It's Restrained until the end of its next turn, or until it escapes with a Strength check against {DC}.",
+            "Frost-hard roots seize the target. It's Restrained until the end of its next turn, or until it escapes with a Strength check against {DC}.",
+            "Frost-hard roots seize the target. It's Restrained until the end of its next turn, or until it escapes with a Strength check against {DC}."
+          ],
+          "gift": [
+            "Each gains {{5*PB}} temporary hit points.",
+            "Each gains {{10*PB}} temporary hit points.",
+            "Each gains {{10*PB}} temporary hit points, and resistance to one damage type until your next turn.",
+            "Each gains {{10*PB}} temporary hit points, and resistance to one damage type until your next turn."
+          ]
+        }
+      }
+    ]
+  },
+  "abilities": {
+    "passive": [
+      {
+        "name": "The Seasons",
+        "description": "Each fight, he sees every Season about once. The rhythm is his tactics.",
+        "rider": "phase",
+        "text": "While Nature is your Paragon it always holds one Season, and the Season decides what this Passive does. In combat a Season's effect starts when it arrives, at the start of your turn, and lasts until your next turn.",
+        "tiers": [
+          {
+            "card": "Radius 15 feet."
+          },
+          {
+            "card": "Radius 20 feet."
+          },
+          {
+            "card": "Radius 30 feet. Spring's healing doubles, and Summer's extra die becomes 2d8."
+          },
+          {
+            "card": "Autumn's enemies also can't take reactions, and Winter's cover becomes three-quarters."
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Season's Blow",
+        "description": "The year lands with the blade.",
+        "activation": "action",
+        "uses": "1",
+        "rider": "blow",
+        "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra piercing damage, and the current Season adds its effect.",
+        "tiers": [
+          {
+            "card": "+3d8 piercing",
+            "mech": {
+              "damage": {
+                "dice": "3d8",
+                "type": "piercing"
+              }
+            }
+          },
+          {
+            "card": "+5d8 piercing",
+            "mech": {
+              "damage": {
+                "dice": "5d8",
+                "type": "piercing"
+              }
+            }
+          },
+          {
+            "card": "+7d8 piercing",
+            "mech": {
+              "damage": {
+                "dice": "7d8",
+                "type": "piercing"
+              }
+            }
+          },
+          {
+            "card": "+9d8 piercing",
+            "mech": {
+              "damage": {
+                "dice": "9d8",
+                "type": "piercing"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Season's Gift",
+        "description": "Whatever the year happens to be holding, he hands out.",
+        "activation": "bonus",
+        "uses": "1",
+        "rider": "gift",
+        "text": "Up to {PB} allies within 30 feet receive the current Season's gift.",
+        "tiers": [
+          {
+            "card": "Up to {PB} allies within 30 ft"
+          },
+          {
+            "card": "Up to {PB} allies within 30 ft"
+          },
+          {
+            "card": "Up to {PB} allies within 30 ft"
+          },
+          {
+            "card": "Up to {PB} allies within 30 ft · The Full Year — once per long rest, give all four gifts at once"
+          }
+        ]
+      }
+    ]
+  }
+}

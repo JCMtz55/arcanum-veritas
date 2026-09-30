@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "example": true,
+  "cognition": "protection",
+  "name": "The Unbroken Oath",
+  "icon": "🛡️",
+  "description": "For a player who hears Protection as a promise to stand in front of others.",
+  "savingThrow": "—",
+  "damageType": "—",
+  "source": "Paragon rules — worked example",
+  "abilities": {
+    "passive": [
+      {
+        "name": "Oathwall",
+        "text": "Allies within 10 feet of you add half your Verum Modifier (rounded up) to their AC.",
+        "tiers": [
+          {
+            "card": "Allies within 10 ft: +{{ceil(VM/2)}} AC"
+          },
+          {
+            "card": "Allies within 10 ft: +{{ceil(VM/2)}} AC"
+          },
+          {
+            "card": "The area grows to 15 ft"
+          },
+          {
+            "card": "The area grows to 15 ft"
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Take the Blow",
+        "activation": "reaction",
+        "uses": "1",
+        "text": "When an ally within 30 feet is hit by an attack, you swap places with it and become the attack's target. You take the damage with resistance.",
+        "tiers": [
+          {
+            "card": "Swap places with the ally and take the hit with resistance"
+          },
+          {
+            "card": "Swap places with the ally and take the hit with resistance"
+          },
+          {
+            "card": "Swap places with the ally and take the hit with resistance"
+          },
+          {
+            "card": "You take no damage at all if the attack's total is lower than {DC}"
+          }
+        ]
+      }
+    ]
+  }
+}

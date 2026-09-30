@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "player": "zeke",
+  "cognition": "life",
+  "name": "The Evergreen",
+  "icon": "🌿",
+  "description": "A leaf that doesn't fall in winter. While Life burns, green sap runs in the cracks of Zeke's scales, and flowers open where he stands.",
+  "savingThrow": "Constitution",
+  "damageType": "Necrotic",
+  "source": "Zeke's Paragons",
+  "art": "zekeParagonLife.png",
+  "abilities": {
+    "passive": [
+      {
+        "name": "Evergreen Sap",
+        "description": "Life does not wait to be asked.",
+        "text": "At the start of each of your turns, you or one ally within 30 feet regains hit points equal to your Verum Modifier.",
+        "tiers": [
+          {
+            "text": "One creature within 30 feet regains hit points equal to your Verum Modifier.",
+            "card": "One creature within 30 ft regains {VM} HP at the start of each of your turns"
+          },
+          {
+            "text": "Healing past a creature's maximum becomes temporary hit points instead of being lost.",
+            "card": "Healing past full becomes temporary HP"
+          },
+          {
+            "text": "It heals your Verum Modifier plus your proficiency bonus.",
+            "card": "Heals {{VM+PB}} HP instead"
+          },
+          {
+            "text": "Two creatures heal each turn, not one.",
+            "card": "Two creatures heal each turn · {{VM+PB}} HP each"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Sap the Wicked",
+        "description": "Life is not created here. It is moved.",
+        "activation": "action",
+        "uses": "1",
+        "text": "You make a melee weapon attack. On a hit, the target takes your weapon's damage plus extra necrotic damage. You and allies of your choice within 30 feet share hit points equal to half the necrotic damage, divided as you choose.",
+        "tiers": [
+          {
+            "text": "The hit deals an extra 3d10 necrotic damage.",
+            "card": "+3d10 necrotic · you and allies within 30 ft share half of it as healing",
+            "mech": {
+              "damage": {
+                "dice": "3d10",
+                "type": "necrotic"
+              },
+              "heal": {
+                "amount": "half the necrotic damage",
+                "who": "you and allies within 30 ft"
+              }
+            }
+          },
+          {
+            "text": "An extra 5d10 necrotic. The target's hit point maximum drops by the necrotic damage until it finishes a long rest.",
+            "card": "+5d10 · the target loses that much max HP until a long rest",
+            "mech": {
+              "damage": {
+                "dice": "5d10",
+                "type": "necrotic"
+              },
+              "penalty": {
+                "maxHP": "reduced by the necrotic damage until a long rest"
+              }
+            }
+          },
+          {
+            "text": "An extra 7d10. The healing equals all of the necrotic damage, and the target can't regain hit points until the end of its next turn.",
+            "card": "+7d10 · healing equals ALL of it · the target can't heal until the end of its next turn",
+            "mech": {
+              "damage": {
+                "dice": "7d10",
+                "type": "necrotic"
+              },
+              "heal": {
+                "amount": "the necrotic damage"
+              },
+              "deny": [
+                "healing"
+              ]
+            }
+          },
+          {
+            "text": "An extra 9d10. If the attack drops the target to 0 hit points, one ally within 60 feet who is at 0 hit points — or who died within the last minute — rises with half its hit points.",
+            "card": "+9d10 · a kill raises an ally at 0 HP (or dead within the minute) at half their max HP",
+            "mech": {
+              "damage": {
+                "dice": "9d10",
+                "type": "necrotic"
+              },
+              "revive": "one ally at 0 HP or dead within 1 minute, to half max HP"
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Evergreen Oath",
+        "description": "Not yet.",
+        "activation": "reaction",
+        "uses": "1",
+        "text": "When a creature you can see within 60 feet drops to 0 hit points, it drops to 1 hit point instead and regains extra hit points.",
+        "tiers": [
+          {
+            "text": "It regains 2d10 + your Verum Modifier hit points.",
+            "card": "Drops to 1 HP instead, then regains 2d10 + {VM}"
+          },
+          {
+            "text": "It regains 10 × your Proficiency Bonus, the excess as temporary hit points, and one condition on it ends.",
+            "card": "Regains {{10*PB}} (excess as temp HP) and ends one condition"
+          },
+          {
+            "text": "For 1 minute its hit point maximum can't be reduced, and it holds on at 1 hit point once more if it drops again.",
+            "card": "For 1 min its max HP can't be reduced · it holds on at 1 HP once more"
+          },
+          {
+            "text": "It can target a creature that died within the last minute, if its body is intact.",
+            "card": "Can reach a creature dead within the last minute, body intact"
+          }
+        ]
+      }
+    ]
+  }
+}

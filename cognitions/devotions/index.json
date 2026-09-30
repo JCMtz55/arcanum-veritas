@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "note": "Every Devotion file in this folder. The server reads the folder directly and only warns when this list disagrees with it; a plain static host has no way to list a directory, so this is how the builder finds them there. Add a file, add a line.",
+  "devotions": [
+    {
+      "file": "zeke_life_devotion.json",
+      "owner": "zeke",
+      "cognition": "life",
+      "name": "The Evergreen"
+    },
+    {
+      "file": "zeke_protection_devotion.json",
+      "owner": "zeke",
+      "cognition": "protection",
+      "name": "The Stained Crescent"
+    },
+    {
+      "file": "zeke_nature_devotion.json",
+      "owner": "zeke",
+      "cognition": "nature",
+      "name": "The Turning Year"
+    },
+    {
+      "file": "example_fire_kindled_devotion.json",
+      "owner": "example",
+      "cognition": "fire",
+      "name": "The Kindled Heart",
+      "example": true
+    },
+    {
+      "file": "example_fire_hearth_devotion.json",
+      "owner": "example",
+      "cognition": "fire",
+      "name": "The Hearth-Keeper",
+      "example": true
+    },
+    {
+      "file": "example_protection_devotion.json",
+      "owner": "example",
+      "cognition": "protection",
+      "name": "The Unbroken Oath",
+      "example": true
+    }
+  ]
+}

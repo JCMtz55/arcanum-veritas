@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "kind": "devotion",
+  "note": "One Devotion: one player's reading of one Cognition, held in a Deeper Burn. Paragon Abilities are written for each character with their DM, so they can't be generated from a Cognition's own JSON — they live here. The shape deliberately mirrors a Cognition file: name / icon / description / savingThrow / damageType / engine are the same meta fields, `abilities` is grouped the way `verumEffects` is, and every ability carries a four-entry `tiers` ladder for Ranks I-IV. A tier is a string, or {text, card, mech} — the same tolerance a Cognition tier has. Formula shorthands: {VM} {PB} {DC} {ATK} as everywhere else, plus {{ ... }} for arithmetic over VM, PB, DC, ATK, LVL and RANK. The file name is the id: <owner>_<cognition>_devotion.json, with the owner's username, or `example` for the rules' own worked sets.",
+  "example": true,
+  "cognition": "fire",
+  "name": "The Kindled Heart",
+  "icon": "🔥",
+  "description": "For a player who hears Fire as fury and destruction. Built from Fierce and Wildfire.",
+  "savingThrow": "Dexterity",
+  "damageType": "Fire",
+  "source": "Paragon rules — worked example",
+  "abilities": {
+    "passive": [
+      {
+        "name": "Ember Soul",
+        "text": "Your weapon attacks deal an extra 1d6 fire damage, and a creature you hit takes fire damage equal to your Verum Modifier at the start of its next turn. This lingering burn doesn't stack.",
+        "tiers": [
+          {
+            "card": "+1d6 fire on every hit · the target burns for {VM} at the start of its next turn"
+          },
+          {
+            "card": "+2d6 fire · an Ablaze creature ending its turn within 5 ft of another spreads to it"
+          },
+          {
+            "card": "+2d6 fire, and your fire damage ignores resistance"
+          },
+          {
+            "card": "+3d6 fire · immunity to fire counts only as resistance against your flames"
+          }
+        ]
+      }
+    ],
+    "offensive": [
+      {
+        "name": "Wildfire Rush",
+        "activation": "action",
+        "uses": "1",
+        "text": "You make one weapon attack. On a hit, the target must succeed on a Dexterity saving throw against your Verum DC or be Ablaze. An Ablaze creature takes fire damage equal to twice your Verum Modifier at the start of each of its turns until it, or a creature within 5 feet of it, uses an action to smother the flames.",
+        "tiers": [
+          {
+            "card": "Dex save vs {DC} or Ablaze — {{2*VM}} fire at the start of each of its turns"
+          },
+          {
+            "card": "Ablaze spreads to any creature it ends its turn within 5 ft of"
+          },
+          {
+            "card": "Smothering takes an action and a Dexterity check vs {DC}"
+          },
+          {
+            "card": "Ablaze deals {{5*VM}} fire a turn"
+          }
+        ]
+      }
+    ]
+  }
+}

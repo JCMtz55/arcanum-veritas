@@ -62,23 +62,28 @@ const MODES = {
     brand: "The Paragon", tagline: "deeper burn",
     docTitle: "The Paragon — Deeper Burn",
     toast: "The Paragon path — one Cognition, all the way down",
-    composerTab: "The Path", refTab: "Paragon",
+    composerTab: "Devotions", refTab: "Paragon",
     cardTitle: "The Paragon", atkLabel: "Paragon attack",
     slotDial: false,
     kind: "paragon", noun: "Paragon", plural: "Paragons",
     needCard: "Light a Devotion first",
     rail: parRail, main: renderParagon,
     refList: renderParRefList, ref: renderParRef,
-    pick: parToggleDevotion,
+    pick: null,                       // nothing to pick from a rail — the Devotion cards do it
     clear: () => parClear(),
     syncBar: parSyncBar,
     snapshot: () => parSnapshot(),
     name: { get: () => state.par.name, set: v => state.par.name = v },
     ids:  d => d.devotions || [],
-    load: (d, name) => Object.assign(state.par, {
-      devotions: [...(d.devotions || [])], paragon: d.paragon || null, builds: d.builds || {},
-      season: d.season || 0, arrived: true, rotated: false, name,
-    }),
+    // Loading a saved Paragon swears its three again, as far as the DM still allows: a Devotion
+    // that has since been closed is simply dropped rather than shown as something you can't use.
+    load: (d, name) => {
+      const open = new Set(parPool().map(x => x.cognition));
+      PAR.sworn = (d.devotions || []).filter(id => open.has(id)).slice(0, parMax());
+      PAR.active = PAR.sworn.includes(d.paragon) ? d.paragon : null;
+      Object.assign(state.par, { wheel: { ...(d.wheel || {}) }, arrived: true, rotated: false, out: false, name });
+      parSaveChoice();
+    },
   },
 };
 
@@ -86,8 +91,13 @@ const MODES = {
 state.mode = "av";
 function mode()     { return MODES[state.mode] || MODES.av; }
 // The Paragon path is the DM's to open, so it joins the cycle only for a player who walks it
-// (and for the DM, who needs to see what they wrote). The other two are always there.
-function modeOrder() { return MODE_ORDER.filter(k => k !== "par" || parAllowed()); }
+// (and for the DM, who needs to see what they wrote). And it closes the other two behind it: a
+// Paragon can't use Arcanum Veritas or Ignitions, so for them there is only the one Art and the
+// ⇄ button has nowhere to go.
+function modeOrder() {
+  if (parLocked()) return ["par"];
+  return MODE_ORDER.filter(k => k !== "par" || parAllowed());
+}
 function nextMode()  { const o = modeOrder(); return o[(o.indexOf(state.mode) + 1) % o.length]; }
 
 // ═══════════════════════════════════════════════════════════
@@ -97,6 +107,11 @@ function setMode(m, quiet) {
   if (m === "par" && !parAllowed()) {            // a remembered mode the DM has since closed
     if (!quiet) toast("The Paragon path isn't open to you — your DM opens it");
     m = "av";
+  }
+  // A Paragon has one Art. A remembered seal or Eidon from before the path opened goes nowhere.
+  if (parLocked() && m !== "par") {
+    if (!quiet) toast("A Paragon can't use Arcanum Veritas or Ignitions — that road is closed");
+    m = "par";
   }
   state.mode = MODES[m] ? m : "av";
   try { localStorage.setItem("av-mode", state.mode); } catch (e) {}
@@ -108,14 +123,20 @@ function setMode(m, quiet) {
 function toggleMode() { setMode(nextMode()); }
 
 function applyMode() {
-  const M = mode(), N = MODES[nextMode()];
+  const M = mode(), order = modeOrder(), N = MODES[nextMode()];
   const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
   // Arcanum Veritas is the unclassed default; the other two carry a body class for their colours
   MODE_ORDER.forEach(k => document.body.classList.toggle(k, k !== "av" && k === state.mode));
+  // `locked` is what hides the rail and the summary card: on this path the Devotion cards are all
+  // there is, and there is no seal to summarise.
+  document.body.classList.toggle("par-only", parLocked());
   document.querySelector(".brand").innerHTML = `${M.brand}<em>${M.tagline}</em>`;
   set("modeBtn", `⇄ ${N.brand}`);
   const btn = document.getElementById("modeBtn");
-  if (btn) btn.title = `Switch to ${N.brand} — ${MODE_ORDER.map(k => MODES[k].brand).join(", ")} cycle in turn`;
+  if (btn) {
+    btn.hidden = order.length < 2;               // one Art, nowhere to switch to
+    btn.title = `Switch to ${N.brand} — ${order.map(k => MODES[k].brand).join(", ")} cycle in turn`;
+  }
   set("tabComposer", M.composerTab);
   set("tabRings", M.refTab);
   set("sealTitle", M.cardTitle);

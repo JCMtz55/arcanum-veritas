@@ -1,4 +1,4 @@
-# Arcanum Veritas Builder
+﻿# Arcanum Veritas Builder
 ### Once Upon a Star ★ — Magic System Reference Tool
 
 ---
@@ -65,8 +65,8 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   damage.js         ← The Damage tab
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
-  paragon-examples.js ← The three worked Paragon sets from the rules — loaded by the builder and Admin alike
-  paragon.js        ← Paragon mode: Devotions, the Deeper Burn, the ability sets the DM wrote, its reference
+  paragon-examples.js ← RETIRED — a pointer; the worked sets moved into cognitions/devotions/<player>_<cognition>_devotion.json
+  paragon.js        ← The Paragon path: the Devotion cards, the Deeper Burn, Rotate, every tracker, its reference
   modes.js          ← The mode registry — what each Cognitive Art calls things and which renderers it owns
   dice.js           ← The dice tray: rolls the numbers the card already printed
   hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
@@ -77,12 +77,15 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
 cognitions/
   index.json        ← Master list of all cognitions + ready status
   fire.json, ice.json, … (one .json per cognition)
+  devotions/
+    <player>_<cognition>_devotion.json ← One Devotion: one player's reading of one Cognition
+    index.json      ← The list of them — for a static host only; the server reads the folder
 server/
   server.js         ← The server: sign-in, per-player Cognition access, the admin API
   db.js             ← Database connection and tables
   auth.js           ← Password hashing and session tokens
   seed.json         ← First-run players and their mastered Cognitions
-  paragon-seed.json ← First-run Paragon paths and ability sets (Zeke's three)
+  paragon-seed.json ← RETIRED — no longer read; the sets live in cognitions/devotions/<player>_<cognition>_devotion.json
 package.json        ← Server dependencies and the start command
 README.md           ← This file
 ```
@@ -364,53 +367,100 @@ The **⇄ Ignition** button in the header switches the builder from Arcanum Veri
 
 ## Paragon Mode
 
-The **⇄** button in the header cycles the builder through the Cognitive Arts — **Arcanum Veritas → Ignition → The Paragon → back**. The Paragon path is the third: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. The rail, Codex, Damage tab and your level stay shared; the Composer becomes **The Path**, the card becomes **The Paragon**, and the Rings tab becomes the **Paragon** reference. The choice is remembered in the browser.
+The Paragon path is the third Cognitive Art: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. It is not a third view of the same builder — **it replaces the builder**.
 
-**The path is the DM's to open.** It's a choice of identity made with them, not a mode a player switches on, so Paragon mode is in the ⇄ cycle only for a player the DM has put on the path (and for the DM, who needs to see what they wrote). For everyone else it isn't there at all, and a remembered `av-mode` of `par` is refused.
+**The path is the DM's to open.** It's a choice of identity made with them, not a mode a player switches on. While it's closed, Paragon mode isn't in the ⇄ cycle at all and a remembered `av-mode` of `par` is refused.
 
-The three don't mix at the table — **a Paragon can't use Arcanum Veritas or Ignitions, can't manifest Eidons, and has no Blaze Points** — but the builder still lets a Paragon *open* the other two, with a note saying so. Planning a seal you can't draw is harmless; pretending the rules allow it isn't.
+**While it's open, it closes the other two.** A Paragon can't use Arcanum Veritas or Ignitions, can't manifest Eidons and has no Blaze Points, so for that account the builder has **one Art and no ⇄ button**, and `setMode` sends any other mode back to `par`. The DM is not locked — they need to see every Art to run the table.
+
+What a Paragon's Composer board looks like, and what it deliberately doesn't have:
+
+- **No Cognition rail.** A Paragon doesn't choose from the whole book. They choose from the Devotions their DM opened, and those can only be Cognitions they have already mastered.
+- **No summary card.** There is no seal to summarise. The **Devotions reel** is the page. (The card panel is still rendered, hidden, so Copy-as-text and Save-as-image keep working.)
+- **Choosing and reading are separate.** The reel is the choosing; **Paragon Abilities** is its own section below it, and it holds **only the Devotion in the Deeper Burn** — a Devotion that isn't your Paragon grants nothing, so there is nothing of it to read. Rotating swaps the whole section over; putting the Burn out empties it.
+- **Codex, Damage, Emotion and Learning stay.** Reading a Cognition is lore, not an Art.
 
 Nothing is *built* here. Paragon Abilities are written for each player with their DM — "two Paragons of the same Cognition may resonate with different parts of it" — so they can't be generated from a Cognition's JSON the way a seal's Verum Effects are. Paragon mode is a character sheet and a round tracker.
 
-- **Header** — the Slot dial is hidden; Verum mod and Dream mod stay. The live chips show your **Paragon attack** (Proficiency + Verum mod), your **Verum DC** (the Paragon DC — the same one every Cognitive Art uses), and the **uses** you have left.
-- **Devotions** — click three Cognitions in the rail to swear yourself to them. A fourth is refused: replacing one is a **Pilgrimage**, a downtime ritual. A Devotion that isn't your Paragon grants nothing on its own, and the first one you swear lights itself.
-- **The Deeper Burn** — one Devotion at a time is your **Paragon**. **Rotate** is a Bonus Action that moves it to another Devotion and ends only the old one's **Passive** abilities — anything its Offensive or Supportive abilities set in motion keeps running. **Incapacitated** puts the Burn out; you relight any Devotion with a Bonus Action on a later turn.
-- **Uses** — the rules call activation costs a placeholder until the Paragon Ability guideline is finished, so the tracker pools them the way Zeke's sheet does: Offensive and Supportive abilities share **Proficiency Bonus uses per long rest** across all three Devotions. **Long rest** restores them.
-- **Abilities** — each is **Passive**, **Offensive** or **Supportive** (colour-coded on the edge), with its activation, its uses, its rule, and a **Rank I–IV ladder** with the Rank you're at lit. Every number resolves live against your Verum mod and Proficiency Bonus, the way a seal's do.
-- **Resonances** — a Cognition can have more than one written set. Fire has **The Kindled Heart** (fury) and **The Hearth-Keeper** (the hearth); Protection has **The Unbroken Oath** and Zeke's **The Stained Crescent**. Where there's a choice, the Devotion row offers it.
-- **Nature's wheel** — **The Turning Year** holds a Season (🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter) that decides what its Passive does and what Season's Blow and Season's Gift add. **Next round** turns it; on the turn it's lit the Season *arrives* instead of turning. From Rank IV it turns either way.
-- **Paragon tab** — the rules from the vault's *Paragon* note (the path, the Deeper Burn, Rotate, the three ability types, Pilgrimage), plus one page per written ability set.
+### The sheet
+
+- **Header** — the Slot dial is hidden; Verum mod and Dream mod stay. It shows what is burning, your **Paragon attack** (Proficiency + Verum mod), your **Paragon DC** (your Verum DC — the same one every Cognitive Art uses), your Rank, and how many of the three you have sworn. It warns when the bar doesn't meet the path's requirement: a Dream mod of at least +1 (a Dream Score of 13), and three Cognitions at Learn Full.
+- **The Devotions reel, which is also Rotate** — one line, one tile per Devotion the DM has opened: your sworn ones first, in the order you swore them, then the rest of the pool dashed. **The focused tile is the one in the Deeper Burn.** Choosing a Devotion and Rotating to it were two gestures doing one thing, so they're one control:
+  - **Click a sworn tile** — it takes the Deeper Burn. That is a Rotate: a **Bonus Action** that ends only the old Paragon's **Passive** abilities, while anything its Offensive or Supportive abilities set in motion keeps running. The line under the reel says when you've spent the Bonus Action this turn.
+  - **The ‹ › arrows** step the focus round your three — the same Rotate, without aiming. The focused tile is scrolled into view.
+  - **Click a dashed tile** to **swear** it; a fourth is refused, because replacing one is a **Pilgrimage**. The **✕** on a sworn tile releases it, and releasing the one alight puts the Burn out.
+  - **Incapacitated** puts the Burn out; clicking any sworn tile **relights** it with a Bonus Action on a later turn.
+  - Your three, and which one burns, are kept **with your account** — they survive a reload and a different browser.
+  - **If that save can't reach the server**, the Rotate is *kept* rather than rolled back — it's the middle of a fight, and the Burn belongs where you just put it — and the header says so in as many words, with a **Try again**. An unsaved Rotate that quietly reverts on the next reload is worse than one that admits it. The whole `{sworn, active}` pair goes up every time, so one successful save afterwards puts everything right.
+- **Uses** — the rules call activation costs a placeholder until the Paragon Ability guideline is finished, so the tracker pools them the way Zeke's sheet does: Offensive and Supportive abilities share **Proficiency Bonus uses per long rest** across every Devotion. Each Offensive or Supportive ability has a **use it** button, and **Long rest** restores them.
+- **Paragon Abilities** — the section under the cards, holding the burning Devotion and nothing else. Grouped **Passive**, **Offensive**, **Supportive** (colour-coded on the edge), each with its activation, its uses, its rule, the line for the Rank you're at, and the full **Rank I–IV ladder** with that Rank lit.
+- **Engines** — a Devotion can declare a cycle. **The Turning Year** holds a Season (🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter) that decides what its Passive does and what Season's Blow and Season's Gift add. **Next round** turns it; on the turn it's lit the Season *arrives* instead of turning; **hold** is the Rank III hold (once per Deeper Burn) and **‹ back** is the Rank IV reversal.
+- **The Cognition's own rules** — "whatever a Cognition charges or depends on when it forms the Core of a seal applies to its Paragon Abilities too", so the burning Devotion's own Cognition file is read for its **`cost`** (a toll, with a ledger of how often it's been paid since the last long rest), its **`engine`** (Sun's Solar Tracker with its Gold/Black marks and the Reckoning, Lunar's phase) and the **`mastery`** traits your level has reached. A toll written per slot level says plainly that a Paragon has no slot, and shows itself at slot 1.
+- **Pilgrimage** — name the swap on your own sheet and your DM is told. Nothing changes until they answer. The picker offers Cognitions you've mastered that aren't Devotions yet, and — because a Pilgrimage is also how Zeke's **Nature** is meant to *reach* Learn Full — the names of Cognitions you don't know at all.
+- **Paragon tab** (Reference ▾ › Paragon) — the rules from the vault's *Paragon* note, a page per Devotion written for you, and the three worked examples from the rules.
 
 ### Where a player's abilities come from
 
-A player's ability sets belong to **them**, not to the Cognition, so they live in the `paragon_builds` table and arrive from `api/paragon`. A player only ever receives their own. `PARAGON_EXAMPLES` in `js/paragon.js` holds just the three worked examples from the rules — they're reading in the Paragon tab and a starting point for the DM, never something a player can use as their own resonance. On a plain static host there are no accounts, so the examples stand in and nothing is gated.
+**One file per Devotion**, in `cognitions/devotions/`, authored beside the Cognitions themselves and served the same way — never as a static file on the real server, and never anyone's but their own.
 
-A Devotion with no set written is still a Devotion — its card says so, which is what a new player's Cognition looks like before they and their DM build it.
+```
+cognitions/devotions/
+  zeke_life_devotion.json          The Evergreen
+  zeke_protection_devotion.json    The Stained Crescent
+  zeke_nature_devotion.json        The Turning Year
+  example_fire_kindled_devotion.json
+  example_fire_hearth_devotion.json
+  example_protection_devotion.json
+  index.json
+```
+
+The name is **`<owner>_<cognition>_devotion.json`** — the owner's username, or `example` for the rules' own worked sets — and **the file name is the id**, so there's only ever one of them to keep right. Where one owner has two readings of the same Cognition (the two Fire examples), a word goes in between: `example_fire_kindled_devotion.json`. Writing a new Devotion is writing a new file: nothing else is edited, and two Devotions written at once never touch the same file.
+
+The server **reads the folder**, so it picks up a new file on restart with nothing to update. It refuses a file with no `player` (and no `example: true`) or an unknown `cognition`, and warns — without refusing — when the name disagrees with what's inside, since that's a rename half-done. `index.json` exists for one reason: a browser can't list a directory, so a plain static host finds the files through it. The server compares the two on boot and says so if the index has fallen behind. **Add a file, add a line.**
+
+The shape deliberately mirrors a Cognition file, so the two read as one system:
+
+| A Cognition has | A Devotion has |
+| --- | --- |
+| `name` · `icon` · `description` · `savingThrow` · `damageType` | the same (`id` comes from the file name) |
+| `engine` — a cycle (`phases`) or a tally (`tracker`) | the same: The Wheel is `engine.phases` |
+| `verumEffects`, grouped `offensive` / `supportive` / `control` / … | `abilities`, grouped `passive` / `offensive` / `supportive` |
+| each effect's `tiers[4]`, each `{text, card, mech}` | the same, and the four are Ranks I–IV |
+| — | `player` (whose it is), `cognition` (what it's sworn to), `example: true` for the rules' own |
+| — | an ability's `activation` (`action` / `bonus` / `reaction`), `uses`, and `rider` (which of the engine's phase lines it takes) |
+
+A tier is a string or `{text, card, mech}`, the same tolerance a Cognition tier has. Numbers use the shorthands the rest of the builder uses — `{VM}` `{PB}` `{DC}` `{ATK}` — plus **`{{ … }}`** for arithmetic over `VM`, `PB`, `DC`, `ATK`, `LVL` and `RANK`, with `ceil()` / `floor()` / `abs()`: `{{2*(VM+PB)}}` renders as the number. It is parsed, not `eval`ed.
+
+A Devotion the DM has opened with **no set written** is still a Devotion: it appears with the Cognition's own name, says plainly that its abilities are still to be written, and still carries the Cognition's own rules, the DC and the attack. A set written for a Cognition the player *hasn't* mastered appears under Pilgrimage as "written for you, out of reach" — which is exactly what Zeke's **The Turning Year** is until his Nature Pilgrimage is walked.
+
+On a plain static host there are no accounts, so the builder reads `cognitions/devotions/index.json` and then each file it names, shows every Devotion, and gates nothing.
 
 ### The DM's side
 
-On the **Admin page** (`admin.html`), each player's page has a **Paragon path** section:
+On the **Admin page** (`admin.html`), each player's page has a **Paragon path** section with exactly two controls, because only two things here are the DM's:
 
-- **Open the path** — one toggle. While it's closed the player can't reach Paragon mode at all.
-- **Ability sets** — everything written for that player, with Edit and Delete.
-- **The editor** — Cognition, the resonance's name, flavour, save and damage type, then one block per ability: its name, whether it's **Passive**, **Offensive** or **Supportive**, its activation and uses (a Passive has neither — it's always on and ends when they Rotate), the rule, and the four **Rank I–IV** lines. Up to six abilities per set.
-- **Start from an example** — copies one of the three worked examples into the editor so the DM can make it that character's own.
-- Numbers are written the way the rules write them — `your Verum Modifier`, `twice your Verum Modifier`, `your proficiency bonus`, `5 × Proficiency Bonus`, `your Verum DC` — and the builder resolves them to that player's real numbers on the card.
+- **Open the path** — one toggle. While it's closed the player never sees it; while it's open they lose Arcanum Veritas and Ignition entirely.
+- **Devotions** — a chip per Cognition **that player has mastered**; click to open or close. Nothing else is listed, and the server refuses a Cognition that isn't granted, so the rule holds even if the page is stale. The chips read at a glance: plain = mastered but not a Devotion · jade = open · filled = sworn by the player · ✦ = burning right now · dashed = no abilities written for it yet.
+- **Pilgrimage** — the notices players have raised. **Walked** closes the old Devotion and opens the new one in one step (the arriving Cognition must be granted first); **Decline** answers without changing anything. Waiting Pilgrimages join the **Reminders** count in the header.
 
-Everything the DM types is validated server-side before it's stored, since the player's builder renders whatever comes back.
+Revoking a Cognition closes its Devotion and unswears it. Closing a Devotion unswears it, and puts the Burn out if that was the one alight.
 
-**Zeke** is seeded on first run from `server/paragon-seed.json`: his path is opened and his three sets (The Evergreen, The Stained Crescent, The Turning Year) are written for his account.
+**Zeke** is seeded on first run: his path is opened, and the Devotions in the file that he has already mastered (**Life** and **Protection**) go into his pool. **Nature** does not — his sheet says it needs a Pilgrimage, and the app says the same thing.
+
+### What was retired
+
+The old model kept ability sets in the `paragon_builds` table and typed them into an editor on the Admin page. Both are gone: the table is left standing so nothing a DM already wrote is destroyed, and nothing reads it. `js/paragon-examples.js` is an empty pointer — the three worked examples now live in the Devotion file with `"example": true`. `server/paragon-seed.json` is no longer read.
 
 ## The Admin Page
 
 Everything the DM keeps lives on `admin.html`, reached from the Admin card on the front page. It is **its own page, not a tab**, for two reasons: administration has nothing to do with composing a seal, and while it lived inside the builder every player's browser downloaded the whole DM interface. Now none of it is shipped to them.
 
-It stands alone — none of the builder's scripts load here. All it needs is `js/data.js` for the domains and Ranks, `grimms/js/data.js` for the Grimm book, and `js/paragon-examples.js`. The page signs you in itself and turns away anyone who isn't the DM; every call it makes is behind `requireDm`, which is where the real boundary is.
+It stands alone — none of the builder's scripts load here. All it needs is `js/data.js` for the domains and Ranks and `grimms/js/data.js` for the Grimm book — the Paragon Abilities aren't shipped here either, since the page only reports which Devotions have a set written. The page signs you in itself and turns away anyone who isn't the DM; every call it makes is behind `requireDm`, which is where the real boundary is.
 
 The rail holds three things:
 
-- **Reminders** — players who have tracked a Cognition to 4/4 and are waiting for you to enable it. The count also rides the page header and the front page's Admin card.
-- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, and open or close their **Paragon path** and write their ability sets.
+- **Reminders** — players who have tracked a Cognition to 4/4 and are waiting for you to enable it, and Paragons waiting on a **Pilgrimage**. The count also rides the page header and the front page's Admin card.
+- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, and open or close their **Paragon path** and the **Devotions** they may swear.
 - **Grimms** — every Grimm with its **Three Chains**, its **Reality Shift** (revealed or hidden — while hidden, its text never reaches that player's browser) and its **abilities**, each allowed or denied.
 
 The Grimm controls used to sit in a `Grimms · DM` tab inside the Companion. They moved here, so the Companion now only *reads* that state. A denied ability leaves the player's loadout the next time their Companion loads, which is what `fitLoadout` already does on every render of their sheet.

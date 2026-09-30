@@ -1,4 +1,4 @@
-// Arcanum Veritas server — the database. Postgres when DATABASE_URL is set (Railway);
+﻿// Arcanum Veritas server — the database. Postgres when DATABASE_URL is set (Railway);
 // otherwise an embedded PGlite database in .data/, so the server runs locally with nothing installed.
 
 import { fileURLToPath } from "node:url";
@@ -75,9 +75,9 @@ const SCHEMA = [
   // Who walks the Paragon path. The DM turns it on per player — the path is a choice of identity
   // made with them, not something a player switches on for themselves.
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS paragon BOOLEAN NOT NULL DEFAULT false`,
-  // A player's Paragon Ability sets. These are written for each character with their DM, so unlike
-  // a seal's Verum Effects they can't come from a Cognition's JSON — they belong to the player.
-  // `data` is the set as JSON text: flavour, save, damage, and the abilities with their Rank ladders.
+  // RETIRED. Paragon Ability sets used to be typed into the Admin page and kept here. They now
+  // live in cognitions/devotions/<player>_<cognition>_devotion.json, authored beside the Cognitions themselves.
+  // The table is left standing so nothing a DM already wrote is destroyed; nothing reads it.
   `CREATE TABLE IF NOT EXISTS paragon_builds (
      id           SERIAL PRIMARY KEY,
      user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -86,6 +86,35 @@ const SCHEMA = [
      data         TEXT NOT NULL,
      updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
      UNIQUE (user_id, cognition_id, name)
+   )`,
+  // The Devotions the DM has opened to a player: the pool they may swear from. The server only
+  // ever writes a row here for a Cognition the player has mastered — a granted one.
+  `CREATE TABLE IF NOT EXISTS paragon_devotions (
+     user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     cognition_id TEXT NOT NULL,
+     opened_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, cognition_id)
+   )`,
+  // Which of those the player has sworn — up to three — and which one is held in the Deeper Burn.
+  // `sworn` is a JSON array of Cognition ids, in the order they were sworn. The Burn itself is
+  // round-by-round state and belongs in the browser; this is the part that must survive a reload.
+  `CREATE TABLE IF NOT EXISTS paragon_choice (
+     user_id    INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+     sworn      TEXT NOT NULL DEFAULT '[]',
+     active     TEXT,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  // A Pilgrimage: the downtime ritual that swaps one Devotion for another. The rule asks the
+  // player to give the DM advance notice, so the notice itself is a row the DM answers.
+  `CREATE TABLE IF NOT EXISTS paragon_pilgrimage (
+     id         SERIAL PRIMARY KEY,
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     leaving    TEXT,
+     arriving   TEXT NOT NULL,
+     note       TEXT NOT NULL DEFAULT '',
+     status     TEXT NOT NULL DEFAULT 'asked' CHECK (status IN ('asked', 'walked', 'declined')),
+     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+     decided_at TIMESTAMPTZ
    )`,
   // The character's own numbers on the command bar, remembered per account (defaults = the builder's)
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,

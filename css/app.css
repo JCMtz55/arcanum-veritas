@@ -614,10 +614,96 @@ body.par #mFull{display:none}            /* the Paragon card has no FULL reading
 body.par .blaze .bp{border-color:#3f8065}
 body.par .blaze .bp.on{background:radial-gradient(circle at 40% 35%,#c8f0dc,#3f8065 70%);
   border-color:#5da584;box-shadow:0 0 6px rgba(123,194,164,.4)}
-body.par .burn.prim{border-color:#3f8065;background:rgba(123,194,164,.07)}
-body.par .burn .rnd{color:#7BC2A4}
 body.par .chip.on{background:#7BC2A4;border-color:#7BC2A4;color:var(--slate)}
 body.par .rung.now{border-color:#3f8065}
+
+/* ── The Paragon-only shell ──────────────────────────────────
+   A Paragon doesn't choose from the whole book and has no seal to summarise, so on this path the
+   rail and the summary panel are gone and the Devotion cards have the width to themselves. The
+   summary panel is still rendered, hidden, because Copy-as-text and Save-as-image read from it. */
+body.par-only #boardComposer > .rail{display:none}
+body.par-only #boardComposer > .seal{display:none}
+body.par-only #slotDial{display:none}
+
+/* The header: what is burning, the numbers, the rotation dial, and the round's trackers */
+.par-hd{margin-bottom:16px;border:1px solid var(--line);border-radius:11px;background:var(--panel);overflow:hidden}
+.par-hd-l{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid var(--line)}
+.par-burn{display:flex;align-items:center;gap:11px;min-width:230px;flex:1}
+.par-burn-i{font-size:26px;line-height:1;width:30px;text-align:center}
+.par-burn.lit .par-burn-i{filter:drop-shadow(0 0 7px rgba(123,194,164,.55))}
+.par-burn.dark .par-burn-i{opacity:.35}
+.par-burn-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.par-burn-t b{font-family:var(--sans);font-size:16px;color:var(--bone)}
+.par-burn.lit .par-burn-t b{color:#9BD5BA}
+.par-burn-t i{font-style:normal;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+.par-nums{display:flex;flex-wrap:wrap;align-items:center}
+.par-nums .n{margin:0 6px 0 0}
+.par-track{padding:12px 16px;display:flex;flex-direction:column;gap:9px}
+.par-track .hint{margin:0}
+
+/* ── The Devotions reel ──────────────────────────────────────
+   One line. Choosing a Devotion and Rotating to it are the same gesture, so they are the same
+   control: the focused tile is the one in the Deeper Burn, and the arrows step the focus round. */
+.par-reel{display:flex;align-items:stretch;gap:8px}
+.par-arrow{flex:0 0 auto;width:30px;border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  color:var(--bone2);font-size:17px;line-height:1;cursor:pointer;font-family:var(--sans)}
+.par-arrow:hover:not(:disabled){border-color:#3f8065;color:#9BD5BA}
+.par-arrow:disabled{opacity:.3;cursor:default}
+.par-track-x{flex:1;min-width:0;display:flex;gap:9px;overflow-x:auto;padding:2px;
+  scroll-snap-type:x proximity;scrollbar-width:thin}
+.par-tile{position:relative;flex:0 0 auto;min-width:184px;max-width:260px;scroll-snap-align:center;
+  border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.par-tile.sworn{border-color:#2f6650}
+.par-tile.spare{border-style:dashed;opacity:.72}
+.par-tile.spare:hover{opacity:1}
+.par-tile.dis{opacity:.35}
+.par-tile.burning{border-color:#3f8065;background:rgba(123,194,164,.09);
+  box-shadow:0 0 0 1px rgba(123,194,164,.3)}
+.par-tile-b{display:flex;align-items:center;gap:9px;width:100%;padding:10px 12px;
+  background:none;border:0;cursor:pointer;text-align:left;font-family:var(--sans)}
+.par-tile-b:disabled{cursor:default}
+.par-tile-b .ico{font-size:19px;line-height:1;width:22px;text-align:center;flex:none}
+.par-tile.burning .par-tile-b .ico{filter:drop-shadow(0 0 6px rgba(123,194,164,.55))}
+.par-tile-n{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.par-tile-n b{font-size:13.5px;color:var(--bone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-tile.burning .par-tile-n b{color:#9BD5BA}
+.par-tile-n i{font-style:normal;font-size:10.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.par-tile-s{flex:none;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.par-tile.burning .par-tile-s{color:#7BC2A4}
+/* Release stays faintly visible rather than hover-only — a phone has no hover */
+.par-tile-x{position:absolute;top:3px;right:4px;border:0;background:none;color:var(--mute);
+  font-size:10px;line-height:1;padding:2px 3px;cursor:pointer;opacity:.4}
+.par-tile:hover .par-tile-x,.par-tile-x:focus{opacity:1}
+.par-tile-x:hover{color:var(--ember)}
+.par-card-d{margin:9px 0 8px;font-size:13px;line-height:1.5;color:var(--bone2)}
+.par-warn{margin:8px 0 0;padding:7px 11px;border:1px solid var(--brass);border-left-width:3px;border-radius:7px;
+  background:rgba(197,155,76,.07);font-family:var(--sans);font-size:12px;line-height:1.45;color:var(--bone2)}
+.par-warn .chip{margin-left:8px;vertical-align:baseline}
+/* Unsaved is louder than a note: the Burn works, but it isn't on the account yet */
+.par-unsaved{margin:0;border-color:var(--ember);background:rgba(198,93,59,.09)}
+.par-unsaved strong{color:var(--ember)}
+/* The abilities section: which Devotion is being read, then its engine and every ability */
+.par-now{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:4px}
+.par-now .ico{font-size:22px;line-height:1;width:26px;text-align:center;
+  filter:drop-shadow(0 0 7px rgba(123,194,164,.5))}
+.par-now-t{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.par-now-t b{font-family:var(--sans);font-size:15.5px;color:#9BD5BA}
+.par-now-t i{font-style:normal;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+.par-foot{margin:11px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.5;color:var(--mute)}
+
+/* An engine — Nature's Wheel, Sun's Solar Tracker, a Cognition's toll */
+.par-eng{margin-top:10px;padding:11px 13px;border:1px solid #2f6650;border-radius:9px;background:rgba(123,194,164,.04)}
+.par-eng-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.par-eng-h b{font-family:var(--sans);font-size:13px;color:#9BD5BA}
+.par-eng-h i{font-style:normal;font-family:var(--sans);font-size:11.5px;line-height:1.45;color:var(--mute);flex:1;min-width:140px}
+.par-eng .chips{margin-bottom:0}
+.par-eng .cdx-defs{margin:0}
+
+/* Pilgrimage — the notice a player gives their DM */
+.par-pil{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px;align-items:end}
+.par-pil label{display:block;font-family:var(--sans);font-size:11px;color:var(--mute);letter-spacing:.02em}
+.par-pil label .pick,.par-pil label .search{margin-top:5px;width:100%}
+.par-pil .chips{grid-column:1/-1;margin:0}
 
 /* One Paragon Ability: its type on the edge, the live Rank called out under the rule */
 .par-ab{margin-top:9px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
@@ -626,32 +712,29 @@ body.par .rung.now{border-color:#3f8065}
 .par-ab.supportive{border-left:3px solid var(--verdant)}
 .par-ab-h{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
 .par-ab-h b{font-family:var(--sans);font-size:13.5px;color:var(--bone)}
+.par-ab-h .mini{margin-left:auto}
+.par-ab-f{margin:0 0 6px;font-size:12.5px;line-height:1.5;color:var(--mute);font-style:italic}
 .par-ab-t{margin:0 0 7px;font-size:13.5px;line-height:1.5;color:var(--bone2)}
 .par-ab-now{margin:0 0 7px;padding:6px 10px;border:1px solid #3f8065;border-radius:7px;
   background:rgba(123,194,164,.08);font-family:var(--sans);font-size:12.5px;line-height:1.45;color:var(--bone)}
+.par-ab-now.rider{border-color:var(--brass);background:rgba(197,155,76,.08)}
 .par-ab .ladder{margin-top:2px}
 
-/* The note a Paragon sees on the two Arts their path closed off */
+/* Kept so an old browser that still has the pre-lockout builder cached renders the note legibly */
 .path-warn{margin:0 0 12px;padding:9px 13px;border:1px solid #3f8065;border-left-width:3px;border-radius:8px;
   background:rgba(123,194,164,.07);font-family:var(--sans);font-size:12.5px;line-height:1.5;color:var(--bone2)}
 .path-warn strong{color:#7BC2A4}
 
-/* ── Admin: writing a player's Paragon Abilities ───────────── */
+/* ── Admin: opening the path, and setting a player's Devotions ───────────── */
 .adm-sub{margin:16px 0 8px;font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--mute);letter-spacing:.02em}
-.par-edit{margin-top:12px;padding:14px 16px;border:1px solid #3f8065;border-radius:10px;background:rgba(123,194,164,.04)}
-.par-edit .adm-sub{margin-top:0}
-.par-edit label{display:block;margin:12px 0 5px;font-family:var(--sans);font-size:11px;color:var(--mute);letter-spacing:.02em}
-.par-edit label .search,.par-edit label .pick{margin-top:5px;width:100%}
-.par-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 14px}
-.par-ranks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px;margin-top:4px}
 .par-ta{width:100%;resize:vertical;font-family:var(--serif);line-height:1.45}
-.par-edit .par-ab-h{gap:6px}
-.par-edit .par-ab-h .search,.par-edit .par-ab-h .pick{margin-top:0;width:auto}
-.par-name{flex:1;min-width:130px}
-.par-pick{flex:none;width:auto}
-.par-uses{width:110px;flex:none}
-.par-note{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--mute)}
-.par-edit .mini.adm-del{margin-left:auto}
+/* A Devotion chip in Admin: mastered, open, sworn, burning — four states, read at a glance */
+.dev-chip{position:relative}
+.dev-chip.open{border-color:#3f8065;color:#9BD5BA;background:rgba(123,194,164,.1)}
+.dev-chip.sworn{border-color:#5da584;color:var(--slate);background:#7BC2A4}
+.dev-chip.burning{box-shadow:0 0 0 2px rgba(123,194,164,.35)}
+.dev-chip.unwritten{border-style:dashed;opacity:.72}
+.dev-legend{margin:9px 0 0;font-family:var(--sans);font-size:11px;line-height:1.6;color:var(--mute)}
 
 /* ── Admin: the Grimms. The chain marks read the same here as on a player's sheet,
    so these match grimms/css/app.css rather than inventing a second look. */
