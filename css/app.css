@@ -652,3 +652,9 @@ body.par .rung.now{border-color:#3f8065}
 .par-uses{width:110px;flex:none}
 .par-note{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--mute)}
 .par-edit .mini.adm-del{margin-left:auto}
+
+/* ── Admin: the Grimms. The chain marks read the same here as on a player's sheet,
+   so these match grimms/css/app.css rather than inventing a second look. */
+.chains{display:flex;gap:6px;align-items:center}
+.chain{font-size:22px;line-height:1;filter:grayscale(.2)}
+.chain.broken{opacity:.18;filter:grayscale(1)}

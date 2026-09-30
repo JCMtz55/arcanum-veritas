@@ -519,7 +519,13 @@ app.use("/css", express.static(path.join(ROOT, "css")));
 app.use("/js", express.static(path.join(ROOT, "js")));
 // The front page (index.html) is where everyone signs in; the Grimm Companion has no sign-in of its
 // own, so without a session it sends you back there.
-app.use("/grimms", async (req, res, next) => (await currentUser(req)) ? next() : res.redirect("/"));
+app.use("/grimms", async (req, res, next) => {
+  // The Grimm book is referenced by the Admin page too, which can be opened signed out. Let that
+  // one asset through — the route below serves an empty book to anyone without a session, so it
+  // parses as JavaScript instead of redirecting to a page of HTML.
+  if (req.path === "/js/data.js") return next();
+  return (await currentUser(req)) ? next() : res.redirect("/");
+});
 
 // The Grimm data carries every Reality Shift, so a player is served a copy with the ones the DM
 // hasn't revealed cut out — hiding them in the page would leave the text a click away in the file.
@@ -537,6 +543,9 @@ function grimmDataFor(revealed) {
 }
 app.get("/grimms/js/data.js", async (req, res) => {
   const user = await currentUser(req);
+  // Signed out, the book itself is campaign material — serve nothing rather than a redirect
+  if (!user) return res.type("application/javascript").set("Cache-Control", "no-store")
+    .send('window.GRIMM_DATA = { "grimms": [] };\n');
   let revealed;
   if (user.role === "dm") revealed = new Set(GRIMM_DATA.grimms.map(g => g.id));
   else {
@@ -549,6 +558,9 @@ app.get("/grimms/js/data.js", async (req, res) => {
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
 app.get("/", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/arcanum.html", (req, res) => res.sendFile(path.join(ROOT, "arcanum.html")));
+// The Admin page. Served like any other page — it signs you in itself, and turns away anyone who
+// isn't the DM. Every call it makes is behind requireDm, which is where the real boundary is.
+app.get("/admin.html", (req, res) => res.sendFile(path.join(ROOT, "admin.html")));
 
 app.use((err, req, res, next) => {
   if (!err.status || err.status >= 500) console.error(err);

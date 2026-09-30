@@ -63,15 +63,15 @@ function sheet(id = S.current) {
 const pbOf = lvl => 2 + Math.floor((Math.max(1, lvl) - 1) / 4);
 const stageIdx = st => STAGES.indexOf(st);
 
-// The chains, each Grimm's Reality Shift and which abilities it may use are the DM's to keep.
-// Opened through the Ephemer server, ROLE says who is looking and the server's answer wins; on a
-// plain static host nothing is fetched, so abilities are all open and no Reality Shift is shown.
-let ROLE = null, TOGGLES = {};
+// The chains, each Grimm's Reality Shift and which abilities it may use are the DM's to keep —
+// they are set on the Admin page and only read here. Opened through the Ephemer server the
+// server's answer wins; on a plain static host nothing is fetched, so abilities are all open and
+// no Reality Shift is shown.
+let TOGGLES = {};
 async function syncGrimms() {
   try {
     const me = await fetch('../api/me');
     if (!me.ok) return;
-    ROLE = (await me.json()).user.role;
     const { chains, toggles } = await (await fetch('../api/grimms/state')).json();
     TOGGLES = toggles || {};
     for (const g of D.grimms) sheet(g.id).chains = chains[g.id] ?? g.chains;

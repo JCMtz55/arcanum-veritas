@@ -3,8 +3,8 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", learn: "boardLearn", admin: "boardAdmin" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", learn: "tabLearn", admin: "tabAdmin" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", learn: "boardLearn" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", learn: "tabLearn" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
@@ -12,8 +12,8 @@ function setView(v) {
     document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
   // Rings, Damage and Emotion live in the Reference menu — its button stands in for their tab
   document.getElementById("refBtn").className = "tab" + (["rings", "damage", "emotion"].includes(v) ? " on" : "");
-  // Learning and Admin live in the account menu — its button stands in for their tab
-  document.getElementById("whoBtn").classList.toggle("on", v === "learn" || v === "admin");
+  // Learning lives in the account menu — its button stands in for the tab
+  document.getElementById("whoBtn").classList.toggle("on", v === "learn");
   if (v === "codex") {
     if (!state.codexId) {
       const first = state.core || (INDEX.find(c => c.ready) || {}).id;
@@ -31,7 +31,6 @@ function setView(v) {
   if (v === "damage") { renderDamageList(); renderDamage(); }
   if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
   if (v === "learn") openLearning();
-  if (v === "admin") openAdmin();
 }
 
 function renderCodexList() {

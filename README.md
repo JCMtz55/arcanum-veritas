@@ -23,7 +23,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 **Who sees what.** Each player has an account and sees only the Cognitions granted to it; nothing else reaches their browser. The **DM** account reads every Cognition, held-back ones included, and has an **Admin** tab: pick a player, click Cognitions to grant or take them away (saved at once), set or reset passwords, add and delete players. `ready` in `index.json` is still the global gate — a granted Cognition that isn't `ready` shows greyed out and its text is not served.
 
-**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** in the DM's Admin tab (the tab reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The name field autocompletes from the Cognitions the player doesn't have yet — their **names only**; nothing else about them is sent. Any other name can still be typed; one that matches nothing in `index.json` is listed apart, with nothing to enable.
+**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** on the DM's Admin page (the front page's Admin card reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The name field autocompletes from the Cognitions the player doesn't have yet — their **names only**; nothing else about them is sent. Any other name can still be typed; one that matches nothing in `index.json` is listed apart, with nothing to enable.
 
 **Saved builds.** Signed in, the seal panel has **Save**. A seal or an Eidon is saved under its name (saving the same name again replaces it) and then shows as a card on the composer's opening screen — under "Pick a cognition…", seals in Arcanum Veritas, Eidons in Ignition — where one click loads it; **manage** there opens the full list for deleting. With a build already on the table, the same list is under the panel's **⋯** menu (*Saved builds…*), next to copy, image and print. A save holds the recipe, not the character — level and modifiers stay whatever the bar says — and an Eidon also keeps its count of successful manifestations. Saves are private to the account; the DM cannot see them.
 
@@ -37,7 +37,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 3. Add `DM_PASSWORD` (and optionally `DM_USERNAME`, default `dm`) before the first deploy. Without it a random DM password is printed once in the deploy log.
 4. Under the service's Networking settings, generate a domain.
 
-On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each in the Admin tab and pass it on; they can change it from the button with their name. The players' in-progress trackers in `seed.json` are imported once too — on the first start that has the tracker, even into a database that was seeded earlier. After that the database is the truth and `seed.json` is never read again.
+On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each on the Admin page and pass it on; they can change it from the button with their name. The players' in-progress trackers in `seed.json` are imported once too — on the first start that has the tracker, even into a database that was seeded earlier. After that the database is the truth and `seed.json` is never read again.
 
 Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then remove the variable.
 
@@ -50,6 +50,7 @@ Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then 
 ```
 index.html          ← The Ephemer front page: sign-in and the choice of tools (js/hub.js)
 arcanum.html        ← The builder: header, boards, and the script tags
+admin.html          ← The DM's own page: accounts, grants, Paragon paths, the Grimms (js/admin.js)
 grimms/             ← The Grimm Companion (see grimms/README.md)
 css/
   app.css           ← Every style
@@ -64,11 +65,13 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   damage.js         ← The Damage tab
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
+  paragon-examples.js ← The three worked Paragon sets from the rules — loaded by the builder and Admin alike
   paragon.js        ← Paragon mode: Devotions, the Deeper Burn, the ability sets the DM wrote, its reference
   modes.js          ← The mode registry — what each Cognitive Art calls things and which renderers it owns
   dice.js           ← The dice tray: rolls the numbers the card already printed
   hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
-  account.js        ← Sign-in, the account menu, the DM's Admin tab
+  admin.js          ← The Admin page only (admin.html) — stands alone, not part of this list's load order
+  account.js        ← Sign-in and the account menu
   journal.js        ← The Learning tab and saved seals / Eidons / Paragons
   events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
@@ -386,7 +389,7 @@ A Devotion with no set written is still a Devotion — its card says so, which i
 
 ### The DM's side
 
-The **Admin** tab gains a **Paragon path** section on each player's page:
+On the **Admin page** (`admin.html`), each player's page has a **Paragon path** section:
 
 - **Open the path** — one toggle. While it's closed the player can't reach Paragon mode at all.
 - **Ability sets** — everything written for that player, with Edit and Delete.
@@ -397,6 +400,20 @@ The **Admin** tab gains a **Paragon path** section on each player's page:
 Everything the DM types is validated server-side before it's stored, since the player's builder renders whatever comes back.
 
 **Zeke** is seeded on first run from `server/paragon-seed.json`: his path is opened and his three sets (The Evergreen, The Stained Crescent, The Turning Year) are written for his account.
+
+## The Admin Page
+
+Everything the DM keeps lives on `admin.html`, reached from the Admin card on the front page. It is **its own page, not a tab**, for two reasons: administration has nothing to do with composing a seal, and while it lived inside the builder every player's browser downloaded the whole DM interface. Now none of it is shipped to them.
+
+It stands alone — none of the builder's scripts load here. All it needs is `js/data.js` for the domains and Ranks, `grimms/js/data.js` for the Grimm book, and `js/paragon-examples.js`. The page signs you in itself and turns away anyone who isn't the DM; every call it makes is behind `requireDm`, which is where the real boundary is.
+
+The rail holds three things:
+
+- **Reminders** — players who have tracked a Cognition to 4/4 and are waiting for you to enable it. The count also rides the page header and the front page's Admin card.
+- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, and open or close their **Paragon path** and write their ability sets.
+- **Grimms** — every Grimm with its **Three Chains**, its **Reality Shift** (revealed or hidden — while hidden, its text never reaches that player's browser) and its **abilities**, each allowed or denied.
+
+The Grimm controls used to sit in a `Grimms · DM` tab inside the Companion. They moved here, so the Companion now only *reads* that state. A denied ability leaves the player's loadout the next time their Companion loads, which is what `fitLoadout` already does on every render of their sheet.
 
 ## Layout
 

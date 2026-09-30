@@ -6,7 +6,7 @@ function renderBar() {
   const g = S.current && grimmById(S.current);
   document.documentElement.style.setProperty('--hue', g ? g.hue : '#B08842');
   // Signed in as the DM, one more view: every Grimm's chains, abilities and Reality Shift
-  $('#tabs').innerHTML = Object.entries(ROLE === 'dm' ? { ...VIEWS, dm: 'Grimms · DM' } : VIEWS).map(([k, n]) => `<button class="tab ${S.view === k ? 'on' : ''}" onclick="setView('${k}')">${n}</button>`).join('');
+  $('#tabs').innerHTML = Object.entries(VIEWS).map(([k, n]) => `<button class="tab ${S.view === k ? 'on' : ''}" onclick="setView('${k}')">${n}</button>`).join('');
   if (!g) { $('#dials').innerHTML = ''; $('#live').innerHTML = ''; return; }
   const sh = sheet(), v = derived(sh);
   $('#dials').innerHTML = `
@@ -22,10 +22,9 @@ function renderBar() {
 
 function render() {
   if (S.view === 'chains') S.view = 'dm';          // the view was called Chains before it held more
-  if (S.view === 'dm' && ROLE !== 'dm') S.view = 'sheet';
+  if (S.view === 'dm') S.view = 'sheet';   // the DM's controls moved to admin.html
   renderBar();
   if (S.view === 'sheet') S.current ? renderSheet() : renderChooser();
-  else if (S.view === 'dm') renderGrimmsAdmin();
   else if (S.view === 'codex') renderCodex();
   else if (S.view === 'party') renderParty();
   else renderRules();
