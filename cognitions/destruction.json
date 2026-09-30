@@ -1,0 +1,313 @@
+{
+  "id": "destruction",
+  "name": "Destruction",
+  "icon": "💥",
+  "opposing": "creation",
+  "description": "Ruin, Collapse, Wrath, Demolition, The End of Things.",
+  "savingThrow": "Constitution",
+  "damageType": "Force",
+  "incompatible": [ "creation" ],
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Cracked", "card": "−2 AC until the end of its next turn" },
+      "major":  { "name": "Broken Footing", "card": "knocked Prone and can't stand up" },
+      "severe": { "name": "Shattered", "card": "Incapacitated, and its armor or shield breaks" }
+    }
+  },
+  "cost": {
+    "text": "Destruction does not choose what it spares. An Area, Field or Control Area seal with Destruction as its Core affects every creature in its shape — you cannot exclude allies — and every unattended nonmagical object inside it takes the seal's damage. And it takes something back: when you draw a Destruction seal of 5th level or higher, make a Wisdom saving throw (DC 10 + the slot level). On a failure you forget one memory of the DM's choosing until you finish a long rest; on a natural 1, it is gone for good.",
+    "card": "Area, Field and Control Area can't spare allies, and wreck unattended objects · 5th+ slot: Wis save (10 + slot) or lose a memory until a long rest — permanently on a natural 1"
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Ruin",
+        "description": "Everything that protects was built. Everything built can be broken.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Force damage and deals triple damage to objects and structures. A creature that is hit or fails has its armor or shield (your choice) Cracked: −1 AC, stacking to −3, until it is repaired during a rest.",
+            "card": "Damage becomes Force · triple damage to objects and structures · their armor or shield is Cracked, −1 AC (stacks to −3) until repaired",
+            "mech": {
+              "damage": { "type": "force" },
+              "penalty": { "ac": -1 }
+            }
+          },
+          {
+            "text": "Barriers break before it. Any wall, barrier or ward of 4th level or lower in the seal's path or area shatters, and the seal carries through it. Structures it touches take maximum damage.",
+            "card": "Walls, barriers and wards ≤4th in its path shatter and it carries through · Structures take maximum damage",
+            "mech": {
+              "damage": { "type": "force" },
+              "penalty": { "ac": -1 }
+            }
+          },
+          {
+            "text": "Barriers of 6th level or lower now shatter. Destruction answers Creation: any Creation seal of equal or lower slot that this seal touches — a Structure, a Construct, an Object — is unmade. A creature whose armor reaches −3 is Sundered: the armor grants no AC at all until it is mended by magic.",
+            "card": "Barriers ≤6th shatter · unmakes any Creation seal of equal or lower slot it touches · armor at −3 is Sundered — no AC until magically mended",
+            "mech": {
+              "damage": { "type": "force" },
+              "penalty": { "ac": -1 }
+            }
+          },
+          {
+            "text": "Nothing stands. Every wall, barrier, ward and structure of 8th level or lower in the seal's area comes down, and a creature that fails while its armor is Sundered — or while it wears none — takes double damage.",
+            "card": "Everything built ≤8th in the area comes down · Sundered or unarmored targets that fail take double damage",
+            "mech": {
+              "damage": { "type": "force" },
+              "penalty": { "ac": -1 }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Overkill",
+        "description": "The blow does not stop because the target did.",
+        "tiers": [
+          {
+            "text": "The damage is turned into Force damage. When the seal drops a creature to 0 hit points, the damage it had left over carries to the nearest other creature within 10 feet of it.",
+            "card": "Damage becomes Force · damage left over when it drops a creature carries to the nearest creature within 10 ft",
+            "mech": {
+              "damage": { "type": "force" }
+            }
+          },
+          {
+            "text": "The overflow keeps going. It carries from creature to creature within 15 feet, each one taking what the last left over, until it is spent. You choose the order.",
+            "card": "The overflow chains creature to creature within 15 ft, in the order you choose, until spent",
+            "mech": {
+              "damage": { "type": "force" }
+            }
+          },
+          {
+            "text": "Whatever the seal or its overflow drops bursts: each creature within 10 feet of it takes Five Times your Verum Modifier in Force damage.",
+            "card": "Anything it drops bursts — 5×VM force to everyone within 10 ft",
+            "mech": {
+              "damage": { "type": "force" }
+            }
+          },
+          {
+            "text": "The overflow no longer divides. It strikes every creature of your choice within 30 feet of what fell, each taking the full amount left over.",
+            "card": "The overflow hits every creature you choose within 30 ft, each for the full leftover",
+            "mech": {
+              "damage": { "type": "force" }
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Breaking Point",
+        "description": "Whatever holds them was made. It can be unmade.",
+        "tiers": [
+          {
+            "text": "Each target breaks free of any grapple and of any nonmagical restraint — chains, ropes, manacles, collapsed rubble — and the thing that held it is destroyed.",
+            "card": "The targets break free of grapples and nonmagical restraints — and destroy them",
+            "mech": {
+              "deny": [ "grappled", "restrained" ]
+            }
+          },
+          {
+            "text": "Magical bindings of 4th level or lower on each target — a Hold, a Forcecage, a web — shatter as well.",
+            "card": "Also shatters magical bindings of 4th or lower on them",
+            "mech": {
+              "deny": [ "grappled", "restrained" ]
+            }
+          },
+          {
+            "text": "Until the end of each target's next turn, its weapon attacks deal triple damage to objects and structures, and its first hit Cracks the target's armor or shield (−1 AC, as Ruin).",
+            "card": "Until their next turn: their weapons deal triple to objects, and their first hit Cracks armor −1 AC",
+            "mech": {
+              "buff": { "who": "the seal's targets", "rider": "first hit Cracks armor −1 AC" }
+            }
+          },
+          {
+            "text": "For 1 minute, the targets can't be Grappled, Restrained or Petrified, and no binding, wall or ward of 8th level or lower can hold them in place.",
+            "card": "1 min — can't be Grappled, Restrained or Petrified · nothing ≤8th can hold them",
+            "mech": {
+              "deny": [ "grappled", "restrained", "petrified" ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Wrath",
+        "description": "The oldest thing in you is the part that wants to break.",
+        "tiers": [
+          {
+            "text": "Self only. For 1 minute you have advantage on Strength checks and saving throws, your melee attacks deal an extra amount of Force damage equal to your Verum Modifier, and they deal triple damage to objects and structures.",
+            "card": "Self · 1 min: advantage on Str checks and saves · melee +{VM} force, triple to objects",
+            "mech": {
+              "buff": { "who": "you", "advantage": "Strength checks and saving throws" }
+            }
+          },
+          {
+            "text": "You also have resistance to bludgeoning, piercing and slashing damage, and you can't be knocked Prone or moved against your will by anything of 4th level or lower.",
+            "card": "Also resist bludgeoning, piercing and slashing · can't be knocked Prone or moved by anything ≤4th",
+            "mech": {
+              "buff": { "who": "you", "advantage": "Strength checks and saving throws" }
+            }
+          },
+          {
+            "text": "You can't be Charmed or Frightened, your speed increases by 10 feet, and your first melee hit each turn Cracks the target's armor or shield (−1 AC, as Ruin).",
+            "card": "No Charm or Fear · +10 ft speed · first melee hit each turn Cracks armor −1 AC",
+            "mech": {
+              "deny": [ "charmed", "frightened" ]
+            }
+          },
+          {
+            "text": "Once per long rest: Cataclysm. For 1 minute the damage of your seals and attacks is doubled. When it ends, you gain 3 levels of Exhaustion.",
+            "card": "1/long rest CATACLYSM — 1 min, your seals and attacks deal double damage · then 3 levels of Exhaustion",
+            "mech": {
+              "conditions": [ { "name": "Exhaustion" } ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Break Their Tools",
+        "description": "Take away what they hold, and see what is left.",
+        "tiers": [
+          {
+            "text": "A creature that fails has the weapon, shield or focus it holds Cracked: it has disadvantage on attack rolls made with it until it is repaired during a rest.",
+            "card": "Fail: their weapon, shield or focus is Cracked — disadvantage on attacks with it until repaired",
+            "mech": {
+              "penalty": { "disadvantage": "attack rolls with the Cracked item" }
+            }
+          },
+          {
+            "text": "A nonmagical weapon, shield or focus is destroyed outright. A magic one is Cracked instead.",
+            "card": "Nonmagical weapons, shields and foci are destroyed · magic ones are Cracked",
+            "mech": {
+              "penalty": { "disadvantage": "attack rolls with the Cracked item" }
+            }
+          },
+          {
+            "text": "One magic item it carries of rare rarity or lower stops working until it is mended over a long rest.",
+            "card": "One magic item (rare or lower) stops working until mended over a long rest",
+            "mech": {
+              "deny": [ "magic item" ]
+            }
+          },
+          {
+            "text": "Once per long rest, destroy one magic item it carries of very rare rarity or lower, permanently. Artifacts and Aeon Crystals are beyond it.",
+            "card": "1/long rest destroy one very rare or lower magic item for good — not artifacts or Aeon Crystals",
+            "mech": {
+              "deny": [ "magic item" ]
+            }
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Demolition",
+        "description": "Every building is only rubble waiting.",
+        "tiers": [
+          {
+            "text": "Destroy a nonmagical object up to 5 feet in any dimension, or break open a door, lock, gate or wall section up to 5 feet thick. You know the weakest point of any structure you can see.",
+            "card": "Destroy a nonmagical object up to 5 ft or break through 5 ft of wall · see any structure's weak point",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Bring down a 30-foot section of any nonmagical structure. Break a magical lock, glyph or ward of 5th level or lower.",
+            "card": "Bring down 30 ft of structure · break a magical lock, glyph or ward ≤5th",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Collapse a building, a bridge or a tunnel — you choose which way it falls. Break any ward or barrier of 7th level or lower.",
+            "card": "Collapse a building, bridge or tunnel the way you choose · break wards ≤7th",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Level a fortress, or break a permanent magical structure of 8th level or lower. What you bring down this way cannot be raised again by magic of lower level than the slot you used.",
+            "card": "Level a fortress or break a permanent magical structure ≤8th · it can't be magically raised by a lower slot",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Shatter",
+      "type": "Offensive",
+      "description": "The seal leaves cracks where it lands.",
+      "effect": {
+        "text": "On a hit or failed saving throw, the target takes bonus Force damage equal to one damage die of the primary effect's type (min 1d6), and its armor or shield is Cracked: −1 AC until the end of its next turn. The seal deals triple damage to objects.",
+        "card": "+1 die force · −1 AC until the end of their next turn · triple damage to objects",
+        "mech": {
+          "damage": { "dice": [ "1d6" ], "type": "force" },
+          "penalty": { "ac": -1 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Bonus damage increases to two dice, and the penalty becomes −2 AC.",
+          "card": "+2 dice · −2 AC",
+          "mech": { "penalty": { "ac": -2 } }
+        },
+        {
+          "text": "Level 11+: Bonus damage increases to three dice, and any barrier of 5th level or lower between you and the target shatters before the seal lands.",
+          "card": "+3 dice · barriers ≤5th in the way shatter first",
+          "mech": { "penalty": { "ac": -2 } }
+        }
+      ]
+    },
+    {
+      "name": "Unchained",
+      "type": "Supportive",
+      "description": "Nothing holds them long.",
+      "effect": {
+        "text": "When the primary effect resolves, each of its targets breaks free of any grapple, and its weapon attacks deal triple damage to objects until the end of its next turn.",
+        "card": "The seal's targets: free of grapples · weapons deal triple to objects until their next turn",
+        "mech": {
+          "deny": [ "grappled" ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: Each target also ends the Restrained condition on itself, and its next weapon hit ignores the bonus from a shield.",
+          "card": "Also end Restrained · their next hit ignores shields",
+          "mech": { "deny": [ "grappled", "restrained" ] }
+        },
+        {
+          "text": "Level 11+: Each target's next weapon hit also ignores resistance to its damage.",
+          "card": "Their next hit also ignores resistance",
+          "mech": { "deny": [ "grappled", "restrained" ] }
+        }
+      ]
+    },
+    {
+      "name": "Rubble",
+      "type": "Control",
+      "description": "The ground under them stops being ground.",
+      "effect": {
+        "text": "When the primary effect hits or a target fails its saving throw, the ground in a 10-foot radius around the point of impact breaks into rubble — difficult terrain for 1 minute. Creatures that failed can't take the Dash action until the end of their next turn.",
+        "card": "10 ft of rubble, difficult terrain for 1 min · those who failed can't Dash next turn",
+        "mech": {
+          "terrain": { "radius": 10 }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The radius increases to 15 feet, and creatures that failed are knocked Prone.",
+          "card": "15 ft · those who failed are knocked Prone",
+          "mech": {
+            "terrain": { "radius": 15 },
+            "conditions": [ { "name": "Prone" } ]
+          }
+        },
+        {
+          "text": "Level 11+: Creatures that failed are also Restrained under the rubble until the end of their next turn, or until they free themselves with a Strength check against your Verum DC.",
+          "card": "Those who failed are Restrained under the rubble until their next turn (Str check {DC} to escape)",
+          "mech": {
+            "terrain": { "radius": 15 },
+            "conditions": [ { "name": "Prone" }, { "name": "Restrained" } ]
+          }
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

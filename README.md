@@ -108,7 +108,7 @@ Every Cognition carries a `category` in `index.json`, and both rails group and f
 | **Fate** | 5 | Balance · Disaster · Fortune · Misfortune · Promises — what happens to you |
 | **Dominion** | 8 | Carnage · Civilization · Control · Craft · Creation · Power · Protection · Speed — will imposed on the world |
 
-Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Blood · Death · Life · Lunar · Nightmare · Nullity · Soul · Sun** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
+Domain is not the same question as how strong a Cognition should be, so it isn't the same field. **`"favorite": true`** marks the players' favourites — **Blood · Death · Life · Lunar · Melancholy · Nightmare · Nullity · Soul · Sun** — which are held to a higher power bar wherever they sit by domain. They show a ★ in the rail and a *★ player favourite* tag in the Codex.
 
 A **domain picker** sits above the search box in both the Composer and Codex rails, showing each domain with its count (`Corporeal · 6`) and taking the domain's colour once chosen. The two rails share one filter, so narrowing in the Composer narrows the Codex too. `All domains` clears it. Filter and search compose: *Corporeal* + `o` gives Blood and Bones.
 

@@ -18,7 +18,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "earth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "anger",
@@ -111,7 +111,7 @@
       "category": "reason",
       "tier": "I",
       "opposing": "ignorance",
-      "ready": false
+      "ready": true
     },
     {
       "id": "control",
@@ -163,7 +163,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "decay",
-      "ready": false
+      "ready": true
     },
     {
       "id": "death",
@@ -187,6 +187,17 @@
       "requires": [ "Grief", "Apathy" ],
       "opposing": "hope",
       "ready": false
+    },
+    {
+      "id": "destruction",
+      "name": "Destruction",
+      "icon": "💥",
+      "fa": "house-crack",
+      "category": "dominion",
+      "tier": "IV",
+      "requires": [ "Carnage", "Disaster" ],
+      "opposing": "creation",
+      "ready": true
     },
     {
       "id": "disaster",
@@ -227,7 +238,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "air",
-      "ready": false
+      "ready": true
     },
     {
       "id": "emotion",
@@ -311,7 +322,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "control",
-      "ready": false
+      "ready": true
     },
     {
       "id": "games",
@@ -392,7 +403,7 @@
       "category": "reason",
       "tier": "II",
       "opposing": "lies",
-      "ready": false
+      "ready": true
     },
     {
       "id": "hollowing",
@@ -521,7 +532,7 @@
       "category": "elemental",
       "tier": "I",
       "opposing": "shadow",
-      "ready": false
+      "ready": true
     },
     {
       "id": "lightning",
@@ -576,6 +587,18 @@
       "ready": false
     },
     {
+      "id": "melancholy",
+      "name": "Melancholy",
+      "icon": "🩵",
+      "fa": "hand-holding-droplet",
+      "category": "mores",
+      "favorite": true,
+      "tier": "IV",
+      "requires": [ "Sadness", "Soul" ],
+      "opposing": "hope",
+      "ready": true
+    },
+    {
       "id": "metal",
       "name": "Metal",
       "icon": "⚙️",
@@ -603,7 +626,7 @@
       "category": "vital",
       "tier": "I",
       "opposing": "civilization",
-      "ready": false
+      "ready": true
     },
     {
       "id": "night",
@@ -658,7 +681,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "war",
-      "ready": false
+      "ready": true
     },
     {
       "id": "power",
@@ -710,7 +733,7 @@
       "category": "umbral",
       "tier": "II",
       "opposing": "truth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "shadow",
@@ -730,7 +753,7 @@
       "category": "umbral",
       "tier": "I",
       "opposing": "sound",
-      "ready": false
+      "ready": true
     },
     {
       "id": "soul",
@@ -776,7 +799,7 @@
       "requires": [ "Fire", "Life" ],
       "opposing": "night",
       "coreOnly": true,
-      "ready": false
+      "ready": true
     },
     {
       "id": "thievery",
@@ -786,7 +809,7 @@
       "category": "dominion",
       "tier": "II",
       "opposing": "protection",
-      "ready": false
+      "ready": true
     },
     {
       "id": "time",
@@ -818,7 +841,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "stagnation",
-      "ready": false
+      "ready": true
     },
     {
       "id": "trickery",
@@ -860,7 +883,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "toxin",
-      "ready": false
+      "ready": true
     },
     {
       "id": "wilderness",
@@ -870,7 +893,7 @@
       "category": "vital",
       "tier": "II",
       "opposing": "civilization",
-      "ready": false
+      "ready": true
     },
     {
       "id": "will",
@@ -880,7 +903,7 @@
       "category": "reason",
       "tier": "I",
       "opposing": "apathy",
-      "ready": false
+      "ready": true
     },
     {
       "id": "wisdom",
