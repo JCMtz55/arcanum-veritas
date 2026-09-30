@@ -42,7 +42,30 @@ function showAccount() {
   const b = document.getElementById("whoBtn");
   b.textContent = ME.displayName; b.hidden = false;
   document.getElementById("tabAdmin").hidden = ME.role !== "dm";
+  document.getElementById("tabLearn").hidden = ME.role === "dm";   // the DM has no character to track
+  document.getElementById("saveBtn").hidden = document.getElementById("savedBtn").hidden = false;
+  if (ME.role === "dm") refreshAdmin().catch(() => {});            // so the Admin tab can show its reminders
 }
+// ── The character's numbers — level, Verum mod, Dream mod — are remembered with the account.
+// The slot is not: it belongs to the seal being drawn.
+function applySheet(s) {
+  if (!s) return;
+  state.charLevel = s.charLevel; state.verumMod = s.verumMod; state.dreamMod = s.dreamMod;
+  document.getElementById("vmInput").value = s.verumMod;
+  document.getElementById("dsInput").value = s.dreamMod;
+}
+// Saved a moment after the last change, reading the bar as it stands then
+let sheetTimer = null;
+function saveSheet() {
+  if (!API || !ME) return;
+  clearTimeout(sheetTimer);
+  sheetTimer = setTimeout(() => {
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v | 0));
+    api("PUT", "api/sheet", { charLevel: state.charLevel, verumMod: clamp(state.verumMod, -2, 12), dreamMod: clamp(state.dreamMod, -2, 12) })
+      .catch(err => toast(`Couldn't save your numbers — ${err.message}`));
+  }, 700);
+}
+
 function openAccount() {
   document.getElementById("acctName").textContent = ME.displayName;
   showErr("acctErr");
@@ -65,15 +88,28 @@ function signOut() {
 // ═══════════════════════════════════════════════════════════
 //  ADMIN — players, and which Cognitions each may read
 // ═══════════════════════════════════════════════════════════
-const ADMIN = { users: [], sel: null };   // sel: a user id, or "new"
+const ADMIN = { users: [], sel: null };   // sel: a user id, "new", or "reminders"
 
+// Reminders: a player has tracked a Cognition to 4/4 and it isn't enabled for them yet.
+// A name the index doesn't know is listed apart — there is nothing to enable.
+function adminPending(known = true) {
+  return ADMIN.users.flatMap(u => u.learning
+    .filter(l => l.depth === 4 && !!l.cognitionId === known && !u.cognitions.includes(l.cognitionId))
+    .map(l => ({ user: u, ...l })));
+}
+function syncAdminTab() {
+  const n = adminPending().length;
+  document.getElementById("tabAdmin").textContent = n ? `Admin · ${n}` : "Admin";
+}
+async function refreshAdmin() {
+  ADMIN.users = (await api("GET", "api/admin/users")).users;
+  syncAdminTab();
+}
 async function openAdmin() {
   if (ME?.role !== "dm") return setView("composer");
-  try {
-    ADMIN.users = (await api("GET", "api/admin/users")).users;
-  } catch (err) { toast(err.message); }
-  if (ADMIN.sel !== "new" && !ADMIN.users.some(u => u.id === ADMIN.sel))
-    ADMIN.sel = (ADMIN.users.find(u => u.role === "player") || ADMIN.users[0] || {}).id ?? "new";
+  try { await refreshAdmin(); } catch (err) { toast(err.message); }
+  if (ADMIN.sel !== "new" && ADMIN.sel !== "reminders" && !ADMIN.users.some(u => u.id === ADMIN.sel))
+    ADMIN.sel = adminPending().length ? "reminders" : (ADMIN.users.find(u => u.role === "player") || ADMIN.users[0] || {}).id ?? "new";
   renderAdminList(); renderAdmin();
 }
 function openAdminUser(id) {
@@ -85,7 +121,10 @@ function openAdminUser(id) {
 
 function renderAdminList() {
   const box = document.getElementById("adminList");
-  box.innerHTML = `<div class="grp">Accounts<i></i></div>` + ADMIN.users.map(u =>
+  const n = adminPending().length;
+  box.innerHTML = `<button class="cog ${ADMIN.sel === "reminders" ? "core" : ""}" onclick="openAdminUser('reminders')">
+      <span class="ico">✦</span><span class="nm">Reminders</span>${n ? `<span class="rl dm">${n}</span>` : ""}</button>
+    <div class="grp">Accounts<i></i></div>` + ADMIN.users.map(u =>
     `<button class="cog ${ADMIN.sel === u.id ? "core" : ""}" onclick="openAdminUser(${u.id})" title="${escQ(u.username)}">
       <span class="ico">${u.role === "dm" ? "★" : "◆"}</span><span class="nm">${esc(u.displayName)}</span>
       <span class="rl ${u.role === "dm" ? "dm" : ""}">${u.role === "dm" ? "DM" : u.cognitions.length}</span></button>`).join("");
@@ -105,6 +144,22 @@ function renderAdmin() {
         <input class="search" id="admNewPass" type="text" autocomplete="off" minlength="8">
         <div class="acct-row"><button class="mini on" type="submit">Create player</button></div>
       </form></div>`;
+    return;
+  }
+  if (ADMIN.sel === "reminders") {
+    const todo = adminPending(), loose = adminPending(false);
+    host.innerHTML = `<div class="cdx"><div class="cdx-hd"><div><h1>Reminders</h1>
+        <p class="cdx-desc">Players who have tracked a Cognition to 4/4. Nothing opens for them until you enable it.</p></div></div>
+      <div class="cdx-sec"><h2>Waiting to be enabled</h2>` +
+      (todo.length ? `<div class="cdx-defs">` + todo.map(p =>
+        `<div class="cdx-def"><b>${esc(p.user.displayName)}</b><span>has mastered <strong>${esc(p.name)}</strong></span>
+          <button class="mini on" onclick="adminEnable(${p.user.id},'${escAttr(p.cognitionId)}')">Enable</button></div>`).join("") + `</div>`
+        : `<div class="cdx-note"><p>Nothing is waiting.</p></div>`) + `</div>` +
+      (loose.length ? `<div class="cdx-sec"><h2>Mastered, but not in the builder</h2>
+        <p class="cdx-rings">These names match no Cognition in index.json, so there is nothing to enable.</p>
+        <div class="cdx-defs">` + loose.map(p =>
+          `<div class="cdx-def"><b>${esc(p.user.displayName)}</b><span>${esc(p.name)}</span></div>`).join("") + `</div></div>` : "") +
+      `</div>`;
     return;
   }
   const u = ADMIN.users.find(x => x.id === ADMIN.sel);
@@ -148,8 +203,20 @@ function renderAdmin() {
           title="${escQ(c.name)}${c.written === false ? " — held back (not ready)" : ""}">${esc(c.name)}</button>`).join("") + `</div>`;
     });
     h += `</div>`;
+    // The player's own tracker, as they keep it — read-only here
+    h += `<div class="cdx-sec"><h2>Learning — kept by ${esc(u.displayName)}</h2>` +
+      (u.learning.length ? `<div class="cdx-defs">` + u.learning.map(l =>
+        `<div class="cdx-def"><b>${esc(l.name)}</b><span><span class="pips-ro">${pipText(l.depth)}</span> ${l.depth}/4${
+          l.depth === 4 ? (l.cognitionId ? " — waiting for you to enable it" : " — not in the builder") : ""}</span></div>`).join("") + `</div>`
+        : `<div class="cdx-note"><p>Nothing tracked yet.</p></div>`) + `</div>`;
   }
   host.innerHTML = h + `</div>`;
+}
+function pipText(d) { return "▰".repeat(d) + "▱".repeat(4 - d); }
+
+function adminEnable(userId, cogId) {
+  api("PUT", `api/admin/users/${userId}/cognitions/${encodeURIComponent(cogId)}`)
+    .then(() => { toast("Enabled"); return openAdmin(); }).catch(err => toast(err.message));
 }
 
 async function adminToggle(userId, cogId, btn) {
@@ -159,7 +226,8 @@ async function adminToggle(userId, cogId, btn) {
   try {
     await api(on ? "PUT" : "DELETE", `api/admin/users/${userId}/cognitions/${encodeURIComponent(cogId)}`);
     u.cognitions = on ? u.cognitions.concat(cogId) : u.cognitions.filter(x => x !== cogId);
-    renderAdminList(); renderAdmin();
+    if (on) u.learning = u.learning.filter(l => l.cognitionId !== cogId);   // the server drops it from their tracker
+    syncAdminTab(); renderAdminList(); renderAdmin();
   } catch (err) { btn.disabled = false; toast(err.message); }
 }
 function adminCreate(e) {

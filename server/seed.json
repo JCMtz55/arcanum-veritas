@@ -1,20 +1,28 @@
 {
   "players": [
     { "username": "grizzly", "displayName": "Grizzly",
-      "cognitions": ["corruption", "fire", "fortune", "growth", "hate", "isolation", "lightning", "metal", "pain", "shadow"] },
+      "cognitions": ["corruption", "fire", "fortune", "growth", "hate", "isolation", "lightning", "metal", "pain", "shadow"],
+      "learning": { "Ice": 3, "Protection": 3, "Silence": 3, "Speed": 3, "Apathy": 2, "Blood": 2, "Life": 2, "Bones": 1 } },
     { "username": "khaled", "displayName": "Khaled",
-      "cognitions": ["bones", "civilization", "fire", "fortune", "hate", "power"] },
+      "cognitions": ["bones", "civilization", "fire", "fortune", "hate", "power"],
+      "learning": { "Blood": 2, "Apathy": 1, "Dream": 1, "Flesh": 1, "Metal": 1 } },
     { "username": "richard", "displayName": "Richard",
-      "cognitions": ["beast", "civilization", "death", "fire", "fortune"] },
+      "cognitions": ["beast", "civilization", "death", "fire", "fortune"],
+      "learning": { "Toxin": 3, "Silence": 1, "Heroism": 3 } },
     { "username": "rory", "displayName": "Rory",
-      "cognitions": ["civilization", "corruption", "death", "fire", "flesh", "fortune", "lightning", "misfortune", "pain", "emotion"] },
+      "cognitions": ["civilization", "corruption", "death", "fire", "flesh", "fortune", "lightning", "misfortune", "pain", "emotion"],
+      "learning": { "Nightmare": 3, "Silence": 3, "Toxin": 3, "Apathy": 2, "Bones": 2, "Hate": 2, "Life": 2, "Metal": 2, "Dream": 1, "Power": 1, "Vileness": 1 } },
     { "username": "salomon", "displayName": "Salomon",
-      "cognitions": ["apathy", "blood", "bones", "civilization", "corruption", "death", "fire", "flesh", "fortune", "hate", "ice", "isolation", "life", "lightning", "metal", "misfortune", "pain", "power", "protection", "soul", "craft"] },
+      "cognitions": ["apathy", "blood", "bones", "civilization", "corruption", "death", "fire", "flesh", "fortune", "hate", "ice", "isolation", "life", "lightning", "metal", "misfortune", "pain", "power", "protection", "soul", "craft"],
+      "learning": { "Silence": 3, "Creation": 2, "Dream": 1, "Night": 1, "Toxin": 1 } },
     { "username": "solomon", "displayName": "Solomon",
-      "cognitions": ["apathy", "blood", "bones", "corruption", "death", "fire", "flesh", "fortune", "hate", "isolation", "life", "metal", "misfortune", "pain", "power", "protection", "craft"] },
+      "cognitions": ["apathy", "blood", "bones", "corruption", "death", "fire", "flesh", "fortune", "hate", "isolation", "life", "metal", "misfortune", "pain", "power", "protection", "craft"],
+      "learning": { "Toxin": 3, "Dream": 2, "Creation": 1, "Identity": 3, "Soul": 1, "Sun": 3, "Magic": 0 } },
     { "username": "zariel", "displayName": "Zariel",
-      "cognitions": ["apathy", "beast", "blood", "civilization", "fire", "flesh", "fortune", "isolation", "misfortune", "nullity", "pain", "power"] },
+      "cognitions": ["apathy", "beast", "blood", "civilization", "fire", "flesh", "fortune", "isolation", "misfortune", "nullity", "pain", "power"],
+      "learning": { "Hate": 2, "Corruption": 1, "Death": 1, "Life": 1, "Toxin": 1, "Fate": 0 } },
     { "username": "zeke", "displayName": "Zeke",
-      "cognitions": ["apathy", "blood", "civilization", "fire", "flesh", "fortune", "growth", "ice", "isolation", "life", "metal", "pain", "power", "toxin", "protection"] }
+      "cognitions": ["apathy", "blood", "civilization", "fire", "flesh", "fortune", "growth", "ice", "isolation", "life", "metal", "pain", "power", "toxin", "protection"],
+      "learning": { "Bones": 2, "Misfortune": 2, "Soul": 2 } }
   ]
 }

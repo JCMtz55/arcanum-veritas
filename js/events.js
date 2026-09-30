@@ -81,6 +81,7 @@ function toast(msg) {
   el.addEventListener("input", e => {
     const v = parseInt(e.target.value, 10);
     state[id === "vmInput" ? "verumMod" : "dreamMod"] = isNaN(v) ? 0 : v;
+    saveSheet();
     syncBar(); renderMain();
   });
 });

@@ -3,8 +3,8 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", admin: "boardAdmin" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", admin: "tabAdmin" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", learn: "boardLearn", admin: "boardAdmin" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", learn: "tabLearn", admin: "tabAdmin" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
@@ -26,6 +26,7 @@ function setView(v) {
   }
   if (v === "damage") { renderDamageList(); renderDamage(); }
   if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
+  if (v === "learn") openLearning();
   if (v === "admin") openAdmin();
 }
 

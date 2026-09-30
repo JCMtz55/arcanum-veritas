@@ -22,6 +22,7 @@
     <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
     <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
     <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
+    <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
     <button class="tab" id="tabAdmin" onclick="setView('admin')" hidden>Admin</button>
   </div>
   <div class="dials">
@@ -62,6 +63,8 @@
       <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
       <button class="mini" onclick="rollSeal()" title="Roll the seal's dice — every damage and healing number, added up (R)">Roll</button>
       <button class="mini" onclick="rollSeal(true)" title="Roll it as a critical hit — double dice (shift+R, or shift-click a chip)">Crit</button>
+      <button class="mini" id="saveBtn" onclick="saveBuild()" title="Keep this build on your account" hidden>Save</button>
+      <button class="mini" id="savedBtn" onclick="openSaves()" title="Your saved seals and Eidons" hidden>Saved</button>
       <button class="mini" onclick="copySum()">Copy</button>
       <button class="mini" onclick="saveImage()" title="Save this card as a PNG — on a phone, it opens the share sheet">Image</button>
       <button class="mini" onclick="window.print()">Print</button>
@@ -107,6 +110,10 @@
   <section class="codex" id="ringBody"></section>
 </div>
 
+<div class="board" id="boardLearn" hidden>
+  <section class="codex" id="learnBody"></section>
+</div>
+
 <div class="board" id="boardAdmin" hidden>
   <aside class="rail">
     <div class="cogs" id="adminList" style="padding-top:11px"></div>
@@ -145,6 +152,12 @@
   </form>
 </dialog>
 
+<dialog class="acct saves" id="savesDlg">
+  <h2>Saved builds</h2>
+  <div id="savesBody"></div>
+  <div class="acct-row"><button class="mini" type="button" onclick="document.getElementById('savesDlg').close()">Close</button></div>
+</dialog>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/data.js"></script>
@@ -159,6 +172,7 @@
 <script src="js/ignition.js"></script>
 <script src="js/dice.js"></script>
 <script src="js/account.js"></script>
+<script src="js/journal.js"></script>
 <script src="js/events.js"></script>
 </body>
 </html>

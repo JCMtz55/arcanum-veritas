@@ -192,6 +192,7 @@ async function boot() {
       if (!me.ok) return showGate();
       ME = (await me.json()).user;
       showAccount();
+      applySheet(ME.sheet);
     }
     const r = await fetch(API ? "api/cognitions" : "cognitions/index.json");
     if (!r.ok) throw new Error(r.status);
@@ -260,6 +261,7 @@ function bumpSlot(d) {
 }
 function bumpLvl(d) {
   state.charLevel = Math.min(20, Math.max(1, state.charLevel + d));
+  saveSheet();
   syncBar(); renderMain();
 }
 function syncBar() {

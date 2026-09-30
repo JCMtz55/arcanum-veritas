@@ -36,6 +36,31 @@ const SCHEMA = [
      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
      expires_at TIMESTAMPTZ NOT NULL
    )`,
+  // A player's own tracker of what they are still learning. Free text on purpose: a player only
+  // knows a Cognition by the name they heard at the table, and must not be shown the full list.
+  // `key` is the lower-cased name; depth counts quarters, 4 = mastered and waiting on the DM.
+  `CREATE TABLE IF NOT EXISTS learning (
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     key        TEXT NOT NULL,
+     name       TEXT NOT NULL,
+     depth      SMALLINT NOT NULL DEFAULT 1 CHECK (depth BETWEEN 0 AND 4),
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, key)
+   )`,
+  // Saved seals and Eidons — private to the account that made them. `data` is the build as JSON text.
+  `CREATE TABLE IF NOT EXISTS saves (
+     id         SERIAL PRIMARY KEY,
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     kind       TEXT NOT NULL CHECK (kind IN ('seal', 'eidon')),
+     name       TEXT NOT NULL,
+     data       TEXT NOT NULL,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  `CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
+  // The character's own numbers on the command bar, remembered per account (defaults = the builder's)
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verum_mod  SMALLINT NOT NULL DEFAULT 4`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS dream_mod  SMALLINT NOT NULL DEFAULT 0`,
 ];
 
 export async function migrate(db) {

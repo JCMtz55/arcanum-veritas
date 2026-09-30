@@ -17,7 +17,13 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 **Who sees what.** Each player has an account and sees only the Cognitions granted to it; nothing else reaches their browser. The **DM** account reads every Cognition, held-back ones included, and has an **Admin** tab: pick a player, click Cognitions to grant or take them away (saved at once), set or reset passwords, add and delete players. `ready` in `index.json` is still the global gate — a granted Cognition that isn't `ready` shows greyed out and its text is not served.
 
-**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds only accounts and grants (`users`, `user_cognitions`, `sessions`). The server serves `index.html`, `css/`, `js/` and `grimms/`; `cognitions/` is only reachable through the signed-in API.
+**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** in the DM's Admin tab (the tab reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The tracker takes names as free text, so a player never sees the list of Cognitions they don't have — a name that matches nothing in `index.json` is listed apart, with nothing to enable.
+
+**Saved builds.** Signed in, the seal panel has **Save** and **Saved**. A seal or an Eidon is saved under its name (saving the same name again replaces it) and loads back from the Saved list. A save holds the recipe, not the character — level and modifiers stay whatever the bar says — and an Eidon also keeps its count of successful manifestations. Saves are private to the account; the DM cannot see them.
+
+**Character numbers.** Level, Verum mod and Dream mod are remembered with the account: change them on the bar and they are there at the next sign-in, on any device. The slot is not remembered — it belongs to the seal being drawn, and is kept in a saved seal.
+
+**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds accounts, grants, trackers and saved builds (`users`, `user_cognitions`, `learning`, `saves`, `sessions`). The server serves `index.html`, `css/`, `js/` and `grimms/`; `cognitions/` is only reachable through the signed-in API.
 
 **Deploying on Railway.**
 1. New project → *Deploy from GitHub repo* → this repo. Railway runs `npm start`.
@@ -25,7 +31,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 3. Add `DM_PASSWORD` (and optionally `DM_USERNAME`, default `dm`) before the first deploy. Without it a random DM password is printed once in the deploy log.
 4. Under the service's Networking settings, generate a domain.
 
-On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each in the Admin tab and pass it on; they can change it from the button with their name. After that first start the database is the truth and `seed.json` is never read again.
+On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each in the Admin tab and pass it on; they can change it from the button with their name. The players' in-progress trackers in `seed.json` are imported once too — on the first start that has the tracker, even into a database that was seeded earlier. After that the database is the truth and `seed.json` is never read again.
 
 Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then remove the variable.
 
@@ -52,6 +58,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   dice.js           ← The dice tray: rolls the numbers the card already printed
   account.js        ← Sign-in, the account menu, the DM's Admin tab
+  journal.js        ← The Learning tab and saved seals / Eidons
   events.js         ← Copy/toast, keyboard, start-up — must load last
 cognitions/
   index.json        ← Master list of all cognitions + ready status

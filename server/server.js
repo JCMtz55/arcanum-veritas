@@ -17,6 +17,9 @@ const LOCKED = "!";   // a password_hash nobody can sign in with — the DM sets
 
 const INDEX = JSON.parse(await readFile(path.join(ROOT, "cognitions", "index.json"), "utf8")).cognitions;
 const BY_ID = new Map(INDEX.map(c => [c.id, c]));
+// A player's tracker names a Cognition in free text — this is how a name finds its index entry
+const BY_NAME = new Map(INDEX.flatMap(c => [[c.id, c], [c.name.toLowerCase(), c]]));
+const keyOf = name => String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
 
 const db = await openDb();
 await migrate(db);
@@ -26,7 +29,8 @@ await seed();
 //  FIRST RUN
 // ═══════════════════════════════════════════════════════════
 // An empty database gets the DM account and the players in seed.json with their mastered
-// Cognitions. After that the database is the truth — seed.json is never read again.
+// Cognitions. Their in-progress trackers are brought in once as well — also into a database that
+// was seeded before the tracker existed. After that the database is the truth.
 async function seed() {
   const dmName = (process.env.DM_USERNAME || "dm").toLowerCase();
   if (!(await db.query("SELECT 1 FROM users LIMIT 1")).rows.length) {
@@ -47,6 +51,21 @@ async function seed() {
     }
     console.log(`Seeded ${players.length} players. They cannot sign in until the DM sets their passwords.`);
   }
+  if (!(await db.query("SELECT 1 FROM meta WHERE key = 'learning_seeded'")).rows.length) {
+    const { players } = JSON.parse(await readFile(path.join(ROOT, "server", "seed.json"), "utf8"));
+    for (const p of players) {
+      const user = (await db.query("SELECT id FROM users WHERE username = $1", [p.username])).rows[0];
+      if (!user) continue;
+      const mine = await grantsOf(user.id);
+      for (const [name, depth] of Object.entries(p.learning || {})) {
+        if (mine.has(BY_NAME.get(keyOf(name))?.id)) continue;   // already enabled — nothing left to track
+        await db.query("INSERT INTO learning (user_id, key, name, depth) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+          [user.id, keyOf(name), name, depth]);
+      }
+    }
+    await db.query("INSERT INTO meta (key, value) VALUES ('learning_seeded', '1')");
+    console.log("Learning trackers imported from seed.json.");
+  }
   // A way back in for a DM who lost the password: set RESET_DM_PASSWORD, redeploy, then remove it.
   if (process.env.RESET_DM_PASSWORD) {
     await db.query("UPDATE users SET password_hash = $1 WHERE role = 'dm' AND username = $2",
@@ -62,7 +81,7 @@ async function currentUser(req) {
   const m = new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`).exec(req.headers.cookie || "");
   if (!m) return null;
   const { rows } = await db.query(
-    `SELECT u.id, u.username, u.display_name, u.role
+    `SELECT u.id, u.username, u.display_name, u.role, u.char_level, u.verum_mod, u.dream_mod
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > now()`, [tokenHash(m[1])]);
   return rows[0] || null;
@@ -106,7 +125,21 @@ app.use(express.json({ limit: "20kb" }));
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 
 // ── Signing in and out ─────────────────────────────────────
-app.get("/api/me", requireUser, (req, res) => res.json({ user: publicUser(req.user) }));
+app.get("/api/me", requireUser, (req, res) => res.json({ user: {
+  ...publicUser(req.user),
+  sheet: { charLevel: req.user.char_level, verumMod: req.user.verum_mod, dreamMod: req.user.dream_mod },
+} }));
+
+// The character's numbers on the command bar — level, Verum mod, Dream mod — kept with the account
+app.put("/api/sheet", requireUser, async (req, res) => {
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+  const { charLevel, verumMod, dreamMod } = req.body || {};
+  if (!int(charLevel, 1, 20) || !int(verumMod, -2, 12) || !int(dreamMod, -2, 12))
+    return res.status(400).json({ error: "Those numbers are out of range." });
+  await db.query("UPDATE users SET char_level = $1, verum_mod = $2, dream_mod = $3 WHERE id = $4",
+    [charLevel, verumMod, dreamMod, req.user.id]);
+  res.json({ ok: true });
+});
 
 app.post("/api/login", async (req, res) => {
   const username = String(req.body?.username || "").trim().toLowerCase();
@@ -169,6 +202,75 @@ app.get("/api/cognitions/:id", requireUser, async (req, res) => {
   }
 });
 
+// ── Learning: each player keeps their own tracker. It unlocks nothing — reaching 4/4 only puts
+// a reminder on the DM's Admin tab, and the DM enabling the Cognition is what opens it.
+const LEARNING_MAX = 60;
+app.get("/api/learning", requireUser, async (req, res) => {
+  const { rows } = await db.query("SELECT name, depth FROM learning WHERE user_id = $1 ORDER BY depth DESC, name", [req.user.id]);
+  res.json({ learning: rows });
+});
+
+app.put("/api/learning", requireUser, async (req, res) => {
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").slice(0, 40), key = keyOf(name);
+  const depth = Number(req.body?.depth);
+  if (!key) return res.status(400).json({ error: "Name the Cognition you are learning." });
+  if (!Number.isInteger(depth) || depth < 0 || depth > 4) return res.status(400).json({ error: "Depth runs from 0 to 4." });
+  const entry = BY_NAME.get(key);
+  if (entry && (await grantsOf(req.user.id)).has(entry.id)) return res.status(409).json({ error: `You already have ${entry.name}.` });
+  const has = (await db.query("SELECT key FROM learning WHERE user_id = $1", [req.user.id])).rows;
+  if (!has.some(r => r.key === key) && has.length >= LEARNING_MAX) return res.status(400).json({ error: "Your tracker is full." });
+  await db.query(
+    `INSERT INTO learning (user_id, key, name, depth) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (user_id, key) DO UPDATE SET depth = EXCLUDED.depth, updated_at = now()`,
+    [req.user.id, key, name, depth]);
+  res.json({ ok: true });
+});
+
+app.delete("/api/learning/:name", requireUser, async (req, res) => {
+  await db.query("DELETE FROM learning WHERE user_id = $1 AND key = $2", [req.user.id, keyOf(req.params.name)]);
+  res.json({ ok: true });
+});
+
+// ── Saved seals and Eidons: private to the account, the DM included ─────────────
+const SAVES_MAX = 200, SAVE_BYTES = 8000;
+function cleanSave(body) {
+  const name = String(body?.name || "").trim().slice(0, 60);
+  const data = body?.data && typeof body.data === "object" ? JSON.stringify(body.data) : "";
+  if (!name) return { error: "A saved build needs a name." };
+  if (!data || data.length > SAVE_BYTES) return { error: "That build can't be saved." };
+  return { name, data };
+}
+
+app.get("/api/saves", requireUser, async (req, res) => {
+  const { rows } = await db.query("SELECT id, kind, name, data FROM saves WHERE user_id = $1 ORDER BY kind DESC, lower(name)", [req.user.id]);
+  res.json({ saves: rows.map(r => ({ id: r.id, kind: r.kind, name: r.name, data: JSON.parse(r.data) })) });
+});
+
+app.post("/api/saves", requireUser, async (req, res) => {
+  const s = cleanSave(req.body), kind = req.body?.kind;
+  if (s.error) return res.status(400).json({ error: s.error });
+  if (kind !== "seal" && kind !== "eidon") return res.status(400).json({ error: "That build can't be saved." });
+  if ((await db.query("SELECT id FROM saves WHERE user_id = $1", [req.user.id])).rows.length >= SAVES_MAX)
+    return res.status(400).json({ error: `You can keep ${SAVES_MAX} saved builds — delete one first.` });
+  const { rows } = await db.query("INSERT INTO saves (user_id, kind, name, data) VALUES ($1, $2, $3, $4) RETURNING id",
+    [req.user.id, kind, s.name, s.data]);
+  res.status(201).json({ id: rows[0].id });
+});
+
+app.put("/api/saves/:id", requireUser, async (req, res) => {
+  const s = cleanSave(req.body);
+  if (s.error) return res.status(400).json({ error: s.error });
+  const { rows } = await db.query("UPDATE saves SET name = $1, data = $2, updated_at = now() WHERE id = $3 AND user_id = $4 RETURNING id",
+    [s.name, s.data, parseInt(req.params.id, 10) || 0, req.user.id]);
+  if (!rows.length) return res.status(404).json({ error: "No such saved build." });
+  res.json({ ok: true });
+});
+
+app.delete("/api/saves/:id", requireUser, async (req, res) => {
+  await db.query("DELETE FROM saves WHERE id = $1 AND user_id = $2", [parseInt(req.params.id, 10) || 0, req.user.id]);
+  res.json({ ok: true });
+});
+
 // ── Admin: players and what each may read ──────────────────
 const admin = express.Router();
 admin.use(requireUser, requireDm);
@@ -178,9 +280,12 @@ admin.get("/users", async (req, res) => {
     `SELECT id, username, display_name, role, password_hash <> '${LOCKED}' AS has_password
        FROM users ORDER BY role, display_name`)).rows;
   const grants = (await db.query("SELECT user_id, cognition_id FROM user_cognitions")).rows;
+  const learning = (await db.query("SELECT user_id, key, name, depth FROM learning ORDER BY depth DESC, name")).rows;
   res.json({ users: users.map(u => ({
     ...publicUser(u), hasPassword: u.has_password,
     cognitions: grants.filter(g => g.user_id === u.id).map(g => g.cognition_id),
+    // cognitionId is null for a name the index doesn't know — nothing the DM can enable yet
+    learning: learning.filter(l => l.user_id === u.id).map(l => ({ name: l.name, depth: l.depth, cognitionId: BY_NAME.get(l.key)?.id || null })),
   })) });
 });
 
@@ -231,6 +336,9 @@ admin.put("/users/:id/cognitions/:cog", async (req, res) => {
   if (!BY_ID.has(req.params.cog)) return res.status(404).json({ error: "No such Cognition." });
   await db.query("INSERT INTO user_cognitions (user_id, cognition_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
     [req.target.id, req.params.cog]);
+  // enabled — it leaves the player's tracker, and with it the DM's reminder
+  const entry = BY_ID.get(req.params.cog);
+  await db.query("DELETE FROM learning WHERE user_id = $1 AND key IN ($2, $3)", [req.target.id, entry.id, entry.name.toLowerCase()]);
   res.json({ ok: true });
 });
 
