@@ -651,7 +651,10 @@ body.par-only #slotDial{display:none}
 .par-arrow:disabled{opacity:.3;cursor:default}
 .par-track-x{flex:1;min-width:0;display:flex;gap:9px;overflow-x:auto;padding:2px;
   scroll-snap-type:x proximity;scrollbar-width:thin}
-.par-tile{position:relative;flex:0 0 auto;min-width:184px;max-width:260px;scroll-snap-align:center;
+/* Tiles share the row rather than sitting left-aligned with dead space after them: they grow from
+   a 184px basis to fill whatever width there is, and stop shrinking at 184px — past that the
+   track scrolls instead, which is what a long pool and a phone both need. */
+.par-tile{position:relative;flex:1 1 184px;min-width:184px;scroll-snap-align:center;
   border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .par-tile.sworn{border-color:#2f6650}
 .par-tile.spare{border-style:dashed;opacity:.72}
