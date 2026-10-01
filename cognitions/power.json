@@ -8,9 +8,18 @@
   "damageType": "Force",
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Staggered", "card": "pushed 10 ft" },
-      "major":  { "name": "Floored", "card": "knocked Prone and can't stand up" },
-      "severe": { "name": "Overwhelmed", "card": "Stunned" }
+      "minor": {
+        "name": "Shoved",
+        "card": "pushed 10 ft"
+      },
+      "major": {
+        "name": "Floored",
+        "card": "knocked Prone and can't stand up"
+      },
+      "severe": {
+        "name": "Overwhelmed",
+        "card": "Stunned"
+      }
     }
   },
   "verumEffects": {

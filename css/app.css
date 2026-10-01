@@ -523,6 +523,44 @@ i.dom-cosmical{color:var(--d-cosmical)}
   font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--mute)}
 .saved-m:hover{color:var(--bone)}
 
+/* ── Conditions tab ───────────────────────────────────────────
+   Four states a condition can be in. Only three of the sixteen are anything but `same`, so the
+   badge is the page's whole navigation: if it isn't marked, it's 5e as written. */
+.cnd-tag{font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap}
+.cnd-rl{font-size:8.5px;padding:1px 5px;border-radius:999px;border:1px solid;background:none}
+.cs-same{color:var(--mute);border-color:var(--line)}
+.cs-changed{color:#E0B050;border-color:#8a6a2a;background:rgba(224,176,80,.08)}
+.cs-fresh{color:var(--verdant);border-color:#3f6e54;background:rgba(78,140,106,.10)}
+.cs-retired{color:var(--ember);border-color:#8e4030;background:rgba(192,85,63,.10)}
+.cnd-rl.cs-changed,.cnd-rl.cs-fresh,.cnd-rl.cs-retired{background:none}
+/* The rules themselves read as a list, not prose */
+.cnd-ul{margin:0;padding-left:17px}
+.cnd-ul li{margin:0 0 5px;line-height:1.5}
+.cnd-ul li:last-child{margin-bottom:0}
+/* The Eidon ladder and the named-state tables: a bold name over its own small print */
+.cnd-tbl td b{display:block;font-weight:600}
+.cnd-tbl td em{display:block;margin-top:2px;font-size:11px;color:var(--mute);font-style:normal;line-height:1.35}
+/* A Template the Burning primary has no Verum for — usable, but on bare power dice */
+.tpl.tpl-bare{opacity:.62}
+.tpl.tpl-bare:hover,.tpl.tpl-bare.on{opacity:1}
+.tpl.tpl-bare i{color:var(--ember)}
+
+/* A condition a Cognition made, sitting in the same list as 5e's own */
+.cs-cog{color:var(--indigo);border-color:#46527d;background:rgba(98,116,184,.10)}
+/* The questions a condition always raises: the question in the system face, the answer in serif */
+.cnd-qa{display:flex;flex-direction:column;gap:11px}
+.cnd-q{padding:10px 13px;background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  border-left:2px solid var(--indigo)}
+.cnd-q b{display:block;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--bone);margin-bottom:5px}
+.cnd-q p{margin:0;font-size:13.5px;line-height:1.55;color:var(--bone2)}
+
+/* One condition naming another — a link, not a button that looks like one */
+.cnd-link{padding:0;background:none;border:0;border-bottom:1px dotted var(--mute);border-radius:0;
+  cursor:pointer;font:inherit;color:var(--indigo)}
+.cnd-link:hover{color:var(--bone);border-bottom-color:var(--bone)}
+.cdx-note.cnd-see-note{border-color:#8a6a2a;background:rgba(224,176,80,.05)}
+
 /* ── Custom Ignitions ─────────────────────────────────────────
    Listed with the saved Eidons, and deliberately not dressed like them: a saved Eidon is a recipe
    you wrote, an Ignition is a technique the body already knows. Molten gold (the Ignition mode's

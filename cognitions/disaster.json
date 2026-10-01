@@ -8,9 +8,18 @@
   "damageType": "Bludgeoning",
   "eidon": {
     "conditions": {
-      "minor":  { "name": "Shaken", "card": "knocked Prone" },
-      "major":  { "name": "Buried", "card": "Restrained under debris" },
-      "severe": { "name": "Crushed", "card": "Stunned beneath the collapse" }
+      "minor": {
+        "name": "Unsteady",
+        "card": "knocked Prone"
+      },
+      "major": {
+        "name": "Buried",
+        "card": "Restrained under debris"
+      },
+      "severe": {
+        "name": "Crushed",
+        "card": "Stunned beneath the collapse"
+      }
     }
   },
   "verumEffects": {

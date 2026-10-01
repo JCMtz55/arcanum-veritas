@@ -231,6 +231,8 @@ const RULES = {
   ],
   countering: [
     "Core to Core — only an opposing Core counters (see the Cognition's Opposed entry). Complements never counter.",
+    "Opposition is MUTUAL. A Core counters if EITHER Cognition names the other as its opposite — the entries are written one way round (Acid names Metal; Metal names Lightning), and that is a statement about what each Cognition is, not about who may counter whom. Acid and Metal counter each other.",
+    "A Cognition whose opposite is a concept rather than another Cognition — passion, decay, ignorance — has nothing that counters it by opposition. That is a gap in the ledger, not a protection: rule it at the table until the opposite is written.",
     "Slot must match — the countering seal's slot is equal or higher.",
     "Reaction countering spends a use and a slot like any seal.",
     "Dual Use — a seal as an action and another as a reaction in the same round = one level of exhaustion, removed only by a long rest with sleep.",

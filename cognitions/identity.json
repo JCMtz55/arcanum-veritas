@@ -50,12 +50,12 @@
             }
           },
           {
-            "text": "A creature hit or that fails is Mistaken until the end of its next turn: it can't tell friend from foe, and uses its action to attack the nearest creature.",
+            "text": "A creature hit or that fails is Frenzied until the end of its next turn: it can't tell friend from foe, and uses its action to attack the nearest creature.",
             "card": "MISTAKEN — attacks the nearest creature, friend or foe",
             "mech": {
               "conditions": [
                 {
-                  "name": "Mistaken",
+                  "name": "Frenzied",
                   "duration": "until the end of its next turn"
                 }
               ]
@@ -107,7 +107,7 @@
             }
           },
           {
-            "text": "At the start of each of its turns, it may end one condition on itself that changed who it was: Charmed, Frightened, Mistaken, Confused, or a curse of the slot level or lower.",
+            "text": "At the start of each of its turns, it may end one condition on itself that changed who it was: Charmed, Frightened, Frenzied, Confused, or a curse of the slot level or lower.",
             "card": "At the start of each turn, end one identity-changing condition on itself",
             "mech": {
               "buff": {
@@ -147,12 +147,12 @@
             }
           },
           {
-            "text": "A creature that fails is Mistaken until the end of its next turn, attacking the nearest creature.",
+            "text": "A creature that fails is Frenzied until the end of its next turn, attacking the nearest creature.",
             "card": "MISTAKEN until their next turn — attacks the nearest creature",
             "mech": {
               "conditions": [
                 {
-                  "name": "Mistaken",
+                  "name": "Frenzied",
                   "duration": "until the end of its next turn"
                 }
               ]
@@ -164,7 +164,7 @@
             "mech": {
               "conditions": [
                 {
-                  "name": "Mistaken",
+                  "name": "Frenzied",
                   "duration": "1 minute",
                   "escape": "Charisma save at the end of each of its turns"
                 }
@@ -328,8 +328,8 @@
       },
       "upgrades": [
         {
-          "text": "Level 5+: Each may also end one Charmed, Frightened or Mistaken condition on itself.",
-          "card": "Each may end Charmed, Frightened or Mistaken on itself"
+          "text": "Level 5+: Each may also end one Charmed, Frightened or Frenzied condition on itself.",
+          "card": "Each may end Charmed, Frightened or Frenzied on itself"
         },
         {
           "text": "Level 11+: The advantage lasts 1 minute and covers transformation too.",
@@ -357,8 +357,8 @@
           "card": "Disadvantage on its next attack against you or the seal's targets"
         },
         {
-          "text": "Level 11+: It is Mistaken until the end of its next turn.",
-          "card": "Mistaken until the end of their next turn"
+          "text": "Level 11+: It is Frenzied until the end of its next turn.",
+          "card": "Frenzied until the end of their next turn"
         }
       ]
     }

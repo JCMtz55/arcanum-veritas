@@ -292,15 +292,15 @@
             }
           },
           {
-            "text": "Creatures entering or starting their turn in scorched terrain must succeed on a Dexterity saving throw or be Ignited.",
-            "card": "Enter or start turn there: Dex save or Ignited",
+            "text": "Creatures entering or starting their turn in scorched terrain must succeed on a Dexterity saving throw or be Ablaze.",
+            "card": "Enter or start turn there: Dex save or Ablaze",
             "mech": {
               "save": {
                 "ability": "Dexterity"
               },
               "conditions": [
                 {
-                  "name": "Ignited"
+                  "name": "Ablaze"
                 }
               ]
             }
@@ -346,8 +346,8 @@
             }
           },
           {
-            "text": "A creature that ends its turn within 5 feet of one of your Structures takes 2d6 fire damage. A Construct's attacks Ignite on a hit.",
-            "card": "2d6 fire to end turn within 5 ft of a Structure · Constructs Ignite on hit",
+            "text": "A creature that ends its turn within 5 feet of one of your Structures takes 2d6 fire damage. A Construct's attacks set a target Ablaze on a hit.",
+            "card": "2d6 fire to end turn within 5 ft of a Structure · Constructs set a target Ablaze on hit",
             "mech": {
               "damage": {
                 "amount": "2d6",
@@ -355,7 +355,7 @@
               },
               "conditions": [
                 {
-                  "name": "Ignited",
+                  "name": "Ablaze",
                   "source": "Construct hit"
                 }
               ]
@@ -422,8 +422,8 @@
       "type": "Offensive",
       "description": "The primary effect carries a burning edge.",
       "effect": {
-        "text": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6). On a failed Dexterity save vs your Verum DC, they are also Ignited — taking 1d6 fire damage at the start of their next turn.",
-        "card": "+1 die fire · Dex save or Ignited (1d6 at start of next turn)",
+        "text": "On a hit or failed saving throw, the target takes bonus fire damage equal to one damage die of the primary effect's type (min 1d6). On a failed Dexterity save vs your Verum DC, they are also Ablaze — taking 1d6 fire damage at the start of their next turn.",
+        "card": "+1 die fire · Dex save or Ablaze (1d6 at start of next turn)",
         "mech": {
           "damage": {
             "dice": [
@@ -436,7 +436,7 @@
           },
           "conditions": [
             {
-              "name": "Ignited"
+              "name": "Ablaze"
             }
           ]
         }
@@ -448,18 +448,18 @@
           "mech": {
             "conditions": [
               {
-                "name": "Ignited"
+                "name": "Ablaze"
               }
             ]
           }
         },
         {
-          "text": "Level 11+: Bonus damage increases to three dice, and the Ignited condition lasts 1 minute instead of one turn.",
-          "card": "+3 dice · Ignited lasts 1 minute",
+          "text": "Level 11+: Bonus damage increases to three dice, and the Ablaze condition lasts 1 minute instead of one turn.",
+          "card": "+3 dice · Ablaze lasts 1 minute",
           "mech": {
             "conditions": [
               {
-                "name": "Ignited"
+                "name": "Ablaze"
               }
             ]
           }

@@ -116,7 +116,7 @@
     ],
     "control": [
       {
-        "name": "Ravenous",
+        "name": "Frenzied",
         "description": "You lend them your appetite. They find out how much it weighs.",
         "tiers": [
           {
@@ -151,18 +151,18 @@
             }
           },
           {
-            "text": "A Starving creature is Ravenous: on each of its turns it uses its action to attack the nearest creature, friend or foe, with its bite or whatever it holds.",
+            "text": "A Starving creature is Frenzied: on each of its turns it uses its action to attack the nearest creature, friend or foe, with its bite or whatever it holds.",
             "card": "RAVENOUS — each turn it attacks the nearest creature, friend or foe",
             "mech": {
               "conditions": [
                 {
-                  "name": "Ravenous"
+                  "name": "Frenzied"
                 }
               ]
             }
           },
           {
-            "text": "Self-Devouring. A Ravenous creature with no creature within its reach turns on itself: Incapacitated, it takes necrotic damage equal to Five Times your Verum Modifier at the start of each of its turns, and you regain half of it.",
+            "text": "Self-Devouring. A Frenzied creature with no creature within its reach turns on itself: Incapacitated, it takes necrotic damage equal to Five Times your Verum Modifier at the start of each of its turns, and you regain half of it.",
             "card": "SELF-DEVOURING — nothing in reach: Incapacitated, 5×VM necrotic each turn · you regain half",
             "mech": {
               "conditions": [

@@ -111,12 +111,12 @@
             }
           },
           {
-            "text": "Sentence. Name the offence aloud: a creature that fails is Paralysed until the end of its next turn, and for 1 minute afterwards it cannot use the ability, weapon or magic it committed the offence with.",
-            "card": "SENTENCE — Paralysed a turn, then barred from the thing it did it with for 1 min",
+            "text": "Sentence. Name the offence aloud: a creature that fails is Paralyzed until the end of its next turn, and for 1 minute afterwards it cannot use the ability, weapon or magic it committed the offence with.",
+            "card": "SENTENCE — Paralyzed a turn, then barred from the thing it did it with for 1 min",
             "mech": {
               "conditions": [
                 {
-                  "name": "Paralysed",
+                  "name": "Paralyzed",
                   "duration": "until the end of its next turn"
                 }
               ]

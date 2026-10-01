@@ -3,15 +3,15 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", emotion: "boardEmotion", learn: "boardLearn" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", emotion: "tabEmotion", learn: "tabLearn" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", conditions: "boardConditions", emotion: "boardEmotion", learn: "boardLearn" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", conditions: "tabConditions", emotion: "tabEmotion", learn: "tabLearn" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
   Object.entries(VIEW_TABS).forEach(([k, id]) =>
     document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
   // Rings, Damage and Emotion live in the Reference menu — its button stands in for their tab
-  document.getElementById("refBtn").className = "tab" + (["rings", "damage", "emotion"].includes(v) ? " on" : "");
+  document.getElementById("refBtn").className = "tab" + (["rings", "damage", "conditions", "emotion"].includes(v) ? " on" : "");
   // Learning lives in the account menu — its button stands in for the tab
   document.getElementById("whoBtn").classList.toggle("on", v === "learn");
   if (v === "codex") {
@@ -29,6 +29,7 @@ function setView(v) {
     renderRingList(); renderRing();
   }
   if (v === "damage") { renderDamageList(); renderDamage(); }
+  if (v === "conditions") { if (!state.condRef) state.condRef = "overview"; openConditionsView(); }
   if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
   if (v === "learn") openLearning();
 }
@@ -72,6 +73,33 @@ function ringsUsing(cog, pool) {
   return out;
 }
 
+// ── Opposition is MUTUAL, and the data is written one way round.
+// Acid names Metal; Metal names Lightning. Each entry says what that Cognition *is* set against, not
+// who may counter whom — so countering reads BOTH directions, and the Codex shows everything this
+// Cognition is opposed to, however the ledger happens to be written. Where the named opposite is a
+// concept rather than a Cognition ("passion", "decay"), it is shown as what it is: flavour, with
+// nothing yet on the other side of it to counter with.
+let OPP_BACK = null;
+async function oppositionMap() {
+  const key = INDEX.filter(c => c.ready).map(c => c.id).join(",");
+  if (OPP_BACK && OPP_BACK.key === key) return OPP_BACK;
+  const ready = INDEX.filter(c => c.ready);
+  await Promise.all(ready.map(c => loadCognition(c.id)));
+  const back = {};
+  for (const c of ready) {
+    const o = LOADED[c.id]?.opposing;
+    if (o && INDEX.some(x => x.id === o)) (back[o] ||= []).push(c);
+  }
+  return (OPP_BACK = { key, back });
+}
+function opposedList(id, cog) {
+  const seen = new Map(), add = e => e && seen.set(e.id, e);
+  add(INDEX.find(c => c.id === cog?.opposing));             // what it names
+  for (const c of (OPP_BACK?.back[id] || [])) add(c);        // what names it
+  seen.delete(id);
+  return [...seen.values()];
+}
+
 function renderCodex() {
   const host = document.getElementById("codexBody");
   if (!host) return;
@@ -82,7 +110,13 @@ function renderCodex() {
     return;
   }
   const tier = getTier(state.charLevel);
-  const opp  = INDEX.find(c => c.id === cog.opposing);
+  oppositionMap().then(() => { if (state.view === "codex" && state.codexId === entry.id) renderCodex(); }).catch(() => {});
+  const opps = opposedList(entry.id, cog);
+  // A named opposite that is no Cognition — the concept stays, but nothing counters through it
+  const oppWord = cog.opposing && !INDEX.some(c => c.id === cog.opposing) ? cog.opposing : null;
+  // Strike and Zone can only be primed by a Cognition with an Offensive Verum. Eight ready ones
+  // have none, by design — say so here rather than letting it be found mid-session.
+  const noOffensive = !(cog.verumEffects?.offensive || []).length;
 
   let h = `<div class="cdx">
     <div class="cdx-hd"><div class="cdx-ico">${cogIcon(entry)}</div><div>
@@ -95,9 +129,17 @@ function renderCodex() {
         ${cog.damageType  ? `<span class="t hot">${esc(cog.damageType)}</span>` : ""}
         ${absoluteName(cog.damageType) ? (IRRESISTIBLE.has(baseType(cog.damageType)) ? `<span class="t hot" title="Irresistible — nothing resists, reduces or absorbs it">born Absolute</span>`
           : `<span class="t hot" title="Absolute damage — resistance and immunity only reduce it, by 2× / 4× the target's PB">→ ${esc(absoluteName(cog.damageType))} from Lv ${TIERS[earliestAbsolute(cog)].min}</span>`) : ""}
-        ${opp ? `<span class="t">opposed by ${esc(opp.name)}</span>` : ""}
+        ${opps.map(o => `<span class="t" title="Opposition is mutual — either Core counters the other">opposed by ${esc(o.name)}</span>`).join("")}
+        ${oppWord ? `<span class="t" title="A concept, not a Cognition — nothing counters this one by opposition yet">set against ${esc(oppWord)}</span>` : ""}
+        ${noOffensive ? `<span class="t" title="No Offensive Verum — it can't be the primary of a Strike or Zone Eidon">doesn't strike</span>` : ""}
       </div>
     </div></div>`;
+
+  if (noOffensive) h += `<div class="cdx-sec"><div class="cdx-note"><p><strong>${esc(entry.name)} has no Offensive Verum</strong>,
+    and that is its nature rather than a gap — it is not a Cognition that hits. Two consequences worth knowing before you build:
+    it can never be the <strong>primary</strong> of a <strong>Strike</strong> or <strong>Zone</strong> Eidon (those borrow Offensive),
+    and a seal drawn on it reaches for an Offensive Ring in vain. It can still ride <em>second</em> in an Eidon and lend its Sigil,
+    which is exactly how Heroism arms a blow it could never throw itself.</p></div></div>`;
 
   // ── What using it costs, before what it does
   if (cog.cost) h += `<div class="cdx-sec"><h2>Cost of use</h2>

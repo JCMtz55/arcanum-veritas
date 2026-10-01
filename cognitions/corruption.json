@@ -159,12 +159,12 @@
             }
           },
           {
-            "text": "A target carrying 2 or more curses that is hit, or fails its save, is also Staggered — losing its reaction until the start of its next turn.",
-            "card": "Two or more curses: also Staggered, losing their reaction",
+            "text": "A target carrying 2 or more curses that is hit, or fails its save, is also Slowed — losing its reaction until the start of its next turn.",
+            "card": "Two or more curses: also Slowed, losing their reaction",
             "mech": {
               "conditions": [
                 {
-                  "name": "Staggered"
+                  "name": "Slowed"
                 }
               ],
               "deny": [

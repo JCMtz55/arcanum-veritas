@@ -13,7 +13,7 @@
   "eidon": {
     "conditions": {
       "minor": {
-        "name": "Shaken",
+        "name": "Faltering",
         "card": "disadvantage on its next saving throw"
       },
       "major": {

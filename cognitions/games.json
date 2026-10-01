@@ -113,7 +113,7 @@
               },
               "conditions": [
                 {
-                  "name": "Bound by the rule",
+                  "name": "Bound",
                   "duration": "until the end of its next turn"
                 }
               ]

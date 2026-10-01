@@ -26,6 +26,7 @@
       <div class="more-menu" onclick="this.parentNode.open = false">
         <button class="tab" id="tabRings" onclick="setView('rings')">Rings</button>
         <button class="tab" id="tabDamage" onclick="setView('damage')">Damage</button>
+        <button class="tab" id="tabConditions" onclick="setView('conditions')">Conditions</button>
         <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
       </div>
     </details>
@@ -113,6 +114,17 @@
   <section class="codex" id="damageBody"></section>
 </div>
 
+<div class="board" id="boardConditions" hidden>
+  <aside class="rail">
+    <div class="rail-top">
+      <input class="search" id="condSearch" type="search" placeholder="Search conditions" oninput="renderConditionList()">
+    </div>
+    <div class="cogs" id="conditionList"></div>
+    <div class="rail-foot"><button class="ghost" onclick="window.print()">Print</button></div>
+  </aside>
+  <section class="codex" id="conditionBody"></section>
+</div>
+
 <div class="board" id="boardEmotion" hidden>
   <aside class="rail">
     <div class="cogs" id="emoList" style="padding-top:11px"></div>
@@ -179,6 +191,8 @@
 <script src="js/codex.js"></script>
 <script src="js/rings.js"></script>
 <script src="js/damage.js"></script>
+<!-- conditions.js reuses the Damage tab's Cognition chips, so it comes after it -->
+<script src="js/conditions.js"></script>
 <script src="js/emotion.js"></script>
 <script src="js/ignition.js"></script>
 <script src="js/paragon.js"></script>

@@ -23,6 +23,7 @@ const state = {
   codexId:     null,       // which cognition the Codex is reading
   ringRef:     null,       // {type, sub} — which Ring the Rings tab is reading
   dmgRef:      "overview", // which damage type the Damage tab is reading
+  condRef:     "overview", // which page the Conditions tab is reading
   filter:      null,       // domain filter, shared by both rails; null = all
   phase:       0,          // where a cycling Core (Lunar) stands in its cycle
   sealName:    "",         // the player's own name for the seal (optional)

@@ -218,9 +218,9 @@
         "description": "You force the familiar into the grotesque — turning what was once a guardian into a horror.",
         "tiers": [
           {
-            "text": "This seal reaches the dreamed and the called: Denizens, spirits, conjured dreamforms, and any creature summoned or conjured by magic. One that fails turns Feral until the end of its next turn, attacking the nearest creature regardless of allegiance.",
-            "card": "Denizens, spirits and summoned creatures: Feral until the end of their next turn — they attack whoever is nearest",
-            "mech": { "conditions": [ { "name": "Feral", "duration": "until the end of their next turn" } ] }
+            "text": "This seal reaches the dreamed and the called: Denizens, spirits, conjured dreamforms, and any creature summoned or conjured by magic. One that fails turns Frenzied until the end of its next turn, attacking the nearest creature regardless of allegiance.",
+            "card": "Denizens, spirits and summoned creatures: Frenzied until the end of their next turn — they attack whoever is nearest",
+            "mech": { "conditions": [ { "name": "Frenzied", "duration": "until the end of their next turn" } ] }
           },
           {
             "text": "One that fails is transformed into a Demi-Nightmare for 1 minute — its CR one higher than before, and hostile to every creature.",

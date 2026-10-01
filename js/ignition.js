@@ -540,10 +540,17 @@ function buildForge() {
 
   // ── Name + Template
   let t = `<input class="search eidon-name" type="text" placeholder="Name your Eidon — ${esc(e.name)}" value="${esc(I.name).replace(/"/g, "&quot;")}" oninput="ignName(this.value)">`;
+  // A Template borrows its primary Cognition's Verum of a given pool. Some Cognitions have none of
+  // it — Heroism has no Offensive Verum at all — so the Template still works but runs on bare power
+  // dice. Say which before the choice is made, not after.
+  const primCog = e.prim?.cog || null;
+  const bare = d => primCog && !d.pools.some(p => primCog.verumEffects?.[p]?.length && !primCog.incompatible?.includes(p));
   t += `<div class="tpls">` + Object.entries(EIDON_TEMPLATES).map(([k, d]) =>
-      `<button class="tpl${I.template === k ? " on" : ""}" onclick="setTemplate('${k}')"><b>${d.label}</b><em class="tpl-ep">${d.epithet}</em><span>${d.use}</span>
-        <i>${d.acts.map(a => EIDON_ACTS[a]).join(" or ")} · borrows ${d.pools.map(p => COMP_DATA[p].label).join(" or ")}</i></button>`).join("") +
-    `</div><p class="hint">One Template per Eidon — it's the Eidon's shape, the way a Ring is a seal's.</p>`;
+      `<button class="tpl${I.template === k ? " on" : ""}${bare(d) ? " tpl-bare" : ""}" onclick="setTemplate('${k}')"
+        ${bare(d) ? `title="${escQ(e.prim.entry.name)} has no ${d.pools.map(p => COMP_DATA[p].label).join(" or ")} Verum — this Template would run on its power dice alone"` : ""}><b>${d.label}</b><em class="tpl-ep">${d.epithet}</em><span>${d.use}</span>
+        <i>${d.acts.map(a => EIDON_ACTS[a]).join(" or ")} · borrows ${d.pools.map(p => COMP_DATA[p].label).join(" or ")}${bare(d) ? ` — <strong>nothing to borrow</strong>` : ""}</i></button>`).join("") +
+    `</div><p class="hint">One Template per Eidon — it's the Eidon's shape, the way a Ring is a seal's.${
+      primCog && Object.values(EIDON_TEMPLATES).some(bare) ? ` <strong>${esc(e.prim.entry.name)}</strong> has nothing to lend the marked ones; they still work, on power dice alone.` : ""}</p>`;
   h += block("Eidon — template", t);
   if (!e.t) return h;
 

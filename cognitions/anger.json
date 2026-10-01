@@ -70,7 +70,7 @@
             "mech": {
               "conditions": [
                 {
-                  "name": "Burning",
+                  "name": "Ablaze",
                   "tick": "3×VM fire",
                   "escape": "Dodge or Disengage"
                 }
@@ -169,7 +169,7 @@
             "mech": {
               "conditions": [
                 {
-                  "name": "Enraged",
+                  "name": "Frenzied",
                   "duration": "1 minute",
                   "escape": "Charisma save at the end of each of its turns"
                 }

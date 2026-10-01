@@ -63,6 +63,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   codex.js          ← The Codex tab (and the view switcher)
   rings.js          ← The Rings tab
   damage.js         ← The Damage tab
+  conditions.js     ← The Conditions tab: the house conditions, the Eidon ladders, the named states defined
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   paragon-examples.js ← RETIRED — a pointer; the worked sets moved into cognitions/devotions/<player>_<cognition>_devotion.json
@@ -340,6 +341,20 @@ The **Damage** tab is the reference for the sixteen damage types and their **Abs
 
 "Dealt by" is read from the Cognition files themselves, so it stays current as Cognitions are added or rebalanced. It lists only ready Cognitions — held-back ones appear when they're opened up.
 
+## The Conditions Tab
+
+The **Conditions** tab holds the two kinds of condition this campaign uses, which nothing else in the vault keeps in one place: 5e's conditions **as this table plays them**, and the ones the Cognitions make for themselves.
+
+- **Overview** — what changed and nothing else: **Stunned** (rewritten — halved Speed, no Reactions, an Action *or* a Bonus Action, never more than one attack) and **Paralyzed** (**Resist / Force Through**). Everything else is 5e as written, which is why the badge is the page's whole navigation — if a condition isn't marked, it hasn't moved. Because Stunned was rewritten rather than replaced, **nothing in the system needs erratum**: every effect that says *Stunned* already means the new rules.
+- **One condition** — its rules as a list, its status badge, the design note where there is one, and **Applied by**: the Cognitions with a Verum, Sigil or Eidon condition that inflicts it. Click one to open it in the Codex. Paralyzed also carries **Resist / Force Through** and how far it reaches (Paralyzed only; Incapacitated is vanilla; no limit on Force Through, since Exhaustion is the limiter).
+- **Eidon conditions** — how the **Status** and **Zone** Templates spend power dice on them, and the full table of every Cognition's **minor / major / severe** ladder with what each does.
+
+**The rail holds one list, in two groups.** **Base conditions** (the fourteen 5e ones) and **Homebrew conditions** (the states the Cognitions name), each alphabetical — so a name is easy to find and you always know which half of the game you're reading. A homebrew one is marked **Homebrew — from the Cognitions** on its page, with its normal duration, what it does, and who applies it; where it has **rules of its own** in the vault (Dream Exhaustion, Wounds and Injuries, Corruption Points) the page says so and points there. A **search box** at the top of the rail filters across both groups.
+
+**Conditions link to each other.** They quote each other constantly — Buried is "Restrained… and Blinded", Ravenous is "a Starving creature", Dread-frozen is "Paralyzed with dread" — so every mention of another condition is a link to that entry. Only capitalised matches are linked, so the prose "bound to a prohibition" stays plain while "is Bound" does not.
+
+Like the Damage tab, **which states exist and who inflicts them is read from the Cognition files**, so it can't drift out of date; only the fourteen standard conditions and the named-state definitions are typed into `js/conditions.js`. The rail is built from what the signed-in account's Cognitions actually name, so a player who hasn't been granted Nightmare never sees *Nightling* in it. Prose stand-ins in the data (`the named Core Emotion`) are filtered out rather than listed as states, and a state with no definition written logs a console warning rather than rendering blank.
+
 ## The Emotion Tab
 
 The **Emotion** tab is the table-side reference for **Emotional Alchemy** — the vault's system under `Magic System/Emotion`, which the Emotion Cognition gates and the five Primals feed. Eight pages, each printable on its own:
@@ -544,6 +559,10 @@ The tray lives outside `.card` on purpose: **Image** and **Print** capture the c
 **Limits.** One Core + (slot − 1) Complements (Coven adds up to 3). Your action, once per turn, never a bonus action — Ward is a reaction. Aura, Field, Control zones, and Constructs concentrate. A seal is immune to *Counterspell* and *Dispel Magic*, suppressed by *Antimagic Field*, and unmade early only by an opposing seal.
 
 **Countering.** Core to Core only (see the Cognition's Opposed entry); the countering slot must be equal or higher; a reaction counter spends a use and a slot; casting as an action and a reaction in the same round costs one level of exhaustion (Dual Use).
+
+**Opposition is mutual.** Each Cognition's `opposing` field says what that Cognition *is set against*, not who may counter whom — and the entries are written one way round (Acid names Metal; Metal names Lightning). **A Core counters if either Cognition names the other**, so Acid and Metal counter each other, and the Codex lists every Cognition a given one is opposed to, reading both directions. Where the named opposite is a **concept rather than a Cognition** — *passion*, *decay*, *ignorance*, *vileness* — the Codex shows **set against ⟨concept⟩**, and nothing counters that Cognition by opposition until an opposite is written. That is a gap in the ledger, not a protection.
+
+**Eight ready Cognitions have no Offensive Verum** — Apathy, Civilization, Control, Growth, Heroism, Isolation, Misfortune and Silence. That is their nature, not an omission: they are not Cognitions that hit. The consequence is worth knowing before you build, so the Codex says it on each of their pages and the Forge marks the Templates they have nothing to lend. None of them can be the **primary** of a **Strike** or **Zone** Eidon; they can still ride second and lend a Sigil, which is how Heroism arms a blow it could never throw.
 
 ---
 
