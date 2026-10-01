@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "kind": "ignition",
+  "note": "See ignition_rory_reapers_communion.json for the full schema note. In short: the file name is the id (ignition_<owner>_<slug>.json), `cognitions` lists the Cognition ids with the primary first, and `sections` render in order with any of `desc`, `notes`, `defs`, `table`, `rings` and `tone`.",
+
+  "player": "richard",
+  "name": "Stand With Me",
+  "icon": "⚔️",
+  "rank": 3,
+  "cognitions": ["power", "heroism"],
+  "template": "Strike",
+  "activation": "Action · 1 Blaze Point",
+  "source": "Origin not set — see the vault note",
+  "vault": "Magic System/Ignitions/Stand With Me.md",
+  "quote": "I have never once swung this alone. That is the whole of the trick.",
+  "description": "Not a blow Richard lands — a blow the party lands, and he is only the arm it travels down. He calls; whoever answers pays a reaction for the privilege, and the strike grows by exactly as many as were willing. An Oath of Conquest teaches that fear wins battles. This is the other half, learned from the people standing next to him: the thing they are afraid of is not you, it is all of you, at once.",
+
+  "sections": [
+    {
+      "h": "Quick reference",
+      "defs": [
+        { "b": "Cognitions", "t": "<strong>Power</strong> (primary) and <strong>Heroism</strong> — both must be Burning." },
+        { "b": "Template", "t": "Strike — the empowered blow. Rank III: 8d12 power dice, none spent on options, so every die is output." },
+        { "b": "Activation", "t": "Action, 1 Blaze Point, no Eidon Check. It counts as your Eidon for the round." },
+        { "b": "Damage", "t": "<strong>Force</strong>, and it <strong>cannot be reduced by anything</strong> — no damage reduction, no <em>Shield</em>, no absorption." },
+        { "b": "Save DC", "t": "The Verum DC every Cognitive Art shares — <strong>{{DC}}</strong> as the bar stands." },
+        { "b": "Costs", "t": "1 Blaze Point — and your allies' reactions. Power asks nothing else." }
+      ],
+      "rings": "Why Power is primary and not Heroism: a Strike borrows its primary Cognition's <strong>Offensive</strong> Verum, and Heroism has <strong>no Offensive Verum at all</strong> — it stands, shields and commands, it does not hit. So Power carries the blow and Heroism rides second, lending its Sigil. That is the entry's thesis, not a workaround: Richard supplies the force, the others supply the heroism."
+    },
+    {
+      "h": "The Strike",
+      "notes": "One weapon attack. On a hit: your weapon's damage plus the unspent power dice, plus every die your allies brought.",
+      "table": {
+        "cols": ["Rank", "Feature"],
+        "rows": [
+          ["I", "One weapon attack; weapon damage plus the unspent dice."],
+          ["II", "<strong>Follow-through</strong> — on a miss, half the unspent dice still land."],
+          ["III", "<strong>Split</strong> — divide the unspent dice between two attacks against different targets."],
+          ["IV", "Crits on 19–20; a critical hit rolls the power dice twice."]
+        ]
+      }
+    },
+    {
+      "h": "What it borrows",
+      "defs": [
+        { "b": "Overwhelming Force", "t": "<em>Power's Offensive Verum, Tier 3 at your level.</em> The damage is <strong>pure Force</strong> whatever the weapon was. It ignores resistance to the original type, immunity counts only as resistance, and — the tier that matters — <strong>it cannot be reduced by any means</strong>. No damage reduction, no <em>Shield</em>, no absorption. It arrives whole." },
+        { "b": "Righteous Strike", "t": "<em>Heroism's Offensive Sigil.</em> On a hit the target makes a <strong>Charisma saving throw</strong> or takes <strong>radiant damage equal to twice its own saving throw bonus</strong> (minimum 2d6) — the better it is at standing firm, the more standing firm costs it — and it cannot make opportunity attacks until the end of its next turn." }
+      ]
+    },
+    {
+      "h": "The Call",
+      "notes": "When you take the action, <strong>before the attack roll</strong>, you call. Every ally within <strong>30 feet</strong> who can see or hear you may spend their <strong>reaction</strong> to <strong>Answer</strong>. They declare together, before anything is rolled.",
+      "rings": "Only so many can answer — the number is your <strong>Rank</strong>, and this cap is what the whole thing rests on.",
+      "table": {
+        "cols": ["Rank", "Allies who may Answer", "Dice each one brings"],
+        "rows": [
+          ["I", "1", "2d12"],
+          ["II", "2", "3d12"],
+          ["III", "<strong>3</strong>", "<strong>4d12</strong>"],
+          ["IV", "4", "5d12"]
+        ]
+      },
+      "defs": [
+        { "b": "Their dice join the output", "t": "At Rank III that is <strong>4d12</strong> each — three answering is <strong>+12d12</strong> on top of your own 8d12." },
+        { "b": "They gain a bonus to their next roll", "t": "<strong>+{{VM+PB}}</strong> each as the bar stands — Verum mod plus Proficiency Bonus — on the next d20 roll they make." },
+        { "b": "They gain advantage", "t": "On their next attack roll, before the end of their next turn." }
+      ]
+    },
+    {
+      "h": "And the count changes the blow",
+      "defs": [
+        { "b": "Two or more Answer", "t": "Your attack roll has <strong>advantage</strong>." },
+        { "b": "Three or more Answer", "t": "The attack <strong>hits</strong>. You still roll the d20 — not to see whether it lands, but to see whether it <strong>crits</strong>." },
+        { "b": "Rank IV, four Answer", "t": "Each ally who Answered takes a <strong>Quick Action</strong>." }
+      ],
+      "tone": "success"
+    },
+    {
+      "h": "Who can Answer",
+      "notes": "It is never forced and no one is ever obliged. An ally must be <strong>within 30 feet</strong>, <strong>able to see or hear you</strong>, and <strong>still holding their reaction</strong>. A Frightened, Incapacitated or Charmed ally cannot Answer; neither can one whose reaction has been stripped.",
+      "tone": "question",
+      "rings": "A reaction already spent cannot Answer — so every <em>Shield</em>, every Counterspell, every opportunity attack taken earlier in the round is one voice that can't reply. That tension is the mechanic."
+    }
+  ]
+}

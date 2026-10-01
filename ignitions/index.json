@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "note": "Every custom Ignition file in this folder. The server reads the folder directly and only warns when this list disagrees with it; a plain static host has no way to list a directory, so this is how the builder finds them there. Add a file, add a line.",
+  "ignitions": [
+    {
+      "file": "ignition_rory_reapers_communion.json",
+      "owner": "rory",
+      "name": "Reaper's Communion",
+      "cognitions": ["nightmare", "corruption"]
+    },
+    {
+      "file": "ignition_richard_stand_with_me.json",
+      "owner": "richard",
+      "name": "Stand With Me",
+      "cognitions": ["power", "heroism"]
+    },
+    {
+      "file": "ignition_grizzly_nobodys_hour.json",
+      "owner": "grizzly",
+      "name": "Nobody's Hour",
+      "cognitions": ["shadow", "silence"]
+    }
+  ]
+}

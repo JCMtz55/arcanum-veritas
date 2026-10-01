@@ -63,7 +63,7 @@ const MODES = {
     docTitle: "The Paragon — Deeper Burn",
     toast: "The Paragon path — one Cognition, all the way down",
     composerTab: "Devotions", refTab: "Paragon",
-    cardTitle: "The Paragon", atkLabel: "Paragon attack",
+    cardTitle: "The Paragon", atkLabel: "Paragon attack", dcLabel: "Paragon DC",
     slotDial: false,
     kind: "paragon", noun: "Paragon", plural: "Paragons",
     needCard: "Light a Devotion first",
@@ -141,7 +141,9 @@ function applyMode() {
   set("tabRings", M.refTab);
   set("sealTitle", M.cardTitle);
   document.querySelector(".lv.atk i").textContent = M.atkLabel;
-  document.querySelector(".lv.dc i").textContent  = "Verum DC";   // every Cognitive Art shares it
+  // Every Cognitive Art resolves on the same DC; the Paragon rules just call it by its own name,
+  // and the bar is the only place that name appears now.
+  document.querySelector(".lv.dc i").textContent  = M.dcLabel || "Verum DC";
   const slot = document.getElementById("slotDial");
   if (slot) slot.hidden = !M.slotDial;
   document.title = M.docTitle;

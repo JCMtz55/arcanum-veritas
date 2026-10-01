@@ -24,6 +24,13 @@ const BY_ID = new Map(INDEX.map(c => [c.id, c]));
 // never anyone's but their own. A file with `example: true` belongs to nobody.
 const DEVOTIONS_DIR = path.join(ROOT, "cognitions", "devotions");
 const DEVOTIONS = await loadDevotions();
+// Custom Ignitions: a permanent technique one character owns, inherited from a Dream Item, a
+// Dream-Touched Creature or an Epiphany. One file each, in ignitions/, named
+// ignition_<owner>_<slug>.json — added the same way a Devotion is, and served the same way: never
+// as a static file, never anyone's but their own, and only once the DM has enabled it. They are
+// read-only entries, not recipes: nothing here ever loads into the Forge.
+const IGNITIONS_DIR = path.join(ROOT, "ignitions");
+const IGNITIONS = await loadIgnitions();
 
 // A byte-order mark is invisible in every editor and fatal to JSON.parse, and Windows PowerShell
 // writes one by default — so a Devotion saved from a shell would vanish with a baffling parse
@@ -66,8 +73,46 @@ async function loadDevotions() {
   return out;
 }
 
+// The same shape as loadDevotions, for the same reasons: the folder is the truth, the file name is
+// the id, and a bad file is skipped with a reason rather than taking the server down with it.
+async function loadIgnitions() {
+  let files = [];
+  try {
+    files = (await readdir(IGNITIONS_DIR)).filter(f => f.startsWith("ignition_") && f.endsWith(".json")).sort();
+  } catch (e) {
+    console.warn(`ignitions/ can't be read — there will be no custom Ignitions. ${e.message}`);
+    return [];
+  }
+  const out = [];
+  for (const file of files) {
+    let d;
+    try { d = await readJson(path.join(IGNITIONS_DIR, file)); }
+    catch (e) { console.warn(`ignitions/${file} isn't valid JSON — skipped. ${e.message}`); continue; }
+    const id = file.replace(/\.json$/, "");
+    const owner = d.player || (d.example ? "example" : null);
+    if (!owner) { console.warn(`ignitions/${file}: needs a "player", or "example": true — skipped.`); continue; }
+    if (!d.name) { console.warn(`ignitions/${file}: needs a "name" — skipped.`); continue; }
+    const cogs = Array.isArray(d.cognitions) ? d.cognitions : [];
+    const unknown = cogs.filter(c => !BY_ID.has(c));
+    if (unknown.length) { console.warn(`ignitions/${file}: unknown Cognition${unknown.length > 1 ? "s" : ""} ${unknown.join(", ")} — skipped.`); continue; }
+    // A lint, not a rule: a name that disagrees with what's inside is a rename half-done
+    if (!file.startsWith(`ignition_${owner}_`))
+      console.warn(`ignitions/${file}: the name doesn't match ${owner} — expected ignition_${owner}_<slug>.json.`);
+    out.push({ ...d, id, cognitionNames: cogs.map(c => BY_ID.get(c).name) });
+  }
+  try {
+    const listed = ((await readJson(path.join(IGNITIONS_DIR, "index.json"))).ignitions || []).map(x => x.file);
+    const missing = files.filter(f => !listed.includes(f)), extra = listed.filter(f => !files.includes(f));
+    if (missing.length || extra.length)
+      console.warn(`ignitions/index.json is out of date — ${missing.length ? `missing ${missing.join(", ")}` : ""}${missing.length && extra.length ? "; " : ""}${extra.length ? `lists ${extra.join(", ")} which isn't there` : ""}. The server is fine; a static host would be wrong.`);
+  } catch (e) { console.warn("ignitions/index.json is missing or unreadable — a static host won't find the custom Ignitions."); }
+  console.log(`Loaded ${out.length} custom Ignition${out.length === 1 ? "" : "s"} from ignitions/.`);
+  return out;
+}
+
 const devotionsOf = username => DEVOTIONS.filter(d => d.player && d.player.toLowerCase() === String(username).toLowerCase());
 const DEVOTION_EXAMPLES = DEVOTIONS.filter(d => d.example);
+const ignitionsOf = username => IGNITIONS.filter(i => i.player && i.player.toLowerCase() === String(username).toLowerCase());
 // A player's tracker names a Cognition in free text — this is how a name finds its index entry
 const BY_NAME = new Map(INDEX.flatMap(c => [[c.id, c], [c.name.toLowerCase(), c]]));
 const keyOf = name => String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
@@ -477,6 +522,21 @@ app.delete("/api/saves/:id", requireUser, async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Custom Ignitions: written in ignitions/, enabled per player by the DM ───────
+// Two things have to agree, the same two a Devotion needs: a file was written for this player, and
+// the DM has switched it on. An Ignition the DM has not enabled never reaches the browser at all.
+// The DM is served every one of them, each saying whose it is — they wrote them.
+async function enabledIgnitionsOf(userId) {
+  const { rows } = await db.query("SELECT ignition_id FROM user_ignitions WHERE user_id = $1", [userId]);
+  return new Set(rows.map(r => r.ignition_id));
+}
+
+app.get("/api/ignitions", requireUser, async (req, res) => {
+  if (req.user.role === "dm") return res.json({ ignitions: IGNITIONS, dm: true });
+  const on = await enabledIgnitionsOf(req.user.id);
+  res.json({ ignitions: ignitionsOf(req.user.username).filter(i => on.has(i.id)) });
+});
+
 // ── Grimm Companion: the Three Chains, and what the DM has switched on or off for each Grimm.
 // Everyone at the table reads this; only the DM writes it.
 app.get("/api/grimms/state", requireUser, async (req, res) => {
@@ -521,6 +581,7 @@ admin.get("/users", async (req, res) => {
   const opened = (await db.query("SELECT user_id, cognition_id FROM paragon_devotions")).rows;
   const choices = (await db.query("SELECT user_id, sworn, active FROM paragon_choice")).rows;
   const asked = (await db.query("SELECT * FROM paragon_pilgrimage WHERE status = 'asked' ORDER BY created_at")).rows;
+  const ignOn = (await db.query("SELECT user_id, ignition_id FROM user_ignitions")).rows;
   const swornOf = id => { try { return JSON.parse(choices.find(c => c.user_id === id)?.sworn || "[]"); } catch (e) { return []; } };
   res.json({ users: users.map(u => ({
     ...publicUser(u), hasPassword: u.has_password, paragon: !!u.paragon,
@@ -531,6 +592,11 @@ admin.get("/users", async (req, res) => {
     burning: choices.find(c => c.user_id === u.id)?.active || null,
     devotionSets: devotionsOf(u.username).map(d => ({ cog: d.cognition, name: d.name, id: d.id })),
     pilgrimage: asked.filter(p => p.user_id === u.id).map(pilgrimageRow),
+    // Custom Ignitions: which are switched on, and which have been written for them at all.
+    // Same split as the Devotions above — the entries live in ignitions/, not in this page.
+    ignitions: ignOn.filter(i => i.user_id === u.id).map(i => i.ignition_id),
+    ignitionSets: ignitionsOf(u.username).map(i => ({
+      id: i.id, name: i.name, rank: i.rank || null, cognitions: i.cognitionNames || [], source: i.source || null })),
     cognitions: grants.filter(g => g.user_id === u.id).map(g => g.cognition_id),
     // cognitionId is null for a name the index doesn't know — nothing the DM can enable yet
     learning: learning.filter(l => l.user_id === u.id).map(l => ({ name: l.name, depth: l.depth, cognitionId: BY_NAME.get(l.key)?.id || null })),
@@ -623,6 +689,25 @@ admin.delete("/users/:id/devotions/:cog", async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Admin: custom Ignitions — which of the ones written for a player are switched on.
+// The entries aren't here: they're authored in ignitions/ignition_<player>_<slug>.json. The server
+// only ever enables one for the player whose name is inside the file, so a mis-click in a stale
+// page can't hand Rory's Ignition to Khaled.
+admin.put("/users/:id/ignitions/:ign", async (req, res) => {
+  const ign = IGNITIONS.find(i => i.id === req.params.ign);
+  if (!ign) return res.status(404).json({ error: "No such Ignition." });
+  if (!ign.player || ign.player.toLowerCase() !== req.target.username.toLowerCase())
+    return res.status(400).json({ error: `“${ign.name}” was written for ${ign.player || "nobody"}, not ${req.target.display_name}.` });
+  await db.query("INSERT INTO user_ignitions (user_id, ignition_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    [req.target.id, ign.id]);
+  res.json({ ok: true });
+});
+
+admin.delete("/users/:id/ignitions/:ign", async (req, res) => {
+  await db.query("DELETE FROM user_ignitions WHERE user_id = $1 AND ignition_id = $2", [req.target.id, req.params.ign]);
+  res.json({ ok: true });
+});
+
 // A Devotion taken away is unsworn too, and puts out the Burn if it was the one alight.
 async function unswear(userId, cog) {
   const { sworn, active } = await choiceOf(userId);
@@ -707,7 +792,9 @@ app.get("/grimms/js/data.js", async (req, res) => {
 });
 
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
-app.get("/", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
+// "/" and "/index.html" are the same front page — an old bookmark or a hand-typed URL used to
+// get Express's bare "Cannot GET /index.html" instead of the hub.
+app.get(["/", "/index.html"], (req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/arcanum.html", (req, res) => res.sendFile(path.join(ROOT, "arcanum.html")));
 // The Admin page. Served like any other page — it signs you in itself, and turns away anyone who
 // isn't the DM. Every call it makes is behind requireDm, which is where the real boundary is.

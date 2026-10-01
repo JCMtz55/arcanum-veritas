@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "kind": "ignition",
+  "note": "One custom Ignition: a permanent technique one character owns, inherited from a Dream Item, a Dream-Touched Creature or an Epiphany — not a recipe to be re-built, so the builder shows it read-only and never loads it into the Forge. The file name is the id: ignition_<owner>_<slug>.json, with the owner's username. `cognitions` lists the Cognition ids it calls on, the primary first; every one must be Burning to use it. `rank` is 1-4 and only labels the entry — the numbers in the prose are the author's. Sections render in order; each may carry any of `desc`, `notes` (a string or an array of paragraphs), `defs`, `table`, `rings` (small print), and `tone` ('dm' | 'success' | 'failure' | 'question') to colour a note. Formula shorthands {VM} {PB} {DC} {ATK} resolve against the command bar, as everywhere else. The server hands a file to nobody but the player it names, and only once the DM has enabled it.",
+
+  "player": "rory",
+  "name": "Reaper's Communion",
+  "icon": "🦠",
+  "rank": 3,
+  "cognitions": ["nightmare", "corruption"],
+  "template": "Strike",
+  "activation": "Action · 1 Blaze Point",
+  "source": "Epiphany — the battle of Asha the Fallen",
+  "vault": "Magic System/Ignitions/Reaper's Communion.md",
+  "quote": "Atticus takes the dead. He does not take what made them dead. Someone has to.",
+  "description": "Not forged in a yard over six workweeks, but inherited the hard way — an Epiphany at the end of the battle of Asha the Fallen, after a night of driving Corruption and Nightmare through the same swing. By morning her body knew it without her. The POPE reading is the one she uses: a priest does not merely end the sinner. A priest takes the sin.",
+
+  "sections": [
+    {
+      "h": "Quick reference",
+      "defs": [
+        { "b": "Cognitions", "t": "<strong>Nightmare</strong> (primary) and <strong>Corruption</strong> — both must be Burning." },
+        { "b": "Template", "t": "Strike — the empowered blow. Rank III: 8d12 power dice, none spent on options, so every die is output." },
+        { "b": "Activation", "t": "Action, 1 Blaze Point, no Eidon Check. It counts as your Eidon for the round." },
+        { "b": "Damage", "t": "Absolute Void — it ignores resistance and immunity altogether, which is the only way past a Nightmare's Dreamborn Resilience." },
+        { "b": "Save DC", "t": "The Verum DC every Cognitive Art shares — <strong>{{DC}}</strong> as the bar stands." },
+        { "b": "Costs", "t": "Nightmare's own Dream save every use, and Corruption absorbed on a hit against a Nightmare." }
+      ],
+      "rings": "An Ignition's recipe never changes shape, but it keeps growing: it always uses your current power dice and your Template's Rank features. Forged at Rank III, it is still yours at Rank IV — 10d12, crits on 19-20, and Absolute damage as standard."
+    },
+    {
+      "h": "The Strike",
+      "notes": "One weapon attack. On a hit: your weapon's damage plus the unspent power dice as Void damage.",
+      "table": {
+        "cols": ["Rank", "Feature"],
+        "rows": [
+          ["I", "One weapon attack; weapon damage plus the unspent dice."],
+          ["II", "<strong>Follow-through</strong> — on a miss, half the unspent dice still land."],
+          ["III", "<strong>Split</strong> — divide the unspent dice between two attacks against different targets."],
+          ["IV", "Crits on 19-20; a critical hit rolls the power dice twice."]
+        ]
+      }
+    },
+    {
+      "h": "Borrowed Verum — Void-Bleed",
+      "notes": [
+        "Nightmare is the primary Cognition, so the Strike borrows its <strong>Offensive</strong> Verum at your level. The damage is <strong>Absolute Void</strong> from the first tier and ignores resistance and immunity altogether — soul, dream-form and body alike.",
+        "A creature hit cannot regain hit points until the end of its next turn, its <strong>maximum hit points drop by the Void damage dealt</strong> (Soul Erosion), and it gains <strong>1 level of Dream Exhaustion</strong>."
+      ],
+      "tone": "dm",
+      "rings": "Soul Erosion's maximum-HP reduction is calculated from the <strong>undoubled</strong> damage. One roll, one multiplier — otherwise a single hit erases a Nightling's hit point maximum twice over."
+    },
+    {
+      "h": "The Doubling",
+      "notes": "Against a creature of the <strong>Nightmare</strong> type — Demi-Nightmare, Nightling, Recurring or Primordial — the <strong>power dice are doubled</strong>. At Rank III that is 16d12 Absolute Void on a hit, and 8d12 on a miss through Follow-through.",
+      "defs": [
+        { "b": "Only the dice", "t": "Weapon damage, Rage, Divine Fury and every other rider are not doubled." },
+        { "b": "Never both", "t": "At Rank IV the doubling and a critical hit do not stack. A crit against a Nightmare rolls the power dice twice <em>or</em> doubles them — take the larger." }
+      ]
+    },
+    {
+      "h": "The Communion",
+      "notes": [
+        "Corruption is the second Cognition, so it lends its Sigil — normally <strong>Taint</strong>, which puts a Corruption Point <em>into</em> the target. In Rory's hands the Taint runs backwards. She does not leave rot behind. She drinks it.",
+        "On a hit against a Nightmare, she absorbs Corruption Points according to what she hit."
+      ],
+      "table": {
+        "cols": ["Nightmare", "Corruption absorbed"],
+        "rows": [
+          ["Demi-Nightmare", "— <em>there is nothing in it yet worth taking</em>"],
+          ["Nightling", "Roll <strong>1d6</strong> — <strong>1 Point</strong> on a 5-6"],
+          ["Recurring Nightmare", "<strong>1 Point</strong>, guaranteed"],
+          ["Primordial Nightmare", "<strong>1d4 + 1 Points</strong>"]
+        ]
+      },
+      "defs": [
+        { "b": "Once per creature", "t": "Per long rest. A Recurring Nightmare that re-forms is the same creature — it does not pay twice, however many times it comes back." },
+        { "b": "It stops at 9", "t": "Absorption can never take her above Corruption Score 9. The tenth Point — the one that unmakes her — is never something this Ignition does <em>to</em> her. She has to walk into that one herself." }
+      ]
+    },
+    {
+      "h": "The Communion Save",
+      "notes": "Immediately after absorbing, make a <strong>Corruption Saving Throw</strong> — your modifier is [(Good − Evil) + (Order − Chaos)] ÷ 2 — against <strong>DC 10 + your Corruption Score</strong>, counted <em>after</em> the absorption.",
+      "defs": [
+        { "b": "Success", "t": "Your soul makes room. Your <strong>Corruption ceiling rises by 1</strong>, permanently, to a maximum of 10 plus your Proficiency Bonus — <strong>{{10+PB}}</strong> as the bar stands. And your <strong>floor rises with it</strong> — no atonement, quest, miracle or cleansing can take your Score below the number of raises you have earned. You can hold more than a soul was built to, and you can never be clean again." },
+        { "b": "Failure", "t": "No room is made. The Points stay exactly where they landed, and you are that much nearer the end. Nothing else happens. Nothing else needs to." },
+        { "b": "You may refuse", "t": "Always. The absorption is part of the Strike, but you can decline the save and simply carry the Points as ordinary Corruption. Refusing is the safe play, and it is also the slow death — the Points accumulate against an unmoved ceiling of 10." }
+      ],
+      "tone": "dm",
+      "rings": "The save is deliberately a losing race. The DC climbs with the very Score the ability feeds, so every success makes the next one harder: at Score 5 it is DC 15, at Score 8 it is DC 18 — and there is no proficiency in it. The reward for taking rot into yourself is permission to take more, bought with a floor you can never get back under."
+    },
+    {
+      "h": "Past the Table",
+      "notes": "If the Communion Save carries the ceiling above 10, the Corruption ruleset's threshold table runs out of rows. The rulings for that case:",
+      "defs": [
+        { "b": "Full Nightmarification", "t": "It happens at your ceiling, not at 10. You pass every threshold on the way up and suffer each one — you simply no longer <em>end</em> at 10." },
+        { "b": "Each Point above 10", "t": "Grants another Nightmare Intrusion of your Nature." },
+        { "b": "And for each one", "t": "The DM takes something of yours that does not come back: a memory, a face, a name, someone who used to know you." }
+      ]
+    },
+    {
+      "h": "What it costs every use",
+      "notes": "Nightmare is the primary Cognition, and an Ignition pays what the Eidon it was drilled from pays: a <strong>Dream saving throw, DC 10, +2 for each use since your last long rest, +5 in Insomnia</strong>. On a failure you gain 1 level of Dream Exhaustion. Past your Proficiency Bonus in uses per long rest, you gain the level automatically.",
+      "rings": "This is the real brake, and it bites hardest exactly where Nightmares live: in Insomnia the first use is DC 15, the second 17, the third 19. Burning the Cognitions costs nothing; your {PB} Blaze Points cap you well before that."
+    }
+  ]
+}

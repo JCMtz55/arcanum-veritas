@@ -401,9 +401,9 @@ function parHeader() {
                 P.out ? "Incapacitated — relight a Devotion with a Bonus Action" :
                 three.length ? "Light one of your Devotions" : "Swear a Devotion below"}</i></span>
       </div>
+      <!-- Paragon attack and the Paragon DC are already on the command bar, which every Art
+           shares and which never scrolls away. Only what the bar doesn't carry goes here. -->
       <div class="par-nums">
-        <span class="n atk"><b>${sgn(sealAttack())}</b><i>Paragon attack</i></span>
-        <span class="n dc"><b>${verumDC()}</b><i>Paragon DC</i></span>
         <span class="n"><b>${parRank(tier)}</b><i>level ${state.charLevel}</i></span>
         <span class="n"><b>${three.length}/${parMax()}</b><i>Devotions sworn</i></span>
       </div>
@@ -543,12 +543,10 @@ function parBurningBlock() {
   const tier = getTier(state.charLevel), cog = parEntry(d.cognition);
   const any = PAR_GROUP_ORDER.some(g => (d.abilities?.[g] || []).length);
 
-  let h = `<div class="par-now">
-    <span class="ico">${cogIcon(cog)}</span>
-    <span class="par-now-t"><b>${esc(d.name)}</b><i>Paragon of ${esc(cog.name)} · ${parRank(tier)} · Deeper Burn</i></span>
-    <span class="t hot">burning</span></div>`;
-  if (d.description) h += `<p class="par-card-d">${esc(d.description)}</p>`;
-  // What the reel's one line has no room for lives here, on the Devotion actually in play
+  // No name line of its own: the block's own title names it, the header says what's burning, and
+  // the reel marks it. Only what none of those carry goes here — the flavour and the numbers.
+  let h = "";
+  if (d.description) h += `<p class="par-card-d" style="margin-top:0">${esc(d.description)}</p>`;
   h += `<div class="c-tags">
     ${d.savingThrow && d.savingThrow !== "—" ? `<span class="t">${esc(d.savingThrow)} save vs ${verumDC()}</span>` : ""}
     ${d.damageType && d.damageType !== "—" ? `<span class="t">${esc(d.damageType)}</span>` : ""}
@@ -569,7 +567,7 @@ function parBurningBlock() {
   h += `<p class="par-foot">Only while burning — an ability works, and a Passive is on, only while
     its Cognition is your Paragon. Rotating ends the Passives and nothing else${three.length > 1
       ? `, and brings ${esc(parEntry(three.find(id => id !== d.cognition)).name)}'s or the third's here instead` : ""}.</p>`;
-  return block(`Paragon Abilities — ${esc(d.name)}`, h);
+  return block(`Paragon Abilities — ${esc(d.name)} · ${esc(cog.name)} · ${parRank(tier)}`, h);
 }
 
 // The engine — Nature's Wheel, and anything else written the same way: a cycle of phases that

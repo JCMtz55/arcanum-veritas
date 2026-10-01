@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "kind": "ignition",
+  "note": "See ignition_rory_reapers_communion.json for the full schema note. In short: the file name is the id (ignition_<owner>_<slug>.json), `cognitions` lists the Cognition ids with the primary first, and `sections` render in order with any of `desc`, `notes`, `defs`, `table`, `rings` and `tone`.",
+
+  "player": "grizzly",
+  "name": "Nobody's Hour",
+  "icon": "🌑",
+  "rank": 3,
+  "cognitions": ["shadow", "silence"],
+  "template": "Strike (Bonus Action)",
+  "activation": "Bonus Action · 1 Blaze Point",
+  "source": "Origin not set — see the vault note",
+  "vault": "Magic System/Ignitions/Nobody's Hour.md",
+  "quote": "There is a moment in every room where nobody is counting. It is shorter than you think, and it is always there.",
+  "description": "Not a blow — the half-second before one, taken on purpose. Grizzly steps out of the room's attention, and whatever he does next arrives from a direction nobody was watching. Every other Ignition is a technique that simply works. This one can fail, and that is the trade: it costs only a Bonus Action, and it asks for a roll in exchange.",
+
+  "sections": [
+    {
+      "h": "Quick reference",
+      "defs": [
+        { "b": "Cognitions", "t": "<strong>Shadow</strong> (primary) and <strong>Silence</strong> — both must be Burning." },
+        { "b": "Template", "t": "Strike — the empowered blow, taken as a <strong>Bonus Action</strong>, so it carries <strong>half output</strong>. Rank III: 8d12 power dice, <strong>4d12</strong> at half." },
+        { "b": "Activation", "t": "Bonus Action, 1 Blaze Point. It counts as your Eidon for the round." },
+        { "b": "The roll", "t": "A <strong>Dexterity (Stealth)</strong> check against the highest passive Perception among the enemies — <em>in place of</em> an Eidon Check." },
+        { "b": "Damage", "t": "<strong>Necrotic</strong> — Shadow's own." },
+        { "b": "Save DC", "t": "The Verum DC every Cognitive Art shares — <strong>{{DC}}</strong> as the bar stands." }
+      ]
+    },
+    {
+      "h": "The Hour",
+      "notes": "<strong>Bonus Action, 1 Blaze Point.</strong> Make a <strong>Dexterity (Stealth) check</strong> against the <strong>highest passive Perception</strong> among the enemies who could perceive you. You do <strong>not</strong> need to be hidden to try — this is not hiding, it is becoming <em>unaccounted for</em>.",
+      "defs": [
+        { "b": "On a success", "t": "You have the hour. Your <strong>next attack before the end of your next turn</strong> is enhanced." },
+        { "b": "On a failure", "t": "The <strong>Blaze Point is spent</strong> and nothing happens. The room was paying more attention than you thought." }
+      ],
+      "rings": "It doesn't break your hiding either way. Succeeding doesn't make you Hidden in the formal sense, and failing doesn't reveal you — it only means the hour wasn't there."
+    },
+    {
+      "h": "What number to beat",
+      "notes": "The highest <strong>passive Perception</strong> among creatures hostile to you that could notice you at all. Enemies that are <strong>unconscious, Blinded, Deafened or unaware of the fight entirely don't count</strong> — and if none of them can perceive you, there is nothing to slip past and <strong>the check succeeds automatically</strong>. One roll covers the room; this is not a check per enemy.",
+      "tone": "dm"
+    },
+    {
+      "h": "What the hour is worth",
+      "notes": "Your next attack carries the half output of the Strike — and lands on a wider edge.",
+      "table": {
+        "cols": ["Rank", "Extra damage", "That attack crits on"],
+        "rows": [
+          ["I", "2d12", "19–20"],
+          ["II", "3d12", "19–20"],
+          ["III", "<strong>4d12</strong>", "<strong>18–20</strong>"],
+          ["IV", "5d12", "17–20"]
+        ]
+      },
+      "defs": [
+        { "b": "The dice are necrotic", "t": "Shadow's type — and, like any damage dice, they <strong>double on a critical hit</strong>." },
+        { "b": "The range is for that attack only", "t": "It does not carry to your others that turn." },
+        { "b": "One attack, not the turn", "t": "Dread Ambusher's extra swing, a second Extra Attack, a Grimm's follow-up — the hour is spent on the first attack that lands after it, and then it is over." }
+      ]
+    },
+    {
+      "h": "What it borrows",
+      "defs": [
+        { "b": "Unseen Strike", "t": "<em>Shadow's Offensive Verum, Tier 3 at your level.</em> The attack deals <strong>+2d6 necrotic</strong> on top of everything else, the target is <strong>Blinded</strong> until the end of its next turn, and — the tier that makes this Ignition what it is — a hit <strong>stops it speaking or shouting for 1 round</strong>. No alarm is raised." },
+        { "b": "Muted Impact", "t": "<em>Silence's Offensive Sigil.</em> The target is <strong>Silenced for 1 minute</strong> — no calls for help, no signals, no command words, no verbal components — repeating a <strong>Constitution</strong> save against your Verum DC at the end of each of its turns to end it early. At your level it also <strong>suppresses the target's aura-based features</strong> while it holds." }
+      ]
+    },
+    {
+      "h": "And no one hears it",
+      "notes": "Read those two together before ruling on the scene. Shadow stops the target's <strong>voice</strong>; Silence stops its <strong>ability to be heard at all</strong>, and takes its auras down with it. A sentry hit by this is blind, mute, cannot signal, and — if it drops — was never able to tell anyone. <strong>This is a one-target assassination tool wearing a damage buff's clothes</strong>, and the damage is the smaller half of what it does.",
+      "tone": "dm"
+    }
+  ]
+}

@@ -414,7 +414,8 @@ function rollEidon() {
 function renderForge() { asEidonSlot(renderForgeNow); }
 function renderForgeNow() {
   const comp = document.getElementById("composer"), seal = document.getElementById("sumBody");
-  comp.innerHTML = pathWarning() + ignRules() + buildForge() + (state.ign.burning.length ? "" : savedHome());
+  comp.innerHTML = pathWarning() + ignRules() + buildForge()
+    + (state.ign.burning.length ? "" : ignMineHome() + savedHome());
   const e = eidon();
   if (!e.prim)      { seal.innerHTML = `<div class="empty">Burn a Cognition from the left to begin an Eidon.</div>`; seal.dataset.text = ""; }
   else if (!e.ok)   { seal.innerHTML = `<div class="empty">Choose a Template — what shape the Eidon takes.</div>`; seal.dataset.text = ""; }
@@ -712,6 +713,83 @@ function templateRef(k) {
     `</div><p class="cdx-rings">Every die spent adds +1 to the Eidon Check.</p></div>`;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  CUSTOM IGNITIONS — the ones a character actually owns
+// ═══════════════════════════════════════════════════════════
+// An Eidon is improvised and a saved Eidon is a recipe, but an Ignition is a technique the body
+// already knows: inherited from a Dream Item, a Dream-Touched Creature or an Epiphany, with rules
+// written for one character. So these are read-only entries, authored in ignitions/ and enabled per
+// player by the DM — nothing here ever loads into the Forge or touches the builder's state. They
+// are listed beside the saved Eidons because that is where a player looks for what they keep.
+let IGN_MINE = [];
+async function loadMyIgnitions() {
+  if (!API) {   // a static host has no accounts, so the folder is simply public, as cognitions are
+    try {
+      const list = (await (await fetch("ignitions/index.json")).json()).ignitions || [];
+      IGN_MINE = (await Promise.all(list.map(x =>
+        fetch(`ignitions/${x.file}`).then(r => r.json()).catch(() => null))))
+        .filter(Boolean).map((d, i) => ({ ...d, id: (list[i].file || "").replace(/\.json$/, "") }));
+    } catch (e) { IGN_MINE = []; }
+    return IGN_MINE;
+  }
+  try { IGN_MINE = (await api("GET", "api/ignitions")).ignitions || []; }
+  catch (e) { IGN_MINE = []; }
+  return IGN_MINE;
+}
+const ignMine = id => IGN_MINE.find(i => i.id === id);
+// What a card says under the name — its Cognitions, the way a saved Eidon names its Burning ones
+function ignAbout(ig) {
+  const cogs = (ig.cognitionNames || (ig.cognitions || []).map(c => INDEX.find(x => x.id === c)?.name || c)).join(" + ");
+  return [cogs, ig.template, ig.rank ? `Rank ${["I", "II", "III", "IV"][ig.rank - 1] || ig.rank}` : null]
+    .filter(Boolean).join(" · ");
+}
+// The Forge's opening screen, above the saved Eidons: what this character owns outright.
+// `ign-home` is the whole point of the different look — an Ignition is not a build you made.
+function ignMineHome() {
+  if (!IGN_MINE.length) return "";
+  const dm = API && ME && ME.role === "dm";
+  return `<div class="blk saved-home ign-home"><div class="blk-h">
+      <h2>${dm ? "Custom Ignitions — every one written" : "Your Ignitions"}</h2><div class="rule"></div>
+      <span class="ign-tag">permanent · no Eidon Check</span></div>
+    <div class="rings">` + IGN_MINE.map(ig => `<button class="ring ign-ring" onclick="openMyIgnition('${escAttr(ig.id)}')"
+      title="${escQ(ig.name)} — open the entry">
+      <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>`).join("")
+    + `</div></div>`;
+}
+function openMyIgnition(id) { setView("rings"); openIgnRef("mine:" + id); }
+
+// ── The entry itself. Sections are the author's, in their order; every part is optional, so a
+// one-paragraph Ignition is as valid as Reaper's Communion.
+const IGN_TONE = { dm: "ign-dm", success: "ign-good", failure: "ign-bad", question: "ign-ask" };
+// An Ignition's prose carries the same shorthands a Devotion's does — {VM} {PB} {DC}, and {{…}}
+// for arithmetic over them — so it runs through the same resolver. parResolve lives in paragon.js
+// only because the Devotions needed it first; if that file ever goes, fall back to the shared one.
+const ignText = s => (typeof parResolve === "function" ? parResolve : resolve)(s == null ? "" : s);
+function ignSection(s) {
+  const paras = p => (Array.isArray(p) ? p : [p]).filter(Boolean).map(t => `<p>${ignText(t)}</p>`).join("");
+  let h = `<div class="cdx-sec">${s.h ? `<h2>${esc(s.h)}</h2>` : ""}`;
+  if (s.desc)  h += `<p class="cdx-desc">${ignText(s.desc)}</p>`;
+  if (s.notes) h += `<div class="cdx-note ${IGN_TONE[s.tone] || ""}">${paras(s.notes)}</div>`;
+  if (s.defs?.length) h += `<div class="cdx-defs">` + s.defs.map(d =>
+    `<div class="cdx-def"><b>${ignText(d.b)}</b><span>${ignText(d.t)}</span></div>`).join("") + `</div>`;
+  if (s.table?.rows?.length) h += `<div class="tbl-wrap"><table class="tbl"><thead><tr>` +
+    (s.table.cols || []).map(c => `<th>${esc(c)}</th>`).join("") + `</tr></thead><tbody>` +
+    s.table.rows.map(r => `<tr>` + r.map((c, i) => `<td${i ? ` class="wrap"` : ""}>${ignText(c)}</td>`).join("") + `</tr>`).join("") +
+    `</tbody></table></div>`;
+  if (s.rings) h += `<p class="cdx-rings">${ignText(s.rings)}</p>`;
+  return h + `</div>`;
+}
+function ignMineRef(ig) {
+  const burning = (ig.cognitions || []).map(c => INDEX.find(x => x.id === c)).filter(Boolean);
+  return `<p class="cdx-desc">${ignText(ig.description || "")}</p>
+    ${ig.quote ? `<div class="ign-quote">“${esc(ig.quote)}”</div>` : ""}
+    <div class="c-tags" style="margin-bottom:16px">
+      ${burning.map(c => `<span class="t dom ${catOf(c) || ""}">${esc(c.name)}</span>`).join("")}
+      ${ig.activation ? `<span class="t">${esc(ig.activation)}</span>` : ""}
+      ${ig.source ? `<span class="t">${esc(ig.source)}</span>` : ""}
+    </div>` + (ig.sections || []).map(ignSection).join("");
+}
+
 const IGN_REF = [
   { key: "overview", label: "Ignitions", grp: "The system", body: () => `
     <p class="cdx-desc">The way non-spellcasters get a piece of the magic: not spells thrown from a distance, but a Cognition's power driven through the body — faster, stronger, hitting harder.</p>
@@ -806,19 +884,31 @@ const IGN_REF = [
     </div></div>` },
 ];
 
+// The rulebook, plus whatever this character owns at the top of it — the Ignitions a player has
+// are the first thing they should find in the Ignitions tab, above the rules that explain them.
+function ignRefSections() {
+  // The rulebook's own labels are authored HTML ("Blaze &amp; Burning"), so the rail prints every
+  // label raw — which means an Ignition's name, which is data, is escaped here instead.
+  const mine = IGN_MINE.map(ig => ({
+    key: "mine:" + ig.id, label: esc(ig.name), grp: (API && ME && ME.role === "dm") ? "Custom Ignitions" : "Yours",
+    title: esc(ig.name), mine: true, body: () => ignMineRef(ig),
+  }));
+  return mine.concat(IGN_REF);
+}
 function renderIgnRefList() {
   const box = document.getElementById("ringList"); if (!box) return;
   const on = state.ignRef || "overview";
   let grp = "", h = "";
-  IGN_REF.forEach(s => {
+  ignRefSections().forEach(s => {
     if (s.grp !== grp) { grp = s.grp; h += `<div class="rail-grp">${grp}</div>`; }
-    h += `<button class="cog${s.key === on ? " core" : ""}" onclick="openIgnRef('${s.key}')"><span class="nm">${s.label}</span></button>`;
+    h += `<button class="cog${s.key === on ? " core" : ""}${s.mine ? " ign-own" : ""}" onclick="openIgnRef('${escAttr(s.key)}')"><span class="nm">${s.label}</span></button>`;
   });
   box.innerHTML = h;
 }
 function renderIgnRef() {
   const host = document.getElementById("ringBody"); if (!host) return;
-  const s = IGN_REF.find(x => x.key === (state.ignRef || "overview")) || IGN_REF[0];
-  host.innerHTML = `<div class="cdx"><div class="cdx-hd"><div><h1>${s.title || s.label}</h1></div></div>${s.body()}</div>`;
+  const all = ignRefSections();
+  const s = all.find(x => x.key === (state.ignRef || "overview")) || all.find(x => x.key === "overview") || all[0];
+  host.innerHTML = `<div class="cdx ${s.mine ? "ign-entry" : ""}"><div class="cdx-hd"><div><h1>${s.title || s.label}</h1></div></div>${s.body()}</div>`;
 }
 function openIgnRef(k) { state.ignRef = k; renderIgnRefList(); renderIgnRef(); document.getElementById("ringBody").scrollTop = 0; }

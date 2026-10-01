@@ -246,6 +246,7 @@ function renderAdmin() {
           title="${escQ(c.name)}${c.written === false ? " — held back (not ready)" : ""}">${esc(c.name)}</button>`).join("") + `</div>`;
     });
     h += `</div>`;
+    h += renderIgnAdmin(u);
     h += renderParAdmin(u);
     // The player's own tracker, as they keep it — read-only here
     h += `<div class="cdx-sec"><h2>Learning — kept by ${esc(u.displayName)}</h2>` +
@@ -297,6 +298,59 @@ function adminDelete(id) {
   if (!confirm(`Delete ${u.displayName}'s account and everything granted to it?`)) return;
   api("DELETE", `api/admin/users/${id}`)
     .then(() => { ADMIN.sel = null; toast("Player deleted"); return openAdmin(); }).catch(err => toast(err.message));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN — CUSTOM IGNITIONS
+// ═══════════════════════════════════════════════════════════
+// One thing on this page belongs to the DM: whether an Ignition written for this player is
+// switched on. The Ignitions themselves are authored in ignitions/ignition_<player>_<slug>.json,
+// beside the Cognitions, for the same reason Paragon Abilities are — they are written for one
+// character, and a file is reviewable where a textarea is not. The server will only ever enable
+// one for the player named inside it, so this page can be stale without being dangerous.
+const RANK_NUM = ["I", "II", "III", "IV"];
+
+async function ignAdminToggle(userId, ignId, btn) {
+  const u = ADMIN.users.find(x => x.id === userId);
+  const on = !(u.ignitions || []).includes(ignId);
+  const name = (u.ignitionSets || []).find(s => s.id === ignId)?.name || ignId;
+  btn.disabled = true;
+  try {
+    await api(on ? "PUT" : "DELETE", `api/admin/users/${userId}/ignitions/${encodeURIComponent(ignId)}`);
+    await refreshAdmin();
+    toast(on ? `${name} is open to ${u.displayName}` : `${name} taken back`);
+    renderAdminList(); renderAdmin();
+  } catch (err) { btn.disabled = false; toast(err.message); }
+}
+
+function renderIgnAdmin(u) {
+  const sets = u.ignitionSets || [], on = new Set(u.ignitions || []);
+  let h = `<div class="cdx-sec"><h2>Ignitions — ${on.size} of ${sets.length} enabled</h2>
+    <p class="cdx-rings">A permanent technique this character owns, inherited from a Dream Item, a
+      Dream-Touched Creature or an Epiphany. Click to enable or take back — it is saved at once, and
+      one that isn't enabled never reaches ${esc(u.displayName)}'s browser. They appear in the
+      <strong>Forge</strong>, above their saved Eidons, and as their own entries in the
+      <strong>Ignitions</strong> tab. They are read-only: an Ignition never loads into the builder.</p>`;
+
+  if (!sets.length) {
+    h += `<div class="cdx-note"><p>Nothing written for ${esc(u.displayName)} yet. Add a file to
+      <code>ignitions/</code> named <code>ignition_${esc(u.username)}_&lt;slug&gt;.json</code> and it
+      appears here to be enabled.</p></div>`;
+  } else {
+    h += `<div class="chips">` + sets.map(s => {
+      const isOn = on.has(s.id);
+      const about = [s.cognitions.join(" + "), s.rank ? `Rank ${RANK_NUM[s.rank - 1] || s.rank}` : null].filter(Boolean).join(" · ");
+      return `<button class="chip ign-chip ${isOn ? "on" : ""}" onclick="ignAdminToggle(${u.id},'${escAttr(s.id)}',this)"
+        aria-pressed="${isOn}" title="${escQ(s.name)} — ${escQ(about)}${isOn ? " · enabled" : ""}">${esc(s.name)}</button>`;
+    }).join("") + `</div>
+    <div class="cdx-defs" style="margin-top:12px">` + sets.map(s => {
+      const about = [s.cognitions.join(" + "), s.rank ? `Rank ${RANK_NUM[s.rank - 1] || s.rank}` : null, s.source]
+        .filter(Boolean).join(" · ");
+      return `<div class="cdx-def"><b>${esc(s.name)}</b><span>${esc(about)}${
+        on.has(s.id) ? "" : ` — <em>not enabled</em>`}</span></div>`;
+    }).join("") + `</div>`;
+  }
+  return h + `</div>`;
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -116,6 +116,16 @@ const SCHEMA = [
      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
      decided_at TIMESTAMPTZ
    )`,
+  // The custom Ignitions the DM has enabled for a player: permanent techniques one character owns,
+  // inherited from a Dream Item, a Dream-Touched Creature or an Epiphany. The Ignitions themselves
+  // are authored as files in ignitions/ — the database only knows their ids, exactly as it only
+  // knows a Cognition's. A player with no row here has none, which is everyone until the DM says so.
+  `CREATE TABLE IF NOT EXISTS user_ignitions (
+     user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     ignition_id  TEXT NOT NULL,
+     enabled_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, ignition_id)
+   )`,
   // The character's own numbers on the command bar, remembered per account (defaults = the builder's)
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS char_level SMALLINT NOT NULL DEFAULT 1`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verum_mod  SMALLINT NOT NULL DEFAULT 4`,

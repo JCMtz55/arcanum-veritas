@@ -202,6 +202,9 @@ async function boot() {
     // Whose Devotions these are, and whether the path is open at all. Before the first render,
     // because for a Paragon it decides which Art the builder is — and there is only one.
     await loadParagon();
+    // The custom Ignitions this account owns — they appear in the Forge and in the Ignitions tab,
+    // so they are wanted before the first render too. Failing to load them costs nothing else.
+    await loadMyIgnitions();
     renderCogList();
     renderCodexList();
     syncBar();

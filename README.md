@@ -80,6 +80,9 @@ cognitions/
   devotions/
     <player>_<cognition>_devotion.json ← One Devotion: one player's reading of one Cognition
     index.json      ← The list of them — for a static host only; the server reads the folder
+ignitions/
+  ignition_<player>_<slug>.json ← One custom Ignition: a permanent technique one character owns
+  index.json        ← The list of them — for a static host only; the server reads the folder
 server/
   server.js         ← The server: sign-in, per-player Cognition access, the admin API
   db.js             ← Database connection and tables
@@ -365,6 +368,30 @@ The **⇄ Ignition** button in the header switches the builder from Arcanum Veri
 - **Forge it in downtime** — under the Eidon Check, what forging the recipe on screen into a permanent Ignition would take (the vault's *Forging Ignitions*): its **Rank** (I–IV, by character level), **workweeks** (2 / 4 / 6 / 8, +1 for each of the second and third Cognitions), **Forge DC** (10 / 12 / 14 / 16, +2 per extra Cognition, +1 per 2 dice spent), the **Dream Catalyst** value, and your odds per week on a Forge roll of d20 + Dream + Proficiency. The **Forged recipe** toggle lifts the three-Cognition cap to **3 + Dream mod**: each Cognition beyond the third costs +2 workweeks, +2 DC and its own Catalyst, and such a recipe can't be manifested as an improvised Eidon (the Roll button refuses it). The card's footer and the copied text carry the plan too.
 - **Ignitions tab** — the rules from the vault's *Ignitions* and *Eidons* notes: Blaze and Burning, inheriting an Ignition, manifesting Eidons, **a page per Template** (roll, activation, output, what it borrows, power dice / reach / slot by Rank, its four Rank features and its spend menu — read the way the Rings tab reads a Ring), the Eidon Check and its odds, converting an Eidon into an Ignition, **Forging (downtime)**, and the example Eidons.
 
+### Custom Ignitions — the ones a character actually owns
+
+An Eidon is improvised, and a saved Eidon is a recipe you wrote. An **Ignition** is neither: it is a technique the body already knows, inherited from a Dream Item, a Dream-Touched Creature or a Dream Realm Epiphany, with rules written for one character. So the builder treats them as **read-only entries** — they are never loaded into the Forge, never editable, and never counted as a build.
+
+**One file per Ignition**, in `ignitions/`, authored the way a Devotion is and served the same way: never as a static file on the real server, never anyone's but their own, and only once the DM has enabled it.
+
+```
+ignitions/
+  ignition_rory_reapers_communion.json
+  index.json        ← the list — a static host can't read a directory
+```
+
+A file names its `player` (the username), its `name`, the `cognitions` it calls on (**the primary first** — every one must be Burning to use it), and then `sections`, which are simply the entry as the DM wrote it. Everything else is optional: `rank` (1–4), `template`, `activation`, `source`, `quote`, `description`, `vault` (where the long note lives). Each section may carry any of `desc`, `notes` (a paragraph or an array of them), `defs` (term / text rows), `table` (`cols` + `rows`), `rings` (small print), and `tone` — `dm`, `success`, `failure` or `question` — to colour the note. The prose takes the same shorthands as everything else: `{VM}` `{PB}` `{DC}` `{ATK}`, and `{{ … }}` for arithmetic over them, so an entry's numbers move with the command bar.
+
+Where they appear:
+
+- **The Forge**, above the saved Eidons, under **Your Ignitions** — gold-edged rather than brass, because an Ignition is not a build you made. Clicking one opens its entry.
+- **The Ignitions tab**, as its own page at the top of the rail under **Yours**, above the rulebook sections that explain it.
+- **The Admin page**, per player: an **Ignitions — N of M enabled** section with a chip each. Click to enable or take back; it saves at once, and one that isn't enabled never reaches that player's browser. The server only ever enables an Ignition for the player named inside the file, so a stale page can't hand one to the wrong character.
+
+The DM sees every custom Ignition in their own Forge and Ignitions tab, each labelled with whose it is — they wrote them. On a plain static host there are no accounts, so the builder reads `ignitions/index.json` and then each file it names, shows all of them, and gates nothing.
+
+To add one: write the JSON, add a line to `ignitions/index.json`, restart the server, then enable it on the player's Admin page.
+
 ## Paragon Mode
 
 The Paragon path is the third Cognitive Art: the way a character gives their soul to a few Cognitions instead of learning to draw one in a hundred shapes. It is not a third view of the same builder — **it replaces the builder**.
@@ -384,7 +411,8 @@ Nothing is *built* here. Paragon Abilities are written for each player with thei
 
 ### The sheet
 
-- **Header** — the Slot dial is hidden; Verum mod and Dream mod stay. It shows what is burning, your **Paragon attack** (Proficiency + Verum mod), your **Paragon DC** (your Verum DC — the same one every Cognitive Art uses), your Rank, and how many of the three you have sworn. It warns when the bar doesn't meet the path's requirement: a Dream mod of at least +1 (a Dream Score of 13), and three Cognitions at Learn Full.
+- **The command bar** — the Slot dial is hidden; Verum mod and Dream mod stay. It carries your **Paragon attack** (Proficiency + Verum mod), your **Paragon DC** (your Verum DC — the same one every Cognitive Art uses, under the name the Paragon rules give it) and the **uses** left. The bar never scrolls away, so those three numbers live there and **nowhere else on the page**.
+- **The Paragon header** — what is burning, your Rank and level, and how many of the three you have sworn: only what the bar doesn't already carry. It warns when the bar doesn't meet the path's requirement — a Dream mod of at least +1 (a Dream Score of 13), and three Cognitions at Learn Full — and it's where an unsaved Rotate says so.
 - **The Devotions reel, which is also Rotate** — one line, one tile per Devotion the DM has opened: your sworn ones first, in the order you swore them, then the rest of the pool dashed. The tiles **share the row**, growing from a 184px basis to fill whatever width there is rather than leaving dead space after them; past 184px each they stop shrinking and the reel scrolls instead, which is what a long pool and a phone both need. **The focused tile is the one in the Deeper Burn.** Choosing a Devotion and Rotating to it were two gestures doing one thing, so they're one control:
   - **Click a sworn tile** — it takes the Deeper Burn. That is a Rotate: a **Bonus Action** that ends only the old Paragon's **Passive** abilities, while anything its Offensive or Supportive abilities set in motion keeps running. The line under the reel says when you've spent the Bonus Action this turn.
   - **The ‹ › arrows** step the focus round your three — the same Rotate, without aiming. The focused tile is scrolled into view.
@@ -393,7 +421,7 @@ Nothing is *built* here. Paragon Abilities are written for each player with thei
   - Your three, and which one burns, are kept **with your account** — they survive a reload and a different browser.
   - **If that save can't reach the server**, the Rotate is *kept* rather than rolled back — it's the middle of a fight, and the Burn belongs where you just put it — and the header says so in as many words, with a **Try again**. An unsaved Rotate that quietly reverts on the next reload is worse than one that admits it. The whole `{sworn, active}` pair goes up every time, so one successful save afterwards puts everything right.
 - **Uses** — the rules call activation costs a placeholder until the Paragon Ability guideline is finished, so the tracker pools them the way Zeke's sheet does: Offensive and Supportive abilities share **Proficiency Bonus uses per long rest** across every Devotion. Each Offensive or Supportive ability has a **use it** button, and **Long rest** restores them.
-- **Paragon Abilities** — the section under the cards, holding the burning Devotion and nothing else. Grouped **Passive**, **Offensive**, **Supportive** (colour-coded on the edge), each with its activation, its uses, its rule, the line for the Rank you're at, and the full **Rank I–IV ladder** with that Rank lit.
+- **Paragon Abilities** — the section under the reel, holding the burning Devotion and nothing else. Its block title names it (`Paragon Abilities — The Turning Year · Nature · Rank III`) and it then opens straight into the flavour and the numbers, rather than repeating a name the header and the reel are already showing. Grouped **Passive**, **Offensive**, **Supportive** (colour-coded on the edge), each with its activation, its uses, its rule, the line for the Rank you're at, and the full **Rank I–IV ladder** with that Rank lit.
 - **Engines** — a Devotion can declare a cycle. **The Turning Year** holds a Season (🌱 Spring → ☀️ Summer → 🍂 Autumn → ❄️ Winter) that decides what its Passive does and what Season's Blow and Season's Gift add. **Next round** turns it; on the turn it's lit the Season *arrives* instead of turning; **hold** is the Rank III hold (once per Deeper Burn) and **‹ back** is the Rank IV reversal.
 - **The Cognition's own rules** — "whatever a Cognition charges or depends on when it forms the Core of a seal applies to its Paragon Abilities too", so the burning Devotion's own Cognition file is read for its **`cost`** (a toll, with a ledger of how often it's been paid since the last long rest), its **`engine`** (Sun's Solar Tracker with its Gold/Black marks and the Reckoning, Lunar's phase) and the **`mastery`** traits your level has reached. A toll written per slot level says plainly that a Paragon has no slot, and shows itself at slot 1.
 - **Pilgrimage** — name the swap on your own sheet and your DM is told. Nothing changes until they answer. The picker offers Cognitions you've mastered that aren't Devotions yet, and — because a Pilgrimage is also how Zeke's **Nature** is meant to *reach* Learn Full — the names of Cognitions you don't know at all.
@@ -460,7 +488,7 @@ It stands alone — none of the builder's scripts load here. All it needs is `js
 The rail holds three things:
 
 - **Reminders** — players who have tracked a Cognition to 4/4 and are waiting for you to enable it, and Paragons waiting on a **Pilgrimage**. The count also rides the page header and the front page's Admin card.
-- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, and open or close their **Paragon path** and the **Devotions** they may swear.
+- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, enable or take back the **custom Ignitions** written for them, and open or close their **Paragon path** and the **Devotions** they may swear.
 - **Grimms** — every Grimm with its **Three Chains**, its **Reality Shift** (revealed or hidden — while hidden, its text never reaches that player's browser) and its **abilities**, each allowed or denied.
 
 The Grimm controls used to sit in a `Grimms · DM` tab inside the Companion. They moved here, so the Companion now only *reads* that state. A denied ability leaves the player's loadout the next time their Companion loads, which is what `fitLoadout` already does on every render of their sheet.

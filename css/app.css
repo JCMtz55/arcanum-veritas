@@ -523,6 +523,35 @@ i.dom-cosmical{color:var(--d-cosmical)}
   font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--mute)}
 .saved-m:hover{color:var(--bone)}
 
+/* ── Custom Ignitions ─────────────────────────────────────────
+   Listed with the saved Eidons, and deliberately not dressed like them: a saved Eidon is a recipe
+   you wrote, an Ignition is a technique the body already knows. Molten gold (the Ignition mode's
+   own accent) and a branded left edge say "owned, permanent" where brass says "kept". */
+.ign-home{margin-bottom:26px}
+.ign-home h2{color:#E0B050}
+.ign-tag{margin-left:10px;font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:.07em;
+  text-transform:uppercase;color:#8a6a2a;white-space:nowrap}
+.ign-ring{
+  flex:0 1 240px; border-color:#8a6a2a; background:rgba(224,176,80,.06);
+  border-left:3px solid #E0B050; padding-left:13px;
+}
+.ign-ring:hover{border-color:#E0B050;background:rgba(224,176,80,.12)}
+.ign-ring b{color:#E0B050!important;font-weight:700;letter-spacing:.005em}
+.ign-ring span{color:var(--bone2)}
+/* The rail entry for one you own, above the rulebook sections */
+.cog.ign-own .nm{color:#E0B050}
+.cog.ign-own.core{background:rgba(224,176,80,.16);border-color:#E0B050}
+/* The entry page */
+.ign-entry .cdx-hd h1{color:#E0B050}
+.ign-quote{margin:-4px 0 18px;padding-left:13px;border-left:2px solid #8a6a2a;
+  font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--bone2)}
+.cdx-note.ign-dm{border-color:#8a6a2a;background:rgba(224,176,80,.05)}
+.cdx-note.ign-good{border-color:#3f6e54;background:rgba(78,140,106,.07)}
+.cdx-note.ign-bad{border-color:#8e4030;background:rgba(192,85,63,.07)}
+.cdx-note.ign-ask{border-color:#4a5790;background:rgba(98,116,184,.07)}
+/* Admin: the chips that enable one for a player */
+.chip.ign-chip.on{background:#E0B050;border-color:#E0B050;color:#1B1F26}
+
 /* ── Ephemer front page (index.html), and the way back to it ── */
 .home{margin-right:11px;color:var(--brass);text-decoration:none;font-size:15px;line-height:1}
 .home:hover{color:#E0B050}
@@ -685,13 +714,8 @@ body.par-only #slotDial{display:none}
 /* Unsaved is louder than a note: the Burn works, but it isn't on the account yet */
 .par-unsaved{margin:0;border-color:var(--ember);background:rgba(198,93,59,.09)}
 .par-unsaved strong{color:var(--ember)}
-/* The abilities section: which Devotion is being read, then its engine and every ability */
-.par-now{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:4px}
-.par-now .ico{font-size:22px;line-height:1;width:26px;text-align:center;
-  filter:drop-shadow(0 0 7px rgba(123,194,164,.5))}
-.par-now-t{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
-.par-now-t b{font-family:var(--sans);font-size:15.5px;color:#9BD5BA}
-.par-now-t i{font-style:normal;font-family:var(--sans);font-size:11.5px;color:var(--mute)}
+/* The abilities section. It carries no name line of its own — the block title names the Devotion,
+   the header says what's burning and the reel marks it — so it opens straight into the flavour. */
 .par-foot{margin:11px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.5;color:var(--mute)}
 
 /* An engine — Nature's Wheel, Sun's Solar Tracker, a Cognition's toll */
