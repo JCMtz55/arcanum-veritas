@@ -587,6 +587,16 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .ign-card{display:flex;flex-direction:column;cursor:default}
 .ign-open{display:block;width:100%;padding:0;border:0;background:none;text-align:left;
   font:inherit;color:inherit;cursor:pointer}
+/* The reel, mirroring the Paragon's: arrows either side of a track that scrolls when the cards
+   outgrow it. Cards grow from a 240px basis to share the row rather than leaving dead space. */
+.ign-reel{display:flex;align-items:stretch;gap:8px}
+.ign-arrow{flex:0 0 auto;width:30px;border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  color:var(--bone2);font-size:17px;line-height:1;cursor:pointer;font-family:var(--sans)}
+.ign-arrow:hover:not(:disabled){border-color:#E0B050;color:#E0B050}
+.ign-arrow:disabled{opacity:.3;cursor:default}
+.ign-track{flex:1;min-width:0;display:flex;gap:9px;overflow-x:auto;padding:2px;
+  scroll-snap-type:x proximity;scrollbar-width:thin}
+.ign-track .ign-card{flex:1 1 240px;min-width:240px;scroll-snap-align:center;margin:0}
 .ign-foot{display:flex;align-items:center;gap:9px;margin-top:10px}
 .ign-use{padding:4px 11px;border:1px solid #8a6a2a;
   border-radius:6px;background:rgba(224,176,80,.14);color:#E0B050;cursor:pointer;
