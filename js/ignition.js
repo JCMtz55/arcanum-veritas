@@ -761,21 +761,34 @@ function ignMineHome() {
   return `<div class="blk saved-home ign-home"><div class="blk-h">
       <h2>${dm ? "Custom Ignitions — every one written" : "Your Ignitions"}</h2><div class="rule"></div>
       <span class="ign-tag">permanent · no Eidon Check</span></div>
-    <div class="rings">` + IGN_MINE.map(ig => `<div class="ring ign-ring ign-card">
+    <div class="rings">` + IGN_MINE.map(ig => {
+      const missing = ignMissing(ig), lit = !missing.length;
+      return `<div class="ring ign-ring ign-card${lit ? " ign-lit" : ""}">
       <button class="ign-open" onclick="openMyIgnition('${escAttr(ig.id)}')"
         title="${escQ(ig.name)} — open the entry">
         <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>
-      <button class="ign-use" onclick="useMyIgnition('${escAttr(ig.id)}')"
-        title="${escQ(ig.name)} — spend 1 Blaze Point">Use · 1 Blaze</button></div>`).join("")
+      <div class="ign-foot"><button class="ign-use" onclick="useMyIgnition('${escAttr(ig.id)}')"
+        title="${escQ(lit ? `${ig.name} — spend 1 Blaze Point` : `${ig.name} needs ${missing.join(" and ")} Burning`)}">Use · 1 Blaze</button>
+        ${lit ? `<span class="ign-ready">lit</span>` : ""}</div></div>`;
+    }).join("")
     + `</div></div>`;
 }
 function openMyIgnition(id) { setView("rings"); openIgnRef("mine:" + id); }
+// Which of an Ignition's Cognitions aren't Burning, by name. It names them by id and the server
+// drops any file naming one that doesn't exist, so the list can be trusted as written; an Ignition
+// that names none has nothing to require and is always ready.
+function ignMissing(ig) {
+  const lit = new Set(state.ign.burning.map(b => b.id));
+  return (ig.cognitions || []).filter(c => !lit.has(c)).map(c => INDEX.find(x => x.id === c)?.name || c);
+}
 // Using one costs a Blaze Point and nothing else. An Ignition is a technique the body already
 // knows — there is no Eidon Check to roll and no builder state to set, so this only moves the
-// Blaze counter and says what it did.
+// Blaze counter and says what it did. What it does ask for is its own Cognitions, Burning.
 function useMyIgnition(id) {
   const ig = ignMine(id);
   if (!ig) return;
+  const missing = ignMissing(ig);
+  if (missing.length) return toast(`${ig.name} needs ${missing.join(" and ")} Burning`);
   if (blazeNow() < 1) return toast(`No Blaze Point left to use ${ig.name}`);
   spendBlaze(1);
   toast(`${ig.name} — 1 Blaze Point spent · ${blazeNow()} / ${blazeMax()} left`);
