@@ -3,15 +3,15 @@
 // ═══════════════════════════════════════════════════════════
 //  CODEX — one cognition, entire
 // ═══════════════════════════════════════════════════════════
-const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", conditions: "boardConditions", emotion: "boardEmotion", learn: "boardLearn" };
-const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", conditions: "tabConditions", emotion: "tabEmotion", learn: "tabLearn" };
+const VIEWS = { composer: "boardComposer", codex: "boardCodex", rings: "boardRings", damage: "boardDamage", conditions: "boardConditions", actions: "boardActions", emotion: "boardEmotion", learn: "boardLearn" };
+const VIEW_TABS = { composer: "tabComposer", codex: "tabCodex", rings: "tabRings", damage: "tabDamage", conditions: "tabConditions", actions: "tabActions", emotion: "tabEmotion", learn: "tabLearn" };
 function setView(v) {
   state.view = v;
   Object.entries(VIEWS).forEach(([k, id]) => document.getElementById(id).hidden = k !== v);
   Object.entries(VIEW_TABS).forEach(([k, id]) =>
     document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
   // Rings, Damage and Emotion live in the Reference menu — its button stands in for their tab
-  document.getElementById("refBtn").className = "tab" + (["rings", "damage", "conditions", "emotion"].includes(v) ? " on" : "");
+  document.getElementById("refBtn").className = "tab" + (["rings", "damage", "conditions", "actions", "emotion"].includes(v) ? " on" : "");
   // Learning lives in the account menu — its button stands in for the tab
   document.getElementById("whoBtn").classList.toggle("on", v === "learn");
   if (v === "codex") {
@@ -30,6 +30,7 @@ function setView(v) {
   }
   if (v === "damage") { renderDamageList(); renderDamage(); }
   if (v === "conditions") { if (!state.condRef) state.condRef = "overview"; openConditionsView(); }
+  if (v === "actions") { if (!state.actRef) state.actRef = "overview"; renderActionList(); renderAction(); }
   if (v === "emotion") { if (!state.emoRef) state.emoRef = "overview"; renderEmoList(); renderEmo(); }
   if (v === "learn") openLearning();
 }

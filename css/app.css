@@ -548,6 +548,12 @@ i.dom-cosmical{color:var(--d-cosmical)}
 
 /* A condition a Cognition made, sitting in the same list as 5e's own */
 .cs-cog{color:var(--indigo);border-color:#46527d;background:rgba(98,116,184,.10)}
+/* Actions: 5e's own against this campaign's, and the cost badge in the rail */
+.ak-common{color:var(--mute);border-color:var(--line)}
+.ak-home{color:var(--indigo);border-color:#46527d;background:rgba(98,116,184,.10)}
+.act-rl{font-size:8.5px;padding:1px 5px;border-radius:999px;border:1px solid var(--line);
+  background:none;color:var(--mute);font-weight:500}
+
 /* The questions a condition always raises: the question in the system face, the answer in serif */
 .cnd-qa{display:flex;flex-direction:column;gap:11px}
 .cnd-q{padding:10px 13px;background:var(--panel);border:1px solid var(--line);border-radius:9px;
