@@ -414,8 +414,11 @@ function rollEidon() {
 function renderForge() { asEidonSlot(renderForgeNow); }
 function renderForgeNow() {
   const comp = document.getElementById("composer"), seal = document.getElementById("sumBody");
+  // Your own Ignitions stay on the Forge even once something is Burning — an Ignition is used
+  // *with* its Cognitions lit, so hiding the card the moment you Burn would hide the Use button
+  // exactly when it is wanted. Saved Eidons are recipes to load, so they still step aside.
   comp.innerHTML = pathWarning() + ignRules() + buildForge()
-    + (state.ign.burning.length ? "" : ignMineHome() + savedHome());
+    + ignMineHome() + (state.ign.burning.length ? "" : savedHome());
   const e = eidon();
   if (!e.prim)      { seal.innerHTML = `<div class="empty">Burn a Cognition from the left to begin an Eidon.</div>`; seal.dataset.text = ""; }
   else if (!e.ok)   { seal.innerHTML = `<div class="empty">Choose a Template — what shape the Eidon takes.</div>`; seal.dataset.text = ""; }
@@ -758,12 +761,26 @@ function ignMineHome() {
   return `<div class="blk saved-home ign-home"><div class="blk-h">
       <h2>${dm ? "Custom Ignitions — every one written" : "Your Ignitions"}</h2><div class="rule"></div>
       <span class="ign-tag">permanent · no Eidon Check</span></div>
-    <div class="rings">` + IGN_MINE.map(ig => `<button class="ring ign-ring" onclick="openMyIgnition('${escAttr(ig.id)}')"
-      title="${escQ(ig.name)} — open the entry">
-      <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>`).join("")
+    <div class="rings">` + IGN_MINE.map(ig => `<div class="ring ign-ring ign-card">
+      <button class="ign-open" onclick="openMyIgnition('${escAttr(ig.id)}')"
+        title="${escQ(ig.name)} — open the entry">
+        <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>
+      <button class="ign-use" onclick="useMyIgnition('${escAttr(ig.id)}')"
+        title="${escQ(ig.name)} — spend 1 Blaze Point">Use · 1 Blaze</button></div>`).join("")
     + `</div></div>`;
 }
 function openMyIgnition(id) { setView("rings"); openIgnRef("mine:" + id); }
+// Using one costs a Blaze Point and nothing else. An Ignition is a technique the body already
+// knows — there is no Eidon Check to roll and no builder state to set, so this only moves the
+// Blaze counter and says what it did.
+function useMyIgnition(id) {
+  const ig = ignMine(id);
+  if (!ig) return;
+  if (blazeNow() < 1) return toast(`No Blaze Point left to use ${ig.name}`);
+  spendBlaze(1);
+  toast(`${ig.name} — 1 Blaze Point spent · ${blazeNow()} / ${blazeMax()} left`);
+  syncBar(); renderMain();
+}
 
 // ── The entry itself. Sections are the author's, in their order; every part is optional, so a
 // one-paragraph Ignition is as valid as Reaper's Communion.
