@@ -81,9 +81,11 @@ function ringsUsing(cog, pool) {
 // concept rather than a Cognition ("passion", "decay"), it is shown as what it is: flavour, with
 // nothing yet on the other side of it to counter with.
 let OPP_BACK = null;
+function oppositionKey()   { return INDEX.filter(c => c.ready).map(c => c.id).join(","); }
+function oppositionReady() { return !!OPP_BACK && OPP_BACK.key === oppositionKey(); }
 async function oppositionMap() {
-  const key = INDEX.filter(c => c.ready).map(c => c.id).join(",");
-  if (OPP_BACK && OPP_BACK.key === key) return OPP_BACK;
+  const key = oppositionKey();
+  if (oppositionReady()) return OPP_BACK;
   const ready = INDEX.filter(c => c.ready);
   await Promise.all(ready.map(c => loadCognition(c.id)));
   const back = {};
@@ -111,7 +113,11 @@ function renderCodex() {
     return;
   }
   const tier = getTier(state.charLevel);
-  oppositionMap().then(() => { if (state.view === "codex" && state.codexId === entry.id) renderCodex(); }).catch(() => {});
+  // The back-map needs every ready Cognition fetched, so the first Codex render goes out without it
+  // and draws again once it lands. Only when it isn't built yet: re-rendering on an already-cached
+  // map would schedule the next render from inside the last one, over and over, until the tab dies.
+  if (!oppositionReady())
+    oppositionMap().then(() => { if (state.view === "codex" && state.codexId === entry.id) renderCodex(); }).catch(() => {});
   const opps = opposedList(entry.id, cog);
   // A named opposite that is no Cognition — the concept stays, but nothing counters through it
   const oppWord = cog.opposing && !INDEX.some(c => c.id === cog.opposing) ? cog.opposing : null;
