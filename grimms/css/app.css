@@ -143,6 +143,238 @@ textarea.txt{width:100%;min-height:70px;font-family:var(--serif);font-size:14px;
 .ab.open .ab-h .car{transform:rotate(90deg)}
 .ab-b{padding:2px 13px 11px;display:none}
 .ab.open .ab-b{display:block}
+/* Servants on the field: a card each, wearing the face of whatever form they are in. */
+.souls{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:8px}
+.soulcard{display:flex;flex-direction:column;border:1px solid var(--line);border-top:3px solid var(--k-active);border-radius:8px;overflow:hidden;background:color-mix(in srgb,var(--k-active) 5%,transparent)}
+.soulcard.elite,.soulcard.formed{border-top-color:var(--k-super);background:color-mix(in srgb,var(--k-super) 7%,transparent)}
+.soulcard .face{position:relative;aspect-ratio:4/3;overflow:hidden;background:color-mix(in srgb,var(--line) 35%,transparent)}
+/* The plates are full-body 4:5 with the head near the very top, so the 4:3 window sits high. */
+.soulcard .face img{width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block}
+.soulcard .noface{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--sans);font-size:44px;font-weight:700;color:var(--mute);opacity:.5}
+.soulcard .badge,.soulcard .crtag{position:absolute;bottom:6px;font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;backdrop-filter:blur(3px);background:rgba(0,0,0,.6);color:var(--bone)}
+.soulcard .badge{left:6px;color:var(--k-super);box-shadow:inset 0 0 0 1px var(--k-super)}
+.soulcard .crtag{right:6px}
+.soulcard .meat{display:flex;flex-direction:column;gap:6px;padding:9px 10px 10px}
+.soulcard .nm{font-family:var(--sans);font-weight:600;font-size:13.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.soulcard .hpline{display:flex;align-items:center;gap:6px}
+.soulcard .hpline .num{width:66px}
+.soulcard .hpbar{height:4px;border-radius:3px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden}
+.soulcard .hpbar i{display:block;height:100%;background:var(--k-active);transition:width .2s}
+.soulcard .tether{color:var(--k-super)}
+.soulcard .acts{display:flex;flex-wrap:wrap;gap:5px}
+.soulcard .hint{margin:0}
+
+/* Charge trackers. Collapsed to one button by default, so a card is no taller than it was before
+   they existed; open, each one is a single compact row. Pips up to six, numbers past that. */
+.trtog{font-variant-numeric:tabular-nums}
+.trtog.on{background:color-mix(in srgb,var(--k-active) 18%,transparent)}
+.trwrap{display:flex;flex-direction:column;gap:4px;padding:6px 7px;border-radius:6px;
+  background:color-mix(in srgb,var(--line) 28%,transparent)}
+.trwrap .tr{display:flex;align-items:center;gap:6px}
+.trwrap .tr .nm{flex:1;min-width:0;font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trwrap .pips{display:flex;gap:3px;flex-shrink:0}
+.trwrap .pips i{width:13px;height:13px;border-radius:50%;cursor:pointer;
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--k-active) 55%,transparent);transition:background .12s}
+.trwrap .pips i.on{background:var(--k-active)}
+.trwrap .pips i:hover{box-shadow:inset 0 0 0 1.5px var(--k-active)}
+.trwrap .pm{width:20px;height:20px;flex-shrink:0;border:0;border-radius:5px;cursor:pointer;font-size:14px;line-height:1;
+  font-family:var(--sans);color:var(--bone);background:color-mix(in srgb,var(--k-active) 22%,transparent)}
+.trwrap .pm:hover{background:color-mix(in srgb,var(--k-active) 38%,transparent)}
+.trwrap .cnt{min-width:46px;text-align:center;font-family:var(--sans);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.trwrap .cnt small{font-weight:400;opacity:.6}
+.trwrap .cnt.out{color:var(--ember)}
+/* Art pulled out of the vault — a plate at the head of a statblock, or inline in prose. */
+.plate{margin:0 0 12px;text-align:center}
+.plate img{max-width:100%;max-height:420px;border-radius:8px;border:1px solid var(--line);display:block;margin:0 auto}
+img.art{max-width:100%;border-radius:6px}
+/* A Shackle Break while it holds: the banner above the loadout, and each ability's "+" form. */
+.shackled{align-items:center;gap:10px;margin:0 0 10px;padding:8px 11px;border:1px solid var(--k-super);border-left-width:3px;border-radius:7px;background:color-mix(in srgb,var(--k-super) 9%,transparent)}
+.plusform{margin-bottom:6px;padding:8px 11px;border-left:3px solid var(--k-super);border-radius:0 6px 6px 0;background:color-mix(in srgb,var(--k-super) 8%,transparent)}
+.plusform>:first-child{margin-top:0} .plusform>:last-child{margin-bottom:0}
+
+/* ── The two big openings ──────────────────────────────────────────────
+   A Shackle Break and a Reality Shift each take the screen for a couple of seconds before their
+   window appears. Click or any key skips either; prefers-reduced-motion gets the title card and
+   none of the movement. Everything inside is decoration — pointer-events stay off so the skip
+   handler on the overlay is the only thing that can be hit. */
+.cine{position:fixed;inset:0;z-index:200;display:grid;place-items:center;cursor:pointer;
+  animation:sb-in .18s ease-out both}
+.cine.out{animation:sb-out .3s ease-in both}
+.cine>*{grid-area:1/1}
+.cine-words{position:relative;text-align:center;pointer-events:none}
+.cine-words b{display:block;font-family:var(--sans);font-weight:700;font-size:clamp(30px,8.5vw,74px);line-height:1;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--bone)}
+.cine-words em{display:block;margin-top:10px;font-family:var(--serif);font-style:italic;font-size:clamp(14px,2.6vw,21px);
+  color:var(--bone2);letter-spacing:.04em}
+.cine-skip{position:absolute;bottom:26px;left:0;right:0;text-align:center;pointer-events:none;
+  font-family:var(--sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);
+  animation:sb-skip 2.4s ease-in both}
+
+/* ── A Shackle Break opening: the page shakes and glows red, the words land, the chain snaps. ── */
+.sb-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,color-mix(in srgb,var(--ember) 42%,transparent) 0%,rgba(10,12,15,.86) 62%,rgba(10,12,15,.95) 100%);
+  animation:sb-pulse 2.4s ease-out both}
+.sbreak .cine-words{animation:sb-slam .5s cubic-bezier(.2,1.5,.4,1) both}
+.sbreak .cine-words b{text-shadow:0 0 22px color-mix(in srgb,var(--ember) 85%,transparent),0 0 70px color-mix(in srgb,var(--ember) 55%,transparent)}
+/* Lifted clear of the lettering — the two sit in the same grid cell, and a chain crossing the
+   words at mid-height reads as a smudge rather than a chain. */
+.sb-chain{position:relative;width:min(760px,92vw);pointer-events:none;overflow:visible;transform:translateY(-86px)}
+.sb-chain ellipse,.sb-chain path{fill:none;stroke:var(--bone2);stroke-width:5;
+  filter:drop-shadow(0 0 7px color-mix(in srgb,var(--ember) 80%,transparent))}
+.sb-chain .lh{animation:sb-left 2.4s cubic-bezier(.3,0,.2,1) both}
+.sb-chain .rh{animation:sb-right 2.4s cubic-bezier(.3,0,.2,1) both}
+.sb-chain .shards rect{fill:var(--bone);stroke:none;opacity:0;
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--ember) 90%,transparent))}
+.sb-chain .shards .s0{animation:sb-sh0 1.5s ease-out .42s both}
+.sb-chain .shards .s1{animation:sb-sh1 1.5s ease-out .42s both}
+.sb-chain .shards .s2{animation:sb-sh2 1.4s ease-out .44s both}
+.sb-chain .shards .s3{animation:sb-sh3 1.4s ease-out .44s both}
+.sb-chain .shards .s4{animation:sb-sh4 1.6s ease-out .43s both}
+.sb-chain .shards .s5{animation:sb-sh5 1.6s ease-out .43s both}
+@keyframes sb-in{from{opacity:0}to{opacity:1}}
+@keyframes sb-out{to{opacity:0}}
+@keyframes sb-pulse{0%{opacity:0}8%{opacity:1}18%{opacity:.72}22%{opacity:1}100%{opacity:.9}}
+@keyframes sb-slam{0%{opacity:0;transform:scale(2.4);filter:blur(9px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes sb-skip{0%,70%{opacity:0}100%{opacity:1}}
+/* The links pull together before they go — the tension is what sells the snap. */
+@keyframes sb-left{
+  0%{transform:translateX(0)}
+  14%{transform:translateX(13px)}
+  16%{transform:translateX(11px)}
+  17%{transform:translateX(14px)}
+  100%{transform:translateX(-230px) rotate(-12deg);opacity:.12}}
+@keyframes sb-right{
+  0%{transform:translateX(0)}
+  14%{transform:translateX(-13px)}
+  16%{transform:translateX(-11px)}
+  17%{transform:translateX(-14px)}
+  100%{transform:translateX(230px) rotate(12deg);opacity:.12}}
+@keyframes sb-sh0{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(-120px,-78px) rotate(-200deg)}}
+@keyframes sb-sh1{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(126px,-64px) rotate(190deg)}}
+@keyframes sb-sh2{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(-92px,72px) rotate(150deg)}}
+@keyframes sb-sh3{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(104px,84px) rotate(-170deg)}}
+@keyframes sb-sh4{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(-54px,-114px) rotate(120deg)}}
+@keyframes sb-sh5{0%{opacity:1;transform:none}100%{opacity:0;transform:translate(46px,110px) rotate(-130deg)}}
+/* The page under it: one hard shake, and a red edge that stays while the chains are off.
+   The shake goes on the page's own parts, never on <body> — a transform on body makes it the
+   containing block for everything position:fixed, which lands the overlay (and the red edge)
+   partway down the document instead of over the viewport. */
+body.breaking .bar,body.breaking main,body.breaking .foot{animation:sb-shake .42s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes sb-shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}
+  30%,50%,70%{transform:translate(-7px,2px)}40%,60%{transform:translate(7px,-1px)}100%{transform:none}}
+/* One edge, two colours: red while the chains are off, pink while a domain is up. There is only
+   ever one ::after on body, so with both running the Shift wins — it is the bigger thing. */
+body.shackled-now::after,body.shifted-now::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:30;
+  box-shadow:inset 0 0 90px color-mix(in srgb,var(--edge) 34%,transparent),
+             inset 0 0 14px color-mix(in srgb,var(--edge) 26%,transparent);
+  animation:sb-edge 3.4s ease-in-out infinite}
+body.shackled-now::after{--edge:var(--k-super)}
+body.shifted-now::after{--edge:#FF4FA3}
+@keyframes sb-edge{0%,100%{opacity:.55}50%{opacity:1}}
+/* ── A Reality Shift rising ────────────────────────────────────────────
+   Pink and black drag in from every edge, spiral down into one ball, and the domain's name lands
+   on it. The wisps are one element each: a long soft streak rotated to its own angle, swung inward
+   while it shortens, so the far end trails and the bright head goes in first. */
+.rshift{--rs-hot:#FF4FA3;--rs-deep:#A5165F;--rs-ink:#120518}
+.rshift .rs-void{position:absolute;inset:0;
+  background:radial-gradient(circle at center,rgba(14,5,18,.42) 0%,rgba(6,3,9,.93) 62%,rgba(3,2,5,.98) 100%);
+  animation:sb-in .5s ease-out both}
+.rshift .rs-field{position:absolute;inset:0;overflow:hidden}
+.rshift .rs-field.hot{animation:rs-spin 2.8s linear both}
+.rshift .rs-field.dark{animation:rs-spin-back 2.8s linear both}
+.rshift .rs-field i{position:absolute;left:50%;top:50%;width:54vmax;height:13px;margin-top:-6.5px;
+  transform-origin:0 50%;border-radius:999px;opacity:0;filter:blur(6px);
+  background:linear-gradient(90deg,rgba(255,255,255,.95) 0%,var(--rs-hot) 16%,var(--rs-deep) 44%,var(--rs-ink) 76%,transparent 100%);
+  animation:rs-fall 1.5s cubic-bezier(.42,0,.3,1) var(--d) both}
+/* The black half of it: a dark streak that would vanish into the page without its own pink rim. */
+.rshift .rs-field.dark i{height:20px;margin-top:-10px;
+  background:linear-gradient(90deg,#000 0%,#07040A 46%,rgba(10,5,14,.65) 72%,transparent 100%);
+  filter:blur(7px) drop-shadow(0 0 11px color-mix(in srgb,var(--rs-hot) 60%,transparent));
+  animation-duration:1.7s;animation-timing-function:cubic-bezier(.5,0,.35,1)}
+.rshift .rs-ball{width:min(44vmin,330px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#fff 0%,var(--rs-hot) 20%,var(--rs-deep) 46%,#1C0518 72%,#05030A 100%);
+  box-shadow:0 0 100px 26px color-mix(in srgb,var(--rs-hot) 42%,transparent),inset 0 0 70px rgba(0,0,0,.78);
+  animation:rs-ball 2.8s cubic-bezier(.2,.9,.25,1) both}
+.rshift .rs-ring{width:min(44vmin,330px);aspect-ratio:1;border-radius:50%;opacity:0;
+  border:2px solid color-mix(in srgb,var(--rs-hot) 85%,transparent);animation:rs-ring 1.2s ease-out 1.42s both}
+/* The Shift is named for its domain, so the domain's name is the headline and "Reality Shift" is
+   the small line above it — the reverse of a Shackle Break, where the mechanic is the headline. */
+.rshift .cine-words{animation:rs-words .72s cubic-bezier(.2,1.4,.4,1) 1.5s both}
+.rshift .cine-words b{font-size:clamp(10px,1.9vw,15px);letter-spacing:.46em;margin-right:-.46em;
+  color:#F7CFE4;text-shadow:0 0 14px color-mix(in srgb,var(--rs-hot) 80%,transparent),0 1px 2px rgba(0,0,0,.9)}
+.rshift .cine-words em{display:block;margin-top:12px;font-family:var(--serif);font-style:italic;font-weight:600;
+  font-size:clamp(30px,7.6vw,66px);line-height:1.05;letter-spacing:.01em;color:#fff;
+  text-shadow:0 0 18px var(--rs-hot),0 0 60px color-mix(in srgb,var(--rs-hot) 70%,transparent),0 2px 4px rgba(0,0,0,.92)}
+@keyframes rs-spin{from{transform:rotate(0)}to{transform:rotate(54deg)}}
+@keyframes rs-spin-back{from{transform:rotate(0)}to{transform:rotate(-46deg)}}
+@keyframes rs-fall{
+  0%{opacity:0;transform:rotate(var(--a)) translateX(70vmax) scaleX(1.5)}
+  16%{opacity:.95}
+  100%{opacity:0;transform:rotate(calc(var(--a) + 215deg)) translateX(2vmax) scaleX(.16)}}
+@keyframes rs-ball{
+  0%{transform:scale(.02);opacity:.25}
+  42%{transform:scale(.4);opacity:1}
+  58%{transform:scale(1.14)}
+  68%{transform:scale(.95)}
+  100%{transform:scale(1.02)}}
+@keyframes rs-ring{0%{opacity:.85;transform:scale(.92)}100%{opacity:0;transform:scale(3.4)}}
+@keyframes rs-words{0%{opacity:0;transform:scale(1.5);filter:blur(10px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+/* The page under it: no shake — reality is being replaced, not struck — just a pink wash. */
+body.shifting .bar,body.shifting main,body.shifting .foot{animation:rs-wash 2.8s ease-out both}
+@keyframes rs-wash{0%{filter:none}30%{filter:saturate(1.5) hue-rotate(-24deg)}100%{filter:none}}
+
+/* The side column's shortcut to whichever of the two this Grimm has. */
+.mythical .bm{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mythical .bm+.bm{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.mythical .bm .nm{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--kc)}
+.mythical .bm .hint{flex:1 1 100%;margin:0}
+.btn.go-sb{background:var(--k-super);border-color:var(--k-super);color:#15181d;font-weight:600}
+.btn.go-rs{background:#C2237A;border-color:#C2237A;color:#fff;font-weight:600}
+.btn.go-sb:hover:not(:disabled),.btn.go-rs:hover:not(:disabled){filter:brightness(1.15);color:inherit}
+
+/* The Servant is chosen by name in the dropdown; what it BECOMES is chosen here, as a card wearing
+   that form's own plate. Gold for the Divine, red for the Forbidden. The whole card takes the form —
+   "Read it first" sits inside it and deliberately does not. */
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:10px}
+.formcard{--fc:var(--k-active);display:flex;flex-direction:column;overflow:hidden;cursor:pointer;
+  background:var(--slate);border:1px solid var(--line);border-radius:10px;
+  transition:border-color .15s,transform .15s,box-shadow .15s}
+.formcard.forbidden{--fc:var(--k-super)}
+.formcard:hover{border-color:var(--fc);transform:translateY(-2px);
+  box-shadow:0 0 0 1px var(--fc),0 8px 22px -10px color-mix(in srgb,var(--fc) 75%,transparent)}
+.formcard .art{position:relative;display:block;aspect-ratio:4/3;overflow:hidden;
+  background:color-mix(in srgb,var(--line) 35%,transparent)}
+.formcard .art img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block;
+  filter:grayscale(.35) brightness(.8);transition:filter .15s}
+.formcard:hover .art img{filter:none}
+.formcard .noart{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;color:var(--fc);opacity:.4;
+  background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--fc) 16%,transparent),transparent 70%)}
+.formcard .mark{position:absolute;top:6px;left:6px;font-family:var(--sans);font-size:9.5px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;backdrop-filter:blur(3px);
+  background:rgba(0,0,0,.62);color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}
+.formcard .meat{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:9px 10px}
+.formcard .nm{font-family:var(--sans);font-weight:600;font-size:13px;line-height:1.25;color:var(--bone)}
+.formcard .take{margin-top:auto;padding:7px 10px;text-align:center;font-family:var(--sans);font-size:11.5px;
+  font-weight:600;letter-spacing:.03em;color:var(--fc);border-top:1px solid var(--line);
+  background:color-mix(in srgb,var(--fc) 9%,transparent)}
+.formcard:hover .take{background:color-mix(in srgb,var(--fc) 20%,transparent)}
+.formcard.empty{cursor:default;opacity:.55;justify-content:center;min-height:90px}
+.formcard.empty:hover{border-color:var(--line);transform:none;box-shadow:none}
+.formcard.empty .nm{color:var(--mute)}
+
+/* The setup window the animation hands over to. */
+.sb-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.sb-read{margin-top:10px;max-height:40vh;overflow:auto;padding:2px 12px;border-left:3px solid var(--k-super);
+  border-radius:0 6px 6px 0;background:color-mix(in srgb,var(--k-super) 7%,transparent)}
+@media (prefers-reduced-motion:reduce){
+  .cine,.cine *,body.breaking .bar,body.breaking main,body.breaking .foot,
+  body.shifting .bar,body.shifting main,body.shifting .foot,body.shackled-now::after{animation:none!important}
+  .sb-chain .lh{transform:translateX(-230px) rotate(-12deg)}
+  .sb-chain .rh{transform:translateX(230px) rotate(12deg)}
+  .sb-chain .shards rect{opacity:0}
+  .rshift .rs-field{display:none}            /* a still frame of a storm is just clutter */
+  .cine-skip{opacity:1}
+}
 .tag{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
 .tag.k{color:var(--kc);border-color:var(--kc)}
 .tag.st{color:var(--bone2)}

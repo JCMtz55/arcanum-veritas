@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=2026-10-13">
 </head>
 <body>
 
@@ -25,12 +25,14 @@
 <dialog id="dlg"></dialog>
 <div class="toast" id="toast"></div>
 
-<script src="js/data.js"></script>
-<script src="js/md.js"></script>
-<script src="js/core.js"></script>
-<script src="js/sheet.js"></script>
-<script src="js/panels.js"></script>
-<script src="js/views.js"></script>
-<script src="js/app.js"></script>
+<!-- ?v= is a cache buster: browsers hold on to these files hard, and a stale panels.js looks like
+     a data bug rather than a cache one. Bump the date whenever you change a js/ or css/ file. -->
+<script src="js/data.js?v=2026-10-13"></script>
+<script src="js/md.js?v=2026-10-13"></script>
+<script src="js/core.js?v=2026-10-13"></script>
+<script src="js/sheet.js?v=2026-10-13"></script>
+<script src="js/panels.js?v=2026-10-13"></script>
+<script src="js/views.js?v=2026-10-13"></script>
+<script src="js/app.js?v=2026-10-13"></script>
 </body>
 </html>

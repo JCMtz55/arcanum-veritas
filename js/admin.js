@@ -487,7 +487,117 @@ function renderParAdmin(u) {
       groups its abilities the way a Cognition groups <code>verumEffects</code>, and gives each one
       a four-entry <code>tiers</code> ladder for Ranks I–IV. The server hands a set to nobody but
       the player it names.</p></div>`;
-  return h + `</div>`;
+  return h + soulsSection(u) + `</div>`;
+}
+
+// ── A player's Servants (Juan, 2026-10-09) ──────────────────────────────
+// Their roster lives in grimm_souls now, so the DM can see what each Servant has been upgraded to
+// and what charges it is holding — and correct a number or grant an upgrade without taking the
+// player's sheet off them. Loaded on demand: most of the time you are on this page for something
+// else, and there is no reason to ask the server for every player's roster to render a card.
+const SOULS_BY_USER = {};
+function soulsSection(u) {
+  return `<h3 class="adm-sub">Servants</h3>
+    <p class="cdx-rings">What ${esc(u.displayName)} holds, what they have upgraded, and what they
+      have spent. Editing writes the same row their sheet syncs — safest between sessions.</p>
+    <div id="souls-${u.id}"><button class="mini" onclick="loadSouls(${u.id})">Show their Servants</button></div>`;
+}
+async function loadSouls(uid) {
+  const box = document.getElementById("souls-" + uid);
+  if (box) box.innerHTML = `<p class="hint">Reading…</p>`;
+  try {
+    const { souls } = await api("GET", `api/admin/players/${uid}/souls`);
+    SOULS_BY_USER[uid] = souls || [];
+  } catch (e) { if (box) box.innerHTML = `<p class="hint">Couldn't read them: ${esc(e.message || e)}</p>`; return; }
+  drawSouls(uid);
+}
+const soulName = key => key.startsWith("vault:")
+  ? key.slice(6).replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+  : "their own";
+// Which Grimm an account holds. The Companion's party list carries a `short` name per Grimm and the
+// accounts are named the same way (salomon → Salomon), which is the only link between the two.
+const userById = id => (ADMIN.users || []).find(u => u.id === id);
+const grimmOfUser = u => (GRIMMS.grimms || []).find(g =>
+  String(g.short || "").toLowerCase() === String(u && u.username || "").toLowerCase());
+const vaultKeyOf = name => "vault:" + String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+// The vault's Servants are the baseline, listed whether or not the player has touched them — a row
+// exists only once they change something, so there is nothing to prefill and nothing to go stale.
+// Their own souls are appended, and so is anything recorded against another Grimm.
+function drawSouls(uid) {
+  const box = document.getElementById("souls-" + uid);
+  if (!box) return;
+  const rows = SOULS_BY_USER[uid] || [];
+  const u = userById(uid), g = grimmOfUser(u);
+  const byKey = new Map(rows.map(r => [r.grimm + "|" + r.key, r]));
+  const lines = [];
+
+  if (g) for (const sv of (g.servants || [])) {
+    const key = vaultKeyOf(sv.name), r = byKey.get(g.id + "|" + key);
+    byKey.delete(g.id + "|" + key);
+    lines.push({ nm: sv.name, grimm: g.id, key, r, vault: true });
+  }
+  for (const r of byKey.values()) lines.push({ nm: r.edits.name || soulName(r.key), grimm: r.grimm, key: r.key, r, vault: r.key.startsWith("vault:") });
+
+  if (!lines.length) {
+    box.innerHTML = `<div class="cdx-note"><p>${esc((u && u.displayName) || "This player")} holds no Grimm
+      with Servants${g ? "" : " that this page can match to their account"}.</p></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="cdx-defs">` + lines.map(l => {
+    const s = l.r, tr = (s && s.state.tr) || [];
+    const up = s ? ["level", "cr", "hp", "ac"].filter(k => s.edits[k] != null && s.edits[k] !== "")
+      .map(k => `${k.toUpperCase()} ${s.edits[k]}`).join(" · ") : "";
+    const where = s && s.state.out ? " · summoned" : s && s.state.prep ? " · prepared" : "";
+    return `<div class="cdx-def${s ? "" : " dis"}"><b>${esc(l.nm)}</b>
+      <span>${esc(l.grimm)}${l.vault ? "" : " · written by them"}${up ? ` · upgraded: ${esc(up)}` : s ? " · no upgrades recorded" : " · untouched"}${where}${s && s.state.hp != null ? ` · ${s.state.hp} HP` : ""}</span>
+      ${tr.length ? `<span>${tr.map(t => `${esc(t.name)} <b>${+t.cur || 0}/${+t.max || 0}</b>`).join(" · ")}</span>` : ""}
+      ${l.vault || s ? `<button class="mini" onclick="editSoulAdmin(${uid},'${escAttr(l.grimm)}','${escAttr(l.key)}','${escAttr(l.nm)}')">Edit</button>` : ""}</div>`;
+  }).join("") + `</div>
+  <p class="hint" style="font-style:normal">Greyed means <b>untouched</b> — the Servant is on their
+    sheet as the vault writes it, with nothing recorded against it. Editing one writes the first row.</p>`;
+}
+// One soul, by hand. Only the numbers and the charges — the same things the player may change.
+// Addressed by grimm + key rather than by position, because the list now includes untouched vault
+// Servants that have no row at all, and a Servant with no row is exactly the one you grant an
+// upgrade to. Saving it writes that first row.
+const soulRow = (uid, grimm, key) => (SOULS_BY_USER[uid] || []).find(r => r.grimm === grimm && r.key === key);
+function editSoulAdmin(uid, grimm, key, nm) {
+  const s = soulRow(uid, grimm, key) || { grimm, key, edits: {}, state: {} };
+  const box = document.getElementById("souls-" + uid);
+  document.getElementById("asEdit")?.remove();
+  const f = (k, lbl) => `<label class="adm-f"><span>${lbl}</span><input id="as_${k}" value="${escQ(s.edits[k] ?? "")}"></label>`;
+  const tr = s.state.tr || [];
+  box.insertAdjacentHTML("afterbegin", `<div class="cdx-note" id="asEdit">
+    <p><b>${esc(nm)}</b> — ${esc(grimm)}${soulRow(uid, grimm, key) ? "" : " · nothing recorded yet"}</p>
+    <div class="adm-line">${f("level", "Level")}${f("cr", "CR")}${f("hp", "HP")}${f("ac", "AC")}</div>
+    ${tr.length ? `<div class="adm-line">${tr.map((t, j) =>
+      `<label class="adm-f"><span>${esc(t.name)}</span><input id="as_tr${j}" value="${+t.cur || 0}" style="width:60px"></label>`).join("")}</div>` : ""}
+    <div class="adm-line"><button class="mini on" onclick="saveSoulAdmin(${uid},'${escAttr(grimm)}','${escAttr(key)}','${escAttr(nm)}')">Save</button>
+      <button class="mini" onclick="document.getElementById('asEdit').remove()">Cancel</button></div>
+    <p class="hint" style="font-style:normal">Leave a number empty to hand it back to the vault's
+      statblock. Their sheet picks this up the next time it loads${tr.length ? "" : "; they define their own charge trackers, so there are none to correct here yet"}.</p></div>`);
+}
+async function saveSoulAdmin(uid, grimm, key, nm) {
+  const s = soulRow(uid, grimm, key) || { grimm, key, edits: {}, state: {} };
+  const edits = { ...s.edits }, state = { ...s.state };
+  for (const k of ["level", "cr", "hp", "ac"]) {
+    const v = (document.getElementById("as_" + k)?.value ?? "").trim();
+    if (v === "") delete edits[k]; else edits[k] = v;
+  }
+  if ((s.state.tr || []).length) state.tr = s.state.tr.map((t, j) => {
+    const v = +(document.getElementById("as_tr" + j)?.value ?? t.cur) || 0;
+    return { ...t, cur: Math.max(0, Math.min(+t.max || 0, v)) };
+  });
+  try {
+    await api("PUT", `api/admin/players/${uid}/souls/${encodeURIComponent(grimm)}/${encodeURIComponent(key)}`, { edits, state });
+    const cur = soulRow(uid, grimm, key);
+    if (cur) { cur.edits = edits; cur.state = state; }
+    else (SOULS_BY_USER[uid] = SOULS_BY_USER[uid] || []).push({ grimm, key, edits, state });
+    document.getElementById("asEdit")?.remove();
+    drawSouls(uid);
+    toast(`${nm} updated.`);
+  } catch (e) { alert("Couldn't save: " + (e.message || e)); }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -517,6 +627,8 @@ function grimmById(id)   { return (GRIMMS.grimms || []).find(g => g.id === id); 
 function grimmChains(id) { const n = GRIMM_CHAINS[id]; return n === undefined ? 3 : n; }
 // Abilities are open unless the DM has switched one off; a Reality Shift stays hidden until revealed
 function shiftOn(id)        { return GRIMM_TOGGLES[id]?.shift === true; }
+// A Shackle Break is hidden until the DM says otherwise, the same as a Reality Shift
+function shackleOn(id)      { return GRIMM_TOGGLES[id]?.shackle === true; }
 function abilityOn(id, aid) { return GRIMM_TOGGLES[id]?.[`a:${aid}`] !== false; }
 
 async function setChains(id, n) {
@@ -545,7 +657,7 @@ function chainIcons(n) {
 function renderGrimmAdmin(id) {
   const g = grimmById(id);
   if (!g) return `<div class="empty">No such Grimm.</div>`;
-  const n = grimmChains(id), sh = shiftOn(id);
+  const n = grimmChains(id), sh = shiftOn(id), sb = shackleOn(id);
 
   let h = `<div class="cdx"><div class="cdx-hd"><div>
       <h1 style="color:${g.hue}">${esc(g.name)}</h1>
@@ -554,6 +666,7 @@ function renderGrimmAdmin(id) {
         <span class="t">${esc(CHAIN_STATE[n])}</span>
         <span class="t">${g.abilities.length} abilities</span>
         ${g.shift ? `<span class="t ${sh ? "hot" : ""}">Reality Shift ${sh ? "revealed" : "hidden"}</span>` : ""}
+        ${g.shackle ? `<span class="t ${sb ? "hot" : ""}">Shackle Break ${sb ? "revealed" : "hidden"}</span>` : ""}
       </div></div></div>
 
     <div class="cdx-sec"><h2>The Three Chains</h2>
@@ -572,6 +685,17 @@ function renderGrimmAdmin(id) {
         <button class="mini ${sh ? "on" : ""}" onclick="setToggle('${escAttr(id)}','shift',${!sh})">
           ${sh ? "✓ Revealed" : "Reveal it"}</button>
         ${sh ? `<span class="hint" style="margin:0">Their sheet can read it now.</span>` : ""}
+      </div></div>`;
+  }
+
+  if (g.shackle) {
+    const forms = (g.servants || []).filter(s => s.divine || s.forbidden).length;
+    h += `<div class="cdx-sec"><h2>Shackle Break — ${esc(g.shackle.name)}</h2>
+      <p class="cdx-rings">While it's hidden its text never reaches that player's browser${forms ? `, and neither do the ${forms} Divine and Forbidden Forms it transforms a Servant into` : ""}.</p>
+      <div class="adm-line" style="gap:10px">
+        <button class="mini ${sb ? "on" : ""}" onclick="setToggle('${escAttr(id)}','shackle',${!sb})">
+          ${sb ? "✓ Revealed" : "Reveal it"}</button>
+        ${sb ? `<span class="hint" style="margin:0">Their sheet can run it now.</span>` : ""}
       </div></div>`;
   }
 

@@ -1,4 +1,4 @@
-// A small markdown renderer — just what the vault pages use: headings, rules,
+﻿// A small markdown renderer — just what the vault pages use: headings, rules,
 // tables, nested lists, quotes and Obsidian callouts, bold/italic/code/links.
 
 function esc(s) {
@@ -12,6 +12,8 @@ function inline(s) {
     .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
     .replace(/(^|[^\w*])\*([^*\n]+)\*(?!\w)/g, '$1<i>$2</i>')
     .replace(/(^|[^\w])_([^_\n]+)_(?!\w)/g, '$1<i>$2</i>')
+    // images before links — ![alt](src) contains a [alt](src) the link rule would otherwise eat
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img class="art" src="$2" alt="$1">')
     .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 }
 
@@ -34,6 +36,13 @@ function md(src) {
       i++; continue;
     }
     if (/^\s*([-_*])(\s*\1){2,}\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
+
+    // An image on a line of its own is a plate, not a sentence — don't bury it in a paragraph.
+    // NB: no loading="lazy" — these render inside <dialog>, where a lazy image is never fetched.
+    if ((m = l.match(/^\s*!\[([^\]]*)\]\(([^)\s]+)\)\s*$/))) {
+      out.push(`<figure class="plate"><img src="${esc(m[2])}" alt="${esc(m[1])}"></figure>`);
+      i++; continue;
+    }
 
     if (isTable(l)) {
       const rows = [];

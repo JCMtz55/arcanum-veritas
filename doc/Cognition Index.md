@@ -269,7 +269,7 @@ All thirteen Divine Laws now have either a Cognition or a documented reason for 
 
 ### Completion backlog
 - **The 22-Cognition pass is done.** Every Cognition that received Creation/Utility effects is now complete across all five Compositions (or states its incompatibility), and its JSON matches the vault entry exactly.
-- **The next pass is the 16 untouched documented Cognitions** — [[Acid]], [[Air]], [[Balance]], [[Carnage]], [[Control]], [[Disaster]], [[Hate]], [[Hollowing]], [[Night]], [[Nightmare]], [[Shadow]], [[Silence]], [[Soul]], [[Speed]], [[Sun]], [[Toxin]]. Most need Creation and Utility; several also lack an Offensive or Supportive Core effect.
+- **The next pass is the 16 untouched documented Cognitions** — [[Acid]], [[Air]], [[Balance]], [[Carnage]], [[Control]], [[Disaster]], [[Hate]], [[Hollowing]], [[Night]], [[Nightmare]], [[Shadow]], [[Once Upon a Star ★/NPCs/Summons/Silence]], [[Soul]], [[Speed]], [[Sun]], [[Toxin]]. Most need Creation and Utility; several also lack an Offensive or Supportive Core effect.
 - **[[Creation]] and [[Dream]] are pre-Composition legacy documents.** Their effects use the old "Verum Sub-Effect" format with no Offensive/Supportive/Control typing at all. They need a full rework before either column can be assessed.
 - **[[Sun]] deliberately has no Creation or Utility.** Its Two Suns engine gives it exactly three abilities, one per Composition, each with a fixed Corruption cost and a Corona — adding more means designing new costs and Coronas, not just new text.
 

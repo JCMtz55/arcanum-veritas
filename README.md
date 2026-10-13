@@ -64,6 +64,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   rings.js          ← The Rings tab
   damage.js         ← The Damage tab
   conditions.js     ← The Conditions tab: the house conditions, the Eidon ladders, the named states defined
+  actions.js        ← The Actions tab: the action economy, 5e's actions and this campaign's own
   emotion.js        ← The Emotion tab: Emotional Alchemy, the Primals, the 48 emotions
   ignition.js       ← Ignition mode: Burning, Blaze, the Eidon Forge, its reference
   paragon-examples.js ← RETIRED — a pointer; the worked sets moved into cognitions/devotions/<player>_<cognition>_devotion.json
@@ -354,6 +355,17 @@ The **Conditions** tab holds the two kinds of condition this campaign uses, whic
 **Conditions link to each other.** They quote each other constantly — Buried is "Restrained… and Blinded", Ravenous is "a Starving creature", Dread-frozen is "Paralyzed with dread" — so every mention of another condition is a link to that entry. Only capitalised matches are linked, so the prose "bound to a prohibition" stays plain while "is Bound" does not.
 
 Like the Damage tab, **which states exist and who inflicts them is read from the Cognition files**, so it can't drift out of date; only the fourteen standard conditions and the named-state definitions are typed into `js/conditions.js`. The rail is built from what the signed-in account's Cognitions actually name, so a player who hasn't been granted Nightmare never sees *Nightling* in it. Prose stand-ins in the data (`the named Core Emotion`) are filtered out rather than listed as states, and a state with no definition written logs a console warning rather than rendering blank.
+
+## The Actions Tab
+
+The **Actions** tab is the action economy in one place — 5e's actions as this table plays them, and the five this campaign added. Same shape as Conditions: two groups in one rail (**Common actions · 14**, **Homebrew actions · 5**), a search box, and cross-links, so *Quick Action*'s menu of six options are each a link to that entry.
+
+- **The action economy** — what a turn actually gives you (movement, one Action, one Bonus Action *only when something grants it*, one free object interaction), what happens off your turn (one Reaction, plus a Quick Action which costs none of them), and the four distinctions worth holding on to: a Quick Action is not a Reaction, a Quick Attack is not the Attack action, a bonus action is not a resource you own, and a Grand Action is not a spell even when it casts one.
+- **One action** — its cost badge, a one-line summary, its rules, and **Questions it always raises** (40 across the tab). The homebrew entries name the vault file they were transcribed from.
+
+The five homebrew ones: **Quick Action** (outside the economy entirely, granted by a trigger, one of six small options), **Quick Attack** (its offensive option — one attack or one narrow cantrip, never Extra Attack), **Grand Action** (declared, charged a full round, resolved at the start of your next turn, breakable by a Damage Threshold and counterspellable only at equal or higher slot), **Pair Action** (two creatures on a shared initiative spending both Actions), and **Vinculum Action** (the Grimm version — a Grimm Slot each, once per turn, drawn from the pair matrix).
+
+Unlike the Conditions tab, **nothing here is computed from the Cognition files** — the action economy belongs to the vault, not the Cognitions. It is transcribed from `Homebrew/Rulesets/Actions/` and `Grimms/Vinculum Grimm Actions.md`; edit those and `js/actions.js` together.
 
 ## The Emotion Tab
 

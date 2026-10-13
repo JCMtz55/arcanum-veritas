@@ -1,10 +1,12 @@
-// Grimm-specific trackers. Each PANELS[id] returns the inside of one card; state
+﻿// Grimm-specific trackers. Each PANELS[id] returns the inside of one card; state
 // lives in sheet().x. LONG_REST[id] tidies up after a rest, USE_HOOK[abilityId]
 // reacts when an ability is used from the sheet.
 
 // EXTRA[id]: a second card, below the abilities. SHIFT_PANEL[id]: a tracker inside the Reality
 // Shift card, for a Shift that asks you to keep something in your head.
-const PANELS = {}, EXTRA = {}, SHIFT_PANEL = {}, LONG_REST = {}, USE_HOOK = {};
+// SHACKLE_SETUP[id]: the window that opens behind the animation when a Shackle Break is used, for
+// the choices that Grimm has to make while the chains are off.
+const PANELS = {}, EXTRA = {}, SHIFT_PANEL = {}, LONG_REST = {}, USE_HOOK = {}, SHACKLE_SETUP = {};
 
 const X = () => sheet().x;
 function xset(k, v) { X()[k] = v; save(); render(); }
@@ -29,27 +31,64 @@ const ABILS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const abilMod = n => Math.floor((+n - 10) / 2);
 
 // The numbers a statblock's text states about itself — a vault table or the usual 5e wording.
+// A vault page's own stats table is tried FIRST, because the prose patterns are greedy about
+// where they match: a page that merely mentions "Armor Class 14 + PB" in a transformed form, or
+// asks "flat 22 hit points?" in a DM note, would otherwise overwrite the real numbers with the
+// first thing that looks like one. Table row, then line-leading label, then loose 5e wording.
 function sbRead(text) {
   const t = String(text || ''), pick = (...res) => { for (const re of res) { const m = t.match(re); if (m) return m[1].trim(); } return ''; };
   const out = {
-    ac: pick(/Armor Class\W*(\d+)/i, /\*\*AC\*\*\s*\|\s*(\d+)/i, /^\W*AC\b\W*(\d+)/im),
-    hp: pick(/Hit Points\W*(\d+)/i, /\*\*HP\*\*\s*\|\s*(\d+)/i, /^\W*HP\b\W*(\d+)/im),
-    hd: pick(/Hit Points\W*\d+\s*\(([^)]+)\)/i, /\*\*HP\*\*\s*\|\s*\d+\s*\(([^)]+)\)/i),
+    ac: pick(/\*\*AC\*\*\s*\|\s*\**(\d+)/i, /^\W*AC\b\W*(\d+)/im, /Armor Class\W*(\d+)/i),
+    hp: pick(/\*\*HP\*\*\s*\|\s*\**(\d+)/i, /^\W*HP\b\W*(\d+)/im, /Hit Points\W*(\d+)/i),
+    hd: pick(/\*\*HP\*\*\s*\|\s*\**\d+\s*\(([^)]+)\)/i, /Hit Points\W*\d+\s*\(([^)]+)\)/i),
     speed: pick(/^\W*Speed\W*\|?\s*([^|\n]+)/im),
-    cr: pick(/Challenge(?: Rating)?\W*([\d/]+)/i, /^\W*CR\b\W*([\d/]+)/im, /\*\*Base\*\*\s*\|[^|]*\|\s*\**([\d/]+)/),
+    cr: pick(/\*\*CR\*\*\s*\|\s*\**([\d/]+)/i, /^\W*CR\b\W*([\d/]+)/im, /Challenge(?: Rating)?\W*([\d/]+)/i, /\*\*Base\*\*\s*\|[^|]*\|\s*\**([\d/]+)/),
   };
   const scores = [...t.matchAll(/(\d{1,2})\s*\(\s*[+−–-]?\s*\d+\s*\)/g)].map(m => +m[1]);
   if (scores.length >= 6) ABILS.forEach((a, i) => out[a] = scores[i]);
   return out;
 }
 // Everything a Gate of Caelum sheet can recruit: the vault's servants, then the player's own.
+// The vault keeps a soul's Base block and its two Parted Gates forms as three separate files, so
+// the forms arrive already split — and the AC/HP/CR scrape only ever sees the Base block, which is
+// what stops a Divine Form's "Armor Class 15 + PB" from being read as the soul's own AC.
+// The first plate on a page is that soul's face — the builder has already copied it into img/.
+const firstImage = t => (String(t || '').match(/!\[[^\]]*\]\(([^)\s]+)\)/) || [])[1] || '';
+const withArt = f => f && { ...f, img: firstImage(f.text) };
+// A vault soul's id is derived from its NAME, never its position in the folder. It used to be
+// 'vault:' + readdirSync index, so adding or renaming one Base file shifted every index and quietly
+// re-pointed saved state — HP, attuned items, trackers — at a different Servant. gateState() below
+// migrates the old positional keys across once.
+const vaultKey = name => 'vault:' + String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// What the player is allowed to change about a vault soul (Juan, 2026-10-09): its numbers, nothing
+// else. The vault keeps owning the prose, so your statblock fixes keep reaching them.
+const EDITABLE = ['level', 'cr', 'hp', 'ac', 'speed', ...ABILS];
 function sbAll(g = grimmById('gate-of-caelum'), x = sheet('gate-of-caelum').x) {
+  const edits = x.edits || {};
   return [
-    ...g.servants.map((s, i) => ({ id: 'vault:' + i, name: s.name, vault: true, body: s.text, ...sbRead(s.text) })),
+    ...g.servants.map(s => {
+      const id = vaultKey(s.name);
+      const base = {
+        id, name: s.name, vault: true, body: s.text, img: firstImage(s.text),
+        forms: (s.divine || s.forbidden) ? { divine: withArt(s.divine), forbidden: withArt(s.forbidden) } : null,
+        ...sbRead(s.text),
+      };
+      // The player's upgrades sit on top of the scraped numbers — an empty string means "unchanged".
+      const e = edits[id] || {};
+      for (const k of EDITABLE) if (e[k] !== undefined && e[k] !== '') base[k] = e[k];
+      if (e.note) base.note = e.note;
+      return base;
+    }),
     ...(x.statblocks || []),
   ];
 }
 const sbFind = id => sbAll().find(b => b.id === id);
+// One form, on its own — never both at once.
+function viewForm(id, which) {
+  const b = sbFind(id), f = b && b.forms && b.forms[which];
+  if (!f) return toast('That Servant has no Parted Gates forms.');
+  openDialog(f.name, prose(f.text, sheet()));
+}
 
 function sbHtml(b) {
   if (b.vault) return prose(b.body, sheet());
@@ -69,7 +108,23 @@ function viewStatblock(id) { const b = sbFind(id); if (b) openDialog(b.name, sbH
 // as an Elite — is kept per soul in x.souls[id].
 const sbNewId = () => 'sb' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
 function gateState(g, x) {
-  x.statblocks = x.statblocks || []; x.souls = x.souls || {};
+  x.statblocks = x.statblocks || []; x.souls = x.souls || {}; x.edits = x.edits || {};
+  // Positional vault ids → name-keyed ones, once. The index order is the order g.servants is in,
+  // which is the order the builder read the Base folder in, so the mapping is exact for any sheet
+  // saved before this change. Anything pointing past the end of the roster is dropped rather than
+  // guessed at — that soul's file is gone from the vault.
+  if (!x.vaultKeyed) {
+    for (const bag of ['souls', 'edits']) {
+      for (const [k, v] of Object.entries(x[bag] || {})) {
+        const m = /^vault:(\d+)$/.exec(k);
+        if (!m) continue;
+        delete x[bag][k];
+        const s = g.servants[+m[1]];
+        if (s) x[bag][vaultKey(s.name)] = v;
+      }
+    }
+    x.vaultKeyed = true;
+  }
   if (x.servants) {            // sheets saved before souls and statblocks were one thing
     for (const s of x.servants) {
       let b = sbAll(g, x).find(b => b.id === s.sb) || sbAll(g, x).find(b => b.name === s.name);
@@ -78,9 +133,23 @@ function gateState(g, x) {
     }
     delete x.servants;
   }
-  return sbAll(g, x).map(b => ({ b, s: x.souls[b.id] || (x.souls[b.id] = { hp: null, elite: false, out: false, items: '' }) }));
+  const all = sbAll(g, x).map(b => ({ b, s: x.souls[b.id] || (x.souls[b.id] = { hp: null, elite: false, out: false, items: '' }) }));
+  // Sheets written before preparation existed had every recruited soul available. Carry the first
+  // day's worth over as prepared so nobody opens the app to an empty roster, then leave it alone.
+  if (!x.prepInit) {
+    const cap = gatePrepared(sheet('gate-of-caelum'));
+    all.forEach(({ s }, i) => { if (s.prep === undefined) s.prep = i < cap; });
+    x.prepInit = true;
+  }
+  return all;
 }
-const gateSlots = sh => awakened(sh) ? 6 : 3;
+// Two different caps, and they are not the same number (rework, Juan 2026-10-09):
+//   the ROSTER is every soul he holds at all — character level, so 11 at level 11;
+//   PREPARED is how many of them answer today — the Grimm's old Servant Slots, 3 Invoked / 6 Awakened.
+// Preparing is free until the first summon of the day; after that a swap costs a Grimm Slot.
+const gatePrepared = sh => awakened(sh) ? 6 : 3;
+const gateRoster = sh => sh.level;
+const gateSlots = gateRoster;                  // old name, kept for the Recruit cap
 const crNum = cr => { const m = String(cr ?? '').match(/^\s*(\d+)\s*\/\s*(\d+)/); return m ? m[1] / m[2] : parseFloat(cr) || 0; };
 const gateMaxCr = sh => sh.level + pbOf(sh.level);
 // A servant's max HP on the field: its statblock's, plus 10 × PB for each missing party member,
@@ -106,25 +175,46 @@ const shardsFor = cr => SHARD_DROP[Math.min(20, Math.floor(crNum(cr)))] || 0;
 // Silence holds a servant slot · the Harvest DC is CR + 10.
 PANELS['gate-of-caelum'] = (g, sh, v) => {
   const x = sh.x, souls = gateState(g, x);
+  const sb = shackleOn(sh, g);          // the Parted Gates, while they are open
   const limit = Math.ceil(v.pb / 2);
   const field = souls.filter(o => o.s.out), lent = souls.filter(o => o.s.lent), limbo = souls.filter(o => !o.s.out && !o.s.lent);
+  const ready = limbo.filter(o => o.s.prep);     // prepared today, so it can actually be called
+  const prepped = souls.filter(o => o.s.prep).length, prepCap = gatePrepared(sh);
   const out = field.filter(o => !o.s.elite).length;
   const bonusHp = 10 * v.pb * (+x.missing || 0);
-  const rows = field.map(({ b, s }) => { const id = attr(b.id), arm = ARMAMENT[s.armament]; return `<div class="item on">
-      <span class="nm">${esc(b.name)}</span>${b.cr ? `<span class="tag">CR ${esc(b.cr)}</span>` : ''}
-      ${s.elite ? `<span class="tag k" style="--kc:var(--k-super)">Elite${arm ? ' · ' + arm[0] : ''}</span>` : ''}
-      <span class="sp"></span>
-      <span class="lbl">HP</span><input class="num" type="number" value="${s.hp ?? ''}" onchange="soulSet('${id}','hp',this.value)">
-      <span class="lbl">/ ${gateMaxHp(b, s, sh) ?? '—'}</span>
-      <button class="btn sm" onclick="viewStatblock('${id}')">Statblock</button>
-      <button class="btn sm warn" title="It dropped to 0 HP — back to Limbo; it answers again at full HP" onclick="soulFell('${id}')">Fell</button>
-      <button class="btn sm" title="Send it back to Limbo — it keeps its HP" onclick="dismissSoul('${id}')">Dismiss</button>
-      ${s.elite ? `<div class="row" style="flex-basis:100%;margin:0">
-        <span class="hint" style="flex:1;min-width:200px">${arm ? arm[1](v.pb) + '. ' : ''}Can't be dominated.</span>
-        <button class="btn sm ${s.willUsed ? 'on' : ''}" title="Once per summon: automatically succeed on a saving throw" onclick="soulSet('${id}','willUsed',${!s.willUsed},true)">Servant's Will · ${s.willUsed ? 'used' : 'ready'}</button>
-        <button class="btn sm" title="End of its turn: regains PB d4 hit points" onclick="soulRegen('${id}')">Regenerate · ${v.pb}d4</button>
-        ${s.armament === 'warrior' ? rollBtn('Necrotic', v.pb, 6) : ''}</div>` : ''}
-      ${s.items ? `<span class="hint" style="flex-basis:100%">Attuned: ${esc(s.items)}</span>` : ''}
+  // What is on the field gets a card with its face on it — there are only ever two, plus an Elite,
+  // and a transformed Servant wears the art of the form it is wearing.
+  const rows = field.map(({ b, s }) => { const id = attr(b.id), arm = ARMAMENT[s.armament];
+    const form = sb && s.form && b.forms && b.forms[s.form];   // transformed by the Parted Gates
+    const art = (form && form.img) || b.img, title = form ? form.name : b.name;
+    const max = gateMaxHp(b, s, sh);
+    const frac = !form && max ? Math.max(0, Math.min(1, (+s.hp || 0) / max)) : null;
+    return `<div class="soulcard${form ? ' formed' : s.elite ? ' elite' : ''}">
+      <div class="face">${art ? `<img src="${attr(art)}" alt="">` : `<span class="noface">${esc(b.name.slice(0, 1))}</span>`}
+        ${form ? `<span class="badge">${s.form === 'divine' ? '✦ Divine' : '◉ Forbidden'}</span>`
+               : s.elite ? `<span class="badge">Elite${arm ? ' · ' + arm[0] : ''}</span>` : ''}
+        ${b.cr ? `<span class="crtag">CR ${esc(b.cr)}</span>` : ''}
+      </div>
+      <div class="meat">
+        <div class="nm" title="${attr(title)}">${esc(title)}</div>
+        ${form ? `<div class="lbl tether" title="Soul Tether: it shares your hit point pool">Soul Tether — shares your pool</div>`
+               : `<div class="hpline"><span class="lbl">HP</span>
+            <input class="num" type="number" value="${s.hp ?? ''}" onchange="soulSet('${id}','hp',this.value,true)">
+            <span class="lbl">/ ${max ?? '—'}</span></div>
+          ${frac === null ? '' : `<div class="hpbar"><i style="width:${Math.round(frac * 100)}%"></i></div>`}`}
+        <div class="acts">
+          <button class="btn sm" onclick="${form ? `viewForm('${id}','${s.form}')` : `viewStatblock('${id}')`}">Statblock</button>
+          <button class="btn sm warn" title="It dropped to 0 HP — back to Limbo; it answers again at full HP" onclick="soulFell('${id}')">Fell</button>
+          <button class="btn sm" title="Send it back to Limbo — it keeps its HP" onclick="dismissSoul('${id}')">Dismiss</button>
+        </div>
+        ${s.elite ? `<div class="acts">
+          <button class="btn sm ${s.willUsed ? 'on' : ''}" title="Once per summon: automatically succeed on a saving throw" onclick="soulSet('${id}','willUsed',${!s.willUsed},true)">Servant's Will · ${s.willUsed ? 'used' : 'ready'}</button>
+          <button class="btn sm" title="End of its turn: regains PB d4 hit points" onclick="soulRegen('${id}')">Regenerate · ${v.pb}d4</button>
+          ${s.armament === 'warrior' ? rollBtn('Necrotic', v.pb, 6) : ''}</div>
+          <p class="hint">${arm ? arm[1](v.pb) + '. ' : ''}Can't be dominated.</p>` : ''}
+        ${trCardHtml(b.id, s)}
+        ${s.items ? `<p class="hint">Attuned: ${esc(s.items)}</p>` : ''}
+      </div>
     </div>`; }).join('');
   const lentRows = lent.map(({ b, s }) => `<div class="item">
       <span class="nm">${esc(b.name)}</span><span class="hint">empowers <b>${esc(s.lent)}</b> — one extra action each turn</span>
@@ -137,7 +227,8 @@ PANELS['gate-of-caelum'] = (g, sh, v) => {
   return `<h2>Commander of Souls</h2>
     <div class="stats">
       ${stat(`${out}/${limit}`, 'summoned at once')}
-      ${stat(`${souls.length}/${gateSlots(sh)}`, 'servant slots')}
+      ${stat(`${prepped}/${prepCap}`, x.prepLocked ? 'prepared · locked' : 'prepared today', prepped > prepCap ? 'var(--ember)' : '')}
+      ${stat(`${souls.length}/${gateRoster(sh)}`, 'soul roster')}
       ${stat(gateMaxCr(sh), 'Max Servant CR (+3 w/ slots)')}
       ${stat(x.shards || 0, 'soul shards', 'var(--brass)')}
     </div>
@@ -148,10 +239,19 @@ PANELS['gate-of-caelum'] = (g, sh, v) => {
     </div>
     ${bonusHp ? `<p class="hint">Each servant's max HP is raised by <b>${bonusHp}</b> for the missing party (10 × PB each).</p>` : ''}
     <h3>Summoned</h3>
-    <div class="items">${rows || '<p class="hint">Every soul is in Limbo.</p>'}</div>
+    ${rows ? `<div class="souls">${rows}</div>` : '<p class="hint">Every soul is in Limbo.</p>'}
     <div class="row" style="margin-top:9px">
-      <select class="pick" id="svBlock" style="flex:1"><option value="">${limbo.length ? 'Summon a servant…' : souls.length ? 'No recruited soul is waiting in Limbo' : 'No souls recruited yet'}</option>${limbo.map(({ b }) => `<option value="${attr(b.id)}">${esc(b.name)}${b.cr ? ' · CR ' + esc(b.cr) : ''}</option>`).join('')}</select>
-      <label class="lbl"><input type="checkbox" id="svElite" onchange="$('#svArm').hidden = !this.checked"> as Elite</label>
+      <select class="pick" id="svBlock" style="flex:1"><option value="">${ready.length || (sb && field.length) ? 'Summon a servant…' : limbo.length ? 'None of today\'s Servants are in Limbo' : souls.length ? 'Nothing prepared — prepare the day\'s Servants below' : 'No souls recruited yet'}</option>${
+        // Only what was prepared today answers. The Parted Gates transform a Servant who is ALREADY
+        // on the field, so while they are open the ones out there are choosable too.
+        (sb ? [...ready, ...field] : ready).map(({ b, s }) => `<option value="${attr(b.id)}">${esc(b.name)}${b.cr ? ' · CR ' + esc(b.cr) : ''}${s.out ? ' · on the field' : ''}</option>`).join('')}</select>
+      ${sb ? `<select class="pick" id="svMode" onchange="$('#svArm').hidden = this.value !== 'elite'" title="While ${esc(sb.name)} is open, a Servant can be called into one of its forms">
+        <option value="">as itself</option>
+        <option value="elite">as Elite</option>
+        <option value="divine">✦ Divine Form</option>
+        <option value="forbidden">◉ Forbidden Form</option>
+      </select>`
+      : `<label class="lbl"><input type="checkbox" id="svElite" onchange="$('#svArm').hidden = !this.checked"> as Elite</label>`}
       <select class="pick" id="svArm" hidden title="Elite Armament">${Object.entries(ARMAMENT).map(([k, a]) => `<option value="${k}">${a[0]} Enhancement</option>`).join('')}</select>
       <button class="btn pri" onclick="summonSoul(${limit})">Summon</button></div>
     <div id="pOut"></div>
@@ -165,14 +265,21 @@ function summonSoul(limit) {
   const id = $('#svBlock').value, b = sbFind(id), x = X();
   if (!b) return toast('Choose which recruited soul to summon.');
   const field = Object.entries(x.souls).filter(([k, s]) => s.out && sbFind(k)).map(([, s]) => s);
-  const asElite = $('#svElite').checked;
+  const mode = $('#svMode') ? $('#svMode').value : ($('#svElite').checked ? 'elite' : '');
+  const asElite = mode === 'elite', asForm = mode === 'divine' || mode === 'forbidden';
+  if (!x.souls[id].prep) return toast(`${b.name} was not prepared today — call it up from the roster first.`);
+  // A form is the same move wherever it is chosen from — the Summon row, or the Shackle Break's own
+  // window — so there is one implementation of it, below.
+  if (asForm) return transformServant(id, mode);
+  if (x.souls[id].out) return toast(`${b.name} is already on the field.`);
   if (asElite && field.some(s => s.elite)) return toast('An Elite Servant is already on the field.');
   if (!asElite && field.filter(s => !s.elite).length >= limit) return toast(`You can hold ${limit} servant${limit > 1 ? 's' : ''} at once — dismiss one first.`);
   if (sheet().familiar) return toast('Your Grimm is in Familiar form — it can\'t summon.');
   const armament = asElite ? $('#svArm').value : '';
-  if (!spend(asElite ? 2 : 1)) return;   // Commander of Souls costs 1 Grimm Slot, Elite Servant 2
+  if (!spend(asElite ? 2 : 1)) return;           // Commander of Souls costs 1 Grimm Slot, Elite Servant 2
   const s = x.souls[id];
-  s.out = true; s.elite = asElite; s.armament = armament; s.willUsed = false;
+  x.prepLocked = true;                           // the day has begun — re-preparing now costs
+  s.out = true; s.elite = asElite; s.form = ''; s.armament = armament; s.willUsed = false;
   // never tracked, or fell at 0 — it answers the call whole, at the max HP it has right now
   if (!s.hp) s.hp = gateMaxHp(b, s) ?? 0;
   // an Elite's arrival halves the others: nobody keeps more HP than their new max
@@ -180,15 +287,218 @@ function summonSoul(limit) {
     const ob = sbFind(k), max = ob && o.out && !o.elite ? gateMaxHp(ob, o) : null;
     if (max != null && o.hp > max) o.hp = max;
   });
+  // Anything this Servant refills "each summon" is full again as it arrives — only its own.
+  const refilled = trRefill('summon', id);
   save(); render();
-  toast(`${b.name} answers — ${asElite ? '2 Grimm Slots' : '1 Grimm Slot'} spent.`);
+  toast(`${b.name} answers — ${asElite ? '2 Grimm Slots' : '1 Grimm Slot'} spent${refilled ? `, ${refilled} charge${refilled > 1 ? 's' : ''} full again` : ''}.`);
 }
-function dismissSoul(id) { const s = X().souls[id]; s.out = false; s.elite = false; save(); render(); }
+// ── The Parted Gates take one Servant ───────────────────────────────────
+// The Shackle Break already paid for the transformation, so a form costs no further slot. Everything
+// else on the field goes home: "All other active Servants immediately return to Limbo, pouring their
+// remaining strength through the gate as they depart" — 5 × PB temporary hit points each.
+// Returns true when it happened, so a caller can close its window on success and leave it open on a
+// refusal with the toast still readable.
+function transformServant(id, mode) {
+  const b = sbFind(id), x = X();
+  if (!b) return toast('Choose which Servant the Gates take.');
+  if (!(b.forms && b.forms[mode])) return toast(`${b.name} has no ${mode === 'divine' ? 'Divine' : 'Forbidden'} Form.`);
+  if (!x.souls[id].prep) return toast(`${b.name} was not prepared today — call it up from the roster first.`);
+  if (Object.entries(x.souls).some(([k, o]) => k !== id && o.out && o.form)) return toast('The Parted Gates transform one Servant. Dismiss the transformed one first.');
+  if (sheet().familiar) return toast('Your Grimm is in Familiar form — it can\'t summon.');
+  const s = x.souls[id];
+  x.prepLocked = true;
+  s.out = true; s.elite = false; s.form = mode; s.armament = ''; s.willUsed = false;
+  let sent = 0;
+  Object.entries(x.souls).forEach(([k, o]) => { if (k !== id && o.out) { o.out = false; o.elite = false; o.form = ''; sent++; } });
+  if (!s.hp) s.hp = gateMaxHp(b, s) ?? 0;
+  trRefill('summon', id);
+  save(); render();
+  const f = b.forms[mode], pb = pbOf(sheet().level);
+  toast(`${f.name}${sent ? ` — ${sent} Servant${sent > 1 ? 's' : ''} returned to Limbo, +${5 * pb} temporary hit points to the shared pool` : ''}.`);
+  return true;
+}
+// The window the Break opens: the one decision the Gates force. A Servant already on the field is
+// the usual answer, but one prepared and waiting in Limbo can be called straight into a form, which
+// is what the Summon row allows while the Gates are open — so both are offered here.
+SHACKLE_SETUP['gate-of-caelum'] = (sh, g) => {
+  const x = sh.x, souls = gateState(g, x), pb = pbOf(sh.level);
+  const has = o => o.b.forms && (o.b.forms.divine || o.b.forms.forbidden);
+  const field = souls.filter(o => o.s.out && has(o)), ready = souls.filter(o => !o.s.out && !o.s.lent && o.s.prep && has(o));
+  if (!field.length && !ready.length)
+    return { body: `<div class="prose"><p>The Gates are open and there is <b>no Servant for them to take</b> — nothing prepared today has a form, on the field or in Limbo.</p>
+      <p>Everything else the Break does is already running. You can still transform one later from the <b>Summoned</b> card.</p></div>` };
+  // Who it is, is a name — the Servant you already know. WHAT it becomes is a picture, because the
+  // two forms are the actual choice and they look nothing like each other.
+  const all = [...field, ...ready];
+  return {
+    done: 'Not yet',
+    after: shackleFormPick,
+    body: `<div class="prose"><p>The Gates part for <b>one</b> Servant. Every other Servant on the field returns to Limbo as it changes, pouring <b>${5 * pb} temporary hit points</b> each into the shared pool on the way out.</p></div>
+      <div class="row"><span class="lbl">The Gates take</span>
+        <select class="pick" id="sgWho" style="flex:1;min-width:200px" onchange="shackleFormPick()">${
+          all.map(o => `<option value="${attr(o.b.id)}">${esc(o.b.name)}</option>`).join('')}</select></div>
+      <p class="hint" id="sgNote"></p>
+      <div class="formgrid" id="sgForms"></div>
+      <div id="sgText"></div>`,
+  };
+};
+// Redrawn whenever the chosen Servant changes: its own two forms, wearing their own art, and what
+// choosing costs. The card is the choice; Read sits inside it and doesn't take the form with it.
+const FORM_LABEL = { divine: ['✦', 'Divine Form'], forbidden: ['◉', 'Forbidden Form'] };
+function shackleFormPick() {
+  const b = sbFind($('#sgWho').value), f = (b && b.forms) || {}, x = X();
+  const here = (x.souls[(b || {}).id] || {}).out;
+  const sent = Object.entries(x.souls).filter(([k, o]) => k !== (b || {}).id && o.out && sbFind(k)).map(([k]) => sbFind(k).name);
+  const card = mode => {
+    const [mark, label] = FORM_LABEL[mode];
+    if (!f[mode]) return `<div class="formcard empty"><span class="meat">
+      <span class="nm">No ${label}</span><span class="lbl">${esc(b.name)} has none written.</span></span></div>`;
+    // Four of the twelve forms have no plate in the vault yet (Ishmar's and Silence's). They get the
+    // mark in place of art rather than an empty grey window.
+    return `<div class="formcard ${mode}" onclick="shackleTakeForm('${mode}')" title="Take this form">
+      <span class="art">${f[mode].img ? `<img src="${attr(f[mode].img)}" alt="" loading="lazy">` : `<span class="noart">${mark}</span>`}
+        <span class="mark">${mark} ${label}</span></span>
+      <span class="meat"><span class="nm">${esc(f[mode].name)}</span>
+        <button class="btn sm" onclick="event.stopPropagation();shackleFormRead('${mode}')">Read it first</button></span>
+      <span class="take">${mark} Take this form</span></div>`;
+  };
+  $('#sgForms').innerHTML = card('divine') + card('forbidden');
+  $('#sgNote').innerHTML = `<b>${esc(b.name)}</b> is ${here ? 'on the field' : 'in Limbo — it answers as it changes'}. ${sent.length
+    ? `Choosing sends <b>${sent.map(esc).join('</b>, <b>')}</b> back to Limbo — they keep their HP and can be summoned again.`
+    : 'Nothing else is on the field, so nothing is sent back.'}`;
+  $('#sgText').innerHTML = '';
+}
+// In place, under the picker — never in a new dialog, which would replace this window.
+function shackleFormRead(mode) {
+  const b = sbFind($('#sgWho').value), f = b && b.forms && b.forms[mode];
+  $('#sgText').innerHTML = f ? `<div class="sb-read">${prose(f.text, sheet())}</div>` : '';
+}
+function shackleTakeForm(mode) {
+  if (transformServant($('#sgWho').value, mode) === true) $('#dlg').close();
+}
+function dismissSoul(id) { const s = X().souls[id]; s.out = false; s.elite = false; s.form = ''; save(); render(); }
 function soulSet(id, k, v, redraw) { X().souls[id][k] = k === 'hp' || k === 'pool' ? +v : v; save(); if (redraw) render(); }
+
+// ── charge trackers ─────────────────────────────────────────────────────
+// Spell slots, inspiration dice, weapon charges, Ki — anything a Servant spends and gets back.
+// The player writes their own (Juan, 2026-10-09): a name, a maximum, and when it refills. Kept per
+// soul in x.souls[id].tr, so they travel with the soul and survive a dismissal.
+//
+// On a summon card they stay behind ONE toggle and nothing else, so a card is exactly as tall as it
+// was before trackers existed until the player asks to see them. Which is open is deliberately NOT
+// saved: it is a glance, not state, and it should not sync or survive a reload.
+const TR_OPEN = new Set();
+const trOf = s => (s.tr = s.tr || []);
+const RESETS = { none: 'never', short: 'short rest', long: 'long rest', summon: 'each summon' };
+// Few enough to count at a glance → pips. More than that and pips are a wall, so show the numbers.
+const trPips = t => +t.max > 0 && +t.max <= 6;
+
+function trToggle(id) { TR_OPEN.has(id) ? TR_OPEN.delete(id) : TR_OPEN.add(id); render(); }
+function trAdd(soulId) {
+  const name = ($('#trName')?.value || '').trim();
+  const max = Math.max(0, Math.floor(+($('#trMax')?.value || 0)));
+  const reset = $('#trReset')?.value || 'long';
+  if (!name) return toast('Give the tracker a name — "Ki", "Holy Arcana", "1st-level slots".');
+  if (!max) return toast('How many? Set a maximum above 0.');
+  trOf(X().souls[soulId]).push({ id: 't' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), name, max, cur: max, reset });
+  TR_OPEN.add(soulId);
+  save(); render(); editTrackers(soulId); toast(`${name} — ${max}, refills on a ${RESETS[reset]}.`);
+}
+function trStep(soulId, trId, d) {
+  const t = trOf(X().souls[soulId]).find(t => t.id === trId); if (!t) return;
+  t.cur = Math.max(0, Math.min(+t.max, (+t.cur || 0) + d));
+  save(); render();
+}
+function trPip(soulId, trId, n) {
+  const t = trOf(X().souls[soulId]).find(t => t.id === trId); if (!t) return;
+  t.cur = (+t.cur === n) ? n - 1 : n;      // clicking the last filled pip spends it
+  save(); render();
+}
+function trEdit(soulId, trId, k, v) {
+  const t = trOf(X().souls[soulId]).find(t => t.id === trId); if (!t) return;
+  if (k === 'max') { t.max = Math.max(0, Math.floor(+v || 0)); t.cur = Math.min(+t.cur || 0, t.max); }
+  else t[k] = v;
+  save(); render(); editTrackers(soulId);
+}
+function trDel(soulId, trId) {
+  const s = X().souls[soulId], list = trOf(s), i = list.findIndex(t => t.id === trId);
+  if (i < 0) return;
+  const [gone] = list.splice(i, 1);
+  save(); render(); editTrackers(soulId); toast(`Removed ${gone.name}.`);
+}
+
+// The editor: naming them, sizing them, saying when they come back. Spending them happens on the
+// card, not here — this dialog is the thing you open once and then forget about.
+function editTrackers(soulId) {
+  const b = sbFind(soulId), s = X().souls[soulId];
+  if (!b || !s) return;
+  const id = attr(soulId), list = trOf(s);
+  const rows = list.map(t => { const tid = attr(t.id);
+    return `<div class="row">
+      <input class="txt" style="width:150px" value="${attr(t.name)}" onchange="trEdit('${id}','${tid}','name',this.value)">
+      <span class="lbl">of</span>
+      <input class="num" type="number" min="0" value="${+t.max || 0}" onchange="trEdit('${id}','${tid}','max',this.value)">
+      <span class="lbl">refills on</span>
+      <select class="pick" onchange="trEdit('${id}','${tid}','reset',this.value)">
+        ${Object.entries(RESETS).map(([k, lbl]) => `<option value="${k}"${t.reset === k ? ' selected' : ''}>${lbl}</option>`).join('')}
+      </select>
+      <span class="hint">${trPips(t) ? 'pips' : 'numbers'}</span>
+      <span class="sp"></span>
+      <button class="btn sm warn" onclick="trDel('${id}','${tid}')">Remove</button>
+    </div>`; }).join('');
+  openDialog(`${b.name} — charges`, `
+    ${rows || '<p class="hint">Nothing tracked yet.</p>'}
+    <h3>Add one</h3>
+    <div class="row">
+      <input class="txt" id="trName" style="width:150px" placeholder="Ki, Holy Arcana, 1st-level slots…">
+      <span class="lbl">of</span>
+      <input class="num" id="trMax" type="number" min="1" value="3">
+      <span class="lbl">refills on</span>
+      <select class="pick" id="trReset">${Object.entries(RESETS).map(([k, lbl]) =>
+        `<option value="${k}"${k === 'long' ? ' selected' : ''}>${lbl}</option>`).join('')}</select>
+      <span class="sp"></span>
+      <button class="btn pri" onclick="trAdd('${id}')">Add</button>
+    </div>
+    <p class="hint">Six or fewer shows as <b>pips</b> you click; more than six shows as <b>numbers</b> with – and +. They sit behind one <b>Charges</b> button on the summon card, so the card stays the size it is until you open them. A long rest also refills anything set to a short rest.</p>`);
+}
+// Called by the rest buttons and by Summon. Refills every tracker whose rule matches, on every
+// soul — a long rest also covers anything that refills on a short one.
+function trRefill(kind, soulId) {
+  const x = X(), kinds = kind === 'long' ? ['long', 'short'] : [kind];
+  let n = 0;
+  for (const [id, s] of Object.entries(x.souls || {})) {
+    if (soulId && id !== soulId) continue;
+    for (const t of trOf(s)) if (kinds.includes(t.reset) && +t.cur !== +t.max) { t.cur = +t.max; n++; }
+  }
+  return n;
+}
+
+// The card's one line: a toggle, and the trackers only once asked for.
+function trCardHtml(soulId, s) {
+  const list = trOf(s);
+  if (!list.length) return '';
+  const id = attr(soulId), open = TR_OPEN.has(soulId);
+  const spent = list.filter(t => +t.cur < +t.max).length;
+  if (!open) return `<div class="acts"><button class="btn sm trtog" onclick="trToggle('${id}')"
+      title="${attr(list.map(t => `${t.name} ${t.cur}/${t.max}`).join(' · '))}">▸ Charges · ${list.length}${spent ? ` · ${spent} spent` : ''}</button></div>`;
+  return `<div class="acts"><button class="btn sm trtog on" onclick="trToggle('${id}')">▾ Charges</button></div>
+    <div class="trwrap">${list.map(t => {
+      const tid = attr(t.id), cur = +t.cur || 0, max = +t.max || 0;
+      const body = trPips(t)
+        ? `<span class="pips">${Array.from({ length: max }, (_, i) =>
+            `<i class="${i < cur ? 'on' : ''}" title="${i + 1} of ${max}" onclick="trPip('${id}','${tid}',${i + 1})"></i>`).join('')}</span>`
+        : `<button class="pm" onclick="trStep('${id}','${tid}',-1)" aria-label="Spend one">–</button>
+           <span class="cnt ${cur === 0 ? 'out' : ''}">${cur}<small>/${max}</small></span>
+           <button class="pm" onclick="trStep('${id}','${tid}',1)" aria-label="Give one back">+</button>`;
+      return `<div class="tr"><span class="nm" title="${attr(t.name)} — refills on a ${attr(RESETS[t.reset] || 'long rest')}">${esc(t.name)}</span>
+        ${body}
+        <button class="btn sm" title="Refill it" onclick="trStep('${id}','${tid}',${max})">↺</button></div>`;
+    }).join('')}</div>`;
+}
 // 0 HP: back to Limbo, whole again the next time it is called. Arcane Repose answers if it is composed.
 function soulFell(id) {
   const b = sbFind(id), s = X().souls[id], sh = sheet();
-  s.out = false; s.elite = false; s.hp = null; s.willUsed = false;
+  s.out = false; s.elite = false; s.form = ''; s.hp = null; s.willUsed = false;
   save(); render();
   if (awakened(sh) && has(sh, 'arcane-repose') && crNum(b.cr) >= 1)
     openDialog('Arcane Repose', `<div class="prose"><p><b>${esc(b.name)}</b> falls and returns to Limbo — it will answer again at full HP.</p>
@@ -232,24 +542,53 @@ function relinquishNow(id) {
 }
 function returnSoul(id) { const s = X().souls[id]; s.lent = ''; s.pool = null; save(); render(); }
 
+// ── Preparing the day's Servants ──
+// Free to arrange until the first summon of the day; after that, calling a soul up out of the roster
+// is a swap — 1 Grimm Slot and an Action. Letting one go is always free; it just stops answering.
+function prepSoul(id) {
+  const sh = sheet(), x = X(), s = x.souls[id], b = sbFind(id), cap = gatePrepared(sh);
+  if (s.prep) {
+    if (s.out) return toast(`${b.name} is on the field — dismiss it first.`);
+    if (s.lent) return toast(`${b.name} is relinquished — call it back first.`);
+    s.prep = false; save(); render();
+    return toast(`${b.name} stands down for the day.`);
+  }
+  if (Object.values(x.souls).filter(o => o.prep).length >= cap)
+    return toast(`You can prepare ${cap} Servant${cap > 1 ? 's' : ''} a day — stand one down first.`);
+  if (x.prepLocked && !spend(1)) return;         // the day has begun: swapping costs
+  s.prep = true; save(); render();
+  toast(x.prepLocked ? `${b.name} is called up — 1 Grimm Slot spent (Action).` : `${b.name} is prepared for the day.`);
+}
+
 // ── Recruited souls: the statblocks, in a card of their own ──
 EXTRA['gate-of-caelum'] = (g, sh, v) => {
   const x = sh.x, souls = gateState(g, x), slots = gateSlots(sh);
+  const sb = shackleOn(sh, g);          // the forms are only offered while the Gates are open
   const boost = Math.min(3, +x.ariseBoost || 0), maxCr = gateMaxCr(sh) + boost, cr = x.ariseCr;
   const canLend = has(sh, 'relinquish-command');
   const rows = souls.map(({ b, s }) => `<div class="item ${s.out ? 'on' : ''}">
       <span class="nm">${esc(b.name)}</span>${b.cr ? `<span class="tag">CR ${esc(b.cr)}</span>` : ''}
-      <span class="hint">${[b.hp && `HP ${esc(b.hp)}`, b.ac && `AC ${esc(b.ac)}`, s.out && 'summoned', s.lent && `with ${esc(s.lent)}`, b.vault && 'from the vault',
+      <span class="hint">${[b.level && `Lv ${esc(b.level)}`, b.hp && `HP ${esc(b.hp)}`, b.ac && `AC ${esc(b.ac)}`, s.out && 'summoned', s.lent && `with ${esc(s.lent)}`,
+        b.vault && ((X().edits || {})[b.id] ? '<b>upgraded</b>' : 'from the vault'),
         crNum(b.cr) > gateMaxCr(sh) + 3 && '<span style="color:#e4927f">above your Max Servant CR</span>'].filter(Boolean).join(' · ')}</span>
       <span class="sp"></span>
+      <button class="btn sm ${s.prep ? 'on' : ''}" title="${s.prep ? 'Prepared today — click to stand it down' : x.prepLocked ? 'Call it up mid-day: 1 Grimm Slot and an Action' : 'Prepare it for the day'}" onclick="prepSoul('${attr(b.id)}')">${s.prep ? 'Prepared' : x.prepLocked ? 'Call up · 1 slot' : 'Prepare'}</button>
       <button class="btn sm" onclick="viewStatblock('${attr(b.id)}')">View</button>
+      ${sb && b.forms ? `${b.forms.divine ? `<button class="btn sm" title="${attr(b.forms.divine.name)}" onclick="viewForm('${attr(b.id)}','divine')">View Divine</button>` : ''}${b.forms.forbidden ? `<button class="btn sm" title="${attr(b.forms.forbidden.name)}" onclick="viewForm('${attr(b.id)}','forbidden')">View Forbidden</button>` : ''}` : ''}
       ${canLend && !s.out && !s.lent ? `<button class="btn sm" onclick="relinquishSoul('${attr(b.id)}')">Relinquish</button>` : ''}
       ${s.lent ? `<button class="btn sm warn" title="Call it back from ${attr(s.lent)} — it returns to Limbo" onclick="returnSoul('${attr(b.id)}')">End Relinquish</button>` : ''}
-      ${b.vault ? '' : `<button class="btn sm" onclick="editStatblock('${attr(b.id)}')">Edit</button><button class="btn sm warn" onclick="releaseSoul('${attr(b.id)}')">Release</button>`}
+      <button class="btn sm" title="Spell slots, inspiration dice, weapon charges — anything it spends" onclick="editTrackers('${attr(b.id)}')">Charges${trOf(s).length ? ` · ${trOf(s).length}` : ''}</button>
+      ${b.vault ? `<button class="btn sm" title="Record a Soul Shard upgrade — its numbers are yours to change; the vault keeps its text" onclick="editVaultNumbers('${attr(b.id)}')">Upgrade${(X().edits || {})[b.id] ? ' ✓' : ''}</button>`
+                : `<button class="btn sm" onclick="editStatblock('${attr(b.id)}')">Edit</button><button class="btn sm warn" onclick="releaseSoul('${attr(b.id)}')">Release</button>`}
       <input class="txt" style="flex-basis:100%" placeholder="Attuned items — 2, or 3 when it is the Elite" value="${attr(s.items || '')}" onchange="soulSet('${attr(b.id)}','items',this.value,true)">
     </div>`).join('');
-  return `<h2>Recruited souls <span class="r"><button class="btn sm pri" onclick="editStatblock()">Recruit</button></span></h2>
-    <div class="stats">${stat(`${souls.length}/${slots}`, 'servant slots', souls.length > slots ? 'var(--ember)' : '')}</div>
+  const prepped = souls.filter(o => o.s.prep).length, prepCap = gatePrepared(sh);
+  return `<h2>The soul roster <span class="r"><button class="btn sm pri" onclick="editStatblock()">Recruit</button></span></h2>
+    <div class="stats">
+      ${stat(`${souls.length}/${gateRoster(sh)}`, 'souls held', souls.length > gateRoster(sh) ? 'var(--ember)' : '')}
+      ${stat(`${prepped}/${prepCap}`, x.prepLocked ? 'prepared · the day has begun' : 'prepared today', prepped > prepCap ? 'var(--ember)' : '')}
+    </div>
+    <p class="hint">You hold <b>${gateRoster(sh)}</b> souls — your character level — and after each Long Rest you choose <b>${prepCap}</b> of them to answer that day. ${x.prepLocked ? 'The day has begun: <b>calling one up now costs 1 Grimm Slot and an Action</b>. Standing one down is free.' : 'Arrange them freely until your first summon.'}</p>
     <div class="items" style="margin-top:10px">${rows || '<p class="hint">No souls answer yet.</p>'}</div>
     <h3>Arise</h3>
     <div class="row">${numIn('Creature CR', 'ariseCr', '')}
@@ -270,6 +609,66 @@ function ariseSpend(kind) {
   toast(kind === 'boost' ? 'Max Servant CR raised by 1 for this Arise — 1 Grimm Slot spent.' : 'Another attempt — 1 Grimm Slot spent. Roll Persuasion again.');
 }
 function ariseDone() { const x = X(); x.ariseBoost = 0; x.ariseCr = ''; save(); render(); }
+
+// ── upgrading a vault soul ──
+// Its numbers only (Juan, 2026-10-09). A Soul Shard level-up changes what a Servant *is* — CR, hit
+// points, the ability it just raised — but the vault still owns its prose, so the sheet keeps
+// receiving your corrections to the text. A blank field means "whatever the statblock says".
+function editVaultNumbers(id) {
+  const b = sbFind(id); if (!b || !b.vault) return;
+  const e = (X().edits || {})[id] || {};
+  const scraped = sbRead((grimmById('gate-of-caelum').servants.find(s => vaultKey(s.name) === id) || {}).text || '');
+  const f = (key, label, w, type = 'number') =>
+    `<span class="lbl">${label}</span><input class="${type === 'number' ? 'num' : 'txt'}" id="vn_${key}" type="${type}"
+       placeholder="${attr(scraped[key] ?? '—')}" value="${attr(e[key] ?? '')}"${w ? ` style="width:${w}px"` : ''}>`;
+  openDialog(`${b.name} — upgrade`, `
+    <p class="hint" style="margin-top:0">Leave a field empty to keep what the statblock says. Its text, traits and actions stay as the vault writes them.</p>
+    <div class="row">${f('level', 'Level', 60)}${f('cr', 'CR', 60, 'text')}${f('hp', 'HP', 70)}${f('ac', 'AC', 60)}${f('speed', 'Speed', 130, 'text')}</div>
+    <div class="row">${ABILS.map(a => f(a, a.toUpperCase(), 56)).join('')}</div>
+    <div class="row"><span class="lbl">Note</span><input class="txt" id="vn_note" style="flex:1" placeholder="What changed, and when" value="${attr(e.note || '')}"></div>
+    <h3>Soul Shards</h3>
+    <div class="row">${stat(X().shards || 0, 'banked', 'var(--brass)')}${+e.spent ? stat(+e.spent, 'spent on this one') : ''}
+      <span class="lbl">Spend</span><input class="num" id="vn_spend" type="number" min="0" placeholder="40">
+      <button class="btn sm" onclick="spendShards('${attr(id)}')">Spend them</button></div>
+    <p class="hint">The cost and the <b>Max Servant CR</b> it needs are on this Servant's own sheet, under <i>Upgrade Path</i> — spending here just takes them out of the bank, so the number you type is the one the table agreed. Raising its CR past your cap flags itself red on the roster.</p>
+    <div class="row"><button class="btn sm warn" onclick="clearVaultNumbers('${attr(id)}')">Reset to the vault</button>
+      <span class="sp"></span><button class="btn pri" onclick="saveVaultNumbers('${attr(id)}')">Save</button></div>`);
+}
+function saveVaultNumbers(id) {
+  const x = X(), out = {};
+  for (const k of EDITABLE) { const v = ($('#vn_' + k)?.value ?? '').trim(); if (v !== '') out[k] = v; }
+  const note = ($('#vn_note')?.value || '').trim(); if (note) out.note = note;
+  x.edits = x.edits || {};
+  // Shards already spent are a record of what happened, not one of the numbers being set — they
+  // survive a save that clears every field, and a reset to the vault.
+  const spent = +((x.edits[id] || {}).spent) || 0;
+  if (spent) out.spent = spent;
+  if (Object.keys(out).length) x.edits[id] = out; else delete x.edits[id];
+  $('#dlg').close(); save(); render(); toast(`${sbFind(id)?.name || 'Servant'} updated.`);
+}
+// Shards were bankable and unspendable — Harvest put them in and nothing ever took them out, so an
+// upgrade was recorded on the sheet while the balance sat there untouched. The cost itself stays on
+// the Servant's own Upgrade Path rather than being parsed out of it: the table agrees the number,
+// the app only moves it. Does not save or close, so it can be done alongside the numbers above.
+function spendShards(id) {
+  const x = X(), have = +x.shards || 0, n = Math.max(0, Math.floor(+($('#vn_spend')?.value || 0)));
+  if (!n) return toast('How many shards? The cost is on its Upgrade Path.');
+  if (n > have) return toast(`Only ${have} shard${have === 1 ? '' : 's'} banked — ${n} would overdraw it.`);
+  x.shards = have - n;
+  const e = (x.edits = x.edits || {})[id] || (x.edits[id] = {});
+  e.spent = (+e.spent || 0) + n;
+  save();
+  $('#vn_spend').value = '';
+  toast(`${n} shard${n === 1 ? '' : 's'} spent — ${x.shards} left. Set its new numbers above and Save.`);
+  editVaultNumbers(id);
+}
+function clearVaultNumbers(id) {
+  const x = X(), spent = +((x.edits || {})[id] || {}).spent || 0;
+  delete (x.edits || {})[id];
+  if (spent) (x.edits = x.edits || {})[id] = { spent };   // the shards were still spent
+  $('#dlg').close(); save(); render();
+  toast(`Back to the vault's numbers${spent ? ` — the ${spent} shards spent on it are still on record` : ''}.`);
+}
 
 // ── writing a statblock ──
 const sbField = (id, label, val, w, type = 'text') => `<span class="lbl">${label}</span><input class="${type === 'number' ? 'num' : 'txt'}" id="${id}" type="${type}" value="${attr(val ?? '')}"${w ? ` style="width:${w}px"` : ''}>`;
@@ -384,6 +783,7 @@ function releaseSoulNow(id) {
 // A long rest gives Fake Death back and calls every relinquished servant home. Summoned servants stay.
 LONG_REST['gate-of-caelum'] = sh => {
   sh.x.fakeDeathUsed = false;
+  sh.x.prepLocked = false;        // a new day: arrange the prepared Servants freely again
   Object.values(sh.x.souls || {}).forEach(s => { s.lent = ''; s.pool = null; });
 };
 // Shadow Exchange: after the swap roll a d6 — on a 5 or 6 the Grimm Slot comes back
@@ -454,12 +854,32 @@ function viewStone(name) {
 }
 LONG_REST['ouroboros-vigil'] = sh => { sh.x.items = []; (sh.x.stones || []).forEach(s => s.struck = false); };
 
+// The Arm of the Bloodkeeper opens on a Reaction, before the triggering hit lands, and the first
+// thing it does is hand over a second body's worth of hit points. The app stores a PC's max HP but
+// not their current HP, so Borrowed Flesh is shown as a number to write down rather than applied to
+// the sheet — a maxHp that the round tracker's × could strand at +130 is worse than no maxHp at all.
+SHACKLE_SETUP['vidarr'] = sh => {
+  const borrowed = 10 * sh.level;
+  return { body: `<div class="prose">
+    <p>The arm comes apart into ash and the plated one grows in its place. <b>It resolves before the damage that paid for it</b> — the blow lands on the arm.</p>
+    <ul>
+      <li><b>Borrowed Flesh:</b> maximum hit points <b>+${borrowed}</b> <i>(10 × level)</i>, gained as hit points now — <b>${sh.maxHp} → ${sh.maxHp + borrowed}</b>. It is ammunition, not armour: nothing unspent is kept when the Arm closes.</li>
+      <li><b>The Shackle-Hand</b> is an extra attack on your Attack action — reach 10 ft., <b>2d10 + Cha</b> in the cursed damage type — and once a turn a hit can <b>Tear</b>.</li>
+      <li><b>Penance becomes The Sentence:</b> the Arm is a fourth weapon at <b>2d12</b> that cannot be reduced or resisted and cannot be committed to, the self-damage is paid out of the Borrowed Flesh and still counts in full, and <b>Ash-Cursed creatures get no saving throw</b>.</li>
+    </ul>
+    <p class="hint">Write the borrowed total on your own sheet — the companion tracks your <b>base</b> max HP, so it will keep showing ${sh.maxHp}.</p></div>` };
+};
+
 // ── Víðarr — ash curses & blood ─────────────────────────────────────────
 PANELS['vidarr'] = (g, sh, v) => {
   const x = sh.x; x.targets = x.targets || [];
   const pool = x.pool ?? 0, placed = x.targets.reduce((t, c) => t + c.curses, 0);
   const thr = sh.level * 5, blood = x.blood || 0;
-  const broke = sh.effects.some(e => /blood keeper/i.test(e.name));
+  // Asking shackleOn, not matching the Break's name — the name has changed once already
+  // (Arm of the Blood Keeper → Arm of the Bloodkeeper) and a string match fails silently,
+  // which reads as "none of my + forms are running" rather than as a bug.
+  const sb = shackleOn(sh, g), broke = !!sb;
+  const borrowed = 10 * sh.level;
   const rows = x.targets.map((t, i) => `<div class="item">
       <span class="nm">${esc(t.name)}</span><span class="sp"></span>
       <span class="lbl">Curses</span><div class="step"><button onclick="curse(${i},'curses',-1)">–</button><span>${t.curses}</span><button onclick="curse(${i},'curses',1)">+</button></div>
@@ -469,13 +889,15 @@ PANELS['vidarr'] = (g, sh, v) => {
       <button class="x" onclick="curseDrop(${i})">×</button>
       <span class="hint" style="flex-basis:100%">vs this target: <b>+${t.curses}</b> to hit & DC · <b>+${t.curses}d8</b> ${esc(x.dmgType || '')} on hits</span>
     </div>`).join('');
-  return `<h2>Curse of the Ashes ${broke ? '<span class="state st-fraying">Arm of the Blood Keeper</span>' : ''}</h2>
+  return `<h2>Curse of the Ashes ${broke ? `<span class="state st-fraying">${esc(sb.name)}</span>` : ''}</h2>
     <div class="stats">
       ${stat(`${placed}/${pool}`, 'curses placed')}
       ${stat(`${thr}`, 'dmg per spell slot')}
-      ${has(sh, 'cursebounded') ? stat(broke ? '15–20' : '18–20', `crit · fumble 1–4`) : ''}
-      ${has(sh, 'hateful-luck') ? stat(broke ? '1–6' : '1', 'Hateful Luck on') : ''}
+      ${has(sh, 'cursebounded') ? stat(broke ? '16–20' : '18–20', `crit · fumble 1–4`) : ''}
+      ${has(sh, 'hateful-luck') ? stat(broke ? '1–4' : '1', 'Hateful Luck on') : ''}
+      ${broke ? stat(`+${borrowed}`, `Borrowed Flesh · max HP ${sh.maxHp + borrowed}`) : ''}
     </div>
+    ${broke ? `<p class="hint" style="margin-top:9px"><b>Tear</b> — once on your turn, when the Arm hits: <b>Shackle</b> <i>(grappled, speed 0, no teleport, curses can't be cleansed · Str save vs your spell save DC to break, +1 per curse on it)</i> · <b>Sunder</b> <i>(take a Multiattack attack, a recharge ability, its Reaction until end of its next turn, or a Legendary Resistance — only while the Arm holds, once per creature, and it may spend a Legendary Resistance to refuse)</i> · <b>Harvest</b> <i>(the Arm's damage hits you instead and every curse on the target detonates free)</i>.</p>` : ''}
     <div class="row" style="margin-top:10px">
       <span class="lbl">Damage type</span><select class="pick" onchange="xset('dmgType',this.value)"><option value="">—</option>${DAMAGE_TYPES.map(t => `<option ${x.dmgType === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <button class="btn sm" onclick="curseAll()" title="Bonus Action: +1 Ash Stack on every cursed creature">+1 stack to all</button>
@@ -489,7 +911,7 @@ PANELS['vidarr'] = (g, sh, v) => {
     <div class="row" style="margin-top:7px"><span class="hint">${blood}/${thr} damage toward the next spell slot · regained today: <b>${x.slotsBack || 0}</b></span><span class="sp"></span>
       <input class="num" id="bdDmg" type="number" placeholder="dmg" style="width:64px"><button class="btn sm" onclick="bloodTake()">Took damage</button>
       ${rollBtn('Self-provoke', v.pb, 8)}</div>
-    <p class="hint">${has(sh, 'hateful-luck') ? '' : '(Not loaded) '}Hateful Luck on a natural ${broke ? '1–6' : '1'}: heal <b>${5 * v.pb}</b>, regain a spell slot, Misty Step, or +10 on your next d20${broke ? '; on a 1–2 you may restore a Grimm Slot instead' : ''}. Temporary HP doesn't feed the blood.</p>`;
+    <p class="hint">${has(sh, 'hateful-luck') ? '' : '(Not loaded) '}Hateful Luck on a natural ${broke ? '<b>1–4</b> — the same band Cursebounded fumbles on, so every fumble pays' : '1'}: heal <b>${5 * v.pb}</b>, regain a spell slot, Misty Step, or +10 on your next d20${broke ? ' — <b>choose two</b>, and on a natural 1 also restore a Grimm Slot' : ''}. Temporary HP doesn't feed the blood.${broke ? ' The <b>self-provoke</b> costs no Grimm Slot while the Arm is open, and it can bleed the Borrowed Flesh.' : ''}</p>`;
 };
 function curseAdd() { const n = $('#cuName').value.trim(); if (!n) return; const x = X(); (x.targets = x.targets || []).push({ name: n, curses: 1, stacks: 0 }); save(); render(); }
 function curse(i, k, n) { const t = X().targets[i]; t[k] = Math.max(0, t[k] + n); save(); render(); }

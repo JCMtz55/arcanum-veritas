@@ -35,7 +35,39 @@ const GRIMMS = [
 ];
 
 // Supporting pages a player's sheet can open (statblocks for summons and stones).
-const SERVANTS = { 'gate-of-caelum': ['Gate of Caelum/Servants/Silence.md'] };
+// One statblock per soul, and nothing else: every entry here becomes a RECRUITABLE soul that
+// holds a servant slot. The Servant Roster index was in this list once and the sheet counted
+// it as a soul — 7/6 slots, and it showed up in the Summon dropdown. Keep indexes, roleplay
+// references and background entries out.
+// Read from the folders rather than a hand-kept list, so renaming a form in the vault just works.
+//   Statblocks/Base/       one file per recruitable soul — each is ONE SERVANT SLOT
+//   Statblocks/Divine/     its Parted Gates Divine Form
+//   Statblocks/Forbidden/  its Parted Gates Forbidden Form
+// Roleplay/ and Servant Roster.md stay out: anything listed as a servant becomes a recruitable
+// soul holding a slot, and the Roster index once pushed the sheet to 7/6.
+const SERVANTS = { 'gate-of-caelum': 'Gate of Caelum/Servants/Statblocks' };
+
+// A form file is matched to its soul by name token, so the forms can be renamed freely in the
+// vault without touching this file: "Alaric D'Arquen" claims both "Sir Alaric, Exemplar of the
+// Radiant Oath" and "Alaric The Fallen" on the strength of the word "alaric". Honorifics and
+// epithets in front of the name are why this is not just a first-word match.
+const nameWords = n => n.toLowerCase().split(/[^a-z0-9']+/).filter(w => w.length > 2);
+
+// Each Grimm's Imperfect Shackle Break, in a file of its own (Juan, 2026-10-09).
+//
+// These used to be read off the Grimm's own page, which meant the only way to get one into the app
+// was to write it there — and anything on that page reaches every reader. Salomon's Parted Gates is
+// NOT revealed, so it cannot live on the Gate of Caelum page at all. Its own file keeps the release
+// decision in the DM's hands: parsed into `g.shackle` rather than into `g.abilities`, so the server
+// can cut it per reader exactly as it cuts an unrevealed Reality Shift, and the sheet merges it back
+// in only if it arrives. Adding one is adding a line here; nothing is auto-discovered, so an NPC's
+// Shackle Break can never be swept in by accident.
+//
+// Paths are relative to Player Grimms/. The toggle that reveals one is `shackle` (see the Admin tab).
+const SHACKLES = {
+  'gate-of-caelum': 'Gate of Caelum/Gate of Caelum - Shackle Break.md',
+  'vidarr':         'Vidarr - Shackle Break.md',
+};
 
 // Each Grimm's Reality Shift, from Reality Shifts/Players/. These are built into the data but
 // stay hidden in the app until the DM reveals one — see the DM view. Only these files are read:
@@ -69,12 +101,51 @@ const read = f => fs.readFileSync(f, 'utf8').replace(/\r\n/g, '\n');
 const exists = f => fs.existsSync(f);
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+// ── art ────────────────────────────────────────────────────────────────
+// Vault pages embed art as ![[file.png]], and the art lives in <vault>/../resources — outside the
+// folder the app is served from. So anything a page actually references is copied into grimms/img/
+// and the embed rewritten to a plain relative image. Embeds that resolve to nothing are dropped
+// rather than printed as raw text. The index is built lazily and only once, on the first embed.
+const IMG_OUT = path.join(here, '../img');
+const RESOURCES = path.join(VAULT, '..', 'resources');
+let resIndex = null;
+function resourceIndex() {
+  if (resIndex) return resIndex;
+  resIndex = new Map();
+  const walk = dir => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith('.')) continue;
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (!resIndex.has(e.name)) resIndex.set(e.name, p);   // first match wins
+    }
+  };
+  if (exists(RESOURCES)) walk(RESOURCES);
+  return resIndex;
+}
+const artCopied = new Map();
+const artMissing = new Set();
+function useImage(name) {
+  if (artCopied.has(name)) return artCopied.get(name);
+  const src = resourceIndex().get(name);
+  if (!src) { artMissing.add(name); artCopied.set(name, null); return null; }
+  const safe = name.replace(/[^\w.-]+/g, '_');
+  fs.mkdirSync(IMG_OUT, { recursive: true });
+  fs.copyFileSync(src, path.join(IMG_OUT, safe));
+  const url = 'img/' + safe;
+  artCopied.set(name, url);
+  return url;
+}
+
 // Obsidian → plain markdown the site's renderer understands.
 function clean(md) {
   return md
     .replace(/^---\n[\s\S]*?\n---\n/, '')               // frontmatter
     .replace(/%%[\s\S]*?%%/g, '')                        // Obsidian comments
-    .replace(/!\[\[[^\]]*\]\]/g, '')                     // embeds
+    .replace(/!\[\[([^\]|]+?)(?:\|[^\]]*)?\]\]/g, (_, n) => {   // embeds → copied art
+      const url = useImage(n.trim());
+      return url ? `![](${url})` : '';
+    })
     .replace(/<img[^>]*>/gi, '')
     .replace(/<br\s*\/?>/gi, ' ')
     .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2')       // [[target|label]]
@@ -168,11 +239,45 @@ function parseGrimm(meta) {
     abilities, stances };
 }
 
+// ── a Shackle Break, from its own file ──────────────────────────────────
+// The file is one "## <Name>" section shaped exactly as it was when it lived on the Grimm page: a
+// "*Imperfect Shackle Break*" tag line, a rule, then the body — whose "### Fake Death +" sub-headings
+// the sheet reads as what each ability becomes while the Break holds. So it is parsed into the same
+// single ability object the page used to yield, and nothing downstream had to change shape.
+function shackle(id) {
+  const rel = SHACKLES[id];
+  if (!rel) return null;
+  const f = path.join(PG, rel);
+  if (!exists(f)) { console.log(`   ⚠ ${id}: no Shackle Break at ${rel}`); return null; }
+  const md = clean(read(f));
+  const sec = md.split(/^## /m)[1];
+  if (!sec) { console.log(`   ⚠ ${rel}: no "## <Name>" heading — skipped`); return null; }
+  const nl = sec.indexOf('\n');
+  const name = sec.slice(0, nl).trim().replace(/\.$/, '');
+  const body = sec.slice(nl + 1);
+  const tag = (body.match(/^\s*\*([^*\n]+)\*/) || [])[1] || 'Imperfect Shackle Break';
+  const text = body.replace(/^\s*\*[^*\n]+\*\s*\n(___\n)?/, '').trim();
+  return { id: slug(name), name, stage: 'shackle', kind: 'shackle',
+    tag: tag.trim(), cost: costOf('shackle', text), action: actionOf(text), text };
+}
+
 // ── statblocks: Gate of Caelum servants, Ouroboros soul stones & spirits ─
 function servants(id) {
-  return (SERVANTS[id] || []).filter(f => exists(path.join(PG, f))).map(f => ({
-    name: path.basename(f, '.md'), text: clean(read(path.join(PG, f))),
-  }));
+  const root = SERVANTS[id];
+  if (!root || !exists(path.join(PG, root, 'Base'))) return [];
+  const md = sub => {
+    const dir = path.join(PG, root, sub);
+    return exists(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.md'))
+      .map(f => ({ name: path.basename(f, '.md'), text: clean(read(path.join(dir, f))) })) : [];
+  };
+  const divine = md('Divine'), forbidden = md('Forbidden');
+  const pick = (list, name) => { const want = nameWords(name);
+    return list.find(f => nameWords(f.name).some(w => want.includes(w))) || null; };
+  return md('Base').map(b => {
+    const d = pick(divine, b.name), f = pick(forbidden, b.name);
+    if (!d || !f) console.log(`   ⚠ ${b.name}: no ${!d ? 'Divine' : 'Forbidden'} Form found`);
+    return { ...b, divine: d, forbidden: f };
+  });
 }
 // A Shift's page is cut into the beats the sheet's helper card runs: what happens when it opens,
 // what holds while it lasts, what you can spend an action on, the Lair Action, and the collapse.
@@ -320,7 +425,7 @@ function rules() {
 // ── write ────────────────────────────────────────────────────────────────
 const data = {
   built: new Date().toISOString().slice(0, 10),
-  grimms: GRIMMS.map(m => ({ ...parseGrimm(m), servants: servants(m.id), shift: shift(m.id) })),
+  grimms: GRIMMS.map(m => ({ ...parseGrimm(m), servants: servants(m.id), shift: shift(m.id), shackle: shackle(m.id) })),
   realityShift: shiftRules(),
   soulStones: soulStones(),
   pairs: pairs(),
@@ -332,6 +437,8 @@ fs.writeFileSync(OUT,
   'window.GRIMM_DATA = ' + JSON.stringify(data, null, 1) + ';\n');
 
 for (const g of data.grimms)
-  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, shift: ${g.shift ? g.shift.name : '—'}`);
+  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, shift: ${g.shift ? g.shift.name : '—'}, shackle: ${g.shackle ? g.shackle.name : '—'}`);
 console.log(`${data.soulStones.length} soul stones · ${Object.keys(data.pairs.actions).length} pair actions · ${data.rules.length} rule pages`);
+const art = [...artCopied.values()].filter(Boolean).length;
+console.log(`${art} image${art === 1 ? '' : 's'} copied to grimms/img/${artMissing.size ? `\n⚠ not found in resources/: ${[...artMissing].join(', ')}` : ''}`);
 console.log('→', path.relative(process.cwd(), OUT));

@@ -45,12 +45,12 @@
       "h": "What the hour is worth",
       "notes": "Your next attack carries the half output of the Strike — and lands on a wider edge.",
       "table": {
-        "cols": ["Rank", "Extra damage", "That attack crits on"],
+        "cols": ["Rank", "Extra damage", "Extra Critical Range"],
         "rows": [
-          ["I", "2d12", "19–20"],
-          ["II", "3d12", "19–20"],
-          ["III", "<strong>4d12</strong>", "<strong>18–20</strong>"],
-          ["IV", "5d12", "17–20"]
+          ["I", "2d12", "+3"],
+          ["II", "3d12", "+4"],
+          ["III", "<strong>4d12</strong>", "<strong>+5</strong>"],
+          ["IV", "5d12", "+6"]
         ]
       },
       "defs": [

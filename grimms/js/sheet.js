@@ -23,7 +23,7 @@ function renderSheet() {
       ${loadoutCard(g, sh, v)}
       ${shiftCard(g, sh)}
     </div>
-    <aside class="rounds">${slotsCard(g, sh, v)}${effectsCard(g, sh)}</aside>
+    <aside class="rounds">${slotsCard(g, sh, v)}${mythicalCard(g, sh, v)}${effectsCard(g, sh)}</aside>
   </div>
   <p class="foot">Saved in this browser only · <button class="btn sm" onclick="exportSheet()">Export backup</button> <button class="btn sm" onclick="importSheet()">Import</button> <button class="btn sm warn" onclick="resetSheet()">Reset this sheet</button></p>`;
 }
@@ -34,7 +34,8 @@ function slotsCard(g, sh, v) {
   for (let i = 0; i < v.base; i++) pips += `<button class="pip ${i < sh.used ? 'used' : ''}" title="${i < sh.used ? 'Spent — click to restore' : 'Click to spend'}" onclick="pipClick(${i},false)"></button>`;
   for (let i = 0; i < sh.temp; i++) pips += `<button class="pip temp ${i < sh.tempUsed ? 'used' : ''}" title="Temporary slot bought with Exhaustion" onclick="pipClick(${i},true)"></button>`;
   return `<section class="card slots">
-    <h2>Grimm Slots <span class="r"><button class="btn sm" onclick="longRest()" title="Only if you dreamt — a disrupted rest restores nothing">Long rest</button></span></h2>
+    <h2>Grimm Slots <span class="r"><button class="btn sm" onclick="shortRest()" title="Refills Servant charges set to a short rest">Short rest</button>
+      <button class="btn sm" onclick="longRest()" title="Only if you dreamt — a disrupted rest restores nothing">Long rest</button></span></h2>
     <div class="slots-h">
     <div class="row"><div class="pips">${pips || '<span class="hint">A Dormant Grimm has no slots.</span>'}</div></div>
     <div class="row">
@@ -55,6 +56,44 @@ function slotsCard(g, sh, v) {
     </div>
     </div>
     <p class="hint">Exhaustion from forcing the Grimm or an Exhausting Exchange <b>can't be removed by magic</b> like <i>Greater Restoration</i> — only by resting in a Safe Haven or divine intervention. Slots come back only after a Long Rest in which you <b>dream</b>.</p>
+  </section>`;
+}
+// ── Mythical Grimm Abilities ────────────────────────────────────────────
+// A Shackle Break sits at the bottom of the ability list and a Reality Shift in its own card under
+// the loadout — in a fight both are a scroll away. The side column keeps whichever this Grimm
+// actually has one click away, shows what is already running, and can end either.
+// It appears only when there is something to show: no card at all for a Grimm with neither, and the
+// Shackle Break half waits for the stage that unlocks it, the Shift half for the DM to reveal it.
+function mythicalCard(g, sh, v) {
+  const sb = abilitiesOf(g).find(a => a.kind === 'shackle' && unlocked(a, sh.stage));
+  const shift = g.shift && shiftOn(g.id) ? g.shift : null;
+  if (!sb && !shift) return '';
+  const open = sb && shackleOn(sh, g), rs = rsState(sh);
+  const roundsOf = name => (sh.effects.find(e => e.name === name) || {}).rounds;
+  const left = n => `<span class="tag k">${n ?? '—'} round${n === 1 ? '' : 's'} left</span>`;
+  // rs.on can outlive the reveal — a sheet saved mid-Shift, then the DM hides it — so the rounds are
+  // only read once we know there is still a Shift to read them from.
+  const sbLeft = open ? roundsOf(open.name) : 0, rsLeft = rs.on && shift ? roundsOf(shift.name) : 0;
+  return `<section class="card mythical">
+    <h2>Mythical Grimm Abilities</h2>
+    ${!sb ? '' : open
+      ? `<div class="bm" style="--kc:var(--k-super)"><span class="nm">${esc(open.name)}</span>${left(sbLeft)}
+          <span class="sp"></span><button class="btn sm warn" onclick="shackleEndNow()">End it now</button>
+          <p class="hint">Every ability is running its <b>+</b> form.</p></div>`
+      : `<div class="bm" style="--kc:var(--k-super)">
+          <button class="btn go-sb" onclick="useAbility('${attr(sb.id)}')" title="${attr(sb.name)}">Shackle Break</button>
+          <span class="tag k">${sb.cost} slot${sb.cost > 1 ? 's' : ''}</span>
+          <p class="hint">${esc(sb.name)} · 3 rounds, then 2 Exhaustion and 3 Dream Exhaustion.${
+            sh.familiar ? ' <b>Familiar form can\'t.</b>' : v.left < sb.cost ? ' <b>Not enough slots.</b>' : ''}</p></div>`}
+    ${!shift ? '' : rs.on
+      ? `<div class="bm" style="--kc:#FF4FA3"><span class="nm">${esc(shift.name)}</span>${left(rsLeft)}
+          <span class="sp"></span><button class="btn sm warn" onclick="shiftEnd()">End the Shift</button>
+          <p class="hint">Your attacks hit automatically in here if you can reach.</p></div>`
+      : `<div class="bm" style="--kc:#FF4FA3">
+          <button class="btn go-rs" onclick="shiftStart()" title="${attr(shift.name)}">Reality Shift</button>
+          <span class="tag k">10 rounds</span>
+          <p class="hint">${esc(shift.name)} · then 3 Exhaustion, 5 Dream Exhaustion, and 30 days before it answers again.${
+            sh.dreamExhaustion ? ` <b>Blocked — you carry ${sh.dreamExhaustion} Dream Exhaustion.</b>` : ''}</p></div>`}
   </section>`;
 }
 function pipClick(i, temp) {
@@ -84,7 +123,16 @@ function longRest() {
   const sh = sheet();
   sh.used = 0; sh.temp = 0; sh.tempUsed = 0; sh.effects = []; sh.round = 1; sh.inCombat = false;
   if (LONG_REST[S.current]) LONG_REST[S.current](sh);
-  save(); render(); toast('Long rest — Grimm Slots restored. Recompose your abilities if you wish.');
+  // Servant charge trackers refill by their own rule; a long rest covers the short-rest ones too.
+  const n = typeof trRefill === 'function' ? trRefill('long') : 0;
+  save(); render();
+  toast(`Long rest — Grimm Slots restored${n ? `, ${n} Servant charge${n > 1 ? 's' : ''} refilled` : ''}. Recompose your abilities if you wish.`);
+}
+// Servants spend charges between long rests, so the short rest needs a button of its own.
+function shortRest() {
+  const n = typeof trRefill === 'function' ? trRefill('short') : 0;
+  save(); render();
+  toast(n ? `Short rest — ${n} Servant charge${n > 1 ? 's' : ''} refilled.` : 'Short rest — nothing of the Grimm\'s refills on one.');
 }
 function bump(k, n) { const sh = sheet(); sh[k] = Math.max(0, (+sh[k] || 0) + n); save(); render(); }
 function toggle(k) { const sh = sheet(); sh[k] = !sh[k]; save(); render(); }
@@ -113,27 +161,38 @@ function loadoutCard(g, sh, v) {
   };
   const loaded = new Set([...sh.loadout.passive, ...sh.loadout.active, ...sh.loadout.super]);
   const show = abilitiesOf(g).filter(a => a.kind === 'core' || loaded.has(a.id) || (a.kind === 'shackle' && unlocked(a, sh.stage)));
+  const sb = shackleOn(sh, g), plus = plusForms(sb);
+  const left = sb ? (sh.effects.find(e => e.name === sb.name) || {}).rounds : 0;
   return `<section class="card span12">
     <h2>Abilities <span class="r">
       <button class="btn sm ${sh.inCombat ? 'on' : ''}" onclick="toggle('inCombat')" title="In combat, swapping an ability is an Exhausting Exchange">${sh.inCombat ? 'In combat — swaps cost Exhaustion' : 'Out of combat'}</button>
       <button class="btn sm" onclick="openCompendium('${g.id}')">Full ability pool</button></span></h2>
+    ${sb ? `<div class="row shackled"><b>${esc(sb.name)} is open</b>
+      <span class="tag k" style="--kc:var(--k-super)">${left ?? '—'} round${left === 1 ? '' : 's'} left</span>
+      <span class="hint" style="flex:1;min-width:180px">Every ability below is running its <b>+</b> form.</span>
+      <button class="btn sm warn" onclick="shackleEndNow()">End it now</button></div>` : ''}
     <div class="loadout">${col('passive')}${col('active')}${col('super')}</div>
     <p class="hint" style="margin-top:0">Compose after a Long Rest (1 hour of introspection). ${sh.inCombat ? '<b>Exhausting Exchange:</b> each swap now is a Bonus Action and +1 Exhaustion, once per round.' : ''} ✦ = additional ability.</p>
-    ${show.map(a => abilityHtml(a, sh, true)).join('')}
+    ${show.map(a => abilityHtml(a, sh, true, plus)).join('')}
   </section>`;
 }
-function abilityHtml(a, sh, usable) {
+function abilityHtml(a, sh, usable, plus) {
   const cost = a.cost ? `<span class="cost" title="${a.cost} Grimm Slot${a.cost > 1 ? 's' : ''}">${'<i></i>'.repeat(a.cost)}</span>` : '';
   const useBtn = usable && a.cost ? `<button class="btn sm pri" onclick="event.stopPropagation();useAbility('${a.id}')">Use</button>` : '';
-  return `<div class="ab ${a.kind}" id="ab-${a.id}">
+  // While a Shackle Break holds, an ability that has a "+" form shows it in its place — the
+  // original stays underneath, because the + text only describes what changed.
+  const up = plus && plus[a.name.trim().toLowerCase()];
+  return `<div class="ab ${a.kind}${up ? ' open' : ''}" id="ab-${a.id}">
     <div class="ab-h" onclick="this.parentNode.classList.toggle('open')">
-      <span class="nm">${esc(a.name)}</span>
+      <span class="nm">${esc(a.name)}${up ? ' +' : ''}</span>
       <span class="tag k">${KIND_NAME[a.kind]}</span>
       ${a.action ? `<span class="tag">${esc(a.action)}</span>` : ''}
-      ${a.stage === 'additional' ? '<span class="tag st">Additional</span>' : a.stage !== 'shackle' ? `<span class="tag st">${STAGE_NAME[a.stage] || a.stage}</span>` : ''}
+      ${up ? '<span class="tag k" style="--kc:var(--k-super)">Evolved</span>'
+           : a.stage === 'additional' ? '<span class="tag st">Additional</span>'
+           : a.stage !== 'shackle' ? `<span class="tag st">${STAGE_NAME[a.stage] || a.stage}</span>` : ''}
       ${cost}${useBtn}<span class="car">▶</span>
     </div>
-    <div class="ab-b">${prose(a.text, sh)}</div>
+    <div class="ab-b">${up ? `<div class="plusform">${prose(up, sh)}</div><p class="hint">Unchanged below.</p>` : ''}${prose(a.text, sh)}</div>
   </div>`;
 }
 function setLoad(k, i, id) {
@@ -149,6 +208,9 @@ function useAbility(id) {
   if (mins) sh.effects.push({ name: a.name, rounds: mins });
   if (USE_HOOK[a.id]) USE_HOOK[a.id](sh, g);
   save(); render();
+  // A Shackle Break is not an ability you press and forget: the chains come off on screen, and then
+  // its window asks for whatever this Grimm has to decide while it holds.
+  if (a.kind === 'shackle') return shackleBreakOpen(a, g);
   toast(`${a.name} — ${a.cost} slot${a.cost > 1 ? 's' : ''} spent${mins ? `, tracking ${mins} rounds` : ''}.`);
 }
 
@@ -228,10 +290,13 @@ function shiftStart() {
   sh.effects = sh.effects.filter(e => e.name !== s.name);
   sh.effects.push({ name: s.name, rounds: 10 });
   save(); render();
-  const act = (s.parts || []).find(p => p.key === 'activation');
-  openDialog(`${s.name} rises`, act
-    ? act.entries.map(e => `<div class="stagehead">${esc(e.name)}</div>${prose(e.text, sh)}`).join('')
-    : `<div class="prose"><p>The domain is yours for 10 rounds.</p></div>`);
+  // The domain arrives on screen first; its On Activation beats land the moment it settles.
+  realityShiftOpen(s, () => {
+    const act = (s.parts || []).find(p => p.key === 'activation');
+    openDialog(`${s.name} rises`, act
+      ? act.entries.map(e => `<div class="stagehead">${esc(e.name)}</div>${prose(e.text, sheet())}`).join('')
+      : `<div class="prose"><p>The domain is yours for 10 rounds.</p></div>`);
+  });
 }
 // Ending it: the collapse, and what it takes out of you.
 function shiftEnd() {

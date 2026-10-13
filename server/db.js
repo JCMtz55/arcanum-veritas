@@ -63,14 +63,54 @@ const SCHEMA = [
      grimm_id TEXT PRIMARY KEY,
      chains   SMALLINT NOT NULL CHECK (chains BETWEEN 0 AND 3)
    )`,
-  // What the DM has switched on or off for one Grimm: `key` is "shift" for its Reality Shift, or
-  // "a:<ability id>" for one ability. A Grimm with no row for a key keeps that key's default —
-  // abilities are on, the Reality Shift is off.
+  // What the DM has switched on or off for one Grimm: `key` is "shift" for its Reality Shift,
+  // "shackle" for its Imperfect Shackle Break, or "a:<ability id>" for one ability. A Grimm with no
+  // row for a key keeps that key's default — abilities are on, the Reality Shift and the Shackle
+  // Break are off.
   `CREATE TABLE IF NOT EXISTS grimm_toggles (
      grimm_id TEXT NOT NULL,
      key      TEXT NOT NULL,
      enabled  BOOLEAN NOT NULL,
      PRIMARY KEY (grimm_id, key)
+   )`,
+  // Shackle Breaks defaulted to visible before they were gated (2026-10-09), because the only way
+  // to get one into the app was to write it on the Grimm's own page. Zariel's Arm of the Blood
+  // Keeper was live and his table knows it, so it is switched on once here rather than taken away
+  // by an upgrade. ON CONFLICT DO NOTHING, so a DM who later hides it stays hidden.
+  // Salomon's Parted Gates gets no row: it is unrevealed, and the default is off.
+  `INSERT INTO grimm_toggles (grimm_id, key, enabled) VALUES ('vidarr', 'shackle', true)
+     ON CONFLICT (grimm_id, key) DO NOTHING`,
+  // A player's Servants (Juan, 2026-10-09). These used to live only in the browser, which meant a
+  // cleared cache lost the roster, a second device saw nothing, and a Soul Shard upgrade to a vault
+  // Servant had nowhere to be written down at all.
+  //
+  // A row is the player's DELTA, never a copy of the statblock. The vault still owns a Servant's
+  // prose and keeps updating it on every rebuild; `edits` holds only what the player may change —
+  // level, CR, HP, AC, ability scores, attuned items and a note — and `state` holds what moves at
+  // the table: current HP, prepared, summoned, Elite, which form, and the charge trackers. A soul
+  // the player wrote themselves has its whole statblock in `edits` and no vault base to layer onto.
+  //
+  // `soul_key` is 'vault:<name-slug>' or the player's own 'sb<rand>'. It is keyed by NAME and not by
+  // position: the ids were once 'vault:' + readdirSync index, so adding or renaming one Base file
+  // shifted every index and silently re-pointed saved state at the wrong Servant. Survivable in
+  // localStorage, permanent once it is a row — see the migration in panels.js gateState().
+  `CREATE TABLE IF NOT EXISTS grimm_souls (
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     grimm_id   TEXT NOT NULL,
+     soul_key   TEXT NOT NULL,
+     edits      TEXT NOT NULL DEFAULT '{}',
+     state      TEXT NOT NULL DEFAULT '{}',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, grimm_id, soul_key)
+   )`,
+  // Set the first time a browser hands its localStorage roster up, so the adoption only ever runs
+  // once per player per Grimm. Without it, a player who opened an old tab would re-import a stale
+  // roster over the one they have been using.
+  `CREATE TABLE IF NOT EXISTS grimm_souls_adopted (
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     grimm_id   TEXT NOT NULL,
+     adopted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, grimm_id)
    )`,
   // Who walks the Paragon path. The DM turns it on per player — the path is a choice of identity
   // made with them, not something a player switches on for themselves.

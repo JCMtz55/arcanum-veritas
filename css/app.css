@@ -444,6 +444,14 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .cdx-def span{flex:1;min-width:0;color:var(--bone2)}
 .cdx-def.dis b,.cdx-def.dis span{opacity:.4}
 .cdx-def{gap:16px}
+
+/* A labelled field in an inline admin editor — the DM correcting a Servant's numbers or charges */
+.adm-f{display:inline-flex;flex-direction:column;gap:3px;margin-right:10px}
+.adm-f span{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--mute)}
+.adm-f input{width:76px;padding:4px 7px;font-size:13px;color:var(--bone);
+  background:color-mix(in srgb,var(--line) 30%,transparent);border:1px solid var(--line);border-radius:5px}
+.adm-f input:focus{outline:0;border-color:var(--mute)}
 /* mastery rows: the unlock level sits under the name as a small tag */
 .cdx-defs.mastery .cdx-def{padding:12px 16px}
 .cdx-defs.mastery .cdx-def b{flex-basis:124px}

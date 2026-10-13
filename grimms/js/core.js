@@ -4,6 +4,15 @@
 const D = window.GRIMM_DATA;
 const KEY = 'grimm-companion:v1';
 
+// A Shackle Break is authored in a file of its own and arrives in `g.shackle`, not in `g.abilities`
+// — so the server can withhold an unrevealed one (Salomon's Parted Gates) exactly the way it
+// withholds an unrevealed Reality Shift, and its text never reaches that reader's browser at all.
+// Merge it back into the ability list once, here, so everything downstream keeps finding it where it
+// has always been: a `kind: 'shackle'` entry in `g.abilities`.
+for (const g of (D.grimms || []))
+  if (g.shackle && !(g.abilities || []).some(a => a.kind === 'shackle'))
+    (g.abilities = g.abilities || []).push(g.shackle);
+
 const STAGES = ['dormant', 'invoked', 'chained', 'awakened', 'unveiled'];
 const STAGE_NAME = { dormant:'Dormant', invoked:'Invoked', chained:'Chained', awakened:'Awakened', unveiled:'Unveiled' };
 // Grimm Slots and ability slots by stage (Grimm Slots.md, Grimm Abilities.md).
@@ -46,7 +55,13 @@ function load() {
   return s;
 }
 const S = load();
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+// localStorage is the working copy; the Servants also go up to the server, debounced. Every
+// mutation in the app already calls save(), which is why the mirror hangs off it rather than off
+// forty call sites.
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  try { queueSouls(); } catch (e) {}
+}
 
 function sheet(id = S.current) {
   const g = grimmById(id);
@@ -78,6 +93,68 @@ async function syncGrimms() {
     save();
   } catch (e) {}
 }
+// ── Servants, kept on the server ───────────────────────────────────────
+// A player's roster used to live only in this browser, so clearing site data lost it, a second
+// device saw nothing, and an upgrade to a vault Servant had nowhere to be written down. Now the
+// sheet's `x.souls` / `x.edits` / `x.statblocks` are mirrored to grimm_souls, keyed by soul.
+//
+// localStorage stays the working copy and the offline fallback: on a static host nothing is fetched
+// and everything below no-ops, exactly as the chains and toggles do.
+let SOULS_SYNCED = false;
+
+// The three bags the sheet keeps → one record per soul, which is what the server stores.
+function soulsPayload(gid) {
+  const x = sheet(gid).x || {}, own = {}, out = {};
+  for (const b of (x.statblocks || [])) own[b.id] = b;
+  const keys = new Set([...Object.keys(x.souls || {}), ...Object.keys(x.edits || {}), ...Object.keys(own)]);
+  for (const k of keys)
+    out[k] = { edits: own[k] || (x.edits || {})[k] || {}, state: (x.souls || {})[k] || {} };
+  return out;
+}
+// …and back again. A record whose `edits` has a name is a soul the player wrote; the rest are
+// layers on a vault Servant's numbers.
+function applySouls(gid, bag) {
+  const x = sheet(gid).x;
+  x.souls = {}; x.edits = {}; x.statblocks = [];
+  for (const [k, v] of Object.entries(bag || {})) {
+    x.souls[k] = v.state || {};
+    if (v.edits && v.edits.name) x.statblocks.push({ ...v.edits, id: k });
+    else if (v.edits && Object.keys(v.edits).length) x.edits[k] = v.edits;
+  }
+  x.vaultKeyed = true;   // the server only ever holds name-keyed ids
+}
+async function syncSouls() {
+  try {
+    const r = await fetch('../api/grimms/souls');
+    if (!r.ok) return;
+    const { grimms, adopted } = await r.json();
+    for (const g of D.grimms) {
+      const bag = grimms[g.id], has = bag && Object.keys(bag).length;
+      if (has) applySouls(g.id, bag);
+      // Nothing on the server and this browser was never adopted: hand up what it has, once.
+      else if (!(adopted || []).includes(g.id) && Object.keys(soulsPayload(g.id)).length)
+        await pushSouls(g.id, true);
+    }
+    SOULS_SYNCED = true;
+    save();
+  } catch (e) {}
+}
+// Debounced, because every pip click calls save(). The last write for a Grimm wins.
+const pushTimers = {};
+async function pushSouls(gid, adopt) {
+  try {
+    await fetch('../api/grimms/souls/' + encodeURIComponent(gid), {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ souls: soulsPayload(gid), adopt: !!adopt }),
+    });
+  } catch (e) {}
+}
+function queueSouls(gid = S.current) {
+  if (!SOULS_SYNCED || !gid) return;      // static host, or the first load has not answered yet
+  clearTimeout(pushTimers[gid]);
+  pushTimers[gid] = setTimeout(() => pushSouls(gid), 800);
+}
+
 // Abilities are open unless the DM has switched one off; a Reality Shift stays hidden until revealed.
 const abilityOn = (gid, aid) => TOGGLES[gid]?.['a:' + aid] !== false;
 const shiftOn = gid => TOGGLES[gid]?.shift === true;
@@ -107,6 +184,27 @@ function unlocked(a, stage) {
   return true;
 }
 const slotKind = a => a.kind === 'passive' ? 'passive' : a.kind === 'super' ? 'super' : a.kind === 'active' ? 'active' : null;
+
+// ── A Shackle Break while it is running ────────────────────────────────
+// It is "on" for exactly as long as its duration sits on the round tracker, which is what Use put
+// there and what the round tracker takes away — so nothing extra has to be stored or kept in sync.
+function shackleOn(sh = sheet(), g = grimmById(S.current)) {
+  return (g.abilities || []).find(a => a.kind === 'shackle' && (sh.effects || []).some(e => e.name === a.name)) || null;
+}
+// Inside a Shackle Break, "### Fake Death +" is what Fake Death becomes while it holds. Pull those
+// out keyed by the ability they evolve, so the sheet can show the + form in place of the original.
+function plusForms(a) {
+  const out = {};
+  if (!a) return out;
+  const t = String(a.text || ''), heads = [...t.matchAll(/^#{3,4} (.+)$/gm)];
+  heads.forEach((h, i) => {
+    const name = h[1].trim();
+    if (!/\+$/.test(name)) return;
+    const end = i + 1 < heads.length ? heads[i + 1].index : t.length;
+    out[name.replace(/\s*\+$/, '').trim().toLowerCase()] = t.slice(h.index + h[0].length, end).trim();
+  });
+  return out;
+}
 
 function defaultLoadout(g, stage) {
   const n = ABILITY_SLOTS[stage], out = { passive:[], active:[], super:[] };

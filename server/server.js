@@ -547,9 +547,109 @@ app.get("/api/grimms/state", requireUser, async (req, res) => {
   res.json({ chains: Object.fromEntries(chains.map(r => [r.grimm_id, r.chains])), toggles: out });
 });
 
+// ── Grimm Companion: a player's own Servants ────────────────────────────
+// Each row is that player's delta on one soul, never a copy of the statblock: `edits` is what they
+// may change (a vault soul's numbers, or the whole statblock for a soul they wrote), and `state` is
+// what moves at the table — HP, prepared, summoned, and the charge trackers. See db.js.
+//
+// A soul whose `edits` carries a `name` is the player's own; anything else is a layer on the vault's.
+const GRIMM_ID = /^[a-z0-9_-]{1,40}$/;
+const SOUL_KEY = /^(vault:[a-z0-9-]{1,60}|sb[a-z0-9]{1,30})$/;
+const asJson = (v, fallback = {}) => { try { const o = JSON.parse(v); return o && typeof o === "object" ? o : fallback; } catch { return fallback; } };
+
+app.get("/api/grimms/souls", requireUser, async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT grimm_id, soul_key, edits, state FROM grimm_souls WHERE user_id = $1", [req.user.id]);
+  const adopted = (await db.query(
+    "SELECT grimm_id FROM grimm_souls_adopted WHERE user_id = $1", [req.user.id])).rows.map(r => r.grimm_id);
+  const out = {};
+  for (const r of rows) (out[r.grimm_id] = out[r.grimm_id] || {})[r.soul_key] =
+    { edits: asJson(r.edits), state: asJson(r.state) };
+  res.json({ grimms: out, adopted });
+});
+
+// The browser hands up the whole set for one Grimm and the server makes the table match it — a
+// delete has to be able to travel, and a player has one roster per Grimm, not a shared one.
+// `adopt` is the first hand-up from a browser that had the roster only in localStorage; it is
+// recorded so it can never run twice and re-import a stale roster from a forgotten tab.
+app.put("/api/grimms/souls/:grimm", requireUser, async (req, res) => {
+  const grimm = req.params.grimm;
+  if (!GRIMM_ID.test(grimm)) return res.status(400).json({ error: "Not a Grimm." });
+  const souls = req.body?.souls;
+  if (!souls || typeof souls !== "object") return res.status(400).json({ error: "Nothing to save." });
+  const keys = Object.keys(souls).filter(k => SOUL_KEY.test(k)).slice(0, 200);
+
+  if (req.body.adopt) {
+    // Checked with a SELECT rather than the INSERT's row count, because PGlite does not report one
+    // — relying on it meant the very first adoption looked like a repeat and the roster was never
+    // uploaded at all, while the guard row went in and made it permanent.
+    const seen = await db.query(
+      "SELECT 1 FROM grimm_souls_adopted WHERE user_id = $1 AND grimm_id = $2", [req.user.id, grimm]);
+    // Already adopted: this is an old tab offering its copy. Keep what is in the table.
+    if (seen.rows.length) return res.json({ ok: true, adopted: false });
+    await db.query(
+      `INSERT INTO grimm_souls_adopted (user_id, grimm_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, grimm_id) DO NOTHING`, [req.user.id, grimm]);
+  }
+  for (const k of keys) {
+    const v = souls[k] || {};
+    await db.query(
+      `INSERT INTO grimm_souls (user_id, grimm_id, soul_key, edits, state, updated_at)
+       VALUES ($1, $2, $3, $4, $5, now())
+       ON CONFLICT (user_id, grimm_id, soul_key)
+       DO UPDATE SET edits = EXCLUDED.edits, state = EXCLUDED.state, updated_at = now()`,
+      [req.user.id, grimm, k, JSON.stringify(v.edits || {}), JSON.stringify(v.state || {})]);
+  }
+  // Rows the browser no longer has are gone — a release has to travel. But an empty set would mean
+  // "delete the roster", which is far more likely to be a bug at the other end than an intention,
+  // so it has to say so out loud.
+  if (keys.length)
+    await db.query(
+      `DELETE FROM grimm_souls WHERE user_id = $1 AND grimm_id = $2
+         AND NOT (soul_key = ANY($3::text[]))`, [req.user.id, grimm, keys]);
+  else if (req.body.clear === true)
+    await db.query("DELETE FROM grimm_souls WHERE user_id = $1 AND grimm_id = $2", [req.user.id, grimm]);
+  res.json({ ok: true, saved: keys.length });
+});
+
 // ── Admin: players and what each may read ──────────────────
 const admin = express.Router();
 admin.use(requireUser, requireDm);
+
+// The DM reads and corrects a player's Servants (Juan, 2026-10-09) — the roster, the upgrades they
+// have recorded and the charges they are holding. Writing one is for granting an upgrade or fixing
+// a number; it is the same row the player's own sheet syncs, so do it between sessions when you can.
+admin.get("/players/:id/souls", async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT grimm_id, soul_key, edits, state, updated_at FROM grimm_souls WHERE user_id = $1 ORDER BY grimm_id, soul_key",
+    [+req.params.id || 0]);
+  res.json({ souls: rows.map(r => ({ grimm: r.grimm_id, key: r.soul_key, edits: asJson(r.edits), state: asJson(r.state), updated: r.updated_at })) });
+});
+
+admin.put("/players/:id/souls/:grimm/:key", async (req, res) => {
+  const uid = +req.params.id || 0, { grimm, key } = req.params;
+  if (!GRIMM_ID.test(grimm) || !SOUL_KEY.test(key)) return res.status(400).json({ error: "Not a soul." });
+  const edits = req.body?.edits, state = req.body?.state;
+  if (typeof edits !== "object" && typeof state !== "object")
+    return res.status(400).json({ error: "Send edits, state, or both." });
+  const cur = (await db.query(
+    "SELECT edits, state FROM grimm_souls WHERE user_id = $1 AND grimm_id = $2 AND soul_key = $3",
+    [uid, grimm, key])).rows[0];
+  // A vault Servant exists on every sheet whether or not it has a row — a row is only the player's
+  // delta on it — so the DM granting it an upgrade may be writing the first one. A soul the player
+  // WROTE has no existence outside its row, so there the row must already be there.
+  if (!cur && !key.startsWith("vault:"))
+    return res.status(404).json({ error: "That player has no such soul." });
+  await db.query(
+    `INSERT INTO grimm_souls (user_id, grimm_id, soul_key, edits, state, updated_at)
+     VALUES ($1, $2, $3, $4, $5, now())
+     ON CONFLICT (user_id, grimm_id, soul_key)
+     DO UPDATE SET edits = EXCLUDED.edits, state = EXCLUDED.state, updated_at = now()`,
+    [uid, grimm, key,
+     JSON.stringify(typeof edits === "object" && edits ? edits : asJson(cur?.edits)),
+     JSON.stringify(typeof state === "object" && state ? state : asJson(cur?.state))]);
+  res.json({ ok: true });
+});
 
 admin.put("/grimms/:grimm/chains", async (req, res) => {
   const chains = req.body?.chains;
@@ -561,10 +661,11 @@ admin.put("/grimms/:grimm/chains", async (req, res) => {
   res.json({ ok: true });
 });
 
-// Reveal or hide a Grimm's Reality Shift ("shift"), or allow or deny one ability ("a:<id>")
+// Reveal or hide a Grimm's Reality Shift ("shift") or its Imperfect Shackle Break ("shackle"), or
+// allow or deny one ability ("a:<id>")
 admin.put("/grimms/:grimm/toggles/:key", async (req, res) => {
   const { grimm, key } = req.params;
-  if (!/^[a-z0-9_-]{1,40}$/.test(grimm) || !/^(shift|a:[a-z0-9-]{1,60})$/.test(key) || typeof req.body?.enabled !== "boolean")
+  if (!/^[a-z0-9_-]{1,40}$/.test(grimm) || !/^(shift|shackle|a:[a-z0-9-]{1,60})$/.test(key) || typeof req.body?.enabled !== "boolean")
     return res.status(400).json({ error: "That isn't something the DM can switch." });
   await db.query(
     `INSERT INTO grimm_toggles (grimm_id, key, enabled) VALUES ($1, $2, $3)
@@ -768,10 +869,22 @@ app.use("/grimms", async (req, res, next) => {
 const GRIMM_DATA_FILE = path.join(ROOT, "grimms", "js", "data.js");
 const GRIMM_DATA = JSON.parse((await readFile(GRIMM_DATA_FILE, "utf8")).replace(/^[^{]*/, "").replace(/;\s*$/, ""));
 const dataCache = new Map();
-function grimmDataFor(revealed) {
-  const key = [...revealed].sort().join(",");
+function grimmDataFor(shifts, shackles) {
+  const key = "s:" + [...shifts].sort().join(",") + "|b:" + [...shackles].sort().join(",");
   if (!dataCache.has(key)) {
-    const data = { ...GRIMM_DATA, grimms: GRIMM_DATA.grimms.map(g => revealed.has(g.id) ? g : { ...g, shift: null }) };
+    const data = { ...GRIMM_DATA, grimms: GRIMM_DATA.grimms.map(g => {
+      const out = { ...g };
+      if (!shifts.has(g.id)) out.shift = null;
+      if (!shackles.has(g.id)) {
+        out.shackle = null;
+        // The Divine and Forbidden Forms are the Shackle Break's payload, not a separate feature:
+        // twelve stat blocks that spell out the mechanic in full, each headed "Divine Form — Exalted
+        // Servant". Withholding the rules while serving the forms would reveal it anyway, so they go
+        // with it. The Base stat block of each soul stays — that is what the player uses every session.
+        out.servants = (g.servants || []).map(s => ({ ...s, divine: null, forbidden: null }));
+      }
+      return out;
+    }) };
     if (dataCache.size > 32) dataCache.clear();
     dataCache.set(key, "window.GRIMM_DATA = " + JSON.stringify(data) + ";\n");
   }
@@ -782,13 +895,17 @@ app.get("/grimms/js/data.js", async (req, res) => {
   // Signed out, the book itself is campaign material — serve nothing rather than a redirect
   if (!user) return res.type("application/javascript").set("Cache-Control", "no-store")
     .send('window.GRIMM_DATA = { "grimms": [] };\n');
-  let revealed;
-  if (user.role === "dm") revealed = new Set(GRIMM_DATA.grimms.map(g => g.id));
-  else {
-    const { rows } = await db.query("SELECT grimm_id FROM grimm_toggles WHERE key = 'shift' AND enabled");
-    revealed = new Set(rows.map(r => r.grimm_id));
+  let shifts, shackles;
+  if (user.role === "dm") {
+    const all = new Set(GRIMM_DATA.grimms.map(g => g.id));
+    shifts = all; shackles = all;
+  } else {
+    const { rows } = await db.query(
+      "SELECT grimm_id, key FROM grimm_toggles WHERE key IN ('shift', 'shackle') AND enabled");
+    shifts = new Set(rows.filter(r => r.key === "shift").map(r => r.grimm_id));
+    shackles = new Set(rows.filter(r => r.key === "shackle").map(r => r.grimm_id));
   }
-  res.type("application/javascript").set("Cache-Control", "no-store").send(grimmDataFor(revealed));
+  res.type("application/javascript").set("Cache-Control", "no-store").send(grimmDataFor(shifts, shackles));
 });
 
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
