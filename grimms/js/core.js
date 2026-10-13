@@ -158,7 +158,15 @@ function queueSouls(gid = S.current) {
 // Abilities are open unless the DM has switched one off; a Reality Shift stays hidden until revealed.
 const abilityOn = (gid, aid) => TOGGLES[gid]?.['a:' + aid] !== false;
 const shiftOn = gid => TOGGLES[gid]?.shift === true;
-const abilitiesOf = g => g.abilities.filter(a => abilityOn(g.id, a.id));
+// A Shackle Break is hidden until the DM reveals it, exactly as a Reality Shift is — the Admin page
+// has always said so and has always had this switch. The server withholds an unrevealed Break from a
+// *player's* copy of data.js, which is why this was never missed; but the DM is served every Break,
+// so without this check the Admin page could read "Shackle Break hidden" while the sheet still
+// offered the button. Filtered here rather than at each call site so the side column, the ability
+// list and the Compendium all agree.
+const breakOn = gid => TOGGLES[gid]?.shackle === true;
+const abilitiesOf = g => g.abilities.filter(a =>
+  abilityOn(g.id, a.id) && (a.kind !== 'shackle' || breakOn(g.id)));
 
 function derived(sh = sheet()) {
   const pb = pbOf(sh.level);

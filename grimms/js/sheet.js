@@ -67,8 +67,12 @@ function slotsCard(g, sh, v) {
 function mythicalCard(g, sh, v) {
   const sb = abilitiesOf(g).find(a => a.kind === 'shackle' && unlocked(a, sh.stage));
   const shift = g.shift && shiftOn(g.id) ? g.shift : null;
-  if (!sb && !shift) return '';
-  const open = sb && shackleOn(sh, g), rs = rsState(sh);
+  // A Break already running when the DM hides it still has to be endable, or its rounds, its
+  // Exhaustion and its Dream save are stranded on the sheet with no way to resolve them. So `open`
+  // is read from the unfiltered list, the same way rs.on outlives its own reveal.
+  const open = shackleOn(sh, g);
+  if (!sb && !open && !shift) return '';
+  const rs = rsState(sh);
   const roundsOf = name => (sh.effects.find(e => e.name === name) || {}).rounds;
   const left = n => `<span class="tag k">${n ?? '—'} round${n === 1 ? '' : 's'} left</span>`;
   // rs.on can outlive the reveal — a sheet saved mid-Shift, then the DM hides it — so the rounds are
@@ -76,7 +80,7 @@ function mythicalCard(g, sh, v) {
   const sbLeft = open ? roundsOf(open.name) : 0, rsLeft = rs.on && shift ? roundsOf(shift.name) : 0;
   return `<section class="card mythical">
     <h2>Mythical Grimm Abilities</h2>
-    ${!sb ? '' : open
+    ${!sb && !open ? '' : open
       ? `<div class="bm" style="--kc:var(--k-super)"><span class="nm">${esc(open.name)}</span>${left(sbLeft)}
           <span class="sp"></span><button class="btn sm warn" onclick="shackleEndNow()">End it now</button>
           <p class="hint">Every ability is running its <b>+</b> form.</p></div>`

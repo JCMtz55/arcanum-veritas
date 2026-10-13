@@ -185,6 +185,14 @@ function shackleEnd() {
   render();
 }
 
+// The DM's switches used to be read exactly once, at boot. Flip one on the Admin page and the
+// Companion kept the old set until someone reloaded — which at the table reads as "the toggle does
+// nothing", because the Admin page updates its own copy immediately and looks like it worked.
+// Re-read them whenever this page comes back to the foreground. No-ops on a static host.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) syncGrimms().then(render);
+});
+
 document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = { '1': 'sheet', '2': 'codex', '3': 'party', '4': 'rules' }[e.key];
