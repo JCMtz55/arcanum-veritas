@@ -414,8 +414,12 @@ function rollEidon() {
 function renderForge() { asEidonSlot(renderForgeNow); }
 function renderForgeNow() {
   const comp = document.getElementById("composer"), seal = document.getElementById("sumBody");
-  comp.innerHTML = pathWarning() + ignRules() + buildForge()
-    + (state.ign.burning.length ? "" : ignMineHome() + savedHome());
+  // What you own outright comes before what you improvise: the Blaze tracker, then your Ignitions,
+  // then the Eidon builder. They also stay put once something is Burning — an Ignition is used
+  // *with* its Cognitions lit, so hiding the card the moment you Burn would hide the Use button
+  // exactly when it is wanted. Saved Eidons are recipes to load, so they still step aside.
+  comp.innerHTML = pathWarning() + ignRules() + blazeBlock() + ignMineHome() + buildForge()
+    + (state.ign.burning.length ? "" : savedHome());
   const e = eidon();
   if (!e.prim)      { seal.innerHTML = `<div class="empty">Burn a Cognition from the left to begin an Eidon.</div>`; seal.dataset.text = ""; }
   else if (!e.ok)   { seal.innerHTML = `<div class="empty">Choose a Template — what shape the Eidon takes.</div>`; seal.dataset.text = ""; }
@@ -510,11 +514,10 @@ function ignRules() {
   </div></details>`;
 }
 
-function buildForge() {
-  const I = state.ign, e = eidon();
-  let h = "";
-
-  // ── Blaze & Burning
+// The Blaze & Burning tracker. Its own function so the Forge can set it above your Ignitions and
+// the Eidon builder below them — it is what the Use button spends and what the lit state reads.
+function blazeBlock() {
+  const I = state.ign;
   const bmax = blazeMax(), bnow = blazeNow();
   let b = `<div class="blaze">${Array.from({ length: bmax }, (_, i) => `<span class="bp${i < bnow ? " on" : ""}"></span>`).join("")}
     <b>${bnow} / ${bmax}</b><i>Blaze Points</i></div>`;
@@ -533,8 +536,12 @@ function buildForge() {
     <button class="chip" onclick="shortRest()">Short rest (+1, spend a Hit Die)</button>
     <button class="chip" onclick="longRest()">Long rest</button></div>`;
   if (I.burnedRound) b += `<p class="hint">You've Burned this turn.</p>`;
-  h += block("Blaze &amp; Burning", b);
+  return block("Blaze &amp; Burning", b);
+}
 
+function buildForge() {
+  const I = state.ign, e = eidon();
+  let h = "";
   if (!e.prim) return h;
   h += primaryRules(e);
 
@@ -754,16 +761,56 @@ function ignAbout(ig) {
 // `ign-home` is the whole point of the different look — an Ignition is not a build you made.
 function ignMineHome() {
   if (!IGN_MINE.length) return "";
-  const dm = API && ME && ME.role === "dm";
+  const dm = API && ME && ME.role === "dm", many = IGN_MINE.length > 1;
   return `<div class="blk saved-home ign-home"><div class="blk-h">
-      <h2>${dm ? "Custom Ignitions — every one written" : "Your Ignitions"}</h2><div class="rule"></div>
+      <h2>Ignitions</h2><div class="rule"></div>
       <span class="ign-tag">permanent · no Eidon Check</span></div>
-    <div class="rings">` + IGN_MINE.map(ig => `<button class="ring ign-ring" onclick="openMyIgnition('${escAttr(ig.id)}')"
-      title="${escQ(ig.name)} — open the entry">
-      <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>`).join("")
-    + `</div></div>`;
+    <div class="ign-reel">
+      <button class="ign-arrow" onclick="ignScroll(-1)" ${many ? "" : "disabled"}
+        title="Earlier Ignitions" aria-label="Scroll back">‹</button>
+      <div class="ign-track" id="ignReel">` + IGN_MINE.map(ig => {
+      const missing = ignMissing(ig), lit = !missing.length;
+      return `<div class="ring ign-ring ign-card${lit ? " ign-lit" : ""}">
+      <button class="ign-open" onclick="openMyIgnition('${escAttr(ig.id)}')"
+        title="${escQ(ig.name)} — open the entry">
+        <b>${esc(ig.name)}</b><span>${esc(ignAbout(ig))}${dm && ig.player ? ` — ${esc(ig.player)}` : ""}</span></button>
+      <div class="ign-foot"><button class="ign-use" onclick="useMyIgnition('${escAttr(ig.id)}')"
+        title="${escQ(lit ? `${ig.name} — spend 1 Blaze Point` : `${ig.name} needs ${missing.join(" and ")} Burning`)}">Use · 1 Blaze</button>
+        ${lit ? `<span class="ign-ready">lit</span>` : ""}</div></div>`;
+    }).join("")
+    + `</div>
+      <button class="ign-arrow" onclick="ignScroll(1)" ${many ? "" : "disabled"}
+        title="Later Ignitions" aria-label="Scroll forward">›</button>
+    </div></div>`;
+}
+// The reel scrolls by a whole card, so a step always lands on one rather than halfway across two.
+function ignScroll(dir) {
+  const track = document.getElementById("ignReel");
+  if (!track) return;
+  const card = track.querySelector(".ign-card");
+  track.scrollBy({ left: dir * ((card?.offsetWidth || 240) + 9), behavior: "smooth" });
 }
 function openMyIgnition(id) { setView("rings"); openIgnRef("mine:" + id); }
+// Which of an Ignition's Cognitions aren't Burning, by name. It names them by id and the server
+// drops any file naming one that doesn't exist, so the list can be trusted as written; an Ignition
+// that names none has nothing to require and is always ready.
+function ignMissing(ig) {
+  const lit = new Set(state.ign.burning.map(b => b.id));
+  return (ig.cognitions || []).filter(c => !lit.has(c)).map(c => INDEX.find(x => x.id === c)?.name || c);
+}
+// Using one costs a Blaze Point and nothing else. An Ignition is a technique the body already
+// knows — there is no Eidon Check to roll and no builder state to set, so this only moves the
+// Blaze counter and says what it did. What it does ask for is its own Cognitions, Burning.
+function useMyIgnition(id) {
+  const ig = ignMine(id);
+  if (!ig) return;
+  const missing = ignMissing(ig);
+  if (missing.length) return toast(`${ig.name} needs ${missing.join(" and ")} Burning`);
+  if (blazeNow() < 1) return toast(`No Blaze Point left to use ${ig.name}`);
+  spendBlaze(1);
+  toast(`${ig.name} — 1 Blaze Point spent · ${blazeNow()} / ${blazeMax()} left`);
+  syncBar(); renderMain();
+}
 
 // ── The entry itself. Sections are the author's, in their order; every part is optional, so a
 // one-paragraph Ignition is as valid as Reaper's Communion.
