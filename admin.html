@@ -83,8 +83,11 @@
 <!-- Only what the DM's work needs: the domain tables and Ranks, and the Grimm book. None of the
      builder — no composer, no card, no dice. Paragon Abilities aren't here either: they live in
      cognitions/devotions/<player>_<cognition>_devotion.json, and the page reads their names off the API. -->
-<script src="js/data.js"></script>
-<script src="grimms/js/data.js"></script>
-<script src="js/admin.js"></script>
+<!-- ?v= is a cache buster, as in grimms/index.html: browsers hold these hard, and a stale admin.js
+     looks like "the toggle does nothing" rather than a cached file. Bump it when this page's js
+     or the Grimm data changes. -->
+<script src="js/data.js?v=2026-10-19a"></script>
+<script src="grimms/js/data.js?v=2026-10-19a"></script>
+<script src="js/admin.js?v=2026-10-19a"></script>
 </body>
 </html>

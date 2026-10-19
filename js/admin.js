@@ -689,14 +689,27 @@ function renderGrimmAdmin(id) {
   }
 
   if (g.shackle) {
+    // A Break's payload is withheld with it, and it is not the same payload for every Grimm: the
+    // Parted Gates carry twelve Servant forms, The Fallen Hero carries the two troops it puts on
+    // the field. Name what the lock actually covers, so the DM can see what flipping it hands over.
     const forms = (g.servants || []).filter(s => s.divine || s.forbidden).length;
+    const secret = (g.troops || []).filter(t => t.secret === "shackle");
+    const withheld = [
+      forms ? `the ${forms} Divine and Forbidden Forms it transforms a Servant into` : "",
+      secret.length ? `${secret.length === 1 ? "the troop" : `the ${secret.length} troops`} it puts on the field — <b>${secret.map(t => esc(t.name)).join("</b>, <b>")}</b>` : "",
+    ].filter(Boolean);
     h += `<div class="cdx-sec"><h2>Shackle Break — ${esc(g.shackle.name)}</h2>
-      <p class="cdx-rings">While it's hidden its text never reaches that player's browser${forms ? `, and neither do the ${forms} Divine and Forbidden Forms it transforms a Servant into` : ""}.</p>
+      <p class="cdx-rings">While it's hidden its text never reaches that player's browser${
+        withheld.length ? `, and neither does what it carries: ${withheld.join("; and ")}` : ""}.</p>
       <div class="adm-line" style="gap:10px">
         <button class="mini ${sb ? "on" : ""}" onclick="setToggle('${escAttr(id)}','shackle',${!sb})">
           ${sb ? "✓ Revealed" : "Reveal it"}</button>
         ${sb ? `<span class="hint" style="margin:0">Their sheet can run it now.</span>` : ""}
-      </div></div>`;
+      </div>
+      ${secret.length ? `<p class="hint" style="margin:9px 0 0">${sb
+        ? `Their sheet now holds <b>${secret.map(t => esc(t.name)).join("</b> and <b>")}</b>. Neither can be picked as a job — the Break is the only thing that puts them on the field.`
+        : `Revealing it also sends <b>${secret.map(t => esc(t.name)).join("</b> and <b>")}</b> to their browser. Until then their copy of the data has no record that either exists.`}</p>` : ""}
+      </div>`;
   }
 
   h += `<div class="cdx-sec"><h2>Abilities</h2>

@@ -186,18 +186,26 @@ function shackleEndNow() {
   save(); render();
   shackleClose(sb.name);
 }
+// The one funnel both endings pass through — rounds running out above, "End it now" below — so a
+// Grimm that has to put something back when the chains close registers it once, in SHACKLE_END,
+// and gets it done on either path.
 function shackleClose(name) {
   const v = derived(sheet());
+  const extra = SHACKLE_END[S.current] ? SHACKLE_END[S.current](sheet(), name) : '';
   openDialog(`${name} ends`, `<div class="prose"><p>The chains close again — and bite.</p>
     <ul><li>Gain <b>2 points of Exhaustion</b> and <b>3 points of Dream Exhaustion</b>.</li>
     <li>Make a <b>Dream Saving Throw, DC ${v.dreamDC}</b> (8 + PB + Dream mod). On a failure the bond is damaged — tell your DM.</li></ul></div>
+    ${extra}
     <div class="row"><button class="btn pri" onclick="shackleEnd()">Apply exhaustion & roll the save</button></div><div id="shOut"></div>`);
 }
 function shackleEnd() {
   const sh = sheet(), v = derived(sh);
   sh.exhaustion += 2; sh.dreamExhaustion += 3; save();
-  const r = d(20), tot = r + sh.dreamMod;
-  $('#shOut').innerHTML = `<div class="roll">d20 ${r} ${sign(sh.dreamMod)} = <b>${tot}</b> vs DC ${v.dreamDC} — ${tot >= v.dreamDC ? '<b class="ok">the bond holds</b>' : '<b class="bad">the bond is damaged</b> — tell your DM'}</div>`;
+  const r = d(20), tot = r + sh.dreamMod, failed = tot < v.dreamDC;
+  // Some Breaks cost more than the bond on a failure — White Rabbit's hands Grizzly something of
+  // Silk's that he did not ask for. The Grimm registers that in SHACKLE_FAIL (see panels.js).
+  const extra = failed && SHACKLE_FAIL[S.current] ? SHACKLE_FAIL[S.current](sh, v) : '';
+  $('#shOut').innerHTML = `<div class="roll">d20 ${r} ${sign(sh.dreamMod)} = <b>${tot}</b> vs DC ${v.dreamDC} — ${failed ? '<b class="bad">the bond is damaged</b> — tell your DM' : '<b class="ok">the bond holds</b>'}</div>${extra}`;
   $('#shOut').previousElementSibling.remove();
   render();
 }

@@ -54,9 +54,15 @@ const SERVANTS = { 'gate-of-caelum': 'Gate of Caelum/Servants/Statblocks' };
 // way Servant Roster.md is kept out of the servant list.
 const TROOPS = { 'white-rabbit': 'White Rabbit/Troops' };
 const TROOP_SHARED = 'Universal Traits';
+// A troop that is NOT a job: it arrives through a Shackle Break and is the DM's to reveal. Named
+// here rather than flagged in the note, for the same reason SHACKLES is a list — nothing is
+// auto-discovered, so a secret can never be swept onto a player's sheet by a file being added.
+// `secret` carries the toggle that reveals it; the server cuts the troop out of a reader's copy of
+// data.js until that toggle is on, exactly as it cuts an unrevealed Shackle Break.
+const TROOP_SECRET = { 'white-rabbit': { 'The Fallen Hero': 'shackle', 'Squire': 'shackle' } };
 // The platoon parades in this order whatever order the folder is read in. Anything not listed
 // follows, alphabetically.
-const TROOP_ORDER = ['Infantry', 'Scout', 'Medic', 'Magus', 'Bulwark'];
+const TROOP_ORDER = ['Infantry', 'Scout', 'Medic', 'Magus', 'Bulwark', 'Squire', 'The Fallen Hero'];
 
 // A form file is matched to its soul by name token, so the forms can be renamed freely in the
 // vault without touching this file: "Alaric D'Arquen" claims both "Sir Alaric, Exemplar of the
@@ -78,6 +84,7 @@ const nameWords = n => n.toLowerCase().split(/[^a-z0-9']+/).filter(w => w.length
 const SHACKLES = {
   'gate-of-caelum': 'Gate of Caelum/Gate of Caelum - Shackle Break.md',
   'vidarr':         'Vidarr - Shackle Break.md',
+  'white-rabbit':   'White Rabbit - Shackle Break.md',
 };
 
 // Each Grimm's Reality Shift, from Reality Shifts/Players/. These are built into the data but
@@ -360,11 +367,13 @@ function troops(id) {
   const one = f => ({ name: path.basename(f, '.md'), text: clean(read(path.join(dir, f))) });
   const shared = files.includes(TROOP_SHARED + '.md') ? one(TROOP_SHARED + '.md').text : '';
   const rank = n => { const i = TROOP_ORDER.indexOf(n); return i < 0 ? TROOP_ORDER.length : i; };
+  const secret = TROOP_SECRET[id] || {};
   const types = files.filter(f => path.basename(f, '.md') !== TROOP_SHARED).map(f => {
     const t = one(f), st = troopStats(t.text);
     if (!st.hp) console.log(`   ⚠ ${t.name}: no "**HP** | base + (per × your level)" row`);
     if (!st.sigil) console.log(`   ⚠ ${t.name}: no "**Sigil**" row — the tile will use its initials`);
-    return { id: slug(t.name), ...t, img: firstPlate(t.text), ...st };
+    return { id: slug(t.name), ...t, img: firstPlate(t.text), ...st,
+      ...(secret[t.name] ? { secret: secret[t.name] } : {}) };
   }).sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
   return { types, shared };
 }

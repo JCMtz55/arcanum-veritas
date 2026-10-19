@@ -12,6 +12,11 @@
 // text changes — Hollownest makes the whole platoon corporeal "at full strength" as it rises.
 const PANELS = {}, EXTRA = {}, SHIFT_PANEL = {}, LONG_REST = {}, USE_HOOK = {}, SHACKLE_SETUP = {};
 const ROUND_HOOK = {}, SHIFT_START = {}, SHIFT_END = {};
+// SHACKLE_FAIL[id]: extra HTML appended to the Shackle Break's closing dialog when the Dream Save
+// fails, for a Break whose failure costs more than the bond.
+// SHACKLE_END[id]: called as the chains close, on either path — the rounds running out or "End it
+// now" — for whatever that Grimm has to put back. Returns HTML for the closing dialog.
+const SHACKLE_FAIL = {}, SHACKLE_END = {};
 
 const X = () => sheet().x;
 function xset(k, v) { X()[k] = v; save(); render(); }
@@ -981,6 +986,10 @@ const JOBS_FALLBACK = [
   { name: 'Bulwark',  sigil: 'BWK', charges: {} },
 ];
 const troopTypes = (g = grimmById('white-rabbit')) => (g && g.troops && g.troops.length) ? g.troops : JOBS_FALLBACK;
+// A secret troop is not a job: it arrives through a Shackle Break, cannot be assigned, and must not
+// appear in the job picker or the Compendium. The server already withholds it from a player whose
+// DM has not revealed the Break, so this filter is the second lock, not the only one.
+const troopJobs = (g) => troopTypes(g).filter(t => !t.secret);
 const troopType = (job, g) => job ? troopTypes(g).find(t => t.name === job) || null : null;
 const troopSigil = t => t ? (t.sigil || t.name.slice(0, 3).toUpperCase()) : '—';
 const troopCharges = t => (t && t.charges) || {};
@@ -1015,7 +1024,157 @@ const TROOP_DICE = {
   'Magic Edge':    (v, x) => [v.pb, 12, +x.dex || 0],
   'Arcane Nova':   () => [4, 8, 0],
   'Fluffy Paw':    (v, x) => [v.pb, 6, +x.wis || 0],
+  'Vorpal Blade':  (v, x) => [v.pb, 12, +x.dex || 0],
+  'The Collapse':  () => [10, 10, 0],
+  "The Knight's Charge": (v, x) => [v.pb, 10, +x.dex || 0],
 };
+
+// ── The Fallen Hero — the Shackle Break's one body ──────────────────────
+// He is a troop for everything that reads "your troops", and a job for nothing: no picker, no
+// reassignment, and he does not count against the 2 × PB cap. He is on the field exactly as long as
+// the Shackle Break is, which the round tracker already owns — so the card is derived from
+// shackleOn() and nothing extra has to be stored, started or cleaned up.
+const FALLEN = 'The Fallen Hero';
+// Knighted, in one line: while he stands every troop READS as a Squire. Its own job is left
+// untouched underneath, so nothing has to be remembered and restored, and a Break that ends in
+// some way this panel never sees cannot strand the platoon in the wrong job. Everything else —
+// HP maximum, AC, speed, actions, charges, the statblock button — follows from the type lookup.
+const SQUIRE = 'Squire';
+const troopJobName = (t, knighted) => (knighted && t.job) ? SQUIRE : t.job;
+const fallenType = () => troopTypes().find(t => t.name === FALLEN) || null;
+const fallenOn = (sh, g) => !!(fallenType() && shackleOn(sh, g));
+const fallenState = sh => (sh.x.fallen = sh.x.fallen || { hp: null, used: {}, acted: 0, reacted: 0 });
+function fallenSet(k, v, num) {
+  const sh = sheet(), f = fallenState(sh);
+  if (k === 'hp') {
+    // The Ninety-Nine: damage cannot take him below 1 while the Break holds, so the field floors
+    // at 1 rather than 0. Typing a 0 into it is the one thing the rules say cannot happen.
+    const max = troopMaxHp(fallenType(), sh);
+    f.hp = Math.max(1, Math.min(max || 1e9, Math.floor(+v || 1)));
+  } else f[k] = num ? +v : v;
+  save(); render();
+}
+function fallenAct(kind) {
+  const sh = sheet(), f = fallenState(sh), k = kind === 'reaction' ? 'reacted' : 'acted';
+  const cap = kind === 'reaction' ? 3 : 1;                 // Stand Behind Me, three times per round
+  const used = f[k] === sh.round ? (f[k + 'N'] || 1) : 0;
+  if (used >= cap) { f[k] = 0; f[k + 'N'] = 0; } else { f[k] = sh.round; f[k + 'N'] = used + 1; }
+  save(); render();
+}
+function fallenPip(name, n) {
+  const sh = sheet(), f = fallenState(sh), max = troopCharges(fallenType())[name] || 0;
+  const left = max - (f.used[name] || 0);
+  f.used[name] = max - (left === n ? n - 1 : n);
+  save(); render();
+}
+function fallenRoll(name) {
+  const sh = sheet(), v = derived(sh), dice = TROOP_DICE[name];
+  if (!dice) return;
+  const [n, sides, bonus] = dice(v, sh.x);
+  rollOut(`${FALLEN} · ${name}`, n, sides, bonus);
+}
+// The chains come off and he is simply there — no choice to make, so the Break's window only tells
+// the player what just changed about the platoon standing in front of them.
+SHACKLE_SETUP['white-rabbit'] = (sh, g, a) => {
+  const ty = fallenType(), v = derived(sh), f = fallenState(sh);
+  f.hp = troopMaxHp(ty, sh) || null; f.used = {}; f.acted = 0; f.reacted = 0;
+  const n = (sh.x.troops || []).filter(t => t.job && troopAlive(t)).length;
+  const dex = +sh.x.dex || 0;
+  return { done: 'He stands', body: `<div class="prose">
+    <p>The warren goes quiet. Every Vorpal Bunny on the field stops, turns, and <b>kneels</b> — including the ones mid-swing.</p>
+    <p><b>Three things happen before anything else acts.</b> The creature that drew the Reaction is <b>stabilised at 1 hit point</b>. He takes his <b>Multiattack immediately</b>, out of turn. Every hostile within 60 ft that can see him makes a <b>DC ${8 + v.pb + sh.dreamMod} Wisdom save</b> or is <b>frightened of him</b> until the end of its next turn.</p></div>
+    <div class="stats">
+      ${stat(troopMaxHp(ty, sh) || '—', 'his hit points · cannot go below 1')}
+      ${stat(ty && ty.ac || '—', 'his AC')}
+      ${stat(`3 × ${v.pb}d12${sign(dex)}`, 'Multiattack · crit 18–20')}
+      ${stat(`+${v.pb}`, 'Knighted — AC, saves, attack, spell DC')}
+      ${stat(n, `troop${n === 1 ? '' : 's'} kneeling`)}
+    </div>
+    <p class="hint"><b>The Ninety-Nine:</b> damage cannot reduce him below 1 hit point. Nothing on the field can kill him — only the clock, in three rounds. <b>No One Else Falls:</b> the first time each round that anyone you choose within 60 ft would drop to 0, they drop to 1 instead.</p>
+    <p class="hint"><b>Knighted:</b> all ${n} of them become <b>Squires</b> — job trait, actions and charges dropped, a flat <b>+${v.pb}</b> for the platoon however many are standing, <b>The Knight's Charge</b> at <b>${v.pb}d10</b> critting on 18–20, and <b>no Squire falls</b> while he stands. When he goes each takes its own job back, the platoon is <b>restored whole</b> — full HP, every charge — and every troop may <b>take a new job on the spot</b>.</p>` };
+};
+// He kneels once before he goes, and the platoon gets up whole (Juan, 2026-10-19). Every Squire
+// takes its own job back — the one it knelt as, which was never overwritten — and then the whole
+// platoon is RESTORED: full hit points, every charge back, the fallen re-formed. On top of that
+// the jobs are free to change right now, without waiting for a rest, because they have all just
+// been something else anyway.
+SHACKLE_END['white-rabbit'] = sh => {
+  const troops = sh.x.troops || [];
+  const hurt = troops.filter(t => t.job && (t.dead || t.down != null || (t.hp != null && t.hp < troopMaxHp(troopType(t.job), sh)))).length;
+  const spent = troops.filter(t => Object.values(t.used || {}).some(n => n > 0)).length;
+  troops.forEach(t => {
+    t.used = {}; t.down = null; t.dead = false; t.acted = 0; t.actedN = 0; t.reacted = 0; t.reactedN = 0;
+    t.hp = troopMaxHp(troopType(t.job), sh) || null;
+  });
+  sh.x.fallen = null;
+  save();
+  return `<div class="prose"><p><b>He kneels once, and the platoon gets up.</b> Every Squire takes back the job it knelt as, and
+    the whole platoon is <b>restored</b> — full hit points, every charge back${hurt || spent ? ` (${[hurt && `${hurt} re-formed`, spent && `${spent} refilled`].filter(Boolean).join(', ')})` : ''}.</p>
+    <p>They may all <b>take new jobs right now</b>, without waiting for a rest. Use the <b>Job</b> button on any troop.</p></div>`;
+};
+// A failed Dream Save on this Break does more than damage the bond: he does not entirely let go.
+SHACKLE_FAIL['white-rabbit'] = () => `<div class="prose" style="margin-top:9px">
+    <p><b>It Does Not Entirely Let Go.</b> Grizzly surfaces carrying something that is not his —
+    roll a d6 on the Shackle Break's table, or let your DM choose. Tell them either way.</p></div>
+  <div class="row"><button class="btn" onclick="fallenLeak()">Roll the d6</button></div><div id="leakOut"></div>`;
+const LEAK = [
+  ['The ticking', 'For 24 hours he hears a pocket watch that is not in his pocket. Not frightening — worse than that. Familiar.'],
+  ['A name he has never heard', 'He says <i>Cloud</i> out loud, in a voice slightly lower than his own, and does not know why he said it.'],
+  ['The weight', 'His arms remember carrying a child out of a collapse. He has never carried a child out of anything.'],
+  ['A habit', 'He checks that everyone else is all right before himself — not as a choice. For a day he <b>cannot</b> take the Dodge action, or any action protecting only himself, while an ally is below half hit points.'],
+  ['The gears', 'His hands know something he never learned: for 24 hours he can strip and rebuild any fine mechanism, perfectly, without instruction.'],
+  ['The Promise', 'He dreams of black flames that do not burn, and a voice that says <i>we will meet again</i> — and wakes certain it was not talking to him.'],
+];
+function fallenLeak() {
+  const r = d(6), [name, text] = LEAK[r - 1];
+  $('#leakOut').innerHTML = `<div class="roll">d6 <b>${r}</b> — <b>${name}.</b> ${text}</div>`;
+}
+
+function fallenCard(sh, v) {
+  const ty = fallenType(), f = fallenState(sh);
+  const max = troopMaxHp(ty, sh), hp = f.hp == null ? max : +f.hp;
+  const frac = max ? Math.max(0, Math.min(1, hp / max)) : 0;
+  const acts = troopActions(ty);
+  f.used = f.used || {};
+  const tick = (kind, cap, label) => {
+    const used = (f[kind === 'reaction' ? 'reacted' : 'acted'] === sh.round)
+      ? (f[(kind === 'reaction' ? 'reacted' : 'acted') + 'N'] || 1) : 0;
+    return `<button class="btn sm tact ${used >= cap ? 'spent' : used ? 'part' : ''}"
+      onclick="fallenAct('${kind}')">${label}${cap > 1 ? ` ${used}/${cap}` : used >= cap ? ' ✓' : ''}</button>`;
+  };
+  return `<div class="soulcard troopcard fallen-hero">
+    <div class="face${ty.img ? '' : ' blank'}">${ty.img
+      ? `<img src="${attr(ty.img)}" alt="" onclick="lightbox(this.src,'${attr(ty.name)}')" title="Click to see it whole">`
+      : `<span class="noface sig">✦</span>`}
+      <span class="badge">Shackle Break</span>
+      ${ty.ac ? `<span class="crtag">AC ${ty.ac}</span>` : ''}
+    </div>
+    <div class="meat">
+      <div class="nm" title="${attr(ty.name)}">${esc(ty.name)}</div>
+      <div class="hpline"><span class="lbl">HP</span>
+        <input class="num" type="number" value="${hp}" onchange="fallenSet('hp',this.value)">
+        <span class="lbl">/ ${max || '—'}</span></div>
+      <div class="hpbar"><i style="width:${Math.round(frac * 100)}%"></i></div>
+      ${ty.speed ? `<div class="lbl spd">${esc(ty.speed)}</div>` : ''}
+      <div class="acts">${tick('action', 1, 'Action')}${tick('reaction', 3, 'Reaction')}</div>
+      ${acts.some(a => a.max) ? `<div class="trwrap">${acts.filter(a => a.max).map(a => {
+        const left = a.max - (f.used[a.name] || 0);
+        return `<div class="tr"><span class="nm" title="${attr(a.name)} — ${left} of ${a.max} left">${esc(a.name)}</span>
+          <span class="pips">${Array.from({ length: a.max }, (_, k) =>
+            `<i class="${k < left ? 'on' : ''}" onclick="fallenPip('${attr(a.name)}',${k + 1})"></i>`).join('')}</span></div>`;
+      }).join('')}</div>` : ''}
+      <div class="acts">${acts.filter(a => TROOP_DICE[a.name]).map(a => {
+        const [n, sides, bonus] = TROOP_DICE[a.name](v, sh.x);
+        return `<button class="btn sm" onclick="fallenRoll('${attr(a.name)}')">${esc(a.name)} · ${n}d${sides}${bonus ? sign(bonus) : ''}</button>`;
+      }).join('')}</div>
+      <div class="acts">
+        <button class="btn sm" onclick="troopStatblock('${attr(FALLEN)}')">Statblock</button>
+        <button class="btn sm warn" onclick="shackleEndNow()">Send him back</button>
+      </div>
+      <p class="hint"><b>The Ninety-Nine:</b> damage cannot take him below 1 — nothing on the field can kill him, only the clock. Acts on your initiative, needs no Bonus Action, and does not count against the troop cap.</p>
+    </div>
+  </div>`;
+}
 // Every troop gets a tile — the platoon proper, the reinforcements called up by the ability, and
 // any summoned past the limit by Hollownest's Reinforcement Surge. They all take jobs. A platoon
 // can run to 2×PB, and as full-width rows that was the whole card; as tiles eight of them fit in
@@ -1036,7 +1195,7 @@ function troopPick(el, i) {
       <i>${esc(a)}</i><span class="pips">${Array.from({ length: max }, (_, k) =>
         `<button class="pip sm ${k < (t.used[a] || 0) ? 'used' : ''}" title="${attr(a)}" onclick="event.stopPropagation();troopCharge(${i},'${a}',${k})"></button>`).join('')}</span>
     </span>`).join('')}</div>` : '';
-  const rows = [null, ...troopTypes()].map(ty => {
+  const rows = [null, ...troopJobs()].map(ty => {
     const c = Object.entries(troopCharges(ty)), j = ty ? ty.name : '';
     return `<button type="button" class="pickrow active${j === t.job ? ' on' : ''}"
       onclick="event.stopPropagation();abTipOff(true);troopJob(${i},'${attr(j)}')">
@@ -1125,14 +1284,19 @@ function troopRoll(i, name) {
 const troopBase = sh => awakened(sh) ? 3 : 2;
 
 // One card: the plate, the HP, the charges, and the round's ticks.
-function troopCard(i, t, sh, v) {
+// `knighted` is The Fallen Hero standing — the job's trait, actions and charges are suspended, so
+// the card stops offering them and offers The Knight's Charge instead. A spent charge is left
+// exactly as it was: it is waiting, not refunded.
+function troopCard(i, t, sh, v, knighted) {
   t.used = t.used || {};
-  const ty = troopType(t.job), nm = troopName(i, troopBase(sh), sh.x.reinf || 0);
+  const corp = troopsCorp(sh);
+  const jn = troopJobName(t, knighted);                    // Squire while he stands
+  const ty = troopType(jn), nm = troopName(i, troopBase(sh), sh.x.reinf || 0);
   const max = troopMaxHp(ty, sh), hp = t.hp == null ? max : +t.hp;
   const frac = max ? Math.max(0, Math.min(1, hp / max)) : 0;
   const till = troopDownTill(t);
   const acts = troopActions(ty);
-  const reactCap = t.job === 'Bulwark' ? 2 : 1;
+  const reactCap = jn === 'Bulwark' ? 2 : 1;               // Unbroken Guard; a Squire has one
   const tick = (kind, cap, label) => {
     const used = troopUsed(t, sh, kind);
     return `<button class="btn sm tact ${used >= cap ? 'spent' : used ? 'part' : ''}"
@@ -1145,6 +1309,7 @@ function troopCard(i, t, sh, v) {
       : `<span class="noface sig">${troopSigil(ty)}</span>`}
       ${t.dead ? '<span class="badge warn">Fallen</span>'
         : till != null ? `<span class="badge warn">Last Stand · to round ${till}</span>`
+        : knighted && t.job ? `<span class="badge sworn" title="${attr(`Sworn to The Fallen Hero — it takes ${t.job} back when he goes`)}">Squire · was ${esc(t.job)}</span>`
         : t.job ? `<span class="badge">${esc(t.job)}</span>` : '<span class="badge">No job</span>'}
       ${ty && ty.ac ? `<span class="crtag">AC ${ty.ac}</span>` : ''}
     </div>
@@ -1152,12 +1317,12 @@ function troopCard(i, t, sh, v) {
       <div class="nm" title="${attr(nm + (ty ? ' · ' + ty.name : ''))}">${esc(nm)}${i >= troopBase(sh) ? ' <span class="tag">R</span>' : ''}</div>
       ${!t.job ? '<p class="hint">Give it a job to put it on the field.</p>'
         : t.dead ? '<p class="hint">It did not survive Last Stand. A Short Rest re-forms it.</p>'
-        : `<div class="hpline"><span class="lbl">HP</span>
+        : `${corp ? `<div class="hpline"><span class="lbl">HP</span>
             <input class="num" type="number" value="${hp}" onchange="troopHpSet(${i},this.value)">
             <span class="lbl">/ ${max || '—'}</span></div>
-          <div class="hpbar"><i style="width:${Math.round(frac * 100)}%"></i></div>
+          <div class="hpbar"><i style="width:${Math.round(frac * 100)}%"></i></div>` : ''}
           ${ty && ty.speed ? `<div class="lbl spd">${esc(ty.speed)}</div>` : ''}
-          <div class="acts">${tick('action', 1, 'Action')}${tick('reaction', reactCap, 'Reaction')}</div>`}
+          <div class="acts">${tick('action', 1, 'Action')}${tick('reaction', knighted ? 1 : reactCap, 'Reaction')}</div>`}
       ${t.job && !t.dead && acts.some(a => a.max) ? `<div class="trwrap">${acts.filter(a => a.max).map(a => {
         const left = a.max - (t.used[a.name] || 0);
         return `<div class="tr"><span class="nm" title="${attr(a.name)} — ${left} of ${a.max} left">${esc(a.name)}</span>
@@ -1170,10 +1335,10 @@ function troopCard(i, t, sh, v) {
         return `<button class="btn sm" onclick="troopRoll(${i},'${attr(a.name)}')">${esc(a.name)} · ${n}d${sides}${bonus ? sign(bonus) : ''}</button>`;
       }).join('')}</div>` : ''}
       <div class="acts">
-        <button class="btn sm" onclick="troopPick(this,${i})" title="Change its job, or spend a charge">Job</button>
-        ${t.job ? `<button class="btn sm" onclick="troopStatblock('${attr(t.job)}')">Statblock</button>` : ''}
-        ${t.job && !t.dead && till == null ? `<button class="btn sm warn" title="It dropped to 0 HP" onclick="troopFell(${i})">Fell</button>` : ''}
-        ${t.job && (t.dead || till != null || hp < max) ? `<button class="btn sm" title="Whole again" onclick="troopReform(${i})">Re-form</button>` : ''}
+        <button class="btn sm" ${knighted ? 'disabled title="It is sworn to him — jobs cannot change while he stands"' : 'title="Change its job, or spend a charge"'} onclick="troopPick(this,${i})">Job</button>
+        ${t.job ? `<button class="btn sm" onclick="troopStatblock('${attr(jn)}')">Statblock</button>` : ''}
+        ${corp && t.job && !t.dead && till == null ? `<button class="btn sm warn" title="It dropped to 0 HP" onclick="troopFell(${i})">Fell</button>` : ''}
+        ${corp && t.job && (t.dead || till != null || hp < max) ? `<button class="btn sm" title="Whole again" onclick="troopReform(${i})">Re-form</button>` : ''}
       </div>
     </div>
   </div>`;
@@ -1185,12 +1350,17 @@ PANELS['white-rabbit'] = (g, sh, v) => {
   while (x.troops.length < total) x.troops.push({ job: '', used: {} });
   if (x.troops.length > total) x.troops.length = total;
   // A dead troop lends the Commander nothing: the traits are "for each Infantry" in the platoon,
-  // and one that did not survive Last Stand is not in it any more.
-  const n = j => x.troops.filter(t => t.job === j && troopAlive(t)).length;
+  // and one that did not survive Last Stand is not in it any more. While he stands they are all
+  // Squires, so every job count falls to zero on its own and the banner takes the row.
+  const n = j => x.troops.filter(t => troopJobName(t, fallenOn(sh, g)) === j && troopAlive(t)).length;
   const dex = +x.dex || 0, wis = +x.wis || 0, half = Math.floor(v.pb / 2);
   const corp = troopsCorp(sh), rsOn = rsState(sh).on;
   const standing = x.troops.filter(t => troopAlive(t)).length;
   const fallen = total - standing;
+  // Knighted: while The Fallen Hero stands the platoon stops being specialists. Every job trait,
+  // action and charge is suspended — all of them, however many are out — and the Grimm User gets a
+  // flat +PB instead. It is the one thing in this panel that takes something away.
+  const knighted = fallenOn(sh, g);
   // Each troop is a tile in the same square vocabulary as the ability hotbar: the job's initials
   // on the face, charges as pips under them, and everything you press — picking the job, spending
   // a charge — in the popover. Pips cannot be buttons inside a button, and that is the right trade
@@ -1210,7 +1380,7 @@ PANELS['white-rabbit'] = (g, sh, v) => {
         ${i >= base ? '<span class="act">R</span>' : ''}</span>
       <span class="cap">${esc(nm)}</span></button>`;
   }).join('');
-  const troopCards = x.troops.map((t, i) => troopCard(i, t, sh, v)).join('');
+  const troopCards = (knighted ? fallenCard(sh, v) : '') + x.troops.map((t, i) => troopCard(i, t, sh, v, knighted)).join('');
   return `<h2>Umbra Platoon <span class="r">
       ${grimmById('white-rabbit').troopTraits ? `<button class="btn sm" onclick="troopTraitsDialog()" title="What every troop has, whatever its job">Universal traits</button>` : ''}
       <button class="btn sm" onclick="troopRest()">Short rest</button></span></h2>
@@ -1218,21 +1388,24 @@ PANELS['white-rabbit'] = (g, sh, v) => {
       ${stat(total, `troops${reinf || surge ? ` · ${base} + ${reinf}${surge ? ` + ${surge}` : ''}` : ''}`)}
       ${fallen ? stat(fallen, 'fallen', 'var(--ember)') : ''}
       ${stat(`${40 * standing} ft`, `warding range${corp ? ' · from each corporeal troop' : ''}`)}
-      ${stat(`${20 - n('Infantry')}–20`, 'crit range')}
+      ${knighted
+        ? stat(`+${v.pb}`, 'Knighted — AC, saves, attack, spell DC', 'var(--k-super)')
+        : `${stat(`${20 - n('Infantry')}–20`, 'crit range')}
       ${n('Scout') ? stat(`+${n('Scout')}`, 'atk & dmg, +' + 3 * n('Scout') + ' Perception') : ''}
       ${n('Medic') ? stat(`+${10 * n('Medic')}`, 'max HP') : ''}
       ${n('Magus') ? stat(`+${n('Magus')}`, 'spell atk & DC') : ''}
-      ${n('Bulwark') ? stat(`+${n('Bulwark')}`, 'AC & saves') : ''}
+      ${n('Bulwark') ? stat(`+${n('Bulwark')}`, 'AC & saves') : ''}`}
     </div>
+    ${knighted ? `<p class="hint knighted-note"><b>Every troop is a Squire.</b> It kneels, drops its job — trait, actions and charges all — and stands back up sworn to him. Squires <b>do not stack</b>: the platoon is a flat <b>+${v.pb}</b> however many are standing. Their Action is <b>The Knight's Charge</b>, <b>${v.pb}d10</b> at ${sign((+x.dex || 0) + v.pb)}, critting on <b>18–20</b>, and <b>no Squire falls</b> while he stands. When he goes they take their jobs back, come up <b>whole</b>, and may be <b>reassigned on the spot</b>.</p>` : ''}
     <div class="row" style="margin-top:10px">${numIn('Dex mod', 'dex', 0)}${numIn('Wis mod', 'wis', 0)}
       <span class="pair"><span class="lbl">Reinforcements</span><div class="step"><button onclick="xbump('reinf',-1,0,${Math.max(0, maxT - base)})">–</button><span>${reinf}</span><button onclick="xbump('reinf',1,0,${Math.max(0, maxT - base)})">+</button></div></span>
       ${surge ? `<span class="pair"><span class="lbl">Surge</span><div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${surge}</span><button onclick="xbump('surge',1,0,8)">+</button></div></span>` : ''}
       <label class="lbl" title="${attr(rsOn ? 'Hollownest holds — the platoon is corporeal whatever this says' : 'The troop has HP, AC and Speed only when it is physical. Inside Hollownest that is automatic; tick this if your DM rules them physical outside it.')}">
         <input type="checkbox" ${corp ? 'checked' : ''} ${rsOn ? 'disabled' : ''} onchange="xset('corp',this.checked)"> Corporeal${rsOn ? ' · Hollownest' : ''}</label></div>
-    ${corp ? `<div class="row" style="margin-top:9px">
+    ${corp || knighted ? `<div class="row" style="margin-top:9px">
         <button class="btn pri" onclick="troopsAllActed()" title="The Umbra Platoon Bonus Action: every troop moves and takes one Action">Platoon acts · Bonus Action</button>
         <button class="btn" onclick="troopsClearActed()" title="Vorpal Ambush Strike lets them act again, even if they already have">Let them act again</button>
-        <span class="hint" style="flex:1;min-width:200px">Round <b>${sh.round}</b>. Ticks clear themselves on <b>Next round</b>, and a troop at 0 HP dies at the end of the round after it fell unless it is healed.</span>
+        <span class="hint" style="flex:1;min-width:200px">Round <b>${sh.round}</b>. Ticks clear themselves on <b>Next round</b>${corp ? ', and a troop at 0 HP dies at the end of the round after it fell unless it is healed' : ''}.</span>
       </div>
       <div class="souls">${troopCards}</div>`
     : `<div class="troops">${troopRows}</div>`}

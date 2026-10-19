@@ -180,6 +180,18 @@ textarea.txt{width:100%;min-height:70px;font-family:var(--serif);font-size:14px;
 .troopcard.fallen{opacity:.55;border-top-color:var(--mute)}
 .soulcard .badge.warn{color:var(--ember);box-shadow:inset 0 0 0 1px var(--ember)}
 .troopcard .spd{font-size:10.5px;opacity:.75}
+/* The Fallen Hero is not one of the five. He wears the Shackle Break's colour, and he leads the
+   row because he arrives at the front of it. */
+.troopcard.fallen-hero{border-top-color:var(--k-shackle,var(--k-super));
+  background:color-mix(in srgb,var(--k-shackle,var(--k-super)) 9%,transparent)}
+.troopcard.fallen-hero .face{aspect-ratio:4/5}
+.troopcard.fallen-hero .face.blank{aspect-ratio:5/2}
+.troopcard.fallen-hero .noface.sig{color:var(--k-shackle,var(--k-super));font-size:40px;opacity:.7}
+.troopcard.fallen-hero .badge{color:var(--k-shackle,var(--k-super));
+  box-shadow:inset 0 0 0 1px var(--k-shackle,var(--k-super))}
+.troopcard.fallen-hero .hpbar i{background:var(--k-shackle,var(--k-super))}
+.knighted-note{margin:8px 0 0;padding:7px 9px;border-radius:7px;
+  border-left:2px solid var(--k-super);background:color-mix(in srgb,var(--k-super) 8%,transparent)}
 .troopcard .trwrap .tr .nm{font-size:11px}
 /* The round's ticks: what this troop has already spent. Pressed is spent. */
 .tact{font-variant-numeric:tabular-nums}

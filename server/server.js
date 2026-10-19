@@ -882,7 +882,12 @@ function grimmDataFor(shifts, shackles) {
         // Servant". Withholding the rules while serving the forms would reveal it anyway, so they go
         // with it. The Base stat block of each soul stays — that is what the player uses every session.
         out.servants = (g.servants || []).map(s => ({ ...s, divine: null, forbidden: null }));
+        // Same reasoning for a troop the Break calls: The Fallen Hero's statblock IS the payload of
+        // White Rabbit's Shackle Break, and his note says so in its first paragraph. Serving him
+        // while withholding the Break would hand the player the secret and keep the rules.
+        out.troops = (g.troops || []).filter(t => t.secret !== "shackle");
       }
+      if (!shifts.has(g.id)) out.troops = (out.troops || g.troops || []).filter(t => t.secret !== "shift");
       return out;
     }) };
     if (dataCache.size > 32) dataCache.clear();
