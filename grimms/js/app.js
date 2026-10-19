@@ -25,8 +25,18 @@ function render() {
   // While the chains are off or a domain is up, the page keeps a low edge — red or pink — so the
   // table can tell at a glance that something big is still running.
   const live = S.current ? sheet() : null;
+  const domain = live && live.rs && live.rs.on;
   document.body.classList.toggle('shackled-now', !!(live && shackleOn()));
-  document.body.classList.toggle('shifted-now', !!(live && live.rs && live.rs.on));
+  document.body.classList.toggle('shifted-now', !!domain);
+  // While a domain holds, the page wears its plate — a dark wash of the Shift's own art behind the
+  // sheet, so anyone glancing at the screen can see whose reality the table is standing in. It is a
+  // variable rather than an element because body::before paints it and clearing the variable takes
+  // it away; a Shift whose note carries no plate just sets none and the page looks as it always did.
+  // Absolute, not "img/…": a relative url() inside a custom property is resolved against the
+  // stylesheet that *uses* the variable, not the document, so css/app.css turned the plate into
+  // css/img/… and the backdrop silently never loaded.
+  const plate = domain && shiftOn(S.current) && grimmById(S.current).shift?.art;
+  document.body.style.setProperty('--rs-plate', plate ? `url('${new URL(plate, location.href).href}')` : 'none');
   renderBar();
   if (S.view === 'sheet') S.current ? renderSheet() : renderChooser();
   else if (S.view === 'codex') renderCodex();
@@ -126,10 +136,17 @@ function shackleBreakOpen(a, g) {
 const RS_WISPS = 16, RS_VOID = 11;
 const rsWisps = (n, skew) => Array.from({ length: n }, (_, i) =>
   `<i style="--a:${Math.round(i * 360 / n + (i % 3) * skew)}deg;--d:${(i % 6) * 70}ms"></i>`).join('');
+// The domain's own plate is the payoff. It opens out of the ball on the ring burst — the energies
+// collapse to a point and the place is simply there, which is what a Reality Shift is: not a spell
+// laid on a place, a place laid on a place. The ball fades as the art passes it so the centre of
+// the screen is the domain and not a pink sphere sitting on top of it.
+// A Shift whose note carries no plate runs exactly the original animation at the original length;
+// the extra second is only bought when there is something to look at.
 function realityShiftOpen(s, after) {
+  const plate = s.art ? `<div class="rs-plate" style="background-image:url('${attr(s.art)}')"></div>` : '';
   cinematic({
-    kind: 'rshift', body: 'shifting', ms: 2800,
-    inner: `<div class="rs-void"></div>
+    kind: `rshift${s.art ? ' plated' : ''}`, body: 'shifting', ms: s.art ? 3800 : 2800,
+    inner: `<div class="rs-void"></div>${plate}
       <div class="rs-field hot">${rsWisps(RS_WISPS, 7)}</div>
       <div class="rs-field dark">${rsWisps(RS_VOID, 11)}</div>
       <div class="rs-ball"></div><div class="rs-ring"></div>

@@ -12,7 +12,7 @@ function renderCodex() {
     <div>
       <div class="hero" style="--hue:${g.hue};margin-bottom:6px"><div><h1>${esc(g.name)}</h1><div class="sub">Grimm of <b>${esc(g.user)}</b></div></div></div>
       <div class="forms">
-        ${['invoked', 'awakened'].map(s => g.images[s] ? `<div class="form"><img src="${attr(g.images[s])}" alt="${attr(g.name)} — ${s} form" loading="lazy" onerror="this.remove()"><div>${STAGE_NAME[s]}<b>${esc(g.forms[s] || '')}</b></div></div>` : '').join('')}
+        ${['invoked', 'awakened'].map(s => g.images[s] ? `<div class="form"><img src="${attr(g.images[s])}" alt="${attr(g.name)} — ${s} form" loading="lazy" onerror="this.remove()" onclick="lightbox(this.src,'${attr(g.name)} — ${attr(g.forms[s] || STAGE_NAME[s])}')" title="Click to see it whole"><div>${STAGE_NAME[s]}<b>${esc(g.forms[s] || '')}</b></div></div>` : '').join('')}
       </div>
       ${mine ? `<p class="hint">Numbers are shown for <b>your</b> level ${mine.level} (PB ${pbOf(mine.level)}).</p>` : ''}
       ${groups.map(([st, label]) => {

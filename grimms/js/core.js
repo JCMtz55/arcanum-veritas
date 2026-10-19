@@ -227,12 +227,24 @@ function defaultLoadout(g, stage) {
   return out;
 }
 // Keep the loadout the right size when the stage changes.
+//
+// Only a sheet that has never composed this kind gets the default loadout. Once the array exists
+// it is the player's own arrangement and is kept exactly as it stands, blanks included: with the
+// hotbar as the loadout an emptied socket is a decision, and the old behaviour — drop the blanks,
+// then top back up from the defaults — meant "clear this slot" silently refilled itself and an
+// empty socket could never be seen. An ability that has become invalid (locked by the stage, or
+// switched off by the DM) is blanked in place rather than closing the gap, so nothing else slides
+// along the bar underneath someone's hand mid-fight.
 function fitLoadout(g, sh) {
   const n = ABILITY_SLOTS[sh.stage], def = defaultLoadout(g, sh.stage);
   for (const k of ['passive', 'active', 'super']) {
-    let arr = (sh.loadout[k] || []).filter(id => { const a = g.abilities.find(x => x.id === id); return a && unlocked(a, sh.stage) && abilityOn(g.id, id); });
+    const fresh = !Array.isArray(sh.loadout[k]);
+    let arr = fresh ? [] : sh.loadout[k].map(id => {
+      const a = id && g.abilities.find(x => x.id === id);
+      return a && unlocked(a, sh.stage) && abilityOn(g.id, id) ? id : '';
+    });
     arr = arr.slice(0, n[k]);
-    for (const id of def[k]) if (arr.length < n[k] && !arr.includes(id)) arr.push(id);
+    if (fresh) for (const id of def[k]) if (arr.length < n[k] && !arr.includes(id)) arr.push(id);
     while (arr.length < n[k]) arr.push('');
     sh.loadout[k] = arr;
   }
@@ -248,6 +260,29 @@ function toast(msg) {
   clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 2200);
 }
 function attr(s) { return esc(s).replace(/'/g, '&#39;'); }
+
+// ── Lightbox ───────────────────────────────────────────────────────────
+// The plates are the thing on this site people actually want to look at, and every surface shows
+// them small: a 66px sigil, a 118px portrait, a column-width card. Any of them opens full size
+// here. Click anywhere or press Escape to close; the image itself is `contain`, never cropped,
+// because being able to see the whole painting is the entire point of opening it.
+function lightbox(src, caption) {
+  if (!src) return;
+  document.getElementById('lbox')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lbox';
+  el.className = 'lbox';
+  el.innerHTML = `<img src="${attr(src)}" alt="${attr(caption || '')}">
+    ${caption ? `<figcaption>${esc(caption)}</figcaption>` : ''}
+    <span class="lbox-x" aria-hidden="true">×</span>`;
+  const key = e => { if (e.key === 'Escape') { e.stopPropagation(); off(); } };
+  const off = () => { el.remove(); document.removeEventListener('keydown', key, true); };
+  el.addEventListener('click', off);
+  document.addEventListener('keydown', key, true);
+  document.body.append(el);
+}
+// A CSS background is not an <img>, so the url() has to be unwrapped before it can be opened.
+const bgUrl = el => (getComputedStyle(el).backgroundImage.match(/url\(["']?(.*?)["']?\)/) || [])[1] || '';
 
 // Rendered vault text, with the numbers the player needs pinned beside the words.
 function prose(text, sh) {

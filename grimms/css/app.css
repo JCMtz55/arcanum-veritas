@@ -323,6 +323,237 @@ body.shifted-now::after{--edge:#FF4FA3}
 body.shifting .bar,body.shifting main,body.shifting .foot{animation:rs-wash 2.8s ease-out both}
 @keyframes rs-wash{0%{filter:none}30%{filter:saturate(1.5) hue-rotate(-24deg)}100%{filter:none}}
 
+/* ── The domain's own plate ───────────────────────────────────────────
+   The art arrives on the ring burst and opens out of the ball as a circle: blurred and colourless
+   at first, as though reality were still deciding, then sharp. That is the whole thesis of a Shift
+   in one move — not a spell laid on a place, a place laid on a place.
+   The inset vignette is load-bearing: over a bright plate like Eden the white lettering vanishes
+   without it. Only Shifts whose note carries art get any of this; the rest run as they always did. */
+.rshift .rs-plate{position:absolute;inset:0;background-size:cover;background-position:center;
+  clip-path:circle(0% at 50% 50%);
+  box-shadow:inset 0 0 min(34vmax,420px) min(8vmax,100px) rgba(3,2,5,.93);
+  animation:rs-plate 1.6s cubic-bezier(.22,.85,.3,1) 1.34s both}
+/* A soft well under the lettering. Eden and Solemn Temperance are bright in the middle, and the
+   edge vignette alone does nothing there — the name needs its own darkness to sit in. */
+.rshift .rs-plate::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse 48% 32% at 50% 50%,rgba(3,2,5,.6) 0%,rgba(3,2,5,.26) 56%,transparent 100%)}
+@keyframes rs-plate{
+  0%{clip-path:circle(0% at 50% 50%);opacity:0;filter:blur(26px) saturate(.25)}
+  30%{opacity:1}
+  100%{clip-path:circle(82% at 50% 50%);opacity:1;filter:blur(0) saturate(1)}}
+/* Once the plate is through, the ball has done its work and goes out rather than sitting on the
+   domain as a bright sphere. Without art the ball IS the payoff, so this only applies when plated. */
+.rshift.plated .rs-ball{animation:rs-ball-plated 2.6s cubic-bezier(.2,.9,.25,1) both}
+@keyframes rs-ball-plated{
+  0%{transform:scale(.02);opacity:.25}
+  42%{transform:scale(.4);opacity:1}
+  54%{transform:scale(1.14)}
+  62%{transform:scale(.95);opacity:1}
+  80%{transform:scale(1.32);opacity:0}
+  100%{transform:scale(1.4);opacity:0}}
+/* The name lands after the place does, not on top of it arriving. */
+.rshift.plated .cine-words{animation-delay:1.95s}
+
+/* ── While the domain holds ───────────────────────────────────────────
+   Two things wear the plate once a Shift is up. The page carries it behind everything, dark and
+   fading out before it reaches the text, so a glance at the screen says whose reality this is; the
+   Shift's own card carries it full, where it is an actual picture of the place you are standing in. */
+body.shifted-now::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--rs-plate,none);background-size:cover;background-position:center top;
+  opacity:.3;filter:saturate(.8);
+  -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 46%,transparent 86%);
+          mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 46%,transparent 86%);
+  animation:rs-settle 1.3s ease-out both}
+@keyframes rs-settle{from{opacity:0;transform:scale(1.06)}to{opacity:.3;transform:none}}
+/* ── Lightbox ─────────────────────────────────────────────────────────
+   Above everything, including the cinematics' z-index 200, because it is opened deliberately and
+   nothing should be able to sit over it. `contain` always: the whole painting or nothing. */
+.lbox{position:fixed;inset:0;z-index:300;display:grid;place-items:center;cursor:zoom-out;
+  padding:28px;background:rgba(4,5,8,.93);animation:sb-in .16s ease-out both}
+.lbox img{max-width:min(1100px,94vw);max-height:86vh;object-fit:contain;border-radius:10px;
+  box-shadow:0 30px 90px rgba(0,0,0,.8)}
+.lbox figcaption{position:absolute;left:0;right:0;bottom:26px;text-align:center;pointer-events:none;
+  font-family:var(--serif);font-style:italic;font-size:15px;color:var(--bone2);
+  text-shadow:0 2px 8px rgba(0,0,0,.95)}
+.lbox-x{position:absolute;top:16px;right:22px;pointer-events:none;font-size:30px;line-height:1;
+  color:var(--mute)}
+@media (max-width:620px){.lbox{padding:14px}.lbox img{max-height:78vh}}
+/* Anything that opens one says so on hover. */
+.hero.plate .portrait{cursor:zoom-in}
+
+/* ── The hotbar ───────────────────────────────────────────────────────
+   The equipped loadout as squares you can read across in one look: kind is the frame colour, cost
+   is the pips, action is the corner badge, and the rules text is on hover. The Grimm's own plate
+   sits faintly behind every sigil so a bar reads as *that Grimm's* bar. The accordion list below
+   is untouched — this sits on top of it and does not replace it. */
+.hotbar{display:flex;flex-wrap:wrap;gap:10px 22px;margin:2px 0 12px;align-items:flex-start}
+.hbgroup{display:flex;flex-direction:column;gap:7px}
+.hblbl{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--kc,var(--mute))}
+.hbrow{display:flex;flex-wrap:wrap;gap:10px}
+/* An empty socket has to look like a hole rather than a disabled ability — dashed, hollow, and
+   carrying nothing but a plus, so a half-filled bar is obvious at a glance in a fight. */
+.slotbtn.empty .sig{background:none;border-style:dashed;
+  border-color:color-mix(in srgb,var(--kc) 45%,var(--line));box-shadow:none}
+.slotbtn.empty .sig::before,.slotbtn.empty .sig::after{display:none}
+.slotbtn.empty .sig b{font-size:24px;font-family:var(--sans);font-weight:400;color:var(--mute)}
+.slotbtn.empty .cap{color:var(--mute)}
+.slotbtn.empty:hover .sig{border-style:solid;border-color:var(--kc)}
+.slotbtn.empty:hover .sig b{color:var(--bone)}
+/* The equip list inside the popover. A choice already sitting in another socket stays visible
+   and struck rather than vanishing, so the reason it cannot be picked is on screen. */
+.abtip-b.picker{display:flex;flex-direction:column;gap:5px;max-height:48vh}
+.pickrow{display:flex;gap:10px;align-items:center;text-align:left;width:100%;cursor:pointer;
+  padding:6px 8px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);
+  font:inherit;color:var(--bone)}
+.pickrow:hover:not(:disabled){border-color:var(--kc);background:color-mix(in srgb,var(--kc) 12%,var(--panel2))}
+.pickrow.on{border-color:var(--kc);box-shadow:inset 0 0 0 1px var(--kc)}
+.pickrow:disabled{cursor:default;opacity:.45}
+.pickrow.taken b{text-decoration:line-through}
+.pickrow .sig{flex:0 0 auto;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--kc) 22%,var(--panel));border:1px solid var(--line)}
+.pickrow .sig b{font-family:var(--serif);font-size:14px;font-weight:600;text-decoration:none}
+.pickrow .pr-id{display:flex;flex-direction:column;gap:1px;min-width:0}
+.pickrow .pr-id b{font-family:var(--sans);font-size:13px;font-weight:600}
+.slotbtn{position:relative;width:86px;padding:0;background:none;border:0;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;font:inherit;color:var(--bone2)}
+.slotbtn.passive{--kc:var(--k-passive)} .slotbtn.active{--kc:var(--k-active)}
+.slotbtn.super{--kc:var(--k-super)}     .slotbtn.core{--kc:var(--k-core)}
+.slotbtn.shackle{--kc:var(--k-shackle)}
+.slotbtn .sig{position:relative;width:66px;height:66px;border-radius:12px;overflow:hidden;
+  display:grid;place-items:center;background:var(--panel2);
+  border:1px solid color-mix(in srgb,var(--kc) 72%,var(--line));
+  box-shadow:0 4px 14px rgba(0,0,0,.5);transition:transform .12s ease,box-shadow .12s ease}
+/* Two washes under the letters: the Grimm's plate, then the kind's colour over it. */
+.slotbtn .sig::before{content:"";position:absolute;inset:0;
+  background:var(--icon,var(--sheet-plate,none)) center/cover no-repeat;opacity:.34}
+.slotbtn .sig::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(155deg,color-mix(in srgb,var(--kc) 40%,transparent) 0%,rgba(5,7,10,.86) 100%)}
+.slotbtn .sig b{position:relative;z-index:1;font-family:var(--serif);font-weight:600;font-size:26px;
+  letter-spacing:.03em;color:var(--bone);text-shadow:0 2px 7px rgba(0,0,0,.95)}
+.slotbtn:hover .sig,.slotbtn:focus-visible .sig{transform:translateY(-2px);
+  box-shadow:0 8px 22px rgba(0,0,0,.6),0 0 0 1px var(--kc)}
+.slotbtn .sig .act{position:absolute;top:4px;right:4px;z-index:2;font-family:var(--sans);font-size:8px;
+  font-weight:700;letter-spacing:.08em;padding:2px 4px;border-radius:4px;
+  background:rgba(5,7,10,.82);color:var(--kc)}
+.slotbtn .sig .plus{position:absolute;top:3px;left:6px;z-index:2;font-family:var(--sans);font-weight:700;
+  font-size:15px;line-height:1;color:var(--k-super);text-shadow:0 1px 4px rgba(0,0,0,.95)}
+.slotbtn .sig .pips{position:absolute;bottom:5px;left:0;right:0;z-index:2;display:flex;justify-content:center;gap:3px}
+.slotbtn .pips i{width:7px;height:7px;border-radius:50%;background:var(--hue);
+  box-shadow:0 0 0 1px rgba(5,7,10,.8)}
+.slotbtn .cap{font-family:var(--sans);font-size:10.5px;line-height:1.2;text-align:center;
+  max-width:86px;color:var(--bone2)}
+/* Not enough slots, or the Grimm is a familiar: still readable, visibly not ready. */
+.slotbtn.dim .sig{opacity:.42;filter:grayscale(.6)}
+.slotbtn.dim .cap{opacity:.55}
+.slotbtn.evolved .sig{border-color:var(--k-super)}
+
+/* The tooltip. One element, moved and refilled — and pinnable, because a touch screen has no
+   hover and would otherwise never see it. Nothing is spent from the square itself; Use lives
+   in here, where the cost has already been read. */
+.abtip{position:absolute;z-index:150;background:var(--panel);border:1px solid var(--line);
+  border-top:3px solid var(--kc,var(--line));border-radius:11px;padding:12px 14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.66);pointer-events:none}
+.abtip.pinned{pointer-events:auto}
+.abtip.passive{--kc:var(--k-passive)} .abtip.active{--kc:var(--k-active)}
+.abtip.super{--kc:var(--k-super)}     .abtip.core{--kc:var(--k-core)}
+.abtip.shackle{--kc:var(--k-shackle)}
+.abtip-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.abtip-h b{font-family:var(--sans);font-size:14px;color:var(--bone);margin-right:2px}
+.abtip-b{max-height:46vh;overflow:auto;font-size:13.5px}
+.abtip-f{display:flex;gap:10px;align-items:center;margin-top:10px;padding-top:9px;
+  border-top:1px solid var(--line)}
+@media (max-width:620px){
+  .hotbar{gap:8px}
+  .slotbtn{width:68px}
+  .slotbtn .sig{width:58px;height:58px}
+  .slotbtn .sig b{font-size:22px}
+  .slotbtn .cap{font-size:9.5px;max-width:68px}
+}
+
+/* ── Tile rows shared by the panels ───────────────────────────────────
+   Troops and souls use the ability hotbar's own squares, so the sheet has one tile vocabulary
+   rather than three that look alike and behave differently. */
+.troops{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.slotbtn.troop .sig b{font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.06em}
+/* Called up this fight rather than standing in the platoon. */
+.slotbtn.reinf .sig{border-style:dashed}
+/* A spent charge reads as a hole, not a dot — status only; the pips you press are in the panel. */
+.slotbtn .sig .pips i.spent{background:transparent;box-shadow:inset 0 0 0 1px var(--mute)}
+/* Souls. The three states the roster is actually scanned for: on the field, prepared for the day,
+   and lent out. A soul at rest is dimmed by the shared .dim rule. */
+.slotbtn.soul .sig b{font-size:22px}
+.slotbtn.soul .sig .act{font-size:9px;color:var(--bone2)}
+.slotbtn.soul.out .sig{border-color:var(--k-super);box-shadow:0 0 0 1px var(--k-super),0 4px 14px rgba(0,0,0,.5)}
+.slotbtn.soul.prep .sig{border-color:var(--hue)}
+.slotbtn.soul.lent .sig{border-style:dotted;border-color:var(--k-passive)}
+.slotbtn .sig .plus.warn{color:var(--ember);left:auto;right:5px;top:auto;bottom:3px}
+/* The two Mythics, closing the bar. The Shift keeps the pink it wears everywhere else in the app,
+   and anything actually running gets a lit ring so it is visible without reading a number. */
+.hbgroup.mythic{--kc:#FF4FA3}
+.slotbtn.rshift{--kc:#FF4FA3}
+.slotbtn.running .sig{border-color:var(--kc);box-shadow:0 0 0 1px var(--kc),0 0 18px -2px var(--kc),0 4px 14px rgba(0,0,0,.5)}
+.slotbtn.running .sig .act{background:var(--kc);color:#1b0510;font-weight:700}
+.slotbtn.shackle.running{--kc:var(--k-super)}
+/* Charges, inside the popover, where they can be buttons. */
+.chgrow{display:flex;flex-wrap:wrap;gap:4px 14px;margin-bottom:9px;padding-bottom:9px;
+  border-bottom:1px solid var(--line)}
+.chgrow .chg{display:flex;align-items:center;gap:7px}
+.chgrow .chg i{font-style:normal;font-family:var(--sans);font-size:10px;font-weight:600;
+  letter-spacing:.04em;color:var(--bone2)}
+
+/* ── The Sheet's header band ──────────────────────────────────────────
+   Scoped to .hero.plate on purpose: the plain .hero is also the Compendium's title row and the
+   chooser's thumbnail wrapper, and neither of those wants a panel drawn around it.
+   The band is the same image twice — blurred as the field, crisp as the inset — because the art
+   we have cannot be cropped to a banner. 2nd Stage plates are 4:5 and the familiars run 0.72:1 to
+   1.73:1, so any fixed banner crop decapitates somebody. This treatment is aspect-agnostic: drop
+   in a new plate and it works without a focal point being tuned for it. */
+.hero.plate{position:relative;display:flex;gap:20px;align-items:center;margin-bottom:18px;
+  padding:18px 20px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+  background:var(--panel)}
+.hero.plate .hero-back{position:absolute;inset:0;background:var(--field) center/cover no-repeat;
+  filter:blur(18px) saturate(1.35) brightness(.95);transform:scale(1.3)}
+/* Darkest on the left, where the type sits; the art keeps the right of the band. Tuned against
+   the plates themselves — most of them are already dark, so the scrim has to do the work with
+   opacity rather than by dimming the image, or the whole band crushes to flat black. */
+.hero.plate .hero-back::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(8,10,13,.94) 0%,rgba(8,10,13,.8) 38%,rgba(8,10,13,.42) 72%,rgba(8,10,13,.3) 100%)}
+.hero.plate>*:not(.hero-back){position:relative}
+.hero.plate .portrait{width:118px;height:148px;border-radius:11px;
+  background:var(--panel2) var(--plate) center/cover no-repeat;
+  border:1px solid var(--hue);box-shadow:0 12px 34px rgba(0,0,0,.66);flex:0 0 auto}
+.hero.plate .hero-id{min-width:0}
+.hero.plate .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--bone2);margin-bottom:5px}
+.hero.plate h1{font-size:clamp(25px,3.1vw,35px)}
+.hero.plate .sub{margin-top:5px}
+.hero.plate .hero-domain{margin-top:7px;font-family:var(--sans);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:#F7CFE4}
+.hero.plate .hero-domain b{font-family:var(--serif);font-style:italic;font-weight:600;
+  font-size:15px;letter-spacing:0;text-transform:none;color:#fff}
+/* A domain is a landscape and has earned a clear look at it — barely blurred, and it keeps more
+   of its own colour than a portrait field does. */
+.hero.plate.domain .hero-back{filter:blur(3px) saturate(1.05) brightness(.6);transform:scale(1.06)}
+.hero.plate.domain{border-color:color-mix(in srgb,#FF4FA3 40%,var(--line))}
+/* On a phone the band becomes a grid rather than a wrapping flex row: wrapping left the name
+   hanging under the portrait at a ragged indent, and the header of a combat tool has no business
+   being 290px tall before the first stat. Portrait and name share a row, chains take their own. */
+@media (max-width:620px){
+  .hero.plate{display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;
+    column-gap:13px;row-gap:9px;padding:13px;text-align:left}
+  .hero.plate .portrait{width:86px;height:108px}
+  .hero.plate .hero-id{grid-column:2}
+  .hero.plate h1{font-size:23px}
+  .hero.plate .eyebrow{font-size:10px;letter-spacing:.2em;margin-bottom:3px}
+  .hero.plate .sub{font-size:13px;margin-top:3px}
+  .hero.plate .chains.shown{grid-column:1/-1;margin-left:0;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  body.shifted-now::before{animation:none}
+  .rshift .rs-plate{animation-duration:.45s;animation-delay:.1s}
+  .rshift.plated .cine-words{animation-delay:.3s}}
+
 /* The side column's shortcut to whichever of the two this Grimm has. */
 .mythical .bm{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .mythical .bm+.bm{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
@@ -432,7 +663,12 @@ body.shifting .bar,body.shifting main,body.shifting .foot{animation:rs-wash 2.8s
 .side small{color:var(--mute);font-family:var(--sans);font-size:10.5px;margin-left:auto}
 .forms{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 14px}
 .form{flex:1 1 220px;max-width:340px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.form img{display:block;width:100%;height:220px;object-fit:cover;background:var(--slate)}
+/* No fixed height and no crop. The plates run from 0.72:1 to 1.73:1, so a 220px `cover` box was
+   beheading the portraits and slicing the ends off the landscapes. Each one now shows at its own
+   ratio in the column's width, and the two cards simply end up different heights — which is the
+   honest result when the art is different shapes. */
+.form img{display:block;width:100%;height:auto;background:var(--slate);cursor:zoom-in}
+.forms{align-items:flex-start}
 .form div{padding:7px 11px;font-family:var(--sans);font-size:12.5px}
 .form div b{display:block;font-size:14px}
 .stagehead{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:16px 0 8px;display:flex;align-items:center;gap:8px}

@@ -83,6 +83,28 @@ const SHIFTS = {
   'peco':              'Final Step.md',
 };
 
+// Each Grimm's portrait, per stage. The sheet shows `invoked` up to Chained and `awakened` from
+// Awakened on, so these are the 1st Stage (familiar) and 2nd Stage (true form) plates from
+// resources/grimm/Players/. Named by file rather than discovered, exactly as the Shifts above are:
+// the folders also hold WIP and alternates, and nothing should be swept in by accident.
+//
+// Why this exists at all: the images used to come from scraping <img src='…'> out of the Grimm's
+// vault page, which only ever found the old GMBinder HTML. Six of the eight Grimms had no portrait
+// in the app, and the two that did were hotlinking gmbinder.com — a third-party host, for art Juan
+// owns and keeps locally. A name here is resolved through useImage(), so the file is copied into
+// grimms/img/ and served from the app like every other plate. The scrape is kept as the fallback
+// for anything not listed (Peco, until his two stages are drawn).
+const PORTRAITS = {
+  'gate-of-caelum':    { invoked: 'familiar_gateOfCaelum.png',  awakened: 'grimm_GateOfCaelum.png' },
+  'ouroboros-vigil':   { invoked: 'familiar_oroborosVigil.jpeg', awakened: 'grimm_Oroboros.png' },
+  'vidarr':            { invoked: 'familiar_vidar.jpg',          awakened: 'grimm_Vidarr.png' },
+  'white-rabbit':      { invoked: 'familiar_whiteRabbit.png',    awakened: 'grimm_WhiteRabbit.png' },
+  'makoa':             { invoked: 'familiar_makoa.png',          awakened: 'grimm_Makoa.png' },
+  'thanatos':          { invoked: 'familiar_Thanatos.png',       awakened: 'grimm_Thanatos.png' },
+  'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTIger.jpg', awakened: 'grimm_RageOfTheTiger.png' },
+  // 'peco': no local art yet — falls back to whatever the page's own <img> tags carry.
+};
+
 const RULES = [
   ['grimms',    'Rules of the Grimm',  'Grimms.md'],
   ['types',     'Grimm Stages',        'Lore/Types of Grimm.md'],
@@ -235,7 +257,14 @@ function parseGrimm(meta) {
         cost: costOf(kind, rest), action: actionOf(rest), text: rest });
     }
   }
-  return { ...meta, name, forms, images: { invoked: imgs[0] || '', awakened: imgs[1] || '' },
+  // PORTRAITS wins where it has an entry; the scraped tags are the fallback. A name listed there
+  // that resolves to nothing is reported at the end with every other missing embed, so a renamed
+  // or misspelt file is noisy rather than silently blank — which is how six empty portraits went
+  // unnoticed in the first place.
+  const art = PORTRAITS[meta.id] || {};
+  const pick = (k, i) => (art[k] && useImage(art[k])) || imgs[i] || '';
+  return { ...meta, name, forms,
+    images: { invoked: pick('invoked', 0), awakened: pick('awakened', 1) },
     abilities, stances };
 }
 
@@ -361,9 +390,16 @@ function shift(id) {
     else extra.push({ title: head, text: body });
   }
   const order = ['activation', 'passives', 'actions', 'lair', 'collapse'];
+  const intro = chunks[0].trim();
+  // The domain's plate, lifted out of the intro so the app can use it as art rather than only as a
+  // picture in a body of prose: the activation cinematic opens on it and the sheet wears it while
+  // the Shift holds. `clean()` has already copied it into img/ and rewritten the embed, so this is
+  // just reading back the URL it produced. No plate in the note simply means no art — every caller
+  // checks, and the Shift looks exactly as it did before.
+  const art = (intro.match(/!\[[^\]]*\]\((img\/[^)]+)\)/) || [])[1] || null;
   return {
     name: path.basename(f, '.md'),
-    intro: chunks[0].trim(),
+    intro, art,
     parts: order.filter(k => parts[k]).map(k => ({ key: k, title: PART_TITLE[k], ...parts[k] })),
     extra, text,
   };

@@ -566,22 +566,22 @@ EXTRA['gate-of-caelum'] = (g, sh, v) => {
   const sb = shackleOn(sh, g);          // the forms are only offered while the Gates are open
   const boost = Math.min(3, +x.ariseBoost || 0), maxCr = gateMaxCr(sh) + boost, cr = x.ariseCr;
   const canLend = has(sh, 'relinquish-command');
-  const rows = souls.map(({ b, s }) => `<div class="item ${s.out ? 'on' : ''}">
-      <span class="nm">${esc(b.name)}</span>${b.cr ? `<span class="tag">CR ${esc(b.cr)}</span>` : ''}
-      <span class="hint">${[b.level && `Lv ${esc(b.level)}`, b.hp && `HP ${esc(b.hp)}`, b.ac && `AC ${esc(b.ac)}`, s.out && 'summoned', s.lent && `with ${esc(s.lent)}`,
-        b.vault && ((X().edits || {})[b.id] ? '<b>upgraded</b>' : 'from the vault'),
-        crNum(b.cr) > gateMaxCr(sh) + 3 && '<span style="color:#e4927f">above your Max Servant CR</span>'].filter(Boolean).join(' · ')}</span>
-      <span class="sp"></span>
-      <button class="btn sm ${s.prep ? 'on' : ''}" title="${s.prep ? 'Prepared today — click to stand it down' : x.prepLocked ? 'Call it up mid-day: 1 Grimm Slot and an Action' : 'Prepare it for the day'}" onclick="prepSoul('${attr(b.id)}')">${s.prep ? 'Prepared' : x.prepLocked ? 'Call up · 1 slot' : 'Prepare'}</button>
-      <button class="btn sm" onclick="viewStatblock('${attr(b.id)}')">View</button>
-      ${sb && b.forms ? `${b.forms.divine ? `<button class="btn sm" title="${attr(b.forms.divine.name)}" onclick="viewForm('${attr(b.id)}','divine')">View Divine</button>` : ''}${b.forms.forbidden ? `<button class="btn sm" title="${attr(b.forms.forbidden.name)}" onclick="viewForm('${attr(b.id)}','forbidden')">View Forbidden</button>` : ''}` : ''}
-      ${canLend && !s.out && !s.lent ? `<button class="btn sm" onclick="relinquishSoul('${attr(b.id)}')">Relinquish</button>` : ''}
-      ${s.lent ? `<button class="btn sm warn" title="Call it back from ${attr(s.lent)} — it returns to Limbo" onclick="returnSoul('${attr(b.id)}')">End Relinquish</button>` : ''}
-      <button class="btn sm" title="Spell slots, inspiration dice, weapon charges — anything it spends" onclick="editTrackers('${attr(b.id)}')">Charges${trOf(s).length ? ` · ${trOf(s).length}` : ''}</button>
-      ${b.vault ? `<button class="btn sm" title="Record a Soul Shard upgrade — its numbers are yours to change; the vault keeps its text" onclick="editVaultNumbers('${attr(b.id)}')">Upgrade${(X().edits || {})[b.id] ? ' ✓' : ''}</button>`
-                : `<button class="btn sm" onclick="editStatblock('${attr(b.id)}')">Edit</button><button class="btn sm warn" onclick="releaseSoul('${attr(b.id)}')">Release</button>`}
-      <input class="txt" style="flex-basis:100%" placeholder="Attuned items — 2, or 3 when it is the Elite" value="${attr(s.items || '')}" onchange="soulSet('${attr(b.id)}','items',this.value,true)">
-    </div>`).join('');
+  // A soul per tile, in the hotbar's square vocabulary. At level 13 this card was thirteen
+  // full-width rows of eight buttons each and ran past 2000px on its own; the roster is something
+  // you scan — who is prepared, who is out — and act on one at a time, so the face carries the
+  // glance (initials, CR, prepared, summoned, lent) and the panel carries the eight buttons.
+  const rows = souls.map(({ b, s }) => {
+    const over = crNum(b.cr) > gateMaxCr(sh) + 3;
+    const state = s.out ? 'out' : s.lent ? 'lent' : s.prep ? 'prep' : 'rest';
+    return `<button type="button" class="slotbtn soul ${state}${s.prep || s.out ? '' : ' dim'}"
+      data-soul="${attr(b.id)}" onclick="event.stopPropagation();soulPanel(this,'${attr(b.id)}')"
+      title="${attr(b.name + (b.cr ? ` · CR ${b.cr}` : ''))}">
+      <span class="sig"><b>${esc(sigil(b.name))}</b>
+        ${b.cr ? `<span class="act">${esc(String(b.cr))}</span>` : ''}
+        ${over ? '<span class="plus warn">!</span>' : ''}
+        ${s.out ? '<span class="pips"><i></i></span>' : ''}</span>
+      <span class="cap">${esc(b.name)}</span></button>`;
+  }).join('');
   const prepped = souls.filter(o => o.s.prep).length, prepCap = gatePrepared(sh);
   return `<h2>The soul roster <span class="r"><button class="btn sm pri" onclick="editStatblock()">Recruit</button></span></h2>
     <div class="stats">
@@ -589,7 +589,7 @@ EXTRA['gate-of-caelum'] = (g, sh, v) => {
       ${stat(`${prepped}/${prepCap}`, x.prepLocked ? 'prepared · the day has begun' : 'prepared today', prepped > prepCap ? 'var(--ember)' : '')}
     </div>
     <p class="hint">You hold <b>${gateRoster(sh)}</b> souls — your character level — and after each Long Rest you choose <b>${prepCap}</b> of them to answer that day. ${x.prepLocked ? 'The day has begun: <b>calling one up now costs 1 Grimm Slot and an Action</b>. Standing one down is free.' : 'Arrange them freely until your first summon.'}</p>
-    <div class="items" style="margin-top:10px">${rows || '<p class="hint">No souls answer yet.</p>'}</div>
+    <div class="troops">${rows || '<p class="hint">No souls answer yet.</p>'}</div>
     <h3>Arise</h3>
     <div class="row">${numIn('Creature CR', 'ariseCr', '')}
       ${cr ? stat(`DC ${Math.floor(+cr) + 10}`, 'Persuasion') : ''}
@@ -600,6 +600,38 @@ EXTRA['gate-of-caelum'] = (g, sh, v) => {
       ${boost || cr ? `<button class="btn sm" onclick="ariseDone()">Done</button>` : ''}</div>
     <p class="hint">${cr && +cr > maxCr ? `<b style="color:#e4927f">CR ${+cr} is beyond your reach</b> — raise the Max CR with slots (up to +3) or let the soul go. ` : ''}Speak <b>Arise</b> over a creature dead less than 24 hours (Action): Persuasion against <b>CR + 10</b>; the DM may grant a bonus for honouring the dead. On a success press <b>Recruit</b> and add its statblock — written here, or pasted from a 5e source. Each recruited soul holds one servant slot until you release it. <b>Undying Attunement:</b> an item a servant attunes to can't be taken back; after a Long Rest you may strip one from a servant, and it is lost forever.</p>`;
 };
+// Everything the roster row used to carry, for one soul. Opened from its tile, and the only place
+// any of it can be pressed — which is what lets the roster itself be a grid of squares.
+function soulPanel(el, id) {
+  if (abTipPin === `soul:${id}`) return abTipOff(true);
+  const g = grimmById('gate-of-caelum'), sh = sheet('gate-of-caelum'), x = sh.x;
+  const o = gateState(g, x).find(z => z.b.id === id);
+  if (!o) return;
+  const { b, s } = o, sb = shackleOn(sh, g), canLend = has(sh, 'relinquish-command');
+  const q = attr(b.id);
+  const facts = [b.cr && `CR ${esc(b.cr)}`, b.level && `Lv ${esc(b.level)}`, b.hp && `HP ${esc(b.hp)}`, b.ac && `AC ${esc(b.ac)}`,
+    s.out && '<b>summoned</b>', s.lent && `with <b>${esc(s.lent)}</b>`,
+    b.vault && ((x.edits || {})[b.id] ? '<b>upgraded</b>' : 'from the vault')].filter(Boolean).join(' · ');
+  const over = crNum(b.cr) > gateMaxCr(sh) + 3;
+  popAt(el, `<div class="abtip-h"><b>${esc(b.name)}</b>
+      <span class="tag k">${s.out ? 'Summoned' : s.lent ? 'Relinquished' : s.prep ? 'Prepared' : 'At rest'}</span></div>
+    <div class="abtip-b"><p class="hint" style="margin:0">${facts}</p>
+      ${over ? '<p class="hint" style="color:#e4927f;margin:6px 0 0"><b>Above your Max Servant CR.</b></p>' : ''}
+      <div class="row" style="margin-top:9px;gap:6px">
+        <button class="btn sm ${s.prep ? 'on' : 'pri'}" title="${s.prep ? 'Prepared today — click to stand it down' : x.prepLocked ? 'Call it up mid-day: 1 Grimm Slot and an Action' : 'Prepare it for the day'}" onclick="prepSoul('${q}')">${s.prep ? 'Prepared' : x.prepLocked ? 'Call up · 1 slot' : 'Prepare'}</button>
+        <button class="btn sm" onclick="viewStatblock('${q}')">View</button>
+        ${sb && b.forms ? `${b.forms.divine ? `<button class="btn sm" title="${attr(b.forms.divine.name)}" onclick="viewForm('${q}','divine')">Divine</button>` : ''}${b.forms.forbidden ? `<button class="btn sm" title="${attr(b.forms.forbidden.name)}" onclick="viewForm('${q}','forbidden')">Forbidden</button>` : ''}` : ''}
+        ${canLend && !s.out && !s.lent ? `<button class="btn sm" onclick="relinquishSoul('${q}')">Relinquish</button>` : ''}
+        ${s.lent ? `<button class="btn sm warn" title="Call it back from ${attr(s.lent)} — it returns to Limbo" onclick="returnSoul('${q}')">End Relinquish</button>` : ''}
+        <button class="btn sm" title="Spell slots, inspiration dice, weapon charges — anything it spends" onclick="editTrackers('${q}')">Charges${trOf(s).length ? ` · ${trOf(s).length}` : ''}</button>
+        ${b.vault ? `<button class="btn sm" title="Record a Soul Shard upgrade — its numbers are yours to change; the vault keeps its text" onclick="editVaultNumbers('${q}')">Upgrade${(x.edits || {})[b.id] ? ' ✓' : ''}</button>`
+                  : `<button class="btn sm" onclick="editStatblock('${q}')">Edit</button><button class="btn sm warn" onclick="releaseSoul('${q}')">Release</button>`}
+      </div>
+      <input class="txt" style="width:100%;margin-top:9px" placeholder="Attuned items — 2, or 3 when it is the Elite" value="${attr(s.items || '')}" onchange="soulSet('${q}','items',this.value,true)">
+    </div>`, s.out ? 'super' : 'active', true);
+  abTipPin = `soul:${id}`;
+}
+
 function ariseSpend(kind) {
   if (sheet().familiar) return toast('Your Grimm is in Familiar form.');
   if (!spend(1)) return;
@@ -936,10 +968,37 @@ const JOBS = {
   Magus:    { charges: { 'Magic Edge': 3, 'Arcane Nova': 2 } },
   Bulwark:  { charges: {} },
 };
-// Every troop gets a row of its own — the platoon proper, the reinforcements called up by the
-// ability, and any summoned past the limit by Hollownest's Reinforcement Surge. They all take jobs.
+// Every troop gets a tile — the platoon proper, the reinforcements called up by the ability, and
+// any summoned past the limit by Hollownest's Reinforcement Surge. They all take jobs. A platoon
+// can run to 2×PB, and as full-width rows that was the whole card; as tiles eight of them fit in
+// two lines. The job goes in a popover, the charges stay on the face where they are spent.
 const troopName = (i, base, reinf) =>
   i < base ? `Troop ${i + 1}` : i < base + reinf ? `Reinf. ${i - base + 1}` : `Surge ${i - base - reinf + 1}`;
+const JOB_SHORT = { Infantry: 'INF', Scout: 'SCT', Medic: 'MED', Magus: 'MAG', Bulwark: 'BWK' };
+
+function troopPick(el, i) {
+  const t = X().troops[i];
+  const ch = JOBS[t.job] ? Object.entries(JOBS[t.job].charges) : [];
+  // Charges first — mid-fight this panel is opened to spend one, not to change a job.
+  const charges = ch.length ? `<div class="chgrow">${ch.map(([a, max]) => `<span class="chg">
+      <i>${esc(a)}</i><span class="pips">${Array.from({ length: max }, (_, k) =>
+        `<button class="pip sm ${k < (t.used[a] || 0) ? 'used' : ''}" title="${attr(a)}" onclick="event.stopPropagation();troopCharge(${i},'${a}',${k})"></button>`).join('')}</span>
+    </span>`).join('')}</div>` : '';
+  const rows = ['', ...Object.keys(JOBS)].map(j => {
+    const c = j ? Object.entries(JOBS[j].charges) : [];
+    return `<button type="button" class="pickrow active${j === t.job ? ' on' : ''}"
+      onclick="event.stopPropagation();abTipOff(true);troopJob(${i},'${j}')">
+      <span class="sig"><b>${j ? JOB_SHORT[j] : '—'}</b></span>
+      <span class="pr-id"><b>${j || 'No job'}</b><span class="hint">${
+        j ? (c.length ? c.map(([a, n]) => `${a} ×${n}`).join(' · ') : 'no charges') : 'stands unassigned'}</span></span>
+    </button>`;
+  }).join('');
+  popAt(el, `<div class="abtip-h"><b>${esc(el.dataset.tn || `Troop ${i + 1}`)}</b>${t.job ? `<span class="tag k">${esc(t.job)}</span>` : '<span class="tag">no job</span>'}</div>
+    ${charges}
+    <div class="abtip-b picker">${rows}</div>
+    <div class="abtip-f"><span class="hint">Jobs change after a Short or Long Rest; charges refill on a Short Rest.</span></div>`, 'active', true);
+  abTipPin = `troop:${i}`;
+}
 PANELS['white-rabbit'] = (g, sh, v) => {
   const x = sh.x, base = awakened(sh) ? 3 : 2;
   const maxT = 2 * v.pb, reinf = x.reinf || 0, surge = x.surge || 0, total = base + reinf + surge;
@@ -948,13 +1007,21 @@ PANELS['white-rabbit'] = (g, sh, v) => {
   if (x.troops.length > total) x.troops.length = total;
   const n = j => x.troops.filter(t => t.job === j).length;
   const dex = +x.dex || 0, wis = +x.wis || 0, half = Math.floor(v.pb / 2);
+  // Each troop is a tile in the same square vocabulary as the ability hotbar: the job's initials
+  // on the face, charges as pips under them, and everything you press — picking the job, spending
+  // a charge — in the popover. Pips cannot be buttons inside a button, and that is the right trade
+  // anyway: the face is the glance, the panel is the interaction.
   const troopRows = x.troops.map((t, i) => {
     const ch = JOBS[t.job] ? JOBS[t.job].charges : {};
-    return `<div class="item ${i >= base ? 'reinf' : ''}"><span class="nm">${troopName(i, base, reinf)}</span>
-      ${awakened(sh) ? `<select class="pick" onchange="troopJob(${i},this.value)"><option value="">— no job —</option>${Object.keys(JOBS).map(j => `<option ${t.job === j ? 'selected' : ''}>${j}</option>`).join('')}</select>` : ''}
-      <span class="sp"></span>
-      ${Object.entries(ch).map(([a, max]) => `<span class="lbl">${a}</span><span class="pips">${Array.from({ length: max }, (_, k) => `<button class="pip sm ${k < (t.used[a] || 0) ? 'used' : ''}" onclick="troopCharge(${i},'${a}',${k})"></button>`).join('')}</span>`).join('')}
-    </div>`;
+    const nm = troopName(i, base, reinf);
+    const spent = Object.entries(ch).map(([a, max]) =>
+      Array.from({ length: max }, (_, k) => `<i class="${k < (t.used[a] || 0) ? 'spent' : ''}"></i>`).join('')).join('');
+    return `<button type="button" class="slotbtn troop ${t.job ? 'active' : 'core'}${i >= base ? ' reinf' : ''}${t.job ? '' : ' dim'}"
+      data-tn="${attr(nm)}" onclick="event.stopPropagation();troopPick(this,${i})" title="${attr(nm + (t.job ? ' · ' + t.job : ' · no job'))}">
+      <span class="sig"><b>${t.job ? JOB_SHORT[t.job] : '—'}</b>
+        ${spent ? `<span class="pips">${spent}</span>` : ''}
+        ${i >= base ? '<span class="act">R</span>' : ''}</span>
+      <span class="cap">${esc(nm)}</span></button>`;
   }).join('');
   return `<h2>Umbra Platoon <span class="r"><button class="btn sm" onclick="troopRest()">Short rest</button></span></h2>
     <div class="stats">
@@ -969,7 +1036,7 @@ PANELS['white-rabbit'] = (g, sh, v) => {
     <div class="row" style="margin-top:10px">${numIn('Dex mod', 'dex', 0)}${numIn('Wis mod', 'wis', 0)}
       <span class="pair"><span class="lbl">Reinforcements</span><div class="step"><button onclick="xbump('reinf',-1,0,${Math.max(0, maxT - base)})">–</button><span>${reinf}</span><button onclick="xbump('reinf',1,0,${Math.max(0, maxT - base)})">+</button></div></span>
       ${surge ? `<span class="pair"><span class="lbl">Surge</span><div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${surge}</span><button onclick="xbump('surge',1,0,8)">+</button></div></span>` : ''}</div>
-    <div class="items" style="margin-top:10px">${troopRows}</div>
+    <div class="troops">${troopRows}</div>
     ${awakened(sh) ? `<div class="row" style="margin-top:9px">
       ${n('Infantry') ? rollBtn('Vorpal Slash', half, 6, dex) : ''}
       ${n('Scout') ? rollBtn('Psionic Arrow', half, 6, dex) : ''}
@@ -1044,15 +1111,22 @@ LONG_REST['thanatos'] = sh => { sh.x.hysteria = 0; };
 PANELS['rage-of-the-tiger'] = (g, sh, v) => {
   const x = sh.x; x.stances = (x.stances || []).filter(n => g.stances.some(s => s.name === n));
   const str = +x.str || 0, half = Math.floor(v.pb / 2);
-  // A slot per stance the Rank allows, picked like an ability — 28 stances are too many as chips.
-  const slot = i => `<div class="slotline"><select class="pick" onchange="setStance(${i},this.value)">
-      <option value="">— empty —</option>
-      ${g.stances.map(s => `<option value="${attr(s.name)}" ${s.name === x.stances[i] ? 'selected' : ''} ${x.stances.includes(s.name) && s.name !== x.stances[i] ? 'disabled' : ''}>${esc(s.name)}</option>`).join('')}
-    </select></div>`;
+  // A socket per stance the Rank allows, in the same vocabulary as the ability hotbar: the stance
+  // text is in the hover panel rather than an accordion under the bar. Four dropdowns plus four
+  // expandable rows was most of this card's height, and 28 stances were never going to be chips.
+  const tiles = Array.from({ length: v.pb }, (_, i) => {
+    const n = x.stances[i];
+    if (!n) return `<button type="button" class="slotbtn empty passive" title="Choose a stance"
+      onclick="event.stopPropagation();stancePick(this,${i})"><span class="sig"><b>+</b></span><span class="cap">Empty</span></button>`;
+    return `<button type="button" class="slotbtn passive" data-st="${i}"
+      onmouseenter="stanceTip(this,${i})" onmouseleave="abTipOff()"
+      onfocus="stanceTip(this,${i})" onblur="abTipOff()"
+      onclick="event.stopPropagation();stanceTip(this,${i},true)">
+      <span class="sig"><b>${esc(sigil(n))}</b></span><span class="cap">${esc(n)}</span></button>`;
+  }).join('');
   return `<h2>Arts of War <span class="r"><span class="hint">${x.stances.length}/${v.pb} stances</span></span></h2>
-    <div class="stancerow">${Array.from({ length: v.pb }, (_, i) => slot(i)).join('')}</div>
-    <p class="hint">Chosen after a Long Rest. Swap one when you roll initiative, as a Bonus Action, or when you drop a creature to 0.</p>
-    ${x.stances.map(n => { const s = g.stances.find(t => t.name === n); return `<div class="ab passive"><div class="ab-h" onclick="this.parentNode.classList.toggle('open')"><span class="nm">${esc(n)}</span><span class="tag">stance</span><span class="car">▶</span></div><div class="ab-b">${prose(s.text)}</div></div>`; }).join('')}
+    <div class="hotbar"><div class="hbgroup" style="--kc:var(--k-passive)"><div class="hbrow">${tiles}</div></div></div>
+    <p class="hint">Hover a stance to read it · click a socket to choose. Chosen after a Long Rest; swap one when you roll initiative, as a Bonus Action, or when you drop a creature to 0.</p>
     <h3>Fury of Conquest · ${v.pb} stripes</h3>
     <div class="stats">${stat(5 * v.pb, 'HP burned')}${stat(`+${5 * v.pb} ft`, 'speed')}${stat(`+${v.pb}`, 'Str score')}${stat(`+${half}d8`, 'necrotic on hit')}${stat(`${20 - half}–20`, 'crit range')}
       ${stat(Math.floor(sh.maxHp * .3), 'Tall I Stand heal')}${stat(10 + str + v.pb, 'Kneel DC (Con)')}${stat(`${15 * v.pb} ft`, 'Warmonger move')}</div>
@@ -1181,9 +1255,44 @@ function grandLabor() {
     : '"Behind me. All of you. That is not an order — I am asking."'}</em></p></div>`);
 }
 
+// A stance reads and is chosen exactly as an ability does — same popover, same picker rows — so
+// there is one thing to learn on this sheet rather than two that look alike and behave differently.
+function stanceTip(el, i, pin) {
+  if (abTipPin && !pin) return;
+  if (pin && abTipPin === `st:${i}`) return abTipOff(true);
+  const g = grimmById('rage-of-the-tiger'), n = X().stances[i];
+  const s = g.stances.find(t => t.name === n);
+  if (!s) return;
+  popAt(el, `<div class="abtip-h"><b>${esc(n)}</b><span class="tag k">Stance</span></div>
+    <div class="abtip-b">${prose(s.text)}</div>
+    <div class="abtip-f">
+      <button class="btn sm" onclick="event.stopPropagation();stancePick(document.querySelector('[data-st=&quot;${i}&quot;]'),${i})">Swap</button>
+      <button class="btn sm warn" onclick="event.stopPropagation();setStance(${i},'')">Clear</button></div>`,
+    'passive', pin);
+  if (pin) abTipPin = `st:${i}`;
+}
+function stancePick(el, i) {
+  const g = grimmById('rage-of-the-tiger'), x = X();
+  const rows = g.stances.map(s => {
+    const taken = x.stances.includes(s.name) && s.name !== x.stances[i];
+    return `<button type="button" class="pickrow passive${taken ? ' taken' : ''}${s.name === x.stances[i] ? ' on' : ''}"
+      ${taken ? 'disabled' : `onclick="event.stopPropagation();setStance(${i},'${attr(s.name)}')"`}>
+      <span class="sig"><b>${esc(sigil(s.name))}</b></span>
+      <span class="pr-id"><b>${esc(s.name)}</b><span class="hint">${taken ? 'already taken' : 'stance'}</span></span></button>`;
+  }).join('');
+  popAt(el, `<div class="abtip-h"><b>Stance ${i + 1}</b><span class="tag">${g.stances.length} in the art</span></div>
+    <div class="abtip-b picker">${rows}</div>`, 'passive', true);
+  abTipPin = `stpick:${i}`;
+}
+
 function setStance(i, name) {
   const s = X().stances;
-  if (!name) s.splice(i, 1); else if (i < s.length) s[i] = name; else s.push(name);
+  // Positional, like the ability loadout: clearing stance 2 must leave stance 3 where it is rather
+  // than sliding it left under the player's hand. Blanks are trimmed off the end only.
+  while (s.length <= i) s.push('');
+  s[i] = name || '';
+  while (s.length && !s[s.length - 1]) s.pop();
+  abTipOff(true);
   save(); render();
 }
 USE_HOOK['tall-i-stand'] = sh => { sh.x.wounds = (sh.x.wounds || 0) + 1; };

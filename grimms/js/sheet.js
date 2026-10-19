@@ -5,14 +5,44 @@ function renderSheet() {
   fitLoadout(g, sh);
   const awake = stageIdx(sh.stage) >= 3;
   const form = (awake ? g.forms.awakened : g.forms.invoked) || '';
-  const img = (awake ? g.images.awakened : g.images.invoked) || g.images.invoked;
+  // The sheet always wears the 2nd Stage plate, whatever the stage (Juan, 2026-10-18). The familiar
+  // art is still the Compendium's — side by side with the true form, which is where comparing the
+  // two belongs — but the sheet is the screen you live on, and it should show the Grimm itself.
+  // The form NAME still follows the stage, so an Invoked sheet reads "Striped Fury" over a picture
+  // of Magnamalo on purpose: the name is a fact about where the Grimm is, the plate is its portrait.
+  const img = g.images.awakened || g.images.invoked;
+  // The caption names what is in the picture, not what stage the sheet is on. The plate is always
+  // the true form, so at Invoked the eyebrow reads "Striped Fury" while the lightbox correctly
+  // says "Magnamalo" — the eyebrow is describing the Grimm, the caption is describing the art.
+  const plateName = `${g.name}${g.forms.awakened ? ' — ' + g.forms.awakened : ''}`;
+  // The header band is the art, twice: blurred as the field behind, crisp as the portrait in front.
+  // That is the only treatment that survives the plates we actually have — the 2nd Stage art is
+  // portrait 4:5 and the familiars run from 0.72:1 to 1.73:1, so nothing can be cropped to a banner
+  // without butchering somebody, and a new plate can be dropped in without tuning a focal point.
+  // While a domain holds, the field becomes the Reality Shift's plate: those ARE 16:9 and painted
+  // as landscapes, so this is the one place they get to be the full-width place they were drawn as,
+  // with the Grimm standing crisp in front of it.
+  const domain = sh.rs?.on && shiftOn(g.id) && g.shift?.art;
+  // Absolute, always. These land in a custom property, and a relative url() in a custom property
+  // is resolved against the stylesheet that *uses* the variable rather than the document — so
+  // "img/x.png" read from css/app.css becomes "css/img/x.png" and silently 404s. Same trap as the
+  // page backdrop in app.js. new URL() leaves Peco's external gmbinder address alone.
+  const css = u => (u ? `url('${attr(new URL(u, location.href).href)}')` : 'none');
+  // Published page-wide so the hotbar's sigils can carry the same plate faintly behind them —
+  // a bar should look like this Grimm's bar, not a generic one.
+  document.documentElement.style.setProperty('--sheet-plate', css(img));
 
   $('#view').innerHTML = `
-  <div class="hero">
-    <div class="portrait" style="background-image:url('${attr(img)}')"></div>
-    <div>
+  <div class="hero plate${domain ? ' domain' : ''}" style="--plate:${css(img)};--field:${css(domain || img)}">
+    <div class="hero-back"></div>
+    <div class="portrait" role="button" tabindex="0" title="Click to see it whole"
+      onclick="lightbox(bgUrl(this),'${attr(plateName)}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lightbox(bgUrl(this),'${attr(plateName)}')}"></div>
+    <div class="hero-id">
+      ${form ? `<div class="eyebrow">${esc(form)}</div>` : ''}
       <h1>${esc(g.name)}</h1>
-      <div class="sub">Grimm of <b>${esc(g.user)}</b> · ${esc(form)} · ${STAGE_NAME[sh.stage]}${sh.stage === 'unveiled' ? ' · <b title="Unveiled grants the Reality Shift and nothing else — your DM has its page">Reality Shift</b>' : ''}${sh.familiar ? ' · <b>Familiar form</b>' : ''}</div>
+      <div class="sub">Grimm of <b>${esc(g.user)}</b> · ${STAGE_NAME[sh.stage]}${sh.stage === 'unveiled' ? ' · <b title="Unveiled grants the Reality Shift and nothing else — your DM has its page">Reality Shift</b>' : ''}${sh.familiar ? ' · <b>Familiar form</b>' : ''}</div>
+      ${domain ? `<div class="hero-domain">Standing in <b>${esc(g.shift.name)}</b></div>` : ''}
     </div>
     <div class="chains shown" title="The Three Chains — ${v.chainState}. Your DM keeps them.">${chainIcons(sh.chains)}</div>
   </div>
@@ -23,7 +53,7 @@ function renderSheet() {
       ${loadoutCard(g, sh, v)}
       ${shiftCard(g, sh)}
     </div>
-    <aside class="rounds">${slotsCard(g, sh, v)}${mythicalCard(g, sh, v)}${effectsCard(g, sh)}</aside>
+    <aside class="rounds">${slotsCard(g, sh, v)}${effectsCard(g, sh)}</aside>
   </div>
   <p class="foot">Saved in this browser only · <button class="btn sm" onclick="exportSheet()">Export backup</button> <button class="btn sm" onclick="importSheet()">Import</button> <button class="btn sm warn" onclick="resetSheet()">Reset this sheet</button></p>`;
 }
@@ -58,12 +88,15 @@ function slotsCard(g, sh, v) {
     <p class="hint">Exhaustion from forcing the Grimm or an Exhausting Exchange <b>can't be removed by magic</b> like <i>Greater Restoration</i> — only by resting in a Safe Haven or divine intervention. Slots come back only after a Long Rest in which you <b>dream</b>.</p>
   </section>`;
 }
-// ── Mythical Grimm Abilities ────────────────────────────────────────────
-// A Shackle Break sits at the bottom of the ability list and a Reality Shift in its own card under
-// the loadout — in a fight both are a scroll away. The side column keeps whichever this Grimm
-// actually has one click away, shows what is already running, and can end either.
-// It appears only when there is something to show: no card at all for a Grimm with neither, and the
-// Shackle Break half waits for the stage that unlocks it, the Shift half for the DM to reveal it.
+// ── Mythical Grimm Abilities — SUPERSEDED, kept for one line's worth of undo ─────────────────
+// This was a card in the side column. Both Mythics are now tiles closing the ability hotbar
+// (see mythicTiles), which Juan asked for on 2026-10-18 once the panels were compact enough to
+// afford it. Nothing calls this any more. To put the card back, add `${mythicalCard(g, sh, v)}`
+// to the <aside class="rounds"> in renderSheet and drop the mythic group from hotbar().
+//
+// What it did: kept whichever Mythic this Grimm actually has one click away, showed what was
+// already running, and could end either. No card at all for a Grimm with neither; the Shackle
+// Break half waited for the stage that unlocks it, the Shift half for the DM to reveal it.
 function mythicalCard(g, sh, v) {
   const sb = abilitiesOf(g).find(a => a.kind === 'shackle' && unlocked(a, sh.stage));
   const shift = g.shift && shiftOn(g.id) ? g.shift : null;
@@ -153,16 +186,6 @@ function chainIcons(n) {
 
 // ── Loadout & abilities ─────────────────────────────────────────────────
 function loadoutCard(g, sh, v) {
-  const n = v.abilitySlots;
-  const col = k => {
-    if (!n[k]) return `<div class="slotcol"><span class="lbl">${KIND_NAME[k]}</span><p class="hint">No ${KIND_NAME[k].toLowerCase()} slots at ${STAGE_NAME[sh.stage]}.</p></div>`;
-    const pool = abilitiesOf(g).filter(a => slotKind(a) === k);
-    const lines = sh.loadout[k].map((id, i) => `<div class="slotline"><select class="pick" onchange="setLoad('${k}',${i},this.value)">
-      <option value="">— empty —</option>
-      ${pool.map(a => `<option value="${a.id}" ${a.id === id ? 'selected' : ''} ${!unlocked(a, sh.stage) || (sh.loadout[k].includes(a.id) && a.id !== id) ? 'disabled' : ''}>${esc(a.name)}${a.stage === 'additional' ? ' ✦' : ''}</option>`).join('')}
-    </select></div>`).join('');
-    return `<div class="slotcol"><span class="lbl" style="color:var(--k-${k})">${KIND_NAME[k]} · ${n[k]}</span>${lines}</div>`;
-  };
   const loaded = new Set([...sh.loadout.passive, ...sh.loadout.active, ...sh.loadout.super]);
   const show = abilitiesOf(g).filter(a => a.kind === 'core' || loaded.has(a.id) || (a.kind === 'shackle' && unlocked(a, sh.stage)));
   const sb = shackleOn(sh, g), plus = plusForms(sb);
@@ -175,11 +198,226 @@ function loadoutCard(g, sh, v) {
       <span class="tag k" style="--kc:var(--k-super)">${left ?? '—'} round${left === 1 ? '' : 's'} left</span>
       <span class="hint" style="flex:1;min-width:180px">Every ability below is running its <b>+</b> form.</span>
       <button class="btn sm warn" onclick="shackleEndNow()">End it now</button></div>` : ''}
-    <div class="loadout">${col('passive')}${col('active')}${col('super')}</div>
-    <p class="hint" style="margin-top:0">Compose after a Long Rest (1 hour of introspection). ${sh.inCombat ? '<b>Exhausting Exchange:</b> each swap now is a Bonus Action and +1 Exhaustion, once per round.' : ''} ✦ = additional ability.</p>
-    ${show.map(a => abilityHtml(a, sh, true, plus)).join('')}
+    ${hotbar(g, sh, v, plus)}
+    <p class="hint" style="margin-top:0">Hover a tile to read it, click to pin · click a socket to equip · <b>Use</b> is in the panel. Compose after a Long Rest (1 hour of introspection). ${sh.inCombat ? '<b>Exhausting Exchange:</b> each swap is a Bonus Action and +1 Exhaustion, once per round.' : ''} ✦ = additional ability.</p>
   </section>`;
 }
+// ── The hotbar ──────────────────────────────────────────────────────────
+// What you have equipped, as squares you can read across in one look — kind by colour, cost by
+// pips, action by the corner badge — with the rules text on hover. The accordion list underneath
+// is untouched and is still the full reference; this sits on top of it, it does not replace it.
+//
+// No ability has art of its own. There are eight Grimms at roughly eight abilities each and no
+// icon set anywhere in the vault, so a square can be blank or it can say something: it says the
+// ability's initials, cut in the serif face over the Grimm's own plate. Written art-ready — give
+// an ability an `icon` and the monogram gives way to it without another line changing here.
+const SIGIL_SKIP = /^(of|the|a|an|and|to|in|for|i|my|on)$/i;
+const sigil = n => n.split(/[^A-Za-z]+/).filter(w => w && !SIGIL_SKIP.test(w))
+  .slice(0, 2).map(w => w[0].toUpperCase()).join('') || n.slice(0, 2).toUpperCase();
+const ACT_SHORT = { 'Action':'ACT', 'Bonus Action':'BNS', 'Reaction':'REA', 'Free':'FREE', 'Attack':'ATK' };
+
+// Nothing is spent by clicking a tile. A click pins the tooltip and the Use button lives in
+// there — at a table a misfired tap that eats two Grimm Slots is a worse bug than an extra click,
+// and hover already shows the cost before anyone commits to it.
+//
+// The bar IS the loadout: a socket per slot the stage grants, empty ones included, and clicking an
+// empty socket opens the pool for that kind. The three <select> columns this replaced said the
+// same thing in a form nobody could read across — you could not see at a glance that your second
+// Active slot was empty, and that is exactly the thing you need to see in a fight.
+function hotbar(g, sh, v, plus) {
+  const n = v.abilitySlots;
+  const byId = id => g.abilities.find(a => a.id === id);
+  const groups = [];
+
+  // Familiar is not a loadout slot — it is always there, so it sits in its own group rather than
+  // looking like something you chose.
+  const fixed = abilitiesOf(g).filter(a => a.kind === 'core');
+  if (fixed.length) groups.push({ lbl: 'Always', k: null, tiles: fixed.map(a => tile(a, sh, v, plus)) });
+
+  for (const k of ['passive', 'active', 'super']) {
+    if (!n[k]) continue;
+    groups.push({
+      lbl: `${KIND_NAME[k]} · ${n[k]}`, k,
+      tiles: sh.loadout[k].map((id, i) => {
+        const a = id && byId(id);
+        return a ? tile(a, sh, v, plus, k, i) : socket(k, i);
+      }),
+    });
+  }
+  // The two Mythics close the bar, where an ultimate belongs. They used to be a card of their own
+  // in the side column (Juan, 2026-10-18 — once the panels were compact enough to afford it).
+  const myth = mythicTiles(g, sh, v, plus);
+  if (myth) groups.push(myth);
+
+  return `<div class="hotbar">${groups.map(gr =>
+    `<div class="hbgroup${gr.cls ? ' ' + gr.cls : ''}"${gr.k ? ` style="--kc:var(--k-${gr.k})"` : ''}>
+      <span class="hblbl">${esc(gr.lbl)}</span>
+      <div class="hbrow">${gr.tiles.join('')}</div>
+    </div>`).join('')}</div>`;
+}
+
+// Shackle Break and Reality Shift as two tiles. Each shows what is running on its face — the rounds
+// in the corner badge — and its panel carries the cost, what it will take out of you, and the one
+// button that fires or ends it. A Grimm with neither gets no group at all; a Break waits for the
+// stage that unlocks it and a Shift for the DM to reveal it.
+function mythicTiles(g, sh, v, plus) {
+  const sb = abilitiesOf(g).find(a => a.kind === 'shackle' && unlocked(a, sh.stage));
+  // A Break already running when the DM hides it still has to be endable, or its rounds, its
+  // Exhaustion and its Dream save are stranded with no way to resolve them.
+  const open = shackleOn(sh, g);
+  const shift = g.shift && shiftOn(g.id) ? g.shift : null;
+  if (!sb && !open && !shift) return null;
+  const rs = rsState(sh), tiles = [];
+  const roundsOf = nm => (sh.effects.find(e => e.name === nm) || {}).rounds;
+  if (open || sb) tiles.push(tile(open || sb, sh, v, plus));
+  if (shift) {
+    const blocked = !rs.on && sh.dreamExhaustion > 0;
+    tiles.push(`<button type="button" class="slotbtn rshift${rs.on ? ' running' : ''}${blocked ? ' dim' : ''}" data-rs="1"
+      onmouseenter="shiftTip(this)" onmouseleave="abTipOff()"
+      onfocus="shiftTip(this)" onblur="abTipOff()"
+      onclick="event.stopPropagation();shiftTip(this,true)" title="${attr(shift.name)}">
+      <span class="sig"><b>${esc(sigil(shift.name))}</b>
+        ${rs.on ? `<span class="act">${roundsOf(shift.name) ?? '—'}</span>` : ''}</span>
+      <span class="cap">${esc(shift.name)}</span></button>`);
+  }
+  return { lbl: 'Mythic', k: null, cls: 'mythic', tiles };
+}
+
+function shiftTip(el, pin) {
+  if (abTipPin && !pin) return;
+  if (pin && abTipPin === 'rshift') return abTipOff(true);
+  const g = grimmById(S.current), sh = sheet(), s = g.shift, rs = rsState(sh);
+  if (!s) return;
+  const left = (sh.effects.find(e => e.name === s.name) || {}).rounds;
+  popAt(el, `<div class="abtip-h"><b>${esc(s.name)}</b><span class="tag k">Reality Shift</span>
+      <span class="tag">${rs.on ? `${left ?? '—'} round${left === 1 ? '' : 's'} left` : '10 rounds'}</span></div>
+    <div class="abtip-b"><p class="hint" style="margin:0">${rs.on
+      ? 'Your attacks <b>hit automatically</b> in here if you can reach. Every creature in initiative is trapped.'
+      : `Then <b>3 Exhaustion</b>, <b>5 Dream Exhaustion</b>, and <b>30 days</b> before it answers again.${
+        sh.dreamExhaustion ? ` <b style="color:#e4927f">Blocked — you carry ${sh.dreamExhaustion} Dream Exhaustion.</b>` : ''}`}</p></div>
+    <div class="abtip-f">${rs.on
+      ? `<button class="btn sm warn" onclick="abTipOff(true);shiftEnd()">End the Shift</button>`
+      : `<button class="btn sm pri" onclick="abTipOff(true);shiftStart()">Raise the domain</button>`}
+      <span class="hint">Natural Turn Action · Unveiled</span></div>`, 'rshift', pin);
+  if (pin) abTipPin = 'rshift';
+}
+
+function tile(a, sh, v, plus, k, i) {
+  const up = plus && plus[a.name.trim().toLowerCase()];
+  const short = a.cost > v.left, locked = sh.familiar && a.cost;
+  const seat = k != null ? ` data-k="${k}" data-i="${i}"` : '';
+  // A Break that is already open wears its remaining rounds instead of its cost, and stops being
+  // dimmed for slots it is not about to spend.
+  const run = a.kind === 'shackle' && (shackleOn(sh, grimmById(S.current)) || {}).name === a.name
+    ? ((sh.effects.find(e => e.name === a.name) || {}).rounds ?? '—') : null;
+  if (run !== null) return `<button type="button" class="slotbtn shackle running"
+    onmouseenter="abTip(this,'${a.id}')" onmouseleave="abTipOff()"
+    onfocus="abTip(this,'${a.id}')" onblur="abTipOff()"
+    onclick="event.stopPropagation();abTip(this,'${a.id}',true)" title="${attr(a.name)}">
+    <span class="sig"><b>${esc(sigil(a.name))}</b><span class="act">${run}</span></span>
+    <span class="cap">${esc(a.name)}</span></button>`;
+  return `<button type="button" class="slotbtn ${a.kind}${up ? ' evolved' : ''}${locked || short ? ' dim' : ''}"${seat}
+    onmouseenter="abTip(this,'${a.id}')" onmouseleave="abTipOff()"
+    onfocus="abTip(this,'${a.id}')" onblur="abTipOff()"
+    onclick="event.stopPropagation();abTip(this,'${a.id}',true)">
+    <span class="sig"${a.icon ? ` style="--icon:url('${attr(new URL(a.icon, location.href).href)}')"` : ''}>
+      <b>${a.icon ? '' : esc(sigil(a.name))}</b>
+      ${a.action ? `<span class="act">${esc(ACT_SHORT[a.action] || a.action)}</span>` : ''}
+      ${a.cost ? `<span class="pips">${'<i></i>'.repeat(a.cost)}</span>` : ''}
+      ${up ? '<span class="plus">+</span>' : ''}
+    </span>
+    <span class="cap">${esc(a.name)}</span>
+  </button>`;
+}
+
+function socket(k, i) {
+  return `<button type="button" class="slotbtn empty ${k}" data-k="${k}" data-i="${i}"
+    onclick="event.stopPropagation();abPick(this,'${k}',${i})" title="Equip a ${KIND_NAME[k].toLowerCase()} ability">
+    <span class="sig"><b>+</b></span><span class="cap">Empty</span></button>`;
+}
+
+// The pool for one socket. Everything the stage can hold is listed; what is already in another
+// socket is shown struck through rather than hidden, so the reason a choice is unavailable is on
+// screen instead of being a gap. In combat the Exhausting Exchange is stated before the click,
+// not toasted after it.
+function abPick(el, k, i) {
+  const g = grimmById(S.current), sh = sheet();
+  const here = sh.loadout[k][i];
+  const pool = abilitiesOf(g).filter(a => slotKind(a) === k && unlocked(a, sh.stage));
+  const rows = pool.map(a => {
+    const taken = sh.loadout[k].includes(a.id) && a.id !== here;
+    return `<button type="button" class="pickrow ${a.kind}${taken ? ' taken' : ''}${a.id === here ? ' on' : ''}"
+      ${taken ? 'disabled' : `onclick="event.stopPropagation();setLoad('${k}',${i},'${a.id}')"`}>
+      <span class="sig"><b>${esc(sigil(a.name))}</b></span>
+      <span class="pr-id"><b>${esc(a.name)}${a.stage === 'additional' ? ' ✦' : ''}</b>
+        <span class="hint">${esc(a.action || KIND_NAME[a.kind])}${a.cost ? ` · ${a.cost} slot${a.cost > 1 ? 's' : ''}` : ''}${taken ? ' · already equipped' : ''}</span></span>
+    </button>`;
+  }).join('');
+  popAt(el, `<div class="abtip-h"><b>${KIND_NAME[k]} slot ${i + 1}</b>
+      ${here ? `<span class="tag">replacing ${esc((g.abilities.find(a => a.id === here) || {}).name || '')}</span>` : ''}</div>
+    <div class="abtip-b picker">${rows || '<p class="hint">Nothing in the pool for this slot yet.</p>'}</div>
+    <div class="abtip-f">
+      ${here ? `<button class="btn sm warn" onclick="event.stopPropagation();setLoad('${k}',${i},'')">Clear the slot</button>` : ''}
+      <span class="hint">${sh.inCombat
+        ? '<b>Exhausting Exchange</b> — this is a Bonus Action and +1 Exhaustion.'
+        : 'Free to change outside combat.'}</span>
+    </div>`, k, true);
+  abTipPin = `pick:${k}:${i}`;   // claim the pin, or the next hover would steal the picker away
+}
+
+// One tooltip element, moved and refilled rather than one per square. Pinned means it survives the
+// mouse leaving, which is the only way a touch device can read it at all — there is no hover there.
+let abTipPin = null;
+
+// One popover element for both the tooltip and the equip picker: created once, moved and refilled.
+// It is placed under whatever opened it and nudged back inside the viewport rather than being
+// clipped by it, flipping above when there is no room below.
+function popAt(el, html, kind, pin) {
+  let t = document.getElementById('abtip');
+  if (!t) { t = document.createElement('div'); t.id = 'abtip'; document.body.append(t); }
+  t.className = `abtip ${kind || ''}${pin ? ' pinned' : ''}`;
+  t.innerHTML = html;
+  // A click inside the panel is not a click away from it. Without this the document handler that
+  // dismisses a pinned panel fires the moment you touch a field inside one.
+  t.onclick = e => e.stopPropagation();
+  const r = el.getBoundingClientRect(), w = Math.min(380, innerWidth - 24);
+  t.style.width = w + 'px';
+  t.style.left = Math.round(Math.max(12, Math.min(r.left, innerWidth - w - 12))) + 'px';
+  t.style.top = Math.round(r.bottom + 8 + scrollY) + 'px';
+  if (r.bottom + t.offsetHeight + 20 > innerHeight)
+    t.style.top = Math.round(Math.max(scrollY + 8, r.top - t.offsetHeight - 8 + scrollY)) + 'px';
+  return t;
+}
+
+function abTip(el, id, pin) {
+  if (abTipPin && !pin) return;                        // a pinned pop outranks a hover
+  if (pin && abTipPin === id) return abTipOff(true);   // clicking the pinned one closes it
+  const g = grimmById(S.current), sh = sheet();
+  const a = g.abilities.find(x => x.id === id);
+  if (!a) return;
+  const up = plusForms(shackleOn(sh, g))[a.name.trim().toLowerCase()];
+  const k = el.dataset.k, i = el.dataset.i;            // absent on Familiar and the Shackle Break
+  const running = a.kind === 'shackle' && (shackleOn(sh, g) || {}).name === a.name;
+  popAt(el, `<div class="abtip-h"><b>${esc(a.name)}${up ? ' +' : ''}</b>
+      <span class="tag k">${KIND_NAME[a.kind]}</span>
+      ${a.action ? `<span class="tag">${esc(a.action)}</span>` : ''}
+      ${a.cost ? `<span class="tag">${a.cost} Grimm Slot${a.cost > 1 ? 's' : ''}</span>` : ''}</div>
+    <div class="abtip-b">${up ? `<div class="plusform">${prose(up, sh)}</div><p class="hint">Unchanged below.</p>` : ''}${prose(a.text, sh)}</div>
+    ${a.cost || k ? `<div class="abtip-f">
+      ${running ? `<button class="btn sm warn" onclick="event.stopPropagation();abTipOff(true);shackleEndNow()">End it now</button>`
+        : a.cost ? `<button class="btn sm pri" onclick="event.stopPropagation();abTipOff(true);useAbility('${a.id}')">Use · ${a.cost} slot${a.cost > 1 ? 's' : ''}</button>` : ''}
+      ${k ? `<button class="btn sm" onclick="event.stopPropagation();abPick(document.querySelector('[data-k=&quot;${k}&quot;][data-i=&quot;${i}&quot;]'),'${k}',${i})">Swap</button>` : ''}
+      <span class="hint">${a.cost ? (sh.familiar ? 'Familiar form — slot abilities are unavailable.' : `${derived(sh).left} left`) : ''}</span></div>` : ''}`,
+    a.kind, pin);
+  abTipPin = pin ? id : abTipPin;
+}
+function abTipOff(force) {
+  if (abTipPin && !force) return;
+  abTipPin = null;
+  document.getElementById('abtip')?.remove();
+}
+document.addEventListener('click', () => abTipOff(true));
+
 function abilityHtml(a, sh, usable, plus) {
   const cost = a.cost ? `<span class="cost" title="${a.cost} Grimm Slot${a.cost > 1 ? 's' : ''}">${'<i></i>'.repeat(a.cost)}</span>` : '';
   const useBtn = usable && a.cost ? `<button class="btn sm pri" onclick="event.stopPropagation();useAbility('${a.id}')">Use</button>` : '';
@@ -202,7 +440,9 @@ function abilityHtml(a, sh, usable, plus) {
 function setLoad(k, i, id) {
   const sh = sheet();
   if (sh.inCombat && sh.loadout[k][i] !== id) { sh.exhaustion++; toast('Exhausting Exchange — +1 Exhaustion (Bonus Action).'); }
-  sh.loadout[k][i] = id; save(); render();
+  sh.loadout[k][i] = id;
+  abTipOff(true);   // the picker was the thing that called this; it has had its answer
+  save(); render();
 }
 function useAbility(id) {
   const g = grimmById(S.current), sh = sheet(), a = g.abilities.find(x => x.id === id);
