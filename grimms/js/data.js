@@ -305,7 +305,7 @@ window.GRIMM_DATA = {
     "awakened": "Chimeric Wyrm"
    },
    "images": {
-    "invoked": "img/familiar_oroborosVigil.jpeg",
+    "invoked": "img/familiar_oroborosVigil.png",
     "awakened": "img/grimm_Oroboros.png"
    },
    "abilities": [
@@ -493,7 +493,7 @@ window.GRIMM_DATA = {
     "awakened": "Ashmede"
    },
    "images": {
-    "invoked": "img/familiar_vidar.jpg",
+    "invoked": "img/familiar_vidar.png",
     "awakened": "img/grimm_Vidarr.png"
    },
    "abilities": [
@@ -1405,7 +1405,7 @@ window.GRIMM_DATA = {
     "awakened": "Magnamalo"
    },
    "images": {
-    "invoked": "img/familiar_rageOfTheTIger.jpg",
+    "invoked": "img/familiar_rageOfTheTIger.png",
     "awakened": "img/grimm_RageOfTheTiger.png"
    },
    "abilities": [

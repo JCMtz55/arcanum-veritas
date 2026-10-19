@@ -114,16 +114,22 @@ const SHIFTS = {
 // for anything not listed (Peco, until his two stages are drawn).
 const PORTRAITS = {
   'gate-of-caelum':    { invoked: 'familiar_gateOfCaelum.png',  awakened: 'grimm_GateOfCaelum.png' },
-  'ouroboros-vigil':   { invoked: 'familiar_oroborosVigil.jpeg', awakened: 'grimm_Oroboros.png' },
-  'vidarr':            { invoked: 'familiar_vidar.jpg',          awakened: 'grimm_Vidarr.png' },
+  'ouroboros-vigil':   { invoked: 'familiar_oroborosVigil.png',  awakened: 'grimm_Oroboros.png' },
+  'vidarr':            { invoked: 'familiar_vidar.png',          awakened: 'grimm_Vidarr.png' },
   'white-rabbit':      { invoked: 'familiar_whiteRabbit.png',    awakened: 'grimm_WhiteRabbit.png' },
   'makoa':             { invoked: 'familiar_makoa.png',          awakened: 'grimm_Makoa.png' },
   'thanatos':          { invoked: 'familiar_Thanatos.png',       awakened: 'grimm_Thanatos.png' },
-  'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTIger.jpg', awakened: 'grimm_RageOfTheTiger.png' },
+  'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTIger.png', awakened: 'grimm_RageOfTheTiger.png' },
   'peco':              { invoked: 'familiar_peco.png',           awakened: 'grimm_Peco.png' },
 };
 // With Peco drawn (2026-10-19) every Grimm is served from grimms/img/ and nothing hotlinks
 // gmbinder.com any more. The scrape below still runs as the fallback, but nothing reaches it.
+//
+// Thanatos, Rage of the Tiger, Víðarr and Ouroboros Vigil were redrawn the same day, and the last
+// three 1st-Stage plates moved from .jpg/.jpeg to .png — so the names above are the new ones. The
+// old Ouroboros .jpeg is gone from resources/ entirely; a name that no longer resolves is reported
+// as missing at the end of a build and that Grimm simply loses its portrait, so this list has to
+// move when a plate's extension does.
 
 const RULES = [
   ['grimms',    'Rules of the Grimm',  'Grimms.md'],
@@ -167,11 +173,17 @@ function resourceIndex() {
 }
 const artCopied = new Map();
 const artMissing = new Set();
+// Obsidian writes an embed as a bare file name or as a vault-relative path, depending on how that
+// note's links were made: ![[grimm_Peco.png]] and ![[resources/grimm/Players/2nd Stage/grimm_Peco.png]]
+// are the same plate. The index is keyed by file name, so a path form is resolved — and named in
+// img/ — by its last segment. Without this, Peco's page lost both its plates while the portraits
+// above still worked, because PORTRAITS asks for the bare names (Juan, 2026-10-19).
 function useImage(name) {
   if (artCopied.has(name)) return artCopied.get(name);
-  const src = resourceIndex().get(name);
+  const base = name.split(/[\\/]/).pop();
+  const src = resourceIndex().get(name) || resourceIndex().get(base);
   if (!src) { artMissing.add(name); artCopied.set(name, null); return null; }
-  const safe = name.replace(/[^\w.-]+/g, '_');
+  const safe = base.replace(/[^\w.-]+/g, '_');
   fs.mkdirSync(IMG_OUT, { recursive: true });
   fs.copyFileSync(src, path.join(IMG_OUT, safe));
   const url = 'img/' + safe;
