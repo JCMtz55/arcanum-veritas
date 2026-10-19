@@ -102,8 +102,10 @@ const PORTRAITS = {
   'makoa':             { invoked: 'familiar_makoa.png',          awakened: 'grimm_Makoa.png' },
   'thanatos':          { invoked: 'familiar_Thanatos.png',       awakened: 'grimm_Thanatos.png' },
   'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTIger.jpg', awakened: 'grimm_RageOfTheTiger.png' },
-  // 'peco': no local art yet — falls back to whatever the page's own <img> tags carry.
+  'peco':              { invoked: 'familiar_peco.png',           awakened: 'grimm_Peco.png' },
 };
+// With Peco drawn (2026-10-19) every Grimm is served from grimms/img/ and nothing hotlinks
+// gmbinder.com any more. The scrape below still runs as the fallback, but nothing reaches it.
 
 const RULES = [
   ['grimms',    'Rules of the Grimm',  'Grimms.md'],

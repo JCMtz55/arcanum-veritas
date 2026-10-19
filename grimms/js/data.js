@@ -1600,8 +1600,8 @@ window.GRIMM_DATA = {
     "awakened": "Wicked Whisper"
    },
    "images": {
-    "invoked": "https://www.gmbinder.com/images/Sxp0FFm.png",
-    "awakened": "https://www.gmbinder.com/images/0Joe3dw.png"
+    "invoked": "img/familiar_peco.png",
+    "awakened": "img/grimm_Peco.png"
    },
    "abilities": [
     {
