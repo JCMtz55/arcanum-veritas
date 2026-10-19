@@ -164,6 +164,29 @@ textarea.txt{width:100%;min-height:70px;font-family:var(--serif);font-size:14px;
 .soulcard .acts{display:flex;flex-wrap:wrap;gap:5px}
 .soulcard .hint{margin:0}
 
+/* Troops on the field, once Hollownest has made them corporeal: the same card as a Servant's,
+   wearing the troop TYPE's plate — five of them, not one per troop, so a platoon of eight shows
+   the same five faces. Until the plates exist the sigil stands in for the art. */
+.troopcard .face{aspect-ratio:1/1}
+.troopcard .face img{object-position:50% 25%;cursor:zoom-in}
+/* Until a job's plate exists the face is only its sigil, and a square of nothing is most of the
+   card. Give the sigil a band instead; drop troop_<Job>.png into resources and it becomes art. */
+.troopcard .face.blank{aspect-ratio:5/2}
+.troopcard .noface.sig{font-size:30px;letter-spacing:.08em;color:var(--k-active);opacity:.55}
+.troopcard.reinf{border-top-style:dashed}
+/* At 0 HP it is still standing — that is the whole of Last Stand, and it needs to be loud. */
+.troopcard.laststand{border-top-color:var(--ember);background:color-mix(in srgb,var(--ember) 8%,transparent)}
+.troopcard.laststand .hpbar i{background:var(--ember)}
+.troopcard.fallen{opacity:.55;border-top-color:var(--mute)}
+.soulcard .badge.warn{color:var(--ember);box-shadow:inset 0 0 0 1px var(--ember)}
+.troopcard .spd{font-size:10.5px;opacity:.75}
+.troopcard .trwrap .tr .nm{font-size:11px}
+/* The round's ticks: what this troop has already spent. Pressed is spent. */
+.tact{font-variant-numeric:tabular-nums}
+.tact.part{background:color-mix(in srgb,var(--k-active) 16%,transparent)}
+.tact.spent{background:color-mix(in srgb,var(--k-active) 34%,transparent);border-color:var(--k-active);
+  text-decoration:line-through;opacity:.8}
+
 /* Charge trackers. Collapsed to one button by default, so a card is no taller than it was before
    they existed; open, each one is a single compact row. Pips up to six, numbers past that. */
 .trtog{font-variant-numeric:tabular-nums}

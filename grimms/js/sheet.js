@@ -530,6 +530,7 @@ function shiftStart() {
   rs.on = true; rs.crits = 0; rs.lair = 0;
   rs.banner = 'king'; rs.acclaim = 0; rs.labors = {};   // Solemn Temperance
   rs.traps = []; rs.placed = {};                        // Hollownest
+  if (SHIFT_START[g.id]) SHIFT_START[g.id](sh, rs);     // what the domain does to the sheet as it rises
   sh.inCombat = true;
   sh.effects = sh.effects.filter(e => e.name !== s.name);
   sh.effects.push({ name: s.name, rounds: 10 });
@@ -546,6 +547,7 @@ function shiftStart() {
 function shiftEnd() {
   const g = grimmById(S.current), sh = sheet(), s = g.shift, rs = rsState(sh);
   rs.on = false; rs.crits = 0; rs.lair = 0; rs.acclaim = 0; rs.labors = {}; rs.traps = []; rs.placed = {};
+  if (SHIFT_END[g.id]) SHIFT_END[g.id](sh, rs);
   sh.exhaustion += 3; sh.dreamExhaustion += 5;
   sh.effects = sh.effects.filter(e => e.name !== s.name);
   save(); render();
@@ -579,6 +581,9 @@ function nextRound() {
   const sh = sheet(); sh.round++; sh.inCombat = true;
   const ended = [];
   sh.effects = sh.effects.filter(e => (--e.rounds > 0) || (ended.push(e.name), false));
+  // A per-Grimm tracker that burns down with the round rather than with a duration — Last Stand,
+  // and the Action each troop has or has not spent — gets its turn here, before the redraw.
+  if (ROUND_HOOK[S.current]) ROUND_HOOK[S.current](sh);
   save(); render();
   if (ended.length) toast('Ended: ' + ended.join(', '));
 }

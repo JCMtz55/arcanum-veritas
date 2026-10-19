@@ -6,7 +6,12 @@
 // Shift card, for a Shift that asks you to keep something in your head.
 // SHACKLE_SETUP[id]: the window that opens behind the animation when a Shackle Break is used, for
 // the choices that Grimm has to make while the chains are off.
+// ROUND_HOOK[id]: called by the round tracker after it advances, for a tracker that burns down with
+// the round rather than with an effect's duration (a troop's Last Stand, the ticks it spent).
+// SHIFT_START[id] / SHIFT_END[id]: the Reality Shift opening and collapsing, for the state its own
+// text changes — Hollownest makes the whole platoon corporeal "at full strength" as it rises.
 const PANELS = {}, EXTRA = {}, SHIFT_PANEL = {}, LONG_REST = {}, USE_HOOK = {}, SHACKLE_SETUP = {};
+const ROUND_HOOK = {}, SHIFT_START = {}, SHIFT_END = {};
 
 const X = () => sheet().x;
 function xset(k, v) { X()[k] = v; save(); render(); }
@@ -960,44 +965,218 @@ function bloodTake() {
 USE_HOOK['curse-of-the-ashes'] = sh => { sh.x.pool = pbOf(sh.level); sh.x.targets = []; };
 LONG_REST['vidarr'] = sh => { sh.x.blood = 0; sh.x.slotsBack = 0; sh.x.targets = []; sh.x.pool = 0; };
 
-// ── White Rabbit — troops & jobs ────────────────────────────────────────
-const JOBS = {
-  Infantry: { charges: { 'War Cry': 2 } },
-  Scout:    { charges: { 'Disrupting Bolt': 1 } },
-  Medic:    { charges: { 'Fluffy Paw': 3, 'Purge Pain': 1 } },
-  Magus:    { charges: { 'Magic Edge': 3, 'Arcane Nova': 2 } },
-  Bulwark:  { charges: {} },
+// ── White Rabbit — the Umbra Platoon ────────────────────────────────────
+// A troop type is a vault note now (`White Rabbit/Troops/<Job>.md` → g.troops), exactly as a
+// Servant is: it owns its sigil, its art, the trait it lends the Commander, its actions and
+// charges, and the HP/AC/Speed it wears once Hollownest makes it corporeal. So a sixth job is a
+// sixth note and nothing here changes.
+//
+// JOBS_FALLBACK is what this panel knew before the notes existed, kept for a data.js built from an
+// older vault — without it, a stale data file would show a platoon with no jobs at all.
+const JOBS_FALLBACK = [
+  { name: 'Infantry', sigil: 'INF', charges: { 'War Cry': 2 } },
+  { name: 'Scout',    sigil: 'SCT', charges: { 'Disrupting Bolt': 1 } },
+  { name: 'Medic',    sigil: 'MED', charges: { 'Fluffy Paw': 3, 'Purge Pain': 1 } },
+  { name: 'Magus',    sigil: 'MAG', charges: { 'Magic Edge': 3, 'Arcane Nova': 2 } },
+  { name: 'Bulwark',  sigil: 'BWK', charges: {} },
+];
+const troopTypes = (g = grimmById('white-rabbit')) => (g && g.troops && g.troops.length) ? g.troops : JOBS_FALLBACK;
+const troopType = (job, g) => job ? troopTypes(g).find(t => t.name === job) || null : null;
+const troopSigil = t => t ? (t.sigil || t.name.slice(0, 3).toUpperCase()) : '—';
+const troopCharges = t => (t && t.charges) || {};
+// Corporeal HP is written in the note as a formula — "50 + (5 × your level)" — because that is how
+// Hollownest states it. The builder has already split it into base and per-level.
+const troopMaxHp = (t, sh) => t && t.hp ? t.hp.base + t.hp.per * sh.level : 0;
+
+// Which actions a troop can be told to take, read off its own note: the ### headings under
+// "## Actions" and "## Reactions". A charge count from the Stats table attaches to the action of
+// the same name, so renaming War Cry in the vault renames its pips here.
+function troopSection(t, title) {
+  const parts = String(t && t.text || '').split(/^## +/m);
+  return parts.find(p => new RegExp('^' + title + '\\b', 'i').test(p)) || '';
+}
+function troopActions(t) {
+  const out = [];
+  for (const [title, kind] of [['Actions', 'action'], ['Reactions', 'reaction']])
+    for (const m of troopSection(t, title).matchAll(/^### +(.+?)\s*$/gm))
+      out.push({ name: m[1].replace(/\*/g, '').trim(), kind, max: troopCharges(t)[m[1].trim()] || 0 });
+  // A charge the note lists but no heading claims still gets its pips — the Stats table is the
+  // contract for what is spendable, the headings are only where the text lives.
+  for (const [name, max] of Object.entries(troopCharges(t)))
+    if (!out.some(a => a.name === name)) out.push({ name, kind: 'action', max });
+  return out;
+}
+// The dice a troop rolls, by action name — the one thing still written here rather than scraped,
+// because "Prof Bonus / 2 of d6s + Dex" is prose and these are the numbers it means.
+const TROOP_DICE = {
+  'Vorpal Slash':  (v, x) => [Math.floor(v.pb / 2), 6, +x.dex || 0],
+  'Psionic Arrow': (v, x) => [Math.floor(v.pb / 2), 6, +x.dex || 0],
+  'Disrupting Bolt': (v, x) => [Math.floor(v.pb / 2), 6, +x.dex || 0],
+  'Magic Edge':    (v, x) => [v.pb, 12, +x.dex || 0],
+  'Arcane Nova':   () => [4, 8, 0],
+  'Fluffy Paw':    (v, x) => [v.pb, 6, +x.wis || 0],
 };
 // Every troop gets a tile — the platoon proper, the reinforcements called up by the ability, and
 // any summoned past the limit by Hollownest's Reinforcement Surge. They all take jobs. A platoon
 // can run to 2×PB, and as full-width rows that was the whole card; as tiles eight of them fit in
 // two lines. The job goes in a popover, the charges stay on the face where they are spent.
+//
+// Corporeal — inside Hollownest, or when the DM rules them physical — a tile becomes a card with
+// the troop type's plate on it, its HP, and what it has already spent this round. That is the only
+// state the tile view cannot carry, and it is the state that decides whether a troop lives.
 const troopName = (i, base, reinf) =>
   i < base ? `Troop ${i + 1}` : i < base + reinf ? `Reinf. ${i - base + 1}` : `Surge ${i - base - reinf + 1}`;
 const JOB_SHORT = { Infantry: 'INF', Scout: 'SCT', Medic: 'MED', Magus: 'MAG', Bulwark: 'BWK' };
 
 function troopPick(el, i) {
-  const t = X().troops[i];
-  const ch = JOBS[t.job] ? Object.entries(JOBS[t.job].charges) : [];
+  const t = X().troops[i], mine = troopType(t.job);
+  const ch = Object.entries(troopCharges(mine));
   // Charges first — mid-fight this panel is opened to spend one, not to change a job.
   const charges = ch.length ? `<div class="chgrow">${ch.map(([a, max]) => `<span class="chg">
       <i>${esc(a)}</i><span class="pips">${Array.from({ length: max }, (_, k) =>
         `<button class="pip sm ${k < (t.used[a] || 0) ? 'used' : ''}" title="${attr(a)}" onclick="event.stopPropagation();troopCharge(${i},'${a}',${k})"></button>`).join('')}</span>
     </span>`).join('')}</div>` : '';
-  const rows = ['', ...Object.keys(JOBS)].map(j => {
-    const c = j ? Object.entries(JOBS[j].charges) : [];
+  const rows = [null, ...troopTypes()].map(ty => {
+    const c = Object.entries(troopCharges(ty)), j = ty ? ty.name : '';
     return `<button type="button" class="pickrow active${j === t.job ? ' on' : ''}"
-      onclick="event.stopPropagation();abTipOff(true);troopJob(${i},'${j}')">
-      <span class="sig"><b>${j ? JOB_SHORT[j] : '—'}</b></span>
-      <span class="pr-id"><b>${j || 'No job'}</b><span class="hint">${
-        j ? (c.length ? c.map(([a, n]) => `${a} ×${n}`).join(' · ') : 'no charges') : 'stands unassigned'}</span></span>
+      onclick="event.stopPropagation();abTipOff(true);troopJob(${i},'${attr(j)}')">
+      <span class="sig"><b>${troopSigil(ty)}</b></span>
+      <span class="pr-id"><b>${ty ? esc(ty.name) : 'No job'}</b><span class="hint">${
+        ty ? esc(ty.role || '') + (c.length ? ' · ' + c.map(([a, n]) => `${a} ×${n}`).join(' · ') : '') : 'stands unassigned'}</span></span>
     </button>`;
   }).join('');
   popAt(el, `<div class="abtip-h"><b>${esc(el.dataset.tn || `Troop ${i + 1}`)}</b>${t.job ? `<span class="tag k">${esc(t.job)}</span>` : '<span class="tag">no job</span>'}</div>
     ${charges}
     <div class="abtip-b picker">${rows}</div>
-    <div class="abtip-f"><span class="hint">Jobs change after a Short or Long Rest; charges refill on a Short Rest.</span></div>`, 'active', true);
+    <div class="abtip-f"><span class="hint">Jobs change after a Short or Long Rest — or freely, with <b>Tactical Reassignment</b>, inside Hollownest. Charges refill on a Short Rest.</span></div>`, 'active', true);
   abTipPin = `troop:${i}`;
+}
+// ── A corporeal troop: what it has, and what it has spent ───────────────
+// Only inside Hollownest does a troop have hit points at all — *Umbra Platoon Manifestation* is
+// what makes it a physical token. Outside it, the base Grimm is explicit that White Rabbit has no
+// HP and fades between commands, so the sheet refuses to invent numbers for it; x.corp is the
+// DM's override for a table that rules otherwise.
+const troopsCorp = (sh = sheet('white-rabbit')) => !!(rsState(sh).on || sh.x.corp);
+const troopAlive = t => !t.dead;
+// Last Stand: at 0 HP it stands until the end of your NEXT turn, then dies if not healed. `down`
+// is the round it fell in, so it has until the end of round down + 1.
+const troopDownTill = t => (t.down == null ? null : t.down + 1);
+function troopHpSet(i, v) {
+  const sh = sheet(), t = sh.x.troops[i], max = troopMaxHp(troopType(t.job), sh);
+  t.hp = Math.max(0, Math.min(max || 1e9, Math.floor(+v || 0)));
+  // Healing it above 0 in time pulls it out of Last Stand. It does NOT raise one that already ran
+  // out of it: "then dies if not healed" — past that, only a rest or Re-form calls it back.
+  if (t.hp > 0 && !t.dead) t.down = null;
+  else if (t.hp === 0 && !t.dead && t.down == null) t.down = sh.round;
+  save(); render();
+}
+function troopFell(i) {
+  const sh = sheet(), t = sh.x.troops[i];
+  t.hp = 0; t.down = sh.round;
+  save(); render();
+  toast(`${troopName(i, troopBase(sh), sh.x.reinf || 0)} is at 0 — Last Stand until the end of round ${t.down + 1}.`);
+}
+// Whole again: what a Short Rest, the Warren's activation and a Reinforcement Surge all do.
+function troopReform(i) {
+  const sh = sheet(), t = sh.x.troops[i];
+  t.hp = troopMaxHp(troopType(t.job), sh) || null;
+  t.down = null; t.dead = false; t.acted = 0; t.reacted = 0;
+  save(); render();
+}
+// One Action each when the platoon is commanded, so the tick is per troop and the header button
+// marks the whole platoon at once. Hollownest's Vorpal Ambush Strike un-marks them: "even if they
+// have already acted this round".
+function troopActed(i, kind) {
+  const sh = sheet(), t = sh.x.troops[i], k = kind === 'reaction' ? 'reacted' : 'acted';
+  const cap = kind === 'reaction' && t.job === 'Bulwark' && troopsCorp(sh) ? 2 : 1;   // Unbroken Guard
+  const used = t[k] === sh.round ? (t[k + 'N'] || 1) : 0;
+  if (used >= cap) { t[k] = 0; t[k + 'N'] = 0; } else { t[k] = sh.round; t[k + 'N'] = used + 1; }
+  save(); render();
+}
+const troopUsed = (t, sh, kind) => (t[kind === 'reaction' ? 'reacted' : 'acted'] === sh.round)
+  ? (t[(kind === 'reaction' ? 'reacted' : 'acted') + 'N'] || 1) : 0;
+function troopsAllActed() {
+  const sh = sheet();
+  (sh.x.troops || []).forEach(t => { if (troopAlive(t) && t.job) { t.acted = sh.round; t.actedN = 1; } });
+  save(); render(); toast('The platoon moves and acts — Bonus Action.');
+}
+function troopsClearActed() {
+  const sh = sheet();
+  (sh.x.troops || []).forEach(t => { t.acted = 0; t.actedN = 0; t.reacted = 0; t.reactedN = 0; });
+  save(); render(); toast('Every troop may act again.');
+}
+function troopStatblock(job) {
+  const t = troopType(job);
+  if (!t) return toast('That troop has no statblock in the vault yet.');
+  openDialog(t.name, prose(t.text, sheet('white-rabbit')));
+}
+function troopTraitsDialog() {
+  const g = grimmById('white-rabbit');
+  if (!g.troopTraits) return toast('No shared traits note in the vault — add White Rabbit/Troops/Universal Traits.md.');
+  openDialog('Umbra Platoon — Universal Traits', prose(g.troopTraits, sheet('white-rabbit')));
+}
+// Rolling one of a troop's own actions, with that troop's name on the result.
+function troopRoll(i, name) {
+  const sh = sheet(), v = derived(sh), dice = TROOP_DICE[name];
+  if (!dice) return;
+  const [n, sides, bonus] = dice(v, sh.x);
+  rollOut(`${troopName(i, troopBase(sh), sh.x.reinf || 0)} · ${name}`, n, sides, bonus);
+}
+const troopBase = sh => awakened(sh) ? 3 : 2;
+
+// One card: the plate, the HP, the charges, and the round's ticks.
+function troopCard(i, t, sh, v) {
+  t.used = t.used || {};
+  const ty = troopType(t.job), nm = troopName(i, troopBase(sh), sh.x.reinf || 0);
+  const max = troopMaxHp(ty, sh), hp = t.hp == null ? max : +t.hp;
+  const frac = max ? Math.max(0, Math.min(1, hp / max)) : 0;
+  const till = troopDownTill(t);
+  const acts = troopActions(ty);
+  const reactCap = t.job === 'Bulwark' ? 2 : 1;
+  const tick = (kind, cap, label) => {
+    const used = troopUsed(t, sh, kind);
+    return `<button class="btn sm tact ${used >= cap ? 'spent' : used ? 'part' : ''}"
+      title="${attr(used >= cap ? `${label} spent this round — press to give it back` : `Mark its ${label} spent this round`)}"
+      onclick="troopActed(${i},'${kind}')">${label}${cap > 1 ? ` ${used}/${cap}` : used >= cap ? ' ✓' : ''}</button>`;
+  };
+  return `<div class="soulcard troopcard${t.dead ? ' fallen' : till != null ? ' laststand' : ''}${i >= troopBase(sh) ? ' reinf' : ''}">
+    <div class="face${ty && ty.img ? '' : ' blank'}">${ty && ty.img
+      ? `<img src="${attr(ty.img)}" alt="" onclick="lightbox(this.src,'${attr(ty.name)}')" title="Click to see it whole">`
+      : `<span class="noface sig">${troopSigil(ty)}</span>`}
+      ${t.dead ? '<span class="badge warn">Fallen</span>'
+        : till != null ? `<span class="badge warn">Last Stand · to round ${till}</span>`
+        : t.job ? `<span class="badge">${esc(t.job)}</span>` : '<span class="badge">No job</span>'}
+      ${ty && ty.ac ? `<span class="crtag">AC ${ty.ac}</span>` : ''}
+    </div>
+    <div class="meat">
+      <div class="nm" title="${attr(nm + (ty ? ' · ' + ty.name : ''))}">${esc(nm)}${i >= troopBase(sh) ? ' <span class="tag">R</span>' : ''}</div>
+      ${!t.job ? '<p class="hint">Give it a job to put it on the field.</p>'
+        : t.dead ? '<p class="hint">It did not survive Last Stand. A Short Rest re-forms it.</p>'
+        : `<div class="hpline"><span class="lbl">HP</span>
+            <input class="num" type="number" value="${hp}" onchange="troopHpSet(${i},this.value)">
+            <span class="lbl">/ ${max || '—'}</span></div>
+          <div class="hpbar"><i style="width:${Math.round(frac * 100)}%"></i></div>
+          ${ty && ty.speed ? `<div class="lbl spd">${esc(ty.speed)}</div>` : ''}
+          <div class="acts">${tick('action', 1, 'Action')}${tick('reaction', reactCap, 'Reaction')}</div>`}
+      ${t.job && !t.dead && acts.some(a => a.max) ? `<div class="trwrap">${acts.filter(a => a.max).map(a => {
+        const left = a.max - (t.used[a.name] || 0);
+        return `<div class="tr"><span class="nm" title="${attr(a.name)} — ${left} of ${a.max} left">${esc(a.name)}</span>
+          <span class="pips">${Array.from({ length: a.max }, (_, k) =>
+            `<i class="${k < left ? 'on' : ''}" title="${k + 1} of ${a.max}"
+              onclick="troopPip(${i},'${attr(a.name)}',${k + 1})"></i>`).join('')}</span></div>`;
+      }).join('')}</div>` : ''}
+      ${t.job && !t.dead ? `<div class="acts">${acts.filter(a => TROOP_DICE[a.name]).map(a => {
+        const [n, sides, bonus] = TROOP_DICE[a.name](v, sh.x);
+        return `<button class="btn sm" onclick="troopRoll(${i},'${attr(a.name)}')">${esc(a.name)} · ${n}d${sides}${bonus ? sign(bonus) : ''}</button>`;
+      }).join('')}</div>` : ''}
+      <div class="acts">
+        <button class="btn sm" onclick="troopPick(this,${i})" title="Change its job, or spend a charge">Job</button>
+        ${t.job ? `<button class="btn sm" onclick="troopStatblock('${attr(t.job)}')">Statblock</button>` : ''}
+        ${t.job && !t.dead && till == null ? `<button class="btn sm warn" title="It dropped to 0 HP" onclick="troopFell(${i})">Fell</button>` : ''}
+        ${t.job && (t.dead || till != null || hp < max) ? `<button class="btn sm" title="Whole again" onclick="troopReform(${i})">Re-form</button>` : ''}
+      </div>
+    </div>
+  </div>`;
 }
 PANELS['white-rabbit'] = (g, sh, v) => {
   const x = sh.x, base = awakened(sh) ? 3 : 2;
@@ -1005,28 +1184,40 @@ PANELS['white-rabbit'] = (g, sh, v) => {
   x.troops = x.troops || [];
   while (x.troops.length < total) x.troops.push({ job: '', used: {} });
   if (x.troops.length > total) x.troops.length = total;
-  const n = j => x.troops.filter(t => t.job === j).length;
+  // A dead troop lends the Commander nothing: the traits are "for each Infantry" in the platoon,
+  // and one that did not survive Last Stand is not in it any more.
+  const n = j => x.troops.filter(t => t.job === j && troopAlive(t)).length;
   const dex = +x.dex || 0, wis = +x.wis || 0, half = Math.floor(v.pb / 2);
+  const corp = troopsCorp(sh), rsOn = rsState(sh).on;
+  const standing = x.troops.filter(t => troopAlive(t)).length;
+  const fallen = total - standing;
   // Each troop is a tile in the same square vocabulary as the ability hotbar: the job's initials
   // on the face, charges as pips under them, and everything you press — picking the job, spending
   // a charge — in the popover. Pips cannot be buttons inside a button, and that is the right trade
   // anyway: the face is the glance, the panel is the interaction.
+  //
+  // Corporeal, that trade stops paying: HP, Last Stand and whether this one has already acted are
+  // all state you need WHILE you look at the platoon, not one click away. So the tiles become
+  // cards — the Servants' own card, wearing the troop type's plate.
   const troopRows = x.troops.map((t, i) => {
-    const ch = JOBS[t.job] ? JOBS[t.job].charges : {};
-    const nm = troopName(i, base, reinf);
-    const spent = Object.entries(ch).map(([a, max]) =>
+    const ty = troopType(t.job), nm = troopName(i, base, reinf);
+    const spent = Object.entries(troopCharges(ty)).map(([a, max]) =>
       Array.from({ length: max }, (_, k) => `<i class="${k < (t.used[a] || 0) ? 'spent' : ''}"></i>`).join('')).join('');
     return `<button type="button" class="slotbtn troop ${t.job ? 'active' : 'core'}${i >= base ? ' reinf' : ''}${t.job ? '' : ' dim'}"
       data-tn="${attr(nm)}" onclick="event.stopPropagation();troopPick(this,${i})" title="${attr(nm + (t.job ? ' · ' + t.job : ' · no job'))}">
-      <span class="sig"><b>${t.job ? JOB_SHORT[t.job] : '—'}</b>
+      <span class="sig"><b>${troopSigil(ty)}</b>
         ${spent ? `<span class="pips">${spent}</span>` : ''}
         ${i >= base ? '<span class="act">R</span>' : ''}</span>
       <span class="cap">${esc(nm)}</span></button>`;
   }).join('');
-  return `<h2>Umbra Platoon <span class="r"><button class="btn sm" onclick="troopRest()">Short rest</button></span></h2>
+  const troopCards = x.troops.map((t, i) => troopCard(i, t, sh, v)).join('');
+  return `<h2>Umbra Platoon <span class="r">
+      ${grimmById('white-rabbit').troopTraits ? `<button class="btn sm" onclick="troopTraitsDialog()" title="What every troop has, whatever its job">Universal traits</button>` : ''}
+      <button class="btn sm" onclick="troopRest()">Short rest</button></span></h2>
     <div class="stats">
       ${stat(total, `troops${reinf || surge ? ` · ${base} + ${reinf}${surge ? ` + ${surge}` : ''}` : ''}`)}
-      ${stat(`${40 * total} ft`, 'warding range')}
+      ${fallen ? stat(fallen, 'fallen', 'var(--ember)') : ''}
+      ${stat(`${40 * standing} ft`, `warding range${corp ? ' · from each corporeal troop' : ''}`)}
       ${stat(`${20 - n('Infantry')}–20`, 'crit range')}
       ${n('Scout') ? stat(`+${n('Scout')}`, 'atk & dmg, +' + 3 * n('Scout') + ' Perception') : ''}
       ${n('Medic') ? stat(`+${10 * n('Medic')}`, 'max HP') : ''}
@@ -1035,24 +1226,87 @@ PANELS['white-rabbit'] = (g, sh, v) => {
     </div>
     <div class="row" style="margin-top:10px">${numIn('Dex mod', 'dex', 0)}${numIn('Wis mod', 'wis', 0)}
       <span class="pair"><span class="lbl">Reinforcements</span><div class="step"><button onclick="xbump('reinf',-1,0,${Math.max(0, maxT - base)})">–</button><span>${reinf}</span><button onclick="xbump('reinf',1,0,${Math.max(0, maxT - base)})">+</button></div></span>
-      ${surge ? `<span class="pair"><span class="lbl">Surge</span><div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${surge}</span><button onclick="xbump('surge',1,0,8)">+</button></div></span>` : ''}</div>
-    <div class="troops">${troopRows}</div>
-    ${awakened(sh) ? `<div class="row" style="margin-top:9px">
+      ${surge ? `<span class="pair"><span class="lbl">Surge</span><div class="step"><button onclick="xbump('surge',-1,0,8)">–</button><span>${surge}</span><button onclick="xbump('surge',1,0,8)">+</button></div></span>` : ''}
+      <label class="lbl" title="${attr(rsOn ? 'Hollownest holds — the platoon is corporeal whatever this says' : 'The troop has HP, AC and Speed only when it is physical. Inside Hollownest that is automatic; tick this if your DM rules them physical outside it.')}">
+        <input type="checkbox" ${corp ? 'checked' : ''} ${rsOn ? 'disabled' : ''} onchange="xset('corp',this.checked)"> Corporeal${rsOn ? ' · Hollownest' : ''}</label></div>
+    ${corp ? `<div class="row" style="margin-top:9px">
+        <button class="btn pri" onclick="troopsAllActed()" title="The Umbra Platoon Bonus Action: every troop moves and takes one Action">Platoon acts · Bonus Action</button>
+        <button class="btn" onclick="troopsClearActed()" title="Vorpal Ambush Strike lets them act again, even if they already have">Let them act again</button>
+        <span class="hint" style="flex:1;min-width:200px">Round <b>${sh.round}</b>. Ticks clear themselves on <b>Next round</b>, and a troop at 0 HP dies at the end of the round after it fell unless it is healed.</span>
+      </div>
+      <div class="souls">${troopCards}</div>`
+    : `<div class="troops">${troopRows}</div>`}
+    ${awakened(sh) ? `${corp ? '' : `<div class="row" style="margin-top:9px">
       ${n('Infantry') ? rollBtn('Vorpal Slash', half, 6, dex) : ''}
       ${n('Scout') ? rollBtn('Psionic Arrow', half, 6, dex) : ''}
       ${n('Magus') ? rollBtn('Magic Edge', v.pb, 12, dex) : ''}
       ${n('Magus') ? rollBtn('Arcane Nova', 4, 8) : ''}
       ${n('Medic') ? rollBtn('Fluffy Paw', v.pb, 6, wis) : ''}
-    </div>
-    <p class="hint">Troop attacks hit at <b>${sign(dex + v.pb)}</b>. Bonus Action: every troop moves and takes one action. Jobs change after a Short or Long Rest; charges refill on a Short Rest. Reinforcements take jobs like any other troop, up to <b>${maxT}</b> in the platoon${surge ? ', and a Surge troop stands over that limit until the end of your next turn' : ''}.</p>`
+    </div>`}
+    <p class="hint">Troop attacks hit at <b>${sign(dex + v.pb)}</b>. Bonus Action: every troop moves and takes one action. Jobs change after a Short or Long Rest${corp ? ', or freely with <b>Tactical Reassignment</b> while the Warren holds' : ''}; charges refill on a Short Rest, which also re-forms a fallen troop. Reinforcements take jobs like any other troop, up to <b>${maxT}</b> in the platoon${surge ? ', and a Surge troop stands over that limit until the end of your next turn' : ''}.</p>`
     : '<p class="hint">Troop jobs open with <b>Troop Regiment</b> at Awakened.</p>'}
     <div id="pOut"></div>`;
 };
-function troopJob(i, j) { const t = X().troops[i]; t.job = j; t.used = {}; save(); render(); }
+// Reassigning a job re-forms the body: "It transforms at once and takes the new job's statistics
+// and abilities" — so its HP is the new job's, not what was left of the old one's.
+function troopJob(i, j) {
+  const sh = sheet(), t = sh.x.troops[i];
+  t.job = j; t.used = {};
+  t.hp = troopMaxHp(troopType(j), sh) || null; t.down = null; t.dead = false;
+  save(); render();
+}
 function troopCharge(i, a, k) { const t = X().troops[i]; t.used[a] = k < (t.used[a] || 0) ? k : k + 1; save(); render(); }
-function troopRest() { (X().troops || []).forEach(t => t.used = {}); X().reinf = 0; X().surge = 0; save(); render(); toast('Troop charges restored.'); }
+// The card's pips count what is LEFT, like a Servant's: clicking the last full one spends it.
+function troopPip(i, name, n) {
+  const sh = sheet(), t = sh.x.troops[i], max = troopCharges(troopType(t.job))[name] || 0;
+  const left = max - (t.used[name] || 0);
+  t.used[name] = max - (left === n ? n - 1 : n);
+  save(); render();
+}
+// A Short Rest re-forms the platoon: charges back, bodies whole, the fallen standing again. They
+// are shadow and memory, not flesh — nothing about them has to heal, only be called back.
+function troopRest() {
+  const sh = sheet();
+  (sh.x.troops || []).forEach(t => {
+    t.used = {}; t.down = null; t.dead = false; t.acted = 0; t.reacted = 0;
+    t.hp = troopMaxHp(troopType(t.job), sh) || null;
+  });
+  sh.x.reinf = 0; sh.x.surge = 0;
+  save(); render(); toast('The platoon re-forms — charges restored.');
+}
 USE_HOOK['reinforcements'] = sh => { sh.x.reinf = (sh.x.reinf || 0) + 1; };
-LONG_REST['white-rabbit'] = sh => { (sh.x.troops || []).forEach(t => t.used = {}); sh.x.reinf = 0; sh.x.surge = 0; };
+LONG_REST['white-rabbit'] = sh => {
+  (sh.x.troops || []).forEach(t => {
+    t.used = {}; t.down = null; t.dead = false; t.acted = 0; t.reacted = 0;
+    t.hp = troopMaxHp(troopType(t.job), sh) || null;
+  });
+  sh.x.reinf = 0; sh.x.surge = 0;
+};
+// Each round the ticks clear and Last Stand runs out: a troop that fell in round r can act until
+// the end of round r + 1, and dies when round r + 2 begins if nobody healed it.
+ROUND_HOOK['white-rabbit'] = sh => {
+  const died = [];
+  (sh.x.troops || []).forEach((t, i) => {
+    t.acted = 0; t.actedN = 0; t.reacted = 0; t.reactedN = 0;
+    if (t.down != null && sh.round > t.down + 1) {
+      t.down = null; t.dead = true; t.hp = 0;
+      died.push(troopName(i, troopBase(sh), sh.x.reinf || 0));
+    }
+  });
+  if (died.length) toast(`${died.join(', ')} ${died.length > 1 ? 'do' : 'does'} not rise — Last Stand has run out.`);
+};
+// The Warren wakes: "every Vorpal Bunny under your command becomes corporeal at full strength".
+SHIFT_START['white-rabbit'] = sh => {
+  (sh.x.troops || []).forEach(t => {
+    t.hp = troopMaxHp(troopType(t.job), sh) || null;
+    t.down = null; t.dead = false; t.acted = 0; t.reacted = 0;
+  });
+};
+// …and when it contracts they are shadow again, with no hit points to keep.
+SHIFT_END['white-rabbit'] = sh => {
+  (sh.x.troops || []).forEach(t => { t.hp = null; t.down = null; t.dead = false; t.acted = 0; t.reacted = 0; });
+  sh.x.corp = false;
+};
 
 // ── Makoa — the shell ───────────────────────────────────────────────────
 PANELS['makoa'] = (g, sh, v) => {

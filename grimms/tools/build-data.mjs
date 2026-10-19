@@ -47,6 +47,17 @@ const GRIMMS = [
 // soul holding a slot, and the Roster index once pushed the sheet to 7/6.
 const SERVANTS = { 'gate-of-caelum': 'Gate of Caelum/Servants/Statblocks' };
 
+// White Rabbit's Umbra Platoon, the same way: one file per TROOP TYPE, read from the folder so a
+// new job is a new note and nothing here has to change. Each note owns that job's numbers — the
+// Hollownest appendix is now the summary of these, not the source (Juan, 2026-10-19).
+// `Universal Traits.md` is not a job: it is the block every troop shares, pulled out by name the
+// way Servant Roster.md is kept out of the servant list.
+const TROOPS = { 'white-rabbit': 'White Rabbit/Troops' };
+const TROOP_SHARED = 'Universal Traits';
+// The platoon parades in this order whatever order the folder is read in. Anything not listed
+// follows, alphabetically.
+const TROOP_ORDER = ['Infantry', 'Scout', 'Medic', 'Magus', 'Bulwark'];
+
 // A form file is matched to its soul by name token, so the forms can be renamed freely in the
 // vault without touching this file: "Alaric D'Arquen" claims both "Sir Alaric, Exemplar of the
 // Radiant Oath" and "Alaric The Fallen" on the strength of the word "alaric". Honorifics and
@@ -160,6 +171,11 @@ function useImage(name) {
   artCopied.set(name, url);
   return url;
 }
+
+// The first plate on an already-cleaned page — its face, for the app to use as art rather than
+// only as a picture in a body of prose. clean() has copied the file into img/ by then, so this is
+// just reading back the URL it produced; no plate simply means no art.
+const firstPlate = t => (String(t || '').match(/!\[[^\]]*\]\((img\/[^)\s]+)\)/) || [])[1] || '';
 
 // Obsidian → plain markdown the site's renderer understands.
 function clean(md) {
@@ -310,6 +326,49 @@ function servants(id) {
     return { ...b, divine: d, forbidden: f };
   });
 }
+// ── statblocks: White Rabbit's troop types ──────────────────────────────
+// A troop type is a job with a corporeal body: a sigil for its tile, the trait it lends the
+// Commander, its actions and charges, and — while Hollownest holds — HP, AC and Speed.
+//
+// The numbers are read off the note's own Stats table rather than scraped out of its prose, because
+// a troop's HP is a FORMULA ("50 + (5 × your level)") and no amount of 5e-shaped regex will turn
+// that into a number the sheet can track. Each row is named, so a note can leave one out and the
+// panel simply doesn't show it.
+const TR_ROW = (t, label) =>
+  (t.match(new RegExp(`\\|\\s*\\*\\*${label}\\*\\*\\s*\\|\\s*([^|\\n]+)`, 'i')) || [])[1]?.trim() || '';
+function troopStats(text) {
+  const hp = TR_ROW(text, 'HP').match(/(\d+)\s*\+\s*\(?\s*(\d+)\s*[×x*]\s*(?:your\s+)?level/i);
+  // "War Cry ×2 · Purge Pain ×1" → { 'War Cry': 2, 'Purge Pain': 1 }. An em dash means none.
+  const charges = {};
+  for (const part of TR_ROW(text, 'Charges').split('·')) {
+    const m = part.match(/^\s*(.+?)\s*[×x]\s*(\d+)\s*$/);
+    if (m) charges[m[1].trim()] = +m[2];
+  }
+  return {
+    sigil: TR_ROW(text, 'Sigil').replace(/\*/g, '').slice(0, 4).toUpperCase(),
+    role: TR_ROW(text, 'Role'),
+    hp: hp ? { base: +hp[1], per: +hp[2] } : null,
+    ac: +TR_ROW(text, 'AC').replace(/\D+/g, '') || null,
+    speed: TR_ROW(text, 'Speed'),
+    charges,
+  };
+}
+function troops(id) {
+  const dir = TROOPS[id] && path.join(PG, TROOPS[id]);
+  if (!dir || !exists(dir)) return { types: [], shared: '' };
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
+  const one = f => ({ name: path.basename(f, '.md'), text: clean(read(path.join(dir, f))) });
+  const shared = files.includes(TROOP_SHARED + '.md') ? one(TROOP_SHARED + '.md').text : '';
+  const rank = n => { const i = TROOP_ORDER.indexOf(n); return i < 0 ? TROOP_ORDER.length : i; };
+  const types = files.filter(f => path.basename(f, '.md') !== TROOP_SHARED).map(f => {
+    const t = one(f), st = troopStats(t.text);
+    if (!st.hp) console.log(`   ⚠ ${t.name}: no "**HP** | base + (per × your level)" row`);
+    if (!st.sigil) console.log(`   ⚠ ${t.name}: no "**Sigil**" row — the tile will use its initials`);
+    return { id: slug(t.name), ...t, img: firstPlate(t.text), ...st };
+  }).sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  return { types, shared };
+}
+
 // A Shift's page is cut into the beats the sheet's helper card runs: what happens when it opens,
 // what holds while it lasts, what you can spend an action on, the Lair Action, and the collapse.
 // Newer pages say "On Activation / Passive Effects / Reality Actions / Lair Action / On Collapse";
@@ -463,7 +522,11 @@ function rules() {
 // ── write ────────────────────────────────────────────────────────────────
 const data = {
   built: new Date().toISOString().slice(0, 10),
-  grimms: GRIMMS.map(m => ({ ...parseGrimm(m), servants: servants(m.id), shift: shift(m.id), shackle: shackle(m.id) })),
+  grimms: GRIMMS.map(m => {
+    const tr = troops(m.id);
+    return { ...parseGrimm(m), servants: servants(m.id), troops: tr.types, troopTraits: tr.shared,
+      shift: shift(m.id), shackle: shackle(m.id) };
+  }),
   realityShift: shiftRules(),
   soulStones: soulStones(),
   pairs: pairs(),
@@ -475,7 +538,8 @@ fs.writeFileSync(OUT,
   'window.GRIMM_DATA = ' + JSON.stringify(data, null, 1) + ';\n');
 
 for (const g of data.grimms)
-  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, shift: ${g.shift ? g.shift.name : '—'}, shackle: ${g.shackle ? g.shackle.name : '—'}`);
+  console.log(`${g.name.padEnd(18)} ${g.abilities.length} abilities, ${g.stances.length} stances, shift: ${g.shift ? g.shift.name : '—'}, shackle: ${g.shackle ? g.shackle.name : '—'}${
+    g.troops.length ? `, troops: ${g.troops.map(t => `${t.name}${t.img ? '' : ' (no art)'}`).join(' · ')}` : ''}`);
 console.log(`${data.soulStones.length} soul stones · ${Object.keys(data.pairs.actions).length} pair actions · ${data.rules.length} rule pages`);
 const art = [...artCopied.values()].filter(Boolean).length;
 console.log(`${art} image${art === 1 ? '' : 's'} copied to grimms/img/${artMissing.size ? `\n⚠ not found in resources/: ${[...artMissing].join(', ')}` : ''}`);
