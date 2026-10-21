@@ -645,6 +645,7 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .hub-card .hub-mark{font-size:24px;line-height:1;margin-bottom:14px}
 .hub-card.av:hover{border-color:var(--brass)}   .hub-card.av .hub-mark,.hub-card.av b{color:var(--brass)}
 .hub-card.grimm:hover{border-color:var(--d-umbral)} .hub-card.grimm .hub-mark,.hub-card.grimm b{color:#9A8FCB}
+.hub-card.map:hover{border-color:var(--verdant)} .hub-card.map .hub-mark,.hub-card.map b{color:#6FB088}
 .hub-card.small{flex-basis:100%;padding:15px 22px 16px}
 .hub-card.small b{font-size:14px;margin-bottom:2px}
 .hub-card.small span{font-size:13px;color:var(--mute)}

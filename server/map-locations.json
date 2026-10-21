@@ -1,0 +1,59 @@
+{
+  "_note": "Seeded from Worldbuilding/Ephemer/World Map Reference.md. Every x/y here is a v0 eyeball estimate read off the OLD map image, and none is right for the art this section serves — that render draws Vestur about half again as wide and sets Austur further west, so a pin at its seeded coordinate can land in open water. The DM drags each pin where it belongs; that writes a row to map_locations and the row is the truth from then on. These numbers are a starting position, never a claim. The server filters this file before serving it: a location with secret:true is withheld from players until the DM reveals it.",
+  "locations": [
+    { "id": "aurus", "name": "Aurus", "nation": "aurus", "kind": "capital", "x": 7, "y": 12, "terrain": "open", "note": "Capital, centre of the peninsula." },
+    { "id": "synka", "name": "Synka", "nation": "aurus", "kind": "town", "x": 7, "y": 8, "terrain": "open", "note": "Northern tip." },
+    { "id": "brok", "name": "Brok", "nation": "aurus", "kind": "town", "x": 8, "y": 14, "terrain": "open", "note": "South of Aurus." },
+    { "id": "schnauz", "name": "Schnauz", "nation": "aurus", "kind": "town", "x": 4, "y": 16, "terrain": "open", "note": "Southwestern tip." },
+    { "id": "old-pine", "name": "Old Pine", "nation": "aurus", "kind": "city", "x": 11, "y": 13, "terrain": "open", "note": "Eastern edge, near the Anerolt border.", "vault": "Old Pine - City" },
+    { "id": "villie", "name": "Villie", "nation": "aurus", "kind": "city", "x": 13, "y": 16, "terrain": "open", "note": "Aurus's Underworld city — the surface marker is likely its entrance." },
+
+    { "id": "anerolt", "name": "Anerolt", "nation": "anerolt", "kind": "capital", "x": 15, "y": 10, "terrain": "difficult", "note": "The nation's only settlement, within the ring of mountains." },
+
+    { "id": "lionhearth", "name": "Lionhearth", "nation": "valentis", "kind": "capital", "x": 26, "y": 21, "terrain": "open", "note": "Eastern lobe centre. Crystal-protected, seat of King Ivar." },
+    { "id": "coldspire", "name": "Coldspire", "nation": "valentis", "kind": "grand-city", "x": 22, "y": 8, "terrain": "difficult", "note": "Far north snowfields. Azure-lineage populace." },
+    { "id": "dust", "name": "Dust", "nation": "valentis", "kind": "city", "x": 28, "y": 9, "terrain": "difficult", "note": "Northeast, snowy desert." },
+    { "id": "last-bastion", "name": "Last Bastion", "nation": "valentis", "kind": "grand-city", "x": 18, "y": 14, "terrain": "difficult", "note": "North-central mountains. The last line of defence in the Azure war." },
+    { "id": "the-ridge", "name": "The Ridge", "nation": "valentis", "kind": "city", "x": 20, "y": 15, "terrain": "difficult", "note": "North-central mountain pass." },
+    { "id": "darkwatch", "name": "Darkwatch", "nation": "valentis", "kind": "grand-city", "x": 28, "y": 15, "terrain": "open", "note": "East of The Ridge. Chaotic magic experiments." },
+    { "id": "willowstead", "name": "Willowstead", "nation": "valentis", "kind": "grand-city", "x": 24, "y": 16, "terrain": "open", "note": "Central-east plains. The Great Willow; home of the rebellion." },
+    { "id": "acer", "name": "Acer", "nation": "valentis", "kind": "city", "x": 16, "y": 18, "terrain": "open", "note": "West-central, on the bay. Maple-tree town, Beatrice Bristow's seat." },
+    { "id": "misthold", "name": "Misthold", "nation": "valentis", "kind": "city", "x": 15, "y": 20, "terrain": "open", "note": "West-central forests, near the Jägenberg border. Made almost overnight, and shady with it." },
+    { "id": "crimson-edge", "name": "Crimson Edge", "nation": "valentis", "kind": "grand-city", "x": 15, "y": 25, "terrain": "open", "note": "Southern annexed band, by the great lake. Formerly Faenys." },
+    { "id": "fang", "name": "Fang", "nation": "valentis", "kind": "city", "x": 29, "y": 26, "terrain": "open", "note": "Southern tip of the eastern lobe. A smith town." },
+
+    { "id": "aquilus", "name": "Aquilus", "nation": "talon", "kind": "capital", "x": 5, "y": 23, "terrain": "difficult", "note": "Central-west capital. The old map prints \"Aguilus\"; the vault spelling is canon.", "vault": "[Capital] - Aquilus" },
+    { "id": "old-point", "name": "Old Point", "nation": "talon", "kind": "city", "x": 7, "y": 18, "terrain": "difficult", "note": "North.", "vault": "[City] - Old Point" },
+    { "id": "ashenwall", "name": "Ashenwall", "nation": "talon", "kind": "city", "x": 9, "y": 21, "terrain": "difficult", "note": "Northeast-central.", "vault": "[City] - Ashenwall" },
+    { "id": "shimmerwing", "name": "Shimmerwing", "nation": "talon", "kind": "city", "x": 4, "y": 27, "terrain": "difficult", "note": "West.", "vault": "[City] - Shimmerwing" },
+    { "id": "tryad", "name": "Tryad", "nation": "talon", "kind": "city", "x": 7, "y": 27, "terrain": "difficult", "note": "Central. One end of the gazetteer's scale anchor.", "vault": "[City] - Tryad" },
+    { "id": "sunwater", "name": "Sunwater", "nation": "talon", "kind": "town", "x": 7, "y": 31, "terrain": "difficult", "note": "South-central. Labelled on the map; no vault entry yet." },
+
+    { "id": "grand-temple", "name": "The Grand Temple of Vestur", "nation": "temple", "kind": "city", "x": 13, "y": 22, "terrain": "open", "note": "Neutral city-state on the mainland." },
+
+    { "id": "jagenberg", "name": "Jägenberg", "nation": "jagenberg", "kind": "capital", "x": 16, "y": 22, "terrain": "difficult", "note": "Central spine. The Iron City.", "vault": "The Clanlands of Jägenberg" },
+    { "id": "breith", "name": "Breith", "nation": "jagenberg", "kind": "city", "x": 16, "y": 19, "terrain": "difficult", "note": "North, near the bay. Bears the name of the founding sibling Breith." },
+    { "id": "hallstein", "name": "Hallstein", "nation": "jagenberg", "kind": "city", "x": 18, "y": 23, "terrain": "difficult", "note": "Central-east. Likely named for the founding sibling Hallr — unconfirmed." },
+    { "id": "merk", "name": "Merk", "nation": "jagenberg", "kind": "town", "x": 17, "y": 25, "terrain": "difficult", "note": "South of Hallstein." },
+    { "id": "kor", "name": "Kor", "nation": "jagenberg", "kind": "town", "x": 17, "y": 28, "terrain": "difficult", "note": "Southern spine." },
+    { "id": "fellstrong", "name": "Fellstrong", "nation": "jagenberg", "kind": "city", "x": 19, "y": 29, "terrain": "difficult", "note": "Southeast coast. Likely named for the founding sibling Fell — unconfirmed." },
+    { "id": "zeros", "name": "Zeros", "nation": "jagenberg", "kind": "site", "x": 20, "y": 30, "terrain": "difficult", "note": "Surface gate of the Drow city; the city proper lies deep in the Underworld. Political affiliation unconfirmed.", "vault": "Drow Elves" },
+
+    { "id": "faenys", "name": "Faenys", "nation": "faenys", "kind": "capital", "x": 16, "y": 36, "terrain": "open", "note": "The capital, which came down on its own foundations when the Mantle fell and was rebuilt within a year.", "vault": "The Fall of Faenys" },
+    { "id": "tyff", "name": "Tyff", "nation": "faenys", "kind": "town", "x": 13, "y": 30, "terrain": "open", "note": "Central." },
+    { "id": "asyfall", "name": "Asyfall", "nation": "faenys", "kind": "grand-city", "x": 17, "y": 31, "terrain": "open", "note": "Built on the wreck of Aethereach. The dynasty's eastern frontier seat, facing Zeros.", "vault": "[Grand City] - Asyfall" },
+    { "id": "caell", "name": "Caell", "nation": "faenys", "kind": "town", "x": 13, "y": 33, "terrain": "open", "note": "Central-south." },
+    { "id": "nivelleth", "name": "Nivelleth", "nation": "faenys", "kind": "town", "x": 11, "y": 34, "terrain": "open", "note": "Southwest." },
+    { "id": "isfaren", "name": "Isfaren", "nation": "faenys", "kind": "town", "x": 13, "y": 36, "terrain": "open", "note": "South." },
+
+    { "id": "wollniege", "name": "Wollniege", "nation": "wollniege", "kind": "capital", "x": 9, "y": 30, "terrain": "difficult", "note": "Centre of the territory — the Mushroom Jungle of canon." },
+    { "id": "skippingmire", "name": "Skippingmire", "nation": "wollniege", "kind": "town", "x": 7, "y": 32, "terrain": "difficult", "note": "West." },
+    { "id": "nelrima", "name": "Nelrima", "nation": "wollniege", "kind": "town", "x": 8, "y": 34, "terrain": "difficult", "note": "South." },
+
+    { "id": "tivan", "name": "Tivan — Paradise", "nation": "free", "kind": "island", "x": 37, "y": 16, "terrain": "open", "note": "The turtle-shaped island of the northern Freetides, bearing the settlement Paradise. Not Titan Island, which is hidden and appears on no map." },
+    { "id": "scorched", "name": "The Scorched Lands", "nation": "free", "kind": "island", "x": 37, "y": 32, "terrain": "difficult", "note": "Volcanic island wreathed by the Steaming Depths. The old map prints \"The Scorshed Island\"; the canonical name is Juan's ruling." },
+    { "id": "justicar", "name": "The Rusted Justicar", "nation": "free", "kind": "landmark", "x": 80, "y": 22, "terrain": "open", "note": "A great sword driven into a stone islet at the centre of the Dead Waters — the only marked feature in Austur's interior sea." },
+
+    { "id": "vesper-gulch", "name": "Vesper Gulch", "nation": "talon", "kind": "site", "x": 11, "y": 26, "terrain": "difficult", "secret": true, "note": "Referenced in Chapter 2 — Dreams of Violet Sand, and drawn on no map. This position is an estimate awaiting a ruling, which is why it starts hidden: the guess is the secret, not the place." }
+  ]
+}

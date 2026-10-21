@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Map — Ephemer</title>
+<meta name="description" content="Once Upon a Star ★ — the world map of Ephemer: nations, settlements and travel times.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Leaflet 1.9.4, vendored into map/vendor/ rather than pulled from a CDN, so the map works with
+     no network at all. The files are the published unpkg bundle, verified byte for byte against
+     Leaflet's own SRI hashes:
+       leaflet.js   sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=
+       leaflet.css  sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=
+     vendor/images/ holds the five PNGs leaflet.css refers to by relative path. Upgrading means
+     replacing those files and bumping the ?v= below; nothing else here knows the version. -->
+<link rel="stylesheet" href="vendor/leaflet.css?v=1.9.4">
+<script src="vendor/leaflet.js?v=1.9.4"></script>
+<link rel="stylesheet" href="css/map.css?v=2026-10-21n">
+</head>
+<body>
+
+<div class="bar">
+  <div class="brand">
+    <a href="../" title="Ephemer — back to the front page" aria-label="Ephemer home">★</a>
+    <a href="./">World Map</a><em>once upon a star</em>
+  </div>
+  <div class="bar-tools">
+    <button class="mini" id="btnGrid" title="Show the gazetteer's 100 x 48 grid">Grid</button>
+    <button class="mini" id="btnLabels" title="Show a name beside every pin">Labels</button>
+    <button class="mini" id="btnFit" title="Fit the whole world in the window">Fit</button>
+  </div>
+  <div class="live" id="live"></div>
+</div>
+
+<main>
+  <div id="map"></div>
+
+  <aside class="panel" id="panel">
+
+    <!-- ── Places, by kingdom ───────────────────────────────── -->
+    <section class="pane" id="paneList">
+      <input class="search" id="search" placeholder="Search every place..." autocomplete="off" spellcheck="false">
+
+      <!-- The kingdoms themselves. Shown when nothing is searched or opened. -->
+      <div class="nations" id="nationGrid"></div>
+
+      <!-- One kingdom's places, or search results across all of them. -->
+      <div class="hid" id="listHead">
+        <button class="back mini" id="btnAllNations">&larr; All kingdoms</button>
+        <h2 class="n-title" id="listTitle"></h2>
+        <p class="n-sub" id="listSub"></p>
+      </div>
+      <ul class="places" id="places"></ul>
+    </section>
+
+    <!-- ── The selected place ───────────────────────────────── -->
+    <section class="pane hid" id="paneDetail">
+      <button class="back mini" id="btnBack">&larr; Back</button>
+      <h2 id="dName"></h2>
+      <p class="d-sub" id="dSub"></p>
+      <p class="d-note" id="dNote"></p>
+      <p class="d-vault hid" id="dVault"></p>
+      <div class="d-coord" id="dCoord"></div>
+      <div class="d-acts">
+        <button class="mini" id="btnFrom">Travel from here</button>
+        <button class="mini" id="btnTo">Travel to here</button>
+      </div>
+      <div class="dm-only hid" id="dDm">
+        <label class="tog"><input type="checkbox" id="dRevealed"> <span>Revealed to players</span></label>
+        <div class="d-acts">
+          <button class="mini on" id="btnEdit">Edit</button>
+          <button class="mini" id="btnArchive" title="Put it away. Nothing is deleted; you can bring it back from the DM pane.">Archive</button>
+          <button class="mini hid" id="btnReset" title="Forget every change and fall back to what the gazetteer file says">Reset to seed</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Adding or editing a place (DM) ───────────────────── -->
+    <section class="pane hid" id="paneForm">
+      <button class="back mini" id="btnFormCancel">&larr; Cancel</button>
+      <h2 id="fTitle">New place</h2>
+      <p class="hint" id="fWhere"></p>
+
+      <label class="fld"><span>Name</span>
+        <input class="search" id="fName" maxlength="80" autocomplete="off"></label>
+
+      <div class="fld-row">
+        <label class="fld"><span>Kind</span><select id="fKind"></select></label>
+        <label class="fld"><span>Kingdom</span><select id="fNation"></select></label>
+      </div>
+
+      <label class="fld"><span>Terrain <em>(sets travel pace)</em></span>
+        <select id="fTerrain">
+          <option value="open">Open</option>
+          <option value="difficult">Difficult</option>
+        </select></label>
+
+      <label class="fld"><span>Description</span>
+        <textarea id="fNote" rows="6" maxlength="4000" placeholder="What the table should know about this place."></textarea></label>
+
+      <label class="tog"><input type="checkbox" id="fSecret"> <span>Hidden from players</span></label>
+
+      <div class="d-acts">
+        <button class="mini on" id="btnFormSave">Save</button>
+        <button class="mini" id="btnFormCancel2">Cancel</button>
+      </div>
+    </section>
+
+    <!-- ── Travel ───────────────────────────────────────────── -->
+    <!-- Folded away by default: measuring a leg is an occasional thing, and it was taking up a
+         third of the sidebar every time anyone opened the map. -->
+    <section class="pane" id="paneTravel">
+      <details class="fold" id="travelBox">
+      <summary>Travel &amp; distances</summary>
+      <div class="leg">
+        <button class="slot" id="slotFrom"><em>From</em><span>pick a place</span></button>
+        <button class="swap mini" id="btnSwap" title="Swap the ends">&#8646;</button>
+        <button class="slot" id="slotTo"><em>To</em><span>pick a place</span></button>
+      </div>
+      <div class="knobs">
+        <label>Route <select id="selRoute"></select></label>
+        <label>Pace <select id="selPace"></select></label>
+        <label>Terrain
+          <select id="selTerrain">
+            <option value="auto">From the ends</option>
+            <option value="mixed">Mixed country</option>
+            <option value="open">Open</option>
+            <option value="difficult">Difficult</option>
+          </select>
+        </label>
+        <!-- step 0.1: the ruled scale is 12.6, and a whole-number step would make it untypeable -->
+        <label>Miles / gu <input type="number" id="inpScale" min="1" max="99" step="0.1"></label>
+      </div>
+      <div class="result" id="result"><p class="hint">Pick two places to measure a leg.</p></div>
+      </details>
+    </section>
+
+    <!-- ── DM: placing the pins ─────────────────────────────── -->
+    <section class="pane dm-only hid" id="paneDm">
+      <h3>DM — placing</h3>
+      <p class="hint">
+        Every pin starts on the gazetteer's old estimate, which this art does not match.
+        Switch placing on and drag each one where it belongs; a dropped pin is saved at once
+        and stops being hollow.
+      </p>
+      <label class="tog big"><input type="checkbox" id="dmPlace"> <span>Placing mode</span></label>
+      <div class="bar-prog"><div id="progFill"></div></div>
+      <p class="prog-txt" id="progTxt"></p>
+      <div class="d-acts">
+        <button class="mini on" id="btnAdd" title="Add a place the gazetteer never had">+ Add a place</button>
+        <button class="mini" id="btnCopy" title="Copy every coordinate as a Markdown table">Copy coordinates</button>
+        <button class="mini" id="btnUnplaced" title="Zoom to the next pin you have not set">Next unplaced</button>
+      </div>
+
+      <details class="arch" id="archBox">
+        <summary id="archSum">Archived</summary>
+        <ul class="places" id="archList"></ul>
+      </details>
+    </section>
+
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js?v=2026-10-21n"></script>
+<script src="js/map.js?v=2026-10-21n"></script>
+</body>
+</html>

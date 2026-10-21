@@ -174,6 +174,52 @@ const SCHEMA = [
   // database already out there. DROP IF EXISTS then ADD keeps migrate() re-runnable.
   `ALTER TABLE saves DROP CONSTRAINT IF EXISTS saves_kind_check`,
   `ALTER TABLE saves ADD CONSTRAINT saves_kind_check CHECK (kind IN ('seal', 'eidon', 'paragon'))`,
+  // World Map: where a place actually sits on the map the app serves. map/locations.json carries
+  // the gazetteer's old eyeball estimates, transcribed from a DIFFERENT render — that one drew
+  // Vestur narrower and set Austur further east, so most of those numbers put a pin in open water.
+  // A row here is the DM having dragged the pin where it belongs, and it wins over the file.
+  //
+  // Deleting a row is how a placement is undone: the location falls back to its estimate. x and y
+  // are in the gazetteer's frame (x 0..100 west to east, y 0..48 north to south from the NW corner)
+  // and are fractions of the image, so re-rendering the map at a higher resolution moves nothing.
+  //
+  // `revealed` only means anything for a location the file marks secret; everywhere else is public
+  // by default, because a world map the table cannot read is not a world map.
+  // `placed` is kept apart from the coordinates because revealing a secret place writes a row
+  // before anyone has dragged its pin: without the flag, a reveal would silently promote an
+  // estimate into a placement and the DM would lose track of what is still guesswork.
+  `CREATE TABLE IF NOT EXISTS map_locations (
+     id         TEXT PRIMARY KEY,
+     x          REAL NOT NULL CHECK (x >= 0 AND x <= 100),
+     y          REAL NOT NULL CHECK (y >= 0 AND y <= 48),
+     placed     BOOLEAN NOT NULL DEFAULT true,
+     revealed   BOOLEAN NOT NULL DEFAULT false,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  // 2026-10-21, same day: the table outgrew being a coordinate override. The DM needs to add places
+  // the seed never had — a point of interest, a ruin, where the party is standing tonight — and to
+  // rewrite a description without touching the JSON. So a row now carries the whole editable record.
+  //
+  // A row is still a DELTA over map-locations.json wherever that file has the id: a NULL column means
+  // "whatever the seed says", so correcting one word of a description does not fork the other fields
+  // and a later re-seed still flows through. `custom` marks a row with no seed behind it, where every
+  // column is the truth and NULL means genuinely empty.
+  //
+  // `archived` is how a place leaves. Nothing is deleted: a mis-dropped pin is hidden and can come
+  // back, which is the same bargain the vault makes with its own notes.
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS name       TEXT`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS nation     TEXT`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS kind       TEXT`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS terrain    TEXT`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS note       TEXT`,
+  // NULL = take the seed's answer. `revealed` is the DM's override on top of whichever wins, so a
+  // place is visible to players when it is not secret, or when it is secret and revealed.
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS secret     BOOLEAN`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS custom     BOOLEAN NOT NULL DEFAULT false`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS archived   BOOLEAN NOT NULL DEFAULT false`,
+  `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
+  // Custom places are listed and filtered by nation constantly; seeded ones are looked up by id.
+  `CREATE INDEX IF NOT EXISTS map_locations_nation ON map_locations (nation) WHERE nation IS NOT NULL`,
 ];
 
 export async function migrate(db) {

@@ -1,0 +1,319 @@
+/* ═══════════════════════════════════════════════════════════════
+   World Map — Ephemer
+   The tokens match css/app.css so the three sections look like one
+   application; only what this page actually needs is restated here,
+   rather than pulling in a 59KB sheet whose classes it never uses.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root{
+  --slate:#1B1F26; --panel:#232A33; --panel2:#2B333D; --line:#39424E;
+  --bone:#E8E3D7; --bone2:#C2BDB2; --mute:#7E8791;
+  --ember:#C0553F; --verdant:#4E8C6A; --indigo:#6274B8; --brass:#B08842; --steel:#6E8B97;
+  --accent:var(--brass);
+  --sans:'Space Grotesk',system-ui,sans-serif;
+  --serif:'Spectral',Georgia,serif;
+  --bar:46px;
+  --panelw:330px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--slate); color:var(--bone);
+  font-family:var(--sans); font-size:14px; overflow:hidden;
+}
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.bar{
+  height:var(--bar); display:flex; align-items:center; gap:14px;
+  padding:0 12px; background:var(--panel); border-bottom:1px solid var(--line);
+  position:relative; z-index:1200;
+}
+.brand{font-family:var(--serif); font-size:17px; letter-spacing:.2px; white-space:nowrap}
+.brand a{color:var(--bone); text-decoration:none}
+.brand a:first-child{color:var(--brass); margin-right:9px}
+.brand a:hover{color:var(--brass)}
+.brand em{
+  font-family:var(--sans); font-style:normal; font-size:10px;
+  color:var(--mute); margin-left:9px; letter-spacing:1.4px; text-transform:uppercase;
+}
+.bar-tools{display:flex; gap:6px; margin-left:auto}
+.live{color:var(--mute); font-size:12px; white-space:nowrap}
+.live b{color:var(--bone2); font-weight:500}
+
+/* ── Buttons and fields ──────────────────────────────────── */
+.mini{
+  font-family:var(--sans); font-size:12px; color:var(--bone2);
+  background:var(--panel2); border:1px solid var(--line); border-radius:4px;
+  padding:5px 10px; cursor:pointer; transition:.12s;
+}
+.mini:hover{color:var(--bone); border-color:var(--mute)}
+.mini.on{background:var(--brass); border-color:var(--brass); color:#1B1F26; font-weight:500}
+.search,select,input[type=number]{
+  font-family:var(--sans); font-size:13px; color:var(--bone);
+  background:var(--slate); border:1px solid var(--line); border-radius:4px;
+  padding:6px 8px; width:100%;
+}
+.search:focus,select:focus,input:focus{outline:none; border-color:var(--brass)}
+
+/* ── Layout ──────────────────────────────────────────────── */
+main{display:flex; height:calc(100% - var(--bar))}
+#map{flex:1; background:#121519}
+.panel{
+  width:var(--panelw); flex:0 0 var(--panelw);
+  background:var(--panel); border-left:1px solid var(--line);
+  overflow-y:auto; display:flex; flex-direction:column;
+}
+.pane{padding:12px; border-bottom:1px solid var(--line)}
+.pane h3{
+  margin:0 0 9px; font-family:var(--sans); font-size:10px; font-weight:700;
+  letter-spacing:1.6px; text-transform:uppercase; color:var(--mute);
+}
+.hid{display:none !important}
+.hint{color:var(--mute); font-size:12px; line-height:1.5; margin:0 0 9px}
+
+/* ── The kingdoms, as squares ────────────────────────────── */
+.nations{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px}
+.nation{
+  position:relative; cursor:pointer; text-align:left; padding:9px 10px 10px;
+  background:var(--panel2); border:1px solid var(--line); border-radius:6px;
+  color:var(--bone); font-family:var(--sans); transition:.12s; overflow:hidden;
+}
+/* the kingdom's colour as a bar down its edge, so the map and the list agree at a glance */
+.nation::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c)}
+.nation:hover{border-color:var(--c); background:#2F3845}
+.nation b{display:block; font-size:12.5px; font-weight:500; line-height:1.3; margin-left:4px}
+.nation s{
+  display:block; margin-left:4px; margin-top:3px; text-decoration:none;
+  font-size:10.5px; color:var(--mute); font-variant-numeric:tabular-nums;
+}
+.nation em{
+  position:absolute; right:8px; top:8px; font-style:normal; font-size:9px;
+  letter-spacing:.8px; text-transform:uppercase; color:var(--ember);
+}
+/* The categories that cut across kingdoms. Shortcuts, not territory — so they are small
+   squares in one row rather than tiles the size of a nation, and they carry the same glyph
+   their pins wear on the map. */
+.xcats{
+  grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,1fr); gap:7px;
+  margin-top:7px; padding-top:9px; border-top:1px solid var(--line);
+}
+.xcat{
+  position:relative; cursor:pointer; padding:7px 4px 6px; text-align:center;
+  background:transparent; border:1px dashed var(--line); border-radius:6px;
+  color:var(--bone2); font-family:var(--sans); transition:.12s;
+}
+.xcat:hover{border-color:var(--c); background:var(--panel2)}
+.xcat i{display:block; font-style:normal; font-size:14px; line-height:1; color:var(--c)}
+.xcat b{display:block; font-size:10px; font-weight:500; margin-top:4px; letter-spacing:.3px}
+.xcat s{
+  position:absolute; top:3px; right:5px; text-decoration:none;
+  font-size:9px; color:var(--mute); font-variant-numeric:tabular-nums;
+}
+
+/* ── Section headings inside a list ──────────────────────── */
+.places li.sec-head{
+  cursor:default; padding:9px 2px 3px; font-size:9.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--mute); border-bottom:1px solid var(--line);
+  margin-bottom:3px;
+}
+.places li.sec-head:hover{background:none}
+.places li.sec-head:first-child{padding-top:2px}
+
+/* ── One kingdom's list ──────────────────────────────────── */
+.n-title{margin:9px 0 1px; font-family:var(--serif); font-size:18px; font-weight:600}
+.n-sub{margin:0 0 7px; font-size:11px; color:var(--mute)}
+
+/* ── The place list ──────────────────────────────────────── */
+.places{list-style:none; margin:0; padding:0; max-height:38vh; overflow-y:auto}
+.places li{
+  padding:6px 8px; border-radius:4px; cursor:pointer;
+  display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.places li:hover{background:var(--panel2)}
+.places li i{width:8px; height:8px; border-radius:50%; background:var(--c); flex:0 0 8px}
+.places li.unplaced i{background:transparent; border:1.5px dashed var(--c)}
+.places li b{font-weight:400; color:var(--bone)}
+.places li s{margin-left:auto; color:var(--mute); font-size:11px; text-decoration:none}
+.places li u{
+  text-decoration:none; color:var(--mute); font-size:15px; line-height:1;
+  padding:0 2px 2px; border-radius:3px; margin-left:6px;
+}
+.places li u:hover{color:var(--ember); background:rgba(192,85,63,.15)}
+.places li.secret b::after{content:" \1F512"; font-size:10px}
+
+/* ── The detail pane ─────────────────────────────────────── */
+.back{margin-bottom:9px}
+#paneDetail h2{margin:0 0 2px; font-family:var(--serif); font-size:19px; font-weight:600}
+.d-sub{margin:0 0 9px; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--c,var(--mute))}
+.d-note{margin:0 0 9px; font-family:var(--serif); font-size:13.5px; line-height:1.55; color:var(--bone2)}
+.d-vault{margin:0 0 9px; font-size:11px; color:var(--mute)}
+.d-vault b{color:var(--bone2); font-weight:500}
+.d-coord{font-size:11px; color:var(--mute); margin-bottom:9px; font-variant-numeric:tabular-nums}
+.d-coord em{font-style:normal; color:var(--ember)}
+.d-acts{display:flex; gap:6px; flex-wrap:wrap}
+.dm-only{margin-top:12px; padding-top:12px; border-top:1px dashed var(--line)}
+.tog{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--bone2); cursor:pointer; margin-bottom:9px}
+.tog.big{font-size:13px; color:var(--bone)}
+.tog input{width:auto; accent-color:var(--brass)}
+
+/* ── Travel ──────────────────────────────────────────────── */
+.leg{display:flex; align-items:center; gap:6px; margin-bottom:9px}
+.slot{
+  flex:1; min-width:0; text-align:left; cursor:pointer;
+  background:var(--panel2); border:1px solid var(--line); border-radius:4px;
+  padding:6px 8px; color:var(--bone); font-family:var(--sans);
+}
+.slot em{
+  display:block; font-style:normal; font-size:9px; letter-spacing:1.2px;
+  text-transform:uppercase; color:var(--mute);
+}
+.slot span{display:block; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.slot.set{border-color:var(--brass)}
+.swap{padding:5px 7px}
+.knobs{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:10px}
+.knobs label{font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--mute)}
+.knobs select,.knobs input{margin-top:3px}
+.result{font-size:13px}
+.result table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.result td{padding:3px 0; border-bottom:1px solid var(--line)}
+.result td:last-child{text-align:right; color:var(--bone)}
+.result td:first-child{color:var(--mute); font-size:12px}
+.result .big{font-family:var(--serif); font-size:22px; color:var(--brass); text-align:center; padding:9px 0 4px}
+.result .cav{color:var(--mute); font-size:11px; line-height:1.5; margin:8px 0 0}
+
+/* ── Placement progress ──────────────────────────────────── */
+.bar-prog{height:4px; background:var(--slate); border-radius:2px; overflow:hidden; margin-bottom:6px}
+#progFill{height:100%; width:0; background:var(--brass); transition:width .25s}
+.prog-txt{font-size:11px; color:var(--mute); margin:0 0 9px; font-variant-numeric:tabular-nums}
+
+/* ── Leaflet overrides ───────────────────────────────────── */
+.leaflet-container{background:#121519; font-family:var(--sans)}
+.leaflet-control-zoom a{
+  background:var(--panel); color:var(--bone2); border-color:var(--line) !important;
+}
+.leaflet-control-zoom a:hover{background:var(--panel2); color:var(--bone)}
+.leaflet-control-attribution{
+  background:rgba(27,31,38,.75) !important; color:var(--mute) !important; font-size:10px;
+}
+.leaflet-control-attribution a{color:var(--steel) !important}
+
+/* The pins. A hollow one has never been placed — it is still sitting on the
+   gazetteer's estimate, which this art does not match. `shape-*` comes from
+   kinds[] in js/data.js, so adding a kind there needs at most a rule here. */
+.pin{
+  width:14px; height:14px; border-radius:50%;
+  background:var(--c); border:2px solid rgba(12,14,18,.85);
+  box-shadow:0 0 0 1px rgba(232,227,215,.45), 0 2px 5px rgba(0,0,0,.55);
+  cursor:pointer; transition:transform .12s;
+}
+.pin:hover{transform:scale(1.35)}
+.pin.unplaced{background:transparent; border:2px dashed var(--c); box-shadow:none}
+.pin.shape-big{width:17px; height:17px}
+.pin.shape-small{width:10px; height:10px}
+.pin.shape-square{border-radius:3px; width:13px; height:13px}
+.pin.shape-capital{width:18px; height:18px; border-radius:3px; transform:rotate(45deg)}
+.pin.shape-capital:hover{transform:rotate(45deg) scale(1.3)}
+.pin.shape-poi{width:13px; height:13px; border-radius:3px; transform:rotate(45deg)}
+.pin.shape-poi:hover{transform:rotate(45deg) scale(1.35)}
+/* Subterranean: a triangle pointing down, because what the map can show of an
+   Underworld place is the way in, not the place. Built from borders, so every
+   box property the base .pin sets has to be unset — a box-shadow on a 0x0
+   element draws a square floating beside the triangle. */
+.pin.shape-down{
+  width:0; height:0; background:none; border-radius:0; box-shadow:none;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-top:14px solid var(--c);
+  border-bottom:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.8)) drop-shadow(0 0 1px rgba(232,227,215,.55));
+}
+/* Dashes cannot describe a border-triangle, so an unset one fades instead. */
+.pin.shape-down.unplaced{opacity:.45}
+
+/* The party is the one pin that moves every session, so it reads as a marker
+   rather than as geography: a bright ring that keeps breathing. */
+.pin.shape-party{
+  width:15px; height:15px; background:var(--bone);
+  border:3px solid var(--c); box-shadow:0 0 0 2px rgba(12,14,18,.9), 0 0 11px 3px var(--c);
+  animation:partyPulse 2.1s ease-in-out infinite;
+}
+@keyframes partyPulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(12,14,18,.9), 0 0 7px 2px var(--c)}
+  50%    {box-shadow:0 0 0 2px rgba(12,14,18,.9), 0 0 15px 6px var(--c)}
+}
+.pin.sel{box-shadow:0 0 0 3px var(--brass), 0 2px 7px rgba(0,0,0,.6)}
+/* The two rules above paint with box-shadow, which a 0x0 border-triangle draws as a square
+   floating beside it. The down-triangle opts out of both, and must do so AFTER them to win on
+   order — selection becomes a glow that follows the shape instead. */
+.pin.shape-down,.pin.shape-down.sel{box-shadow:none}
+.pin.shape-down.sel{filter:drop-shadow(0 0 3px var(--brass)) drop-shadow(0 0 7px var(--brass))}
+
+/* ── Form fields ─────────────────────────────────────────── */
+.fld{display:block; margin-bottom:9px}
+.fld > span{
+  display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  color:var(--mute); margin-bottom:3px;
+}
+.fld > span em{font-style:normal; letter-spacing:0; text-transform:none; opacity:.8}
+.fld-row{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+textarea{
+  font-family:var(--serif); font-size:13.5px; line-height:1.5; color:var(--bone);
+  background:var(--slate); border:1px solid var(--line); border-radius:4px;
+  padding:7px 8px; width:100%; resize:vertical;
+}
+textarea:focus{outline:none; border-color:var(--brass)}
+#fWhere{margin-bottom:11px}
+#fWhere b{color:var(--bone2); font-weight:500; font-variant-numeric:tabular-nums}
+
+/* ── Folding sections (Travel, Archived) ─────────────────── */
+.fold > summary,.arch summary{
+  cursor:pointer; font-size:10px; letter-spacing:1.4px; text-transform:uppercase;
+  color:var(--mute); list-style:none; padding:1px 0;
+}
+.fold > summary::-webkit-details-marker,.arch summary::-webkit-details-marker{display:none}
+.fold > summary::before,.arch summary::before{content:"\25B8 "; display:inline-block; transition:.15s}
+.fold[open] > summary::before,.arch[open] summary::before{transform:rotate(90deg)}
+.fold > summary:hover,.arch summary:hover{color:var(--bone2)}
+.fold[open] > summary{margin-bottom:10px}
+
+/* ── Archived ────────────────────────────────────────────── */
+.arch{margin-top:11px; border-top:1px dashed var(--line); padding-top:9px}
+.arch .places{margin-top:7px}
+.arch .places li{opacity:.62}
+.arch .places li:hover{opacity:1}
+.pin-wrap{
+  background:none !important; border:none !important;
+  display:flex; align-items:center; justify-content:center;
+}
+.pin-label{
+  position:absolute; left:21px; top:50%; transform:translateY(-50%);
+  white-space:nowrap; pointer-events:none;
+  font-size:11px; color:var(--bone); text-shadow:0 1px 3px #000,0 0 6px #000; font-weight:500;
+}
+body:not(.show-labels) .pin-label{display:none}
+/* Grid numbers belong to the grid, not to the label toggle. */
+.grid-num{
+  position:absolute; left:3px; top:-7px; white-space:nowrap; pointer-events:none;
+  font-size:11px; font-weight:700; color:#E8B04A; text-shadow:0 1px 3px #000,0 0 6px #000;
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(14px);
+  background:var(--panel2); border:1px solid var(--line); border-radius:5px;
+  padding:9px 16px; font-size:13px; color:var(--bone);
+  opacity:0; pointer-events:none; transition:.2s; z-index:2000;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* ── Narrow screens: the panel becomes a bottom sheet ────── */
+@media (max-width:860px){
+  main{flex-direction:column}
+  #map{flex:1 1 56%}
+  .panel{
+    width:100%; flex:1 1 44%; border-left:none; border-top:1px solid var(--line);
+  }
+  .brand em{display:none}
+  .places{max-height:none}
+}

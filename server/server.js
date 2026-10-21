@@ -848,6 +848,214 @@ admin.put("/pilgrimages/:id", async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── The World Map: where a place actually sits ─────────────
+// map/locations.json holds the gazetteer's eyeball estimates, transcribed from an older render of
+// the world. The art this section serves is not that render — it draws Vestur about half again as
+// wide and sets Austur further west — so most of those coordinates put a pin in open water. The DM
+// drags each one where it belongs and the row written here is the truth from then on.
+// The seed lives in server/, NOT in map/, and that is deliberate. An exact route plus a static
+// mount over the same folder is the shape of the hole already logged against the Grimm book:
+// /grimms//js/data.js and eight other spellings miss the exact route and reach the folder handler,
+// which hands back the unfiltered file. Keeping this file outside every served directory closes
+// that off by construction rather than by out-guessing the URL parser.
+const MAP_FILE = path.join(ROOT, "server", "map-locations.json");
+const MAP_SEED = JSON.parse(await readFile(MAP_FILE, "utf8"));
+const MAP_BY_ID = new Map(MAP_SEED.locations.map(l => [l.id, l]));
+
+// A row overrides the seed field by field: NULL means "whatever the file says". That is what lets
+// the DM rewrite one description without forking the other five columns, and what lets a re-seed
+// still flow through everything they have not touched. A `custom` row has no file behind it, so
+// there the row is simply the whole truth.
+const OVERRIDE = ["name", "nation", "kind", "terrain", "note"];
+
+function effective(seed, row) {
+  const base = seed || {};
+  const out = {
+    id: base.id || (row && row.id),
+    name: base.name || "", nation: base.nation || "free", kind: base.kind || "poi",
+    terrain: base.terrain || "open", note: base.note || "",
+    secret: !!base.secret,
+    x: base.x, y: base.y,
+    placed: false, revealed: false, custom: false,
+  };
+  if (base.vault) out.vault = base.vault;
+  if (row) {
+    for (const f of OVERRIDE) if (row[f] !== null && row[f] !== undefined) out[f] = row[f];
+    if (row.secret !== null && row.secret !== undefined) out.secret = row.secret;
+    out.x = Number(row.x); out.y = Number(row.y);
+    out.placed = row.placed; out.revealed = row.revealed; out.custom = row.custom;
+  }
+  return out;
+}
+
+async function mapLocationsFor(user, { includeArchived = false } = {}) {
+  const { rows } = await db.query(
+    `SELECT * FROM map_locations${includeArchived ? "" : " WHERE NOT archived"}`);
+  const byId = new Map(rows.map(r => [r.id, r]));
+  const dm = user.role === "dm";
+  const out = [];
+  const take = l => {
+    // A secret place is withheld outright rather than sent and hidden in the page — the same
+    // bargain the Grimm book makes with an unrevealed Reality Shift. Hiding it client-side would
+    // leave it one View Source away.
+    if (l.secret && !dm && !l.revealed) return;
+    out.push(l);
+  };
+  for (const seed of MAP_SEED.locations) {
+    const row = byId.get(seed.id);
+    byId.delete(seed.id);
+    if (row && row.archived && !includeArchived) continue;
+    take(effective(seed, row));
+  }
+  // Whatever is left has no seed behind it: places the DM added. A row whose seed entry was later
+  // removed from the file lands here too, which is the right outcome — it keeps working.
+  for (const row of byId.values()) take(effective(null, row));
+  return out;
+}
+
+const SLUG = /^[a-z0-9-]{1,48}$/;
+// Note the null check: JSON.stringify writes NaN as null, and Number(null) is 0, so a client that
+// lost track of where it was pointing would otherwise land a place on the northwest corner.
+const given = v => v !== null && v !== undefined && v !== "";
+const onMap = (x, y) => Number.isFinite(x) && Number.isFinite(y) && x >= 0 && x <= 100 && y >= 0 && y <= 48;
+const slugOrNull = v => { const s = String(v ?? "").trim().toLowerCase(); return SLUG.test(s) ? s : null; };
+const textOrNull = (v, max) => { const s = String(v ?? "").trim(); return s ? s.slice(0, max) : null; };
+
+// Ids are made from the name so a glance at the database still reads like a map. A collision with
+// the seed or with another custom place takes a numeric tail rather than silently overwriting.
+async function freeId(name) {
+  const stem = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "place";
+  const { rows } = await db.query("SELECT id FROM map_locations WHERE id = $1 OR id LIKE $2", [stem, stem + "-%"]);
+  const taken = new Set([...rows.map(r => r.id), ...MAP_BY_ID.keys()]);
+  if (!taken.has(stem)) return stem;
+  for (let n = 2; n < 999; n++) if (!taken.has(`${stem}-${n}`)) return `${stem}-${n}`;
+  return `${stem}-${Date.now().toString(36)}`;
+}
+
+async function writeRow(cur) {
+  const { rows } = await db.query(
+    `INSERT INTO map_locations (id, x, y, placed, revealed, name, nation, kind, terrain, note, secret, custom, archived)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+     ON CONFLICT (id) DO UPDATE SET
+       x = EXCLUDED.x, y = EXCLUDED.y, placed = EXCLUDED.placed, revealed = EXCLUDED.revealed,
+       name = EXCLUDED.name, nation = EXCLUDED.nation, kind = EXCLUDED.kind,
+       terrain = EXCLUDED.terrain, note = EXCLUDED.note, secret = EXCLUDED.secret,
+       custom = EXCLUDED.custom, archived = EXCLUDED.archived, updated_at = now()
+     RETURNING *`,
+    [cur.id, cur.x, cur.y, cur.placed, cur.revealed, cur.name, cur.nation, cur.kind,
+     cur.terrain, cur.note, cur.secret, cur.custom, cur.archived]);
+  return rows[0];
+}
+
+// Answers 401 as JSON rather than redirecting: the page fetches this, and a login page parsed as
+// JSON is a confusing way to be told you are signed out.
+app.get("/map/locations.json", async (req, res) => {
+  const user = await currentUser(req);
+  if (!user) return res.status(401).json({ error: "Sign in first." });
+  // DM-only while the map is being built. The secret/revealed filtering below is left intact and
+  // working, so the day this check comes out, players get exactly what they should and no more.
+  if (user.role !== "dm") return res.status(403).json({ error: "The map is not open yet." });
+  res.set("Cache-Control", "no-store").json({ locations: await mapLocationsFor(user) });
+});
+
+// Everything the DM has put away, so a mis-dropped pin is recoverable rather than gone.
+app.get("/api/map/archived", requireUser, requireDm, async (req, res) => {
+  const { rows } = await db.query("SELECT * FROM map_locations WHERE archived ORDER BY updated_at DESC");
+  res.json({ locations: rows.map(r => effective(MAP_BY_ID.get(r.id), r)) });
+});
+
+// A new place the seed never had — a point of interest, a ruin, where the party is standing tonight.
+app.post("/api/map/locations", requireUser, requireDm, async (req, res) => {
+  const b = req.body || {};
+  const name = textOrNull(b.name, 80);
+  if (!name) return res.status(400).json({ error: "Give it a name." });
+  if (!given(b.x) || !given(b.y)) return res.status(400).json({ error: "Say where it goes." });
+  const x = Number(b.x), y = Number(b.y);
+  if (!onMap(x, y)) return res.status(400).json({ error: "That is off the map." });
+
+  const row = await writeRow({
+    id: await freeId(name), x, y, placed: true, revealed: false,
+    name,
+    nation:  slugOrNull(b.nation) || "free",
+    kind:    slugOrNull(b.kind) || "poi",
+    terrain: b.terrain === "difficult" ? "difficult" : "open",
+    note:    textOrNull(b.note, 4000),
+    // Hidden unless the caller says otherwise — the default is the cautious one, because a place
+    // revealed a session early cannot be un-revealed at the table.
+    secret:  b.secret === undefined ? true : !!b.secret,
+    custom:  true, archived: false,
+  });
+  res.status(201).json({ location: effective(null, row) });
+});
+
+// Editing one. The body carries only what changed; anything it leaves out is left exactly as it
+// was, so rewriting a description never disturbs a coordinate and moving a pin never changes who
+// can see it. Sending null for an overridable field hands it back to the seed.
+app.put("/api/map/locations/:id", requireUser, requireDm, async (req, res) => {
+  const id = req.params.id;
+  const seed = MAP_BY_ID.get(id);
+  const existing = (await db.query("SELECT * FROM map_locations WHERE id = $1", [id])).rows[0];
+  if (!seed && !existing) return res.status(404).json({ error: "No such place." });
+
+  const cur = existing || {
+    id, x: seed.x, y: seed.y, placed: false, revealed: false,
+    name: null, nation: null, kind: null, terrain: null, note: null, secret: null,
+    custom: false, archived: false,
+  };
+  const b = req.body || {};
+  let touched = false;
+
+  if (b.x !== undefined || b.y !== undefined) {
+    if (!given(b.x) || !given(b.y)) return res.status(400).json({ error: "Send both x and y." });
+    const x = Number(b.x), y = Number(b.y);
+    if (!onMap(x, y)) return res.status(400).json({ error: "That is off the map." });
+    cur.x = x; cur.y = y; cur.placed = true; touched = true;
+  }
+  if (b.name !== undefined) {
+    const n = textOrNull(b.name, 80);
+    // A custom place has no seed to fall back on, so it may not be left nameless.
+    if (!n && cur.custom) return res.status(400).json({ error: "Give it a name." });
+    cur.name = n; touched = true;
+  }
+  if (b.nation  !== undefined) { cur.nation  = slugOrNull(b.nation); touched = true; }
+  if (b.kind    !== undefined) { cur.kind    = slugOrNull(b.kind); touched = true; }
+  if (b.terrain !== undefined) {
+    cur.terrain = b.terrain === null ? null : (b.terrain === "difficult" ? "difficult" : "open");
+    touched = true;
+  }
+  if (b.note     !== undefined) { cur.note     = textOrNull(b.note, 4000); touched = true; }
+  if (b.secret   !== undefined) { cur.secret   = b.secret === null ? null : !!b.secret; touched = true; }
+  if (b.revealed !== undefined) { cur.revealed = !!b.revealed; touched = true; }
+  if (b.archived !== undefined) { cur.archived = !!b.archived; touched = true; }
+
+  if (!touched) return res.status(400).json({ error: "Nothing to change." });
+  const row = await writeRow(cur);
+  res.json({ location: effective(seed, row) });
+});
+
+// Undoing a placement: drop the row and the place falls back to its gazetteer estimate — and to
+// every other thing the file says about it. The seed is never edited, so there is always something
+// to fall back to. A place the DM added has no seed behind it and would simply cease to exist, so
+// that one is refused: archiving is how a custom place leaves.
+app.delete("/api/map/locations/:id", requireUser, requireDm, async (req, res) => {
+  const id = req.params.id;
+  const seed = MAP_BY_ID.get(id);
+  const existing = (await db.query("SELECT custom, archived FROM map_locations WHERE id = $1", [id])).rows[0];
+  if (!seed && !existing) return res.status(404).json({ error: "No such place." });
+
+  if (!seed || (existing && existing.custom)) {
+    // A place the DM added has no seed to fall back on, so deleting the row deletes the place.
+    // That is allowed, but only from the archive — two deliberate steps, never one slip.
+    if (!existing || !existing.archived)
+      return res.status(400).json({ error: "This one you added, so there is no seed to fall back to. Archive it first." });
+    await db.query("DELETE FROM map_locations WHERE id = $1", [id]);
+    return res.json({ deleted: id });
+  }
+
+  await db.query("DELETE FROM map_locations WHERE id = $1", [id]);
+  res.json({ location: effective(seed, null) });
+});
+
 app.use("/api/admin", admin);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -914,6 +1122,18 @@ app.get("/grimms/js/data.js", async (req, res) => {
 });
 
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
+
+// The World Map is DM-ONLY for now (Juan, 2026-10-21) — the pins are still being set and half the
+// gazetteer is open questions, so the table does not see it yet. Opening it to players later is
+// this line plus the matching one in the locations route, and the per-place `secret` machinery is
+// already there waiting underneath. /map/locations.json is registered further up and has already
+// answered by the time this runs, which is what keeps its refusal a JSON one.
+app.use("/map", async (req, res, next) => {
+  const user = await currentUser(req);
+  return user && user.role === "dm" ? next() : res.redirect("/");
+});
+app.use("/map", express.static(path.join(ROOT, "map")));
+
 // "/" and "/index.html" are the same front page — an old bookmark or a hand-typed URL used to
 // get Express's bare "Cannot GET /index.html" instead of the hub.
 app.get(["/", "/index.html"], (req, res) => res.sendFile(path.join(ROOT, "index.html")));
