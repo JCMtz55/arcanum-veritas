@@ -1,0 +1,145 @@
+{
+  "id": "decay",
+  "name": "Decay",
+  "icon": "🍂",
+  "opposing": "growth",
+  "description": "Rot, Spoilage, Erosion, Collapse, The Returning of Things.",
+  "savingThrow": "Constitution",
+  "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Crumbling", "card": "its armour and shield give no bonus until repaired" },
+      "major":  { "name": "Rotted", "card": "anything it holds breaks on a failed check" },
+      "severe": { "name": "Returned", "card": "its gear is destroyed outright" }
+    }
+  },
+  "verumEffects": {
+    "control": [
+      {
+        "name": "The Ground Gives",
+        "duration": "ring",
+        "description": "Stone softens, boards sag, iron flakes. You do not attack the thing standing on it — you attack what it is standing on.",
+        "tiers": [
+          {
+            "text": "A 10-foot square of floor, wall or ground within 60 feet becomes difficult terrain as it rots through. A creature that enters or starts its turn there makes a Constitution saving throw, taking 2d6 necrotic damage on a failure.",
+            "card": "10 ft square rots — difficult terrain, Con save or 2d6 necrotic",
+            "mech": {
+              "damage": { "dice": "2d6", "type": "necrotic" },
+              "save": { "ability": "Constitution" }
+            }
+          },
+          {
+            "text": "The area becomes a 20-foot square, and any unattended object or structure within it loses half its remaining hit points. Doors, bars, chains and locks in the area simply give way.",
+            "card": "20 ft — unattended objects lose half their HP · doors, bars and locks give way"
+          },
+          {
+            "text": "The area becomes a 30-foot square. A structure supporting weight within it must be braced or it collapses at the start of your next turn — bridges, scaffolds, stairs and ceilings all count.",
+            "card": "30 ft — any load-bearing structure collapses next turn unless braced"
+          },
+          {
+            "text": "The area becomes a 60-foot square and the rot does not stop when the Shift does. It continues to spread at 5 feet per hour until it reaches something that cannot rot, or until a Growth effect of equal or greater power is used to halt it.",
+            "card": "60 ft — and it keeps spreading 5 ft/hour after the Shift ends until Growth stops it"
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Blight",
+        "duration": "ring",
+        "description": "You do not make a thing. You make the absence where a thing was, and let it widen.",
+        "tiers": [
+          {
+            "text": "Choose a point within 60 feet. A 15-foot-radius blight spreads from it for 1 minute. Plants wither, water spoils, food rots, and light sources within it dim by half their radius.",
+            "duration": "1 minute",
+            "card": "15 ft blight, 1 min — plants wither, water spoils, light halves",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "The blight also suppresses healing within it: a creature that regains hit points inside the area regains half as many.",
+            "card": "Healing inside the blight is halved"
+          },
+          {
+            "text": "The radius increases to 30 feet, and nonmagical objects left in the blight for a full minute are destroyed. Magical objects are unharmed but go inert while they remain.",
+            "card": "30 ft — nonmagical objects destroyed after a minute, magic items go inert inside"
+          },
+          {
+            "text": "The blight becomes permanent until cleansed. The ground within it will not hold a crop, a foundation, or a corpse — anything buried there returns to the surface within a day.",
+            "card": "Permanent until cleansed — nothing grows, nothing is built, nothing stays buried"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "Everything Returns",
+        "description": "Given long enough, every made thing comes apart. You are the long enough.",
+        "tiers": [
+          {
+            "text": "Touch an object no larger than a chest and age it a century in a moment — rusting a lock, rotting a rope, souring a cask, crumbling mortar. It does not work on anything a creature is wearing or holding.",
+            "card": "Age an object a century by touch — not while worn or held",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "You may instead reverse it on one object, arresting its decay entirely for a year — a corpse, a document, a wound dressing, a meal. The Cognition does not care which direction it runs.",
+            "card": "Or run it backwards: halt one object's decay for a year",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Age or arrest something as large as a wagon, a door frame or a boat. You can also tell, by touch, exactly how long any object has left before it fails on its own.",
+            "card": "Wagon-sized · and read by touch how long a thing has left",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Name one made thing you can see, of any size, and set the hour it will fail. It fails then, whatever it is — a gate, a dam, a ship, a wall. You cannot choose sooner than a day away, you cannot undo it, and the Cognition will not tell anyone else it is coming.",
+            "card": "Name a made thing and set the hour it fails — minimum a day out, cannot be undone",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "It Does Not Stop",
+      "type": "Control",
+      "description": "Rot is only obedient while you are paying for it. Let go, and it keeps going — which is sometimes exactly the problem.",
+      "effect": {
+        "text": "When the primary effect resolves, you may decline to end it. The effect persists after the Shift or ring expires, with no further cost to you — but you lose all control of its edges, it spreads toward whatever is nearest rather than whatever you want, and only a Growth effect or a week of work will stop it.",
+        "card": "Let it persist past the Shift at no cost — but it spreads where it likes, not where you want",
+        "mech": { "utility": true }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: You may name one object or creature the rot will not touch as it spreads. One, and you must name it before you let go.",
+          "card": "Name one thing it will spare — chosen before you let go"
+        },
+        {
+          "text": "Level 11+: The persisting rot counts as a Growth-opposed effect of your own power for the purposes of resisting cleansing, so a lesser Growth effect cannot halt it.",
+          "card": "A lesser Growth effect can no longer halt it"
+        }
+      ]
+    },
+    {
+      "name": "Make Way",
+      "type": "Supportive",
+      "description": "The fastest route through a room is often the wall. Decay is how you ask it to stop being one.",
+      "effect": {
+        "text": "When the primary effect resolves, one wall, door, barricade, grate or similar obstruction within the area is reduced to debris. The space it occupied becomes difficult terrain rather than impassable, and allies ignore that difficult terrain until the end of your next turn.",
+        "card": "One obstruction becomes debris — allies ignore the difficult terrain it leaves",
+        "mech": { "utility": true }
+      },
+      "upgrades": [
+        {
+          "text": "The debris is cleared entirely instead of becoming difficult terrain, and the opening is wide enough for two creatures abreast.",
+          "card": "Cleared entirely, and wide enough for two abreast"
+        },
+        {
+          "text": "You may instead rot a path through a floor or ceiling, opening a route to the level above or below. The drop is treated as difficult terrain rather than a fall for creatures of your choice.",
+          "card": "Or open a route up or down — chosen creatures treat the drop as difficult terrain"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

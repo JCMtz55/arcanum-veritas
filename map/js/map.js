@@ -43,6 +43,12 @@
   const kindOf = l => C.kinds.find(k => k.id === l.kind) || { name: l.kind, shape: "dot", group: "poi" };
   const groupOf = l => kindOf(l).group || "poi";
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Descriptions are written in the vault and carry its light markdown. Escape everything first,
+  // then let exactly two things back through — **bold** and *italic* — so a description can style
+  // itself without ever being able to put markup into the page.
+  const lightMd = s => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
 
   let toastT;
   function toast(msg) {
@@ -75,13 +81,29 @@
     maxBoundsViscosity: 0.85,
   });
   L.imageOverlay(C.image.src, bounds).addTo(map);
-  map.fitBounds(bounds);
   map.setMaxBounds(bounds.pad(0.2));
   // One world unit is `pixelWidth / W` image pixels, so 1:1 sits at that log2 —
   // past it the render is being magnified and the art goes soft. `overzoom` is
   // how much softness we allow. Swapping in a bigger render only moves pixelWidth.
   map.setMaxZoom(Math.log2(C.image.pixelWidth / W) + (C.image.overzoom ?? 1));
-  map.setMinZoom(map.getZoom() - 1);
+
+  // The container can have no width when this runs — the pane hidden, a layout that has not
+  // settled, a tab restored in the background. fitBounds on no width yields a nonsense zoom, and
+  // deriving minZoom from it freezes that nonsense in: the map then opens as a pinprick of pins
+  // with no image and cannot be panned out of it, for the rest of the session. So the zoom is
+  // only ever taken when it is a real number, and it is taken again whenever the pane resizes.
+  function fitWorld() {
+    map.invalidateSize(false);
+    map.fitBounds(bounds);
+    const z = map.getZoom();
+    if (Number.isFinite(z)) map.setMinZoom(z - 1);
+  }
+  fitWorld();
+  map.on("resize", () => {
+    const z = map.getBoundsZoom(bounds);
+    if (Number.isFinite(z)) map.setMinZoom(z - 1);
+  });
+
   map.attributionControl.setPrefix("");
   map.attributionControl.addAttribution("Ephemer ★ Once Upon a Star");
 
@@ -272,7 +294,11 @@
 
   function flyTo(id) {
     const l = byId(id); if (!l) return;
-    map.flyTo(toLL(l.x, l.y), Math.max(map.getZoom(), map.getMaxZoom() - 1.5), { duration: 0.6 });
+    const close = map.getMaxZoom() - 1.5;
+    const z = Math.max(map.getZoom(), close);
+    // Never hand Leaflet a NaN: it throws "Invalid LatLng object" from deep inside the projection
+    // and the click looks like it simply did nothing.
+    map.flyTo(toLL(l.x, l.y), Number.isFinite(z) ? z : close, { duration: 0.6 });
   }
 
   // ── The selected place ──────────────────────────────────────────────────
@@ -296,7 +322,7 @@
     $("dName").textContent = l.name;
     $("dSub").textContent = `${nat.name} · ${kindOf(l).name}`;
     $("dSub").style.setProperty("--c", nat.colour);
-    $("dNote").textContent = l.note || "";
+    $("dNote").innerHTML = lightMd(l.note || "");
     if (l.vault) { $("dVault").innerHTML = `In the vault: <b>${esc(l.vault)}</b>`; $("dVault").classList.remove("hid"); }
     else $("dVault").classList.add("hid");
     $("dCoord").innerHTML = `(${l.x}, ${l.y}) · ${l.terrain} · ` +
@@ -521,7 +547,7 @@
   for (const id of ["selRoute", "selPace", "selTerrain", "inpScale"]) $(id).onchange = renderResult;
   $("inpScale").oninput = renderResult;
 
-  $("btnFit").onclick = () => map.fitBounds(bounds);
+  $("btnFit").onclick = fitWorld;
   $("btnGrid").onclick = e => {
     const on = map.hasLayer(grid);
     on ? map.removeLayer(grid) : map.addLayer(grid);

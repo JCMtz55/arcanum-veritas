@@ -1,4 +1,4 @@
-﻿// Grimm-specific trackers. Each PANELS[id] returns the inside of one card; state
+// Grimm-specific trackers. Each PANELS[id] returns the inside of one card; state
 // lives in sheet().x. LONG_REST[id] tidies up after a rest, USE_HOOK[abilityId]
 // reacts when an ability is used from the sheet.
 
@@ -292,11 +292,11 @@ function summonSoul(limit) {
   s.out = true; s.elite = asElite; s.form = ''; s.armament = armament; s.willUsed = false;
   // never tracked, or fell at 0 — it answers the call whole, at the max HP it has right now
   if (!s.hp) s.hp = gateMaxHp(b, s) ?? 0;
-  // an Elite's arrival halves the others: nobody keeps more HP than their new max
-  if (asElite) Object.entries(x.souls).forEach(([k, o]) => {
-    const ob = sbFind(k), max = ob && o.out && !o.elite ? gateMaxHp(ob, o) : null;
-    if (max != null && o.hp > max) o.hp = max;
-  });
+  // An Elite's arrival halves the others' MAXIMUM, and that is a cap, not damage
+  // (ruling, Juan 2026-10-20). Current HP is deliberately NOT clamped down here:
+  // gateMaxHp() derives the halved max on the fly and the bar caps its fraction at 1,
+  // so a full Servant reads full while the Elite stands -- and still reads full when it
+  // leaves, instead of being stuck at ~50% forever. Do not re-add a clamp.
   // Anything this Servant refills "each summon" is full again as it arrives — only its own.
   const refilled = trRefill('summon', id);
   save(); render();

@@ -1,0 +1,163 @@
+{
+  "id": "vileness",
+  "name": "Vileness",
+  "icon": "🥀",
+  "opposing": "heroism",
+  "description": "Regret, Guilt, Bitterness, Rumination, The Unmade Choice.",
+  "savingThrow": "Wisdom",
+  "damageType": "Psychic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Rueful", "card": "disadvantage on the next attack it makes against anyone it has already harmed" },
+      "major":  { "name": "Ruminating", "card": "cannot take the same action twice in a row" },
+      "severe": { "name": "Unmade", "card": "Incapacitated while it relives the choice" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "What You Did",
+        "duration": "ring",
+        "description": "You do not accuse. You simply hold the moment open and let the target look at it — psychic damage drawn from the weight of what they chose, scaling with how recently they chose it.",
+        "tiers": [
+          {
+            "text": "One creature within 60 feet makes a Wisdom saving throw, taking 3d6 psychic damage on a failure, or half as much on a success.",
+            "card": "Wis save {DC} — 3d6 psychic, half on a success",
+            "mech": {
+              "damage": { "dice": "3d6", "type": "psychic" },
+              "save": { "ability": "Wisdom" }
+            }
+          },
+          {
+            "text": "The damage increases to 5d6, and a creature that fails has disadvantage on its next attack roll against anyone it has harmed since the Shift began.",
+            "card": "5d6 — a failure also brings disadvantage against anyone it has already harmed",
+            "mech": {
+              "damage": { "dice": "5d6", "type": "psychic" }
+            }
+          },
+          {
+            "text": "The damage increases to 8d6. If the target has reduced a creature to 0 hit points in the last minute, it rolls the save at disadvantage.",
+            "card": "8d6 — disadvantage on the save if it dropped someone in the last minute",
+            "mech": {
+              "damage": { "dice": "8d6", "type": "psychic" },
+              "penalty": { "disadvantage": "the saving throw if it dropped a creature in the last minute" }
+            }
+          },
+          {
+            "text": "The damage increases to 11d6 and ignores resistance to psychic damage — regret is not a thing the body can brace for. A creature reduced below half its maximum hit points by this effect is Ruminating until the end of its next turn.",
+            "card": "11d6, ignores psychic resistance — below half HP it is Ruminating",
+            "mech": {
+              "damage": { "dice": "11d6", "type": "psychic" },
+              "conditions": [ { "name": "Ruminating", "duration": "until the end of its next turn" } ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Choice Again",
+        "duration": "ring",
+        "description": "The target is returned to the moment it decided, and finds it cannot decide differently — its options narrowing as the memory closes around it.",
+        "tiers": [
+          {
+            "text": "One creature within 30 feet that failed a saving throw against you this turn cannot take the Dash or Disengage action until the end of its next turn.",
+            "card": "No Dash or Disengage until the end of its next turn"
+          },
+          {
+            "text": "It also cannot take the same action it took on its previous turn — the memory will not let it choose otherwise.",
+            "card": "Also cannot repeat last turn's action"
+          },
+          {
+            "text": "Range increases to 60 feet, and while affected the creature treats every ally's space as difficult terrain — it cannot bring itself to stand beside them.",
+            "card": "60 ft — allies' spaces are difficult terrain for it"
+          },
+          {
+            "text": "Once per effect, when the creature would make an attack, it may instead be forced to make a Wisdom saving throw. On a failure it loses its action entirely, spending the turn inside the moment.",
+            "card": "1/effect force a Wis save in place of an attack — a failure costs it the action",
+            "mech": {
+              "save": { "ability": "Wisdom" },
+              "actionEconomy": { "action": -1 }
+            }
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "The Thing Left Behind",
+        "description": "Guilt leaves a residue. You can read it, follow it, and make others feel it where it happened.",
+        "tiers": [
+          {
+            "text": "Touch an object or stand in a place and learn the worst thing anyone did there — not who, and not why. Only that it happened, and roughly how long ago.",
+            "card": "Learn the worst thing done here — not who, not why, only that it was",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Follow that residue like a trail for up to a mile, or name aloud what was done and be believed by anyone who hears it who was present.",
+            "card": "Follow guilt like a trail for a mile · be believed by witnesses",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "A place you mark holds its regret for a year — any creature that sleeps there dreams the thing that was done, in the first person, as the one who did it.",
+            "card": "Mark a place: for a year, sleepers dream the deed as its doer",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Ask one creature a single question about something it regrets. It cannot lie to you, and it cannot refuse to answer — but you cannot ask that creature again, ever.",
+            "card": "One question about a regret, unlieable and unrefusable — once per creature, forever",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "Shared Rot",
+      "type": "Offensive",
+      "description": "You cannot wield regret without carrying some. The effect bites deeper, and the Cognition takes its fee out of you.",
+      "effect": {
+        "text": "When the primary effect resolves, you may gain 1 Corruption Point. If you do, every target rolls its saving throw at disadvantage and takes an additional 2d6 psychic damage on a failure. This is the only way the Cognition can be pushed, and the Point cannot be refused once taken.",
+        "card": "Take 1 Corruption: all targets save at disadvantage and take +2d6 psychic",
+        "mech": {
+          "damage": { "dice": "2d6", "type": "psychic" },
+          "penalty": { "disadvantage": "the saving throw for every target" }
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: You may instead take 2 Corruption Points to apply the effect to every creature of your choice within 30 feet of the original target.",
+          "card": "2 Corruption instead: spread it to everything within 30 ft of the target"
+        },
+        {
+          "text": "Level 11+: If taking the Point would raise your Corruption Score to a threshold that grants a Nature, you may still take it — and the Cognition will not warn you first.",
+          "card": "It will let you cross a Nature threshold, and will not warn you"
+        }
+      ]
+    },
+    {
+      "name": "Nothing To Stand On",
+      "type": "Control",
+      "description": "Heroism's certainty is the thing this Cognition is built to take away — and it takes it first from whoever was most sure.",
+      "effect": {
+        "text": "When the primary effect resolves, one creature of your choice that failed its save loses the benefit of any effect granting it advantage, temporary hit points from an ally, or immunity to the Frightened condition, until the end of its next turn.",
+        "card": "Strip advantage, ally temp HP and Frightened immunity until the end of its next turn",
+        "mech": {
+          "conditions": [ { "name": "Frightened" } ]
+        }
+      },
+      "upgrades": [
+        {
+          "text": "The creature also cannot be the target of a Supportive effect by an ally until the end of its next turn — nobody can reach it where it has gone.",
+          "card": "Allies cannot target it with Supportive effects either"
+        },
+        {
+          "text": "If the creature was under the effect of a Heroism Verum, that effect ends immediately instead.",
+          "card": "If a Heroism Verum was on it, that effect simply ends"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

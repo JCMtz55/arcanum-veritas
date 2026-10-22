@@ -1,0 +1,183 @@
+{
+  "id": "darkness",
+  "name": "Darkness",
+  "icon": "🌑",
+  "opposing": "light",
+  "description": "Lightlessness, Absence, The Unlit, The Thing Underneath. Darkness is not concealment and not deception — that is Shadow's work, and Shadow only ever borrowed the room. Darkness is the room. It is what is there when nothing is shining on it, which is almost everywhere and almost always, and its wielders do not create it so much as stop interrupting it.",
+  "savingThrow": "Dexterity",
+  "damageType": "Cold",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Unlit", "card": "its light sources shed half their radius" },
+      "major":  { "name": "Lightless", "card": "Blinded while it remains in the area" },
+      "severe": { "name": "Unseen By Itself", "card": "Blinded, and it cannot be the target of any effect requiring sight" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "Unlight",
+        "duration": "ring",
+        "description": "Not a bolt of dark. A line along which the light simply is not, and the cold that arrives because nothing has warmed that air in a very long time.",
+        "tiers": [
+          {
+            "text": "A 5-foot-wide, 60-foot line. Each creature in it makes a Dexterity saving throw, taking 3d8 cold damage on a failure or half as much on a success. Nonmagical light sources in the line go out.",
+            "card": "60 ft line — Dex save {DC}, 3d8 cold, half on a success · nonmagical lights go out",
+            "mech": {
+              "damage": { "dice": "3d8", "type": "cold" },
+              "save": { "ability": "Dexterity" }
+            }
+          },
+          {
+            "text": "The damage increases to 5d8, and a creature that fails is Unlit until the end of its next turn — its own light sources shed half their radius.",
+            "card": "5d8 — a failure leaves it Unlit, its lights at half radius",
+            "mech": {
+              "damage": { "dice": "5d8", "type": "cold" },
+              "conditions": [ { "name": "Unlit", "duration": "until the end of its next turn" } ]
+            }
+          },
+          {
+            "text": "The damage increases to 8d8 and the line extinguishes magical light of 3rd level or lower as it passes.",
+            "card": "8d8 — also snuffs magical light of 3rd level or lower",
+            "mech": { "damage": { "dice": "8d8", "type": "cold" } }
+          },
+          {
+            "text": "The damage increases to 11d8, the line widens to 10 feet, and a creature that fails is Blinded until the end of its next turn. The line leaves no mark, no scorch and no cold — only the fact that nothing there is lit any more.",
+            "card": "11d8 · 10 ft wide · a failure is Blinded until the end of its next turn",
+            "mech": {
+              "damage": { "dice": "11d8", "type": "cold" },
+              "conditions": [ { "name": "Blinded", "duration": "until the end of its next turn" } ]
+            }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "Take The Light",
+        "duration": "ring",
+        "description": "You do not fill the space with dark. You take the light out of it, and what remains is what was always underneath.",
+        "tiers": [
+          {
+            "text": "A 20-foot-radius sphere within 120 feet becomes unlit: all nonmagical light inside it is extinguished and cannot be relit while the effect lasts. Creatures without darkvision are Blinded inside it.",
+            "card": "20 ft sphere — nonmagical light cannot be relit · no darkvision means Blinded",
+            "mech": { "conditions": [ { "name": "Blinded" } ] }
+          },
+          {
+            "text": "The radius increases to 40 feet, and magical light of 3rd level or lower is suppressed rather than destroyed — it returns when the effect ends.",
+            "card": "40 ft — magical light of 3rd or lower is suppressed, and returns after"
+          },
+          {
+            "text": "Darkvision no longer helps: creatures relying on darkvision inside the area are Blinded as well. Only truesight, blindsight or tremorsense sees through it.",
+            "card": "Darkvision stops working — only truesight, blindsight or tremorsense sees in"
+          },
+          {
+            "text": "The radius increases to 90 feet and the area is unlit for a full hour, outlasting the Shift. Any light brought into it goes out on entry, and a creature that ends its turn inside takes 2d8 cold damage from the sheer absence.",
+            "duration": "1 hour",
+            "card": "90 ft for an hour, past the Shift — light goes out on entry, 2d8 cold for ending a turn inside",
+            "mech": { "damage": { "dice": "2d8", "type": "cold" } }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "Made Of Dark",
+        "duration": "ring",
+        "description": "Absence, given an edge. It is not solid and it is not illusion — it is a place the light does not reach, holding a shape.",
+        "tiers": [
+          {
+            "text": "Create an unlit barrier up to 20 feet long, 10 feet high and 1 foot thick within 60 feet. It blocks line of sight entirely, does not block movement, and lasts 1 minute.",
+            "duration": "1 minute",
+            "card": "20 ft unlit wall — blocks sight, not movement, 1 min"
+          },
+          {
+            "text": "The barrier may instead be a 15-foot-radius dome, and a creature that passes through it is Unlit until the end of its next turn.",
+            "card": "Or a 15 ft dome — passing through leaves a creature Unlit",
+            "mech": { "conditions": [ { "name": "Unlit", "duration": "until the end of its next turn" } ] }
+          },
+          {
+            "text": "The barrier becomes opaque to divination and scrying as well as sight, and anything fully enclosed by it cannot be targeted by effects that require seeing it.",
+            "card": "Also opaque to scrying — what it encloses cannot be targeted by sight"
+          },
+          {
+            "text": "You may shape up to 1,000 cubic feet of unlit space freely, anchored anywhere within 120 feet, lasting 1 hour. It holds its shape without concentration and moves if you move it as an action.",
+            "duration": "1 hour",
+            "card": "Shape 1,000 cu ft of unlit space for an hour · move it as an action"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "What Was Always There",
+        "description": "Light is the interruption. You are only asking it to stop.",
+        "tiers": [
+          {
+            "text": "Snuff or rekindle any nonmagical flame or lamp you can see within 60 feet, as many as you like, at will. Read the layout of a wholly unlit space by standing in it.",
+            "card": "Snuff or rekindle any nonmagical light within 60 ft at will · read an unlit room by standing in it",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Spend a minute to make a space permanently difficult to light — torches gutter, lanterns dim, and anyone who has been inside remembers it as darker than it was.",
+            "card": "Make a place permanently hard to light, and remembered as darker than it was",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "You and those you choose need no light to read, work or travel for 24 hours — not darkvision, but the sense of a thing's shape without seeing it. You cannot use this to perceive anything that is actively hiding.",
+            "card": "You and chosen others need no light for a day — shape-sense, not darkvision",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Ask the dark in one place what has passed through it unlit. It answers with shapes and counts, never names and never faces, going back as far as the last time that place was brightly lit.",
+            "card": "Ask an unlit place what came through it — shapes and counts, never names, back to its last bright day",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "You Are In It Too",
+      "type": "Control",
+      "description": "The Cognition does not make exceptions for the one who called it. Removing the light removes it for everybody.",
+      "effect": {
+        "text": "You gain no special sight inside darkness you create. You are subject to its Blinded effect exactly as your enemies are, and darkvision will not save you once the effect reaches the tier that suppresses it. You may spend 1 Blaze Point or an additional spell slot of 2nd level or higher to exempt yourself for the duration — and nobody else, ever.",
+        "card": "You are Blinded in your own darkness · 1 Blaze Point or a 2nd+ slot exempts you alone",
+        "mech": { "conditions": [ { "name": "Blinded" } ] }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: The exemption also covers one willing creature you touch as you cast.",
+          "card": "The exemption can also cover one creature you touch"
+        },
+        {
+          "text": "Level 11+: You may decline the exemption entirely and gain a benefit instead: while Blinded in your own darkness, attacks against you are made at disadvantage and you have advantage on Dexterity saving throws. Nobody can aim at what is not lit, including you.",
+          "card": "Refuse the exemption: attacks against you have disadvantage and you get advantage on Dex saves"
+        }
+      ]
+    },
+    {
+      "name": "Nothing To Aim At",
+      "type": "Offensive",
+      "description": "A ranged attack is a line drawn between two things that can see each other. Take one end away.",
+      "effect": {
+        "text": "When the primary effect resolves, ranged attacks originating outside the unlit area against targets inside it are made at disadvantage, and ranged attacks originating inside against targets outside have their range halved. This lasts until the end of your next turn.",
+        "card": "Ranged attacks into the dark have disadvantage · ranged attacks out of it are halved in range",
+        "mech": { "penalty": { "disadvantage": "ranged attacks from outside against targets inside" } }
+      },
+      "upgrades": [
+        {
+          "text": "Ranged attacks from outside against targets inside automatically miss instead, unless the attacker can see through darkness by a means the effect does not suppress.",
+          "card": "They miss outright unless the attacker can genuinely see in"
+        },
+        {
+          "text": "The effect also applies to spells that require the caster to see their target, which simply fail.",
+          "card": "Spells needing sight of the target fail as well"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

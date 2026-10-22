@@ -166,6 +166,16 @@
       "ready": true
     },
     {
+      "id": "darkness",
+      "name": "Darkness",
+      "icon": "🌑",
+      "fa": "circle",
+      "category": "elemental",
+      "tier": "I",
+      "opposing": "light",
+      "ready": true
+    },
+    {
       "id": "death",
       "name": "Death",
       "icon": "💀",
@@ -175,6 +185,16 @@
       "requires": [ "Decay", "Flesh" ],
       "favorite": true,
       "opposing": "life",
+      "ready": true
+    },
+    {
+      "id": "decay",
+      "name": "Decay",
+      "icon": "🍂",
+      "fa": "leaf",
+      "category": "vital",
+      "tier": "I",
+      "opposing": "growth",
       "ready": true
     },
     {
@@ -343,6 +363,17 @@
       "tier": "II",
       "opposing": "levity",
       "ready": false
+    },
+    {
+      "id": "grief",
+      "name": "Grief",
+      "icon": "⚱️",
+      "fa": "urn",
+      "category": "mores",
+      "tier": "III",
+      "requires": [ "Love", "Death" ],
+      "opposing": "healing",
+      "ready": true
     },
     {
       "id": "growth",
@@ -863,6 +894,16 @@
       "requires": [ "Clarity", "Light" ],
       "opposing": "lies",
       "ready": false
+    },
+    {
+      "id": "vileness",
+      "name": "Vileness",
+      "icon": "🥀",
+      "fa": "heart-crack",
+      "category": "mores",
+      "tier": "II",
+      "opposing": "heroism",
+      "ready": true
     },
     {
       "id": "void",

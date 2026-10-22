@@ -1,0 +1,237 @@
+{
+  "id": "grief",
+  "name": "Grief",
+  "icon": "⚱️",
+  "opposing": "healing",
+  "description": "Loss, Mourning, The Empty Place At The Table, The Name You Still Say. Grief is Love that has nowhere left to go, and it is built from exactly that — Love and Death, in that order. It is not Sadness, which passes, and it is not Despair, which has given up on what is coming; Grief is entirely concerned with what is already gone and cannot be got back. Those attuned to it do not make enemies sad. They make them carry something. And the Cognition will not be wielded by anyone who has not paid its entry price, because the only way to learn Grief is to endure a true, unrecoverable loss.",
+  "savingThrow": "Charisma",
+  "damageType": "Necrotic",
+  "eidon": {
+    "conditions": {
+      "minor":  { "name": "Bereft", "card": "disadvantage on its next attack against a creature it has seen fall" },
+      "major":  { "name": "Mourning", "card": "it cannot take the Help action and cannot be Helped" },
+      "severe": { "name": "Inconsolable", "card": "it gains no benefit from any ally's buff, aura or healing" }
+    }
+  },
+  "verumEffects": {
+    "offensive": [
+      {
+        "name": "What You Lost",
+        "description": "You do not add pain. You hand them the weight of everything already missing and make them hold it while they fight.",
+        "tiers": [
+          {
+            "text": "One creature within 60 feet makes a Charisma saving throw, taking 3d8 necrotic damage on a failure or half as much on a success. Add 1d8 for each allied creature that has been reduced to 0 hit points in this scene, to a maximum of 3d8 extra.",
+            "card": "Cha save {DC}, 3d8 necrotic · +1d8 per fallen ally this scene, max +3d8",
+            "mech": {
+              "damage": { "dice": "3d8", "type": "necrotic" },
+              "save": { "ability": "Charisma" }
+            }
+          },
+          {
+            "text": "The base damage increases to 6d8, and a creature that fails is Bereft until the end of its next turn.",
+            "card": "6d8 — a failure is Bereft until the end of its next turn",
+            "mech": {
+              "damage": { "dice": "6d8", "type": "necrotic" },
+              "conditions": [ { "name": "Bereft", "duration": "until the end of its next turn" } ]
+            }
+          },
+          {
+            "text": "The base damage increases to 9d8, the bonus cap rises to 6d8, and the damage dealt cannot be healed until the end of the scene.",
+            "card": "9d8 · bonus cap +6d8 · this damage will not heal until the scene ends",
+            "mech": {
+              "damage": { "dice": "9d8", "type": "necrotic" },
+              "deny": "healing of this damage until the end of the scene"
+            }
+          },
+          {
+            "text": "The base damage increases to 12d8 and a creature that fails is Mourning for 1 minute — it cannot take the Help action and cannot be Helped. If this damage reduces a creature to 0 hit points, every creature that could see it fall makes a Charisma saving throw against being Bereft.",
+            "card": "12d8 · a failure is Mourning for 1 min · a kill spreads Bereft to everyone who saw it",
+            "mech": {
+              "damage": { "dice": "12d8", "type": "necrotic" },
+              "conditions": [ { "name": "Mourning", "duration": "1 minute" } ]
+            }
+          }
+        ]
+      }
+    ],
+    "supportive": [
+      {
+        "name": "Carry It Together",
+        "description": "The weight does not get lighter. It gets shared, which is not the same thing and is the only thing that has ever worked.",
+        "tiers": [
+          {
+            "text": "Choose up to three allies within 30 feet who have seen a companion fall, in this scene or in their own history. Each gains 2d8 temporary hit points and advantage on saving throws against being Frightened or Charmed for 1 minute.",
+            "card": "3 allies: 2d8 temp HP · advantage vs Frightened and Charmed, 1 min",
+            "mech": { "healing": { "dice": "2d8", "kind": "temporary" } }
+          },
+          {
+            "text": "The temporary hit points increase to 4d8, and each chosen ally may immediately end one effect on itself that is causing it to be Frightened.",
+            "card": "4d8 temp HP · each may end one Frightened effect at once",
+            "mech": { "healing": { "dice": "4d8", "kind": "temporary" } }
+          },
+          {
+            "text": "While any chosen ally still has these temporary hit points, all of them know each other's rough condition and direction regardless of distance or sight, and none can be made to attack another by any compulsion.",
+            "card": "They sense one another at any range · no compulsion can turn them on each other"
+          },
+          {
+            "text": "The temporary hit points increase to 6d8 and extend to every ally within 60 feet. The first time each one would drop to 0 hit points while they last, it drops to 1 instead — once per ally, and the Cognition takes the memory of a name it was carrying in exchange.",
+            "card": "6d8 to all allies in 60 ft · first drop to 0 becomes 1, once each",
+            "mech": { "healing": { "dice": "6d8", "kind": "temporary" } }
+          }
+        ]
+      }
+    ],
+    "control": [
+      {
+        "name": "The Empty Chair",
+        "description": "You do not take the ally away. You take away the part of them that knows the ally is still there.",
+        "tiers": [
+          {
+            "text": "Choose one creature within 60 feet and one ally of that creature. For 1 minute, the target cannot take the Help action toward that ally, cannot be Helped by it, and gains no benefit from that ally's auras or buffs.",
+            "card": "Target gets nothing from one named ally for 1 min — no Help, no aura, no buff",
+            "mech": {
+              "deny": "Help, auras and buffs from one named ally",
+              "save": { "ability": "Charisma" }
+            }
+          },
+          {
+            "text": "The target also cannot be healed by that ally, and the two cannot willingly move closer to one another than 10 feet.",
+            "card": "No healing from that ally either, and neither can close within 10 ft"
+          },
+          {
+            "text": "Choose a second ally; the effect covers both. While both are chosen, the target treats every creature as unaligned with it and loses any benefit that requires an ally within a set distance.",
+            "card": "Two allies · the target counts as having no allies at all for distance-based benefits"
+          },
+          {
+            "text": "For the duration the target cannot perceive the chosen allies at all — it cannot see, hear or target them, and they have advantage on attacks against it. If it is reduced to 0 hit points while the effect holds, it dies believing it fought alone.",
+            "card": "It cannot perceive them at all · they attack it at advantage",
+            "mech": { "deny": "all perception of the chosen allies" }
+          }
+        ]
+      }
+    ],
+    "creation": [
+      {
+        "name": "The Cairn",
+        "description": "Grief builds. It is the one thing it does that lasts, and every culture in Ephemer found it without being taught.",
+        "tiers": [
+          {
+            "text": "Raise a stone cairn in an unoccupied space within 30 feet, 5 feet tall, AC 15, 30 hit points. Allies within 10 feet of it have advantage on saving throws against being Frightened. It stands until broken.",
+            "card": "5 ft cairn, AC 15, 30 HP — allies within 10 ft resist Frightened",
+            "mech": { "creation": { "ac": 15, "hp": 30 } }
+          },
+          {
+            "text": "Name aloud one creature that has died. The cairn's radius becomes 20 feet and allies inside it also gain advantage on death saving throws.",
+            "card": "Name a dead creature: 20 ft radius, advantage on death saves inside"
+          },
+          {
+            "text": "The cairn's hit points become 80 and it cannot be destroyed by any creature that did not know the named dead. An ally who ends its turn touching it regains 2d8 hit points, once per ally per scene.",
+            "card": "80 HP · only those who knew the dead can break it · 2d8 healing on touch, once each",
+            "mech": {
+              "creation": { "ac": 15, "hp": 80 },
+              "healing": { "dice": "2d8" }
+            }
+          },
+          {
+            "text": "The cairn becomes permanent and the name becomes unforgettable: no effect, Cognition or Law can remove the named dead from the memory of anyone who reads it, and divination that would conceal them fails within a mile. You may raise only one permanent cairn per name, ever.",
+            "card": "Permanent · the name cannot be erased from any mind, and nothing hides them within a mile"
+          }
+        ]
+      }
+    ],
+    "utility": [
+      {
+        "name": "What It Cost Them",
+        "description": "Everyone is carrying something. Grief is simply the sense that lets you see the shape of it.",
+        "tiers": [
+          {
+            "text": "Look at a creature and know whether it has suffered an unrecoverable loss, and roughly how long ago. You learn nothing about what or who.",
+            "card": "See whether a creature has lost someone, and roughly when",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Touch an object and learn whether anyone has mourned over it, how many, and whether any of them are still alive.",
+            "card": "Read an object for mourning — how many, and whether they still live",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Spend a minute with a willing or Mourning creature and learn the single loss that shaped it most. It knows you looked, and it will know exactly what you saw.",
+            "card": "Learn the loss that shaped a creature most — it knows you looked",
+            "mech": { "utility": true }
+          },
+          {
+            "text": "Stand where someone died and ask who grieved them. You are answered with names, however long ago it was and however thoroughly the record was destroyed — and if the answer is nobody, the Cognition tells you that too, which is worse.",
+            "card": "Ask a death-place who grieved them — names, at any remove · \"nobody\" is a possible answer",
+            "mech": { "utility": true }
+          }
+        ]
+      }
+    ]
+  },
+  "complementEffects": [
+    {
+      "name": "You Have One Too",
+      "type": "Control",
+      "description": "Grief is not a tool you pick up. It is a thing you are already holding, and it requires you to admit which thing.",
+      "effect": {
+        "text": "To add this complement you must name aloud a specific, unrecoverable loss of your own — a person, not a thing, and a real one from your character's history. The primary effect's saving throw DC increases by 2. You are Bereft until the end of your next turn, and you may not name the same loss again until you finish a long rest.",
+        "card": "Name a real loss of your own aloud: DC +2, and you are Bereft until the end of your next turn",
+        "mech": {
+          "conditions": [ { "name": "Bereft", "duration": "until the end of your next turn", "target": "self" } ],
+          "dc": "+2"
+        }
+      },
+      "upgrades": [
+        {
+          "text": "Level 5+: You are no longer Bereft, but the named loss becomes known to every creature that witnessed the effect, whether you wanted that or not.",
+          "card": "No longer Bereft — but everyone who saw it now knows what you named"
+        },
+        {
+          "text": "Level 11+: The DC increase becomes +4 if the loss you name has never been spoken aloud at the table before. The Cognition keeps a list, and so should the DM.",
+          "card": "DC +4 for a loss never spoken at the table before — each name works once"
+        }
+      ]
+    },
+    {
+      "name": "Nothing Heals This",
+      "type": "Offensive",
+      "description": "The defining property of a loss is that it does not come back. The Cognition is very literal about this.",
+      "effect": {
+        "text": "When the primary effect resolves, damage it dealt cannot be restored by healing of any kind until the end of the scene. A creature killed by it cannot be raised by any effect of 5th level or lower.",
+        "card": "Its damage will not heal this scene · a kill resists raising below 6th level",
+        "mech": { "deny": "healing of damage dealt, until the end of the scene" }
+      },
+      "upgrades": [
+        {
+          "text": "The restriction extends to temporary hit points: the target gains none from any source until the end of the scene.",
+          "card": "No temporary hit points from any source either"
+        },
+        {
+          "text": "A creature killed by the effect cannot be raised at all unless the one raising it names the loss you named. Nobody else can do it, and most will never know why they cannot.",
+          "card": "A kill can only be raised by someone who names the loss you named"
+        }
+      ]
+    },
+    {
+      "name": "The Procession",
+      "type": "Supportive",
+      "description": "Grief gathers. It is the only emotion in the Arcanum that reliably grows stronger the more people are feeling it.",
+      "effect": {
+        "text": "This complement arms rather than fires. The next time an ally within 60 feet is reduced to 0 hit points, your next use of a Grief Verum before the end of your next turn costs no Shift and rolls its damage or healing dice twice, taking the higher total.",
+        "card": "Arms: when an ally drops, your next Grief Verum is free and rolls its dice twice",
+        "mech": { "utility": true }
+      },
+      "upgrades": [
+        {
+          "text": "It also triggers when an allied creature you can see dies outright, and the free use may be taken as a reaction.",
+          "card": "Also triggers on an outright death, and the free use can be a reaction"
+        },
+        {
+          "text": "The armed state no longer expires at the end of your next turn. It waits, for as long as it takes, until someone falls.",
+          "card": "The armed state never expires — it waits until someone falls"
+        }
+      ]
+    }
+  ],
+  "schema": 2
+}

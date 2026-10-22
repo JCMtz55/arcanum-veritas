@@ -119,7 +119,7 @@ const PORTRAITS = {
   'white-rabbit':      { invoked: 'familiar_whiteRabbit.png',    awakened: 'grimm_WhiteRabbit.png' },
   'makoa':             { invoked: 'familiar_makoa.png',          awakened: 'grimm_Makoa.png' },
   'thanatos':          { invoked: 'familiar_Thanatos.png',       awakened: 'grimm_Thanatos.png' },
-  'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTIger.png', awakened: 'grimm_RageOfTheTiger.png' },
+  'rage-of-the-tiger': { invoked: 'familiar_rageOfTheTiger.png', awakened: 'grimm_RageOfTheTiger.png' },
   'peco':              { invoked: 'familiar_peco.png',           awakened: 'grimm_Peco.png' },
 };
 // With Peco drawn (2026-10-19) every Grimm is served from grimms/img/ and nothing hotlinks
