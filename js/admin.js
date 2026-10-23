@@ -230,6 +230,9 @@ function renderAdmin() {
       ${dm ? "" : `<div class="adm-line"><button class="mini adm-del" onclick="adminDelete(${u.id})">Delete this player</button></div>`}
     </div>`;
 
+  // The DM keeps characters too — their own, and this is the same panel either way.
+  h += charSection(u);
+
   if (dm) {
     h += `<div class="cdx-sec"><h2>Cognitions</h2>
       <div class="cdx-note"><p>The DM reads every Cognition, held-back ones included. There is nothing to grant.</p></div></div>`;
@@ -617,6 +620,139 @@ const CHAIN_FX = {
 };
 // chains by Grimm id, and the DM's switches: "shift", or "a:<ability id>"
 let GRIMM_CHAINS = {}, GRIMM_TOGGLES = {};
+
+// ═══════════════════════════════════════════════════════════
+//  CHARACTERS — the three numbers only the DM may move
+// ═══════════════════════════════════════════════════════════
+// The character sheet lets a player write everything about themselves except four things, and
+// this is where those four live. The server refuses them from a player's own save route, so this
+// panel is not a convenience wrapped around an honour system — it is the only door.
+//
+//   level  DM-009 · and a granted level issues one Honor and one Morality point (RES-10)
+//   dream  DM-02  · moves only by a campaign event, so the event is required, not optional
+//   fate   DM-05  · the only place a Fate charge is ever created; nothing recharges one
+//
+// Loaded on demand like the Servants, and for the same reason: it is a second request per player
+// and most visits to this page are not about characters.
+
+const CHARS_BY_USER = {};
+
+function charSection(u) {
+  return `<div class="cdx-sec"><h2>Characters</h2>
+    <p class="cdx-rings">Their sheet is theirs — these four numbers are not. A level grant also issues
+      <strong>one Honor and one Morality point</strong> for them to spend, Dream moves <strong>only by a
+      campaign event you name</strong>, and Fate charges exist only because you granted them.</p>
+    <div id="chars-${u.id}"><button class="mini" onclick="loadChars(${u.id})">Show their characters</button></div></div>`;
+}
+
+async function loadChars(uid) {
+  const box = document.getElementById("chars-" + uid);
+  if (box) box.innerHTML = `<p class="hint">Reading…</p>`;
+  try {
+    const { characters } = await api("GET", "api/characters/all");
+    // One request answers for everybody, so cache the lot and let each panel take its own.
+    for (const u of ADMIN.users) CHARS_BY_USER[u.id] = [];
+    for (const c of characters || []) (CHARS_BY_USER[c.userId] ||= []).push(c);
+  } catch (e) {
+    if (box) box.innerHTML = `<p class="hint">Couldn't read them: ${esc(e.message || e)}</p>`;
+    return;
+  }
+  drawChars(uid);
+}
+
+function drawChars(uid) {
+  const box = document.getElementById("chars-" + uid);
+  if (!box) return;
+  const rows = CHARS_BY_USER[uid] || [];
+  if (!rows.length) {
+    box.innerHTML = `<div class="cdx-note"><p>No characters yet. They make their own from the
+      <a href="sheet.html">Character Sheet</a>; there is nothing for you to create here.</p></div>`;
+    return;
+  }
+  box.innerHTML = rows.map(c => {
+    const unspent = (c.honorUnspent || 0) + (c.moralityUnspent || 0);
+    return `<div class="adm-char" id="char-${c.id}">
+      <div class="adm-char-hd"><b>${esc(c.name)}</b>
+        ${unspent ? `<span class="t hot">${unspent} point${unspent === 1 ? "" : "s"} waiting to be spent</span>` : ""}
+        <span class="t">Honor ${c.honorOrder}/${c.honorChaos} · Morality ${c.moralityGood}/${c.moralityEvil}</span></div>
+
+      <div class="adm-line">
+        <label for="lv-${c.id}">Level</label>
+        <input class="search num" id="lv-${c.id}" type="number" min="1" max="20" value="${c.level}">
+        <button class="mini on" onclick="charSetLevel(${c.id},${uid})">Set level</button>
+        <span class="hint">issues one Honor and one Morality point per level gained</span>
+      </div>
+
+      <div class="adm-line">
+        <label for="dr-${c.id}">Dream</label>
+        <input class="search num" id="dr-${c.id}" type="number" min="0" max="30" value="${c.dream}">
+        <input class="search" id="dn-${c.id}" placeholder="Which campaign event? — required" aria-label="The campaign event">
+        <button class="mini on" onclick="charSetDream(${c.id},${uid})">Set Dream</button>
+      </div>
+
+      <div class="adm-line">
+        <label for="ft-${c.id}">Fate</label>
+        <input class="search num" id="ft-${c.id}" type="number" min="0" max="20" value="${c.fate}">
+        <button class="mini on" onclick="charSetFate(${c.id},${uid})">Set charges</button>
+        <span class="hint">nothing recharges these — this is the only source</span>
+      </div>
+
+      <div id="ev-${c.id}" class="adm-events">
+        <button class="mini" onclick="loadCharEvents(${c.id})">History</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// All three write through their own route and then redraw from the row the server hands back,
+// so what the panel shows is what was actually stored — never what we hoped it stored.
+async function charWrite(cid, uid, what, body, said) {
+  try {
+    const { character } = await api("PUT", `api/characters/${cid}/${what}`, body);
+    const list = CHARS_BY_USER[uid] || [];
+    const i = list.findIndex(c => c.id === cid);
+    if (i >= 0) list[i] = { ...list[i], ...character };
+    drawChars(uid);
+    toast(said);
+  } catch (e) { toast(e.message); }
+}
+
+function charSetLevel(cid, uid) {
+  const v = Number(document.getElementById(`lv-${cid}`).value);
+  charWrite(cid, uid, "level", { level: v }, `Level set to ${v}`);
+}
+
+function charSetDream(cid, uid) {
+  const v = Number(document.getElementById(`dr-${cid}`).value);
+  const note = document.getElementById(`dn-${cid}`).value.trim();
+  // The server would refuse an unexplained change anyway; saying so here saves a round trip and
+  // explains the rule rather than just rejecting.
+  const now = (CHARS_BY_USER[uid] || []).find(c => c.id === cid);
+  if (now && v !== now.dream && !note) return toast("Name the campaign event — Dream moves only by one.");
+  charWrite(cid, uid, "dream", { dream: v, note }, `Dream set to ${v}`);
+}
+
+function charSetFate(cid, uid) {
+  const v = Number(document.getElementById(`ft-${cid}`).value);
+  charWrite(cid, uid, "fate", { fate: v }, `Fate charges: ${v}`);
+}
+
+async function loadCharEvents(cid) {
+  const box = document.getElementById("ev-" + cid);
+  if (!box) return;
+  box.innerHTML = `<p class="hint">Reading…</p>`;
+  try {
+    const { events } = await api("GET", `api/characters/${cid}/events`);
+    box.innerHTML = events.length
+      ? `<div class="cdx-defs">` + events.map(e => {
+          const d = e.detail || {};
+          const move = d.from !== undefined ? ` ${d.from} → ${d.to}` : d.into ? ` into ${esc(d.into)}` : "";
+          return `<div class="cdx-def"><b>${esc(e.action)}${move}</b>
+            <span>${esc(e.actor || "—")} · ${new Date(e.at).toLocaleString()}${e.note ? ` — “${esc(e.note)}”` : ""}</span></div>`;
+        }).join("") + `</div>`
+      : `<p class="hint">Nothing recorded yet.</p>`;
+  } catch (e) { box.innerHTML = `<p class="hint">${esc(e.message || e)}</p>`; }
+}
 
 async function loadGrimmState() {
   const s = await api("GET", "api/grimms/state");

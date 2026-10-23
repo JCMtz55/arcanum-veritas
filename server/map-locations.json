@@ -54,6 +54,6 @@
     { "id": "scorched", "name": "The Scorched Lands", "nation": "free", "kind": "island", "x": 37, "y": 32, "terrain": "difficult", "note": "Volcanic island wreathed by the Steaming Depths. The old map prints \"The Scorshed Island\"; the canonical name is Juan's ruling." },
     { "id": "justicar", "name": "The Rusted Justicar", "nation": "free", "kind": "landmark", "x": 80, "y": 22, "terrain": "open", "note": "A great sword driven into a stone islet at the centre of the Dead Waters — the only marked feature in Austur's interior sea." },
 
-    { "id": "vesper-gulch", "name": "Vesper Gulch", "nation": "talon", "kind": "site", "x": 11, "y": 26, "terrain": "difficult", "secret": true, "note": "Referenced in Chapter 2 — Dreams of Violet Sand, and drawn on no map. This position is an estimate awaiting a ruling, which is why it starts hidden: the guess is the secret, not the place." }
+    { "id": "vesper-gulch", "name": "Vesper Gulch", "nation": "talon", "kind": "site", "x": 11, "y": 26, "terrain": "difficult", "secret": true, "note": "A dry ravine with water still at the bottom of it, and the last of that water before the deep desert. Everything east is three days of hard crossing to **Tryad**, which is why journeys in this part of the world are counted *from* Vesper Gulch rather than to it. Travellers sleep at **St Pillow**, kept by **Janier Breth** — a name that began as a joke about what the desert does to a night's rest, and stayed." }
   ]
 }

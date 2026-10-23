@@ -64,12 +64,12 @@
             }
           },
           {
-            "text": "The Judgment. A creature hit or that fails is Bound for 1 minute — it can't move farther from you or teleport — repeating the Charisma save at the end of each of its turns. An oathbreaker that drops to 0 hit points from the seal can't be raised until its broken oath is kept by someone.",
-            "card": "THE JUDGMENT — Bound 1 min, can't move away or teleport · a slain oathbreaker can't be raised until its oath is kept",
+            "text": "The Judgment. A creature hit or that fails is held by Bound — Proximity for 1 minute: it can't move farther from you or teleport, repeating the Charisma save at the end of each of its turns. An oathbreaker that drops to 0 hit points from the seal can't be raised until its broken oath is kept by someone.",
+            "card": "THE JUDGMENT · Bound — Proximity for 1 min, can't move away or teleport · a slain oathbreaker can't be raised until its oath is kept",
             "mech": {
               "conditions": [
                 {
-                  "name": "Bound",
+                  "name": "Bound — Proximity",
                   "duration": "1 minute",
                   "escape": "Charisma save at the end of each of its turns"
                 }

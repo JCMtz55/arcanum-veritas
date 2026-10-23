@@ -506,6 +506,18 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .adm-line .search{flex:1;min-width:0}
 .adm-del{margin-left:0;color:var(--ember);border-color:#6b3229}
 .adm-del:hover{color:var(--ember);border-color:var(--ember)}
+/* The DM's character panel. One card per character, three rows of a number and a button —
+   level, Dream and Fate — so the three things a player cannot set sit together in one place. */
+.adm-char{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:11px;background:var(--slate)}
+.adm-char-hd{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:4px}
+.adm-char-hd b{font-family:var(--serif);font-size:16px;color:var(--bone)}
+.adm-char .adm-line{max-width:620px;gap:9px}
+.adm-char .adm-line label{flex:none;width:46px;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--mute)}
+.adm-char .adm-line .hint{flex:none;margin-top:0}
+.adm-char .search.num{flex:none;width:76px}
+.adm-events{margin-top:11px}
+.adm-events .cdx-defs{margin-top:0}
 .chip.held{border-style:dashed}
 #adminBody .chips{margin-bottom:6px}
 #adminBody code{font-size:12px;color:var(--bone2)}

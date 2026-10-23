@@ -220,6 +220,59 @@ const SCHEMA = [
   `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
   // Custom places are listed and filtered by nation constantly; seeded ones are looked up by id.
   `CREATE INDEX IF NOT EXISTS map_locations_nation ON map_locations (nation) WHERE nation IS NOT NULL`,
+
+  // ── THE CHARACTER SHEET (2026-10-23) ───────────────────────
+  // A character is a row its player owns plus a JSON body they may write freely — and a short list
+  // of columns holding the things the rules put deliberately out of their reach.
+  //
+  // Why the split, and not one blob: the player's save route takes the whole sheet at once, so any
+  // field living inside that blob is a field a forged payload can set. Level, Dream, the Fate
+  // balance and the alignment sub-scores are all DM-authority or allocation-gated, so they are
+  // columns the player's own route simply never writes. Everything else — the six standard scores,
+  // proficiencies, HP, inventory, notes — is in `sheet`, because the shape of a 5e sheet is still
+  // moving and a column per field would be a migration a week.
+  //
+  // `level` — DM-009: only a DM may grant, set or roll back a level, and each granted level issues
+  // one Honor and one Morality allocation (RES-10), held in the two `*_unspent` counters.
+  // `dream`  — DM-01 starts it at 10, and DM-02 says only a special campaign event raises it, so it
+  // is the DM's column too: never an ASI, never part of point buy.
+  // `fate`   — DM-05: a limited balance granted only by the DM. The player's route may spend one and
+  // can do nothing else to it; there is no recharge anywhere in this server, by design.
+  `CREATE TABLE IF NOT EXISTS characters (
+     id               SERIAL PRIMARY KEY,
+     user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     name             TEXT NOT NULL,
+     level            SMALLINT NOT NULL DEFAULT 1 CHECK (level BETWEEN 1 AND 20),
+     dream            SMALLINT NOT NULL DEFAULT 10 CHECK (dream BETWEEN 0 AND 30),
+     fate             SMALLINT NOT NULL DEFAULT 0 CHECK (fate >= 0),
+     honor_order      SMALLINT NOT NULL DEFAULT 0 CHECK (honor_order >= 0),
+     honor_chaos      SMALLINT NOT NULL DEFAULT 0 CHECK (honor_chaos >= 0),
+     morality_good    SMALLINT NOT NULL DEFAULT 0 CHECK (morality_good >= 0),
+     morality_evil    SMALLINT NOT NULL DEFAULT 0 CHECK (morality_evil >= 0),
+     honor_unspent    SMALLINT NOT NULL DEFAULT 0 CHECK (honor_unspent >= 0),
+     morality_unspent SMALLINT NOT NULL DEFAULT 0 CHECK (morality_unspent >= 0),
+     sheet            TEXT NOT NULL DEFAULT '{}',
+     archived         BOOLEAN NOT NULL DEFAULT false,
+     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS characters_user ON characters (user_id) WHERE NOT archived`,
+
+  // DM-007: every sensitive change keeps actor, action, target, timestamp and prior/new values.
+  // Append-only by convention — nothing in the server updates or deletes a row here, so a level
+  // rolled back leaves both the grant and the rollback standing and the pair reads as the story of
+  // what happened. `actor_id` is the account that did it: a DM for a level or a Fate grant, the
+  // player themselves for an allocation or a spent charge.
+  `CREATE TABLE IF NOT EXISTS character_events (
+     id           SERIAL PRIMARY KEY,
+     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+     actor_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     action       TEXT NOT NULL,
+     detail       TEXT NOT NULL DEFAULT '{}',
+     note         TEXT NOT NULL DEFAULT '',
+     at           TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS character_events_char ON character_events (character_id, id DESC)`,
 ];
 
 export async function migrate(db) {

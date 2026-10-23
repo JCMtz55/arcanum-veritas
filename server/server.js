@@ -1056,6 +1056,222 @@ app.delete("/api/map/locations/:id", requireUser, requireDm, async (req, res) =>
   res.json({ location: effective(seed, null) });
 });
 
+// ═══════════════════════════════════════════════════════════
+//  THE CHARACTER SHEET
+// ═══════════════════════════════════════════════════════════
+// A character belongs to one account. Everything a player may set themselves travels in the
+// `sheet` blob and is written by PUT /api/characters/:id; everything the rules put in the DM's
+// hands is a column, and no player route touches one. That division is the whole security model
+// here, and it is why the level is not simply a key in the JSON: this route takes the sheet
+// wholesale, so a field inside it is a field a forged payload sets.
+//
+//   DM-009  only a DM may grant, set or roll back a level — and each granted level issues one
+//           Honor and one Morality allocation (RES-10), which the player then spends
+//   DM-02   Dream moves only by a campaign event the DM records
+//   DM-05   Fate charges are granted by the DM; a player may spend one and nothing recharges
+
+const SHEET_MAX = 16_000;   // one character's JSON. Generous for a sheet, far short of a payload.
+
+// What the client is allowed to put in the blob. Anything else is dropped rather than rejected,
+// so an older or newer page cannot fail a save over a key this server has not heard of.
+const SHEET_KEYS = new Set([
+  "ancestry", "class", "background", "scores", "saves", "skills", "skillAbility", "skillMisc",
+  "saveMisc", "ac", "speed", "hitDice", "hp", "hpMax", "hpTemp", "wounds", "injuries",
+  "exhaustion", "dreamExhaustion", "attuned", "attunementBonus", "senseSpent", "notes",
+]);
+
+const charRow = r => ({
+  id: r.id, name: r.name, level: r.level, dream: r.dream, fate: r.fate,
+  honorOrder: r.honor_order, honorChaos: r.honor_chaos,
+  moralityGood: r.morality_good, moralityEvil: r.morality_evil,
+  honorUnspent: r.honor_unspent, moralityUnspent: r.morality_unspent,
+  sheet: safeJson(r.sheet),
+  updatedAt: r.updated_at,
+});
+function safeJson(text) { try { return JSON.parse(text) || {}; } catch { return {}; } }
+
+async function logEvent(characterId, actorId, action, detail, note = "") {
+  await db.query(
+    "INSERT INTO character_events (character_id, actor_id, action, detail, note) VALUES ($1, $2, $3, $4, $5)",
+    [characterId, actorId, action, JSON.stringify(detail || {}), String(note || "").slice(0, 500)]);
+}
+
+// A DM may open any character in the campaign; everyone else only their own. Returns the row or
+// null, so every route below gets the same answer to "may I touch this one".
+async function charFor(user, id, { write = false } = {}) {
+  const n = Number(id);
+  if (!Number.isInteger(n)) return null;
+  const { rows } = await db.query("SELECT * FROM characters WHERE id = $1", [n]);
+  const row = rows[0];
+  if (!row) return null;
+  if (row.user_id === user.id) return row;
+  // The DM reads everyone's, and writes only through the DM routes — never the player's save.
+  if (user.role === "dm" && !write) return row;
+  return null;
+}
+
+app.get("/api/characters", requireUser, async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT * FROM characters WHERE user_id = $1 AND NOT archived ORDER BY id", [req.user.id]);
+  res.json({ characters: rows.map(charRow) });
+});
+
+// The DM's view of the table — every player's characters, for granting levels and Fate.
+app.get("/api/characters/all", requireUser, requireDm, async (req, res) => {
+  const { rows } = await db.query(
+    `SELECT c.*, u.display_name FROM characters c JOIN users u ON u.id = c.user_id
+      WHERE NOT c.archived ORDER BY u.display_name, c.id`);
+  res.json({ characters: rows.map(r => ({ ...charRow(r), userId: r.user_id, owner: r.display_name })) });
+});
+
+app.post("/api/characters", requireUser, async (req, res) => {
+  const name = String(req.body?.name || "").trim().slice(0, 60) || "New character";
+  const { rows } = await db.query(
+    "INSERT INTO characters (user_id, name) VALUES ($1, $2) RETURNING *", [req.user.id, name]);
+  await logEvent(rows[0].id, req.user.id, "created", { name });
+  res.json({ character: charRow(rows[0]) });
+});
+
+app.get("/api/characters/:id", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  res.json({ character: charRow(row) });
+});
+
+// The player's save. Name and the sheet blob, and deliberately nothing else: a `level` or `dream`
+// arriving in this body is ignored rather than honoured, which is the point of the whole split.
+app.put("/api/characters/:id", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id, { write: true });
+  if (!row) return res.status(404).json({ error: "No such character." });
+
+  const name = String(req.body?.name ?? row.name).trim().slice(0, 60) || row.name;
+  const incoming = req.body?.sheet;
+  if (incoming != null && (typeof incoming !== "object" || Array.isArray(incoming)))
+    return res.status(400).json({ error: "The sheet must be an object." });
+
+  const clean = {};
+  for (const [k, v] of Object.entries(incoming || {})) if (SHEET_KEYS.has(k)) clean[k] = v;
+  const text = JSON.stringify(clean);
+  if (text.length > SHEET_MAX) return res.status(400).json({ error: "That sheet is too large." });
+
+  const { rows } = await db.query(
+    "UPDATE characters SET name = $1, sheet = $2, updated_at = now() WHERE id = $3 RETURNING *",
+    [name, text, row.id]);
+  res.json({ character: charRow(rows[0]) });
+});
+
+app.post("/api/characters/:id/archive", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id, { write: true });
+  if (!row) return res.status(404).json({ error: "No such character." });
+  await db.query("UPDATE characters SET archived = true WHERE id = $1", [row.id]);
+  await logEvent(row.id, req.user.id, "archived", {});
+  res.json({ ok: true });
+});
+
+// ── The DM's routes ────────────────────────────────────────
+// DM-009. A level change is one statement: the new level, and the allocations it owes. Going UP
+// issues one Honor and one Morality point per level gained; a rollback takes back only what is
+// still unspent, because points already spent are in the sub-scores and clawing them out would
+// mean guessing which ones. The audit row records both levels either way.
+app.put("/api/characters/:id/level", requireUser, requireDm, async (req, res) => {
+  const row = await charFor(req.user, req.params.id);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const level = Number(req.body?.level);
+  if (!Number.isInteger(level) || level < 1 || level > 20)
+    return res.status(400).json({ error: "A level is 1 to 20." });
+
+  const gained = level - row.level;
+  if (!gained) return res.json({ character: charRow(row) });
+
+  const honor = gained > 0 ? row.honor_unspent + gained : Math.max(0, row.honor_unspent + gained);
+  const moral = gained > 0 ? row.morality_unspent + gained : Math.max(0, row.morality_unspent + gained);
+
+  const { rows } = await db.query(
+    `UPDATE characters SET level = $1, honor_unspent = $2, morality_unspent = $3, updated_at = now()
+      WHERE id = $4 RETURNING *`, [level, honor, moral, row.id]);
+  await logEvent(row.id, req.user.id, gained > 0 ? "level granted" : "level rolled back",
+    { from: row.level, to: level, allocations: gained }, String(req.body?.note || ""));
+  res.json({ character: charRow(rows[0]) });
+});
+
+// DM-02. Dream moves by a recorded campaign event and in no other way, so this route insists on
+// a note: an increase with no event behind it is exactly what the ruling forbids.
+app.put("/api/characters/:id/dream", requireUser, requireDm, async (req, res) => {
+  const row = await charFor(req.user, req.params.id);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const dream = Number(req.body?.dream);
+  if (!Number.isInteger(dream) || dream < 0 || dream > 30)
+    return res.status(400).json({ error: "A Dream score is 0 to 30." });
+  const note = String(req.body?.note || "").trim();
+  if (dream !== row.dream && !note)
+    return res.status(400).json({ error: "Name the campaign event — Dream moves only by one." });
+
+  const { rows } = await db.query(
+    "UPDATE characters SET dream = $1, updated_at = now() WHERE id = $2 RETURNING *", [dream, row.id]);
+  await logEvent(row.id, req.user.id, "dream changed", { from: row.dream, to: dream }, note);
+  res.json({ character: charRow(rows[0]) });
+});
+
+// DM-05. The only place a Fate charge is ever created.
+app.put("/api/characters/:id/fate", requireUser, requireDm, async (req, res) => {
+  const row = await charFor(req.user, req.params.id);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const fate = Number(req.body?.fate);
+  if (!Number.isInteger(fate) || fate < 0 || fate > 20)
+    return res.status(400).json({ error: "A Fate balance is 0 to 20." });
+  const { rows } = await db.query(
+    "UPDATE characters SET fate = $1, updated_at = now() WHERE id = $2 RETURNING *", [fate, row.id]);
+  await logEvent(row.id, req.user.id, "fate set", { from: row.fate, to: fate }, String(req.body?.note || ""));
+  res.json({ character: charRow(rows[0]) });
+});
+
+// ── The two things a player may do to a locked number ──────
+// DM-04: the player calls Emphasis, with no DM approval step in front of it. The charge is spent
+// here, atomically — the UPDATE's own WHERE is what stops a double submission spending two.
+app.post("/api/characters/:id/fate/spend", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id, { write: true });
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const { rows } = await db.query(
+    "UPDATE characters SET fate = fate - 1 WHERE id = $1 AND fate > 0 RETURNING *", [row.id]);
+  if (!rows[0]) return res.status(400).json({ error: "No Fate charges left — the DM grants them." });
+  await logEvent(row.id, req.user.id, "fate spent", { from: row.fate, to: rows[0].fate },
+    String(req.body?.note || ""));
+  res.json({ fate: rows[0].fate, character: charRow(rows[0]) });
+});
+
+// RES-10: the player chooses within the axis, spending one of the allocations a level issued.
+// Guarded the same way, so two clicks cannot spend one point twice.
+const AXES = {
+  order: ["honor_order", "honor_unspent"], chaos: ["honor_chaos", "honor_unspent"],
+  good: ["morality_good", "morality_unspent"], evil: ["morality_evil", "morality_unspent"],
+};
+app.post("/api/characters/:id/allocate", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id, { write: true });
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const pick = AXES[String(req.body?.into || "")];
+  if (!pick) return res.status(400).json({ error: "Allocate into order, chaos, good or evil." });
+  const [sub, pool] = pick;
+
+  const { rows } = await db.query(
+    `UPDATE characters SET ${sub} = ${sub} + 1, ${pool} = ${pool} - 1, updated_at = now()
+      WHERE id = $1 AND ${pool} > 0 RETURNING *`, [row.id]);
+  if (!rows[0]) return res.status(400).json({ error: "Nothing left to allocate on that axis." });
+  await logEvent(row.id, req.user.id, "allocated", { into: req.body.into });
+  res.json({ character: charRow(rows[0]) });
+});
+
+// DM-007: the history, for the player and the DM both. Secrets never enter it — every detail
+// written above is a number or an axis name, so there is nothing here to filter.
+app.get("/api/characters/:id/events", requireUser, async (req, res) => {
+  const row = await charFor(req.user, req.params.id);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const { rows } = await db.query(
+    `SELECT e.action, e.detail, e.note, e.at, u.display_name AS actor
+       FROM character_events e LEFT JOIN users u ON u.id = e.actor_id
+      WHERE e.character_id = $1 ORDER BY e.id DESC LIMIT 100`, [row.id]);
+  res.json({ events: rows.map(r => ({ ...r, detail: safeJson(r.detail) })) });
+});
+
 app.use("/api/admin", admin);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -1137,6 +1353,7 @@ app.use("/map", express.static(path.join(ROOT, "map")));
 // get Express's bare "Cannot GET /index.html" instead of the hub.
 app.get(["/", "/index.html"], (req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/arcanum.html", (req, res) => res.sendFile(path.join(ROOT, "arcanum.html")));
+app.get("/sheet.html", (req, res) => res.sendFile(path.join(ROOT, "sheet.html")));
 // The Admin page. Served like any other page — it signs you in itself, and turns away anyone who
 // isn't the DM. Every call it makes is behind requireDm, which is where the real boundary is.
 app.get("/admin.html", (req, res) => res.sendFile(path.join(ROOT, "admin.html")));

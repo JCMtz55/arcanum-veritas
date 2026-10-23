@@ -1,0 +1,201 @@
+/* Ephemer — the character sheet.
+   Rides on css/app.css: every colour here is one of its tokens, so the sheet is the same room as
+   the composer and the Companion. Only layout and the sheet's own widgets live in this file. */
+
+.sh{max-width:1180px;margin:0 auto;padding:18px 16px 64px}
+
+/* ── The bar's two extra pieces ─────────────────────────── */
+.sh-where{margin-left:auto;display:flex;align-items:center;gap:10px}
+.sh-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;
+  font-family:var(--sans);font-size:12px;color:var(--bone2);
+  padding:4px 9px;border:1px solid var(--line);border-radius:6px;background:var(--slate)}
+.sh-toggle:hover{border-color:var(--mute)}
+.sh-toggle input{accent-color:var(--brass);margin:0}
+/* When you are in Insomnia the whole bar should say so without being read */
+body.in-dream .sh-toggle{border-color:var(--d-cosmical);color:var(--d-cosmical)}
+.sh-save{font-family:var(--sans);font-size:11px;color:var(--mute);min-width:62px;text-align:right}
+.sh-save[data-state="saving"]{color:var(--brass)}
+.sh-save[data-state="error"]{color:var(--ember)}
+
+/* ── Identity ───────────────────────────────────────────── */
+.sh-id{margin-bottom:18px}
+.sh-name{width:100%;background:none;border:none;border-bottom:1px solid var(--line);
+  color:var(--bone);font-family:var(--serif);font-size:30px;font-weight:600;
+  padding:2px 0 7px;margin-bottom:12px}
+.sh-name:focus{outline:none;border-bottom-color:var(--brass)}
+.sh-name::placeholder{color:var(--mute);font-style:italic}
+.sh-id-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+
+.sh label,.sh-id-grid label{display:flex;flex-direction:column;gap:4px;
+  font-family:var(--sans);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.sh input,.sh textarea,.sh select{background:var(--slate);border:1px solid var(--line);border-radius:5px;
+  color:var(--bone);font-family:var(--sans);font-size:14px;padding:6px 8px;width:100%}
+.sh input:focus,.sh textarea:focus{outline:none;border-color:var(--brass)}
+.sh input:disabled{color:var(--bone2);background:#1A1D23;cursor:not-allowed}
+.sh textarea{font-family:var(--serif);font-size:15px;line-height:1.6;resize:vertical}
+.sh output{display:block;font-family:var(--sans);font-size:18px;font-weight:500;color:var(--brass);padding:5px 0}
+
+.sh-locked{position:relative}
+.sh-lock{position:absolute;right:7px;bottom:7px;font-size:11px;opacity:.55}
+.sh-ro output{color:var(--bone)}
+
+/* ── Panels ─────────────────────────────────────────────── */
+.sh-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;margin-bottom:16px}
+.sh-panel > h2{margin:0 0 4px;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--brass)}
+.sh-note{margin:0 0 14px;font-family:var(--serif);font-size:13px;line-height:1.6;color:var(--bone2)}
+.sh-note b{color:var(--bone);font-weight:600}
+.sh-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){ .sh-cols{grid-template-columns:1fr} }
+
+/* ── The seven scores ───────────────────────────────────── */
+.sh-scores{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+@media (max-width:860px){ .sh-scores{grid-template-columns:repeat(4,1fr)} }
+@media (max-width:520px){ .sh-scores{grid-template-columns:repeat(2,1fr)} }
+.sc{background:var(--slate);border:1px solid var(--line);border-radius:8px;padding:9px 6px;text-align:center}
+.sc h3{margin:0 0 5px;font-family:var(--sans);font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--mute);font-weight:500}
+.sc input{text-align:center;font-size:19px;font-weight:600;padding:3px;border-color:transparent;background:none}
+.sc .sc-mod{margin-top:3px;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--brass)}
+/* Dream is the seventh and reads as the seventh — cosmical, and locked to the DM */
+.sc.dream{border-color:var(--d-cosmical)}
+.sc.dream h3,.sc.dream .sc-mod{color:var(--d-cosmical)}
+
+/* ── Saves, skills, rows of a total and its parts ───────── */
+.sh-saves{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:7px}
+.sh-skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:4px 18px}
+.rw{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:5px;font-family:var(--sans);font-size:13px}
+.rw:hover{background:var(--panel2)}
+.rw .rw-t{flex:none;width:34px;text-align:right;font-weight:600;color:var(--brass);font-variant-numeric:tabular-nums}
+.rw .rw-n{flex:1;color:var(--bone2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rw .rw-a{flex:none;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.rw.is-dream .rw-a{color:var(--d-cosmical)}
+/* Proficiency pip: empty, proficient, expertise */
+.pip{flex:none;width:13px;height:13px;border-radius:50%;border:1px solid var(--line);
+  background:none;cursor:pointer;padding:0}
+.pip[data-t="1"]{background:var(--brass);border-color:var(--brass)}
+.pip[data-t="2"]{background:var(--brass);border-color:var(--brass);box-shadow:inset 0 0 0 2px var(--panel)}
+.rw select{width:auto;font-size:11px;padding:2px 4px}
+
+/* ── Cognitive Saving Throw — it earns its own block ────── */
+.sh-cog{margin-top:14px;padding:12px 14px;background:var(--slate);
+  border:1px solid var(--line);border-left:3px solid var(--d-cosmical);border-radius:7px}
+.sh-cog h3{margin:0 0 3px;font-family:var(--serif);font-size:14px;color:var(--bone)}
+.sh-cog .cog-t{font-family:var(--sans);font-size:24px;font-weight:600;color:var(--d-cosmical);line-height:1.1}
+.sh-cog .cog-p{margin:5px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.6;color:var(--bone2)}
+.sh-cog .cog-x{margin:6px 0 0;font-family:var(--serif);font-size:12px;font-style:italic;color:var(--mute)}
+
+/* ── Combat ─────────────────────────────────────────────── */
+.sh-combat,.sh-hp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.sh-hp{grid-template-columns:repeat(3,1fr)}
+@media (max-width:520px){ .sh-combat,.sh-hp{grid-template-columns:repeat(2,1fr)} }
+.sh-dc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dc{background:var(--slate);border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+.dc b{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:3px}
+.dc .dc-v{font-family:var(--sans);font-size:21px;font-weight:600;color:var(--ember)}
+.dc .dc-p{font-family:var(--sans);font-size:11px;color:var(--bone2);margin-top:2px}
+.dc input{width:68px;display:inline-block;margin-left:6px}
+
+/* ── Wounds, and the ladder widgets ─────────────────────── */
+.sh-wounds{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.track h3{margin:0 0 7px;font-family:var(--sans);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--mute);font-weight:500}
+.pips{display:flex;gap:5px}
+.pips button{width:21px;height:21px;border-radius:5px;border:1px solid var(--line);
+  background:var(--slate);cursor:pointer;padding:0;
+  font-family:var(--sans);font-size:10px;color:var(--mute)}
+.pips button[aria-pressed="true"]{background:var(--ember);border-color:var(--ember);color:var(--bone)}
+.pips.dream button[aria-pressed="true"]{background:var(--d-cosmical);border-color:var(--d-cosmical);color:var(--slate)}
+.track-say{margin-top:7px;font-family:var(--serif);font-size:12.5px;line-height:1.55;color:var(--bone2);max-width:52ch}
+.track-say b{color:var(--bone)}
+.warn{color:var(--ember);font-weight:600}
+
+/* ── Exhaustion, two tracks side by side ────────────────── */
+.sh-exh{display:grid;grid-template-columns:1fr 1.4fr;gap:22px}
+@media (max-width:860px){ .sh-exh{grid-template-columns:1fr} }
+.exh-now{margin-top:8px;padding:9px 11px;background:var(--slate);border:1px solid var(--line);border-radius:6px}
+.exh-now .en-n{font-family:var(--serif);font-size:14px;color:var(--d-cosmical);font-weight:600}
+.exh-now .en-p{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--ember);float:right}
+.exh-now .en-e{margin:4px 0 0;font-family:var(--serif);font-size:12.5px;line-height:1.55;color:var(--bone2)}
+.exh-now .en-c{margin:5px 0 0;font-family:var(--serif);font-size:11.5px;font-style:italic;color:var(--mute)}
+
+/* ── Honor and Morality ─────────────────────────────────── */
+.sh-axes{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:860px){ .sh-axes{grid-template-columns:1fr} }
+.axis{background:var(--slate);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.axis h3{margin:0 0 9px;font-family:var(--serif);font-size:15px;color:var(--bone)}
+.axis h3 span{float:right;font-family:var(--sans);font-size:13px;color:var(--brass)}
+.axis-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:9px}
+.axis-sub{text-align:center}
+.axis-sub b{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:4px}
+.axis-sub .as-v{font-family:var(--sans);font-size:20px;font-weight:600;color:var(--bone)}
+.axis-sub button{margin-top:5px;width:100%;border:1px solid var(--line);background:var(--panel);
+  border-radius:5px;color:var(--bone2);font-family:var(--sans);font-size:11px;padding:3px;cursor:pointer}
+.axis-sub button:hover:not(:disabled){border-color:var(--brass);color:var(--brass)}
+.axis-sub button:disabled{opacity:.35;cursor:not-allowed}
+.axis-say{font-family:var(--serif);font-size:12.5px;line-height:1.6;color:var(--bone2)}
+.axis-say b{color:var(--bone)}
+.unspent{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;
+  background:var(--brass);color:var(--slate);font-family:var(--sans);font-size:10px;font-weight:600}
+
+/* ── Fate ───────────────────────────────────────────────── */
+.sh-fate{display:flex;flex-direction:column;gap:11px}
+.fate-bal{display:flex;align-items:center;gap:10px}
+.fate-bal .fb-v{font-family:var(--sans);font-size:30px;font-weight:600;color:var(--brass);line-height:1}
+.fate-bal .fb-l{font-family:var(--serif);font-size:13px;color:var(--bone2)}
+.fate-roll{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.fate-roll button{border:1px solid var(--brass);background:none;color:var(--brass);border-radius:6px;
+  font-family:var(--sans);font-size:12px;padding:6px 13px;cursor:pointer}
+.fate-roll button:hover:not(:disabled){background:var(--brass);color:var(--slate)}
+.fate-roll button:disabled{opacity:.35;cursor:not-allowed;border-color:var(--line);color:var(--mute)}
+.die{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border:1px solid var(--line);border-radius:7px;background:var(--slate);
+  font-family:var(--sans);font-size:15px;font-weight:600;color:var(--bone2)}
+.die.kept{border-color:var(--brass);color:var(--brass);background:#2A2419}
+.fate-say{font-family:var(--serif);font-size:12.5px;line-height:1.6;color:var(--bone2)}
+
+/* ── Attunement ─────────────────────────────────────────── */
+.sh-attune{display:flex;flex-direction:column;gap:12px}
+.att-row b{font-family:var(--sans);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--mute);font-weight:500}
+.slots{display:flex;gap:6px;margin-top:5px}
+.slot{width:26px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--slate)}
+.slot.full{background:var(--brass);border-color:var(--brass)}
+.slot.planar{border-color:var(--d-cosmical)}
+.slot.planar.full{background:var(--d-cosmical)}
+.slot.dim{opacity:.32}
+.att-say{margin-top:5px;font-family:var(--serif);font-size:12px;line-height:1.55;color:var(--bone2)}
+.att-say.off{color:var(--mute);font-style:italic}
+
+/* ── Cognitive Sense ────────────────────────────────────── */
+.sh-sense{display:grid;grid-template-columns:1fr 1.5fr;gap:18px}
+@media (max-width:860px){ .sh-sense{grid-template-columns:1fr} }
+.sense-uses{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.use{width:17px;height:17px;border-radius:50%;border:1px solid var(--d-cosmical);background:none}
+.use.spent{background:var(--d-cosmical);opacity:.3}
+.sense-modes{display:flex;gap:8px;flex-wrap:wrap}
+.sense-modes button{border:1px solid var(--line);background:var(--slate);color:var(--bone2);
+  border-radius:6px;font-family:var(--sans);font-size:12px;padding:6px 12px;cursor:pointer}
+.sense-modes button:hover:not(:disabled){border-color:var(--d-cosmical);color:var(--d-cosmical)}
+.sense-modes button:disabled{opacity:.35;cursor:not-allowed}
+.sense-out{font-family:var(--serif);font-size:13px;line-height:1.6;color:var(--bone2);min-height:3em}
+.sense-out b{color:var(--bone)}
+.band-table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:11.5px;margin-top:8px}
+.band-table td{padding:3px 7px;border-top:1px solid var(--line);color:var(--bone2);vertical-align:top}
+.band-table td:first-child{color:var(--brass);white-space:nowrap;width:1%}
+.band-table tr.hit td{background:var(--panel2);color:var(--bone)}
+
+/* ── Odds and ends ──────────────────────────────────────── */
+.sh-foot{margin:22px 0 0;font-family:var(--serif);font-size:12px;font-style:italic;
+  color:var(--mute);text-align:center;line-height:1.7}
+.sh-empty{max-width:420px;margin:90px auto;text-align:center}
+.sh-empty h1{font-family:var(--serif);font-size:26px;color:var(--bone);margin:0 0 6px}
+.sh-empty p{font-family:var(--serif);color:var(--bone2);margin:0 0 18px}
+
+@media print{
+  .bar,.sh-where,.live,.pips button{display:none}
+  .sh-panel{break-inside:avoid;border-color:#999}
+  body{background:#fff}
+}

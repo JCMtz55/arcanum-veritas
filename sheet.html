@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Character Sheet — Ephemer</title>
+<meta name="description" content="Once Upon a Star ★ — the character sheet: seven abilities, the Dream skills, Wounds and Injuries, both Exhaustion tracks, Honor and Morality, and the Fate Die.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/sheet.css">
+<!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
+<script src="js/tools.js"></script>
+</head>
+<body>
+
+<div class="bar">
+  <nav class="tools" data-tool="sheet" aria-label="Ephemer tools"></nav>
+  <div class="brand">Character Sheet<em id="brandWho">once upon a star ★</em></div>
+
+  <!-- Where you are standing decides a great deal: the in-dream d20 penalty, whether the three
+       Insomnia attunement slots are live, and whether Cognitive Sense may be used at all. -->
+  <div class="sh-where">
+    <label class="sh-toggle" title="Dream Exhaustion's d20 penalty applies in dream only, and the Insomnia attunement slots are live only here">
+      <input type="checkbox" id="inDream"> <span>In Insomnia</span>
+    </label>
+  </div>
+
+  <div class="live">
+    <select class="mini" id="charPick" aria-label="Which character" hidden></select>
+    <button class="mini" id="newChar" title="Start another character">+ New</button>
+    <span class="sh-save" id="saveState" aria-live="polite"></span>
+  </div>
+</div>
+
+<main class="sh" id="sheet" hidden>
+
+  <!-- ── Identity ─────────────────────────────────────────── -->
+  <section class="sh-id">
+    <input class="sh-name" id="fName" placeholder="Name" aria-label="Character name" maxlength="60">
+    <div class="sh-id-grid">
+      <label>Ancestry <input id="fAncestry" maxlength="40"></label>
+      <label>Class <input id="fClass" maxlength="60"></label>
+      <label>Background <input id="fBackground" maxlength="40"></label>
+      <label class="sh-locked" title="DM-009 — only the DM may change a level">
+        Level <input id="fLevel" type="number" min="1" max="20" disabled>
+        <span class="sh-lock" aria-label="Set by the DM">🔒</span>
+      </label>
+      <label class="sh-ro">Proficiency <output id="oProf">+2</output></label>
+    </div>
+  </section>
+
+  <!-- ── The seven ────────────────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Abilities</h2>
+    <p class="sh-note">Dream is the seventh score. It starts at <b>10</b> and only a campaign event raises it, so it is the DM's to set — never point buy, never an ASI.</p>
+    <div class="sh-scores" id="scores"></div>
+  </section>
+
+  <div class="sh-cols">
+    <!-- ── Saves ──────────────────────────────────────────── -->
+    <section class="sh-panel">
+      <h2>Saving Throws</h2>
+      <div class="sh-saves" id="saves"></div>
+
+      <div class="sh-cog" id="cogst"></div>
+    </section>
+
+    <!-- ── Combat ─────────────────────────────────────────── -->
+    <section class="sh-panel">
+      <h2>Combat</h2>
+      <div class="sh-combat">
+        <label>AC <input id="fAc" type="number" min="0" max="40"></label>
+        <label>Speed <input id="fSpeed" type="number" min="0" max="200" step="5"></label>
+        <label class="sh-ro">Initiative <output id="oInit">+0</output></label>
+        <label>Hit Dice <input id="fHitDice" maxlength="20" placeholder="5d10"></label>
+      </div>
+      <div class="sh-hp">
+        <label>Current HP <input id="fHp" type="number" min="-99" max="999"></label>
+        <label>Max HP <input id="fHpMax" type="number" min="0" max="999"></label>
+        <label>Temp HP <input id="fHpTemp" type="number" min="0" max="999"></label>
+      </div>
+      <div class="sh-dc" id="combatDc"></div>
+    </section>
+  </div>
+
+  <!-- ── Wounds and Injuries ──────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Wounds &amp; Injuries</h2>
+    <p class="sh-note">Each active Wound and each unhealed Injury adds <b>+1</b> to both your death-save DC and your concentration DC. At the sixth Wound the DM determines an Injury, and Wounds reset to the number of active Injuries, capped at five.</p>
+    <div class="sh-wounds" id="wounds"></div>
+  </section>
+
+  <!-- ── The two exhaustion tracks ────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Exhaustion</h2>
+    <p class="sh-note">Two separate tracks. Standard Exhaustion is 2014's; <b>Dream Exhaustion runs 0–8, is cumulative, and its d20 penalty applies in dream only</b>.</p>
+    <div class="sh-exh" id="exhaustion"></div>
+  </section>
+
+  <!-- ── Honor and Morality ───────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Honor &amp; Morality</h2>
+    <p class="sh-note">Four independent sub-scores. The total is the <em>sum</em>; a situational check uses the <em>difference</em>, positive when the dominant side matches the situation and negative when it does not. Every DM-granted level issues one Honor and one Morality point to spend.</p>
+    <div class="sh-axes" id="axes"></div>
+  </section>
+
+  <div class="sh-cols">
+    <!-- ── Fate ───────────────────────────────────────────── -->
+    <section class="sh-panel">
+      <h2>Fate Die — Rolling With Emphasis</h2>
+      <p class="sh-note">Charges are granted by the DM alone and nothing recharges them. Roll two d20 and keep the face <b>farthest from 10</b>; equidistant faces reroll both.</p>
+      <div class="sh-fate" id="fate"></div>
+    </section>
+
+    <!-- ── Attunement ─────────────────────────────────────── -->
+    <section class="sh-panel">
+      <h2>Attunement</h2>
+      <p class="sh-note">Three baseline slots, and three more in Insomnia for Dreamlike and Lucidlike items. Leaving Insomnia suspends what those three grant — <b>it never unattunes them</b>.</p>
+      <div class="sh-attune" id="attune"></div>
+    </section>
+  </div>
+
+  <!-- ── Skills ───────────────────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Skills</h2>
+    <div class="sh-skills" id="skills"></div>
+  </section>
+
+  <!-- ── Cognitive Sense ──────────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Cognitive Sense</h2>
+    <p class="sh-note">A Dream Ability, usable in <b>Insomnia</b> only, after a minute of focus. One use per short rest, two at Dream 18 or higher — and <b>Pulse and Whisper spend from the same pool</b>.</p>
+    <div class="sh-sense" id="sense"></div>
+  </section>
+
+  <!-- ── Notes ────────────────────────────────────────────── -->
+  <section class="sh-panel">
+    <h2>Notes</h2>
+    <textarea id="fNotes" rows="6" placeholder="Traits, bonds, flaws, what you are carrying, what you owe."></textarea>
+  </section>
+
+  <p class="sh-foot" id="foot"></p>
+</main>
+
+<div class="sh-empty" id="empty" hidden>
+  <h1>No character yet</h1>
+  <p>Start one and it saves as you type.</p>
+  <button class="gate-go" id="emptyNew">Create a character</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="js/sheet.js"></script>
+</body>
+</html>

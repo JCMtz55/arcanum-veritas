@@ -25,6 +25,8 @@ const TOOL_BASE = (document.currentScript?.getAttribute("src") || "js/tools.js")
 const TOOLS = [
   { key: "hub", href: "", mark: "★", label: "Home",
     title: "Ephemer — the front page" },
+  { key: "sheet", href: "sheet.html", mark: "✧", label: "Sheet",
+    title: "Character Sheet — the seven abilities, the Dream skills, Wounds, both Exhaustion tracks, Honor and Morality" },
   { key: "arcanum", href: "arcanum.html", mark: "✦", label: "Arcanum",
     title: "Arcanum Veritas, Ignition and the Paragon path — compose seals, forge Eidons, read the Codex" },
   { key: "grimms", href: "grimms/", mark: "⛓", label: "Grimms",

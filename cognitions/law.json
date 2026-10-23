@@ -37,7 +37,7 @@
               },
               "conditions": [
                 {
-                  "name": "Bound",
+                  "name": "Bound — Term",
                   "duration": "until the end of its next turn"
                 }
               ]
