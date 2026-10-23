@@ -41,9 +41,9 @@ async function boot() {
     document.getElementById("hubHello").textContent = `Where to, ${ME.displayName}?`;
     document.getElementById("hubLearn").hidden = dm;
     document.getElementById("hubAdmin").hidden = !dm;
-    // The World Map is DM-only for now (Juan, 2026-10-21) — the card is hidden and the server
-    // turns players away as well, so this is a convenience rather than the boundary.
-    document.getElementById("hubMap").hidden = !dm;
+    // The World Map opened to the table on 2026-10-23 (Juan). Everyone signed in gets the card;
+    // which places are on the map behind it is the server's business, not this line's.
+    document.getElementById("hubMap").hidden = false;
     if (dm) reminders();
   }
   document.getElementById("hub").hidden = false;

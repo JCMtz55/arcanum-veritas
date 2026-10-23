@@ -952,9 +952,9 @@ async function writeRow(cur) {
 app.get("/map/locations.json", async (req, res) => {
   const user = await currentUser(req);
   if (!user) return res.status(401).json({ error: "Sign in first." });
-  // DM-only while the map is being built. The secret/revealed filtering below is left intact and
-  // working, so the day this check comes out, players get exactly what they should and no more.
-  if (user.role !== "dm") return res.status(403).json({ error: "The map is not open yet." });
+  // Open to the table since 2026-10-23 (Juan). What a player gets is decided entirely by
+  // mapLocationsFor: a secret place is withheld outright until the DM reveals it, and every
+  // route that writes is behind requireDm, so this is a reading room for everyone but the DM.
   res.set("Cache-Control", "no-store").json({ locations: await mapLocationsFor(user) });
 });
 
@@ -1123,14 +1123,13 @@ app.get("/grimms/js/data.js", async (req, res) => {
 
 app.use("/grimms", express.static(path.join(ROOT, "grimms")));
 
-// The World Map is DM-ONLY for now (Juan, 2026-10-21) — the pins are still being set and half the
-// gazetteer is open questions, so the table does not see it yet. Opening it to players later is
-// this line plus the matching one in the locations route, and the per-place `secret` machinery is
-// already there waiting underneath. /map/locations.json is registered further up and has already
-// answered by the time this runs, which is what keeps its refusal a JSON one.
+// The World Map was DM-only while the pins were being set; it opened to the table on 2026-10-23
+// (Juan). It still wants a session — the map is campaign material, not a public page — but the
+// role check is gone, and what each account may READ is settled in mapLocationsFor rather than
+// here. /map/locations.json is registered further up and has already answered by the time this
+// runs, which is what keeps its refusal a JSON one.
 app.use("/map", async (req, res, next) => {
-  const user = await currentUser(req);
-  return user && user.role === "dm" ? next() : res.redirect("/");
+  return (await currentUser(req)) ? next() : res.redirect("/");
 });
 app.use("/map", express.static(path.join(ROOT, "map")));
 
