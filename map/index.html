@@ -18,12 +18,15 @@
 <link rel="stylesheet" href="vendor/leaflet.css?v=1.9.4">
 <script src="vendor/leaflet.js?v=1.9.4"></script>
 <link rel="stylesheet" href="css/map.css?v=2026-10-21p">
+<!-- The tool strip, shared with the rest of Ephemer. In <head> so its styling lands before the
+     bar is first painted; ../js/ because it lives at the app root, not in this section. -->
+<script src="../js/tools.js?v=2026-10-23a"></script>
 </head>
 <body>
 
 <div class="bar">
+  <nav class="tools" data-tool="map" aria-label="Ephemer tools"></nav>
   <div class="brand">
-    <a href="../" title="Ephemer — back to the front page" aria-label="Ephemer home">★</a>
     <a href="./">World Map</a><em>once upon a star</em>
   </div>
   <div class="bar-tools">

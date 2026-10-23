@@ -10,11 +10,13 @@
 <!-- Cognition icons. If this can't load, the emoji in index.json are used instead. -->
 <link id="faCss" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="css/app.css">
+<!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
+<script src="js/tools.js"></script>
 </head>
 <body>
 
 <div class="bar">
-  <a class="home" href="./" title="Ephemer — back to the front page" aria-label="Ephemer home">★</a>
+  <nav class="tools" data-tool="arcanum" aria-label="Ephemer tools"></nav>
   <div class="brand">Arcanum Veritas<em>seal composer</em></div>
   <button class="mode" id="modeBtn" onclick="toggleMode()" title="Arcanum Veritas, Ignition and the Paragon path cycle in turn">⇄ Ignition</button>
   <div class="tabs">
