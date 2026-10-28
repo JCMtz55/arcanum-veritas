@@ -15,13 +15,21 @@ const $ = id => document.getElementById(id);
 
 // Eight accents, every one of them already a token in the app's palette, so a character can look
 // like themselves without any of them looking out of place beside the rest of Ephemer.
-// Placeholders until Juan supplies the real plates. Dropping a file into sheet/img/portraits/ and
-// adding its name here is the whole of it — deliberately a list rather than a directory listing,
-// because the server does not serve one and a 404 per guess is not a feature.
+// The party's own plates. `file` is the asset under sheet/img/portraits/, `name` is what the
+// picker says out loud — a filename is an asset id, not a label anyone should have to read.
+// Dropping a file into that folder and adding a line here is the whole of it — deliberately a
+// list rather than a directory listing, because the server does not serve one and a 404 per
+// guess is not a feature. The old placeholders stay on disk so a sheet that picked one still
+// resolves; they are simply no longer offered.
 export const PORTRAITS = [
-  "khaled.png", "zariel.png", "solomon.png",
-  "placeholder-1.png", "placeholder-2.jpeg", "placeholder-3.png", "placeholder-4.png",
-  "placeholder-5.png", "placeholder-6.png", "placeholder-7.png", "placeholder-8.png",
+  { file: "grissly.jpg", name: "Grizzly" },
+  { file: "khaled.jpg", name: "Khaled Guile" },
+  { file: "rory.jpg", name: "Rory Mercury" },
+  { file: "richard.jpg", name: "Richard Aquitaine" },
+  { file: "levnali.jpg", name: "Lev'nali" },
+  { file: "sal-and-sol.jpg", name: "Salomon & Solomon" },
+  { file: "zeke.jpg", name: "Zeke Greyhawk" },
+  { file: "zariel.jpg", name: "Zariel Necroshade" },
 ];
 export const portraitUrl = f => `img/portraits/${f}`;
 
@@ -1125,8 +1133,8 @@ function characterPanel(ch) {
           </div>
         </div>
       </div>
-      <p class="hint">The colour follows you through the sheet. Portraits are placeholders for now —
-        your DM can drop the real ones into <code>sheet/img/portraits/</code>.</p>
+      <p class="hint">The colour follows you through the sheet. The portraits are the party's own
+        plates — pick the one that is yours.</p>
     </section>
 
     ${lastingCard(ch)}

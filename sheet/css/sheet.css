@@ -436,8 +436,11 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .attn-grp.dream .attn-h b{color:var(--dream-soft)}
 
 /* ── portraits and the accent chooser ────────────────────────────────── */
+/* The plates are 2:3 and every face sits in the top third, so a square box anchored to the
+   centre would crop the head off. Anchored to the top it shows head and shoulders, which is
+   what a portrait is for. */
 .por{display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:8px;
-  background:var(--panel2) center/cover no-repeat;border:1px solid var(--line);
+  background:var(--panel2) center top/cover no-repeat;border:1px solid var(--line);
   font-family:var(--sans);font-size:11px;color:var(--mute);overflow:hidden}
 .por.sm{width:26px;height:26px;border-radius:7px}
 .por.lg{width:92px;height:92px;border-radius:11px;font-size:26px}
@@ -452,7 +455,7 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .sw.none{background:var(--panel2);color:var(--mute);font-size:11px;line-height:1}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
 .pgrid-b{aspect-ratio:1;border-radius:10px;border:1px solid var(--line);
-  background:var(--panel2) center/cover no-repeat;padding:0}
+  background:var(--panel2) center top/cover no-repeat;padding:0}
 .pgrid-b:hover{border-color:var(--mute)}
 .pgrid-b.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 

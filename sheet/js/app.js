@@ -731,12 +731,13 @@ const ACTS = {
 
   // ── portrait and accent ──
   portrait: () => {
-    dialog("Portrait", `<div class="pgrid">${PORTRAITS.map(f => `
-        <button class="pgrid-b ${ch().portrait === portraitUrl(f) ? "on" : ""}"
-          data-act="portrait-pick" data-id="${esc(f)}" title="${esc(f)}"
-          style="background-image:url('${esc(portraitUrl(f))}')" aria-label="${esc(f)}"></button>`).join("")}</div>
-      <p class="hint">Placeholders for now. Drop your own into <code>sheet/img/portraits/</code> and add
-        the filename to <code>PORTRAITS</code> in <code>sheet/js/view.js</code>.</p>`, { wide: true });
+    dialog("Portrait", `<div class="pgrid">${PORTRAITS.map(p => `
+        <button class="pgrid-b ${ch().portrait === portraitUrl(p.file) ? "on" : ""}"
+          data-act="portrait-pick" data-id="${esc(p.file)}" title="${esc(p.name)}"
+          style="background-image:url('${esc(portraitUrl(p.file))}')" aria-label="${esc(p.name)}"></button>`).join("")}</div>
+      <p class="hint">The party's plates. A new one is a file dropped into
+        <code>sheet/img/portraits/</code> plus a line in <code>PORTRAITS</code>
+        in <code>sheet/js/view.js</code>.</p>`, { wide: true });
   },
   "portrait-pick": el => { closeDialog(); mutate(s => { s.portrait = portraitUrl(el.dataset.id); }); },
   "portrait-clear": () => mutate(s => { s.portrait = ""; }),
