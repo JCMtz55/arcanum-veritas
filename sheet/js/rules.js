@@ -488,6 +488,28 @@ export function cognitionLearnDC(tier, threshold) {
   return step == null ? null : 5 * t + step;
 }
 export const cognitionNeedsEpiphany = tier => (COGNITION_TIERS[tier] || num(tier)) >= 3;
+
+// The whole table at once, which is what a player actually wants in front of them: the DC for each
+// depth at each Tier, and which Tiers cannot be finished by rolling at all. The sheet prints this
+// rather than one number because a Cognition you have NOT been granted does not tell the browser
+// its Tier — deliberately, on the server — so the row you need is the one you read off.
+export function cognitionLadder() {
+  return Object.keys(COGNITION_TIERS).map(tier => ({
+    tier,
+    needsEpiphany: cognitionNeedsEpiphany(tier),
+    steps: ["quarter", "half", "threshold", "full"]
+      .map(threshold => ({ threshold, dc: cognitionLearnDC(tier, threshold) })),
+  }));
+}
+// What the tracker's four marks mean, in the words the builder's Learning tab already uses — one
+// vocabulary across both tools, because they are the same record seen from two places.
+export const COGNITION_DEPTH_NOTE = [
+  "not begun",
+  "Learn ¼ — rituals only",
+  "Learn ½ — as a secondary Cognition",
+  "past ½",
+  "Learn Full",
+];
 export const cognitionUnderstandingBonus = ch => abilityModifier(ch, "dream");
 
 // ── Attunement ──────────────────────────────────────────────────────────

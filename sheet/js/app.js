@@ -10,6 +10,7 @@ import { state, derived, mutate } from "./store.js";
 import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, ACTION_COST,
   toggleHtml } from "./view.js";
 import * as compendium from "./compendium.js";
+import * as ephemer from "./ephemer.js";
 import { esc, sign, toast, popAt, closePop, popKey, popContains, dialog, closeDialog,
   rollCheck, rollDice, rollHtml, parseDice } from "./pop.js";
 import { icon } from "./icons.js";
@@ -84,14 +85,32 @@ document.addEventListener("submit", e => {
     const name = document.getElementById("newName").value.trim();
     if (name) store.create(name).catch(err => toast(err.message));
   }
+  if (el.dataset.act === "learn-add") {
+    const input = document.getElementById("lrnName");
+    const name = input.value.trim();
+    if (!name) return;
+    if ((state.learning || []).some(l => l.name.toLowerCase() === name.toLowerCase()))
+      return toast(`${name} is already on your tracker.`);
+    input.value = "";
+    // One mark, because tracking something you have not begun is what the row itself says.
+    ephemer.setDepth(name, 1).catch(err => toast(err.message));
+  }
 });
 
 // Number keys switch the centre tab, the way the Grimm Companion's do.
 document.addEventListener("keydown", e => {
   if (e.target.matches("input, textarea, select")) return;
   const tabs = ["combat", "spells", "dream", "gear", "character"];
-  if (e.key >= "1" && e.key <= "5") { state.view = tabs[+e.key - 1]; renderAll(); }
+  if (e.key >= "1" && e.key <= "5") showTab(tabs[+e.key - 1]);
 });
+
+// Switching tabs, in one place, because the Dream tab has to fetch what the account knows the first
+// time it is opened — and a player who never opens it never pays for those three requests.
+function showTab(id) {
+  state.view = id;
+  if (id === "dream") ephemer.ensure().catch(() => {});
+  renderAll();
+}
 
 // ── small helpers ───────────────────────────────────────────────────────
 function setField(id, value) {
@@ -142,7 +161,17 @@ const breakdownFor = (parts) => parts.filter(p => p && p.amount);
 // ── the actions ─────────────────────────────────────────────────────────
 const ACTS = {
   "dlg-close": () => closeDialog(),
-  tab: el => { state.view = el.dataset.id; renderAll(); },
+  tab: el => { showTab(el.dataset.id); },
+
+  // ── Ephemer's own systems ──
+  // The tracker writes straight through to the account, because it is the DM's reminder as much as
+  // the player's note — a depth that only existed in this browser would be neither.
+  "learn-depth": el => ephemer.setDepth(el.dataset.id, Number(el.dataset.i))
+    .catch(err => toast(err.message)),
+  "learn-drop": el => ephemer.dropLearning(el.dataset.id).catch(err => toast(err.message)),
+  "roll-learn": () => showRoll("Understanding a Cognition",
+    rules.cognitionUnderstandingBonus(ch()),
+    [{ reason: "Dream modifier", amount: rules.abilityModifier(ch(), "dream") }]),
   plane: () => { state.inInsomnia = !state.inInsomnia; renderAll(); },
 
   // ── switching, making and saving ──

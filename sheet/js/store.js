@@ -18,6 +18,12 @@ export const state = {
   view: "combat",      // which centre tab
   inInsomnia: false,   // where the character is standing, which the attunement rules care about
   classPlan: null,     // what the classes imply, derived; null until the catalogue has answered
+  // Ephemer's own systems, which live on the ACCOUNT rather than on the character — the DM grants
+  // them to a player, not to a sheet. Null until the Dream tab has asked for them once.
+  cognitions: null,    // the Cognitions this account has been granted
+  learning: null,      // their own tracker: [{ name, depth }]
+  learnNames: null,    // the names of the ones they do not have yet, for the picker
+  ephemerError: "",
 };
 
 const listeners = new Set();

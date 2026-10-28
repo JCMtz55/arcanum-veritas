@@ -6,6 +6,7 @@
 // markup would not be in scope. Event delegation was the better answer anyway.
 
 import * as rules from "./rules.js";
+import * as ephemer from "./ephemer.js";
 import { state, derived, openUnlocks, pendingLevel } from "./store.js";
 import { esc, sign } from "./pop.js";
 import { icon } from "./icons.js";
@@ -531,6 +532,9 @@ function dreamPanel(ch) {
         Proficiency is not added — a Cognitive Saving Throw is not a check.</p>
     </section>
 
+    ${cognitionsCard(ch)}
+    ${learningCard(ch)}
+
     <section class="card">
       <h3>Dream Exhaustion · ${de.level}/8 — ${esc(de.name)}</h3>
       ${de.level ? `<p class="de-now"><b>${de.penalty}</b> to every d20 roll you make <b>in a dream</b>.
@@ -543,6 +547,103 @@ function dreamPanel(ch) {
       <p class="hint">Effects are cumulative, and the −5 holds at 6, 7 and 8.
         A long rest <b>without Dream Walking</b> removes one level; one that included it removes none.
         ${de.collapseSave ? `<b class="hot">At 8 a Cognitive Collapse Dream Save is due — your DM calls it.</b>` : ""}</p>
+    </section>`;
+}
+
+// ── Ephemer's own systems, joined to the sheet ──────────────────────────
+// These belong to the ACCOUNT rather than to the character — the DM grants a Cognition to a player
+// — so they are read from the same routes the Arcanum Veritas builder reads, and the sheet is a
+// second window onto one record rather than a second copy of it. Until now a player kept two tabs
+// open to run one character: the Cognitive Saving Throw on this screen and the Cognitions it is
+// rolled for on another.
+function cognitionsCard() {
+  const mine = state.cognitions;
+  if (mine === null) return `<section class="card">
+      <h3>${icon("cognition")} Cognitions</h3>
+      <p class="hint">Reading what your DM has opened…</p></section>`;
+
+  const byCat = new Map();
+  for (const c of mine) {
+    const k = ephemer.categoryOf(c) || "other";
+    if (!byCat.has(k)) byCat.set(k, []);
+    byCat.get(k).push(c);
+  }
+  const groups = [...byCat.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([cat, list]) => `<div class="cogs-g">
+      <div class="zone-h sm"><h4>${esc(cat === "other" ? "Uncategorised" : cat)}</h4></div>
+      <div class="cogs">${list.sort((a, b) => a.name.localeCompare(b.name)).map(c => `
+        <a class="cog ${esc(ephemer.categoryOf(c))}" href="../arcanum.html"
+          title="${esc(`${c.name} — Tier ${c.tier || "?"}${c.opposing ? `, opposed by ${c.opposing}` : ""}${
+            c.ready ? "" : " · your DM has not opened this one for reading yet"}`)}">
+          ${icon(c.fa || "cognition")}<b>${esc(c.name)}</b><em>${esc(c.tier || "")}</em>
+          ${c.ready ? "" : `<span class="tag">held</span>`}</a>`).join("")}</div>
+    </div>`).join("");
+
+  return `<section class="card">
+      <h3>${icon("cognition")} Cognitions <span class="r">
+        <span class="tag">${mine.length}</span></span></h3>
+      ${state.ephemerError ? `<p class="hint hot">${esc(state.ephemerError)}</p>` : ""}
+      ${mine.length ? groups + `<p class="hint">Your DM grants these to <b>you</b>, not to one
+          character — they follow your account. Open one in the
+          <a href="../arcanum.html">builder</a> to read it and to compose with it.
+          A <b>held</b> one is yours and not yet readable.</p>`
+        : `<p class="hint">None yet. Your DM opens a Cognition once you have mastered it — the
+          tracker below is what tells them you are close.</p>`}
+    </section>`;
+}
+
+function learningCard(ch) {
+  const rows = state.learning;
+  if (rows === null) return "";
+  const going = rows.filter(l => l.depth < 4);
+  const done = rows.filter(l => l.depth === 4);
+
+  const row = l => `<div class="lrn">
+    <b>${esc(l.name)}</b>
+    <span class="lpips">${[1, 2, 3, 4].map(i =>
+      `<button class="pip ${i <= l.depth ? "used" : ""}" data-act="learn-depth"
+        data-id="${esc(l.name)}" data-i="${i === l.depth ? i - 1 : i}"
+        title="${esc(rules.COGNITION_DEPTH_NOTE[i])}"
+        aria-label="${esc(l.name)} ${i} of 4"></button>`).join("")}</span>
+    <em>${l.depth}/4 · ${esc(l.depth === 4
+      ? "mastered — waiting for your DM to open it"
+      : rules.COGNITION_DEPTH_NOTE[l.depth])}</em>
+    <button class="x" data-act="learn-drop" data-id="${esc(l.name)}"
+      aria-label="Stop tracking ${esc(l.name)}">×</button>
+  </div>`;
+
+  const ladder = rules.cognitionLadder();
+  return `<section class="card">
+      <h3>${icon("dream")} Learning <span class="r">
+        <button class="btn sm pri" data-act="roll-learn"
+          title="1d20 + your Dream modifier">Roll · ${sign(rules.cognitionUnderstandingBonus(ch))}</button>
+        </span></h3>
+      ${going.length ? `<div class="lrns">${going.map(row).join("")}</div>`
+        : `<p class="hint">Nothing in progress.</p>`}
+      <form class="adder" data-act="learn-add">
+        <input class="txt" id="lrnName" list="lrnNames" maxlength="40" autocomplete="off"
+          placeholder="A Cognition you have begun to learn" aria-label="Cognition name" required>
+        <datalist id="lrnNames">${(state.learnNames || [])
+          .filter(n => !rows.some(l => l.name.toLowerCase() === n.toLowerCase()))
+          .map(n => `<option value="${esc(n)}"></option>`).join("")}</datalist>
+        <button class="btn sm" type="submit">Track</button>
+      </form>
+
+      ${done.length ? `<div class="zone-h sm"><h4>Mastered — waiting for your DM</h4></div>
+        <div class="lrns">${done.map(row).join("")}</div>` : ""}
+
+      <div class="zone-h sm"><h4>What it takes</h4></div>
+      <div class="dcs">${ladder.map(t => `
+        <div class="dcrow ${t.needsEpiphany ? "epi" : ""}">
+          <i>Tier ${esc(t.tier)}</i>
+          ${t.steps.map(s => `<span title="${esc(s.threshold)}"><em>${esc(s.threshold === "threshold" ? "past ½" : s.threshold)}</em><b>${s.dc}</b></span>`).join("")}
+        </div>`).join("")}</div>
+      <p class="hint">1d20 + your Dream modifier against the DC for the Tier you are after.
+        ⚠️ <b>Tier III and above cannot be finished by rolling</b> — the last step is an Epiphany
+        your DM declares. The Tier of a Cognition you have not been granted is not sent to your
+        browser, so read the row your DM names.
+        Reaching 4/4 tells them you are ready; <b>opening it is still theirs</b>.</p>
     </section>`;
 }
 

@@ -857,6 +857,37 @@ test("a rest brings back only the resources whose rule is written down", () => {
   assert.equal(long.next.hp, 40);
 });
 
+// ── Cognitions ──────────────────────────────────────────────────────────
+// The learn DCs had been in this engine since the first pass with nothing in front of them. The
+// sheet prints the whole table because the Tier of a Cognition the player has NOT been granted is
+// deliberately withheld by the server — so the row they need is the one they read off.
+
+test("the learn DC ladder is 5 x Tier, +5 for a half, +10 for full", () => {
+  assert.equal(R.cognitionLearnDC("I", "quarter"), 5);
+  assert.equal(R.cognitionLearnDC("I", "full"), 15);
+  assert.equal(R.cognitionLearnDC("II", "half"), 15);
+  assert.equal(R.cognitionLearnDC(3, "full"), 25);
+  assert.equal(R.cognitionLearnDC("V", "quarter"), 25);
+  assert.equal(R.cognitionLearnDC("nonsense", "full"), null);
+  assert.equal(R.cognitionLearnDC("I", "nonsense"), null);
+
+  const ladder = R.cognitionLadder();
+  assert.deepEqual(ladder.map(t => t.tier), ["I", "II", "III", "IV", "V"]);
+  assert.deepEqual(ladder[0].steps.map(s => s.dc), [5, 10, 10, 15]);
+  assert.deepEqual(ladder[4].steps.map(s => s.dc), [25, 30, 30, 35]);
+  // Tier III and above cannot be finished by rolling at all — the last step is the DM's to declare.
+  assert.deepEqual(ladder.map(t => t.needsEpiphany), [false, false, true, true, true]);
+
+  // The roll itself is Dream alone: proficiency does not enter into understanding one.
+  const ch = { ...R.blankCharacter(), level: 11,
+    abilities: { ...R.blankCharacter().abilities, dream: 18 }, skills: { incept: 2 } };
+  assert.equal(R.cognitionUnderstandingBonus(ch), 4);
+
+  // And the four marks say the same thing here as they do in the builder's own tracker.
+  assert.equal(R.COGNITION_DEPTH_NOTE.length, 5);
+  assert.match(R.COGNITION_DEPTH_NOTE[4], /Full/);
+});
+
 // ── Items ───────────────────────────────────────────────────────────────
 // CS-051 asks that equipping an item apply its effect, and CS-052 and CS-065 for charges with a
 // recharge trigger. The point of the design is that an item contributes ordinary modifiers, so none

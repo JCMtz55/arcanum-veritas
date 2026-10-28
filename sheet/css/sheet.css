@@ -728,6 +728,54 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .uses .pip{width:11px;height:11px}
 .uses em{font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);margin-left:2px}
 
+/* ── Ephemer's own systems ───────────────────────────────────────────────
+   A Cognition is a chip with its own Font Awesome glyph and its Tier, tinted by category the way
+   the builder tints it — the same Cognition should be the same colour in both tools. The whole
+   chip is a link into the builder, because reading one and composing with one live there. */
+.cogs-g+.cogs-g{margin-top:7px}
+.cogs{display:flex;flex-wrap:wrap;gap:5px}
+.cog{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:20px;padding:3px 10px 3px 8px;
+  font-family:var(--sans);font-size:11.5px;color:var(--bone2);text-decoration:none}
+.cog:hover{border-color:var(--accent);color:var(--bone)}
+.cog .ic{font-size:10px;color:var(--mute)}
+.cog:hover .ic{color:var(--accent)}
+.cog em{font-style:normal;font-size:9px;color:var(--mute);letter-spacing:.08em}
+.cog .tag{font-size:8px;padding:0 4px}
+.cog.elemental .ic{color:#6fa8c7} .cog.mores .ic{color:#c78a6f}
+.cog.fate .ic{color:#b89a5e}      .cog.cosmic .ic{color:#9a86c7}
+.cog.life .ic{color:#7fb08a}      .cog.mind .ic{color:#c76f9a}
+
+/* The tracker: four marks, the same four the builder's Learning tab keeps, writing to the same
+   row on the same account. */
+.lrns{display:flex;flex-direction:column;gap:4px}
+.lrn{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;
+  background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 7px 4px 10px}
+.lrn b{font-family:var(--sans);font-size:12px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrn em{font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);
+  white-space:nowrap}
+.lpips{display:flex;gap:3px}
+.lpips .pip{width:13px;height:13px}
+.lpips .pip.used{background:var(--accent);border-color:var(--accent)}
+.lrn .x{border:0;background:none;padding:0 2px}
+.adder{display:flex;gap:6px;margin-top:7px}
+.adder .txt{flex:1;min-width:0}
+
+/* The learn DCs, as a table rather than one number — the Tier of a Cognition you have not been
+   granted is deliberately not sent to the browser, so the row you need is the one you read off. */
+.dcs{display:flex;flex-direction:column;gap:3px}
+.dcrow{display:grid;grid-template-columns:54px repeat(4,minmax(0,1fr));gap:5px;align-items:center}
+.dcrow i{font-style:normal;font-family:var(--sans);font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--mute)}
+.dcrow span{display:flex;flex-direction:column;gap:1px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+.dcrow em{font-style:normal;font-family:var(--sans);font-size:8px;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--mute)}
+.dcrow b{font-family:var(--sans);font-size:13px}
+.dcrow.epi b{color:var(--brass)}
+.dcrow.epi span:last-child{border-style:dashed}
+
 /* ── the spellbook ───────────────────────────────────────────────────────
    One row per spell, grouped by level. A spell that cannot be cast as it stands is dimmed rather
    than hidden: a Wizard's unprepared book is most of the list and still has to be readable. */
