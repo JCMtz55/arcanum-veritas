@@ -98,6 +98,34 @@ function renderBar() {
       title="${esc(state.saveError || "Every change is saved as you make it")}">${esc(saveLabel)}</span>`;
 }
 
+// ── flags, and what is changing a number ────────────────────────────────
+// A flag you turn on and off is a SQUARE THAT LIGHTS UP, named in its tooltip — the idiom the
+// equipment rows already use. A column of tickboxes reads as a form to fill in; a row of lit squares
+// reads as a set of states, which is what these are. `attr` is whatever the caller wires it with.
+export const toggleHtml = (attr, on, ic, label) =>
+  `<button type="button" class="tgl${on ? " on" : ""}" ${attr}
+    aria-pressed="${on ? "true" : "false"}" title="${esc(label)}">${icon(ic)}<span class="sr">${esc(label)}</span></button>`;
+
+// Everything adjusting one number, with the lasting ones first — they are the ones that are simply
+// true of you, and a list that opens with "3 rounds of Bless" buries them.
+export const buffsOn = (ch, target) =>
+  rules.contributions(rules.activeModifiers(ch), target)
+    .sort((a, b) => Number(b.permanent) - Number(a.permanent));
+
+// The corner mark on a number something is changing: an infinity when every source is lasting, an
+// hourglass the moment anything in the mix runs out. The reasons ride on the button's own tooltip,
+// so hovering the number answers "why is this 18" without a click.
+export function buffMark(list) {
+  if (!list.length) return "";
+  const timed = list.some(c => !c.permanent);
+  return `<span class="bmark ${timed ? "timed" : "lasting"}" aria-hidden="true">${icon(timed ? "timed" : "lasting")}</span>`;
+}
+export function buffTitle(base, list) {
+  if (!list.length) return base;
+  return `${base}\n` + list.map(c =>
+    `${sign(c.amount)} ${c.reason || "unnamed"} — ${c.permanent ? "lasting" : `${c.rounds} round${c.rounds === 1 ? "" : "s"}`}`).join("\n");
+}
+
 // ── left: the seven scores, saves, skills ───────────────────────────────
 function renderLeft() {
   const ch = derived();
@@ -110,15 +138,20 @@ function renderLeft() {
     const base = ch.abilities[id];
     const buffed = score !== base;
     const dm = id === "dream";
+    const name = rules.ABILITY_NAME[id];
+    const onScore = buffsOn(ch, `ability:${id}`);
+    const onSave = buffsOn(ch, `save:${id}`);
     return `<div class="ab2 ${dm ? "dream" : ""}${buffed ? " buffed" : ""}">
       <button class="ab2-roll" data-act="roll-ability" data-id="${id}"
-        title="Roll a ${esc(rules.ABILITY_NAME[id])} check">
-        <i>${esc(rules.ABILITY_NAME[id].slice(0, 3))}</i><b>${sign(mod)}</b></button>
+        title="${esc(buffTitle(`Roll a ${name} check`, onScore))}">
+        <i>${esc(name.slice(0, 3))}</i><b>${sign(mod)}</b></button>
       <button class="ab2-score" data-act="edit-ability" data-id="${id}"
-        title="${dm ? "Dream is your DM's to set" : "Set the score, or add a modifier"}"
-        ${dm ? "disabled" : ""}>${score}</button>
+        title="${esc(buffTitle(dm ? `Dream is your DM's to set — base ${base}`
+          : `Set the score, or add an effect — base ${base}`, onScore))}"
+        ${dm ? "disabled" : ""}>${score}${buffMark(onScore)}</button>
       <button class="ab2-save ${ch.saves?.[id] ? "on" : ""}" data-act="roll-save" data-id="${id}"
-        title="${esc(rules.ABILITY_NAME[id])} saving throw${ch.saves?.[id] ? " · proficient" : ""}">${sign(rules.saveTotal(ch, id))}</button>
+        title="${esc(buffTitle(`${name} saving throw${ch.saves?.[id] ? " · proficient" : ""}`,
+          [...onSave, ...onScore]))}">${sign(rules.saveTotal(ch, id))}${buffMark(onSave)}</button>
     </div>`;
   };
 
@@ -129,16 +162,18 @@ function renderLeft() {
       const multi = s.abilities.length > 1;
       const use = (multi && ch.skillAbility?.[s.id]) || s.abilities[0];
       const dream = s.abilities[0] === "dream";
+      const on = [...buffsOn(ch, `skill:${s.id}`), ...buffsOn(ch, `ability:${use}`)];
       return `<div class="sk ${dream ? "dream" : ""}">
         <button class="sk-prof p${prof}" data-act="cycle-prof" data-id="${s.id}"
           title="${prof === 2 ? "Expertise" : prof === 1 ? "Proficient" : "Not proficient"} — click to change"
           aria-label="${esc(s.name)} proficiency">${prof === 2 ? "◉" : prof === 1 ? "●" : "○"}</button>
-        <button class="sk-roll" data-act="roll-skill" data-id="${s.id}">
+        <button class="sk-roll" data-act="roll-skill" data-id="${s.id}"
+          title="${esc(buffTitle(`Roll ${s.name}`, on))}">
           <span class="sk-nm">${esc(s.name)}</span>
           ${multi ? `<em class="sk-ab" data-act="pick-skill-ability" data-id="${s.id}"
             title="Harvesting uses Wisdom or Intelligence — click to switch">${esc(use.slice(0, 3))}</em>`
             : `<em class="sk-ab mute">${esc(use.slice(0, 3))}</em>`}
-          <b>${sign(rules.skillTotal(ch, s.id, use))}</b>
+          <b>${sign(rules.skillTotal(ch, s.id, use))}${buffMark(on)}</b>
         </button></div>`;
     }).join("");
 
@@ -170,12 +205,25 @@ function renderCentre() {
   const pct = Math.max(0, Math.min(100, Math.round((ch.hp / Math.max(1, max)) * 100)));
   const band = ch.hp <= 0 ? "out" : pct <= 25 ? "crit" : pct <= 50 ? "low" : "ok";
   const unhealed = ch.injuries.filter(i => i && !i.healed).length;
+  // The tile shows what is LEFT, not the pool: once three dice are spent, printing the whole pool
+  // is a lie, and the pool itself is one hover away in the title.
+  const hd = rules.hitDiceState(ch);
 
-  const tile = (act, ic, label, value, title) => `<button class="tile" data-act="${act}" title="${esc(title)}">
-    <i>${icon(ic)}${label}</i><b>${value}</b></button>`;
+  // `target` is optional: give one and the tile carries the mark and the breakdown of whatever is
+  // changing that number, so hovering AC answers "why is it 12" without opening anything.
+  const tile = (act, ic, label, value, title, target) => {
+    const on = target ? buffsOn(ch, target) : [];
+    return `<button class="tile" data-act="${act}" title="${esc(buffTitle(title, on))}">
+      <i>${icon(ic)}${label}</i><b>${value}${buffMark(on)}</b></button>`;
+  };
 
   const c = state.current;
-  $("centre").innerHTML = `
+  // Replacing the markup resets the scroll of both scrollers, so where the reader was is carried
+  // across the redraw. Without this, preparing a spell halfway down the book throws you back to the
+  // top of the tab — and the same was true of every pip and every toggle in every other tab.
+  const centre = $("centre");
+  const was = { centre: centre.scrollTop, panel: document.getElementById("panel")?.scrollTop || 0 };
+  centre.innerHTML = `
     <div class="vitals">
       <button class="face" data-act="portrait" title="Change portrait">
         ${portraitHtml(ch, c.name, "xl")}
@@ -192,12 +240,15 @@ function renderCentre() {
         </button>
       </div>
       <div class="tiles">
-        ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), "Armour Class")}
-        ${tile("roll-init", "initiative", "Init", sign(rules.initiative(ch)), "Roll initiative")}
-        ${tile("edit-speed", "speed", "Speed", rules.speed(ch), "Speed in feet")}
+        ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), `Armour Class — base ${ch.ac}`, "ac")}
+        ${tile("roll-init", "initiative", "Init", sign(rules.initiative(ch)), "Roll initiative", "initiative")}
+        ${tile("edit-speed", "speed", "Speed", rules.speed(ch), `Speed in feet — base ${ch.speed}`, "speed")}
         ${tile("verum", "saveDC", "Verum DC", rules.verumDC(ch),
-          `8 + proficiency ${sign(rules.proficiencyBonus(ch.level))} + highest non-Dream modifier ${sign(rules.verumModifier(ch))} + Dream ${sign(rules.abilityModifier(ch, "dream"))}`)}
-        ${tile("hit-dice", "hitDice", "Hit dice", esc(ch.hitDice || "—"), "Spend a hit die on a short rest")}
+          `8 + proficiency ${sign(rules.proficiencyBonus(ch.level))} + highest non-Dream modifier ${sign(rules.verumModifier(ch))} + Dream ${sign(rules.abilityModifier(ch, "dream"))}`,
+          "saveDc")}
+        ${tile("hit-dice", "hitDice", "Hit dice", esc(hitDiceLeft(ch) || "—"),
+          hd.used ? `${hd.left} of ${hd.total} left — your pool is ${hd.pool}`
+            : "Spend a hit die on a short rest, or with a Quick Action")}
         ${tile("death-saves", "deathDC", "Death DC", rules.deathSaveDC(ch.wounds, unhealed),
           `Death save DC — 10 + ${ch.wounds} Wounds + ${unhealed} unhealed Injuries`)}
         ${tile("conc", "concentration", "Conc", rules.concentrationDC(0, ch.wounds, unhealed) + "+",
@@ -216,7 +267,14 @@ function renderCentre() {
       <button class="btn sm" data-act="dice" title="Roll any expression">${icon("dice")} Dice</button>
     </div>
     <div class="panel" id="panel">${panelHtml(ch)}</div>`;
+
+  centre.scrollTop = was.centre;
+  const panel = document.getElementById("panel");
+  if (panel) panel.scrollTop = was.panel;
 }
+
+const hitDiceLeft = ch =>
+  rules.formatHitDice(rules.hitDiceState(ch).rows.map(r => ({ die: r.die, n: r.left })));
 
 // Conditions belong with the vitals rather than inside the Combat tab: what you are suffering from
 // is read as often as your AC, and it should not disappear the moment you open your spells.
@@ -330,6 +388,7 @@ function combatPanel(ch) {
 
 function spellPanel(ch) {
   const slots = ch.spells?.slots || {};
+  const slotsShort = String(ch.spells?.slotsReset || "l").toLowerCase() === "s";
   const rows = Array.from({ length: 9 }, (_, i) => i + 1).filter(l => slots[l]?.max).map(l => {
     const { max = 0, used = 0 } = slots[l];
     let pips = "";
@@ -340,25 +399,104 @@ function spellPanel(ch) {
       <span class="hint">${max - used}/${max}</span></div>`;
   }).join("");
 
+  // One spell attack and one save DC per casting class, because the ability differs per class and a
+  // published spell is never resisted at the Verum DC. Null means the catalogue has not answered yet.
+  const casting = state.classPlan ? rules.spellcasting(ch, state.classPlan) : [];
+  const castStats = casting.map(c => `
+    <div class="stat"><b>${c.dc}</b><i>${esc(c.className)} save DC</i></div>
+    <div class="stat"><b>${sign(c.attack)}</b><i>${esc(c.className)} attack</i></div>`).join("");
+
   return `<section class="card">
-      <h3>Spell slots <span class="r"><button class="btn sm" data-act="slots-edit">Set</button></span></h3>
-      ${rows || `<p class="hint">No slots set yet.</p>`}
-    </section>
-    <section class="card">
       <h3>Spellcasting</h3>
+      ${casting.length ? `<div class="stats">${castStats}</div>
+        <p class="hint">${casting.map(c => `<b>${esc(c.className)}</b> casts with ${esc(c.abilityName)}
+          (${sign(c.mod)}) — DC 8 + proficiency ${sign(rules.proficiencyBonus(ch.level))} + ${sign(c.mod)}`).join("; ")}.
+          ${casting.length > 1 ? "Each class keeps its own ability, and your proficiency bonus comes from your total level." : ""}</p>`
+        : `<p class="hint">${state.classPlan === null
+            ? "Reading the catalogue…"
+            : "No class on your sheet casts spells. Take one from the compendium and its DC appears here."}</p>`}
       <div class="stats">
         <div class="stat"><b>${rules.verumDC(ch)}</b><i>Verum DC</i></div>
         <div class="stat"><b>${sign(rules.sealAttackBonus(ch))}</b><i>Seal attack</i></div>
         <div class="stat"><b>${rules.sealUses(ch)}</b><i>Seals per long rest</i></div>
       </div>
-      <p class="hint">Arcanum Veritas: a seal costs one use <b>and</b> a spell slot of 1st level or higher.
-        The Verum DC is 8 + PB + your highest ability modifier + your Dream modifier.
+      <p class="hint">Arcanum Veritas is its own thing: a seal costs one use <b>and</b> a spell slot of
+        1st level or higher, and the Verum DC — 8 + PB + your highest ability modifier + your Dream
+        modifier — is what a seal is resisted at, never what a spell above is.
         Compose the seal itself in the <a href="../arcanum.html">builder</a>.</p>
     </section>
+
     <section class="card">
-      <h3>Spells</h3>
-      <p class="hint">The searchable catalogue and prepared lists are the next piece of this tool.
-        Until then, keep what you have prepared in Character › Notes.</p>
+      <h3>Spell slots <span class="r"><button class="btn sm" data-act="slots-edit">Set</button></span></h3>
+      ${rows || `<p class="hint">No slots set yet. Taking a casting class fills these in.</p>`}
+      ${rows ? `<p class="hint">${slotsShort
+        ? "<b>Pact Magic</b> — these come back on a <b>short</b> rest."
+        : "These come back on a long rest."} Click a pip to spend one, click a spent one to hand it back.</p>` : ""}
+    </section>
+
+    ${spellbookCard(ch)}`;
+}
+
+// The book itself. Grouped by level, because that is how a caster looks for a spell, and each row
+// carries the three things you need mid-turn: whether it is ready, whether it needs concentration,
+// and whether it can be cast as a ritual instead of spending anything.
+function spellbookCard(ch) {
+  const book = rules.spellbook(ch);
+  const slots = ch.spells?.slots || {};
+
+  const row = s => {
+    const lv = rules.spellLevel(s);
+    const standing = rules.spellStanding(s);
+    const castable = rules.spellCastable(s);
+    const st = rules.SPELL_STANDING[standing];
+    const toggles = standing === "known" || standing === "prepared";
+    return `<div class="spl ${castable ? "on" : ""}">
+      <button class="spl-s ${standing}" data-act="spell-stand" data-id="${esc(s.id)}"
+        title="${esc(`${st.label} — ${st.hint}${toggles ? " Click to change." : ""}`)}"
+        aria-label="${esc(st.label)}">${esc(st.short)}</button>
+      <button class="spl-n" data-act="spell-open" data-id="${esc(s.id)}"
+        title="Read it, and cast it">
+        <b>${esc(s.name)}</b>
+        <span>${[esc(s.school || ""), s.time ? esc(s.time) : "", s.range ? esc(s.range) : ""]
+          .filter(Boolean).join(" · ")}</span>
+      </button>
+      <span class="spl-t">
+        ${rules.spellIsConcentration(s) ? `<span class="tag k" title="Concentration">C</span>` : ""}
+        ${rules.spellIsRitual(s) ? `<span class="tag" title="Can be cast as a ritual">R</span>` : ""}
+        ${lv > 0 && castable && !rules.castingOptions(ch, lv).some(o => o.left)
+          ? `<span class="tag warn" title="No slot left that can pay for it">no slot</span>` : ""}
+      </span>
+      <button class="x" data-act="spell-del" data-id="${esc(s.id)}"
+        aria-label="Remove ${esc(s.name)}">×</button>
+    </div>`;
+  };
+
+  const groups = book.levels.map(g => {
+    const left = g.level > 0 && slots[g.level]
+      ? `<span class="hint">${(slots[g.level].max || 0) - (slots[g.level].used || 0)}/${slots[g.level].max || 0} slots</span>`
+      : "";
+    return `<div class="spl-g">
+      <div class="spl-lv"><b>${g.level === 0 ? "Cantrips" : `Level ${g.level}`}</b>${left}</div>
+      ${g.spells.map(row).join("")}</div>`;
+  }).join("");
+
+  const c = book.counts;
+  return `<section class="card">
+      <h3>Spells <span class="r">
+        ${c.total ? `<button class="btn sm" data-act="spell-clear"
+          title="Set every levelled spell back to known — the start of a new day">New day</button>` : ""}
+        <button class="btn sm pri" data-act="compendium" data-id="spell">+ Add</button></span></h3>
+      ${c.total ? `<p class="hint">${c.total} spell${c.total === 1 ? "" : "s"}${c.cantrips ? ` · ${c.cantrips} cantrip${c.cantrips === 1 ? "" : "s"}` : ""}
+          · <b>${c.ready}</b> prepared${c.always ? ` · ${c.always} always prepared` : ""}${c.granted ? ` · ${c.granted} granted` : ""}
+          ${c.known ? ` · ${c.known} known and not ready` : ""}</p>
+        <div class="spls">${groups}</div>
+        <p class="hint">Click a spell to read it and cast it; casting spends the slot you choose, so
+          upcasting is just picking a higher one. The chip on the left is how you have it — click it
+          to move between <b>known</b> and <b>prepared</b>. Nothing here caps how many you may prepare:
+          the number your class allows is in your class's own table, and the sheet does not guess it.</p>`
+        : `<p class="hint">Nothing in your spells yet. <b>Add</b> searches the compendium — your DM's
+          imported books included — and a cantrip arrives always prepared while everything else
+          arrives as known, for you to prepare on the day.</p>`}
     </section>`;
 }
 
@@ -418,21 +556,51 @@ export const ACTION_COST = {
 // ── Gear ────────────────────────────────────────────────────────────────
 // The slots from Equipment Ruleset.md, in its order, with the three columns Zariel's own Equipment
 // note keeps: the item, whether it is magical, and whether it is attuned.
+// What an item is doing, in the fewest words that are still true: its effects while they are in
+// force, and a greyed version of them while they are not, because "this ring does nothing right now"
+// is a thing a player needs to be able to see without taking it off to check.
+function itemLine(ch, r) {
+  const fx = rules.itemEffectList(r.item);
+  const live = rules.itemIsActive(ch, r.item, r.where);
+  const bits = fx.map(e => `${sign(e.amount)} ${targetLabel(e.target)}`);
+  if (r.item.qty > 1) bits.unshift(`×${r.item.qty}`);
+  if (r.item.weight) bits.push(`${rules.itemWeightTotal(r.item)} lb`);
+  if (!bits.length) return r.item.notes ? esc(r.item.notes) : "";
+  return `<span class="${fx.length && !live ? "off" : ""}">${esc(bits.join(" · "))}</span>${
+    fx.length && !live ? ` <span class="tag">not in force</span>` : ""}`;
+}
+
+// The charge chip: one click spends one. Mid-session that is the whole interaction, and burying it
+// in a dialog would mean opening a dialog every time somebody waves a wand.
+function chargeChip(r) {
+  const c = rules.itemCharges(r.item);
+  if (!c) return "";
+  return `<button class="chg ${c.left ? "" : "out"}" data-act="item-use" data-id="${esc(r.where)}"
+    ${c.left ? "" : "disabled"}
+    title="${esc(`${c.left} of ${c.max} charges left · ${rules.RECHARGE_BY_ID[c.recharge].label}${
+      c.left ? " · click to spend one" : ""}`)}">${c.left}/${c.max}</button>`;
+}
+
 function gearPanel(ch) {
   const att = rules.attunement(ch, { inInsomnia: state.inInsomnia });
   const row = s => {
     const it = (ch.equipment || {})[s.id] || {};
     const filled = !!it.name;
+    const r = { item: it, where: `slot:${s.id}`, slot: s.id };
+    const line = filled ? itemLine(ch, r) : "";
     return `<div class="slot ${filled ? "on" : ""}">
       <span class="slot-i" title="${esc(s.eg)}">${icon("slot." + s.id)}</span>
       <span class="slot-n">${esc(s.name)}</span>
       <button class="slot-v" data-act="slot-edit" data-id="${s.id}"
-        title="${filled ? esc(it.notes || s.eg) : esc(s.eg)}">${filled ? esc(it.name) : `<em>empty</em>`}</button>
+        title="${filled ? esc(it.notes || s.eg) : esc(s.eg)}">${filled
+          ? `<b>${esc(it.name)}</b>${line ? `<span>${line}</span>` : ""}`
+          : `<em>empty</em>`}</button>
+      ${filled ? chargeChip(r) : `<span></span>`}
       ${filled ? `<span class="slot-f">
           <button class="pipx ${it.magical ? "on" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="magical"
             title="Magical">${icon("effect")}</button>
           <button class="pipx ${it.attuned ? "on" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="attuned"
-            title="Attuned">${icon("attunement")}</button>
+            title="${it.requiresAttunement ? "Attuned — this one needs it to work" : "Attuned"}">${icon("attunement")}</button>
           <button class="pipx ${it.insomniaOnly ? "dream" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="insomniaOnly"
             title="Dreamlike or Lucidlike — uses an Insomnia-only attunement slot">${icon("dream")}</button>
         </span>` : `<span class="slot-f"></span>`}
@@ -482,13 +650,82 @@ function gearPanel(ch) {
     <section class="card">
       <h3>${icon("compendium")} Carried <span class="r">
         <button class="btn sm" data-act="carry-add">Add</button></span></h3>
-      ${(ch.carried || []).length ? `<div class="carry">` + ch.carried.map((it, i) => `
-        <div class="carry-r">
-          <span class="carry-n">${esc(it.name)}${it.qty > 1 ? ` <em>×${it.qty}</em>` : ""}</span>
-          ${it.notes ? `<span class="carry-x">${esc(it.notes)}</span>` : ""}
+      ${(ch.carried || []).length ? `<div class="carry">` + ch.carried.map((it, i) => {
+        const r = { item: it, where: `pack:${i}`, index: i };
+        const line = itemLine(ch, r);
+        return `<div class="carry-r">
+          <button class="carry-n" data-act="item-edit" data-id="${esc(r.where)}"
+            title="${esc(it.notes || "Open it")}">
+            <b>${esc(it.name)}</b>${line ? `<span>${line}</span>` : ""}</button>
+          ${chargeChip(r)}
+          <button class="btn sm" data-act="item-equip" data-id="${esc(r.where)}"
+            title="Put it in a slot, where its effects count">Equip</button>
           <button class="x" data-act="carry-del" data-id="${i}" aria-label="Remove ${esc(it.name)}">×</button>
-        </div>`).join("") + `</div>`
-        : `<p class="hint">Nothing carried but not equipped.</p>`}
+        </div>`;
+      }).join("") + `</div>`
+        : `<p class="hint">Nothing carried but not equipped. An item only grants its effects from a
+          slot — carrying a ring in your pack has never done anything.</p>`}
+    </section>
+
+    ${purseCard(ch)}`;
+}
+
+// Coin and what it all weighs. The encumbrance thresholds are the OPTIONAL 5e rule, so the card
+// names the band you are in and never touches a single number because of it.
+function purseCard(ch) {
+  const w = rules.carriedWeight(ch);
+  const enc = rules.encumbrance(ch);
+  return `<section class="card">
+      <h3>${icon("gear")} Coin and load</h3>
+      <div class="coins">${rules.COINS.map(c => `
+        <label class="coin"><span>${esc(c.short)}</span>
+          <input class="txt" type="number" min="0" max="999999" data-act="coin" data-id="${c.id}"
+            value="${Number(ch.coins?.[c.id]) || 0}" aria-label="${esc(c.name)}"></label>`).join("")}
+      </div>
+      <div class="stats">
+        <div class="stat"><b>${rules.coinTotalGp(ch.coins)}</b><i>gold piece value</i></div>
+        <div class="stat"><b>${w.total}</b><i>pounds carried</i></div>
+        <div class="stat"><b>${enc.capacity}</b><i>your capacity</i></div>
+      </div>
+      <p class="hint">${w.items} lb of gear and ${w.coins} lb of coin — fifty coins to the pound,
+        whatever they are made of.
+        ${enc.band === "none"
+          ? `Encumbered above ${enc.encumbered} lb and heavily above ${enc.heavilyEncumbered} lb, under the optional rule.`
+          : `<b class="hot">${esc(enc.label)}</b> under the optional rule — the sheet says so and changes nothing.`}</p>
+    </section>`;
+}
+
+// Everything that is simply TRUE of this character, as opposed to running out — a worn item's
+// bonus, a permanent ability bump, an effect somebody wrote down with no duration. These used to
+// sit in the Round card beside the countdowns, which was fine with two of them and unreadable with
+// ten; they are grouped by where they come from, because "my gear" and "something I wrote down" are
+// looked for differently and only one of them has a × .
+function lastingCard(ch) {
+  const all = rules.activeModifiers(ch)
+    .filter(m => m && m.active !== false && m.rounds == null);
+  const fromItems = all.filter(rules.isItemModifier);
+  const written = all.filter(m => !rules.isItemModifier(m));
+
+  const row = m => `<div class="mod${rules.isItemModifier(m) ? " item" : ""}">
+    <span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
+    <span class="mod-w" title="${esc(m.reason)}">${esc(m.reason)}</span>
+    ${rules.isItemModifier(m)
+      ? `<span class="mod-r" title="Worn — it goes when the item does">${icon("gear")}</span><span class="x"></span>`
+      : `<span class="mod-r" title="No duration — it does not expire">${icon("lasting")}</span>
+         <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button>`}</div>`;
+
+  return `<section class="card">
+      <h3>${icon("lasting")} Lasting effects <span class="r">
+        <button class="btn sm" data-act="mod-add" title="A named change, with a reason">Add effect</button></span></h3>
+      ${all.length ? `
+        ${fromItems.length ? `<div class="zone-h sm"><h4>From what you are wearing</h4></div>
+          <div class="mods">${fromItems.map(row).join("")}</div>` : ""}
+        ${written.length ? `<div class="zone-h sm"><h4>Written down</h4></div>
+          <div class="mods">${written.map(row).join("")}</div>` : ""}
+        <p class="hint">Anything with a duration lives in <b>Round</b> instead, where it counts down.
+          A worn item's line has no × — it goes when the item comes off.</p>`
+        : `<p class="hint">Nothing lasting. An item's effects appear here the moment it is in a slot,
+          and an effect you add with no duration lands here rather than in the round tracker.</p>`}
     </section>`;
 }
 
@@ -642,6 +879,8 @@ function characterPanel(ch) {
         your DM can drop the real ones into <code>sheet/img/portraits/</code>.</p>
     </section>
 
+    ${lastingCard(ch)}
+
     <section class="card">
       <h3>${icon("effect")} Features &amp; traits <span class="r"><button class="btn sm" data-act="feat-add">Add</button></span></h3>
       ${featureList(ch)}
@@ -668,7 +907,12 @@ function renderRight() {
   const c = state.current;
   const de = rules.dreamExhaustion(ch.dreamExhaustion);
   const unhealed = ch.injuries.filter(i => i && !i.healed).length;
-  const active = (ch.modifiers || []).filter(m => m && m.active !== false);
+  // The Round card is about THIS ROUND, so it holds only what runs out. A worn item's +1 and a
+  // permanent ability bump are simply true of you; they belong with the character, not beside a
+  // countdown — and once a party is six items deep this rail would otherwise be unreadable.
+  const all = rules.activeModifiers(ch).filter(m => m && m.active !== false);
+  const active = all.filter(m => m.rounds != null);
+  const lasting = all.length - active.length;
 
   const step = (act, ic, label, value, max, title) => `
     <span class="trk" title="${esc(title)}"><i>${icon(ic)}${label}</i>
@@ -687,11 +931,15 @@ function renderRight() {
         <button class="btn sm" data-act="end-combat">End combat</button>
       </div>
       ${active.length ? `<div class="mods">` + active.map(m => `
-        <div class="mod"><span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
+        <div class="mod">
+          <span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
           <span class="mod-w" title="${esc(m.reason)}">${esc(m.reason)}</span>
-          <span class="mod-r">${m.rounds == null ? "∞" : `${m.rounds}r`}</span>
+          <span class="mod-r">${icon("timed")}${m.rounds}r</span>
           <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button></div>`).join("") + `</div>`
         : `<p class="hint">Nothing running. A timed effect counts down when you confirm a round.</p>`}
+      ${lasting ? `<button class="lastlink" data-act="tab" data-id="character"
+        title="They do not expire, so they do not belong beside a countdown">
+        ${icon("lasting")}${lasting} lasting effect${lasting === 1 ? "" : "s"} — on the Character tab</button>` : ""}
     </section>
 
     <section class="card">

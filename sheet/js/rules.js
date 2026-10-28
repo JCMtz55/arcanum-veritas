@@ -86,7 +86,11 @@ export function modifierTotal(modifiers, target) {
 export function contributions(modifiers, target) {
   return (modifiers || [])
     .filter(m => m && m.active !== false && m.target === target)
-    .map(m => ({ amount: num(m.amount), reason: m.reason || "", rounds: m.rounds ?? null, id: m.id }));
+    // `permanent` is the distinction the sheet shows: a thing that expires on a confirmed round and
+    // a thing that is simply true of you read completely differently at the table, and a list that
+    // mixes them without saying which is which is a list nobody can act on.
+    .map(m => ({ amount: num(m.amount), reason: m.reason || "", rounds: m.rounds ?? null,
+      id: m.id, source: m.source || "", permanent: m.rounds == null }));
 }
 
 // One confirmed round of the character's own tracker. Anything carrying `rounds` counts down and
@@ -140,7 +144,7 @@ export const turnSpent = ch =>
 
 // ── Derived numbers ─────────────────────────────────────────────────────
 export function abilityScore(ch, id) {
-  return num(ch.abilities?.[id]) + modifierTotal(ch.modifiers, `ability:${id}`);
+  return num(ch.abilities?.[id]) + modifierTotal(activeModifiers(ch), `ability:${id}`);
 }
 export function abilityModifier(ch, id) {
   return abilityMod(abilityScore(ch, id));
@@ -154,19 +158,19 @@ export function skillTotal(ch, skillId, ability) {
   const use = sk.abilities.includes(ability) ? ability : sk.abilities[0];
   return abilityModifier(ch, use)
     + profContribution(proficiencyBonus(ch.level), ch.skills?.[skillId])
-    + modifierTotal(ch.modifiers, `skill:${skillId}`);
+    + modifierTotal(activeModifiers(ch), `skill:${skillId}`);
 }
 export function saveTotal(ch, abilityId) {
   return abilityModifier(ch, abilityId)
     + (ch.saves?.[abilityId] ? proficiencyBonus(ch.level) : 0)
-    + modifierTotal(ch.modifiers, `save:${abilityId}`);
+    + modifierTotal(activeModifiers(ch), `save:${abilityId}`);
 }
 export const passiveScore = (ch, skillId, ability) => 10 + skillTotal(ch, skillId, ability);
 
-export const armorClass = ch => num(ch.ac) + modifierTotal(ch.modifiers, "ac");
-export const speed = ch => num(ch.speed) + modifierTotal(ch.modifiers, "speed");
-export const initiative = ch => abilityModifier(ch, "dex") + modifierTotal(ch.modifiers, "initiative");
-export const maxHp = ch => Math.max(0, num(ch.maxHp) + modifierTotal(ch.modifiers, "maxHp"));
+export const armorClass = ch => num(ch.ac) + modifierTotal(activeModifiers(ch), "ac");
+export const speed = ch => num(ch.speed) + modifierTotal(activeModifiers(ch), "speed");
+export const initiative = ch => abilityModifier(ch, "dex") + modifierTotal(activeModifiers(ch), "initiative");
+export const maxHp = ch => Math.max(0, num(ch.maxHp) + modifierTotal(activeModifiers(ch), "maxHp"));
 
 // ── Honor and Morality ──────────────────────────────────────────────────
 // Four independent non-negative sub-scores, two totals, two directional modifiers (HB-005, HB-006,
@@ -297,10 +301,14 @@ export function cognitiveCollapseSurvived(ch) {
 //
 // This returns a PREVIEW. Nothing is applied until the player confirms it (CS-062), and a resource
 // whose recharge rule is not written down anywhere is left alone rather than guessed at.
-export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven = false } = {}) {
+export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven = false,
+                                  dawn = false, dusk = false } = {}) {
   const changes = [];
   const next = {};
   const hpMax = maxHp(ch);
+  // Item charges whose regain is a dice expression are reported rather than resolved — rolling is
+  // the interface's job, and the preview says so instead of pretending to know the number.
+  const roll = [];
 
   // A class resource whose recharge rule IS written down — the compendium's `reset` says short or
   // long — comes back here. One whose rule is written nowhere is still left alone rather than
@@ -313,9 +321,54 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
     changes.push({ label: "Class resources come back", detail: spent.map(f => f.name).join(", ") });
   }
 
+  // Spell slots. Every expended slot comes back on a long rest — and on a SHORT rest for a class
+  // whose slots work that way, which in the 2014 rules is the Warlock's Pact Magic and nothing else.
+  // Which it is comes from `spells.slotsReset`, written when the class is taken and overridable by
+  // hand, because a sheet may be carrying a pool the compendium never described.
+  const slotsShort = String(ch.spells?.slotsReset || "l").toLowerCase() === "s";
+  if (kind === "long" || slotsShort) {
+    const slots = ch.spells?.slots || {};
+    const spentSlots = Object.keys(slots)
+      .filter(l => num(slots[l]?.used) > 0)
+      .sort((a, b) => num(a) - num(b));
+    if (spentSlots.length) {
+      const nextSlots = {};
+      for (const l of Object.keys(slots)) nextSlots[l] = { ...slots[l], used: 0 };
+      next.spells = { ...(ch.spells || {}), slots: nextSlots };
+      changes.push({
+        label: "Spell slots come back",
+        detail: spentSlots.map(l => `${num(slots[l].used)} at level ${l}`).join(", "),
+      });
+    }
+  }
+
+  // Item charges, on whichever trigger each item carries (CS-065). A long rest includes a short
+  // one; dawn and dusk are passed in, because a party that rested from noon passed neither.
+  const recharging = rechargePlan(ch, { kind, dawn, dusk });
+  if (recharging.length) {
+    const whole = recharging.filter(p => p.all).map(p => ({ where: p.where, by: p.used }));
+    if (whole.length) Object.assign(next, applyRecharge(ch, whole));
+    for (const p of recharging) if (!p.all) roll.push(p);
+    changes.push({ label: "Item charges come back",
+      detail: recharging.map(p => p.all ? p.name : `${p.name} — roll ${p.regain}`).join(", ") });
+  }
+
+  // Hit dice. A short rest is where they are spent, and the dialog does that itself — the preview
+  // only says how many are there to spend, because how many you want is not something to guess at.
+  // A long rest hands back half the pool, rounded down, minimum one (CS-031, CS-062).
+  const hd = hitDiceState(ch);
   if (kind === "short") {
-    changes.push({ label: "Hit dice may be spent", detail: "Choose how many below" });
-  } else {
+    changes.push({ label: "Hit dice may be spent",
+      detail: hd.total ? `${hd.left} of ${hd.total} left — spend them below`
+        : "None on your sheet yet — set the pool in Character › Identity" });
+  } else if (hd.used > 0) {
+    const r = restoreHitDice(ch, Math.min(hd.used, hitDiceRegained(hd.total)));
+    next.hitDiceUsed = r.hitDiceUsed;
+    changes.push({ label: "Hit dice come back", detail: formatHitDice(r.back),
+      from: hd.left, to: hd.left + r.restored });
+  }
+
+  if (kind !== "short") {
     next.hp = hpMax;
     changes.push({ label: "Hit points", from: num(ch.hp), to: hpMax });
     if (dreamWalked) {
@@ -343,7 +396,7 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
   } else if (kind === "long") {
     next.safeHavenRests = 0;      // the pair has to be consecutive
   }
-  return { kind, dreamWalked, safeHaven, changes, next };
+  return { kind, dreamWalked, safeHaven, dawn, dusk, changes, next, roll };
 }
 
 // ── Cognitive Saving Throw ──────────────────────────────────────────────
@@ -378,7 +431,7 @@ export function fabricateCrafting(ch) {
 export const verumModifier = ch => Math.max(...STANDARD_ABILITIES.map(id => abilityModifier(ch, id)));
 export const verumDC = ch =>
   8 + proficiencyBonus(ch.level) + verumModifier(ch) + abilityModifier(ch, "dream")
-  + modifierTotal(ch.modifiers, "saveDc");
+  + modifierTotal(activeModifiers(ch), "saveDc");
 export const sealAttackBonus = ch => proficiencyBonus(ch.level) + verumModifier(ch);
 // Seals per long rest, and inscriptions held at once, both equal the proficiency bonus.
 export const sealUses = ch => proficiencyBonus(ch.level);
@@ -497,6 +550,162 @@ export function attunedItems(ch) {
   for (const it of ch.carried || []) if (it && it.name && it.attuned) out.push({ ...it });
   for (const it of ch.attuned || []) if (it && it.name) out.push({ ...it });
   return out;
+}
+
+// ── Items ───────────────────────────────────────────────────────────────
+// One record wherever it is — in a slot or in the pack — so a thing does not change shape when you
+// put it on. Beyond the name it carries what a table actually asks about mid-session: what it
+// weighs, what it is worth, how many charges are left, and what it is DOING to your numbers.
+//
+// `effects` are the same `{ target, amount }` pairs a hand-written modifier uses, which is the whole
+// trick: an item does not need its own arithmetic anywhere in this engine. It contributes modifiers,
+// those modifiers go through the one path every total already reads, and a +1 ring shows up in the
+// breakdown beside Bless with its own name on it.
+export const ITEM_RECHARGE = [
+  { id: "manual", label: "Only when you say so", hint: "Nothing gives these back on its own." },
+  { id: "short", label: "On a short rest", hint: "And on a long one, which includes it." },
+  { id: "long", label: "On a long rest" },
+  { id: "dawn", label: "At dawn", hint: "A long rest gives these back only if it carried you through dawn." },
+  { id: "dusk", label: "At dusk" },
+];
+export const RECHARGE_BY_ID = Object.fromEntries(ITEM_RECHARGE.map(r => [r.id, r]));
+
+// Charges, read safely: an item with no charges says so by returning null rather than zeroes, so
+// "has no charges" and "has none left" never read the same.
+export function itemCharges(it) {
+  const c = it?.charges;
+  if (!c || num(c.max) <= 0) return null;
+  const max = num(c.max), used = clamp(c.used, 0, max);
+  return { max, used, left: max - used,
+    recharge: RECHARGE_BY_ID[c.recharge] ? c.recharge : "manual",
+    // "all" or a dice expression the sheet rolls — "1d6+1" is how half the published wands word it.
+    regain: String(c.regain || "all").trim() || "all" };
+}
+export const itemWeightTotal = it =>
+  Math.round(num(it?.weight) * Math.max(1, num(it?.qty) || 1) * 100) / 100;
+export const itemEffectList = it =>
+  (it?.effects || []).filter(e => e && e.target && num(e.amount) !== 0)
+    .map(e => ({ target: String(e.target), amount: num(e.amount) }));
+
+// Every item on the character, and where it is, so one piece of code can walk them all. `where` is
+// the address the interface hands back when it wants to change one.
+export function allItems(ch) {
+  const out = [];
+  for (const s of EQUIPMENT_SLOTS) {
+    const it = (ch?.equipment || {})[s.id];
+    if (it && it.name) out.push({ item: it, where: `slot:${s.id}`, slot: s.id, slotName: s.name });
+  }
+  (ch?.carried || []).forEach((it, i) => {
+    if (it && it.name) out.push({ item: it, where: `pack:${i}`, index: i });
+  });
+  return out;
+}
+export const findItem = (ch, where) => allItems(ch).find(r => r.where === where) || null;
+
+// Whether an item's effects are in force. Equipped, because a ring in your pack has never done
+// anything; attuned, where the item says it needs to be; and awake-or-dreaming, because a Dreamlike
+// item goes inactive outside Insomnia without the attunement breaking (DM-14, RES-09).
+//
+// The attunement CAP is deliberately not enforced here. The sheet reports being over it and leaves
+// the choice to the player, the way it reports every other thing it will not referee.
+export function itemIsActive(ch, it, where) {
+  if (!it || !it.name || !String(where || "").startsWith("slot:")) return false;
+  if (it.requiresAttunement && !it.attuned) return false;
+  if (it.insomniaOnly && !ch?.inInsomnia) return false;
+  return true;
+}
+
+export function itemEffects(ch) {
+  const out = [];
+  for (const r of allItems(ch)) {
+    if (!itemIsActive(ch, r.item, r.where)) continue;
+    for (const e of itemEffectList(r.item))
+      out.push({ id: `itm:${r.where}:${e.target}`, target: e.target, amount: e.amount,
+        reason: r.item.name, rounds: null, active: true, source: "item", where: r.where });
+  }
+  return out;
+}
+
+// Everything adjusting this character right now: what someone wrote down, and what their equipment
+// implies. Every total in this file reads THIS rather than the stored list, which is why equipping
+// a +1 cloak moves the AC without anything being written into the sheet twice.
+export const activeModifiers = ch => [...(ch?.modifiers || []), ...itemEffects(ch)];
+export const isItemModifier = m => typeof m?.id === "string" && m.id.startsWith("itm:");
+
+export function spendCharges(it, n = 1) {
+  const c = itemCharges(it);
+  if (!c || c.left < Math.max(1, num(n))) return null;
+  return { ...it.charges, used: c.used + Math.max(1, num(n)) };
+}
+export function restoreCharges(it, n) {
+  const c = itemCharges(it);
+  if (!c || !c.used) return null;
+  return { ...it.charges, used: Math.max(0, c.used - (n == null ? c.used : num(n))) };
+}
+
+// Which charges a rest gives back. A long rest includes a short one; dawn and dusk are asked about
+// rather than assumed, because a party that rested from noon did not pass either (CS-065).
+export function rechargePlan(ch, { kind = "long", dawn = false, dusk = false } = {}) {
+  const fires = new Set(kind === "short" ? ["short"] : ["short", "long"]);
+  if (dawn) fires.add("dawn");
+  if (dusk) fires.add("dusk");
+  return allItems(ch)
+    .map(r => ({ r, c: itemCharges(r.item) }))
+    .filter(({ c }) => c && c.used > 0 && fires.has(c.recharge))
+    .map(({ r, c }) => ({ where: r.where, name: r.item.name, used: c.used, max: c.max,
+      regain: c.regain, all: c.regain === "all" }));
+}
+
+// Applying it. `by` is how many charges to hand back; leaving it out hands all of them back.
+export function applyRecharge(ch, rows) {
+  const equipment = { ...(ch?.equipment || {}) };
+  const carried = [...(ch?.carried || [])];
+  for (const row of rows || []) {
+    const found = findItem(ch, row?.where);
+    if (!found) continue;
+    const charges = restoreCharges(found.item, row.by);
+    if (!charges) continue;
+    if (found.slot) equipment[found.slot] = { ...found.item, charges };
+    else carried[found.index] = { ...found.item, charges };
+  }
+  return { equipment, carried };
+}
+
+// ── Coin and weight ─────────────────────────────────────────────────────
+// Fifty coins to the pound, whatever they are made of, which is the one piece of 5e encumbrance
+// everybody actually uses. Carrying capacity is Strength x 15; the encumbrance thresholds below it
+// are the OPTIONAL variant, so they are reported and never enforced.
+export const COINS = [
+  { id: "pp", name: "Platinum", short: "pp", gp: 10 },
+  { id: "gp", name: "Gold", short: "gp", gp: 1 },
+  { id: "ep", name: "Electrum", short: "ep", gp: 0.5 },
+  { id: "sp", name: "Silver", short: "sp", gp: 0.1 },
+  { id: "cp", name: "Copper", short: "cp", gp: 0.01 },
+];
+export const coinTotalGp = coins =>
+  Math.round(COINS.reduce((t, c) => t + num(coins?.[c.id]) * c.gp, 0) * 100) / 100;
+export const coinCount = coins => COINS.reduce((t, c) => t + num(coins?.[c.id]), 0);
+export const coinWeight = coins => coinCount(coins) / 50;
+
+export function carriedWeight(ch) {
+  const items = allItems(ch).reduce((t, r) => t + itemWeightTotal(r.item), 0);
+  const coins = coinWeight(ch?.coins);
+  return { items: Math.round(items * 100) / 100, coins: Math.round(coins * 100) / 100,
+    total: Math.round((items + coins) * 100) / 100 };
+}
+export function carryingCapacity(ch) {
+  const str = abilityScore(ch, "str");
+  return { capacity: str * 15, encumbered: str * 5, heavilyEncumbered: str * 10 };
+}
+// Which band the load falls in, under the optional rule. "none" is the only one that is not a penalty.
+export function encumbrance(ch) {
+  const { total } = carriedWeight(ch);
+  const cap = carryingCapacity(ch);
+  if (total > cap.capacity) return { band: "over", label: "Over your capacity", total, ...cap };
+  if (total > cap.heavilyEncumbered)
+    return { band: "heavy", label: "Heavily encumbered", total, ...cap };
+  if (total > cap.encumbered) return { band: "light", label: "Encumbered", total, ...cap };
+  return { band: "none", label: "", total, ...cap };
 }
 
 export function attunement(ch, { inInsomnia = false } = {}) {
@@ -729,6 +938,17 @@ export const subclassOptions = def => classGroups(def).archetypes;
 
 export const asiDueAt = (def, classLevel) => !!(def?.levels || {})[num(classLevel)]?.scoreImprovement;
 
+// Which rest brings a class's spell slots back. Everybody is "l" except Pact Magic, and nothing in
+// the compendium data marks that — so it is read off the feature the class actually grants rather
+// than a list of class names, which is the same reason subclasses are detected structurally. A
+// homebrew pact caster that names its feature Pact Magic is read correctly without being registered.
+export function slotResetFor(def) {
+  for (const lv of classLevels(def))
+    for (const f of def?.levels?.[lv]?.features || [])
+      if (/^pact magic$/i.test(featureGroup(f?.name || "").label.trim())) return "s";
+  return "l";
+}
+
 const featureId = (className, level, name) => `cls:${className}:${level}:${name}`;
 const resourceId = (className, name) => `res:${className}:${name}`;
 // Both derived prefixes in one test, because reconcileFeatures has to tell a feature the engine owns
@@ -823,6 +1043,7 @@ export function classProgress(def, level, { subclass = "", picks = {} } = {}) {
     slots: slots ? slots.slice(1).map(num) : null,
     cantripsKnown: slots ? num(slots[0]) : 0,
     castingAbility: def?.spellAbility || "",
+    slotsReset: slotResetFor(def),
   };
 }
 
@@ -852,7 +1073,7 @@ export function featurePlan(classes, defs = {}) {
       ? classProgress(def, c.level, { subclass: c.subclass, picks: c.picks })
       : { className: c.name, level: num(c.level), subclass: subclassKey(c.subclass), hitDie: 0,
           granted: [], resources: [], choices: [], asiLevels: [], subclassOptions: [],
-          slots: null, cantripsKnown: 0, castingAbility: "", unknown: true };
+          slots: null, cantripsKnown: 0, castingAbility: "", slotsReset: "l", unknown: true };
   });
 
   // Slots: exact for one casting class. With two, the 2014 multiclass table is its own progression
@@ -868,7 +1089,12 @@ export function featurePlan(classes, defs = {}) {
     totalLevel: per.reduce((n, p) => n + p.level, 0),
     slots: casters.length === 1 ? casters[0].slots : null,
     cantripsKnown: casters.length === 1 ? casters[0].cantripsKnown : 0,
+    slotsReset: casters.length === 1 ? casters[0].slotsReset : null,
     multiclassCasters: casters.length > 1 ? casters.map(p => p.className) : [],
+    // Every class that states a spellcasting ability, whether or not it has slots of its own: a
+    // Paladin's Charisma DC matters at level 1, before the first slot arrives.
+    casting: per.filter(p => castingAbilityId(p.castingAbility))
+      .map(p => ({ className: p.className, ability: castingAbilityId(p.castingAbility) })),
   };
 }
 
@@ -881,7 +1107,81 @@ export function hitDicePool(classes, defs = {}) {
     if (!hd || !num(c?.level)) continue;
     by.set(hd, (by.get(hd) || 0) + num(c.level));
   }
-  return [...by.entries()].sort((a, b) => b[0] - a[0]).map(([d, n]) => `${n}d${d}`).join(" + ");
+  return formatHitDice([...by.entries()].sort((a, b) => b[0] - a[0]).map(([die, n]) => ({ die, n })));
+}
+
+// ── Hit dice ────────────────────────────────────────────────────────────
+// The pool is a STRING on the sheet — "2d10 + 9d8" — because that is what it shows, what a level up
+// writes, and what a player with a class the catalogue has never heard of types in by hand. So it is
+// also what the engine reads, rather than a second structured copy that can drift out of step with
+// the one on screen. What is SPENT is the only thing stored separately: `hitDiceUsed`, by die size.
+export function parseHitDice(text) {
+  const by = new Map();
+  for (const m of String(text || "").matchAll(/(\d+)\s*d\s*(\d+)/gi)) {
+    const die = num(m[2]), n = num(m[1]);
+    if (die > 0 && n > 0) by.set(die, (by.get(die) || 0) + n);
+  }
+  return [...by.entries()].sort((a, b) => b[0] - a[0]).map(([die, n]) => ({ die, n }));
+}
+export const formatHitDice = rows =>
+  (rows || []).filter(r => r && num(r.n) > 0).map(r => `${num(r.n)}d${num(r.die)}`).join(" + ");
+
+export function hitDiceState(ch) {
+  const used = ch?.hitDiceUsed || {};
+  const rows = parseHitDice(ch?.hitDice).map(r => {
+    const spent = clamp(used[r.die], 0, r.n);
+    return { die: r.die, n: r.n, used: spent, left: r.n - spent };
+  });
+  const sum = k => rows.reduce((t, r) => t + r[k], 0);
+  return { rows, total: sum("n"), used: sum("used"), left: sum("left"),
+    pool: formatHitDice(rows) };
+}
+
+// Spending one. The roll is passed IN, because rolling dice is the interface's job and this file is
+// the one part of the tool that has to stay deterministic. A Constitution penalty cannot make a hit
+// die cost you hit points, so the total it gives back is floored at zero, and what is actually
+// healed is capped at your maximum — the two are reported separately so the dialog can say both.
+export function spendHitDie(ch, die, roll) {
+  const row = hitDiceState(ch).rows.find(r => r.die === num(die));
+  if (!row || row.left <= 0) return null;
+  const con = abilityModifier(ch, "con");
+  const regained = Math.max(0, num(roll) + con);
+  const before = clamp(ch?.hp, 0, maxHp(ch));
+  const hp = clamp(before + regained, 0, maxHp(ch));
+  return {
+    die: row.die, roll: num(roll), con, regained, healed: hp - before, hp,
+    hitDiceUsed: { ...(ch?.hitDiceUsed || {}), [row.die]: row.used + 1 },
+    left: row.left - 1,
+  };
+}
+
+// Handing one back — the same gesture as a spent spell slot, for the die spent by mistake.
+export function returnHitDie(ch, die) {
+  const row = hitDiceState(ch).rows.find(r => r.die === num(die));
+  if (!row || row.used <= 0) return null;
+  return { ...(ch?.hitDiceUsed || {}), [row.die]: row.used - 1 };
+}
+
+// A long rest hands back half the pool, rounded down, minimum one.
+export const hitDiceRegained = total => Math.max(1, Math.floor(Math.max(0, num(total)) / 2));
+
+// Which ones come back: the biggest dice first, because a d10 heals more than a d8 and that is what
+// anybody would pick. 2014 leaves the choice to the player, so the rest says which went back and a
+// spent pip hands any of them over again — the one case where it matters is a click away.
+export function restoreHitDice(ch, count) {
+  const st = hitDiceState(ch);
+  const next = { ...(ch?.hitDiceUsed || {}) };
+  const back = [];
+  let owed = Math.max(0, num(count));
+  for (const r of st.rows) {
+    if (owed <= 0) break;
+    const give = Math.min(owed, r.used);
+    if (!give) continue;
+    next[r.die] = r.used - give;
+    back.push({ die: r.die, n: give });
+    owed -= give;
+  }
+  return { hitDiceUsed: next, back, restored: Math.max(0, num(count)) - owed };
 }
 
 // Merging a derived feature list into the sheet's own. Three rules, in this order: a feature the
@@ -937,6 +1237,169 @@ export function levelUpPlan(ch, defs = {}, { target, className } = {}) {
   };
 }
 
+// ── Spellcasting ────────────────────────────────────────────────────────
+// Two numbers per casting class, and they are NOT the campaign's Verum DC. A Wizard's spells are
+// resisted at 8 + PB + Intelligence; a seal is resisted at the Verum DC, which folds in Dream and
+// the highest modifier of the six. Both belong on the sheet, and conflating them would mean every
+// published spell the party casts is read at the wrong DC (CS-043).
+//
+// A multiclass caster has one of each PER CLASS, because the ability differs: Richard's Paladin
+// spells are Charisma and a Wizard level would be Intelligence. Proficiency is the character's, from
+// the total level, which is what 2014 multiclassing says.
+export const CASTING_ABILITY = {
+  strength: "str", dexterity: "dex", constitution: "con",
+  intelligence: "int", wisdom: "wis", charisma: "cha", dream: "dream",
+  str: "str", dex: "dex", con: "con", int: "int", wis: "wis", cha: "cha",
+};
+export function castingAbilityId(name) {
+  return CASTING_ABILITY[String(name || "").trim().toLowerCase()] || "";
+}
+
+// Temporary attack and damage modifiers are deliberately NOT folded in here, the same way the seal
+// attack bonus leaves them out: this is the number printed on the sheet, and a round of Bless is
+// shown on the roll that uses it rather than quietly rewritten into the character's statistics.
+export const spellSaveDC = (ch, abilityId) =>
+  8 + proficiencyBonus(ch.level) + abilityModifier(ch, abilityId)
+  + modifierTotal(activeModifiers(ch), "saveDc");
+export const spellAttackBonus = (ch, abilityId) =>
+  proficiencyBonus(ch.level) + abilityModifier(ch, abilityId);
+
+// One row per casting class, in the order the classes sit on the sheet. `plan` is a featurePlan —
+// passed in, because which classes cast comes from the catalogue and nothing here may fetch.
+export function spellcasting(ch, plan) {
+  return (plan?.casting || []).map(c => ({
+    className: c.className, ability: c.ability, abilityName: ABILITY_NAME[c.ability],
+    mod: abilityModifier(ch, c.ability),
+    dc: spellSaveDC(ch, c.ability),
+    attack: spellAttackBonus(ch, c.ability),
+  }));
+}
+
+// ── The spellbook ───────────────────────────────────────────────────────
+// `spells.book` is a flat list; an entry is a catalogue spell's own compact fields plus how the
+// character came by it. CS-041 asks for known, prepared, always-prepared and granted tracked
+// SEPARATELY, and they are four genuinely different standings rather than one flag under four names:
+//
+//   known     in your repertoire, not ready today — the spells sitting in a Wizard's book
+//   prepared  chosen for today, and castable
+//   always    always prepared, never counted against the day's list — a Domain, Oath or Pact spell
+//   granted   from a feature, an item or an ancestry rather than from the class's own list
+//
+// Only the first is uncastable, which is the single rule the rest of the sheet reads. A caster who
+// casts from what they know rather than from what they prepared — a Bard, a Sorcerer, a Warlock —
+// marks their repertoire Prepared once and never thinks about it again; the engine does not decide
+// which kind of caster a class is, because the compendium data does not say.
+export const SPELL_STANDINGS = [
+  { id: "known", label: "Known", short: "known",
+    hint: "In your repertoire, not ready today." },
+  { id: "prepared", label: "Prepared", short: "prepared",
+    hint: "Chosen for today, and castable." },
+  { id: "always", label: "Always prepared", short: "always",
+    hint: "Always ready, and never counted against the day's list." },
+  { id: "granted", label: "Granted", short: "granted",
+    hint: "From a feature, an item or your ancestry rather than your class's list." },
+];
+export const SPELL_STANDING = Object.fromEntries(SPELL_STANDINGS.map(s => [s.id, s]));
+
+export const spellLevel = s => clamp(s?.level, 0, 9);
+// Fight Club writes a ritual as "YES"; an absent field and a literal "no" both mean it is not one.
+export const spellIsRitual = s =>
+  !!s?.ritual && !/^(no|false|0)$/i.test(String(s.ritual).trim());
+// Concentration is not its own field in the data — it is in the duration, and that is where every
+// book puts it too ("Concentration, up to 1 minute").
+export const spellIsConcentration = s => /concentration/i.test(String(s?.duration || ""));
+export const spellStanding = s => (SPELL_STANDING[s?.standing] ? s.standing : "known");
+// A cantrip is always castable: there is nothing to prepare and nothing to spend.
+export const spellCastable = s => spellLevel(s) === 0 || spellStanding(s) !== "known";
+
+// What this spell's compact record looks like, made from a catalogue entry. The long rules text is
+// deliberately NOT copied: a sheet is saved on every edit, and forty spells' worth of prose on every
+// keystroke is a lot of nothing. It is read back from the catalogue when a spell is opened, and a
+// spell whose entry has since gone still casts — it just has no text to show.
+export const spellRecord = (e, standing = "known") => ({
+  id: `sp:${String(e?.name || "").toLowerCase()}`,
+  name: String(e?.name || ""), level: clamp(e?.level, 0, 9),
+  school: e?.school || "", time: e?.time || "", range: e?.range || "",
+  components: e?.components || "", duration: e?.duration || "",
+  ritual: e?.ritual || "", classes: e?.classes || "", source: e?.source || "",
+  standing: SPELL_STANDING[standing] ? standing : "known",
+});
+
+// The book, grouped the way a sheet reads it: cantrips first, then one row per level the character
+// actually has a spell at. Levels with nothing in them are left out rather than printed empty.
+export function spellbook(ch) {
+  const list = (ch?.spells?.book || []).filter(s => s && s.name);
+  const byLevel = new Map();
+  for (const s of list) {
+    const lv = spellLevel(s);
+    if (!byLevel.has(lv)) byLevel.set(lv, []);
+    byLevel.get(lv).push(s);
+  }
+  const levels = [...byLevel.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([level, spells]) => ({
+      level,
+      spells: spells.sort((a, b) => String(a.name).localeCompare(String(b.name))),
+    }));
+  const by = id => list.filter(s => spellStanding(s) === id).length;
+  return {
+    list, levels,
+    counts: {
+      total: list.length,
+      known: by("known"), prepared: by("prepared"), always: by("always"), granted: by("granted"),
+      cantrips: list.filter(s => spellLevel(s) === 0).length,
+      // What a player actually wants counted: how many of today's list are ready to cast, cantrips
+      // and always-prepared spells left out because neither is a decision made this morning.
+      ready: list.filter(s => spellLevel(s) > 0 && spellStanding(s) === "prepared").length,
+      concentration: list.filter(spellIsConcentration).length,
+      rituals: list.filter(spellIsRitual).length,
+    },
+  };
+}
+
+export const inSpellbook = (ch, name) =>
+  (ch?.spells?.book || []).some(s => String(s?.name).toLowerCase() === String(name).toLowerCase());
+
+// Which slots could pay for this spell: its own level and every higher one with a slot left. That
+// list IS upcasting — a 1st-level spell cast from a 3rd-level slot is one of these rows (CS-044).
+// A cantrip returns none, because it costs nothing.
+export function castingOptions(ch, level) {
+  const lv = clamp(level, 0, 9);
+  if (!lv) return [];
+  const slots = ch?.spells?.slots || {};
+  const out = [];
+  for (let l = lv; l <= 9; l++) {
+    const row = slots[l];
+    if (!row || !num(row.max)) continue;
+    out.push({ level: l, max: num(row.max), used: num(row.used),
+      left: Math.max(0, num(row.max) - num(row.used)) });
+  }
+  return out;
+}
+
+// Spending one. Returns the whole `spells` object to write, or null if there was nothing to spend —
+// the caller says so rather than silently casting for free.
+export function spendSlot(ch, level) {
+  const slots = { ...(ch?.spells?.slots || {}) };
+  const row = slots[level];
+  if (!row || num(row.used) >= num(row.max)) return null;
+  slots[level] = { ...row, used: num(row.used) + 1 };
+  return { ...(ch?.spells || {}), slots };
+}
+
+// The dice a spell's own text mentions, so casting can offer to roll them. This reads the text and
+// claims nothing about the rules: "8d6" in Fireball's description is an offer to roll 8d6, and which
+// of them the situation calls for is still the player's and the DM's to settle.
+export function diceInText(text, max = 6) {
+  const out = [];
+  for (const m of String(text || "").matchAll(/\b(\d{1,2})d(4|6|8|10|12|20|100)\b/g)) {
+    const d = `${m[1]}d${m[2]}`;
+    if (!out.includes(d)) out.push(d);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 // ── helpers ─────────────────────────────────────────────────────────────
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : 0; }
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, num(v))); }
@@ -949,7 +1412,7 @@ export function blankCharacter() {
     name: "", level: 1, classes: [], ancestry: "", background: "",
     abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, dream: DREAM_START },
     saves: {}, skills: {}, skillAbility: {},
-    hp: 1, maxHp: 1, tempHp: 0, ac: 10, speed: 30, hitDice: "",
+    hp: 1, maxHp: 1, tempHp: 0, ac: 10, speed: 30, hitDice: "", hitDiceUsed: {},
     deathSaveSuccesses: 0, deathSaveFailures: 0,
     exhaustion: 0, dreamExhaustion: 0, wounds: 0, injuries: [], safeHavenRests: 0,
     honor: { order: 0, chaos: 0 }, morality: { good: 0, evil: 0 },
@@ -957,8 +1420,10 @@ export function blankCharacter() {
     fate: 0,
     attuned: [], attunementBonus: 0,
     equipment: {}, carried: [], anatomy: [],
+    coins: { pp: 0, gp: 0, ep: 0, sp: 0, cp: 0 },
     modifiers: [], actions: [], grants: [], used: {}, conditions: [], round: 1, inCombat: false,
-    attacks: [], features: [], inventory: [], spells: {}, notes: "",
+    attacks: [], features: [], inventory: [], notes: "",
+    spells: { slots: {}, book: [], cantripsKnown: 0, slotsReset: "l" },
     portrait: "", accent: "",
     rulesVersion: RULES_VERSION,
   };

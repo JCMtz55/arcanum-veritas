@@ -87,7 +87,8 @@ function normalise(character) {
   const blank = rules.blankCharacter();
   const sheet = { ...blank, ...(character.sheet || {}) };
   sheet.abilities = { ...blank.abilities, ...(character.sheet?.abilities || {}) };
-  for (const k of ["saves", "skills", "skillAbility", "spells", "equipment", "used"])
+  for (const k of ["saves", "skills", "skillAbility", "spells", "equipment", "used", "hitDiceUsed",
+                   "coins"])
     sheet[k] = { ...blank[k], ...(character.sheet?.[k] || {}) };
   for (const k of ["modifiers", "actions", "grants", "injuries", "attacks", "features", "inventory",
                    "attuned", "conditions", "carried", "anatomy"])
@@ -105,6 +106,9 @@ export function derived() {
     abilities: { ...c.sheet.abilities, dream: c.dream },
     level: c.level, fate: c.fate,
     honor: c.honor, morality: c.morality,
+    // Where the character is standing travels with them, because an item's effects depend on it: a
+    // Dreamlike item is inactive while awake, and the engine must not have to be told twice.
+    inInsomnia: state.inInsomnia,
   };
 }
 

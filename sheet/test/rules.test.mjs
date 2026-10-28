@@ -856,3 +856,401 @@ test("a rest brings back only the resources whose rule is written down", () => {
   assert.equal(long.next.features.find(f => f.id === "res:Fighter:Indomitable").used, 0);
   assert.equal(long.next.hp, 40);
 });
+
+// ── Items ───────────────────────────────────────────────────────────────
+// CS-051 asks that equipping an item apply its effect, and CS-052 and CS-065 for charges with a
+// recharge trigger. The point of the design is that an item contributes ordinary modifiers, so none
+// of the totals below needed new arithmetic to notice it.
+
+const worn = (slot, item) => ({ ...R.blankCharacter(), ac: 10, speed: 30,
+  equipment: { [slot]: { name: "x", ...item } } });
+
+test("an equipped item's effects reach every total, and a carried one's do not", () => {
+  const ring = { name: "Ring of Protection", magical: true, requiresAttunement: true, attuned: true,
+    effects: [{ target: "ac", amount: 1 }, { target: "save:dex", amount: 1 }] };
+
+  const on = worn("ring1", ring);
+  assert.equal(R.armorClass(on), 11);
+  assert.equal(R.saveTotal(on, "dex"), 1);
+  assert.equal(R.itemEffects(on).length, 2);
+  assert.equal(R.itemEffects(on)[0].reason, "Ring of Protection");
+  assert.ok(R.isItemModifier(R.itemEffects(on)[0]));
+
+  // Not attuned: it needs it, so it does nothing.
+  const loose = worn("ring1", { ...ring, attuned: false });
+  assert.equal(R.armorClass(loose), 10);
+  assert.equal(R.itemIsActive(loose, loose.equipment.ring1, "slot:ring1"), false);
+
+  // In the pack rather than on the hand: carrying a ring has never done anything.
+  const packed = { ...R.blankCharacter(), ac: 10, carried: [ring] };
+  assert.equal(R.armorClass(packed), 10);
+  assert.equal(R.itemEffects(packed).length, 0);
+
+  // A Dreamlike item is inactive while awake and in force in Insomnia, without the attunement
+  // breaking either way (DM-14, RES-09).
+  const dreamy = worn("neck", { name: "Lucid Pendant", insomniaOnly: true,
+    effects: [{ target: "ability:dream", amount: 2 }] });
+  assert.equal(R.abilityScore(dreamy, "dream"), R.DREAM_START);
+  assert.equal(R.abilityScore({ ...dreamy, inInsomnia: true }, "dream"), R.DREAM_START + 2);
+
+  // And it stacks with a hand-written modifier rather than replacing it — one list, one path.
+  const blessed = { ...on, modifiers: [{ id: "m1", target: "ac", amount: 2, reason: "Shield of Faith", active: true }] };
+  assert.equal(R.armorClass(blessed), 13);
+  assert.deepEqual(R.contributions(R.activeModifiers(blessed), "ac").map(c => c.reason),
+    ["Shield of Faith", "Ring of Protection"]);
+});
+
+test("a contribution says whether it lasts, and where it came from", () => {
+  const ch = { ...R.blankCharacter(), ac: 10,
+    equipment: { shoulders: { name: "Cloak of Protection", effects: [{ target: "ac", amount: 1 }] } },
+    modifiers: [
+      { id: "m1", target: "ac", amount: 2, reason: "Shield of Faith", rounds: 10, active: true },
+      { id: "m2", target: "ac", amount: 1, reason: "A ruling of the DM's", rounds: null, active: true },
+      { id: "m3", target: "ac", amount: 9, reason: "expired", rounds: 0, active: false },
+    ] };
+
+  const on = R.contributions(R.activeModifiers(ch), "ac");
+  assert.deepEqual(on.map(c => [c.reason, c.permanent, c.source]), [
+    ["Shield of Faith", false, ""],
+    ["A ruling of the DM's", true, ""],
+    ["Cloak of Protection", true, "item"],
+  ]);
+  assert.equal(R.armorClass(ch), 14, "an inactive one contributes nothing");
+
+  // Which is the whole split the sheet draws: the round tracker holds what runs out, and everything
+  // else is simply true of the character.
+  assert.equal(on.filter(c => !c.permanent).length, 1);
+  assert.equal(on.filter(c => c.permanent).length, 2);
+  assert.equal(on.filter(c => c.source === "item").length, 1);
+});
+
+test("an item's effects reach the derived numbers that are not plain addition", () => {
+  // Strength through an item moves carrying capacity, because capacity reads the score.
+  const belt = worn("waist", { name: "Belt of Hill Giant Strength", requiresAttunement: true,
+    attuned: true, effects: [{ target: "ability:str", amount: 11 }] });
+  assert.equal(R.abilityScore(belt, "str"), 21);
+  assert.equal(R.carryingCapacity(belt).capacity, 315);
+
+  // And a save-DC item moves the Verum DC and a class DC alike.
+  const rod = worn("mainHand", { name: "Rod of the Pact Keeper",
+    effects: [{ target: "saveDc", amount: 1 }] });
+  assert.equal(R.verumDC(rod), R.verumDC({ ...rod, equipment: {} }) + 1);
+  assert.equal(R.spellSaveDC(rod, "cha"), R.spellSaveDC({ ...rod, equipment: {} }, "cha") + 1);
+});
+
+test("charges are spent, and come back on the trigger the item carries", () => {
+  const wand = { name: "Wand of Magic Missiles",
+    charges: { max: 7, used: 7, recharge: "dawn", regain: "1d6+1" } };
+  const staff = { name: "Staff of Healing", charges: { max: 10, used: 4, recharge: "long", regain: "all" } };
+  const pearl = { name: "Pearl of Power", charges: { max: 1, used: 1, recharge: "manual", regain: "all" } };
+
+  const c = R.itemCharges(staff);
+  assert.deepEqual([c.max, c.used, c.left, c.recharge, c.regain], [10, 4, 6, "long", "all"]);
+  assert.equal(R.itemCharges({ name: "Rope" }), null, "no charges is not zero charges");
+
+  assert.equal(R.spendCharges(staff, 1).used, 5);
+  assert.equal(R.spendCharges(wand, 1), null, "nothing left to spend");
+  assert.equal(R.restoreCharges(staff, 2).used, 2);
+  assert.equal(R.restoreCharges(staff).used, 0, "no number means all of them");
+
+  const ch = { ...R.blankCharacter(), hp: 9, maxHp: 9,
+    equipment: { mainHand: wand }, carried: [staff, pearl] };
+
+  // A short rest fires neither of these; a long rest fires the staff but not the wand.
+  assert.deepEqual(R.rechargePlan(ch, { kind: "short" }), []);
+  assert.deepEqual(R.rechargePlan(ch, { kind: "long" }).map(p => p.name), ["Staff of Healing"]);
+  // Only once the rest is said to have carried through dawn does the wand come back.
+  assert.deepEqual(R.rechargePlan(ch, { kind: "long", dawn: true }).map(p => p.name),
+    ["Wand of Magic Missiles", "Staff of Healing"]);
+  // The Pearl recharges on nothing — it waits to be told, and no rest ever claims it.
+  assert.ok(!R.rechargePlan(ch, { kind: "long", dawn: true, dusk: true })
+    .some(p => p.name === "Pearl of Power"));
+
+  // A long rest resolves the "all" one itself and REPORTS the dice one rather than guessing it.
+  const long = R.restPreview(ch, { kind: "long", dawn: true });
+  assert.equal(R.itemCharges(long.next.carried[0]).used, 0, "the staff is full again");
+  assert.equal(R.itemCharges(long.next.equipment.mainHand).used, 7, "the wand waits for its roll");
+  assert.deepEqual(long.roll.map(r => [r.name, r.regain]), [["Wand of Magic Missiles", "1d6+1"]]);
+  assert.ok(long.changes.some(c2 => /item charges/i.test(c2.label)));
+
+  // Which the caller then applies with whatever it rolled.
+  const after = R.applyRecharge(ch, [{ where: "slot:mainHand", by: 4 }]);
+  assert.equal(R.itemCharges(after.equipment.mainHand).left, 4);
+  assert.equal(R.itemCharges(after.carried[0]).used, 4, "nothing else moved");
+
+  // Nothing spent, nothing said.
+  const full = { ...ch, equipment: {}, carried: [{ ...staff, charges: { ...staff.charges, used: 0 } }] };
+  assert.ok(!R.restPreview(full, { kind: "long", dawn: true }).changes
+    .some(c2 => /item charges/i.test(c2.label)));
+});
+
+test("coin, weight and the optional encumbrance bands", () => {
+  const coins = { pp: 2, gp: 30, ep: 0, sp: 40, cp: 50 };
+  assert.equal(R.coinTotalGp(coins), 54.5);       // 20 + 30 + 4 + 0.5
+  assert.equal(R.coinCount(coins), 122);
+  assert.equal(R.coinWeight(coins), 2.44);
+
+  const ch = { ...R.blankCharacter(), abilities: { ...R.blankCharacter().abilities, str: 10 },
+    coins, equipment: { chest: { name: "Plate", weight: 65 } },
+    carried: [{ name: "Rations", qty: 5, weight: 2 }, { name: "Letter", qty: 1 }] };
+
+  assert.equal(R.itemWeightTotal({ weight: 2, qty: 5 }), 10);
+  assert.deepEqual(R.carriedWeight(ch), { items: 75, coins: 2.44, total: 77.44 });
+  assert.deepEqual(R.carryingCapacity(ch), { capacity: 150, encumbered: 50, heavilyEncumbered: 100 });
+  assert.equal(R.encumbrance(ch).band, "light");
+  assert.equal(R.encumbrance({ ...ch, carried: [], equipment: {}, coins: {} }).band, "none");
+  // The plate alone is already past Strength 10's threshold, which is the point of the variant.
+  assert.equal(R.encumbrance({ ...ch, carried: [] }).band, "light");
+  assert.equal(R.encumbrance({ ...ch, equipment: { chest: { name: "Anvil", weight: 300 } } }).band, "over");
+
+  // Capacity follows the score, items included — the belt test above is the other half of this.
+  const strong = { ...ch, abilities: { ...ch.abilities, str: 20 } };
+  assert.equal(R.carryingCapacity(strong).capacity, 300);
+  assert.equal(R.encumbrance(strong).band, "none");
+});
+
+test("one item in one place: every address resolves to the same record", () => {
+  const ch = { ...R.blankCharacter(),
+    equipment: { mainHand: { name: "Dagger" }, head: { name: "" } },
+    carried: [{ name: "Rope" }, { name: "" }, { name: "Torch" }] };
+
+  assert.deepEqual(R.allItems(ch).map(r => [r.where, r.item.name]),
+    [["slot:mainHand", "Dagger"], ["pack:0", "Rope"], ["pack:2", "Torch"]]);
+  assert.equal(R.findItem(ch, "slot:mainHand").item.name, "Dagger");
+  assert.equal(R.findItem(ch, "pack:2").item.name, "Torch");
+  assert.equal(R.findItem(ch, "pack:1"), null, "an unnamed row is not an item");
+  assert.equal(R.findItem(ch, "slot:feet"), null);
+});
+
+// ── Hit dice ────────────────────────────────────────────────────────────
+// CS-031 asks for expenditure with the Constitution bonus applied. The pool was derived and shown
+// and there was no way to spend one: a short rest said "choose how many below" and there was
+// nothing below.
+
+test("the pool is read back out of the string the sheet shows", () => {
+  assert.deepEqual(R.parseHitDice("2d10 + 9d8"), [{ die: 10, n: 2 }, { die: 8, n: 9 }]);
+  assert.deepEqual(R.parseHitDice("11d6"), [{ die: 6, n: 11 }]);
+  // Biggest die first however it was typed, and two entries of a size are one pool.
+  assert.deepEqual(R.parseHitDice("3d6 + 2d12 + 1d6"), [{ die: 12, n: 2 }, { die: 6, n: 4 }]);
+  assert.deepEqual(R.parseHitDice("5 D 8"), [{ die: 8, n: 5 }]);
+  assert.deepEqual(R.parseHitDice("nonsense"), []);
+  assert.deepEqual(R.parseHitDice(""), []);
+  assert.equal(R.formatHitDice([{ die: 10, n: 2 }, { die: 8, n: 0 }]), "2d10");
+
+  // Which means a derived pool and a hand-typed one are the same thing to everything downstream.
+  assert.equal(R.hitDicePool([{ name: "Fighter", level: 2 }, { name: "Rogue", level: 9 }], DEFS),
+    "2d10 + 9d8");
+});
+
+test("spending a hit die rolls it and adds Constitution", () => {
+  // Constitution 16 (+3), 20 of 44 hit points, a 2/9 split pool with one d8 already gone.
+  const ch = { ...R.blankCharacter(), level: 11, hp: 20, maxHp: 44,
+    abilities: { ...R.blankCharacter().abilities, con: 16 },
+    hitDice: "2d10 + 9d8", hitDiceUsed: { 8: 1 } };
+
+  const st = R.hitDiceState(ch);
+  assert.deepEqual(st.rows, [{ die: 10, n: 2, used: 0, left: 2 }, { die: 8, n: 9, used: 1, left: 8 }]);
+  assert.deepEqual([st.total, st.used, st.left], [11, 1, 10]);
+
+  const out = R.spendHitDie(ch, 10, 6);
+  assert.equal(out.con, 3);
+  assert.equal(out.regained, 9);                 // 6 + 3
+  assert.equal(out.healed, 9);
+  assert.equal(out.hp, 29);
+  assert.deepEqual(out.hitDiceUsed, { 8: 1, 10: 1 });
+
+  // Healing never exceeds the maximum, and the two numbers are reported apart so the dialog can
+  // say "9 rolled, and you were near your maximum".
+  const nearly = R.spendHitDie({ ...ch, hp: 42 }, 10, 6);
+  assert.equal(nearly.regained, 9);
+  assert.equal(nearly.healed, 2);
+  assert.equal(nearly.hp, 44);
+
+  // A Constitution penalty cannot make a hit die cost you hit points.
+  const frail = { ...ch, abilities: { ...ch.abilities, con: 4 } };          // -3
+  assert.equal(R.spendHitDie(frail, 8, 1).regained, 0);
+  assert.equal(R.spendHitDie(frail, 8, 1).healed, 0);
+
+  // A size that is spent out, and a size the character does not have.
+  assert.equal(R.spendHitDie({ ...ch, hitDiceUsed: { 10: 2, 8: 9 } }, 10, 5), null);
+  assert.equal(R.spendHitDie(ch, 12, 5), null);
+
+  // And handing one back, the same gesture as a spent spell slot.
+  assert.deepEqual(R.returnHitDie(ch, 8), { 8: 0 });
+  assert.equal(R.returnHitDie(ch, 10), null, "nothing to hand back");
+});
+
+test("a long rest hands back half the pool, rounded down, minimum one", () => {
+  assert.equal(R.hitDiceRegained(11), 5);
+  assert.equal(R.hitDiceRegained(1), 1, "minimum one, never none");
+  assert.equal(R.hitDiceRegained(2), 1);
+  assert.equal(R.hitDiceRegained(0), 1);
+
+  const ch = { ...R.blankCharacter(), level: 11, hp: 44, maxHp: 44,
+    hitDice: "2d10 + 9d8", hitDiceUsed: { 10: 2, 8: 9 } };
+
+  // Biggest die first: the d10s are worth more and are what anyone would choose back.
+  const r = R.restoreHitDice(ch, 5);
+  assert.deepEqual(r.hitDiceUsed, { 10: 0, 8: 6 });
+  assert.deepEqual(r.back, [{ die: 10, n: 2 }, { die: 8, n: 3 }]);
+  assert.equal(r.restored, 5);
+
+  // Asking for more than are spent gives back what there is, and says so.
+  const all = R.restoreHitDice({ ...ch, hitDiceUsed: { 8: 2 } }, 5);
+  assert.equal(all.restored, 2);
+
+  const long = R.restPreview(ch, { kind: "long" });
+  assert.deepEqual(long.next.hitDiceUsed, { 10: 0, 8: 6 });
+  const line = long.changes.find(c => /hit dice come back/i.test(c.label));
+  assert.equal(line.detail, "2d10 + 3d8");
+  assert.deepEqual([line.from, line.to], [0, 5]);
+
+  // Nothing spent, nothing said — and a short rest never hands any back on its own.
+  const fresh = { ...ch, hitDiceUsed: {} };
+  assert.ok(!R.restPreview(fresh, { kind: "long" }).changes.some(c => /hit dice come back/i.test(c.label)));
+  const short = R.restPreview(ch, { kind: "short" });
+  assert.equal(short.next.hitDiceUsed, undefined);
+  assert.match(short.changes.find(c => /hit dice/i.test(c.label)).detail, /0 of 11 left/);
+});
+
+// ── Spellcasting ────────────────────────────────────────────────────────
+// CS-062 asks a rest to refresh slots, and it did not: five of the eight PCs cast, and every one of
+// them long-rested still holding spent slots. These are the tests that would have caught it.
+
+const caster = (over = {}) => ({ ...R.blankCharacter(), ...over,
+  abilities: { ...R.blankCharacter().abilities, ...(over.abilities || {}) },
+  spells: { ...R.blankCharacter().spells, ...(over.spells || {}) } });
+
+test("a long rest brings every spent spell slot back", () => {
+  const ch = caster({ level: 5, hp: 10, maxHp: 40, spells: { slots: {
+    1: { max: 4, used: 4 }, 2: { max: 3, used: 1 }, 3: { max: 2, used: 0 },
+  } } });
+
+  const long = R.restPreview(ch, { kind: "long" });
+  assert.equal(long.next.spells.slots[1].used, 0);
+  assert.equal(long.next.spells.slots[2].used, 0);
+  assert.equal(long.next.spells.slots[1].max, 4, "the pool itself is not touched");
+  assert.ok(long.changes.some(c => /spell slots/i.test(c.label)));
+
+  // A short rest leaves them alone for everyone but a pact caster.
+  const short = R.restPreview(ch, { kind: "short" });
+  assert.equal(short.next.spells, undefined);
+  assert.ok(!short.changes.some(c => /spell slots/i.test(c.label)));
+
+  // Nothing spent, nothing to say.
+  const fresh = caster({ level: 5, spells: { slots: { 1: { max: 4, used: 0 } } } });
+  assert.ok(!R.restPreview(fresh, { kind: "long" }).changes.some(c => /spell slots/i.test(c.label)));
+});
+
+test("Pact Magic slots come back on a short rest, and that is read out of the data", () => {
+  assert.equal(R.slotResetFor(def("Warlock")), "s");
+  assert.equal(R.slotResetFor(def("Wizard")), "l");
+  assert.equal(R.slotResetFor(def("Paladin")), "l");
+  assert.equal(R.classProgress(def("Warlock"), 5).slotsReset, "s");
+  assert.equal(R.featurePlan([{ name: "Warlock", level: 5 }], DEFS).slotsReset, "s");
+
+  const pact = caster({ level: 5, hp: 40, maxHp: 40,
+    spells: { slotsReset: "s", slots: { 3: { max: 2, used: 2 } } } });
+  assert.equal(R.restPreview(pact, { kind: "short" }).next.spells.slots[3].used, 0);
+  // A long rest includes everything a short one gives, so they come back there too.
+  assert.equal(R.restPreview(pact, { kind: "long" }).next.spells.slots[3].used, 0);
+});
+
+test("a spell save DC and attack bonus are per class, and are not the Verum DC", () => {
+  // Level 5, Intelligence 18 (+4), Wisdom 14 (+2), proficiency +3.
+  const ch = caster({ level: 5, abilities: { int: 18, wis: 14, dream: 16 } });
+  assert.equal(R.proficiencyBonus(5), 3);
+  assert.equal(R.spellSaveDC(ch, "int"), 15);        // 8 + 3 + 4
+  assert.equal(R.spellAttackBonus(ch, "int"), 7);    // 3 + 4
+  assert.equal(R.spellSaveDC(ch, "wis"), 13);
+
+  // The campaign's own DC folds in Dream and the best of the six, so it is a different number and
+  // must never be used for a published spell.
+  assert.equal(R.verumDC(ch), 18);                   // 8 + 3 + 4 + 3
+  assert.notEqual(R.verumDC(ch), R.spellSaveDC(ch, "int"));
+
+  const plan = R.featurePlan([{ name: "Wizard", level: 3 }, { name: "Cleric", level: 2 }], DEFS);
+  const rows = R.spellcasting(ch, plan);
+  assert.deepEqual(rows.map(r => [r.className, r.ability, r.dc, r.attack]),
+    [["Wizard", "int", 15, 7], ["Cleric", "wis", 13, 5]]);
+
+  // A saveDc modifier reaches a class DC the same way it reaches the Verum DC.
+  const blessed = caster({ level: 5, abilities: { int: 18 },
+    modifiers: [{ target: "saveDc", amount: 1, reason: "a ring", active: true }] });
+  assert.equal(R.spellSaveDC(blessed, "int"), 16);
+
+  assert.equal(R.castingAbilityId("Intelligence"), "int");
+  assert.equal(R.castingAbilityId("charisma"), "cha");
+  assert.equal(R.castingAbilityId(""), "");
+});
+
+test("the four standings are tracked separately, and only one of them cannot be cast", () => {
+  const book = [
+    { id: "a", name: "Fire Bolt", level: 0, standing: "known" },
+    { id: "b", name: "Shield", level: 1, standing: "prepared", duration: "1 round" },
+    { id: "c", name: "Bless", level: 1, standing: "always", duration: "Concentration, up to 1 minute" },
+    { id: "d", name: "Hellish Rebuke", level: 1, standing: "granted" },
+    { id: "e", name: "Fireball", level: 3, standing: "known", ritual: "YES" },
+  ];
+  const ch = caster({ spells: { book } });
+  const b = R.spellbook(ch);
+
+  assert.deepEqual(b.levels.map(g => [g.level, g.spells.length]), [[0, 1], [1, 3], [3, 1]]);
+  assert.deepEqual(b.levels[1].spells.map(s => s.name), ["Bless", "Hellish Rebuke", "Shield"]);
+  assert.equal(b.counts.total, 5);
+  assert.equal(b.counts.ready, 1, "cantrips and always-prepared are not today's decisions");
+  assert.equal(b.counts.known, 2);
+  assert.equal(b.counts.always, 1);
+  assert.equal(b.counts.granted, 1);
+  assert.equal(b.counts.concentration, 1);
+  assert.equal(b.counts.rituals, 1);
+
+  // A cantrip is always castable; a levelled spell still only known is not.
+  assert.equal(R.spellCastable(book[0]), true);
+  assert.equal(R.spellCastable(book[1]), true);
+  assert.equal(R.spellCastable(book[2]), true);
+  assert.equal(R.spellCastable(book[3]), true);
+  assert.equal(R.spellCastable(book[4]), false);
+
+  assert.equal(R.spellIsConcentration(book[2]), true);
+  assert.equal(R.spellIsConcentration(book[1]), false);
+  assert.equal(R.spellIsRitual(book[4]), true);
+  assert.equal(R.spellIsRitual({ ritual: "no" }), false);
+  assert.equal(R.spellIsRitual({}), false);
+
+  assert.equal(R.inSpellbook(ch, "fireball"), true);
+  assert.equal(R.inSpellbook(ch, "Counterspell"), false);
+  // An unknown standing reads as known rather than as nothing.
+  assert.equal(R.spellStanding({ standing: "nonsense" }), "known");
+});
+
+test("casting spends the slot you choose, which is all upcasting is", () => {
+  const ch = caster({ spells: { slots: {
+    1: { max: 4, used: 4 }, 2: { max: 3, used: 1 }, 3: { max: 2, used: 0 }, 5: { max: 1, used: 1 },
+  } } });
+
+  // A 1st-level spell can be paid for from 1, 2, 3 or 5 — and the engine says how many are left in
+  // each, so the dialog can grey out the ones that cannot pay.
+  assert.deepEqual(R.castingOptions(ch, 1).map(o => [o.level, o.left]),
+    [[1, 0], [2, 2], [3, 2], [5, 0]]);
+  assert.deepEqual(R.castingOptions(ch, 3).map(o => o.level), [3, 5]);
+  assert.deepEqual(R.castingOptions(ch, 0), [], "a cantrip costs nothing");
+  assert.deepEqual(R.castingOptions(ch, 9), []);
+
+  const spent = R.spendSlot(ch, 2);
+  assert.equal(spent.slots[2].used, 2);
+  assert.equal(spent.slots[1].used, 4, "nothing else moves");
+  assert.equal(R.spendSlot(ch, 1), null, "a slot that is gone cannot be spent");
+  assert.equal(R.spendSlot(ch, 4), null, "a level with no slots cannot be spent");
+
+  // The record a catalogue entry becomes: the fields the sheet reads, and not the prose.
+  const rec = R.spellRecord({ name: "Fireball", level: 3, school: "Evocation",
+    duration: "Instantaneous", text: "A long paragraph." }, "prepared");
+  assert.equal(rec.id, "sp:fireball");
+  assert.equal(rec.standing, "prepared");
+  assert.equal(rec.text, undefined, "the rules text is read back from the catalogue, not copied");
+
+  assert.deepEqual(R.diceInText("each creature takes 8d6 fire damage, or 8d6 again, plus 1d4"),
+    ["8d6", "1d4"]);
+  assert.deepEqual(R.diceInText(""), []);
+});

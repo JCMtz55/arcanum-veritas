@@ -93,6 +93,10 @@ export async function syncClasses(nextClasses, write) {
       });
       s.spells = { ...(s.spells || {}), slots, cantripsKnown: plan.cantripsKnown };
     }
+    // Which rest the slots come back on travels with them, so a Warlock's Pact Magic recharges on a
+    // short rest without anyone remembering to tell the sheet. With two casting classes there is no
+    // single answer, so whatever is already on the sheet is left alone.
+    if (plan.slotsReset) s.spells = { ...(s.spells || {}), slotsReset: plan.slotsReset };
     if (typeof write === "function") write(s);
   }, { now: true });
 
@@ -116,12 +120,24 @@ export async function refreshClassPlan() {
 // ── the searchable drawer ───────────────────────────────────────────────
 // Everything in one dialog with a kind switcher, because the alternative is six dialogs that each
 // need finding. The search is on the name and, for spells, the classes that get them.
-let openKind = "spell", openQuery = "", chosen = null;
+let openKind = "spell", openQuery = "", chosen = null, mineOnly = false;
 
 export async function openCompendium(kind = openKind) {
   openKind = kind; chosen = null;
   dialog("Compendium", `<p class="hint">Loading…</p>`, { wide: true });
   await drawCompendium();
+}
+
+// "Only the ones my classes get" — matched on the spell's own `classes` line against the names on
+// the sheet. It stays OFF by default and says how many it hid, because a homebrew class appears in
+// no published spell's class list and a filter that silently empties the list is worse than none.
+const myClasses = () =>
+  ((state.current?.sheet.classes || []).map(c => String(c?.name || "").toLowerCase()).filter(Boolean));
+function castableByMine(e) {
+  const mine = myClasses();
+  if (!mine.length) return true;
+  const on = String(e.classes || "").toLowerCase();
+  return mine.some(n => on.includes(n));
 }
 
 async function drawCompendium() {
@@ -134,13 +150,20 @@ async function drawCompendium() {
     return;
   }
   const q = openQuery.trim().toLowerCase();
-  const hits = (q ? list.filter(e => matches(e, q)) : list).slice(0, 300);
+  const found = q ? list.filter(e => matches(e, q)) : list;
+  const spellFilter = openKind === "spell" && myClasses().length > 0;
+  const kept = spellFilter && mineOnly ? found.filter(castableByMine) : found;
+  const hidden = found.length - kept.length;
+  const hits = kept.slice(0, 300);
 
   d.querySelector(".dlg-b").innerHTML = `
     <div class="tabs cmp-tabs">${Object.keys(KIND_LABEL).map(k =>
       `<button class="tab ${k === openKind ? "on" : ""}" data-act="cmp-kind" data-id="${k}">${KIND_LABEL[k]}</button>`).join("")}</div>
     <input class="txt" id="cmpQ" placeholder="Search ${esc(KIND_LABEL[openKind].toLowerCase())}"
       value="${esc(openQuery)}" autocomplete="off" aria-label="Search the compendium">
+    ${spellFilter ? `<label class="ck cmp-mine"><input type="checkbox" id="cmpMine" ${mineOnly ? "checked" : ""}>
+      Only the ones ${esc(myClasses().length > 1 ? "my classes get" : "my class gets")}
+      ${mineOnly && hidden ? `<span class="hint">· ${hidden} hidden</span>` : ""}</label>` : ""}
     <div class="cmp">
       <div class="cmp-list">${hits.length ? hits.map(e => `
         <button class="listrow ${chosen === e.name ? "on" : ""}" data-act="cmp-pick" data-id="${esc(e.name)}">
@@ -158,6 +181,8 @@ async function drawCompendium() {
     const el = document.getElementById("cmpQ");
     if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   }); };
+  const mine = d.querySelector("#cmpMine");
+  if (mine) mine.onchange = () => { mineOnly = mine.checked; drawCompendium(); };
   if (!chosen) input.focus();
 }
 
@@ -169,7 +194,11 @@ function matches(e, q) {
 }
 
 function subtitle(kind, e) {
-  if (kind === "spell") return `${e.level ? `Level ${e.level}` : "Cantrip"} · ${e.school || ""}`;
+  if (kind === "spell") {
+    const have = state.current && rules.inSpellbook(state.current.sheet, e.name);
+    return [e.level ? `Level ${e.level}` : "Cantrip", e.school || "",
+      have ? "in your spells" : ""].filter(Boolean).join(" · ");
+  }
   if (kind === "item") return [e.type, e.magic ? "magic" : ""].filter(Boolean).join(" · ");
   if (kind === "class") {
     const { saves } = classProficiencies(e);
@@ -222,11 +251,15 @@ function entryHtml(kind, e) {
 }
 
 const ADDABLE = { race: "Make this my ancestry", background: "Make this my background",
-  class: "Take this class", feat: "Add as a feature", item: "Add to my attacks", spell: "" };
+  class: "Take this class", feat: "Add as a feature", item: "Add to my attacks",
+  spell: "Add to my spells" };
 
 export function setKind(k) { openKind = k; chosen = null; openQuery = ""; return drawCompendium(); }
 export function pick(name) { chosen = name; return drawCompendium(); }
 export const currentKind = () => openKind;
+// Adding a spell leaves the drawer open — nobody adds exactly one — so the list has to be redrawn
+// for the "in your spells" marker to catch up.
+export const redraw = () => drawCompendium();
 
 // ── applying a choice to the sheet ──────────────────────────────────────
 // A racial bonus is recorded as a permanent named modifier rather than written into the base score.
@@ -315,6 +348,19 @@ export async function applyEntry(kind, name) {
       s.features = [...(s.features || []), { id: `feat-${e.name}`, name: e.name, source: "feat", text: e.text }];
     });
     return toast(`${e.name} added to your features.`);
+  }
+
+  if (kind === "spell") {
+    if (rules.inSpellbook(state.current.sheet, e.name))
+      return toast(`${e.name} is already in your spells.`);
+    // A cantrip arrives always-prepared because that is what a cantrip is; everything else arrives
+    // as known and the player says what they did with it this morning.
+    const standing = (Number(e.level) || 0) === 0 ? "always" : "known";
+    mutate(s => {
+      s.spells = { ...(s.spells || {}) };
+      s.spells.book = [...(s.spells.book || []), rules.spellRecord(e, standing)];
+    });
+    return toast(`${e.name} added${standing === "known" ? " — prepare it on the Spells tab" : ""}.`);
   }
 
   if (kind === "item") {

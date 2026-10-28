@@ -7,7 +7,8 @@
 import * as rules from "./rules.js";
 import * as store from "./store.js";
 import { state, derived, mutate } from "./store.js";
-import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, ACTION_COST } from "./view.js";
+import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, ACTION_COST,
+  toggleHtml } from "./view.js";
 import * as compendium from "./compendium.js";
 import { esc, sign, toast, popAt, closePop, popKey, popContains, dialog, closeDialog,
   rollCheck, rollDice, rollHtml, parseDice } from "./pop.js";
@@ -72,6 +73,7 @@ document.addEventListener("input", e => {
   if (!el) return;
   if (el.dataset.act === "skill-query") { state.skillQuery = el.value; renderAll(); document.getElementById("skillQ")?.focus(); }
   if (el.dataset.act === "field") setField(el.dataset.id, el.value);
+  if (el.dataset.act === "coin") ACTS.coin(el);
 });
 
 document.addEventListener("submit", e => {
@@ -187,14 +189,14 @@ const ACTS = {
     const id = el.dataset.id, c = ch();
     showRoll(`${rules.ABILITY_NAME[id]} check`, rules.abilityModifier(c, id),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[id]} modifier`, amount: rules.abilityMod(c.abilities[id]) },
-        ...rules.contributions(c.modifiers, `ability:${id}`).map(m => ({ reason: m.reason, amount: Math.floor(m.amount / 2) || m.amount }))]));
+        ...rules.contributions(rules.activeModifiers(c), `ability:${id}`).map(m => ({ reason: m.reason, amount: Math.floor(m.amount / 2) || m.amount }))]));
   },
   "roll-save": el => {
     const id = el.dataset.id, c = ch();
     showRoll(`${rules.ABILITY_NAME[id]} save`, rules.saveTotal(c, id),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[id]} modifier`, amount: rules.abilityModifier(c, id) },
         { reason: "Proficiency", amount: c.saves?.[id] ? rules.proficiencyBonus(c.level) : 0 },
-        ...rules.contributions(c.modifiers, `save:${id}`)]));
+        ...rules.contributions(rules.activeModifiers(c), `save:${id}`)]));
   },
   "roll-skill": el => {
     const id = el.dataset.id, c = ch(), sk = rules.SKILL_BY_ID[id];
@@ -203,13 +205,13 @@ const ACTS = {
     showRoll(sk.name, rules.skillTotal(c, id, use),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[use]} modifier`, amount: rules.abilityModifier(c, use) },
         { reason: prof === 2 ? "Expertise" : "Proficiency", amount: rules.profContribution(rules.proficiencyBonus(c.level), prof) },
-        ...rules.contributions(c.modifiers, `skill:${id}`)]));
+        ...rules.contributions(rules.activeModifiers(c), `skill:${id}`)]));
   },
   "roll-init": () => {
     const c = ch();
     showRoll("Initiative", rules.initiative(c),
       breakdownFor([{ reason: "Dexterity modifier", amount: rules.abilityModifier(c, "dex") },
-        ...rules.contributions(c.modifiers, "initiative")]));
+        ...rules.contributions(rules.activeModifiers(c), "initiative")]));
   },
   "roll-cogst": () => {
     const c = ch(), src = rules.cognitiveSavingThrowSources(c);
@@ -286,7 +288,8 @@ const ACTS = {
             <button class="btn" value="heal">Heal</button>
             <button class="btn" value="temp">Temp HP</button>
           </div>
-          <label class="ck"><input type="checkbox" id="hpCrit"> it was a critical hit</label>
+          <div class="tgls">${toggleHtml(`id="hpCrit"`, false, "crit", "It was a critical hit")}
+            <span class="hint">a critical hit, which is its own Wound trigger</span></div>
         </form>
         <div id="hpOut"></div>
       </div>`, {
@@ -301,7 +304,8 @@ const ACTS = {
       ev.preventDefault();
       const n = Number(document.getElementById("hpN").value) || 0;
       if (!n) return;
-      const crit = document.getElementById("hpCrit").checked;
+      const critBtn = document.getElementById("hpCrit");
+      const crit = critBtn.classList.contains("on");
       const cur = ch();
       if (b.value === "dmg") {
         const r = rules.applyDamage(cur, n, { critical: crit });
@@ -319,8 +323,16 @@ const ACTS = {
         out.innerHTML = `<p class="hint">${r.replaced ? "Temporary hit points set." : "You already had more — temporary hit points do not stack."}</p>`;
       }
       document.getElementById("hpN").value = "";
-      document.getElementById("hpCrit").checked = false;
+      critBtn.classList.remove("on");
+      critBtn.setAttribute("aria-pressed", "false");
     });
+    document.getElementById("hpCrit").onclick = e => {
+      e.preventDefault();
+      const b = e.currentTarget;
+      const on = !b.classList.contains("on");
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+    };
     document.getElementById("hpMax").onclick = () => {
       const v = Number(prompt("Maximum hit points", String(ch().maxHp)) || 0);
       if (v > 0) mutate(s => { s.maxHp = v; s.hp = Math.min(s.hp, v); });
@@ -334,11 +346,7 @@ const ACTS = {
     toast("One Wound recorded. Six of them calls for an Injury.");
   },
 
-  "hit-dice": el => popAt(el, `<div class="pop-h"><b>Hit dice</b></div>
-    <div class="pop-b"><p class="hint">Spend them on a short rest. Set the pool in Character › Identity;
-      roll the die itself from the Dice button and add your Constitution modifier.</p>
-      <p class="hint">A Quick Action can also spend one to recover hit points.</p></div>`,
-    { pin: true, key: "hd" }),
+  "hit-dice": el => hitDicePop(el),
 
   "death-saves": el => {
     const c = ch(), unhealed = c.injuries.filter(i => i && !i.healed).length;
@@ -384,9 +392,9 @@ const ACTS = {
   "atk-del": el => mutate(s => { s.attacks.splice(+el.dataset.id, 1); }),
   "atk-roll": el => {
     const a = ch().attacks[+el.dataset.id];
-    showRoll(`${a.name || "Attack"} — to hit`, (Number(a.bonus) || 0) + rules.modifierTotal(ch().modifiers, "attack"),
+    showRoll(`${a.name || "Attack"} — to hit`, (Number(a.bonus) || 0) + rules.modifierTotal(rules.activeModifiers(ch()), "attack"),
       breakdownFor([{ reason: "Attack bonus", amount: Number(a.bonus) || 0 },
-        ...rules.contributions(ch().modifiers, "attack")]));
+        ...rules.contributions(rules.activeModifiers(ch()), "attack")]));
   },
   "atk-dmg": el => rollDamage(ch().attacks[+el.dataset.id], false),
   "atk-crit": el => rollDamage(ch().attacks[+el.dataset.id], true),
@@ -443,10 +451,16 @@ const ACTS = {
   },
   "slots-edit": () => {
     const slots = ch().spells?.slots || {};
+    const reset = String(ch().spells?.slotsReset || "l").toLowerCase() === "s" ? "s" : "l";
     dialog("Spell slots", `<div class="fields grid3">${Array.from({ length: 9 }, (_, i) => i + 1).map(l => `
       <label>Level ${l}<input class="txt" type="number" min="0" max="9" id="sl${l}" value="${slots[l]?.max || 0}"></label>`).join("")}</div>
-      <p class="hint">How many you have at each level. Pact slots and other independent pools are
-        separate resources — keep those as a feature with uses until that part is built.</p>`, {
+      <label class="ck-col">When they come back<select class="txt" id="slReset">
+          <option value="l" ${reset === "l" ? "selected" : ""}>On a long rest</option>
+          <option value="s" ${reset === "s" ? "selected" : ""}>On a short rest — Pact Magic</option>
+        </select></label>
+      <p class="hint">How many you have at each level. Taking a casting class fills both of these in;
+        set them here for a pool the catalogue does not describe. A second independent pool is still
+        a feature with uses rather than a second row here.</p>`, {
       footer: `<button class="btn sm pri" id="slOk">Save</button>`,
     });
     document.getElementById("slOk").onclick = () => {
@@ -455,8 +469,54 @@ const ACTS = {
         const max = Number(document.getElementById(`sl${l}`).value) || 0;
         if (max) next[l] = { max, used: Math.min(slots[l]?.used || 0, max) };
       }
+      const slotsReset = document.getElementById("slReset").value === "s" ? "s" : "l";
       closeDialog();
-      mutate(s => { s.spells = { ...(s.spells || {}), slots: next }; });
+      mutate(s => { s.spells = { ...(s.spells || {}), slots: next, slotsReset }; });
+    };
+  },
+
+  // ── the spellbook ──
+  "spell-open": el => spellDialog(el.dataset.id),
+  "spell-del": el => mutate(s => {
+    s.spells = { ...(s.spells || {}) };
+    s.spells.book = (s.spells.book || []).filter(x => x.id !== el.dataset.id);
+  }),
+  // The chip on the left. Preparing and unpreparing is the gesture people make twenty times a day,
+  // so it is one click; the two standings that are not a daily decision open the full list instead.
+  "spell-stand": (el, e) => {
+    const s = (ch().spells?.book || []).find(x => x.id === el.dataset.id);
+    if (!s) return;
+    const standing = rules.spellStanding(s);
+    if (standing === "known" || standing === "prepared")
+      return setStanding(s.id, standing === "known" ? "prepared" : "known");
+    e.stopPropagation();
+    popAt(el, `<div class="pop-h"><b>${esc(s.name)}</b></div>
+      <div class="pop-b list">${rules.SPELL_STANDINGS.map(st => `
+        <button class="listrow ${st.id === standing ? "on" : ""}" data-act="spell-set" data-id="${esc(s.id)}" data-k="${st.id}">
+          <b>${esc(st.label)}</b><span>${esc(st.hint)}</span></button>`).join("")}</div>`,
+      { pin: true, key: `spl:${s.id}` });
+  },
+  "spell-set": el => { closePop(true); setStanding(el.dataset.id, el.dataset.k); },
+
+  // A new day: everything prepared goes back to known, and nothing else moves. Always-prepared and
+  // granted spells are untouched because neither is a choice made in the morning, and cantrips are
+  // not a choice at all.
+  "spell-clear": () => {
+    const n = rules.spellbook(ch()).counts.ready;
+    if (!n) return toast("Nothing is prepared.");
+    dialog("A new day", `<p>${n} prepared spell${n === 1 ? "" : "s"} go${n === 1 ? "es" : ""} back to
+        <b>known</b>, ready to be prepared again. Always-prepared and granted spells stay as they are.</p>`, {
+      footer: `<button class="btn pri" id="spDay">Clear what is prepared</button>
+        <span class="sp"></span><button class="btn sm" data-act="dlg-close">Keep it</button>`,
+    });
+    document.getElementById("spDay").onclick = () => {
+      closeDialog();
+      mutate(s => {
+        s.spells = { ...(s.spells || {}) };
+        s.spells.book = (s.spells.book || []).map(x =>
+          rules.spellStanding(x) === "prepared" ? { ...x, standing: "known" } : x);
+      });
+      toast(`${n} spell${n === 1 ? "" : "s"} back to known.`);
     };
   },
 
@@ -551,7 +611,7 @@ const ACTS = {
         <li><span>Proficiency bonus</span><b>${sign(rules.proficiencyBonus(c.level))}</b></li>
         <li><span>Highest non-Dream modifier</span><b>${sign(rules.verumModifier(c))}</b></li>
         <li><span>Dream modifier</span><b>${sign(rules.abilityModifier(c, "dream"))}</b></li>
-        ${rules.contributions(c.modifiers, "saveDc").map(m =>
+        ${rules.contributions(rules.activeModifiers(c), "saveDc").map(m =>
           `<li><span>${esc(m.reason)}</span><b>${sign(m.amount)}</b></li>`).join("")}
       </ul>
       <p class="hint">Your seal attack bonus is <b>${sign(rules.sealAttackBonus(c))}</b>, and you may
@@ -583,7 +643,41 @@ const ACTS = {
   },
 
   // ── equipment ──
-  "slot-edit": el => slotDialog(el.dataset.id),
+  "slot-edit": el => itemDialog(`slot:${el.dataset.id}`),
+  "item-edit": el => itemDialog(el.dataset.id),
+
+  // One click spends one charge, wherever the item is sitting. Mid-session that is the whole
+  // interaction, and making it a dialog would mean opening one every time somebody waves a wand.
+  "item-use": el => {
+    const found = rules.findItem(ch(), el.dataset.id);
+    if (!found) return;
+    const charges = rules.spendCharges(found.item, 1);
+    if (!charges) return toast(`${found.item.name} has no charges left.`);
+    writeItem(el.dataset.id, it => ({ ...it, charges }));
+    const left = rules.itemCharges({ ...found.item, charges }).left;
+    toast(`${found.item.name} — ${left} charge${left === 1 ? "" : "s"} left.`);
+  },
+
+  "item-equip": el => {
+    const where = el.dataset.id;
+    const found = rules.findItem(ch(), where);
+    if (!found) return;
+    popAt(el, `<div class="pop-h"><b>Wear ${esc(found.item.name)}</b></div>
+      <div class="pop-b list">${rules.slotsFor(ch()).map(s => {
+        const taken = (ch().equipment || {})[s.id];
+        return `<button class="listrow" data-act="item-to-slot" data-id="${esc(where)}" data-k="${s.id}">
+          <b>${esc(s.name)}</b><span>${taken?.name ? `${esc(taken.name)} comes off` : "empty"}</span></button>`;
+      }).join("")}</div>
+      <p class="hint">Whatever is in the slot goes back to your pack. An item only grants its
+        effects from a slot.</p>`, { pin: true, key: "equip" });
+  },
+  "item-to-slot": el => { closePop(true); equipItem(el.dataset.id, el.dataset.k); },
+  "item-unequip": el => { unequipItem(el.dataset.id); },
+
+  coin: el => mutate(s => {
+    s.coins = { ...(s.coins || {}) };
+    s.coins[el.dataset.id] = Math.max(0, Number(el.value) || 0);
+  }),
   "slot-flag": el => mutate(s => {
     const it = (s.equipment || {})[el.dataset.id];
     if (it) it[el.dataset.k] = !it[el.dataset.k];
@@ -602,28 +696,7 @@ const ACTS = {
     s.anatomy = (s.anatomy || []).includes(id)
       ? s.anatomy.filter(x => x !== id) : [...(s.anatomy || []), id];
   }),
-  "carry-add": () => {
-    dialog("Carry an item", `<form class="fields" id="cy">
-        <label>Item<input class="txt" id="cyName" maxlength="80" required autocomplete="off"></label>
-        <label>How many<input class="txt" id="cyQty" type="number" min="1" max="999" value="1"></label>
-        <label>Notes<input class="txt" id="cyNote" maxlength="120"></label>
-        <label class="ck"><input type="checkbox" id="cyAtt"> attuned to it</label>
-        <label class="ck"><input type="checkbox" id="cyDream"> Dreamlike or Lucidlike</label>
-        <button class="btn pri" type="submit">Add</button></form>
-      <p class="hint">Carried, not equipped — nothing here fills a slot or grants its effects.</p>`);
-    document.getElementById("cy").onsubmit = ev => {
-      ev.preventDefault();
-      const name = document.getElementById("cyName").value.trim();
-      if (!name) return;
-      const it = { id: uid(), name,
-        qty: Number(document.getElementById("cyQty").value) || 1,
-        notes: document.getElementById("cyNote").value.trim(),
-        attuned: document.getElementById("cyAtt").checked,
-        insomniaOnly: document.getElementById("cyDream").checked };
-      closeDialog();
-      mutate(s => { s.carried = [...(s.carried || []), it]; });
-    };
-  },
+  "carry-add": () => itemDialog("pack:new"),
   "carry-del": el => mutate(s => { s.carried.splice(+el.dataset.id, 1); }),
 
   // ── portrait and accent ──
@@ -725,8 +798,13 @@ const ACTS = {
   "cmp-kind": el => compendium.setKind(el.dataset.id),
   "cmp-pick": el => compendium.pick(el.dataset.id),
   "cmp-apply": el => {
-    closeDialog();
-    compendium.applyEntry(compendium.currentKind(), el.dataset.id).catch(err => toast(err.message));
+    const kind = compendium.currentKind();
+    // Adding a spell leaves the drawer open — nobody adds exactly one — and redraws it so the
+    // "in your spells" marker catches up. Every other kind is a one-off, so the drawer closes.
+    if (kind !== "spell") closeDialog();
+    compendium.applyEntry(kind, el.dataset.id)
+      .then(() => { if (kind === "spell") compendium.redraw(); })
+      .catch(err => toast(err.message));
   },
 };
 
@@ -765,7 +843,7 @@ function attackDialog() {
 function rollDamage(a, crit) {
   const r = rollDice(a.damage, { crit });
   if (!r) return toast("No damage expression on that attack.");
-  const extra = rules.modifierTotal(ch().modifiers, "damage");
+  const extra = rules.modifierTotal(rules.activeModifiers(ch()), "damage");
   const total = r.total + extra;
   dialog(`${a.name || "Attack"} — damage${crit ? " (critical)" : ""}`,
     rollHtml({ ...r, total }, { label: a.type || "",
@@ -842,42 +920,211 @@ function actionDialog() {
 
 // One equipment slot. The three flags are the columns Zariel's own Equipment note keeps, and the
 // attunement ones feed the counts on the same tab rather than a separate list to keep in step.
-function slotDialog(slotId) {
-  const s = rules.SLOT_BY_ID[slotId];
-  if (!s) return;
-  const it = (ch().equipment || {})[slotId] || {};
-  dialog(s.name, `<form class="fields" id="sf">
-      <label>Item<input class="txt" id="sfName" maxlength="80" value="${esc(it.name || "")}"
-        autocomplete="off" placeholder="${esc(s.eg)}"></label>
-      <label>Notes<input class="txt" id="sfNote" maxlength="120" value="${esc(it.notes || "")}"></label>
-      <label class="ck"><input type="checkbox" id="sfMagic" ${it.magical ? "checked" : ""}> magical</label>
-      <label class="ck"><input type="checkbox" id="sfAtt" ${it.attuned ? "checked" : ""}> attuned to it</label>
-      <label class="ck"><input type="checkbox" id="sfDream" ${it.insomniaOnly ? "checked" : ""}>
-        Dreamlike or Lucidlike — uses an Insomnia-only attunement slot</label>
-      <button class="btn pri" type="submit">Save</button></form>
-    <p class="hint">${esc(s.eg)}. Leave the name empty to clear the slot.</p>`, {
-    footer: it.name ? `<button class="btn sm warn" id="sfClear">Clear the slot</button>` : "",
-  });
+// ── items ───────────────────────────────────────────────────────────────
+// The four things an item can BE. Each is a square that lights up rather than a tickbox: four
+// tickboxes in a column read as a form to fill in, and these are states you want to read at a
+// glance. The words are in the tooltip, and the lit ones are named under the row as well, because
+// an icon nobody has met yet is a guess until it is.
+const ITEM_FLAGS = [
+  { id: "magical", icon: "effect", short: "magical", label: "Magical" },
+  { id: "requiresAttunement", icon: "needsAttunement", short: "needs attunement",
+    label: "Needs attunement — it does nothing until you are attuned" },
+  { id: "attuned", icon: "attunement", short: "attuned", label: "Attuned to it" },
+  { id: "insomniaOnly", icon: "dream", short: "Dreamlike",
+    label: "Dreamlike or Lucidlike — an Insomnia-only slot, and inactive while awake" },
+];
 
-  const save = () => {
-    const name = document.getElementById("sfName").value.trim();
-    closeDialog();
-    mutate(st => {
-      st.equipment = { ...(st.equipment || {}) };
-      if (!name) delete st.equipment[slotId];
-      else st.equipment[slotId] = { name,
-        notes: document.getElementById("sfNote").value.trim(),
-        magical: document.getElementById("sfMagic").checked,
-        attuned: document.getElementById("sfAtt").checked,
-        insomniaOnly: document.getElementById("sfDream").checked };
+// Writing one item back, wherever it lives. Every change to an item goes through here so the two
+// containers — the slots and the pack — never need separate copies of the same edit.
+function writeItem(where, fn) {
+  const found = rules.findItem(ch(), where);
+  if (!found) return;
+  mutate(s => {
+    if (found.slot) {
+      s.equipment = { ...(s.equipment || {}) };
+      s.equipment[found.slot] = fn(found.item);
+    } else {
+      s.carried = [...(s.carried || [])];
+      s.carried[found.index] = fn(found.item);
+    }
+  });
+}
+
+// Equipping is a MOVE, not a copy: one record, in one place, so a wand with three charges left
+// cannot end up as two wands with three charges each. Whatever was in the slot goes to the pack.
+function equipItem(where, slotId) {
+  const found = rules.findItem(ch(), where);
+  if (!found) return;
+  const item = found.item;
+  mutate(s => {
+    const displaced = (s.equipment || {})[slotId];
+    let carried = [...(s.carried || [])];
+    if (found.index != null) carried.splice(found.index, 1);
+    if (displaced?.name) carried = [...carried, displaced];
+    s.carried = carried;
+    s.equipment = { ...(s.equipment || {}), [slotId]: item };
+  });
+  toast(`${item.name} — ${rules.SLOT_BY_ID[slotId]?.name || slotId}.`);
+}
+
+function unequipItem(where) {
+  const found = rules.findItem(ch(), where);
+  if (!found?.slot) return;
+  mutate(s => {
+    s.equipment = { ...(s.equipment || {}) };
+    delete s.equipment[found.slot];
+    s.carried = [...(s.carried || []), found.item];
+  });
+  toast(`${found.item.name} is in your pack. Its effects stop there.`);
+}
+
+// One dialog for one item, wherever it is. It holds the three things an item does beyond having a
+// name: what it weighs and is worth, how many charges it has and what brings them back, and what it
+// is doing to your numbers — which are the same `{target, amount}` pairs a hand-written effect uses.
+function itemDialog(where) {
+  const isNew = where === "pack:new";
+  // The slot comes from the address, not from what is in it — clicking an EMPTY slot has to open
+  // this dialog too, and that is the whole way an item gets put on in the first place.
+  const slotId = where.startsWith("slot:") ? where.slice(5) : null;
+  const slot = slotId ? rules.SLOT_BY_ID[slotId] : null;
+  const found = isNew ? null : rules.findItem(ch(), where);
+  if (!isNew && !slot && !found) return toast("That item is gone.");
+
+  // A working copy: nothing is written until Save, so the effect list can be built up and abandoned.
+  const src = found?.item || {};
+  const c0 = rules.itemCharges(src);
+  const d = {
+    name: src.name || "", qty: Number(src.qty) || 1, weight: Number(src.weight) || 0,
+    value: Number(src.value) || 0, notes: src.notes || "",
+    magical: !!src.magical, requiresAttunement: !!src.requiresAttunement,
+    attuned: !!src.attuned, insomniaOnly: !!src.insomniaOnly,
+    charges: c0 ? { ...c0 } : { max: 0, used: 0, recharge: "manual", regain: "all" },
+    effects: rules.itemEffectList(src),
+    id: src.id || uid(),
+  };
+
+  const fieldId = k => `it${k[0].toUpperCase()}${k.slice(1)}`;
+  const collect = () => {
+    const v = k => document.getElementById(fieldId(k));
+    d.name = v("name").value.trim();
+    d.qty = Math.max(1, Number(v("qty").value) || 1);
+    d.weight = Math.max(0, Number(v("weight").value) || 0);
+    d.value = Math.max(0, Number(v("value").value) || 0);
+    d.notes = v("notes").value.trim();
+    // The four flags are not read back from the DOM: they are squares that light up, and the click
+    // that lights one is what changes `d`. Only the typed fields are collected here.
+    d.charges = { max: Math.max(0, Number(v("max").value) || 0), used: d.charges.used,
+      recharge: v("recharge").value, regain: v("regain").value.trim() || "all" };
+    d.charges.used = Math.min(d.charges.used, d.charges.max);
+    document.querySelectorAll("[data-fx]").forEach(row => {
+      const i = Number(row.dataset.fx);
+      if (!d.effects[i]) return;
+      d.effects[i] = { target: row.querySelector("select").value,
+        amount: Number(row.querySelector("input").value) || 0 };
     });
   };
-  document.getElementById("sf").onsubmit = ev => { ev.preventDefault(); save(); };
-  const clear = document.getElementById("sfClear");
-  if (clear) clear.onclick = () => {
-    closeDialog();
-    mutate(st => { st.equipment = { ...(st.equipment || {}) }; delete st.equipment[slotId]; });
+
+  const draw = () => {
+    const title = slot ? `${slot.name} — ${d.name || "empty"}` : (isNew ? "Carry an item" : d.name || "Item");
+    const dlg = dialog(title, `
+        <form class="fields" id="itf">
+          <label>Item<input class="txt" id="itName" maxlength="80" value="${esc(d.name)}"
+            autocomplete="off" placeholder="${esc(slot ? slot.eg : "Etherium Dagger")}" required></label>
+          <div class="fields grid3">
+            <label>How many<input class="txt" id="itQty" type="number" min="1" max="999" value="${d.qty}"></label>
+            <label>Weight, lb<input class="txt" id="itWeight" type="number" min="0" step="0.1" value="${d.weight}"></label>
+            <label>Value, gp<input class="txt" id="itValue" type="number" min="0" step="0.01" value="${d.value}"></label>
+          </div>
+          <label>Notes<input class="txt" id="itNotes" maxlength="160" value="${esc(d.notes)}"></label>
+          <div class="tgls">
+            ${ITEM_FLAGS.map(f => toggleHtml(`data-tgl="${f.id}"`, d[f.id], f.icon, f.label)).join("")}
+            <span class="hint">${esc(ITEM_FLAGS.filter(f => d[f.id]).map(f => f.short).join(" · ")
+              || "none of these")}</span>
+          </div>
+
+          <div class="zone-h sm"><h4>Charges</h4></div>
+          <div class="fields grid3">
+            <label>How many<input class="txt" id="itMax" type="number" min="0" max="99" value="${d.charges.max}"></label>
+            <label>Comes back<select class="txt" id="itRecharge">${rules.ITEM_RECHARGE.map(r =>
+              `<option value="${r.id}" ${d.charges.recharge === r.id ? "selected" : ""}>${esc(r.label)}</option>`).join("")}</select></label>
+            <label>Regains<input class="txt" id="itRegain" maxlength="12" value="${esc(d.charges.regain)}"
+              placeholder="all, or 1d6+1"></label>
+          </div>
+          ${d.charges.max ? `<p class="hint">${d.charges.max - d.charges.used} of ${d.charges.max} left.
+            <b>Regains</b> is <code>all</code>, or a dice expression the sheet rolls for you when the
+            rest comes round — <code>1d6+1</code> is how half the published wands word it.</p>` : ""}
+
+          <div class="zone-h sm"><h4>What it does to your numbers</h4></div>
+          ${d.effects.length ? d.effects.map((e, i) => `
+            <div class="fx" data-fx="${i}">
+              <select class="txt">${MOD_TARGETS.map(t =>
+                `<option value="${t.value}" ${t.value === e.target ? "selected" : ""}>${esc(t.label)}</option>`).join("")}</select>
+              <input class="txt" type="number" min="-20" max="20" value="${e.amount}">
+              <button class="x" type="button" data-fx-del="${i}" aria-label="Remove this effect">×</button>
+            </div>`).join("")
+            : `<p class="hint">Nothing yet. Add one and it counts the moment the item is in a
+               slot — the same path a hand-written effect takes, so it shows in the breakdown with
+               the item's own name on it.</p>`}
+          <button class="btn sm" type="button" id="itFxAdd">+ Add an effect</button>
+          <button class="btn pri" type="submit">Save</button>
+        </form>`,
+      { footer: [
+        found && d.charges.max ? `<button class="btn sm" id="itUse">Use a charge</button>` : "",
+        found && d.charges.used ? `<button class="btn sm" id="itRefill">Refill</button>` : "",
+        found && slot ? `<button class="btn sm" id="itOff">Take it off</button>` : "",
+        found && !slot ? `<button class="btn sm" id="itOn">Equip</button>` : "",
+        `<span class="sp"></span>`,
+        found ? `<button class="btn sm warn" id="itDel">Remove</button>` : "",
+      ].filter(Boolean).join("") });
+
+    dlg.querySelectorAll("[data-tgl]").forEach(b => b.onclick = () => {
+      collect(); d[b.dataset.tgl] = !d[b.dataset.tgl]; draw();
+    });
+    dlg.querySelectorAll("[data-fx-del]").forEach(b => b.onclick = () => {
+      collect(); d.effects.splice(Number(b.dataset.fxDel), 1); draw();
+    });
+    document.getElementById("itFxAdd").onclick = () => {
+      collect(); d.effects.push({ target: "ac", amount: 1 }); draw();
+    };
+    document.getElementById("itf").onsubmit = ev => { ev.preventDefault(); save(); };
+
+    const on = (id, fn) => { const b = document.getElementById(id); if (b) b.onclick = fn; };
+    on("itUse", () => {
+      const charges = rules.spendCharges({ charges: d.charges }, 1);
+      if (!charges) return toast("No charges left.");
+      d.charges = { ...d.charges, used: charges.used };
+      save({ keepOpen: true });
+    });
+    on("itRefill", () => { d.charges = { ...d.charges, used: 0 }; save({ keepOpen: true }); });
+    on("itOff", () => { closeDialog(); unequipItem(where); });
+    on("itOn", () => { save(); const el = document.querySelector(`[data-act="item-equip"][data-id="${where}"]`); if (el) el.click(); });
+    on("itDel", () => {
+      closeDialog();
+      if (slotId) mutate(s => { s.equipment = { ...(s.equipment || {}) }; delete s.equipment[slotId]; });
+      else mutate(s => { s.carried = (s.carried || []).filter((_, i) => i !== found.index); });
+      toast(`${d.name || "It"} is gone.`);
+    });
   };
+
+  const save = ({ keepOpen = false } = {}) => {
+    collect();
+    if (!d.name) {
+      // An empty name on a slot is how the old dialog cleared it, and that is worth keeping.
+      if (slotId) { closeDialog(); mutate(s => { s.equipment = { ...(s.equipment || {}) }; delete s.equipment[slotId]; }); }
+      return;
+    }
+    const item = { id: d.id, name: d.name, qty: d.qty, weight: d.weight, value: d.value,
+      notes: d.notes, magical: d.magical, requiresAttunement: d.requiresAttunement,
+      attuned: d.attuned, insomniaOnly: d.insomniaOnly,
+      charges: d.charges.max ? { ...d.charges } : null,
+      effects: d.effects.filter(e => e.target && e.amount) };
+    if (isNew) mutate(s => { s.carried = [...(s.carried || []), item]; });
+    else if (slotId) mutate(s => { s.equipment = { ...(s.equipment || {}), [slotId]: item }; });
+    else mutate(s => { s.carried = (s.carried || []).map((x, i) => (i === found.index ? item : x)); });
+    if (keepOpen) draw(); else closeDialog();
+  };
+
+  draw();
 }
 
 // A named change with a reason and a duration. The reason is not optional dressing — it is the whole
@@ -910,34 +1157,272 @@ function modifierDialog() {
   };
 }
 
+// ── hit dice ────────────────────────────────────────────────────────────
+// Spending one is the same job in two places — the tile's popover, and the short rest — so the rows,
+// the roll and the note are written once and each caller wires its own buttons. The pool itself is
+// the string on the sheet; only what is SPENT is tracked, which is why a hand-typed pool works.
+//
+// It is not only a short-rest gesture in this campaign: Quick Action.md lists "regain hit points by
+// expending 1 Hit Dice" among what a Quick Action buys, so the popover has to be able to do it in
+// the middle of a fight.
+function hitDiceRows(c) {
+  const hd = rules.hitDiceState(c);
+  if (!hd.total) return `<p class="hint">No pool yet — take a class and it fills itself in, or set it
+    in Character › Identity.</p>`;
+  return hd.rows.map(r => {
+    let pips = "";
+    for (let i = 0; i < r.n; i++)
+      pips += `<button class="pip ${i < r.used ? "used" : ""}" data-hd-pip="${r.die}" data-i="${i}"
+        title="${i < r.used ? "Spent — click to hand it back" : "Click to spend it"}"
+        aria-label="d${r.die} ${i + 1} of ${r.n}"></button>`;
+    return `<div class="slotrow"><i>d${r.die}</i><div class="pips">${pips}</div>
+      <button class="btn sm ${r.left ? "pri" : ""}" data-hd-spend="${r.die}" ${r.left ? "" : "disabled"}
+        title="Roll a d${r.die} and add your Constitution modifier">Spend</button></div>`;
+  }).join("");
+}
+
+// Rolling is the interface's job; the engine is handed the face that came up. Returns the outcome so
+// the caller can show it, or null when there was nothing of that size left to spend.
+function spendOneHitDie(die) {
+  const r = rollDice(`1d${die}`);
+  const out = rules.spendHitDie(ch(), die, Number(r?.total) || 0);
+  if (!out) { toast(`No d${die} left to spend.`); return null; }
+  mutate(s => { s.hitDiceUsed = out.hitDiceUsed; s.hp = out.hp; });
+  return out;
+}
+
+const hitDieNote = out => !out ? "" : `<div class="hd-roll">
+  <b>${out.healed}</b> hit point${out.healed === 1 ? "" : "s"}
+  <span>d${out.die} rolled ${out.roll}${out.con ? ` ${sign(out.con)} Constitution` : ""}${
+    out.healed < out.regained ? ` · ${out.regained} rolled, and you were near your maximum` : ""}</span></div>`;
+
+// Wires one rendered block of rows, wherever it is: the popover, or the short rest.
+function wireHitDice(root, after) {
+  root.querySelectorAll("[data-hd-spend]").forEach(b => b.onclick = () => {
+    after(spendOneHitDie(Number(b.dataset.hdSpend)));
+  });
+  root.querySelectorAll("[data-hd-pip]").forEach(b => b.onclick = () => {
+    const die = Number(b.dataset.hdPip);
+    const used = rules.hitDiceState(ch()).rows.find(r => r.die === die)?.used || 0;
+    if (Number(b.dataset.i) >= used) return after(spendOneHitDie(die));
+    const back = rules.returnHitDie(ch(), die);
+    if (back) mutate(s => { s.hitDiceUsed = back; });
+    after(null);
+  });
+}
+
+function hitDicePop(el, note = "", reopen = false) {
+  // Opening the pinned pop again with the same key is how popAt toggles it SHUT, which is what the
+  // tile wants and the exact opposite of what a spend wants — so a redraw closes it first.
+  if (reopen) closePop(true);
+  const c = ch();
+  const hd = rules.hitDiceState(c);
+  const con = rules.abilityModifier(c, "con");
+  const p = popAt(el, `<div class="pop-h"><b>Hit dice</b><span class="tag">${hd.left}/${hd.total}</span></div>
+    <div class="pop-b">
+      ${hitDiceRows(c)}
+      ${note}
+      ${hd.total ? `<p class="hint">Spending one rolls the die and adds your Constitution modifier
+        (${sign(con)}). A short rest is the usual place — <b>a Quick Action can also spend one</b>
+        mid-fight. A long rest hands back half your pool, rounded down.</p>
+        <p class="hint">Click a spent pip to hand it back.</p>` : ""}</div>`,
+    { pin: true, key: "hd" });
+  if (!p) return;                 // clicking the tile again closed it, and popAt returned nothing
+
+  // Spending redraws the sheet, which replaces the tile this was anchored to — so the popover is
+  // re-opened over the new one, carrying the roll it just made.
+  wireHitDice(p, out => {
+    const tile = document.querySelector('[data-act="hit-dice"]');
+    if (tile) hitDicePop(tile, hitDieNote(out), true);
+  });
+}
+
 // A rest shows what it will change before it changes anything, and asks the one question that
 // decides whether Dream Exhaustion recovers at all.
 function restDialog(kind) {
   const safeHaven = kind === "haven";
   const real = kind === "short" ? "short" : "long";
-  const draw = dreamWalked => {
-    const p = rules.restPreview(ch(), { kind: real, dreamWalked, safeHaven });
-    dialog(safeHaven ? "Safe Haven long rest" : real === "short" ? "Short rest" : "Long rest",
-      `${real === "long" ? `<label class="ck"><input type="checkbox" id="rdw" ${dreamWalked ? "checked" : ""}>
-          I was Dream Walking during this rest</label>` : ""}
-        ${p.changes.length ? `<ul class="why">` + p.changes.map(c => `<li>
-            <span>${esc(c.label)}${c.detail ? ` — ${esc(c.detail)}` : ""}</span>
-            <b>${c.from != null ? `${c.from} → ${c.to}` : ""}</b></li>`).join("") + `</ul>`
+  const draw = (o = { dreamWalked: false, dawn: true, dusk: false }, note = "") => {
+    const c = ch();
+    const { dreamWalked, dawn, dusk } = o;
+    const p = rules.restPreview(c, { kind: real, dreamWalked, safeHaven, dawn, dusk });
+    const hp = `${c.hp}/${rules.maxHp(c)}`;
+    const d = dialog(safeHaven ? "Safe Haven long rest" : real === "short" ? "Short rest" : "Long rest",
+      `${real === "long" ? `<div class="tgls">
+          ${toggleHtml(`data-tgl="dreamWalked"`, dreamWalked, "dreamWalk", "I was Dream Walking during this rest")}
+          ${toggleHtml(`data-tgl="dawn"`, dawn, "dawn", "It carried us through dawn")}
+          ${toggleHtml(`data-tgl="dusk"`, dusk, "dusk", "And through dusk")}
+          <span class="hint">${[dreamWalked ? "Dream Walking" : "", dawn ? "through dawn" : "",
+            dusk ? "through dusk" : ""].filter(Boolean).join(" · ") || "an ordinary rest, passing neither"}</span>
+        </div>` : ""}
+        ${p.changes.length ? `<ul class="why">` + p.changes.map(c2 => `<li>
+            <span>${esc(c2.label)}${c2.detail ? ` — ${esc(c2.detail)}` : ""}</span>
+            <b>${c2.from != null ? `${c2.from} → ${c2.to}` : ""}</b></li>`).join("") + `</ul>`
           : `<p class="hint">Nothing automatic changes on this one.</p>`}
+        ${real === "short" ? `<div class="hd-block">
+            <div class="zone-h sm"><h4>Hit dice · ${esc(hp)} hit points</h4></div>
+            ${hitDiceRows(c)}
+            ${note}
+          </div>` : ""}
         <p class="hint">${real === "long"
           ? "A long rest only lowers Dream Exhaustion if you did <b>not</b> Dream Walk."
-          : "Hit dice and anything that recharges on a short rest are yours to spend — nothing here guesses at a feature's own rule."}</p>`,
+          : "Each one rolls its die and adds your Constitution modifier, and lands on your hit points as you go — spend as few or as many as you like. Nothing here guesses at a feature's own rule."}</p>`,
       { footer: `<button class="btn pri" id="rOk">Take the rest</button>
           <span class="sp"></span><button class="btn sm" data-act="dlg-close">Not yet</button>` });
 
-    document.getElementById("rdw")?.addEventListener("change", e => draw(e.target.checked));
+    d.querySelectorAll("[data-tgl]").forEach(b => b.onclick = () =>
+      draw({ ...o, [b.dataset.tgl]: !o[b.dataset.tgl] }));
+    // Spending is applied immediately, not on confirmation: a die you rolled is a die you spent, and
+    // "Not yet" should never take back hit points you have already written down.
+    wireHitDice(d, out => draw(o, hitDieNote(out)));
+
     document.getElementById("rOk").onclick = () => {
       closeDialog();
-      mutate(s => { Object.assign(s, p.next); s.used = {}; });
-      toast(p.changes.length ? "Rested." : "Rested — nothing automatic to change.");
+      // Recomputed here rather than reused: hit dice may have been spent since this was drawn, and
+      // the dice-regain charges are rolled at this moment because a preview must not pretend to
+      // know what they will come up.
+      const now = rules.restPreview(ch(), { kind: real, dreamWalked, safeHaven, dawn, dusk });
+      const rolled = (now.roll || []).map(r => {
+        const got = rollDice(r.regain);
+        return { where: r.where, name: r.name, regain: r.regain,
+          by: Math.min(r.used, Math.max(0, Number(got?.total) || 0)), total: got?.total };
+      });
+      mutate(s => {
+        Object.assign(s, now.next);
+        if (rolled.length) Object.assign(s, rules.applyRecharge(ch(), rolled));
+        s.used = {};
+      });
+      toast(rolled.length
+        ? `Rested. ${rolled.map(r => `${r.name} ${r.regain} → ${r.by}`).join(", ")}.`
+        : now.changes.length ? "Rested." : "Rested — nothing automatic to change.");
     };
   };
-  draw(false);
+  draw();
+}
+
+// ── one spell ───────────────────────────────────────────────────────────
+const setStanding = (id, standing) => mutate(s => {
+  s.spells = { ...(s.spells || {}) };
+  s.spells.book = (s.spells.book || []).map(x => (x.id === id ? { ...x, standing } : x));
+});
+
+// Read it and cast it, in one place. The sheet stores a spell's compact fields and not its prose, so
+// the rules text is fetched from the catalogue when the spell is opened — which means a spell whose
+// entry the DM has since changed reads as it reads TODAY, and one whose entry is gone still casts.
+async function spellDialog(id) {
+  const open = () => (ch().spells?.book || []).find(x => x.id === id);
+  if (!open()) return toast("That spell is not in your spells any more.");
+
+  let full = null, loaded = false;
+  const draw = () => {
+    const s = open();
+    if (!s) return closeDialog();
+    const lv = rules.spellLevel(s);
+    const standing = rules.spellStanding(s);
+    const conc = rules.spellIsConcentration(s);
+    const ritual = rules.spellIsRitual(s);
+    const options = rules.castingOptions(ch(), lv);
+    const casting = state.classPlan ? rules.spellcasting(ch(), state.classPlan) : [];
+    const dice = rules.diceInText(full?.text);
+
+    const facts = [["Level", lv ? lv : "Cantrip"], ["School", s.school], ["Casting time", s.time],
+      ["Range", s.range], ["Components", s.components], ["Duration", s.duration],
+      ["Classes", s.classes], ["Ritual", ritual ? "yes" : ""], ["Source", s.source]]
+      .filter(([, v]) => v !== "" && v != null);
+
+    dialog(s.name, `
+        <ul class="why">${facts.map(([k, v]) => `<li><span>${esc(k)}</span><b>${esc(v)}</b></li>`).join("")}</ul>
+
+        <div class="spl-stand">${rules.SPELL_STANDINGS.map(st => `
+          <button class="btn sm ${st.id === standing ? "pri" : ""}" data-sp-stand="${st.id}"
+            title="${esc(st.hint)}">${esc(st.label)}</button>`).join("")}</div>
+
+        ${lv === 0
+          ? `<p class="hint">A cantrip costs nothing — cast it as often as you like.</p>`
+          : standing === "known"
+            ? `<p class="hint hot">Not prepared. Prepare it above, or cast it anyway if your DM says so
+                — the buttons below will still spend the slot.</p>`
+            : ""}
+
+        <div class="spl-cast">
+          ${lv === 0
+            ? `<button class="btn pri" data-sp-cast="0">Cast it</button>`
+            : options.length
+              ? options.map(o => `<button class="btn ${o.level === lv ? "pri" : ""}" data-sp-cast="${o.level}"
+                  ${o.left ? "" : "disabled"} title="${o.left ? esc(`Spends one level ${o.level} slot`) : "None left"}">
+                  ${o.level === lv ? "Cast" : `Upcast to ${o.level}`} · ${o.left}/${o.max}</button>`).join("")
+              : `<p class="hint">You have no slot of level ${lv} or higher. Set your slots on the Spells tab.</p>`}
+          ${ritual ? `<button class="btn sm" data-sp-cast="ritual"
+            title="Ten minutes longer, and no slot spent">As a ritual</button>` : ""}
+        </div>
+
+        ${casting.length ? `<div class="stats">${casting.map(c => `
+          <button class="stat btn-stat" data-sp-atk="${esc(c.ability)}" title="Roll a ${esc(c.className)} spell attack">
+            <b>${sign(c.attack)}</b><i>${esc(c.className)} attack</i></button>
+          <div class="stat"><b>${c.dc}</b><i>${esc(c.className)} save DC</i></div>`).join("")}</div>` : ""}
+
+        ${dice.length ? `<div class="spl-dice"><span class="hint">Dice in its text</span>
+          ${dice.map(d => `<button class="btn sm" data-sp-roll="${esc(d)}">${esc(d)}</button>`).join("")}
+          </div>` : ""}
+
+        ${conc ? `<p class="hint">${ch().concentrating === s.name
+            ? "You are concentrating on this."
+            : "Casting it takes your concentration, and the sheet will say so on the bar."}</p>` : ""}
+
+        ${full?.text ? `<p class="cmp-body">${esc(full.text)}</p>`
+          : loaded ? `<p class="hint">The catalogue has no text for this one any more — it still casts.</p>`
+          : `<p class="hint">Reading its text…</p>`}`,
+      { wide: true,
+        footer: `<button class="btn sm warn" data-sp-del="1">Remove from my spells</button>
+          <span class="sp"></span><button class="btn sm" data-act="dlg-close">Close</button>` });
+
+    const d = document.getElementById("dlg");
+    d.querySelectorAll("[data-sp-stand]").forEach(b => b.onclick = () => {
+      setStanding(id, b.dataset.spStand); draw();
+    });
+    d.querySelectorAll("[data-sp-atk]").forEach(b => b.onclick = () => {
+      const a = b.dataset.spAtk;
+      showRoll(`${s.name} — spell attack`, rules.spellAttackBonus(ch(), a),
+        [{ reason: `Proficiency`, amount: rules.proficiencyBonus(ch().level) },
+         { reason: rules.ABILITY_NAME[a], amount: rules.abilityModifier(ch(), a) }]);
+    });
+    d.querySelectorAll("[data-sp-roll]").forEach(b => b.onclick = () => {
+      const r = rollDice(b.dataset.spRoll);
+      if (r) dialog(`${s.name} — ${b.dataset.spRoll}`, rollHtml(r, { label: "from its text" }));
+    });
+    d.querySelectorAll("[data-sp-cast]").forEach(b => b.onclick = () => castSpell(s, b.dataset.spCast));
+    d.querySelector("[data-sp-del]").onclick = () => {
+      closeDialog();
+      mutate(st => {
+        st.spells = { ...(st.spells || {}) };
+        st.spells.book = (st.spells.book || []).filter(x => x.id !== id);
+      });
+      toast(`${s.name} removed.`);
+    };
+  };
+
+  draw();
+  try { full = await compendium.find("spell", open()?.name); } catch { full = null; }
+  loaded = true;
+  if (document.getElementById("dlg")?.open) draw();
+}
+
+// Casting spends exactly one thing and says what it spent. A ritual spends nothing, a cantrip spends
+// nothing, and a levelled spell spends the slot the player picked — which is all upcasting is.
+function castSpell(s, at) {
+  const conc = rules.spellIsConcentration(s);
+  const take = () => { if (conc) mutate(st => { st.concentrating = s.name; }); };
+
+  if (at === "ritual") { take(); closeDialog(); return toast(`${s.name} cast as a ritual — no slot spent.`); }
+  const level = Number(at) || 0;
+  if (!level) { take(); closeDialog(); return toast(`${s.name} cast.`); }
+
+  const next = rules.spendSlot(ch(), level);
+  if (!next) return toast(`No level ${level} slot left.`);
+  mutate(st => { st.spells = next; });
+  take();
+  closeDialog();
+  toast(`${s.name} cast${level !== rules.spellLevel(s) ? ` at level ${level}` : ""} — one level ${level} slot spent.${conc ? " Concentrating." : ""}`);
 }
 
 // Two d20, keep the face farthest from 10, reroll an equal pair. The charge is spent on the server,

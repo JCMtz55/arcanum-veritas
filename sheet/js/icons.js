@@ -34,6 +34,16 @@ export const ICONS = {
   round: "hourglass-half",
   rest: "bed",
   effect: "wand-magic-sparkles",
+  // The two states every effect is in, and the one distinction the sheet repeats everywhere: a
+  // thing that is simply true of you, and a thing that runs out.
+  lasting: "infinity",
+  timed: "hourglass-half",
+  // Flags that used to be tickboxes. Each is a square that lights up, named in its tooltip.
+  needsAttunement: "lock",
+  dreamWalk: "cloud-moon",
+  dawn: "sun",
+  dusk: "mountain-sun",
+  crit: "burst",
   action: "bolt-lightning",
   levelUp: "arrow-up-right-dots",
   subclass: "sitemap",
