@@ -2,94 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — Ephemer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
-<!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
-<script src="js/tools.js"></script>
+<!-- Admin became a section of its own on 2026-10-28: admin/, beside sheet/, grimms/ and map/.
+     This file stays because the old URL is in bookmarks and in the vault's notes. The server
+     answers /admin.html with a 301 and never reaches this page; the meta refresh is for a static
+     copy of the folder, where there is no server to do the redirecting. -->
+<meta http-equiv="refresh" content="0; url=admin/">
+<link rel="canonical" href="admin/">
+<script>location.replace("admin/" + location.hash);</script>
 </head>
 <body>
-
-<div class="bar">
-  <nav class="tools" data-tool="admin" aria-label="Ephemer tools"></nav>
-  <div class="brand">Admin<em>the DM's own</em></div>
-  <div class="live">
-    <span class="lv" id="pendingBox" hidden><b id="pendingOut">0</b><i>waiting</i></span>
-    <details class="more" id="who" hidden>
-      <summary class="mini" id="whoBtn" title="Your account"></summary>
-      <!-- The other tools used to be listed here; the tool strip at the left of the bar carries
-           them now, on every page rather than this one. -->
-      <div class="more-menu" onclick="this.parentNode.open = false">
-        <button onclick="openAccount()">Change password</button>
-        <button onclick="signOut()">Sign out</button>
-      </div>
-    </details>
-  </div>
-</div>
-
-<div class="board" id="board" hidden>
-  <aside class="rail">
-    <div class="cogs" id="adminList" style="padding-top:11px"></div>
-    <div class="rail-foot"><button class="ghost" onclick="openAdminUser('new')">New player</button></div>
-  </aside>
-  <section class="codex" id="adminBody"></section>
-</div>
-
-<!-- Shown to anyone who isn't the DM, instead of an interface that would fail on every click -->
-<div class="board" id="locked" hidden>
-  <section class="codex">
-    <div class="cdx"><div class="cdx-hd"><div>
-      <h1>Not yours to open</h1>
-      <p class="cdx-desc" id="lockedWhy"></p>
-    </div></div>
-    <div class="cdx-sec"><div class="cdx-note">
-      <p>The Admin page keeps the accounts, what each player may read, the Paragon paths and the Grimms.
-         If you came looking for your own tools, they're on <a href="./">the front page</a>.</p>
-    </div></div></div>
-  </section>
-</div>
-
-<div class="gate" id="gate" hidden>
-  <form class="gate-box" onsubmit="return signIn(event)">
-    <h1>Admin</h1>
-    <p>Sign in as the DM.</p>
-    <label for="gateUser">Name</label>
-    <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
-    <label for="gatePass">Password</label>
-    <input class="search" id="gatePass" type="password" autocomplete="current-password" required>
-    <p class="gate-err" id="gateErr" hidden></p>
-    <button class="gate-go" type="submit">Sign in</button>
-  </form>
-</div>
-
-<dialog class="acct" id="acct">
-  <form onsubmit="return changePassword(event)">
-    <h2 id="acctName"></h2>
-    <label for="acctCur">Current password</label>
-    <input class="search" id="acctCur" type="password" autocomplete="current-password" required>
-    <label for="acctNew">New password</label>
-    <input class="search" id="acctNew" type="password" autocomplete="new-password" minlength="8" required>
-    <p class="gate-err" id="acctErr" hidden></p>
-    <div class="acct-row">
-      <button class="mini on" type="submit">Change password</button>
-      <button class="mini" type="button" onclick="document.getElementById('acct').close()">Close</button>
-    </div>
-  </form>
-</dialog>
-
-<div class="toast" id="toast"></div>
-
-<!-- Only what the DM's work needs: the domain tables and Ranks, and the Grimm book. None of the
-     builder — no composer, no card, no dice. Paragon Abilities aren't here either: they live in
-     cognitions/devotions/<player>_<cognition>_devotion.json, and the page reads their names off the API. -->
-<!-- ?v= is a cache buster, as in grimms/index.html: browsers hold these hard, and a stale admin.js
-     looks like "the toggle does nothing" rather than a cached file. Bump it when this page's js
-     or the Grimm data changes. -->
-<script src="js/data.js?v=2026-10-19a"></script>
-<script src="grimms/js/data.js?v=2026-10-19a"></script>
-<script src="js/admin.js?v=2026-10-19a"></script>
+<p>Admin has moved to <a href="admin/">admin/</a>.</p>
 </body>
 </html>

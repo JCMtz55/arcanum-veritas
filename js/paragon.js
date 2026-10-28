@@ -463,7 +463,7 @@ function parDevotionsBlock() {
   if (!PAR.enabled)
     return block("Devotions", API && ME?.role === "dm"
       ? `<p class="hint">You're reading this as the DM, and the DM holds no Devotions. Open the path
-         for a player on the <a href="admin.html">Admin page</a> and set which Devotions they may
+         for a player on the <a href="admin/#/players">Admin page</a> and set which Devotions they may
          swear; their abilities are written in
          <code>cognitions/devotions/<player>_<cognition>_devotion.json</code>. The worked examples from the rules
          are under <strong>Reference › Paragon</strong>.</p>`

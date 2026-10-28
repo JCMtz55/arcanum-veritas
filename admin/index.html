@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Ephemer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css?v=2026-10-28a">
+<!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
+<script src="../js/tools.js"></script>
+</head>
+<body>
+
+<div class="bar">
+  <nav class="tools" data-tool="admin" aria-label="Ephemer tools"></nav>
+  <div class="brand">Admin<em>the DM's own</em></div>
+  <div class="live">
+    <!-- The inbox. It used to be a row in the rail called Reminders, which meant answering one cost
+         you the page you were on; it opens over the page now, from wherever you are. -->
+    <button class="rem-call" id="remCall" hidden onclick="openReminders()"
+      title="Everything waiting on you — Cognitions tracked to 4/4, and Pilgrimages on the road"></button>
+    <details class="more" id="who" hidden>
+      <summary class="mini" id="whoBtn" title="Your account"></summary>
+      <div class="more-menu" onclick="this.parentNode.open = false">
+        <button onclick="openAccount()">Change password</button>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div class="a-shell" id="board" hidden>
+  <!-- Four topics, each minding its own business. Filled by core.js from the registered sections. -->
+  <nav class="a-secs" id="secs" aria-label="Admin sections"></nav>
+  <div class="board a-board">
+    <!-- Only the sections with a list of their own raise the rail: Players and Grimms. The board
+         and the Compendium hide it and take the width. -->
+    <aside class="rail" id="rail" hidden>
+      <div class="cogs" id="railList"></div>
+      <div class="rail-foot" id="railFoot" hidden></div>
+    </aside>
+    <section class="codex" id="adminBody"></section>
+  </div>
+</div>
+
+<!-- Shown to anyone who isn't the DM, instead of an interface that would fail on every click -->
+<div class="board" id="locked" hidden>
+  <section class="codex">
+    <div class="cdx"><div class="cdx-hd"><div>
+      <h1>Not yours to open</h1>
+      <p class="cdx-desc" id="lockedWhy"></p>
+    </div></div>
+    <div class="cdx-sec"><div class="cdx-note">
+      <p>Admin keeps the accounts, what each player may read, the Paragon paths, the Grimms and the
+         table's live board. If you came looking for your own tools, they're on
+         <a href="../">the front page</a>.</p>
+    </div></div></div>
+  </section>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <form class="gate-box" onsubmit="return signIn(event)">
+    <h1>Admin</h1>
+    <p>Sign in as the DM.</p>
+    <label for="gateUser">Name</label>
+    <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="gatePass">Password</label>
+    <input class="search" id="gatePass" type="password" autocomplete="current-password" required>
+    <p class="gate-err" id="gateErr" hidden></p>
+    <button class="gate-go" type="submit">Sign in</button>
+  </form>
+</div>
+
+<dialog class="acct" id="acct">
+  <form onsubmit="return changePassword(event)">
+    <h2 id="acctName"></h2>
+    <label for="acctCur">Current password</label>
+    <input class="search" id="acctCur" type="password" autocomplete="current-password" required>
+    <label for="acctNew">New password</label>
+    <input class="search" id="acctNew" type="password" autocomplete="new-password" minlength="8" required>
+    <p class="gate-err" id="acctErr" hidden></p>
+    <div class="acct-row">
+      <button class="mini on" type="submit">Change password</button>
+      <button class="mini" type="button" onclick="document.getElementById('acct').close()">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- The inbox, over the page. A <dialog> so Esc closes it and the focus stays inside it. -->
+<dialog class="rem" id="rem">
+  <header class="rem-hd">
+    <h2>Waiting on you</h2>
+    <button class="mini" onclick="closeReminders()">Close</button>
+  </header>
+  <div class="rem-body" id="remBody"></div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<!-- Only what the DM's work needs: the domain tables and Ranks, and the Grimm book. None of the
+     builder — no composer, no card, no dice. Paragon Abilities aren't here either: they live in
+     cognitions/devotions/<player>_<cognition>_devotion.json, and the page reads their names off the API.
+     ?v= is a cache buster, as in grimms/index.html: browsers hold these hard, and a stale script
+     looks like "the toggle does nothing" rather than a cached file. Bump it when any of this
+     page's js or the Grimm data changes.
+     core.js first — it defines section() and onData(), which the four below call as they load. -->
+<script src="../js/data.js?v=2026-10-28a"></script>
+<script src="../grimms/js/data.js?v=2026-10-28a"></script>
+<script src="js/core.js?v=2026-10-28a"></script>
+<script src="js/table.js?v=2026-10-28a"></script>
+<script src="js/players.js?v=2026-10-28a"></script>
+<script src="js/grimms.js?v=2026-10-28a"></script>
+<script src="js/compendium.js?v=2026-10-28a"></script>
+</body>
+</html>

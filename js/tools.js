@@ -33,8 +33,8 @@ const TOOLS = [
     title: "Character Sheet — your seven scores, the Fate Die, Wounds and both exhaustion tracks" },
   { key: "map", href: "map/", mark: "✶", label: "Map",
     title: "World Map — nations, settlements and the roads between them" },
-  { key: "admin", href: "admin.html", mark: "❖", label: "Admin", dm: true,
-    title: "Admin — players, their Cognitions, the Paragon paths and the Grimms" },
+  { key: "admin", href: "admin/", mark: "❖", label: "Admin", dm: true,
+    title: "Admin — the table's live board, the players, the Grimms and the compendium" },
 ];
 
 // A menu rather than a row of buttons: the bars are crowded already — the composer's carries the

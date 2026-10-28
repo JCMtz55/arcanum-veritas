@@ -23,7 +23,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 **Who sees what.** Each player has an account and sees only the Cognitions granted to it; nothing else reaches their browser. The **DM** account reads every Cognition, held-back ones included, and has an **Admin** tab: pick a player, click Cognitions to grant or take them away (saved at once), set or reset passwords, add and delete players. `ready` in `index.json` is still the global gate — a granted Cognition that isn't `ready` shows greyed out and its text is not served.
 
-**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 appears under **Reminders** on the DM's Admin page (the front page's Admin card reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The name field autocompletes from the Cognitions the player doesn't have yet — their **names only**; nothing else about them is sent. Any other name can still be typed; one that matches nothing in `index.json` is listed apart, with nothing to enable.
+**Learning.** Each player has a **Learning** tab: their own tracker of Cognitions in progress, by name, from 0/4 to 4/4. It is theirs to edit and opens nothing in the builder. A Cognition tracked to 4/4 joins the DM's **waiting** count in the Admin bar, which opens the inbox over whatever they are on (the front page's Admin card reads `Admin · n` while any are waiting); **Enable** grants it and removes it from the player's tracker. The name field autocompletes from the Cognitions the player doesn't have yet — their **names only**; nothing else about them is sent. Any other name can still be typed; one that matches nothing in `index.json` is listed apart, with nothing to enable.
 
 **Saved builds.** Signed in, the seal panel has **Save**. A seal or an Eidon is saved under its name (saving the same name again replaces it) and then shows as a card on the composer's opening screen — under "Pick a cognition…", seals in Arcanum Veritas, Eidons in Ignition — where one click loads it; **manage** there opens the full list for deleting. With a build already on the table, the same list is under the panel's **⋯** menu (*Saved builds…*), next to copy, image and print. A save holds the recipe, not the character — level and modifiers stay whatever the bar says — and an Eidon also keeps its count of successful manifestations. Saves are private to the account; the DM cannot see them.
 
@@ -37,7 +37,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 3. Add `DM_PASSWORD` (and optionally `DM_USERNAME`, default `dm`) before the first deploy. Without it a random DM password is printed once in the deploy log.
 4. Under the service's Networking settings, generate a domain.
 
-On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each on the Admin page and pass it on; they can change it from the button with their name. The players' in-progress trackers in `seed.json` are imported once too — on the first start that has the tracker, even into a database that was seeded earlier. After that the database is the truth and `seed.json` is never read again.
+On its first start against an empty database the server creates the DM account and the players in `server/seed.json` with their mastered Cognitions. Seeded players have **no password** — set one for each on their **Admin › Players › Account** tab and pass it on; they can change it from the button with their name. The players' in-progress trackers in `seed.json` are imported once too — on the first start that has the tracker, even into a database that was seeded earlier. After that the database is the truth and `seed.json` is never read again.
 
 Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then remove the variable.
 
@@ -50,7 +50,15 @@ Locked out as DM: set the variable `RESET_DM_PASSWORD`, redeploy, sign in, then 
 ```
 index.html          ← The Ephemer front page: sign-in and the choice of tools (js/hub.js)
 arcanum.html        ← The builder: header, boards, and the script tags
-admin.html          ← The DM's own page: accounts, grants, Paragon paths, the Grimms (js/admin.js)
+admin.html          ← A redirect to admin/ — the old URL, kept for bookmarks
+admin/              ← The DM's own section: the table's board, the players, the Grimms, the compendium
+  index.html        ← The frame: the bar, the section bar, the rail and the inbox
+  css/admin.css     ← Only what the frame adds; the rest is css/app.css
+  js/core.js        ← Sign-in, the section router, shared helpers, the inbox
+  js/table.js       ← The live board, polled while it is open
+  js/players.js     ← One page per player, tabbed
+  js/grimms.js      ← The chains, the two reveals, the ability grids
+  js/compendium.js  ← Importing the 5e content the Character Sheet offers
 grimms/             ← The Grimm Companion (see grimms/README.md)
 css/
   app.css           ← Every style
@@ -72,7 +80,7 @@ js/                 ← Plain scripts sharing one global scope, loaded in this o
   modes.js          ← The mode registry — what each Cognitive Art calls things and which renderers it owns
   dice.js           ← The dice tray: rolls the numbers the card already printed
   hub.js            ← The front page only (index.html) — stands alone, not part of this list's load order
-  admin.js          ← The Admin page only (admin.html) — stands alone, not part of this list's load order
+                      (Admin has its own scripts under admin/js/ — not part of this list's load order)
   account.js        ← Sign-in and the account menu
   journal.js        ← The Learning tab and saved seals / Eidons / Paragons
   events.js         ← Copy/toast, keyboard, start-up — must load last
@@ -413,11 +421,11 @@ Where they appear:
 
 - **The Forge**, above the saved Eidons, under **Your Ignitions** — gold-edged rather than brass, because an Ignition is not a build you made. Clicking one opens its entry.
 - **The Ignitions tab**, as its own page at the top of the rail under **Yours**, above the rulebook sections that explain it.
-- **The Admin page**, per player: an **Ignitions — N of M enabled** section with a chip each. Click to enable or take back; it saves at once, and one that isn't enabled never reaches that player's browser. The server only ever enables an Ignition for the player named inside the file, so a stale page can't hand one to the wrong character.
+- **Admin › Players**, on that player's **Ignitions** tab: **N of M enabled**, with a chip each. Click to enable or take back; it saves at once, and one that isn't enabled never reaches that player's browser. The server only ever enables an Ignition for the player named inside the file, so a stale page can't hand one to the wrong character.
 
 The DM sees every custom Ignition in their own Forge and Ignitions tab, each labelled with whose it is — they wrote them. On a plain static host there are no accounts, so the builder reads `ignitions/index.json` and then each file it names, shows all of them, and gates nothing.
 
-To add one: write the JSON, add a line to `ignitions/index.json`, restart the server, then enable it on the player's Admin page.
+To add one: write the JSON, add a line to `ignitions/index.json`, restart the server, then enable it on that player's **Ignitions** tab in Admin.
 
 ## Paragon Mode
 
@@ -492,7 +500,7 @@ On a plain static host there are no accounts, so the builder reads `cognitions/d
 
 ### The DM's side
 
-On the **Admin page** (`admin.html`), each player's page has a **Paragon path** section with exactly two controls, because only two things here are the DM's:
+In **Admin › Players**, each player's **Paragon** tab has exactly two controls, because only two things here are the DM's:
 
 - **Open the path** — one toggle. While it's closed the player never sees it; while it's open they lose Arcanum Veritas and Ignition entirely.
 - **Devotions** — a chip per Cognition **that player has mastered**; click to open or close. Nothing else is listed, and the server refuses a Cognition that isn't granted, so the rule holds even if the page is stale. The chips read at a glance: plain = mastered but not a Devotion · jade = open · filled = sworn by the player · ✦ = burning right now · dashed = no abilities written for it yet.
@@ -506,17 +514,26 @@ Revoking a Cognition closes its Devotion and unswears it. Closing a Devotion uns
 
 The old model kept ability sets in the `paragon_builds` table and typed them into an editor on the Admin page. Both are gone: the table is left standing so nothing a DM already wrote is destroyed, and nothing reads it. `js/paragon-examples.js` is an empty pointer — the three worked examples now live in the Devotion file with `"example": true`. `server/paragon-seed.json` is no longer read.
 
-## The Admin Page
+## Admin
 
-Everything the DM keeps lives on `admin.html`, reached from the Admin card on the front page. It is **its own page, not a tab**, for two reasons: administration has nothing to do with composing a seal, and while it lived inside the builder every player's browser downloaded the whole DM interface. Now none of it is shipped to them.
+Everything the DM keeps lives in **`admin/`**, a section of its own beside `sheet/`, `grimms/` and `map/`, reached from the Admin card on the front page or the ★ tool strip. It is **not a tab in the builder**, for two reasons: administration has nothing to do with composing a seal, and while it lived inside the builder every player's browser downloaded the whole DM interface. Now none of it is shipped to them. `admin.html` at the root is a 301 to `admin/`, because that was the URL for a year.
 
-It stands alone — none of the builder's scripts load here. All it needs is `js/data.js` for the domains and Ranks and `grimms/js/data.js` for the Grimm book — the Paragon Abilities aren't shipped here either, since the page only reports which Devotions have a set written. The page signs you in itself and turns away anyone who isn't the DM; every call it makes is behind `requireDm`, which is where the real boundary is.
+It stands alone — none of the builder's scripts load here. All it needs is `js/data.js` for the domains and Ranks and `grimms/js/data.js` for the Grimm book — the Paragon Abilities aren't shipped here either, since the page only reports which Devotions have a set written. A session is enough to be served the files; the page turns away anyone who isn't the DM itself, and every call it makes is behind `requireDm`, which is where the real boundary is.
 
-The rail holds three things:
+### Four sections, each minding its own business
 
-- **Reminders** — players who have tracked a Cognition to 4/4 and are waiting for you to enable it, and Paragons waiting on a **Pilgrimage**. The count also rides the page header and the front page's Admin card.
-- **Accounts** — one per player: rename, set a password, delete, grant and revoke Cognitions, read their Learning tracker, enable or take back the **custom Ignitions** written for them, and open or close their **Paragon path** and the **Devotions** they may swear.
-- **Grimms** — every Grimm with its **Three Chains**, its **Reality Shift** (revealed or hidden — while hidden, its text never reaches that player's browser) and its **abilities**, each allowed or denied.
+The section bar across the top is the whole navigation. Only the two sections with a list of their own raise the rail.
+
+- **Table** — every character as it stands right now, one condensed card each: hit points, AC, the save DCs, both exhaustion ladders, Wounds and the DCs they raise, Fate and unspent allocations. **Level / Dream / Fate** steppers and **Allow Lv N**, **+ASI** and **+Feat** are here. It polls every four seconds **while it is open and only while it is open**. Every figure is computed by the server from `sheet/js/rules.js`, so this board and the player's own sheet cannot disagree. This is the one section you open during a session; the card's player name opens their page.
+- **Players** — one page per person, **tabbed**: *Cognitions* (grant and revoke, plus their Learning tracker), *Ignitions*, *Paragon* (the path, the Devotions, the Pilgrimage), *Grimm* (their Grimm's chains and its two reveals), *Servants*, *Character* (their card and the same board controls), *Account* (rename, password, delete). The header carries the summary — how many Cognitions, which Grimm and how many chains, which character and what level.
+- **Grimms** — every Grimm with its **Three Chains**, its **Reality Shift** and its **Shackle Break** (revealed or hidden — while hidden, the text never reaches that player's browser, and neither does what the Break carries) and its **abilities**, each allowed or denied. The chains and the two reveals also appear on their holder's Players page and are the same state; the ability grid lives only here.
+- **Compendium** — the 5e content the Character Sheet offers. The SRD ships with the app; anything else is imported here and kept in the database, never in the repository.
+
+**Reminders is not a section.** Players who have tracked a Cognition to 4/4 and Paragons waiting on a **Pilgrimage** are a count in the bar that opens a panel **over** whatever you are on, so answering one does not cost you the page you were working in. The count also rides the front page's Admin card.
+
+The whole section draws itself from one call, `GET /api/admin/overview` — the Cognition index, the accounts, the board, the Grimm state and the compendium summary together. Each section registers itself with `section()` in `admin/js/core.js` and takes its slice through `onData()`.
+
+The location hash is the route: `#/table`, `#/players/7/paragon`, `#/grimms/gate-of-caelum`. A reload keeps you where you were, and a note in the vault can link at a particular player's tab.
 
 The Grimm controls used to sit in a `Grimms · DM` tab inside the Companion. They moved here, so the Companion now only *reads* that state. A denied ability leaves the player's loadout the next time their Companion loads, which is what `fitLoadout` already does on every render of their sheet.
 

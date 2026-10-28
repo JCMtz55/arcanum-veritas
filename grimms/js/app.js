@@ -20,7 +20,7 @@ function renderBar() {
 }
 
 function render() {
-  // The DM's controls live on admin.html now; a sheet saved while they were a tab here comes back to its own.
+  // The DM's controls live in admin/ now; a sheet saved while they were a tab here comes back to its own.
   if (!VIEWS[S.view]) S.view = 'sheet';
   // While the chains are off or a domain is up, the page keeps a low edge — red or pink — so the
   // table can tell at a glance that something big is still running.

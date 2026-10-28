@@ -557,13 +557,14 @@ app.get("/api/ignitions", requireUser, async (req, res) => {
 
 // ── Grimm Companion: the Three Chains, and what the DM has switched on or off for each Grimm.
 // Everyone at the table reads this; only the DM writes it.
-app.get("/api/grimms/state", requireUser, async (req, res) => {
+async function grimmState() {
   const chains = (await db.query("SELECT grimm_id, chains FROM grimm_chains")).rows;
   const toggles = (await db.query("SELECT grimm_id, key, enabled FROM grimm_toggles")).rows;
   const out = {};
   for (const t of toggles) (out[t.grimm_id] = out[t.grimm_id] || {})[t.key] = !!t.enabled;
-  res.json({ chains: Object.fromEntries(chains.map(r => [r.grimm_id, r.chains])), toggles: out });
-});
+  return { chains: Object.fromEntries(chains.map(r => [r.grimm_id, r.chains])), toggles: out };
+}
+app.get("/api/grimms/state", requireUser, async (req, res) => res.json(await grimmState()));
 
 // ── Grimm Companion: a player's own Servants ────────────────────────────
 // Each row is that player's delta on one soul, never a copy of the statblock: `edits` is what they
@@ -691,7 +692,10 @@ admin.put("/grimms/:grimm/toggles/:key", async (req, res) => {
   res.json({ ok: true });
 });
 
-admin.get("/users", async (req, res) => {
+// The accounts, with everything the Admin section says about them. A function rather than only a
+// route because /overview answers with this too, and a second copy of nine joins is a second copy
+// to get wrong.
+async function adminUsers() {
   const users = (await db.query(
     `SELECT id, username, display_name, role, paragon, password_hash <> '${LOCKED}' AS has_password
        FROM users ORDER BY role, display_name`)).rows;
@@ -702,7 +706,7 @@ admin.get("/users", async (req, res) => {
   const asked = (await db.query("SELECT * FROM paragon_pilgrimage WHERE status = 'asked' ORDER BY created_at")).rows;
   const ignOn = (await db.query("SELECT user_id, ignition_id FROM user_ignitions")).rows;
   const swornOf = id => { try { return JSON.parse(choices.find(c => c.user_id === id)?.sworn || "[]"); } catch (e) { return []; } };
-  res.json({ users: users.map(u => ({
+  return users.map(u => ({
     ...publicUser(u), hasPassword: u.has_password, paragon: !!u.paragon,
     // Which Devotions the DM has opened, which of those the player swore, and which one burns.
     // The Paragon Abilities live in the Devotion file, so the names of the sets come from there.
@@ -719,7 +723,25 @@ admin.get("/users", async (req, res) => {
     cognitions: grants.filter(g => g.user_id === u.id).map(g => g.cognition_id),
     // cognitionId is null for a name the index doesn't know — nothing the DM can enable yet
     learning: learning.filter(l => l.user_id === u.id).map(l => ({ name: l.name, depth: l.depth, cognitionId: BY_NAME.get(l.key)?.id || null })),
-  })) });
+  }));
+}
+admin.get("/users", async (req, res) => res.json({ users: await adminUsers() }));
+
+// Everything the Admin section needs to draw itself, in one call.
+//
+// It used to be five, awaited one after another as the page booted — the Cognition index, the Grimm
+// state, the party board, the compendium summary and the accounts — so the page sat empty for the
+// length of all five in series. They do not depend on each other, so they go together and in
+// parallel. Every section still has its own endpoints for its own writes; this is only the arrival.
+admin.get("/overview", async (req, res) => {
+  const [users, party, grimms, compendium] = await Promise.all([
+    adminUsers(),
+    partyBoard(),
+    grimmState(),
+    db.query(`SELECT id, kind, name, source, ruleset FROM compendium_entries
+               WHERE retired = false ORDER BY kind, name`).then(r => r.rows),
+  ]);
+  res.json({ cognitions: INDEX, users, party, grimms, compendium });
 });
 
 admin.post("/users", async (req, res) => {
@@ -1144,7 +1166,9 @@ function partyCard(row, displayName) {
   const unhealed = Array.isArray(ch.injuries) ? ch.injuries.filter(i => i && !i.healed).length : 0;
   const de = rules.dreamExhaustion(ch.dreamExhaustion);
   return {
-    id: row.id, name: row.name, player: displayName, level: row.level,
+    // userId so a card can hand you its player's page. There was no link from a character back to
+    // an account before, which is most of why the board had to be a place of its own.
+    id: row.id, userId: row.user_id, name: row.name, player: displayName, level: row.level,
     pendingLevel: row.pending_level == null ? null : Number(row.pending_level),
     openUnlocks: Number(row.open_unlocks) || 0,
     classes: (Array.isArray(ch.classes) ? ch.classes : []).filter(x => x && x.name)
@@ -1195,8 +1219,9 @@ app.post("/api/characters", requireUser, async (req, res) => {
   res.json({ character: publicCharacter(made[0]) });
 });
 
-// Registered BEFORE "/api/characters/:id", or ":id" would swallow "party" and answer 404 for the DM.
-app.get("/api/characters/party", requireUser, requireDm, async (req, res) => {
+// The DM's board. A function as well as a route because /api/admin/overview sends it with the
+// first paint, and the board then polls this same shape on its own while it is open.
+async function partyBoard() {
   // The open tokens ride along, so the board can say that a level has been allowed and is still
   // waiting to be taken — the difference between "they are level 12" and "they may become 13".
   const { rows } = await db.query(
@@ -1207,8 +1232,11 @@ app.get("/api/characters/party", requireUser, requireDm, async (req, res) => {
               WHERE k.character_id = c.id AND k.consumed_at IS NULL) AS open_unlocks
        FROM characters c JOIN users u ON u.id = c.user_id
       WHERE c.archived = false ORDER BY u.display_name, c.id`);
-  res.json({ party: rows.map(r => partyCard(r, r.display_name)) });
-});
+  return rows.map(r => partyCard(r, r.display_name));
+}
+// Registered BEFORE "/api/characters/:id", or ":id" would swallow "party" and answer 404 for the DM.
+app.get("/api/characters/party", requireUser, requireDm, async (req, res) =>
+  res.json({ party: await partyBoard() }));
 
 app.get("/api/characters/:id", requireUser, async (req, res) => {
   const row = await loadCharacter(req.params.id, req.user);
@@ -1705,9 +1733,20 @@ app.use("/sheet", express.static(path.join(ROOT, "sheet")));
 // get Express's bare "Cannot GET /index.html" instead of the hub.
 app.get(["/", "/index.html"], (req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/arcanum.html", (req, res) => res.sendFile(path.join(ROOT, "arcanum.html")));
-// The Admin page. Served like any other page — it signs you in itself, and turns away anyone who
-// isn't the DM. Every call it makes is behind requireDm, which is where the real boundary is.
-app.get("/admin.html", (req, res) => res.sendFile(path.join(ROOT, "admin.html")));
+
+// The old single-page Admin, kept as a redirect. It was admin.html at the root for a year, so it
+// is in bookmarks and in the vault's own notes; those should land on the section rather than on
+// Express's bare "Cannot GET". A hash rides along, so a link at a particular player still works.
+app.get("/admin.html", (req, res) => res.redirect(301, "/admin/"));
+
+// Admin — the DM's own section, served the way /sheet and /map are: a session is enough to be
+// handed the files, and the page turns a player away itself with something better worded than a
+// redirect. The real boundary has not moved — every call this section makes is behind requireDm,
+// and the folder holds no data, only the four sections' code.
+app.use("/admin", async (req, res, next) => {
+  return (await currentUser(req)) ? next() : res.redirect("/");
+});
+app.use("/admin", express.static(path.join(ROOT, "admin")));
 
 app.use((err, req, res, next) => {
   if (!err.status || err.status >= 500) console.error(err);

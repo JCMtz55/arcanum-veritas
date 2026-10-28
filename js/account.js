@@ -1,5 +1,5 @@
 // Arcanum Veritas Builder — Sign-in and the account menu.
-// Administration is its own page now (admin.html), so none of it is shipped to players.
+// Administration is its own section now (admin/), so none of it is shipped to players.
 // All of it is inert on a static host: nothing here runs unless boot() found the server's api/.
 
 async function api(method, url, body) {
