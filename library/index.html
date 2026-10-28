@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Library — Ephemer</title>
+<meta name="description" content="Once Upon a Star ★ — the campaign's shared documents, published from the vault.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css?v=2026-10-28b">
+<!-- The tool strip, shared with the rest of Ephemer. In <head> so its styling lands before the
+     bar is first painted; ../js/ because it lives at the app root, not in this section. -->
+<script src="../js/tools.js?v=2026-10-28b"></script>
+<style>
+  /* This section is one frame and nothing else, so it takes the whole viewport under the bar
+     rather than scrolling a page that contains a scrolling page. */
+  html,body{height:100%}
+  body{margin:0;overflow:hidden;background:var(--slate)}
+  .lib-bar{position:sticky;top:0;z-index:40}
+  .lib-wrap{height:calc(100dvh - var(--lib-bar, 57px));position:relative}
+  /* `position` and a z-index on the FRAME, not just on the fallback: a positioned element paints
+     over a static one whatever its z-index, so without this the fallback showed through the site. */
+  .lib-frame{position:relative;z-index:1;display:block;width:100%;height:100%;border:0;
+    background:var(--slate)}
+  /* Behind the frame, so it is what you are looking at if the frame never paints — a changed
+     header at the far end, a blocked third party, no network. The frame covers it when it loads. */
+  .lib-fallback{position:absolute;inset:0;z-index:0;display:flex;flex-direction:column;gap:10px;
+    align-items:center;justify-content:center;text-align:center;padding:24px;
+    font-family:var(--sans);font-size:13px;color:var(--mute)}
+  .lib-fallback a{color:var(--brass)}
+  .lib-out{font-family:var(--sans);font-size:11px;color:var(--mute);text-decoration:none;
+    border:1px solid var(--line);border-radius:6px;padding:4px 9px;white-space:nowrap}
+  .lib-out:hover{color:var(--bone);border-color:var(--mute)}
+</style>
+</head>
+<body>
+
+<div class="bar lib-bar">
+  <nav class="tools" data-tool="library" aria-label="Ephemer tools"></nav>
+  <div class="brand">
+    <a href="./">Library</a><em>once upon a star</em>
+  </div>
+  <span class="sp" style="flex:1"></span>
+  <!-- Always present, whatever the frame does: the site has its own search, its own graph and its
+       own deep links, and some of that is simply better in a tab of its own. -->
+  <a class="lib-out" href="https://publish.obsidian.md/once-upon-a-star" target="_blank"
+     rel="noopener noreferrer">Open in a new tab ↗</a>
+</div>
+
+<div class="lib-wrap">
+  <div class="lib-fallback">
+    <p><b>The Library did not load.</b></p>
+    <p>It is published from the vault and lives at
+      <a href="https://publish.obsidian.md/once-upon-a-star" target="_blank" rel="noopener noreferrer">publish.obsidian.md/once-upon-a-star</a>
+      — open it there.</p>
+  </div>
+  <!-- No `sandbox`: a cross-origin frame is already walled off by the same-origin policy, and a
+       partial sandbox would only break the site's own scripts without making this any safer. -->
+  <iframe class="lib-frame" title="Once Upon a Star ★ — the campaign's shared documents"
+          src="https://publish.obsidian.md/once-upon-a-star"
+          referrerpolicy="no-referrer"
+          allow="clipboard-write"></iframe>
+</div>
+
+<script>
+  // The bar's height is whatever the shared stylesheet makes it, and it WRAPS on a narrow screen —
+  // so the frame is told rather than guessing with a magic number that is wrong at 375px.
+  //
+  // A ResizeObserver rather than a load handler and a resize listener: the bar also changes height
+  // when the web font arrives and when the tool strip's second render adds the DM's rows, and
+  // measuring once at parse time caught none of that — the page scrolled by the 34px difference.
+  const bar = document.querySelector(".lib-bar");
+  const fit = () => document.documentElement.style.setProperty("--lib-bar", bar.offsetHeight + "px");
+  fit();
+  new ResizeObserver(fit).observe(bar);
+</script>
+
+</body>
+</html>

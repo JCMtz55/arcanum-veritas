@@ -33,9 +33,13 @@ a{color:var(--brass)}
 code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 4px;border-radius:4px}
 
 /* ── the bar ─────────────────────────────────────────────────────────── */
-/* overflow:hidden rather than wrapping: the bar is a fixed-height strip, and a status button that
-   does not fit should be clipped, not push the whole document sideways. */
-.bar{height:var(--bar);display:flex;align-items:center;gap:10px;padding:0 12px;overflow:hidden;
+/* The bar is a fixed-height strip and a status button that does not fit should be clipped, not push
+   the whole document sideways — but `overflow:hidden` clipped the TOOL MENU too, so the ★ in the
+   corner opened a panel nobody could see and this was the one page you could not leave by it.
+   `overflow-x:clip` is the fix rather than `hidden`: it is the one value that lets the other axis
+   stay genuinely `visible`, so the menu hangs down over the sheet while the strip still clips. */
+.bar{height:var(--bar);display:flex;align-items:center;gap:10px;padding:0 12px;
+  overflow-x:clip;overflow-y:visible;
   background:var(--panel);border-bottom:1px solid var(--line)}
 .bar>*{min-width:0}
 .brand{font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;

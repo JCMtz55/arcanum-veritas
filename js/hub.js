@@ -44,6 +44,9 @@ async function boot() {
     // The World Map opened to the table on 2026-10-23 (Juan). Everyone signed in gets the card;
     // which places are on the map behind it is the server's business, not this line's.
     document.getElementById("hubMap").hidden = false;
+    // The Library is the published vault — player-facing by definition, since publishing it is what
+    // made it so. Everyone signed in gets the card, the DM included.
+    document.getElementById("hubLibrary").hidden = false;
     // The Character Sheet is a player's own. The DM reads the table from the Admin page instead,
     // where every character is on one board, so the card would only be a longer road to one sheet.
     document.getElementById("hubSheet").hidden = dm;

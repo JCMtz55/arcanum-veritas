@@ -1386,8 +1386,10 @@ app.put("/api/characters/:id/dream", requireUser, requireDm, async (req, res) =>
   // The ruling is that Dream moves only through a special campaign event (DM-02, RES-03), so the
   // event is not optional metadata — it is the thing being recorded. A change with nothing named
   // would leave a score nobody can account for six months later.
+  // It reads as "Dream moves only by 1", which is not the rule and never was — any amount is
+  // allowed, the EVENT is what is required.
   if (dream !== row.dream && !String(note || "").trim())
-    return res.status(400).json({ error: "Name the campaign event — Dream moves only by one." });
+    return res.status(400).json({ error: "Name the campaign event — Dream only moves when one is recorded." });
   const { rows } = await db.query(
     `UPDATE characters SET dream = $1, updated_at = now() WHERE id = $2 RETURNING *`, [dream, row.id]);
   await logEvent(row.id, req.user.id, "dream.set", { from: row.dream, to: dream }, note);
@@ -1720,6 +1722,14 @@ app.use("/map", async (req, res, next) => {
   return (await currentUser(req)) ? next() : res.redirect("/");
 });
 app.use("/map", express.static(path.join(ROOT, "map")));
+
+// The Library — the campaign's shared documents, published from the vault and shown in a frame.
+// The page holds nothing but that frame, and the site at the far end is public anyway; the session
+// is here for consistency with the rest of the app and so the tool strip can ask who you are.
+app.use("/library", async (req, res, next) => {
+  return (await currentUser(req)) ? next() : res.redirect("/");
+});
+app.use("/library", express.static(path.join(ROOT, "library")));
 
 // The Character Sheet. A session is enough — what a player may READ is settled by the routes above,
 // every one of which is owner-scoped, so the page itself carries nothing privileged. The folder's

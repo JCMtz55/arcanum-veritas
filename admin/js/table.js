@@ -40,13 +40,14 @@ async function loadParty() {
 }
 
 // A redraw replaces the whole board, so anything the DM is in the middle of typing has to survive
-// it — and if the caret is actually in the note field, the redraw waits rather than interrupting.
+// it — and if the caret is actually in a field, the redraw waits rather than interrupting.
 function drawParty() {
   const note = document.getElementById("ptyNote");
-  if (note) {
-    PARTY.note = note.value;
-    if (document.activeElement === note) return;
-  }
+  if (note) PARTY.note = note.value;
+  // Any field, not just the note: the Dream score is typed too now, and a four-second poll landing
+  // between the "2" and the "4" of a 24 would be the most annoying bug on this page.
+  const a = document.activeElement;
+  if (a && a.matches?.("#ptyNote, .pty-do input")) return;
   drawBody();
 }
 function startPartyPolling() {
@@ -166,7 +167,12 @@ function partyControls(c) {
       <button onclick="partyBump(${c.id},'level',-1)" aria-label="Lower level">–</button><span>${c.level}</span>
       <button onclick="partyBump(${c.id},'level',1)" aria-label="Raise level">+</button></div></span>
     <span class="pair"><span class="lbl">Dream</span><div class="step">
-      <button onclick="partyBump(${c.id},'dream',-1)" aria-label="Lower Dream">–</button><span>${c.dream}</span>
+      <button onclick="partyBump(${c.id},'dream',-1)" aria-label="Lower Dream">–</button>
+      <input class="stepv" type="number" min="0" max="40" value="${c.dream}" id="ptyDream${c.id}"
+        title="Type a Dream score and press Enter — a campaign event rarely moves it by one"
+        aria-label="Dream score for ${escQ(c.name)}"
+        onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')partyRevert(${c.id},'dream',this)"
+        onchange="partySet(${c.id},'dream',this.value)">
       <button onclick="partyBump(${c.id},'dream',1)" aria-label="Raise Dream">+</button></div></span>
     <span class="pair"><span class="lbl">Fate</span><div class="step">
       <button onclick="partyBump(${c.id},'fate',-1)" aria-label="Take back a Fate use">–</button><span>${c.fate}</span>
@@ -196,20 +202,46 @@ async function partyAllowLevel(id) {
   await afterPartyWrite();
 }
 
+const PARTY_LIMITS = { level: [1, 20], dream: [0, 40], fate: [0, 99] };
+const PARTY_FIELD = { level: "Level", dream: "Dream", fate: "Fate" };
+
+// A nudge is just a set with the arithmetic done here, so there is one write path and one set of
+// guards however the number was changed.
+function partyBump(id, field, by) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (c) partySet(id, field, c[field] + by);
+}
+// Putting the number back after a refused or abandoned edit, without waiting for the next poll.
+function partyRevert(id, field, el) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (c && el) { el.value = c[field]; el.blur(); }
+}
+
 // One change: write it, record the reason, and read the board back. A level also issues the Honor and
 // Morality allocations and the unlock token the server attaches to it — this does not do that itself.
-async function partyBump(id, field, by) {
+//
+// ⭐ Dream is TYPED rather than stepped. It does not creep: it moves when the DM records a campaign
+// event, and the table is at 24 — twenty-four presses of a + button to set up a character is not a
+// control, it is a punishment. The arrows stay for the odd correction.
+async function partySet(id, field, value) {
   const c = PARTY.cards.find(x => x.id === id);
   if (!c) return;
-  const limits = { level: [1, 20], dream: [0, 40], fate: [0, 99] };
-  const next = c[field] + by;
-  const [lo, hi] = limits[field];
-  if (next < lo || next > hi) return toast(`${field === "level" ? "Level" : field === "dream" ? "Dream" : "Fate"} is ${lo} to ${hi}.`);
+  const el = document.getElementById(`pty${PARTY_FIELD[field]}${id}`);
+  const next = Math.round(Number(value));
+  const [lo, hi] = PARTY_LIMITS[field];
+  // An emptied or nonsense box is an abandoned edit, not a change to zero.
+  if (!Number.isFinite(next)) return partyRevert(id, field, el);
+  if (next === c[field]) return partyRevert(id, field, el);
+  if (next < lo || next > hi) {
+    toast(`${PARTY_FIELD[field]} is ${lo} to ${hi}.`);
+    return partyRevert(id, field, el);
+  }
 
   // Lowering a level is a rollback, and it takes features away — say so before it happens.
-  if (field === "level" && by < 0 &&
+  if (field === "level" && next < c[field] &&
       !confirm(`Take ${c.name} back to level ${next}? Allocations already spent are not returned.`)) return;
 
+  if (el) el.blur();                  // so the redraw below is not held off by its own caret
   PARTY.busy = id;
   try {
     const body = { [field]: next, note: partyNote() };

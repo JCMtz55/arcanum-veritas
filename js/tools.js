@@ -33,6 +33,8 @@ const TOOLS = [
     title: "Character Sheet — your seven scores, the Fate Die, Wounds and both exhaustion tracks" },
   { key: "map", href: "map/", mark: "✶", label: "Map",
     title: "World Map — nations, settlements and the roads between them" },
+  { key: "library", href: "library/", mark: "▤", label: "Library",
+    title: "The Library — the campaign's shared documents, published from the vault" },
   { key: "admin", href: "admin/", mark: "❖", label: "Admin", dm: true,
     title: "Admin — the table's live board, the players, the Grimms and the compendium" },
 ];
