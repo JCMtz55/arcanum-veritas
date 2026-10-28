@@ -23,6 +23,11 @@ export const state = {
   cognitions: null,    // the Cognitions this account has been granted
   learning: null,      // their own tracker: [{ name, depth }]
   learnNames: null,    // the names of the ones they do not have yet, for the picker
+  grimmState: null,    // the DM's: chains per Grimm, and what they have revealed
+  grimmSouls: null,    // this player's Servants, per Grimm
+  grimmData: null,     // the generated Grimm roster, fetched once and shared with the other tools
+  ignitions: null,     // the custom Ignitions written for this player and switched on by the DM
+  paragon: null,       // whether the path is open, the pool, and which Devotions are sworn
   ephemerError: "",
 };
 

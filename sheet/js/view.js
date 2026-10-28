@@ -197,8 +197,18 @@ function renderLeft() {
 }
 
 // ── centre: the body ────────────────────────────────────────────────────
-const TABS = { combat: "Combat", spells: "Spells", dream: "Dream", gear: "Gear", character: "Character" };
-const TAB_ICON = { combat: "attack", spells: "spells", dream: "dream", gear: "gear", character: "character" };
+// Seven, since Ephemer's own systems got their own two. The Dream tab had grown into a drawer
+// holding four unrelated things, and the Cognitive Arts are a family in their own right: the
+// Cognitions you know, Arcanum Veritas, your Ignitions and the Paragon path all answer to the same
+// three Arts. The Grimm is nobody's family but its own.
+const TABS = { combat: "Combat", spells: "Spells", dream: "Dream", arts: "Cognitive Arts",
+  grimm: "Grimms", gear: "Gear", character: "Character" };
+// What the strip prints, where the full name is too long to fit seven of them. The tooltip and the
+// aria-label keep the real name, so only the width is abbreviated and never the meaning.
+const TAB_SHORT = { arts: "Arts" };
+const TAB_ICON = { combat: "attack", spells: "spells", dream: "dream", arts: "cognition",
+  grimm: "grimm", gear: "gear", character: "character" };
+export const TAB_ORDER = Object.keys(TABS);
 
 function renderCentre() {
   const ch = derived();
@@ -262,7 +272,7 @@ function renderCentre() {
     <div class="tabs">${Object.entries(TABS).map(([k, label]) =>
       `<button class="tab ${state.view === k ? "on" : ""}" data-act="tab" data-id="${k}"
         title="${label}" aria-label="${label}">
-        ${icon(TAB_ICON[k])}<span class="tab-n">${label}</span></button>`).join("")}
+        ${icon(TAB_ICON[k])}<span class="tab-n">${TAB_SHORT[k] || label}</span></button>`).join("")}
       <span class="sp"></span>
       <button class="btn sm" data-act="compendium" data-id="spell" title="Races, classes, feats, spells and items">${icon("compendium")} Compendium</button>
       <button class="btn sm" data-act="dice" title="Roll any expression">${icon("dice")} Dice</button>
@@ -304,6 +314,8 @@ function panelHtml(ch) {
   if (state.view === "combat") return combatPanel(ch);
   if (state.view === "spells") return spellPanel(ch);
   if (state.view === "dream") return dreamPanel(ch);
+  if (state.view === "arts") return artsPanel(ch);
+  if (state.view === "grimm") return grimmPanel(ch);
   if (state.view === "gear") return gearPanel(ch);
   return characterPanel(ch);
 }
@@ -416,15 +428,8 @@ function spellPanel(ch) {
         : `<p class="hint">${state.classPlan === null
             ? "Reading the catalogue…"
             : "No class on your sheet casts spells. Take one from the compendium and its DC appears here."}</p>`}
-      <div class="stats">
-        <div class="stat"><b>${rules.verumDC(ch)}</b><i>Verum DC</i></div>
-        <div class="stat"><b>${sign(rules.sealAttackBonus(ch))}</b><i>Seal attack</i></div>
-        <div class="stat"><b>${rules.sealUses(ch)}</b><i>Seals per long rest</i></div>
-      </div>
-      <p class="hint">Arcanum Veritas is its own thing: a seal costs one use <b>and</b> a spell slot of
-        1st level or higher, and the Verum DC — 8 + PB + your highest ability modifier + your Dream
-        modifier — is what a seal is resisted at, never what a spell above is.
-        Compose the seal itself in the <a href="../arcanum.html">builder</a>.</p>
+      <p class="hint">⚠️ A <b>seal</b> is resisted at the Verum DC and not at any of these — Arcanum
+        Veritas is its own Art, and it has its own tab now.</p>
     </section>
 
     <section class="card">
@@ -532,9 +537,6 @@ function dreamPanel(ch) {
         Proficiency is not added — a Cognitive Saving Throw is not a check.</p>
     </section>
 
-    ${cognitionsCard(ch)}
-    ${learningCard(ch)}
-
     <section class="card">
       <h3>Dream Exhaustion · ${de.level}/8 — ${esc(de.name)}</h3>
       ${de.level ? `<p class="de-now"><b>${de.penalty}</b> to every d20 roll you make <b>in a dream</b>.
@@ -556,6 +558,153 @@ function dreamPanel(ch) {
 // second window onto one record rather than a second copy of it. Until now a player kept two tabs
 // open to run one character: the Cognitive Saving Throw on this screen and the Cognitions it is
 // rolled for on another.
+// ── Cognitive Arts ──────────────────────────────────────────────────────
+// The three Arts and what they are made of, in one place. They were scattered — the Verum DC sat
+// among the spell slots as though a seal were a spell, and the Cognitions sat under Dream as though
+// knowing one were a kind of exhaustion. They are one family: ⭐ **a Cognition is the material, and
+// Arcanum Veritas, Ignition and the Paragon path are the three things you can do with it.**
+function artsPanel(ch) {
+  return `${veritasCard(ch)}
+    ${cognitionsCard(ch)}
+    ${learningCard(ch)}
+    ${ignitionsCard()}
+    ${paragonCard()}`;
+}
+
+function grimmPanel() {
+  return grimmCard() || `<section class="card">
+    <h3>${icon("grimm")} Grimm</h3>
+    <p class="hint">Reading what your DM keeps…</p></section>`;
+}
+
+function veritasCard(ch) {
+  return `<section class="card">
+      <h3>${icon("saveDC")} Arcanum Veritas <span class="r">
+        <a class="btn sm" href="../arcanum.html">Compose a seal</a></span></h3>
+      <div class="stats">
+        <button class="stat btn-stat" data-act="verum"><b>${rules.verumDC(ch)}</b><i>Verum DC</i></button>
+        <div class="stat"><b>${sign(rules.sealAttackBonus(ch))}</b><i>Seal attack</i></div>
+        <div class="stat"><b>${rules.sealUses(ch)}</b><i>Seals per long rest</i></div>
+        <div class="stat"><b>${rules.ownDreamDC(ch)}</b><i>your Dream DC</i></div>
+      </div>
+      <p class="hint">A seal costs one use <b>and</b> a spell slot of 1st level or higher. The Verum
+        DC — 8 + proficiency + your highest ability modifier + your Dream modifier — is what a
+        <b>seal</b> is resisted at, and never what a published spell is; those have their own DC on
+        the Spells tab. Seals per long rest is your proficiency bonus, and so is the number of
+        inscriptions you may hold at once.</p>
+    </section>`;
+}
+
+// An Ignition is written for one player and switched on by the DM, so a player who has none sees
+// nothing rather than an empty promise. The Blaze Points it costs are the builder's to spend —
+// the same line the Grimm card draws.
+function ignitionsCard() {
+  const mine = state.ignitions;
+  if (!mine || !mine.length) return "";
+  return `<section class="card">
+      <h3>${icon("ignition")} Ignitions <span class="r">
+        <a class="btn sm" href="../arcanum.html">Forge</a></span></h3>
+      <div class="igns">${mine.map(i => `
+        <div class="ign">
+          <span class="ign-i" aria-hidden="true">${esc(i.icon || "✶")}</span>
+          <span class="ign-n"><b>${esc(i.name)}</b>
+            <span>${[i.template, i.activation].filter(Boolean).map(esc).join(" · ")}</span></span>
+          ${i.rank ? `<span class="tag k">Rank ${esc(String(i.rank))}</span>` : ""}
+        </div>
+        ${(i.cognitions || []).length ? `<div class="ign-c">${(i.cognitions || []).map(id =>
+          `<span class="chip">${esc(cognitionName(id))}</span>`).join("")}</div>` : ""}`).join("")}
+      </div>
+      <p class="hint">Written for you and opened by your DM. ⚠️ <b>Every Cognition an Ignition burns
+        must be known at Learn Full</b> — the forge itself, and the Blaze Points it spends, are in the
+        <a href="../arcanum.html">builder</a>.</p>
+    </section>`;
+}
+
+const cognitionName = id =>
+  (state.cognitions || []).find(c => c.id === id)?.name
+  || String(id).replace(/-/g, " ").replace(/\b\w/g, m => m.toUpperCase());
+
+// The Paragon path: three Devotions sworn, one of them held in the Deeper Burn. All of it is the
+// DM's to open and the builder's to choose in — the sheet says where you stand.
+function paragonCard() {
+  const p = state.paragon;
+  if (!p || !p.enabled) return "";
+  const nameOf = id => (p.devotions || []).find(d => d.cognition === id)?.name || cognitionName(id);
+  const open = (p.pilgrimage || []).find(x => x.status === "asked");
+  return `<section class="card">
+      <h3>${icon("paragon")} Paragon <span class="r">
+        <a class="btn sm" href="../arcanum.html">Choose</a></span></h3>
+      ${p.sworn?.length ? `<div class="chips">${p.sworn.map(id => `
+        <span class="chip ${id === p.active ? "on" : ""}"
+          title="${esc(id === p.active ? "Held in the Deeper Burn" : "Sworn")}">
+          ${esc(nameOf(id))}${id === p.active ? " ✦" : ""}</span>`).join("")}</div>`
+        : `<p class="hint">None sworn yet.</p>`}
+      <p class="hint">${p.sworn?.length || 0} of ${p.max || 3} sworn${
+        p.active ? ` · <b>${esc(nameOf(p.active))}</b> is held in the Deeper Burn` : ""}${
+        (p.devotions || []).length ? ` · ${p.devotions.length} in your pool` : ""}.
+        ${open ? `🧭 <b>A Pilgrimage is open</b> — you asked for
+          <b>${esc(open.arrivingName || "")}</b>${open.leavingName ? `, leaving ${esc(open.leavingName)}` : ""},
+          and your DM answers it in Admin.` : ""}</p>
+    </section>`;
+}
+
+// The Grimm, as the sheet needs it and no further. ⭐ The live state — which slots are spent, which
+// stage it is in, what is loaded out — belongs to the Companion, which owns it and keeps it in that
+// browser; copying it here would make two answers to one question. What the sheet shows is the part
+// that is NOT the Companion's: the DM's chains, what the DM has revealed, and how many souls are on
+// the roster — the three things a player currently opens another tab to read.
+function grimmCard() {
+  if (state.grimmData === null && state.grimmState === null) return "";
+  const g = ephemer.myGrimm();
+  if (!g) {
+    // The DM, or an account no Grimm is written for. The Admin page is where the DM reads all eight.
+    return state.grimmData ? `<section class="card">
+      <h3>${icon("grimm")} Grimm</h3>
+      <p class="hint">No Grimm is written for <b>${esc(state.me?.username || "this account")}</b>.
+        A Grimm is matched to the player by name, the same way the Admin page matches it —
+        the DM reads all of them in <a href="../admin/#/grimms">Admin › Grimms</a>.</p>
+    </section>` : "";
+  }
+
+  const chains = Number(state.grimmState?.chains?.[g.id]) || 0;
+  const toggles = state.grimmState?.toggles?.[g.id] || {};
+  const souls = Object.keys(state.grimmSouls?.grimms?.[g.id] || {}).length;
+
+  const reveal = (on, label, name, note) => `<div class="rev ${on ? "on" : ""}">
+    <span class="rev-k">${esc(label)}</span>
+    <b>${on ? esc(name || "revealed") : "not yet"}</b>
+    <span class="hint">${esc(on ? note : "your DM has not revealed it")}</span></div>`;
+
+  return `<section class="card grimm" style="--gh:${esc(g.hue || "var(--accent)")}">
+      <h3>${icon("grimm")} ${esc(g.name)} <span class="r">
+        <a class="btn sm" href="../grimms/">Open the Companion</a></span></h3>
+      <p class="hint">Grimm of <b>${esc(g.user || g.short || "")}</b>${
+        g.forms?.invoked ? ` · Invoked as <b>${esc(g.forms.invoked)}</b>` : ""}${
+        g.forms?.awakened ? ` · Awakened as <b>${esc(g.forms.awakened)}</b>` : ""}</p>
+
+      <div class="chainrow" title="The Three Chains — your DM keeps them">
+        <span class="chainrow-k">The Three Chains</span>
+        <span class="chainpips">${[1, 2, 3].map(i =>
+          `<span class="chainpip ${i <= chains ? "on" : ""}" aria-hidden="true"></span>`).join("")}</span>
+        <b>${chains}/3</b>
+        <span class="hint">${chains >= 3 ? "all three hold" : chains ? "broken" : "every chain is broken"}</span>
+      </div>
+
+      <div class="revs">
+        ${reveal(toggles.shackle === true, "Shackle Break", g.shackle?.name,
+          "yours to use when the stage allows it")}
+        ${reveal(toggles.shift === true, "Reality Shift", g.shift?.name,
+          "yours to use — the Companion has its page")}
+      </div>
+
+      ${souls ? `<p class="hint">${souls} soul${souls === 1 ? "" : "s"} on your roster.
+        Preparing them, and everything they carry, is in the Companion.</p>` : ""}
+      <p class="hint">Your slots, your stage and your loadout live in the
+        <a href="../grimms/">Companion</a>, which is where they are spent — this is the part your DM
+        keeps, so you can read it without leaving your character.</p>
+    </section>`;
+}
+
 function cognitionsCard() {
   const mine = state.cognitions;
   if (mine === null) return `<section class="card">

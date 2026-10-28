@@ -8,7 +8,7 @@ import * as rules from "./rules.js";
 import * as store from "./store.js";
 import { state, derived, mutate } from "./store.js";
 import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, ACTION_COST,
-  toggleHtml } from "./view.js";
+  toggleHtml, TAB_ORDER } from "./view.js";
 import * as compendium from "./compendium.js";
 import * as ephemer from "./ephemer.js";
 import { esc, sign, toast, popAt, closePop, popKey, popContains, dialog, closeDialog,
@@ -100,15 +100,16 @@ document.addEventListener("submit", e => {
 // Number keys switch the centre tab, the way the Grimm Companion's do.
 document.addEventListener("keydown", e => {
   if (e.target.matches("input, textarea, select")) return;
-  const tabs = ["combat", "spells", "dream", "gear", "character"];
-  if (e.key >= "1" && e.key <= "5") showTab(tabs[+e.key - 1]);
+  if (e.key >= "1" && e.key <= String(TAB_ORDER.length)) showTab(TAB_ORDER[+e.key - 1]);
 });
 
-// Switching tabs, in one place, because the Dream tab has to fetch what the account knows the first
-// time it is opened — and a player who never opens it never pays for those three requests.
+// Switching tabs, in one place, because the two that hold Ephemer's own systems have to fetch what
+// the ACCOUNT knows the first time either is opened — and a player who never opens them never pays
+// for those requests.
 function showTab(id) {
+  if (!id) return;
   state.view = id;
-  if (id === "dream") ephemer.ensure().catch(() => {});
+  if (id === "arts" || id === "grimm") ephemer.ensure().catch(() => {});
   renderAll();
 }
 

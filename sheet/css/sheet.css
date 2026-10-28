@@ -134,7 +134,7 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 .tile b{font-family:var(--sans);font-size:17px;line-height:1.1}
 
 /* ── centre: tabs and the panel that scrolls ─────────────────────────── */
-/* The strip scrolls rather than wrapping: five tabs plus their icons overrun a 375px phone, and the
+/* The strip scrolls rather than wrapping: seven tabs plus their icons overrun a 375px phone, and the
    row's parent clips, so a wrapped or clipped Character tab would simply be unreachable. */
 .tabs{display:flex;align-items:center;gap:4px;flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -632,7 +632,9 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 /* `.tab-n`, not `.tab span` — the icon helper emits a <span> too, and hiding "the span" hid the
    icon with the label, leaving a 20x10px empty button. The label gets its own name so this can
    never again mean more than it says. */
-@media (max-width:1240px){
+/* Raised from 1240px when the tabs went from five to seven: "Cognitive Arts" is a long label, and
+   two more of them push the strip into scrolling well before a screen is actually narrow. */
+@media (max-width:1480px){
   .tab .tab-n{display:none}
   .tab{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px}
   .tab .ic{margin-right:0;font-size:14px;opacity:.75;width:1em}
@@ -727,6 +729,44 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .uses{display:inline-flex;align-items:center;gap:3px}
 .uses .pip{width:11px;height:11px}
 .uses em{font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);margin-left:2px}
+
+/* ── Ignitions ───────────────────────────────────────────────────────────
+   One written for you, and switched on. The Cognitions it burns ride underneath, because "every
+   one of these must be at Learn Full" is the rule that decides whether you can use it at all. */
+.igns{display:flex;flex-direction:column;gap:4px}
+.ign{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:7px;padding:5px 9px}
+.ign-i{font-size:15px;line-height:1}
+.ign-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ign-n b{font-family:var(--sans);font-size:12.5px;font-weight:500}
+.ign-n span{font-family:var(--sans);font-size:9.5px;color:var(--mute);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ign-c{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px 32px}
+.ign-c .chip{font-size:9.5px;padding:1px 7px}
+
+/* ── the Grimm ───────────────────────────────────────────────────────────
+   Tinted with the Grimm's own hue, which the generated data carries and the Companion and the
+   Admin page both already use — one Grimm, one colour, wherever you meet it. */
+.card.grimm{border-color:color-mix(in srgb, var(--gh) 45%, var(--line))}
+.card.grimm h3 .ic{color:var(--gh)}
+.chainrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0}
+.chainrow-k{font-family:var(--sans);font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--mute)}
+.chainpips{display:flex;gap:4px}
+.chainpip{width:16px;height:16px;border-radius:4px;transform:rotate(45deg);
+  background:var(--panel2);border:1px solid var(--line)}
+.chainpip.on{background:var(--gh);border-color:var(--gh)}
+.chainrow b{font-family:var(--sans);font-size:13px}
+.revs{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.rev{display:grid;grid-template-columns:110px auto minmax(0,1fr);gap:8px;align-items:baseline;
+  background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;
+  opacity:.62}
+.rev.on{opacity:1;border-color:color-mix(in srgb, var(--gh) 45%, var(--line))}
+.rev-k{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--mute)}
+.rev b{font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap}
+.rev.on b{color:var(--gh)}
+.rev .hint{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── Ephemer's own systems ───────────────────────────────────────────────
    A Cognition is a chip with its own Font Awesome glyph and its Tier, tinted by category the way

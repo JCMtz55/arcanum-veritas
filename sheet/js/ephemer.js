@@ -17,6 +17,37 @@ import { api, state, emit } from "./store.js";
 
 let loading = null;
 
+// ── the Grimm's own data ────────────────────────────────────────────────
+// `grimms/js/data.js` is generated from the vault and sets one global. It is half a megabyte, so it
+// is pulled in ONCE and only when the Dream tab is first opened — and at exactly the URL the Admin
+// page uses, version query included, so the browser serves both tools from one cache entry.
+const GRIMM_DATA_URL = "../grimms/js/data.js?v=2026-10-28a";
+let grimmScript = null;
+
+function loadGrimmData() {
+  if (window.GRIMM_DATA) return Promise.resolve(window.GRIMM_DATA);
+  if (grimmScript) return grimmScript;
+  grimmScript = new Promise(resolve => {
+    const s = document.createElement("script");
+    s.src = GRIMM_DATA_URL;
+    // A sheet on a host with no Grimm data is a sheet without this card, not a broken page.
+    s.onload = () => resolve(window.GRIMM_DATA || null);
+    s.onerror = () => { grimmScript = null; resolve(null); };
+    document.head.append(s);
+  });
+  return grimmScript;
+}
+
+// Whose Grimm is whose. The data carries a `short` — "Grizzly", "Salomon" — and the account carries
+// a username; matching those two is the join, and it is the same one the Admin page makes. Nothing
+// is typed in and nothing is stored on the character, because the Grimm belongs to the player.
+export function myGrimm() {
+  const me = String(state.me?.username || "").toLowerCase();
+  if (!me || !state.grimmData) return null;
+  return (state.grimmData.grimms || [])
+    .find(g => String(g.short || "").toLowerCase() === me) || null;
+}
+
 // Everything at once, because the three answers are small and meaningless apart: which Cognitions
 // you have, which you are working toward, and the names you may pick from (which is the set
 // difference the server computes so the browser never sees the ones you have not been granted).
@@ -24,14 +55,26 @@ export async function ensure(force = false) {
   if (!force && (state.cognitions || loading)) return loading;
   loading = (async () => {
     try {
-      const [mine, learning, names] = await Promise.all([
+      const [mine, learning, names, grimms, souls, data, ignitions, paragon] = await Promise.all([
         api("GET", "../api/cognitions"),
         api("GET", "../api/learning"),
         api("GET", "../api/learning/names"),
+        api("GET", "../api/grimms/state"),
+        api("GET", "../api/grimms/souls"),
+        loadGrimmData(),
+        api("GET", "../api/ignitions"),
+        api("GET", "../api/paragon"),
       ]);
       state.cognitions = mine.cognitions || [];
       state.learning = learning.learning || [];
       state.learnNames = names.names || [];
+      state.grimmState = grimms || { chains: {}, toggles: {} };
+      state.grimmSouls = souls || { grimms: {}, adopted: [] };
+      state.grimmData = data;
+      // An account with no Ignitions written for it, and one the Paragon path is not open to, are
+      // both ordinary answers — each card simply does not appear.
+      state.ignitions = ignitions.ignitions || [];
+      state.paragon = paragon || null;
       state.ephemerError = "";
     } catch (err) {
       // An account with none of this, or a deployment without the API, is a normal answer and not
@@ -39,6 +82,11 @@ export async function ensure(force = false) {
       state.cognitions = state.cognitions || [];
       state.learning = state.learning || [];
       state.learnNames = state.learnNames || [];
+      state.grimmState = state.grimmState || { chains: {}, toggles: {} };
+      state.grimmSouls = state.grimmSouls || { grimms: {}, adopted: [] };
+      state.grimmData = state.grimmData || null;
+      state.ignitions = state.ignitions || [];
+      state.paragon = state.paragon || null;
       state.ephemerError = err.offline ? "" : err.message;
     }
     loading = null;

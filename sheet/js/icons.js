@@ -56,6 +56,9 @@ export const ICONS = {
   compendium: "book",
   dice: "dice",
   cognition: "circle-nodes",
+  grimm: "diamond",
+  ignition: "fire",
+  paragon: "certificate",
   attunement: "link",
 
   // equipment slots
