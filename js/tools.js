@@ -29,6 +29,8 @@ const TOOLS = [
     title: "Arcanum Veritas, Ignition and the Paragon path — compose seals, forge Eidons, read the Codex" },
   { key: "grimms", href: "grimms/", mark: "⛓", label: "Grimms",
     title: "Grimm Companion — your Grimm's sheet, the compendium and the party tools" },
+  { key: "sheet", href: "sheet/", mark: "◉", label: "Sheet",
+    title: "Character Sheet — your seven scores, the Fate Die, Wounds and both exhaustion tracks" },
   { key: "map", href: "map/", mark: "✶", label: "Map",
     title: "World Map — nations, settlements and the roads between them" },
   { key: "admin", href: "admin.html", mark: "❖", label: "Admin", dm: true,

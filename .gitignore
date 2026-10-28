@@ -1,3 +1,8 @@
 node_modules/
 .data/
 .env
+# Compendium bundles built by sheet/tools/build-compendium.mjs. The SRD ships with this repo because
+# it is openly licensed; a bundle holds the books a DM owns, goes into their own deployment's
+# database through Admin -> Compendium, and must never be committed here (CS-085).
+compendium-bundle*.json
+*-compendium-bundle.json

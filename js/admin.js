@@ -105,6 +105,8 @@ async function boot() {
   try {
     INDEX = (await api("GET", "api/cognitions")).cognitions;
     await loadGrimmState();
+    await loadParty();        // so the rail can say how many characters there are before it is opened
+    await loadCompendium();
     await openAdmin();
   } catch (err) { toast(err.message); }
 }
@@ -138,12 +140,16 @@ async function refreshAdmin() {
 }
 async function openAdmin() {
   try { await refreshAdmin(); } catch (err) { toast(err.message); }
-  if (ADMIN.sel !== "new" && ADMIN.sel !== "reminders" && !ADMIN.users.some(u => u.id === ADMIN.sel))
+  if (!["new", "reminders", "party", "compendium"].includes(ADMIN.sel) && !String(ADMIN.sel).startsWith("g:")
+      && !ADMIN.users.some(u => u.id === ADMIN.sel))
     ADMIN.sel = adminWaiting() ? "reminders" : (ADMIN.users.find(u => u.role === "player") || ADMIN.users[0] || {}).id ?? "new";
   renderAdminList(); renderAdmin();
 }
 function openAdminUser(id) {
   ADMIN.sel = id;
+  // The table board polls while it is open and must stop the moment it isn't — leaving it running
+  // behind another section would keep redrawing a panel nobody is looking at.
+  if (id === "party") startPartyPolling(); else stopPartyPolling();
   renderAdminList(); renderAdmin();
   document.getElementById("adminBody").scrollTop = 0;
 }
@@ -151,8 +157,12 @@ function openAdminUser(id) {
 function renderAdminList() {
   const box = document.getElementById("adminList");
   const n = adminWaiting();
-  box.innerHTML = `<button class="cog ${ADMIN.sel === "reminders" ? "core" : ""}" onclick="openAdminUser('reminders')">
+  box.innerHTML = `<button class="cog ${ADMIN.sel === "party" ? "core" : ""}" onclick="openAdminUser('party')" title="Every character, live">
+      <span class="ico">❖</span><span class="nm">The table</span>${PARTY.cards.length ? `<span class="rl">${PARTY.cards.length}</span>` : ""}</button>
+    <button class="cog ${ADMIN.sel === "reminders" ? "core" : ""}" onclick="openAdminUser('reminders')">
       <span class="ico">✦</span><span class="nm">Reminders</span>${n ? `<span class="rl dm">${n}</span>` : ""}</button>
+    <button class="cog ${ADMIN.sel === "compendium" ? "core" : ""}" onclick="openAdminUser('compendium')" title="5e content the sheet offers">
+      <span class="ico">◈</span><span class="nm">Compendium</span>${CMP.entries.length ? `<span class="rl">${CMP.entries.length}</span>` : ""}</button>
     <div class="grp">Accounts<i></i></div>` + ADMIN.users.map(u =>
     `<button class="cog ${ADMIN.sel === u.id ? "core" : ""}" onclick="openAdminUser(${u.id})" title="${escQ(u.username)}${u.paragon ? " — walks the Paragon path" : ""}">
       <span class="ico">${u.role === "dm" ? "★" : u.paragon ? "✦" : "◆"}</span><span class="nm">${esc(u.displayName)}</span>
@@ -204,6 +214,8 @@ function renderAdmin() {
       `</div>`;
     return;
   }
+  if (ADMIN.sel === "party") { host.innerHTML = renderPartyAdmin(); return; }
+  if (ADMIN.sel === "compendium") { host.innerHTML = renderCompendiumAdmin(); return; }
   if (String(ADMIN.sel).startsWith("g:")) { host.innerHTML = renderGrimmAdmin(String(ADMIN.sel).slice(2)); return; }
   const u = ADMIN.users.find(x => x.id === ADMIN.sel);
   if (!u) { host.innerHTML = `<div class="empty">Pick an account or a Grimm from the left.</div>`; return; }
@@ -258,6 +270,404 @@ function renderAdmin() {
   host.innerHTML = h + `</div>`;
 }
 function pipText(d) { return "▰".repeat(d) + "▱".repeat(4 - d); }
+
+// ═══════════════════════════════════════════════════════════
+//  THE TABLE — every character at a glance, while you run the session
+// ═══════════════════════════════════════════════════════════
+// One card per character, condensed to what a DM actually asks for mid-combat: hit points, AC, the
+// save DCs, and the two numbers the Wounds push up. Every figure here is computed by the server from
+// sheet/js/rules.js, so this board and the player's own sheet can never disagree.
+//
+// It polls while it is open. Eight players and one small endpoint is not worth a second transport,
+// and the rest of this app already works by sending small writes and reading back.
+const PARTY = { cards: [], timer: null, at: null, err: null, busy: null, note: "" };
+const PARTY_EVERY = 4000;
+
+async function loadParty() {
+  const was = PARTY.cards.length;
+  try {
+    PARTY.cards = (await api("GET", "api/characters/party")).party;
+    PARTY.at = new Date(); PARTY.err = null;
+  } catch (err) {
+    PARTY.err = err.message;        // keep the last good cards on screen rather than blanking it
+  }
+  if (ADMIN.sel !== "party") return;
+  // The rail only changes when a character appears or leaves. Redrawing it on every poll would
+  // move the row out from under the DM's cursor four times a minute for no reason.
+  if (PARTY.cards.length !== was) renderAdminList();
+  drawParty();
+}
+
+// A redraw replaces the whole board, so anything the DM is in the middle of typing has to survive
+// it — and if the caret is actually in the note field, the redraw waits rather than interrupting.
+function drawParty() {
+  const note = document.getElementById("ptyNote");
+  if (note) {
+    PARTY.note = note.value;
+    if (document.activeElement === note) return;
+  }
+  document.getElementById("adminBody").innerHTML = renderPartyAdmin();
+}
+function startPartyPolling() {
+  stopPartyPolling();
+  loadParty();
+  PARTY.timer = setInterval(() => { if (!document.hidden) loadParty(); }, PARTY_EVERY);
+}
+function stopPartyPolling() { clearInterval(PARTY.timer); PARTY.timer = null; }
+
+// The note the next change is recorded with. One field for the whole board rather than one per
+// control: at the table the DM is already saying why out loud, and every change lands in
+// character_events with an actor and a before/after whether or not a reason is typed.
+const partyNote = () => (document.getElementById("ptyNote")?.value ?? PARTY.note ?? "").trim();
+function clearPartyNote() {
+  PARTY.note = "";
+  const el = document.getElementById("ptyNote");
+  if (el) el.value = "";
+}
+
+function renderPartyAdmin() {
+  const cards = PARTY.cards;
+  const when = PARTY.at ? PARTY.at.toLocaleTimeString() : "—";
+  let h = `<div class="cdx"><div class="cdx-hd"><div><h1>The table</h1>
+      <p class="cdx-desc">Every character as it stands right now, refreshed every few seconds.
+        Level, Dream and Fate are yours to set here — a player's own sheet cannot touch them.</p></div></div>
+
+    <div class="cdx-sec">
+      <div class="adm-line">
+        <input class="search" id="ptyNote" maxlength="200" style="flex:1" value="${escQ(PARTY.note || "")}"
+          placeholder="Why — recorded with the next change you make" aria-label="Reason for the next change">
+        <button class="mini" onclick="loadParty()">Refresh</button>
+      </div>
+      <p class="cdx-rings">Read at ${esc(when)}${PARTY.err ? ` · <strong class="hot">${esc(PARTY.err)}</strong>` : ""}</p>`;
+
+  if (!cards.length) {
+    h += `<div class="cdx-note"><p>No characters yet. A player makes their own from the Character Sheet
+      — you grant the level, the Dream score and any Fate once it exists.</p></div></div></div>`;
+    return h;
+  }
+
+  h += `<div class="pty">` + cards.map(partyCardHtml).join("") + `</div></div></div>`;
+  return h;
+}
+
+function partyCardHtml(c) {
+  const max = Math.max(1, c.maxHp);
+  const pct = Math.max(0, Math.min(100, Math.round((c.hp / max) * 100)));
+  // Three bands, because the only thing a DM needs from a bar across the room is "is this one about
+  // to go down": bloodied at half, critical at a quarter.
+  const band = c.hp <= 0 ? "out" : pct <= 25 ? "crit" : pct <= 50 ? "low" : "ok";
+  const busy = PARTY.busy === c.id ? " busy" : "";
+  const dc = (label, v, title) => `<span class="pty-dc" title="${escQ(title)}"><i>${label}</i><b>${v}</b></span>`;
+
+  return `<section class="pty-card${busy}">
+    <header class="pty-id">
+      <b>${esc(c.name)}</b>
+      <span class="pty-who">${esc(c.player)}</span>
+      <span class="pty-lv">Lv ${c.level}${c.pendingLevel ? ` <u>&rarr; ${c.pendingLevel}</u>` : ""}</span>
+    </header>
+    ${(c.classes || []).length ? `<div class="pty-cls">` + c.classes.map(x =>
+      `<span class="chip">${esc(x.name)} ${x.level}${x.subclass ? ` &middot; ${esc(x.subclass)}` : ""}</span>`).join("") + `</div>` : ""}
+
+    <div class="pty-hp ${band}">
+      <div class="pty-bar"><i style="width:${pct}%"></i></div>
+      <span class="pty-hpn">${c.hp}<em>/${c.maxHp}</em>${c.tempHp ? `<u>+${c.tempHp}</u>` : ""}</span>
+    </div>
+
+    <div class="pty-row">
+      ${dc("AC", c.ac, "Armour Class, with any named modifiers")}
+      ${dc("INIT", sign(c.initiative), "Initiative")}
+      ${dc("SPD", c.speed, "Speed in feet")}
+      ${dc("PP", c.passivePerception, "Passive Perception")}
+    </div>
+    <div class="pty-row">
+      ${dc("SAVE DC", c.saveDc, `Verum DC — 8 + PB + highest ability + Dream (${sign(c.dreamMod)})`)}
+      ${dc("ATK", sign(c.spellAttack), "Seal attack bonus — PB + Verum modifier")}
+      ${dc("DEATH", c.deathSaveDC, `Death save DC — 10 + ${c.wounds} Wounds + ${c.unhealedInjuries} unhealed Injuries`)}
+      ${dc("CONC", c.concentrationFloor, "Concentration DC floor — rises with half the damage taken")}
+    </div>
+
+    <div class="pty-tracks">
+      <span class="pty-t${c.wounds ? " hot" : ""}" title="Each Wound and unhealed Injury adds +1 to both DCs">
+        <i>Wounds</i><b>${c.wounds}</b>${c.wounds >= 6 ? `<u>Injury due</u>` : ""}</span>
+      <span class="pty-t${c.unhealedInjuries ? " hot" : ""}" title="${c.injuries} recorded, ${c.unhealedInjuries} unhealed">
+        <i>Injuries</i><b>${c.unhealedInjuries}</b></span>
+      <span class="pty-t${c.exhaustion ? " hot" : ""}" title="Standard physical Exhaustion">
+        <i>Exh</i><b>${c.exhaustion}<em>/6</em></b></span>
+      <span class="pty-t${c.dreamExhaustion ? " hot" : ""}"
+        title="${escQ(c.dreamExhaustionName)} — ${c.dreamPenalty} to d20 rolls in a dream">
+        <i>Dream exh</i><b>${c.dreamExhaustion}<em>/8</em></b>${c.dreamPenalty ? `<u>${c.dreamPenalty}</u>` : ""}</span>
+      ${c.inCombat ? `<span class="pty-t hot" title="The player's own round tracker"><i>Round</i><b>${c.round}</b></span>` : ""}
+      ${c.activeModifiers ? `<span class="pty-t" title="Named modifiers currently running on this sheet">
+        <i>Effects</i><b>${c.activeModifiers}</b></span>` : ""}
+    </div>
+
+    ${c.conditions.length ? `<div class="pty-cond">` + c.conditions.map(x =>
+      `<span class="chip on">${esc(typeof x === "string" ? x : x.name || "")}</span>`).join("") + `</div>` : ""}
+
+    <footer class="pty-do">
+      ${c.pendingLevel
+        ? `<span class="pty-wait" title="Allowed, and waiting for the player to take it">
+             Level ${c.pendingLevel} waiting</span>`
+        : `<button class="mini go" onclick="partyAllowLevel(${c.id})"
+             title="Clear this character for level ${c.level + 1}. Their sheet grows a LEVEL UP button; the level rises when they press it."
+             ${c.level >= 20 ? "disabled" : ""}>Allow Lv ${Math.min(20, c.level + 1)}</button>`}
+      <span class="pair"><span class="lbl">Level</span><div class="step">
+        <button onclick="partyBump(${c.id},'level',-1)" aria-label="Lower level">–</button><span>${c.level}</span>
+        <button onclick="partyBump(${c.id},'level',1)" aria-label="Raise level">+</button></div></span>
+      <span class="pair"><span class="lbl">Dream</span><div class="step">
+        <button onclick="partyBump(${c.id},'dream',-1)" aria-label="Lower Dream">–</button><span>${c.dream}</span>
+        <button onclick="partyBump(${c.id},'dream',1)" aria-label="Raise Dream">+</button></div></span>
+      <span class="pair"><span class="lbl">Fate</span><div class="step">
+        <button onclick="partyBump(${c.id},'fate',-1)" aria-label="Take back a Fate use">–</button><span>${c.fate}</span>
+        <button onclick="partyBump(${c.id},'fate',1)" aria-label="Grant a Fate use">+</button></div></span>
+      <button class="mini" onclick="partyUnlock(${c.id},'asi')" title="Open an ability score improvement for this player to spend">+ ASI</button>
+      <button class="mini" onclick="partyUnlock(${c.id},'feat')" title="Open a feat for this player to spend">+ Feat</button>
+      ${c.unspent.honor || c.unspent.morality
+        ? `<span class="pty-wait" title="Allocations this player has not spent yet">
+            ${c.unspent.honor ? `${c.unspent.honor} Honor` : ""}${c.unspent.honor && c.unspent.morality ? " · " : ""}${c.unspent.morality ? `${c.unspent.morality} Morality` : ""} unspent</span>`
+        : ""}
+    </footer>
+  </section>`;
+}
+
+// Clearing a character for the next level WITHOUT taking it for them. The player's sheet grows a
+// LEVEL UP button, and pressing it is what moves the level — so the features, the subclass and the
+// ability score improvement are settled in the same breath as the number instead of a sheet sitting
+// at a level nobody has filled in. The stepper below is still there for a correction or a rollback.
+async function partyAllowLevel(id) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (!c) return;
+  PARTY.busy = id;
+  try {
+    const out = await api("POST", `api/characters/${id}/level/allow`, { note: partyNote() });
+    clearPartyNote();
+    toast(`${c.name} may take level ${out.targetLevel}.`);
+  } catch (err) { toast(err.message); }
+  PARTY.busy = null;
+  await loadParty();
+}
+
+// One change: write it, record the reason, and read the board back. A level also issues the Honor and
+// Morality allocations and the unlock token the server attaches to it — this does not do that itself.
+async function partyBump(id, field, by) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (!c) return;
+  const limits = { level: [1, 20], dream: [0, 40], fate: [0, 99] };
+  const next = c[field] + by;
+  const [lo, hi] = limits[field];
+  if (next < lo || next > hi) return toast(`${field === "level" ? "Level" : field === "dream" ? "Dream" : "Fate"} is ${lo} to ${hi}.`);
+
+  // Lowering a level is a rollback, and it takes features away — say so before it happens.
+  if (field === "level" && by < 0 &&
+      !confirm(`Take ${c.name} back to level ${next}? Allocations already spent are not returned.`)) return;
+
+  PARTY.busy = id;
+  try {
+    const body = { [field]: next, note: partyNote() };
+    const out = await api("PUT", `api/characters/${id}/${field}`, body);
+    clearPartyNote();
+    const a = out.allocations;
+    toast(a && a.levels
+      ? `${c.name} — level ${next}, ${a.honor} Honor and ${a.morality} Morality to allocate`
+      : `${c.name} — ${field} ${next}`);
+  } catch (err) { toast(err.message); }
+  PARTY.busy = null;
+  await loadParty();
+}
+
+async function partyUnlock(id, kind) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (!c) return;
+  PARTY.busy = id;
+  try {
+    await api("POST", `api/characters/${id}/unlocks`, { kind, note: partyNote() });
+    clearPartyNote();
+    toast(`${c.name} may now choose ${kind === "asi" ? "an ability score improvement" : "a feat"}.`);
+  } catch (err) { toast(err.message); }
+  PARTY.busy = null;
+  await loadParty();
+}
+
+const sign = n => (Number(n) >= 0 ? "+" : "") + Number(n);
+
+// ═══════════════════════════════════════════════════════════
+//  COMPENDIUM — the 5e content the character sheet offers
+// ═══════════════════════════════════════════════════════════
+// The sheet ships with the SRD because the SRD is openly licensed. Everything else is imported here
+// and kept in the database, never in the repository — which is both the licence answer and the
+// practical one: this deployment is yours, and what you own can live in it without being published.
+const CMP = { entries: [], preview: null, busy: false, bundle: null, progress: null };
+
+async function loadCompendium() {
+  // The summary, not the library: once a DM imports their books this is thousands of rows, and a
+  // listing needs names and counts rather than every spell's text.
+  try { CMP.entries = (await api("GET", "api/compendium?summary=1")).entries; } catch (e) { CMP.entries = []; }
+}
+
+function renderCompendiumAdmin() {
+  const byKind = {};
+  for (const e of CMP.entries) byKind[e.kind] = (byKind[e.kind] || 0) + 1;
+  const LABEL = { race: "ancestries", class: "classes", background: "backgrounds",
+    feat: "feats", spell: "spells", item: "items" };
+
+  return `<div class="cdx"><div class="cdx-hd"><div><h1>Compendium</h1>
+      <p class="cdx-desc">What the Character Sheet offers when a player picks an ancestry, a class or
+        a spell. The <strong>SRD ships with the app</strong>; anything else you own goes in here.</p></div></div>
+
+    <div class="cdx-sec"><h2>Imported into this deployment</h2>
+      ${CMP.entries.length
+        ? `<div class="chips">` + Object.entries(byKind).map(([k, n]) =>
+            `<span class="chip on">${n} ${esc(LABEL[k] || k)}</span>`).join("") + `</div>`
+        : `<div class="cdx-note"><p>Nothing imported yet. Players see the SRD: 9 ancestries, 12 classes,
+             317 spells and 432 items — and one background and one feat, which is all the SRD carries.</p></div>`}
+    </div>
+
+    <div class="cdx-sec"><h2>Upload a collection</h2>
+      <p class="cdx-rings">A whole set of books at once, built from a Fight Club <strong>collection</strong>
+        — the manifest that lists which book files belong together. Build the bundle on your own machine:</p>
+      <pre class="cdx-pre">node sheet/tools/build-compendium.mjs &lt;collection.xml&gt; &lt;FightClub5eXML folder&gt;</pre>
+      <p class="cdx-rings">then pick the <code>compendium-bundle.json</code> it writes. It arrives in batches,
+        so a slow connection cannot lose the lot, and uploading the same bundle twice rewrites the same
+        rows rather than doubling them. <strong>A class spread across several books is merged into one
+        before it gets here</strong> — otherwise the Player's Handbook Fighter and the Xanathar's Fighter
+        would land as two classes, one of them without a hit die.</p>
+      <div class="adm-form">
+        <label for="cmpFile">The bundle</label>
+        <input class="search" id="cmpFile" type="file" accept="application/json,.json"
+          onchange="cmpPickBundle(this)" ${CMP.busy ? "disabled" : ""}>
+        ${CMP.bundle ? `<div class="cdx-defs">` + Object.entries(CMP.bundle.counts || {})
+            .filter(([, n]) => n).map(([k, n]) =>
+              `<div class="cdx-def"><b>${n}</b><span>${esc(LABEL[k] || k)}</span></div>`).join("") + `</div>
+          <p class="cdx-rings">${esc(CMP.bundle.collection || "collection")} · built ${esc(CMP.bundle.builtAt || "")}
+            · ${CMP.bundle.entries.length} entries${CMP.bundle.files
+              ? ` from ${CMP.bundle.files.read} files` : ""}</p>` : ""}
+        <div class="adm-line">
+          ${CMP.bundle ? `<button class="mini on" onclick="cmpUploadBundle()" ${CMP.busy ? "disabled" : ""}>
+            Upload ${CMP.bundle.entries.length} entries</button>` : ""}
+          ${CMP.progress ? `<span class="cdx-rings">${esc(CMP.progress)}</span>` : ""}
+        </div>
+      </div>
+    </div>
+
+    <div class="cdx-sec"><h2>Import a Fight Club compendium</h2>
+      <p class="cdx-rings">Paste a Fight Club 5e XML file. It is read first and shows you what it found;
+        nothing is saved until you say so. An entry with the same name and source replaces the one
+        already here, so re-importing a corrected file is safe. Monsters are ignored — a character
+        sheet has no use for stat blocks.</p>
+      <div class="adm-form">
+        <label for="cmpSource">Where it came from — shown beside every entry it brings</label>
+        <input class="search" id="cmpSource" maxlength="80" placeholder="Player's Handbook, our homebrew, ...">
+        <label for="cmpXml">The XML</label>
+        <textarea class="search par-ta" id="cmpXml" rows="7" spellcheck="false"
+          placeholder="&lt;compendium version=&quot;5&quot;&gt; ..."></textarea>
+        <div class="adm-line">
+          <button class="mini" onclick="cmpPreview()" ${CMP.busy ? "disabled" : ""}>Read it</button>
+          ${CMP.preview ? `<button class="mini on" onclick="cmpImport()" ${CMP.busy ? "disabled" : ""}>
+            Import ${CMP.preview.total} entries</button>` : ""}
+        </div>
+      </div>
+      ${CMP.preview ? `<div class="cdx-defs">` + Object.entries(CMP.preview.counts)
+          .filter(([, n]) => n).map(([k, n]) =>
+            `<div class="cdx-def"><b>${n}</b><span>${esc(LABEL[k] || k)}</span></div>`).join("") + `</div>
+        <p class="cdx-rings">${CMP.preview.sample.map(s => esc(s)).join(" · ")}</p>` : ""}
+      <p class="cdx-rings"><strong>A word on what you paste.</strong> The SRD is open; the books are not.
+        Content from a book you own is fine in your own deployment, but it must not be committed to the
+        repository, which is why this keeps it in the database instead.</p>
+    </div></div>`;
+}
+
+// ── a whole collection, in batches ──────────────────────────────────────
+// The file is read here and never uploaded whole: the request body is capped, and a single statement
+// writing three thousand rows is a bad bet against a hosted database. It goes up in slices with the
+// count moving, so a stall is visible rather than a spinner that may or may not be doing anything.
+const CMP_BATCH = 400;
+
+async function cmpPickBundle(input) {
+  const file = input.files && input.files[0];
+  CMP.bundle = null; CMP.progress = null;
+  if (!file) return cmpRedraw();
+  try {
+    const bundle = JSON.parse(await file.text());
+    if (!Array.isArray(bundle.entries) || !bundle.entries.length)
+      throw new Error("That file holds no entries — is it the bundle the tool wrote?");
+    CMP.bundle = bundle;
+    toast(`${bundle.entries.length} entries read. Nothing uploaded yet.`);
+  } catch (err) {
+    toast(err.message.slice(0, 120));
+  }
+  cmpRedraw();
+}
+
+async function cmpUploadBundle() {
+  const bundle = CMP.bundle;
+  if (!bundle) return;
+  CMP.busy = true;
+  let written = 0, skipped = 0;
+  const total = bundle.entries.length;
+  try {
+    for (let i = 0; i < total; i += CMP_BATCH) {
+      const batch = bundle.entries.slice(i, i + CMP_BATCH);
+      CMP.progress = `Uploading ${Math.min(i + batch.length, total)} of ${total}…`;
+      cmpRedraw();
+      const out = await api("POST", "api/compendium/import-bundle",
+        { entries: batch, source: bundle.collection || "Imported" });
+      written += out.written || 0;
+      skipped += out.skipped || 0;
+    }
+    const counts = await api("GET", "api/compendium/counts");
+    CMP.progress = `${written} written${skipped ? `, ${skipped} skipped` : ""} — this deployment now holds ${counts.total}.`;
+    CMP.bundle = null;
+    toast(`${written} entries imported.`);
+    await loadCompendium();
+  } catch (err) {
+    CMP.progress = `Stopped after ${written} of ${total}: ${err.message}`;
+    toast(err.message);
+  }
+  CMP.busy = false;
+  renderAdminList();
+  cmpRedraw();
+}
+
+function cmpRedraw() {
+  const host = document.getElementById("adminBody");
+  if (host) host.innerHTML = renderCompendiumAdmin();
+}
+
+async function cmpXmlBody() {
+  const xml = document.getElementById("cmpXml")?.value || "";
+  const source = (document.getElementById("cmpSource")?.value || "").trim() || "Imported";
+  return { xml, source };
+}
+
+async function cmpPreview() {
+  const { xml, source } = await cmpXmlBody();
+  if (xml.trim().length < 20) return toast("Paste the XML first.");
+  CMP.busy = true;
+  try {
+    CMP.preview = await api("POST", "api/compendium/import", { xml, source });
+    toast(`Read ${CMP.preview.total} entries. Nothing saved yet.`);
+  } catch (err) { CMP.preview = null; toast(err.message); }
+  CMP.busy = false;
+  // Keep what was pasted: re-rendering the section would otherwise empty the textarea under them.
+  const keep = { xml, source };
+  document.getElementById("adminBody").innerHTML = renderCompendiumAdmin();
+  document.getElementById("cmpXml").value = keep.xml;
+  document.getElementById("cmpSource").value = keep.source === "Imported" ? "" : keep.source;
+}
+
+async function cmpImport() {
+  const { xml, source } = await cmpXmlBody();
+  CMP.busy = true;
+  try {
+    const out = await api("POST", "api/compendium/import", { xml, source, commit: true });
+    toast(`${out.imported} entries imported from ${out.source}.`);
+    CMP.preview = null;
+    await loadCompendium();
+  } catch (err) { toast(err.message); }
+  CMP.busy = false;
+  renderAdminList();
+  document.getElementById("adminBody").innerHTML = renderCompendiumAdmin();
+}
 
 function adminEnable(userId, cogId) {
   api("PUT", `api/admin/users/${userId}/cognitions/${encodeURIComponent(cogId)}`)

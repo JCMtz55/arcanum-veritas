@@ -434,6 +434,10 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .tbl tr.now td{background:var(--panel2);color:var(--bone)}
 .tbl tr.now td:first-child{color:var(--brass);font-weight:700}
 .tbl td.wrap{white-space:normal;min-width:260px;line-height:1.45}
+/* The one command a DM runs on their own machine to build a bundle. Selectable, so it can be copied. */
+.cdx-pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;
+  color:var(--bone2);background:var(--panel);border:1px solid var(--line);border-radius:7px;
+  padding:8px 11px;margin:0 0 11px;overflow-x:auto;white-space:pre;user-select:all}
 .cdx-note{font-size:13.5px;line-height:1.6;color:var(--bone2);margin:11px 0 0;
   border-left:2px solid var(--line);padding-left:13px}
 .cdx-note p{margin:0 0 7px} .cdx-note p:last-child{margin:0}
@@ -646,6 +650,7 @@ i.dom-cosmical{color:var(--d-cosmical)}
 .hub-card.av:hover{border-color:var(--brass)}   .hub-card.av .hub-mark,.hub-card.av b{color:var(--brass)}
 .hub-card.grimm:hover{border-color:var(--d-umbral)} .hub-card.grimm .hub-mark,.hub-card.grimm b{color:#9A8FCB}
 .hub-card.map:hover{border-color:var(--verdant)} .hub-card.map .hub-mark,.hub-card.map b{color:#6FB088}
+.hub-card.sheet:hover{border-color:var(--d-cosmical)} .hub-card.sheet .hub-mark,.hub-card.sheet b{color:#6FC3DE}
 .hub-card.small{flex-basis:100%;padding:15px 22px 16px}
 .hub-card.small b{font-size:14px;margin-bottom:2px}
 .hub-card.small span{font-size:13px;color:var(--mute)}
@@ -847,3 +852,61 @@ body.par-only #slotDial{display:none}
 .chains{display:flex;gap:6px;align-items:center}
 .chain{font-size:22px;line-height:1;filter:grayscale(.2)}
 .chain.broken{opacity:.18;filter:grayscale(1)}
+
+/* ── Admin: the table. Eight characters, condensed enough to read across the room mid-combat.
+   Numbers are the sans face because they are read, not spoken; the labels shrink out of the way. */
+.pty{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px;margin-top:10px}
+.pty-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 11px 9px;
+  display:flex;flex-direction:column;gap:8px}
+.pty-card.busy{opacity:.55}
+.pty-id{display:flex;align-items:baseline;gap:7px}
+.pty-id b{font-family:var(--sans);font-size:14px;letter-spacing:.02em;color:var(--bone)}
+.pty-who{flex:1;font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pty-lv{font-family:var(--sans);font-size:10px;letter-spacing:.07em;color:var(--brass);white-space:nowrap}
+
+/* Hit points: the bar is the thing you glance at, the number is the thing you quote. */
+.pty-hp{display:flex;align-items:center;gap:9px;--hpc:var(--verdant)}
+.pty-hp.low{--hpc:var(--brass)}
+.pty-hp.crit{--hpc:var(--ember)}
+.pty-hp.out{--hpc:var(--mute)}
+.pty-bar{flex:1;height:8px;border-radius:5px;background:#1b2027;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.pty-bar i{display:block;height:100%;background:var(--hpc);transition:width .22s ease}
+.pty-hpn{font-family:var(--sans);font-size:15px;color:var(--hpc);white-space:nowrap}
+.pty-hpn em{font-style:normal;font-size:11px;color:var(--mute)}
+.pty-hpn u{text-decoration:none;font-size:11px;color:var(--steel);margin-left:4px}
+
+.pty-row{display:flex;gap:5px}
+.pty-dc{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:7px;
+  padding:4px 5px;text-align:center;display:flex;flex-direction:column;gap:1px}
+.pty-dc i{font-style:normal;font-family:var(--sans);font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pty-dc b{font-family:var(--sans);font-size:14px;color:var(--bone)}
+
+.pty-tracks{display:flex;flex-wrap:wrap;gap:5px}
+.pty-t{display:flex;align-items:baseline;gap:4px;background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;padding:2px 8px;font-family:var(--sans);font-size:10px;color:var(--mute)}
+.pty-t.hot{border-color:#6d4036;color:#e4927f;background:rgba(192,85,63,.12)}
+.pty-t i{font-style:normal;text-transform:uppercase;letter-spacing:.07em}
+.pty-t b{font-size:12px;color:var(--bone)}
+.pty-t.hot b{color:#f0b3a3}
+.pty-t b em{font-style:normal;font-size:9px;color:var(--mute)}
+.pty-t u{text-decoration:none;font-size:9.5px;opacity:.85}
+.pty-cond{display:flex;flex-wrap:wrap;gap:4px}
+/* The classes and the split, so a glance at the board says Fighter 3 / Rogue 2 rather than Lv 5. */
+.pty-cls{display:flex;flex-wrap:wrap;gap:4px}
+.pty-cls .chip{font-size:9.5px;padding:1px 7px}
+/* An allowed level, waiting on its player. The arrow is the whole point: the number has not moved. */
+.pty-lv u{text-decoration:none;color:var(--bone);opacity:.9}
+
+.pty-do{display:flex;flex-wrap:wrap;gap:7px;align-items:center;
+  border-top:1px solid var(--line);padding-top:8px;margin-top:auto}
+.pty-do .pair{display:flex;align-items:center;gap:5px}
+.pty-do .lbl{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.pty-wait{font-family:var(--sans);font-size:10px;color:var(--brass)}
+/* Allowing the next level is the ordinary way a level moves, so it reads as the primary thing here. */
+.mini.go{margin-left:0;border-color:var(--brass);color:var(--bone);background:rgba(176,136,66,.14)}
+.mini.go:hover{border-color:#d2a558;background:rgba(176,136,66,.24)}
+.mini.go[disabled]{opacity:.4;border-color:var(--line);background:none}
+
+@media (max-width:620px){ .pty{grid-template-columns:1fr} }

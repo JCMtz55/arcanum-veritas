@@ -1,0 +1,666 @@
+/* The Character Sheet.
+ *
+ * The brief was a sheet that fits the screen without scrolling, so the layout is the feature: one
+ * grid exactly the height of the viewport, three zones, and `overflow:hidden` on the page itself so
+ * it CANNOT scroll even if something inside grows. Each zone scrolls on its own instead, and the
+ * detail that would make a page long lives in popovers and dialogs.
+ *
+ * The tokens, the two faces and the dark-only palette are the app's, restated here because the
+ * sheet is its own section with its own stylesheet — the same arrangement grimms/ and map/ have.
+ */
+:root{
+  --slate:#1B1F26; --panel:#232A33; --panel2:#2B333D; --line:#39424E;
+  --bone:#E8E3D7; --bone2:#C2BDB2; --mute:#7E8791;
+  --ember:#C0553F; --verdant:#4E8C6A; --indigo:#6274B8; --brass:#B08842; --steel:#6E8B97;
+  /* Dream is PINK (Juan, 2026-10-27) — it was cosmical blue, which read as "cold magic" and
+     collided with the map's palette. The soft tint is for text on dark, the deep one for fills. */
+  --dream:#E069A6; --dream-soft:#F3A8CC; --dream-deep:#8E3C68;
+  --accent:var(--brass);
+  --sans:'Space Grotesk',system-ui,sans-serif;
+  --serif:'Spectral',Georgia,serif;
+  --bar:44px; --nav:0px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--slate);color:var(--bone);font-family:var(--serif);font-size:15px;
+  overflow:hidden;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--brass)}
+.sp{flex:1}
+.hint{margin:6px 0 0;font-family:var(--sans);font-size:11px;line-height:1.55;color:var(--mute)}
+.hint.hot{color:#e4927f}
+.hot{color:#e4927f}
+code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 4px;border-radius:4px}
+
+/* ── the bar ─────────────────────────────────────────────────────────── */
+/* overflow:hidden rather than wrapping: the bar is a fixed-height strip, and a status button that
+   does not fit should be clipped, not push the whole document sideways. */
+.bar{height:var(--bar);display:flex;align-items:center;gap:10px;padding:0 12px;overflow:hidden;
+  background:var(--panel);border-bottom:1px solid var(--line)}
+.bar>*{min-width:0}
+.brand{font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--mute);white-space:nowrap}
+.barstate{display:flex;align-items:center;gap:7px;flex:none}
+.barstate .btn{white-space:nowrap}
+.pick-btn{display:flex;align-items:baseline;gap:8px;background:none;border:0;padding:3px 7px;border-radius:7px}
+.pick-btn:hover{background:var(--panel2)}
+.pick-btn b{font-family:var(--sans);font-size:14px}
+.pick-btn span{font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.savestate{font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.savestate.saving{color:var(--steel)} .savestate.saved{color:var(--verdant)}
+.savestate.error,.savestate.conflict{color:var(--ember);cursor:pointer;text-decoration:underline}
+
+/* ── the grid. This is the whole trick: 100dvh minus the bar, and it does not scroll. ───────── */
+#app{height:calc(100dvh - var(--bar));overflow:hidden}
+.sheet{display:grid;grid-template-columns:234px minmax(0,1fr) 272px;gap:9px;
+  height:100%;padding:9px;overflow:hidden}
+.zone{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;
+  display:flex;flex-direction:column;gap:9px;padding-right:2px}
+.zone-left,.zone-right{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px}
+.zone-centre{gap:9px}
+
+.zone-h{display:flex;align-items:center;gap:7px;margin:2px 0 1px}
+.zone-h h2{margin:0;font-family:var(--sans);font-size:9.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--mute)}
+.pbtag{margin-left:auto;font-family:var(--sans);font-size:10px;color:var(--brass)}
+
+/* ── left: the seven scores ──────────────────────────────────────────── */
+.abs{display:flex;flex-direction:column;gap:4px}
+.ab2{display:grid;grid-template-columns:1fr 46px 42px;gap:4px}
+.ab2 button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 6px;
+  display:flex;align-items:center;gap:5px;min-height:34px}
+.ab2 button:hover:not(:disabled){border-color:var(--mute)}
+.ab2 button:disabled{opacity:.75;cursor:default}
+.ab2-roll{justify-content:space-between}
+.ab2-roll i{font-style:normal;font-family:var(--sans);font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute)}
+.ab2-roll b{font-family:var(--sans);font-size:17px}
+.ab2-score,.ab2-save{justify-content:center;font-family:var(--sans);font-size:13px}
+.ab2-score{color:var(--bone2)}
+.ab2-save{font-size:12px;color:var(--mute)}
+.ab2-save.on{color:var(--bone);border-color:var(--brass);background:rgba(176,136,66,.14)}
+.ab2.dream .ab2-roll b{color:var(--dream)}
+.ab2.dream .ab2-roll i{color:#7fbfd6}
+.ab2.buffed .ab2-score{color:var(--verdant);border-color:#3f8065}
+.legend{display:grid;grid-template-columns:1fr 46px 42px;gap:4px;margin-top:3px}
+.legend i{font-style:normal;font-family:var(--sans);font-size:8px;text-transform:uppercase;
+  letter-spacing:.1em;color:#5d656e;text-align:center}
+.legend i:first-child{text-align:right}
+
+/* ── left: skills ────────────────────────────────────────────────────── */
+.sks{display:flex;flex-direction:column;gap:1px}
+.sk{display:flex;align-items:stretch;gap:3px}
+.sk-prof{width:22px;flex:none;background:none;border:0;color:var(--mute);font-size:11px;border-radius:5px}
+.sk-prof:hover{background:var(--panel2);color:var(--bone)}
+.sk-prof.p1{color:var(--brass)} .sk-prof.p2{color:var(--verdant)}
+.sk-roll{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:none;border:0;
+  border-radius:6px;padding:3px 6px;text-align:left}
+.sk-roll:hover{background:var(--panel2)}
+.sk-nm{flex:1;min-width:0;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-ab{font-style:normal;font-family:var(--sans);font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--steel);border:1px solid var(--line);border-radius:4px;padding:0 3px}
+.sk-ab.mute{border-color:transparent;color:#5d656e}
+.sk-roll b{font-family:var(--sans);font-size:12px;min-width:24px;text-align:right}
+.sk.dream .sk-nm{color:#aed8e6}
+.sk.dream .sk-ab{color:var(--dream);border-color:#2f5d6e}
+
+.passives{display:flex;flex-wrap:wrap;gap:4px}
+.pv{display:flex;align-items:baseline;gap:5px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:20px;padding:2px 8px;font-family:var(--sans);font-size:9.5px;color:var(--mute)}
+.pv i{font-style:normal;text-transform:uppercase;letter-spacing:.07em}
+.pv b{font-size:12px;color:var(--bone)}
+
+/* ── centre: vitals ──────────────────────────────────────────────────── */
+.vitals{display:grid;grid-template-columns:auto minmax(0,1.1fr) minmax(0,2fr);gap:9px;flex:none}
+.hp{--hpc:var(--verdant)}
+.hp.low{--hpc:var(--brass)} .hp.crit{--hpc:var(--ember)} .hp.out{--hpc:var(--mute)}
+.hp-btn{width:100%;height:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;justify-content:center}
+.hp-btn:hover{border-color:var(--hpc)}
+.hp-n{font-family:var(--sans);font-size:28px;line-height:1;color:var(--hpc)}
+.hp-n em{font-style:normal;font-size:15px;color:var(--mute)}
+.hp-n u{text-decoration:none;font-size:14px;color:var(--steel);margin-left:6px}
+.hp-bar{display:block;width:100%;height:7px;border-radius:5px;background:#1b2027;overflow:hidden;
+  box-shadow:inset 0 0 0 1px var(--line)}
+.hp-bar i{display:block;height:100%;background:var(--hpc);transition:width .22s ease}
+.hp-lbl{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute)}
+
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-height:0}
+.tile:hover{border-color:var(--mute)}
+.tile i{font-style:normal;font-family:var(--sans);font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute);white-space:nowrap}
+.tile b{font-family:var(--sans);font-size:17px;line-height:1.1}
+
+/* ── centre: tabs and the panel that scrolls ─────────────────────────── */
+/* The strip scrolls rather than wrapping: five tabs plus their icons overrun a 375px phone, and the
+   row's parent clips, so a wrapped or clipped Character tab would simply be unreachable. */
+.tabs{display:flex;align-items:center;gap:4px;flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none}
+.tab{background:none;border:1px solid transparent;border-radius:7px;padding:4px 11px;
+  font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute)}
+.tab:hover{color:var(--bone)}
+.tab.on{background:var(--bone);border-color:var(--bone);color:var(--slate);font-weight:700}
+.panel{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;
+  display:flex;flex-direction:column;gap:9px;padding-right:2px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px 11px}
+.card.hi{border-color:var(--brass);background:rgba(176,136,66,.08)}
+.card h3{margin:0 0 8px;font-family:var(--sans);font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.13em;color:var(--mute);display:flex;align-items:center;gap:8px}
+.card h3 .r{margin-left:auto;display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0}
+
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 11px;
+  font-family:var(--sans);font-size:12px}
+.btn:hover:not(:disabled){border-color:var(--mute)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri{background:var(--brass);border-color:var(--brass);color:#1b1f26;font-weight:700}
+.btn.warn{border-color:#6d4036;color:#e4927f}
+.btn.sm{padding:3px 8px;font-size:11px}
+.btn.on{background:var(--bone);border-color:var(--bone);color:var(--slate)}
+.x{background:none;border:0;color:var(--mute);padding:0 4px;font-size:14px;line-height:1}
+.x:hover{color:var(--ember)}
+
+.stats{display:flex;flex-wrap:wrap;gap:6px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;
+  display:flex;flex-direction:column;gap:1px;min-width:72px}
+.stat b{font-family:var(--sans);font-size:17px;line-height:1.1}
+.stat i{font-style:normal;font-family:var(--sans);font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--mute)}
+.btn-stat:hover{border-color:var(--dream)}
+.btn-stat b{color:var(--dream)}
+
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:2px 9px;
+  font-family:var(--sans);font-size:11px;color:var(--bone2);display:inline-flex;align-items:center;gap:3px}
+.chip.on{border-color:var(--brass);color:var(--bone);background:rgba(176,136,66,.14)}
+.chip.dim{opacity:.5}
+
+/* ── centre: attacks, action economy ─────────────────────────────────── */
+.atks{display:flex;flex-direction:column;gap:5px}
+.atk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,110px) auto auto;gap:5px;align-items:stretch}
+.atk button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px;
+  font-family:var(--sans);font-size:11px;text-align:left}
+.atk button:hover{border-color:var(--mute)}
+.atk-nm{display:flex;flex-direction:column;gap:1px;min-width:0}
+.atk-nm b{font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atk-nm span{color:var(--mute);font-size:10px}
+.atk-dmg{text-align:center;color:var(--bone2)}
+.atk-dmg em{font-style:normal;color:var(--mute);font-size:10px}
+.atk-crit{color:var(--brass)}
+.atk .x{border:0;background:none;align-self:center}
+
+.econs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.econ{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 12px;
+  font-family:var(--sans);font-size:11.5px}
+.econ.spent{opacity:.4;text-decoration:line-through}
+.conc-on{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+
+.slotrow{display:flex;align-items:center;gap:9px;padding:2px 0}
+.slotrow i{font-style:normal;font-family:var(--sans);font-size:11px;color:var(--mute);width:12px}
+.pips{display:flex;flex-wrap:wrap;gap:3px;flex:1}
+.pip{width:15px;height:15px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);padding:0}
+.pip:hover{border-color:var(--brass)}
+.pip.used{background:#171b21;border-color:#2c333c}
+
+.ladder{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.rung{width:26px;height:26px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
+  font-family:var(--sans);font-size:11px;color:var(--mute);padding:0}
+.rung.on{background:rgba(192,85,63,.22);border-color:#6d4036;color:#f0b3a3}
+.de-now{margin:0 0 8px;font-size:13px;color:#e4927f}
+.de-now b{font-family:var(--sans)}
+
+.abl{display:flex;flex-direction:column;gap:4px}
+.ab3{background:var(--panel2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ab3-h{display:flex;align-items:center;gap:7px;padding:6px 9px;cursor:pointer}
+.ab3-h .nm{flex:1;font-family:var(--sans);font-size:12.5px}
+.ab3-b{display:none;padding:0 9px 9px;font-size:13px;line-height:1.5;color:var(--bone2);white-space:pre-wrap}
+.ab3.open .ab3-b{display:block}
+.tag{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.tag.good{color:var(--verdant);border-color:#3f8065}
+.tag.bad{color:var(--ember);border-color:#6d4036}
+
+.fields{display:flex;flex-direction:column;gap:7px}
+.fields.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.fields label,.ck-col{display:flex;flex-direction:column;gap:3px;
+  font-family:var(--sans);font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute)}
+.txt{background:var(--slate);border:1px solid var(--line);border-radius:7px;padding:6px 9px;
+  color:var(--bone);font-family:var(--serif);font-size:14px;width:100%}
+.txt:focus{outline:2px solid var(--brass);outline-offset:1px}
+.txt.sm{padding:3px 7px;font-size:12px;max-width:92px;margin-left:auto}
+.txt.ta{font-size:13.5px;line-height:1.5;resize:vertical}
+select.txt{font-family:var(--sans);font-size:13px}
+.ck{display:flex;align-items:center;gap:7px;font-family:var(--sans);font-size:11.5px;color:var(--bone2);
+  text-transform:none;letter-spacing:0}
+
+/* ── right: the campaign's tracks ────────────────────────────────────── */
+.fate-n{display:flex;align-items:baseline;gap:7px;margin-bottom:7px}
+.fate-n b{font-family:var(--sans);font-size:26px;line-height:1;color:var(--brass)}
+.fate-n i{font-style:normal;font-family:var(--sans);font-size:10px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute)}
+.card.fate .btn{width:100%}
+
+.trks{display:flex;flex-wrap:wrap;gap:6px}
+.trk{display:flex;align-items:center;gap:6px}
+.trk i{font-style:normal;font-family:var(--sans);font-size:9px;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--mute)}
+.step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel2);overflow:hidden}
+.step button{background:none;border:0;padding:2px 8px;color:var(--mute);font-family:var(--sans);font-size:13px}
+.step button:hover{background:var(--line);color:var(--bone)}
+.step>span{min-width:34px;text-align:center;font-family:var(--sans);font-size:12.5px;padding:0 2px}
+.step>span em{font-style:normal;font-size:9px;color:var(--mute)}
+
+.axes{display:flex;flex-direction:column;gap:8px}
+.axis-h{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+.axis-h b{font-family:var(--sans);font-size:11px;letter-spacing:.03em}
+.axis-h span{font-family:var(--sans);font-size:10px;color:var(--mute)}
+.axis-h .btn{margin-left:auto}
+.axis-b{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.side{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 7px;
+  font-family:var(--sans);font-size:11px;display:flex;align-items:baseline;justify-content:space-between;gap:5px}
+.side:hover{border-color:var(--mute)}
+.side em{font-style:normal;font-size:12px;color:var(--mute)}
+.side.up{border-color:#3f8065} .side.up em{color:#7BC2A4}
+.side.dn em{color:#e4927f}
+
+.rests{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.rests .btn:last-child{grid-column:1/-1}
+.rounds{display:flex;gap:6px;align-items:center}
+.rounds .btn.pri{flex:1}
+.mods{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.mod{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:7px;padding:3px 7px;font-family:var(--sans);font-size:10.5px}
+.mod-n{color:var(--bone);white-space:nowrap}
+.mod-w{flex:1;min-width:0;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mod-r{color:var(--brass);white-space:nowrap}
+
+/* ── popovers, dialogs, toast ────────────────────────────────────────── */
+.pop{position:fixed;z-index:60;background:var(--panel2);border:1px solid var(--mute);border-radius:10px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55);overflow:hidden;max-height:min(70vh,520px);display:flex;flex-direction:column}
+.pop-h{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1px solid var(--line);
+  font-family:var(--sans);font-size:12px;background:var(--panel)}
+.pop-b{padding:9px 11px;overflow-y:auto;scrollbar-width:thin}
+.pop-f{display:flex;align-items:center;gap:6px;padding:8px 11px;border-top:1px solid var(--line)}
+.pop-b.list{padding:5px}
+.pop-grp{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--mute);padding:7px 6px 3px}
+.listrow{display:flex;align-items:baseline;gap:8px;width:100%;background:none;border:0;border-radius:7px;
+  padding:6px 8px;text-align:left}
+.listrow:hover{background:var(--line)}
+.listrow.on{background:var(--line)}
+.listrow b{flex:1;font-family:var(--sans);font-size:12.5px;font-weight:500}
+.listrow span{font-family:var(--sans);font-size:10.5px;color:var(--mute)}
+.dsrow{display:flex;align-items:center;gap:9px;padding:3px 0}
+.dsrow i{font-style:normal;flex:1;font-family:var(--sans);font-size:11px;color:var(--mute)}
+
+dialog.dlg{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--bone);
+  padding:0;width:min(440px,calc(100vw - 24px));max-height:86dvh;overflow:hidden}
+/* The layout only applies while it is open. Setting display on the element itself would override the
+   browser's `display:none` for a CLOSED dialog, which leaves a 560px box sitting below the fold —
+   and a page that cannot scroll suddenly can, the moment anyone closes their first dice roll. */
+dialog.dlg[open]{display:flex;flex-direction:column}
+dialog.dlg.wide{width:min(620px,calc(100vw - 24px))}
+dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
+.dlg-h{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--line)}
+.dlg-h h3{margin:0;font-family:var(--sans);font-size:13px;font-weight:700}
+.dlg-b{padding:12px 13px;overflow-y:auto;scrollbar-width:thin}
+.dlg-b>p{margin:0 0 9px;font-size:14px;line-height:1.5}
+.dlg-f{display:flex;align-items:center;gap:7px;padding:10px 13px;border-top:1px solid var(--line)}
+
+.rollout{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-bottom:9px}
+.rolltotal{display:flex;align-items:baseline;gap:7px}
+.rolltotal b{font-family:var(--sans);font-size:38px;line-height:1}
+.rolltotal i{font-style:normal;font-family:var(--sans);font-size:10px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute)}
+.rolldice{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.die{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;
+  border:1px solid var(--line);border-radius:7px;background:var(--panel2);
+  font-family:var(--sans);font-size:13px}
+.die.sm{min-width:23px;height:23px;font-size:11px}
+.die.dim{opacity:.35}
+.dgroup{display:inline-flex;align-items:center;gap:4px}
+.dgroup i{font-style:normal;font-family:var(--sans);font-size:10px;color:var(--mute)}
+.why{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.why li{display:flex;align-items:baseline;gap:9px;padding:4px 0;border-bottom:1px solid var(--line);
+  font-family:var(--sans);font-size:11.5px;color:var(--bone2)}
+.why li span{flex:1}
+.why li b{color:var(--bone)}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:flex;flex-direction:column;gap:1px;padding:7px 0;border-bottom:1px solid var(--line)}
+.hist b{font-family:var(--sans);font-size:12.5px;font-weight:500}
+.hist span{font-family:var(--sans);font-size:10px;color:var(--mute)}
+.hist em{font-size:13px;color:var(--bone2)}
+.hpdlg{display:flex;flex-direction:column;gap:10px}
+.hpform{display:flex;flex-direction:column;gap:8px}
+.hpbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.wprompt{margin-top:9px;background:var(--panel2);border:1px solid #6d4036;border-radius:8px;padding:9px 11px}
+.wprompt b{font-family:var(--sans);font-size:12px;color:#f0b3a3}
+.wprompt ul{margin:6px 0;padding-left:18px;font-size:13px;color:var(--bone2)}
+.attn{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+
+/* ── the builder rows and the compendium drawer ──────────────────────── */
+.build{display:flex;flex-direction:column;gap:5px;margin-top:9px}
+.buildrow{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:5px 9px}
+.buildrow i{font-style:normal;font-family:var(--sans);font-size:9px;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--mute);width:84px;flex:none}
+.buildrow b{flex:1;min-width:0;font-family:var(--sans);font-size:12.5px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.buildrow b.none{color:var(--mute);font-style:italic;font-weight:400}
+
+.cmp-tabs{flex-wrap:wrap;margin-bottom:8px}
+.cmp-tabs .tab{padding:3px 8px;font-size:10px}
+.cmp{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:10px;margin-top:9px;
+  height:min(52dvh,420px)}
+.cmp-list{overflow-y:auto;scrollbar-width:thin;border:1px solid var(--line);border-radius:8px;padding:4px}
+.cmp-read{overflow-y:auto;scrollbar-width:thin;padding-right:4px}
+.cmp-read h4{margin:0 0 8px;font-family:var(--sans);font-size:14px;display:flex;align-items:center;gap:7px}
+.cmp-t{margin:0 0 7px;font-size:13.5px;line-height:1.5;color:var(--bone2)}
+.cmp-t b{color:var(--bone);font-family:var(--sans);font-size:12px}
+.cmp-body{margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--bone2);white-space:pre-wrap}
+.cmp-lv{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:5px 0;border-top:1px solid var(--line)}
+.cmp-lv b{font-family:var(--sans);font-size:11px;min-width:58px;color:var(--mute)}
+.cmp-do{margin-top:11px;padding-top:9px;border-top:1px solid var(--line)}
+@media (max-width:620px){ .cmp{grid-template-columns:1fr;height:auto} .cmp-list{max-height:30dvh} }
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);z-index:80;
+  background:var(--bone);color:var(--slate);border-radius:8px;padding:8px 15px;
+  font-family:var(--sans);font-size:12.5px;font-weight:500;opacity:0;pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ── the empty state and the failure state ───────────────────────────── */
+.blank,.fail{max-width:520px;margin:0 auto;padding:48px 20px;text-align:center}
+.blank h1,.fail h1{font-family:var(--sans);font-size:22px;margin:0 0 10px}
+.blank p,.fail p{color:var(--bone2);line-height:1.6}
+.blank-form{display:flex;gap:7px;margin-top:18px}
+.blank-form .txt{flex:1}
+
+/* ── phone: the three zones become three views ───────────────────────── */
+.zonenav{display:none}
+@media (max-width:900px){
+  :root{--nav:46px}
+  #app{height:calc(100dvh - var(--bar) - var(--nav))}
+  .sheet{grid-template-columns:1fr;gap:0}
+  .zone{display:none}
+  body[data-zone="left"] .zone-left,
+  body[data-zone="centre"] .zone-centre,
+  body[data-zone="right"] .zone-right{display:flex}
+  .zonenav{display:grid;grid-template-columns:repeat(3,1fr);height:var(--nav);
+    background:var(--panel);border-top:1px solid var(--line)}
+  .zonenav button{background:none;border:0;font-family:var(--sans);font-size:11px;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+  .zonenav button.on{color:var(--bone);box-shadow:inset 0 2px 0 var(--brass)}
+  .vitals{grid-template-columns:1fr}
+  .fields.grid3{grid-template-columns:repeat(2,1fr)}
+  .brand{display:none}
+  /* The name truncates before the status buttons do: knowing the sheet saved matters more at a
+     table than reading the last four letters of a character's name. */
+  #barId{min-width:0;overflow:hidden}
+  .pick-btn{max-width:100%}
+  .pick-btn b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick-btn span{display:none}
+  .barstate .btn.sm{max-width:104px;overflow:hidden;text-overflow:ellipsis}
+}
+@media (max-width:1180px) and (min-width:901px){
+  .sheet{grid-template-columns:210px minmax(0,1fr) 248px}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+}
+/* ── icons ───────────────────────────────────────────────────────────── */
+.ic{font-size:.86em;opacity:.72;width:1.1em;text-align:center;flex:none}
+.tile .ic,.trk .ic,.stat .ic,.card h3 .ic{margin-right:4px}
+.card h3 .ic{opacity:.6;font-size:11px}
+.hp-ic{margin-right:6px;opacity:.9;font-size:.6em;vertical-align:middle}
+.tab .ic{margin-right:5px;opacity:.6}
+.tab.on .ic{opacity:.85}
+
+/* Dream is pink wherever it appears. */
+.ab2.dream .ab2-roll b{color:var(--dream)}
+.ab2.dream .ab2-roll i{color:var(--dream-soft)}
+.ab2.dream .ab2-score{border-color:var(--dream-deep)}
+.sk.dream .sk-nm{color:var(--dream-soft)}
+.sk.dream .sk-ab{color:var(--dream);border-color:var(--dream-deep)}
+.btn-stat:hover{border-color:var(--dream)}
+.btn-stat b{color:var(--dream)}
+.hint.dreamy b{color:var(--dream-soft)}
+.pipx.dream.on,.pipx.dream{color:var(--dream)}
+.attn-grp.dream .attn-h b{color:var(--dream-soft)}
+
+/* ── portraits and the accent chooser ────────────────────────────────── */
+.por{display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:8px;
+  background:var(--panel2) center/cover no-repeat;border:1px solid var(--line);
+  font-family:var(--sans);font-size:11px;color:var(--mute);overflow:hidden}
+.por.sm{width:26px;height:26px;border-radius:7px}
+.por.lg{width:92px;height:92px;border-radius:11px;font-size:26px}
+.por.none{letter-spacing:.04em}
+.look{display:flex;gap:13px;align-items:flex-start}
+.look-do{display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.swatches{display:flex;flex-wrap:wrap;gap:5px}
+.sw{width:22px;height:22px;border-radius:50%;background:var(--sw,var(--panel2));border:2px solid transparent;
+  box-shadow:0 0 0 1px var(--line);padding:0}
+.sw:hover{box-shadow:0 0 0 1px var(--mute)}
+.sw.on{border-color:var(--bone);box-shadow:0 0 0 1px var(--bone)}
+.sw.none{background:var(--panel2);color:var(--mute);font-size:11px;line-height:1}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.pgrid-b{aspect-ratio:1;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2) center/cover no-repeat;padding:0}
+.pgrid-b:hover{border-color:var(--mute)}
+.pgrid-b.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+
+/* ── actions ─────────────────────────────────────────────────────────── */
+.acts2{display:flex;flex-wrap:wrap;gap:5px}
+.act2{display:inline-flex;align-items:stretch;background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;overflow:hidden}
+.act2:hover{border-color:var(--mute)}
+.act2-b{display:flex;align-items:center;gap:6px;background:none;border:0;padding:4px 9px}
+.act2-n{font-family:var(--sans);font-size:12px}
+.act2 .x{border:0;background:none;padding:0 6px}
+.act2.passive{opacity:.82}
+.act2.reaction{border-color:#4a5a6e}
+.act2.quick,.act2.grand,.act2.pair{border-color:var(--brass)}
+.tag.k{color:var(--accent);border-color:var(--accent)}
+
+/* ── equipment ───────────────────────────────────────────────────────── */
+.slots2{display:flex;flex-direction:column;gap:3px}
+.slot{display:grid;grid-template-columns:22px 86px minmax(0,1fr) auto;gap:7px;align-items:center;
+  padding:2px 0}
+.slot-i{color:var(--mute);text-align:center;font-size:12px}
+.slot.on .slot-i{color:var(--accent)}
+.slot-n{font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute)}
+.slot-v{min-width:0;text-align:left;background:var(--panel2);border:1px solid var(--line);
+  border-radius:7px;padding:4px 8px;font-size:12.5px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-v:hover{border-color:var(--mute)}
+.slot-v em{color:var(--mute);font-style:italic;font-size:11.5px}
+.slot-f{display:flex;gap:2px}
+.pipx{width:22px;height:22px;border-radius:6px;background:none;border:1px solid transparent;
+  color:#4e565f;font-size:10px;padding:0}
+.pipx:hover{border-color:var(--line);color:var(--bone2)}
+.pipx.on{color:var(--accent);border-color:var(--line);background:var(--panel2)}
+.attn-grp{margin-bottom:9px}
+.attn-h{display:flex;align-items:baseline;gap:7px;margin-bottom:5px}
+.attn-h b{font-family:var(--sans);font-size:11px}
+.attn-h span{font-family:var(--sans);font-size:10px;color:var(--mute)}
+.carry{display:flex;flex-direction:column;gap:3px}
+.carry-r{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:7px;padding:4px 9px}
+.carry-n{font-family:var(--sans);font-size:12px}
+.carry-n em{font-style:normal;color:var(--mute)}
+.carry-x{flex:1;min-width:0;font-size:12px;color:var(--mute);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── the popover's own way out ───────────────────────────────────────── */
+.pop-x{position:absolute;top:5px;right:6px;z-index:2;width:22px;height:22px;border-radius:6px;
+  background:none;border:0;color:var(--mute);font-size:15px;line-height:1;padding:0}
+.pop-x:hover{background:var(--line);color:var(--bone)}
+.pop-x.solo{position:absolute}
+.pop{position:fixed}
+.pop .pop-h{padding-right:30px}
+.fate-n{font-family:var(--sans);font-size:15px;color:var(--brass)}
+.card.fate .btn{width:100%}
+.prose{margin:0;font-size:13.5px;line-height:1.55;color:var(--bone2);white-space:pre-wrap}
+
+/* ── scrollbars: present when needed, invisible the rest of the time ─── */
+*{scrollbar-width:thin;scrollbar-color:#39424e transparent}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#39424e;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#4e5a69}
+::-webkit-scrollbar-corner{background:transparent}
+
+@media (max-width:900px){
+  .slot{grid-template-columns:20px minmax(0,1fr) auto}
+  .slot-n{display:none}
+  .look{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+
+/* ── round 3: the portrait on the sheet, conditions up top, the turn's pips ── */
+
+/* The portrait is the first thing on the sheet now, not a 26px chip in the bar. It is a button,
+   because the quickest way to change it should be to click the thing you want changed. */
+.face{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;
+  width:124px;transition:border-color .15s ease}
+.face:hover{border-color:var(--accent,var(--brass))}
+.face .por.xl{width:106px;height:106px;border-radius:9px;font-size:30px;
+  box-shadow:0 1px 10px rgba(0,0,0,.35)}
+.face-n{display:flex;flex-direction:column;align-items:center;gap:1px;max-width:106px}
+.face-n b{font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--bone);
+  max-width:106px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.face-n em{font-style:normal;font-family:var(--sans);font-size:9px;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--mute);max-width:106px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Conditions sit with the vitals, so they stay on screen whichever tab is open. One line. */
+.condbar{display:flex;align-items:center;gap:8px;flex:none;background:var(--panel);
+  border:1px solid var(--line);border-radius:9px;padding:4px 8px;min-height:30px}
+.condbar.live{border-color:#6b4a3a;background:rgba(192,85,63,.07)}
+.condbar-k{display:inline-flex;align-items:center;gap:5px;flex:none;font-family:var(--sans);
+  font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.condbar .chips{flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+.condbar .chips::-webkit-scrollbar{display:none}
+.condbar .chip{flex:none}
+.condbar .chip.conc{border-color:var(--steel);color:var(--bone)}
+.condbar .hint{margin:0;font-size:10.5px}
+.condbar>.btn{flex:none}
+
+/* The turn's allowance, one pip per slot — so "two Actions, one spent" is a thing it can show. */
+.econs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.econ{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:7px;padding:3px 9px;text-decoration:none}
+.econ.done{opacity:.45}
+.econ-n{font-family:var(--sans);font-size:11px;color:var(--bone2)}
+.epips{display:inline-flex;gap:3px}
+.epip{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--steel);
+  background:transparent;padding:0;cursor:pointer;transition:background .12s ease}
+.epip:hover{border-color:var(--bone2)}
+.epip.spent{background:var(--steel);border-color:var(--steel)}
+.epip.extra{border-color:var(--accent,var(--brass));border-style:dashed}
+.epip.extra.spent{background:var(--accent,var(--brass));border-style:solid}
+.econ .x{margin-left:1px}
+
+/* Tight widths: the tabs drop to icons and their tooltip carries the name. Scrolling is the
+   fallback below that, not the first answer — a label you cannot read is wasted width. */
+/* `.tab-n`, not `.tab span` — the icon helper emits a <span> too, and hiding "the span" hid the
+   icon with the label, leaving a 20x10px empty button. The label gets its own name so this can
+   never again mean more than it says. */
+@media (max-width:1240px){
+  .tab .tab-n{display:none}
+  .tab{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px}
+  .tab .ic{margin-right:0;font-size:14px;opacity:.75;width:1em}
+  .tab.on .ic{opacity:1}
+}
+@media (max-width:1120px){
+  .face{width:96px}
+  .face .por.xl{width:78px;height:78px;font-size:24px}
+  .face-n,.face-n b,.face-n em{max-width:78px}
+}
+@media (max-width:900px){
+  .vitals{grid-template-columns:auto minmax(0,1fr)}
+  .vitals .tiles{grid-column:1 / -1}
+}
+
+/* ── the accent, actually spent ──────────────────────────────────────────
+   `--accent` existed and was set on <html> from the character's choice, but almost nothing read
+   it: a hover border, two pips and the portrait grid's selected ring. Picking a colour changed
+   nothing anyone could see. These are the places where one character should look like themselves
+   — the chrome that is theirs — while everything that carries MEANING keeps its own colour:
+   the HP bands stay green/amber/ember, expertise stays verdant, Fate stays brass, and the focus
+   outline stays the one colour known to be legible against every panel in the app. */
+
+/* The tint behind a selected thing. color-mix so one choice drives both the line and the wash. */
+.tab.on{background:var(--accent);border-color:var(--accent);color:#171b21}
+.tab.on .ic{opacity:1;color:#171b21}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#171b21}
+.btn.pri:hover{filter:brightness(1.08)}
+.card.hi{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+
+/* The portrait wears it permanently — it is the character's own frame, not a hover state. */
+.face{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.face:hover{border-color:var(--accent)}
+.face .por{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 1px 10px rgba(0,0,0,.35)}
+
+/* Every card heading and zone heading, which is what carries the colour across the whole sheet. */
+.card h3 .ic{color:var(--accent);opacity:.85}
+.zone-h h2{color:color-mix(in srgb,var(--accent) 70%,var(--bone2))}
+.pbtag{color:var(--accent)}
+.zonenav button.on{box-shadow:inset 0 2px 0 var(--accent)}
+.pick-btn{box-shadow:inset 2px 0 0 var(--accent)}
+.pip:hover,.epip:hover{border-color:var(--accent)}
+
+/* Where a browser cannot do color-mix, the solid accent still reads; only the washes fall back. */
+@supports not (color: color-mix(in srgb, red 50%, blue)){
+  .face{border-color:var(--accent)}
+  .zone-h h2{color:var(--accent)}
+  .card.hi{background:transparent}
+}
+
+/* ── Levelling up ───────────────────────────────────────────────────────────────────────────────
+   The one control on this sheet a player has been waiting for, so it is the only thing allowed to
+   glow. Everything else here is the quieter furniture around it: the class rows, the pending
+   choices, and the use pips on a class resource. */
+.btn.lvlup{border-color:var(--brass);color:var(--bone);
+  background:linear-gradient(180deg,rgba(176,136,66,.26),rgba(176,136,66,.12))}
+.btn.lvlup:hover{border-color:#d2a558;background:linear-gradient(180deg,rgba(176,136,66,.38),rgba(176,136,66,.18))}
+.btn.lvlup em{font-style:normal;font-weight:700;margin-left:3px}
+.btn.lvlup[disabled]{opacity:.45}
+.lvlcard p{margin:0 0 9px;font-size:13px;line-height:1.55;color:var(--bone2)}
+.lvlcard .btn.lvlup{animation:lvlpulse 2.6s ease-in-out infinite}
+@keyframes lvlpulse{0%,100%{box-shadow:0 0 0 0 rgba(176,136,66,0)}50%{box-shadow:0 0 0 4px rgba(176,136,66,.16)}}
+@media (prefers-reduced-motion: reduce){.lvlcard .btn.lvlup{animation:none}}
+
+/* A section of the level-up dialog. Headings rather than cards: it is one page of reading, and the
+   player should be able to take it in before they press the button. */
+.lvl-sec{margin:0 0 14px}
+.lvl-sec h4{margin:0 0 6px;font-family:var(--sans);font-size:9.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.lvl-sec .why{margin:0 0 6px}
+.lvl-sec .abl{max-height:40vh;overflow:auto}
+.picklist{max-height:46vh;overflow:auto}
+.picklist .listrow{align-items:flex-start;flex-direction:column;gap:2px;text-align:left}
+.picklist .listrow span{line-height:1.45}
+
+/* The classes, with the split a multiclass character has to keep adding up. */
+.zone-h.sm{margin-top:10px}
+.zone-h h4{margin:0;font-family:var(--sans);font-size:9.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute)}
+.clslist{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.clsrow{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:5px 7px 5px 10px}
+.clsrow-n{flex:1;min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px}
+.clsrow-n b{font-family:var(--sans);font-size:12.5px;font-weight:500}
+.clsrow-n em{font-style:normal;font-family:var(--sans);font-size:10.5px;color:var(--accent)}
+.clsrow-n em.mute{color:var(--mute)}
+.clsrow .chip{font-size:10px;padding:1px 8px}
+.tag.warn{color:#e4927f;border-color:#6d4036}
+
+/* Features by source, and a pool you can spend from where the class data knows its size. */
+.featgrp+.featgrp{margin-top:6px}
+.uses{display:inline-flex;align-items:center;gap:3px}
+.uses .pip{width:11px;height:11px}
+.uses em{font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);margin-left:2px}

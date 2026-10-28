@@ -220,6 +220,103 @@ const SCHEMA = [
   `ALTER TABLE map_locations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
   // Custom places are listed and filtered by nation constantly; seeded ones are looked up by id.
   `CREATE INDEX IF NOT EXISTS map_locations_nation ON map_locations (nation) WHERE nation IS NOT NULL`,
+  // ── The Character Sheet ───────────────────────────────────────────────────────────────────────
+  // One row per character. `sheet` is the whole editable sheet as JSON text, the same bargain the
+  // Servants make: the player owns what is in there and the engine recomputes every total from it.
+  //
+  // The columns beside it are deliberately NOT in that JSON. `level`, `dream` and `fate` are the
+  // DM's to set (DM-009, DM-02, DM-05), so they are real columns written only by the DM-only routes
+  // and stripped from any player save. If they lived in `sheet` a forged payload would set them, and
+  // hiding the control in the UI is not a permission — the same lesson the map's secret places taught
+  // (`mapLocationsFor`: withhold, don't hide).
+  //
+  // Honor and Morality are four independent non-negative sub-scores, never an ability-modifier pair,
+  // plus the unspent allocations a granted level issues. `honor_order` is the canonical name for the
+  // sub-score the rules note calls "Order" in one paragraph and "Law" in the next.
+  `CREATE TABLE IF NOT EXISTS characters (
+     id               SERIAL PRIMARY KEY,
+     user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     name             TEXT NOT NULL,
+     level            SMALLINT NOT NULL DEFAULT 1 CHECK (level BETWEEN 1 AND 20),
+     dream            SMALLINT NOT NULL DEFAULT 10 CHECK (dream BETWEEN 0 AND 40),
+     fate             SMALLINT NOT NULL DEFAULT 0 CHECK (fate >= 0),
+     honor_order      SMALLINT NOT NULL DEFAULT 0 CHECK (honor_order >= 0),
+     honor_chaos      SMALLINT NOT NULL DEFAULT 0 CHECK (honor_chaos >= 0),
+     morality_good    SMALLINT NOT NULL DEFAULT 0 CHECK (morality_good >= 0),
+     morality_evil    SMALLINT NOT NULL DEFAULT 0 CHECK (morality_evil >= 0),
+     honor_unspent    SMALLINT NOT NULL DEFAULT 0 CHECK (honor_unspent >= 0),
+     morality_unspent SMALLINT NOT NULL DEFAULT 0 CHECK (morality_unspent >= 0),
+     sheet            TEXT NOT NULL DEFAULT '{}',
+     version          INTEGER NOT NULL DEFAULT 1,
+     archived         BOOLEAN NOT NULL DEFAULT false,
+     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  // The Dream score is capped at 40 rather than 20 on purpose. Star Force.md documents a cap of 20,
+  // but the table has been at 24 since Session 76, and a CHECK that refuses the number the DM
+  // actually granted would make the sheet unusable for all eight players. The contradiction is
+  // Juan's to settle; the column records what he set either way.
+  `CREATE INDEX IF NOT EXISTS characters_user ON characters (user_id) WHERE archived = false`,
+  // Append-only history. This is what makes a Fate spend, a granted level or a Dream event
+  // reconstructable afterwards (DM-007, FD-04): who did it, to what, when, and from what to what.
+  // Nothing updates or deletes a row here.
+  `CREATE TABLE IF NOT EXISTS character_events (
+     id           SERIAL PRIMARY KEY,
+     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+     actor_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     action       TEXT NOT NULL,
+     detail       TEXT NOT NULL DEFAULT '{}',
+     note         TEXT NOT NULL DEFAULT '',
+     at           TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS character_events_char ON character_events (character_id, id DESC)`,
+  // A DM-granted advancement the player has yet to spend: a level, an ability score improvement, or
+  // a feat. A token rather than a counter, so each one carries why it was given and when it was
+  // used, and so "allow an ASI" can never be claimed twice (HB-007's acceptance, CS-063).
+  `CREATE TABLE IF NOT EXISTS character_unlocks (
+     id           SERIAL PRIMARY KEY,
+     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+     kind         TEXT NOT NULL CHECK (kind IN ('level', 'asi', 'feat')),
+     note         TEXT NOT NULL DEFAULT '',
+     granted_by   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     granted_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+     consumed_at  TIMESTAMPTZ,
+     choice       TEXT NOT NULL DEFAULT '{}'
+   )`,
+  // Which level this token is permission to REACH. The level column itself stays where it is until
+  // the player presses LEVEL UP and this token is spent, which is the whole gate: the DM authorises
+  // the level, the player applies it, and the raise happens in the same statement that consumes the
+  // token so it can never happen twice (CS-063, DM-009). NULL is an older token, or an `asi`/`feat`
+  // one, neither of which moves the level.
+  `ALTER TABLE character_unlocks ADD COLUMN IF NOT EXISTS target_level SMALLINT`,
+  `CREATE INDEX IF NOT EXISTS character_unlocks_open ON character_unlocks (character_id) WHERE consumed_at IS NULL`,
+  // One row per Fate use ever spent, keyed by the id the sheet generates before it asks. A Fate
+  // balance is granted only by the DM and never recharges, so a spend that gets sent twice — a
+  // retried request, a double tap, a dropped connection the player reloads through — must not cost
+  // two. The primary key is the whole mechanism: the second insert fails and the balance stands.
+  `CREATE TABLE IF NOT EXISTS character_fate_spends (
+     use_id       TEXT PRIMARY KEY,
+     character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+     balance_after SMALLINT NOT NULL,
+     at           TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  // Compendium content the DM uploaded. The SRD ships as a file in sheet/data/ because it is openly
+  // licensed; everything else a DM imports lands HERE, in the database, and never in the git repo —
+  // the requirements forbid bundling copyrighted non-SRD material (CS-085), and this app is public.
+  // `source` is the book or file it came from, kept for the attribution CS-086 asks for.
+  `CREATE TABLE IF NOT EXISTS compendium_entries (
+     id         SERIAL PRIMARY KEY,
+     kind       TEXT NOT NULL,
+     name       TEXT NOT NULL,
+     source     TEXT NOT NULL DEFAULT '',
+     ruleset    TEXT NOT NULL DEFAULT 'dnd5e-2014',
+     data       TEXT NOT NULL DEFAULT '{}',
+     version    INTEGER NOT NULL DEFAULT 1,
+     retired    BOOLEAN NOT NULL DEFAULT false,
+     added_by   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     added_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+     UNIQUE (kind, name, source, version)
+   )`,
 ];
 
 export async function migrate(db) {

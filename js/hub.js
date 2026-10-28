@@ -44,6 +44,9 @@ async function boot() {
     // The World Map opened to the table on 2026-10-23 (Juan). Everyone signed in gets the card;
     // which places are on the map behind it is the server's business, not this line's.
     document.getElementById("hubMap").hidden = false;
+    // The Character Sheet is a player's own. The DM reads the table from the Admin page instead,
+    // where every character is on one board, so the card would only be a longer road to one sheet.
+    document.getElementById("hubSheet").hidden = dm;
     if (dm) reminders();
   }
   document.getElementById("hub").hidden = false;

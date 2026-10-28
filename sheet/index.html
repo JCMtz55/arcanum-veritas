@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Character Sheet — Ephemer</title>
+<meta name="description" content="The Once Upon a Star character sheet: seven scores, the Fate Die, Wounds and both exhaustion tracks, on one screen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Font Awesome, loaded exactly as arcanum.html already loads it. The icons sit beside words rather
+     than replacing them, so a blocked CDN costs a little polish and nothing a player needs. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="css/sheet.css?v=2026-10-27e">
+<script src="../js/tools.js?v=2026-10-27a"></script>
+</head>
+<body>
+
+<header class="bar">
+  <nav class="tools" data-tool="sheet"></nav>
+  <span class="brand">Character Sheet</span>
+  <span id="barId"></span>
+  <span class="sp"></span>
+  <span id="barState" class="barstate"></span>
+</header>
+
+<!-- Hidden until boot answers, so nobody sees an empty sheet fill itself in. -->
+<main id="app" hidden>
+  <section id="noChar" hidden></section>
+
+  <!-- Three zones in one viewport-height grid. The page never scrolls; each zone does. -->
+  <div id="sheet" class="sheet" hidden>
+    <aside id="left" class="zone zone-left"></aside>
+    <section id="centre" class="zone zone-centre"></section>
+    <aside id="right" class="zone zone-right"></aside>
+  </div>
+</main>
+
+<!-- At phone width the three zones become three views, reached from here. -->
+<nav class="zonenav" aria-label="Sheet sections">
+  <button data-zone="left">Scores</button>
+  <button data-zone="centre" class="on">Body</button>
+  <button data-zone="right">Tracks</button>
+</nav>
+
+<section id="fail" class="fail" hidden>
+  <h1>The sheet needs the server</h1>
+  <p id="failWhy"></p>
+  <p><a href="../">Back to Ephemer</a></p>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="js/app.js?v=2026-10-27e"></script>
+<script>
+// The zone switcher is the only thing on this page that is not part of the sheet's own state: which
+// of the three columns a phone is looking at is a property of the window, not of the character.
+document.querySelectorAll(".zonenav button").forEach(b => b.addEventListener("click", () => {
+  document.body.dataset.zone = b.dataset.zone;
+  document.querySelectorAll(".zonenav button").forEach(x => x.classList.toggle("on", x === b));
+}));
+document.body.dataset.zone = "centre";
+</script>
+</body>
+</html>
