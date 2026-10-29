@@ -405,6 +405,33 @@ test("healing is capped at the modified maximum and temporary HP does not stack"
   assert.equal(R.applyHealing(buffed, 100).hp, 50);
 });
 
+test("regaining a hit point from zero clears the death saves, and only from zero", () => {
+  const down = pc({ hp: 0, maxHp: 40, deathSaveSuccesses: 1, deathSaveFailures: 2 });
+
+  assert.equal(R.applyHealing(down, 1).revived, true);
+  assert.equal(R.applyHealing(down, 0).revived, false);          // nothing regained, nothing cleared
+  assert.equal(R.applyHealing(pc({ hp: 8, maxHp: 40 }), 5).revived, false);
+
+  // A hit die on a short rest is a way back up like any other.
+  const withDice = pc({ hp: 0, maxHp: 40, hitDice: "3d8", abilities: { con: 10 } });
+  assert.equal(R.spendHitDie(withDice, 8, 5).revived, true);
+
+  // A long rest carries it in its own preview rather than doing it quietly.
+  const rested = R.restPreview(down, { kind: "long" });
+  assert.equal(rested.next.deathSaveSuccesses, 0);
+  assert.equal(rested.next.deathSaveFailures, 0);
+  assert.ok(rested.changes.some(c => c.label === "Death saves"));
+
+  // Someone who went down with a clean slate gets no line about it.
+  const clean = R.restPreview(pc({ hp: 0, maxHp: 40 }), { kind: "long" });
+  assert.equal(clean.changes.some(c => c.label === "Death saves"), false);
+
+  // And the predicate itself, which is what every path asks.
+  assert.equal(R.clearsDeathSaves(0, 1), true);
+  assert.equal(R.clearsDeathSaves(0, 0), false);
+  assert.equal(R.clearsDeathSaves(3, 9), false);
+});
+
 // ── Arcanum Veritas and Cognition DCs ───────────────────────────────────
 test("Verum DC folds Dream in on top of the highest ability modifier", () => {
   const ch = pc({ level: 5, abilities: { cha: 18, dream: 16 } });

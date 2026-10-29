@@ -13,26 +13,13 @@ import { icon } from "./icons.js";
 
 const $ = id => document.getElementById(id);
 
+// The party's plates live in `plates.js` so the DM's board can read them too — this file cannot be
+// imported outside a browser, and the server needs the same list to tell the board which painting
+// belongs to which plate. Re-exported here because the sheet has always asked view.js for them.
+export { PORTRAITS, portraitUrl, fullArtUrl, portraitOf, artUrl } from "./plates.js";
+
 // Eight accents, every one of them already a token in the app's palette, so a character can look
 // like themselves without any of them looking out of place beside the rest of Ephemer.
-// The party's own plates. `file` is the asset under sheet/img/portraits/, `name` is what the
-// picker says out loud — a filename is an asset id, not a label anyone should have to read.
-// Dropping a file into that folder and adding a line here is the whole of it — deliberately a
-// list rather than a directory listing, because the server does not serve one and a 404 per
-// guess is not a feature. The old placeholders stay on disk so a sheet that picked one still
-// resolves; they are simply no longer offered.
-export const PORTRAITS = [
-  { file: "grissly.jpg", name: "Grizzly" },
-  { file: "khaled.jpg", name: "Khaled Guile" },
-  { file: "rory.jpg", name: "Rory Mercury" },
-  { file: "richard.jpg", name: "Richard Aquitaine" },
-  { file: "levnali.jpg", name: "Lev'nali" },
-  { file: "sal-and-sol.jpg", name: "Salomon & Solomon" },
-  { file: "zeke.jpg", name: "Zeke Greyhawk" },
-  { file: "zariel.jpg", name: "Zariel Necroshade" },
-];
-export const portraitUrl = f => `img/portraits/${f}`;
-
 export const ACCENTS = [
   { id: "brass", name: "Brass", value: "#B08842" },
   { id: "ember", name: "Ember", value: "#C0553F" },
@@ -223,6 +210,10 @@ function renderCentre() {
   const max = rules.maxHp(ch);
   const pct = Math.max(0, Math.min(100, Math.round((ch.hp / Math.max(1, max)) * 100)));
   const band = ch.hp <= 0 ? "out" : pct <= 25 ? "crit" : pct <= 50 ? "low" : "ok";
+  // Temporary hit points get a bar of their own, measured against the same maximum so the two read
+  // as one pool — a floor of 4% because 3 temp on a 94 maximum is a bar nobody can see, and the
+  // point of a second bar is that you notice it. It can exceed the maximum; the bar simply fills.
+  const tempPct = ch.tempHp ? Math.max(4, Math.min(100, Math.round((ch.tempHp / Math.max(1, max)) * 100))) : 0;
   const unhealed = ch.injuries.filter(i => i && !i.healed).length;
   // The tile shows what is LEFT, not the pool: once three dice are spent, printing the whole pool
   // is a lie, and the pool itself is one hover away in the title.
@@ -241,22 +232,54 @@ function renderCentre() {
   // across the redraw. Without this, preparing a spell halfway down the book throws you back to the
   // top of the tab — and the same was true of every pip and every toggle in every other tab.
   const centre = $("centre");
-  const was = { centre: centre.scrollTop, panel: document.getElementById("panel")?.scrollTop || 0 };
+  // The quick damage field goes the same way as the scroll: a save landing while you are typing
+  // redraws this whole column, and a number half typed must not vanish under your hands. Focus
+  // travels with it, so the field is still live for the next hit — but only if it was focused
+  // HERE, which is why it is read now and not assumed: a dialog opened by the last blow owns the
+  // keyboard, and this must not take it back when the save completes.
+  const hpq = $("hpQuick");
+  const was = {
+    centre: centre.scrollTop, panel: document.getElementById("panel")?.scrollTop || 0,
+    hp: hpq ? { value: hpq.value, focused: document.activeElement === hpq } : null,
+  };
   centre.innerHTML = `
     <div class="vitals">
-      <button class="face" data-act="portrait" title="Change portrait">
-        ${portraitHtml(ch, c.name, "xl")}
-        <span class="face-n">
-          <b>${esc(c.name)}</b>
-          <em>Lv ${c.level}${ch.ancestry ? ` · ${esc(ch.ancestry)}` : ""}${ch.classes?.length ? ` · ${esc(ch.classes.map(x => x.name).join(" / "))}` : ""}</em>
-        </span>
-      </button>
-      <div class="hp ${band}">
-        <button class="hp-btn" data-act="hp" title="Damage, healing and temporary hit points">
-          <span class="hp-n">${icon("hp", "hp-ic")}${ch.hp}<em>/${max}</em>${ch.tempHp ? `<u>+${ch.tempHp}</u>` : ""}</span>
-          <span class="hp-bar"><i style="width:${pct}%"></i></span>
-          <span class="hp-lbl">Hit points</span>
+      <div class="vital ${band}">
+        <button class="face-p" data-act="portrait-art"
+          title="${ch.portrait ? "See the whole plate" : "Choose a portrait"}"
+          aria-label="${ch.portrait ? `See ${esc(c.name)}'s plate whole` : "Choose a portrait"}">
+          ${portraitHtml(ch, c.name, "xl")}
+          ${ch.portrait ? `<span class="face-z">${icon("seeWhole")}</span>` : ""}
         </button>
+        <div class="vital-b">
+          <span class="face-n">
+            <b>${esc(c.name)}</b>
+            <em>Lv ${c.level}${ch.ancestry ? ` · ${esc(ch.ancestry)}` : ""}${ch.classes?.length ? ` · ${esc(ch.classes.map(x => x.name).join(" / "))}` : ""}</em>
+          </span>
+          <div class="hp-top">
+            ${ch.hp > 0
+              ? `<button class="hp-n" data-act="hp" title="Temporary hit points, a critical hit, and the maximum">
+                  ${icon("hp", "hp-ic")}${ch.hp}<em>/${max}</em>${ch.tempHp ? `<u>+${ch.tempHp}</u>` : ""}
+                </button>`
+              : deathSaves(ch, unhealed)}
+            <button class="hp-more" data-act="hp" title="Temporary hit points, a critical hit, and the maximum"
+              aria-label="More hit point controls">${icon("more")}</button>
+          </div>
+          <span class="hp-bars">
+            <span class="hp-bar" title="${ch.hp} of ${max} hit points"><i style="width:${pct}%"></i></span>
+            ${ch.tempHp ? `<span class="hp-bar temp" title="${ch.tempHp} temporary hit point${ch.tempHp === 1 ? "" : "s"} — spent before your own">
+              <i style="width:${tempPct}%"></i></span>` : ""}
+          </span>
+          <div class="hp-do">
+            <button class="hp-go dmg" data-act="hp-quick" data-id="dmg" title="Take that much damage">
+              ${icon("damage")}<span>Damage</span></button>
+            <input class="txt hp-in" id="hpQuick" type="number" min="0" max="999" inputmode="numeric"
+              placeholder="0" aria-label="How many hit points" autocomplete="off">
+            <button class="hp-go heal" data-act="hp-quick" data-id="heal" title="Heal that much">
+              ${icon("heal")}<span>Heal</span></button>
+          </div>
+        </div>
+        <button class="face-edit" data-act="portrait" title="Change portrait" aria-label="Change portrait">${icon("pickPlate")}</button>
       </div>
       <div class="tiles">
         ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), `Armour Class — base ${ch.ac}`, "ac")}
@@ -290,10 +313,45 @@ function renderCentre() {
   centre.scrollTop = was.centre;
   const panel = document.getElementById("panel");
   if (panel) panel.scrollTop = was.panel;
+  if (was.hp) {
+    const field = $("hpQuick");
+    if (field) { field.value = was.hp.value; if (was.hp.focused) field.focus(); }
+  }
 }
 
 const hitDiceLeft = ch =>
   rules.formatHitDice(rules.hitDiceState(ch).rows.map(r => ({ die: r.die, n: r.left })));
+
+// At zero hit points the number is the one thing on this panel that says nothing: it is always 0,
+// and what the table actually needs to see is how close this character is to dying (Juan,
+// 2026-10-28). So the number's place is taken by the death saves themselves — three for, three
+// against, each one a click — with the DC beside them, which is the campaign's own number: 10 plus
+// a Wound and an unhealed Injury apiece.
+//
+// Nothing here CLEARS the marks when hit points come back. Whether regaining a hit point resets
+// death saves in Ephemer is the DM's ruling, not this sheet's to make, and the same marks are a
+// click away in the Death DC tile with its Clear. Logged as an open question.
+function deathSaves(ch, unhealed) {
+  const ok = Math.max(0, Math.min(3, ch.deathSaveSuccesses || 0));
+  const no = Math.max(0, Math.min(3, ch.deathSaveFailures || 0));
+  const dc = rules.deathSaveDC(ch.wounds, unhealed);
+  // Three of either ends it, and the panel should say so in a word rather than leave the reader
+  // counting pips. Until then the label is the DC, because that is what is about to be rolled.
+  // The label is kept SHORT on purpose: six pips and two marks already fill this line, and the
+  // panel is often under 200px wide. A skull and the DC say everything "Death saves · DC 10" did.
+  const state = no >= 3 ? { cls: "dead", text: "Dead" }
+    : ok >= 3 ? { cls: "stable", text: "Stable" }
+    : { cls: "", text: `${icon("deathDC")}DC ${dc}` };
+  const pips = (key, n, kind) => [1, 2, 3].map(i =>
+    `<button class="dpip ${kind}${i <= n ? " on" : ""}" data-act="ds-set" data-k="${key}" data-i="${i}"
+      aria-label="${kind === "ok" ? "Success" : "Failure"} ${i} of 3"></button>`).join("");
+  return `<div class="dsave ${state.cls}">
+    <button class="dsave-k" data-act="death-saves"
+      title="Death saves — DC ${dc}: 10 + ${ch.wounds} Wound${ch.wounds === 1 ? "" : "s"} + ${unhealed} unhealed Injur${unhealed === 1 ? "y" : "ies"}. Roll or clear them here.">${state.text}</button>
+    <span class="dsave-g" title="Successes — ${ok} of 3">${icon("dsOk")}${pips("deathSaveSuccesses", ok, "ok")}</span>
+    <span class="dsave-g" title="Failures — ${no} of 3">${icon("dsNo")}${pips("deathSaveFailures", no, "no")}</span>
+  </div>`;
+}
 
 // Conditions belong with the vitals rather than inside the Combat tab: what you are suffering from
 // is read as often as your AC, and it should not disappear the moment you open your spells.
@@ -1121,7 +1179,10 @@ function characterPanel(ch) {
     <section class="card">
       <h3>${icon("character")} Portrait &amp; colour</h3>
       <div class="look">
-        ${portraitHtml(ch, c.name, "lg")}
+        ${ch.portrait
+          ? `<button class="face-p" data-act="portrait-art" title="See the whole plate"
+              aria-label="See ${esc(c.name)}'s plate whole">${portraitHtml(ch, c.name, "lg")}</button>`
+          : portraitHtml(ch, c.name, "lg")}
         <div class="look-do">
           <button class="btn sm" data-act="portrait">${ch.portrait ? "Change portrait" : "Choose a portrait"}</button>
           ${ch.portrait ? `<button class="btn sm warn" data-act="portrait-clear">Remove</button>` : ""}
@@ -1134,7 +1195,8 @@ function characterPanel(ch) {
         </div>
       </div>
       <p class="hint">The colour follows you through the sheet. The portraits are the party's own
-        plates — pick the one that is yours.</p>
+        plates — pick the one that is yours, then click it at the head of the sheet to see the
+        painting whole.</p>
     </section>
 
     ${lastingCard(ch)}

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
-<link rel="stylesheet" href="css/admin.css?v=2026-10-28a">
+<link rel="stylesheet" href="css/admin.css?v=2026-10-28b">
 <!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
 <script src="../js/tools.js"></script>
 </head>
@@ -98,6 +98,9 @@
   <div class="rem-body" id="remBody"></div>
 </dialog>
 
+<!-- A character's plate, opened from the board. Click it or press Esc to close. -->
+<dialog class="lbox" id="lbox" onclick="this.close()"></dialog>
+
 <div class="toast" id="toast"></div>
 
 <!-- Only what the DM's work needs: the domain tables and Ranks, and the Grimm book. None of the
@@ -107,12 +110,12 @@
      looks like "the toggle does nothing" rather than a cached file. Bump it when any of this
      page's js or the Grimm data changes.
      core.js first — it defines section() and onData(), which the four below call as they load. -->
-<script src="../js/data.js?v=2026-10-28a"></script>
-<script src="../grimms/js/data.js?v=2026-10-28a"></script>
-<script src="js/core.js?v=2026-10-28a"></script>
-<script src="js/table.js?v=2026-10-28a"></script>
-<script src="js/players.js?v=2026-10-28a"></script>
-<script src="js/grimms.js?v=2026-10-28a"></script>
-<script src="js/compendium.js?v=2026-10-28a"></script>
+<script src="../js/data.js?v=2026-10-28b"></script>
+<script src="../grimms/js/data.js?v=2026-10-28b"></script>
+<script src="js/core.js?v=2026-10-28b"></script>
+<script src="js/table.js?v=2026-10-28b"></script>
+<script src="js/players.js?v=2026-10-28b"></script>
+<script src="js/grimms.js?v=2026-10-28b"></script>
+<script src="js/compendium.js?v=2026-10-28b"></script>
 </body>
 </html>

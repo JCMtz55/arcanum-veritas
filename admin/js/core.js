@@ -56,6 +56,19 @@ function toast(msg) {
   setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+// The painting, whole. The board shows a character's plate at 34px; this is the same picture at
+// the size it was painted — `contain`, never cropped, which is the point of opening it. Click
+// anywhere or press Escape. The <dialog> is in index.html, so Escape and the backdrop are the
+// browser's job, exactly as the account and reminder dialogs already do it.
+function lightbox(src, caption) {
+  if (!src) return;
+  const d = document.getElementById("lbox");
+  d.innerHTML = `<img src="${escQ(src)}" alt="${escQ(caption || "")}">
+    ${caption ? `<figcaption>${esc(caption)}</figcaption>` : ""}
+    <span class="lbox-x" aria-hidden="true">×</span>`;
+  d.showModal();
+}
+
 // ═══════════════════════════════════════════════════════════
 //  SIGN-IN
 // ═══════════════════════════════════════════════════════════

@@ -99,6 +99,32 @@ export function dialog(title, bodyHtml, { footer = "", wide = false } = {}) {
 }
 export const closeDialog = () => document.getElementById("dlg")?.close();
 
+// ── lightbox ────────────────────────────────────────────────────────────
+// The portrait on the sheet is a 106px square crop of a painting, and the painting is the thing
+// worth looking at. This opens it whole — `contain`, never cropped, because seeing all of it is
+// the entire point of opening it. Click anywhere or press Escape to close.
+//
+// Its own <dialog> rather than `dialog()`'s, so that opening the art never replaces a dialog that
+// is already up, and so Escape, the backdrop and the focus trap stay the browser's job.
+let lboxReturn = null;
+
+export function lightbox(src, caption) {
+  if (!src) return null;
+  lboxReturn = document.activeElement;
+  let d = document.getElementById("lbox");
+  if (!d) {
+    d = document.createElement("dialog"); d.id = "lbox"; d.className = "lbox";
+    d.addEventListener("click", () => d.close());
+    d.addEventListener("close", () => { if (lboxReturn?.isConnected) lboxReturn.focus(); });
+    document.body.append(d);
+  }
+  d.innerHTML = `<img src="${esc(src)}" alt="${esc(caption || "")}">
+    ${caption ? `<figcaption>${esc(caption)}</figcaption>` : ""}
+    <span class="lbox-x" aria-hidden="true">×</span>`;
+  d.showModal();
+  return d;
+}
+
 // ── dice ────────────────────────────────────────────────────────────────
 // A parser, not an evaluator: "2d6+3", "1d20", "4d8 - 1", "2d6+1d4+2". Anything else is refused
 // rather than run, because an expression a player types must never be able to execute code (CS-024).

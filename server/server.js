@@ -11,6 +11,10 @@ import { hashPassword, verifyPassword, newToken, tokenHash } from "./auth.js";
 // The character sheet's rules engine. The same file the browser imports, so the DM's party board and
 // the player's own sheet cannot disagree about a death-save DC. It is pure — no DOM, no state.
 import * as rules from "../sheet/js/rules.js";
+// The party's plates, for the same reason: the DM's board shows the portrait a player chose, and
+// the list of which painting sits behind which plate should exist once. Pure data and four
+// functions — view.js re-exports these, but view.js touches the DOM and cannot be imported here.
+import * as plates from "../sheet/js/plates.js";
 // Reading a Fight Club compendium XML. The same module sheet/tools/build-srd.mjs uses offline, so a
 // class the DM imports tonight is shaped exactly like the SRD classes that shipped with the repo.
 import { convert as convertCompendium, KINDS as COMPENDIUM_KINDS } from "../sheet/js/fc5e.mjs";
@@ -1169,6 +1173,10 @@ function partyCard(row, displayName) {
     // userId so a card can hand you its player's page. There was no link from a character back to
     // an account before, which is most of why the board had to be a place of its own.
     id: row.id, userId: row.user_id, name: row.name, player: displayName, level: row.level,
+    // The plate and the painting behind it, both relative to `sheet/` — the board prefixes them,
+    // because this is the sheet's own catalogue and it is not the board's business where it sits.
+    // Resolved here rather than on the board so the two can never disagree about which is which.
+    portrait: ch.portrait || "", portraitArt: plates.artUrl(ch),
     pendingLevel: row.pending_level == null ? null : Number(row.pending_level),
     openUnlocks: Number(row.open_unlocks) || 0,
     classes: (Array.isArray(ch.classes) ? ch.classes : []).filter(x => x && x.name)

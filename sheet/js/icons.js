@@ -12,11 +12,20 @@ export const ICONS = {
   hp: "heart",
   maxHp: "heart-circle-plus",
   tempHp: "shield-heart",
+  // The two things that happen to hit points at a table, on the vitals panel itself. Plain minus
+  // and plus rather than a cracked heart: `wounds` already wears that glyph on the same screen,
+  // and these two sit beside the words anyway.
+  damage: "minus",
+  heal: "plus",
+  more: "ellipsis",
   ac: "shield-halved",
   speed: "shoe-prints",
   initiative: "bolt",
   hitDice: "dice-d6",
   deathDC: "skull",
+  // The two halves of a death save, so the pips are not colour alone
+  dsOk: "check",
+  dsNo: "xmark",
   concentration: "brain",
   passive: "eye",
   saveDC: "bullseye",
@@ -53,6 +62,9 @@ export const ICONS = {
   spells: "wand-sparkles",
   gear: "shirt",
   character: "user",
+  // the portrait's two doors: open the plate whole, or go and pick a different one
+  seeWhole: "expand",
+  pickPlate: "images",
   compendium: "book",
   dice: "dice",
   cognition: "circle-nodes",

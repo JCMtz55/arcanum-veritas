@@ -371,6 +371,14 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
   if (kind !== "short") {
     next.hp = hpMax;
     changes.push({ label: "Hit points", from: num(ch.hp), to: hpMax });
+    // Coming back from zero clears the death saves, here as everywhere else. It is listed in the
+    // preview rather than done quietly, because a rest is read before it is taken.
+    if (clearsDeathSaves(ch.hp, hpMax)
+        && (num(ch.deathSaveSuccesses) || num(ch.deathSaveFailures))) {
+      next.deathSaveSuccesses = 0;
+      next.deathSaveFailures = 0;
+      changes.push({ label: "Death saves", detail: "Cleared — you are above zero hit points again" });
+    }
     if (dreamWalked) {
       changes.push({
         label: "Dream Exhaustion", detail: "No change — this rest included Dream Walking",
@@ -826,10 +834,17 @@ export function applyDamage(ch, amount, { critical = false } = {}) {
     concentrationDC: concentrationDC(dmg, ch.wounds, ch.injuries?.length ?? ch.injuries),
   };
 }
+// Regaining a hit point from zero clears the death saves — Ephemer follows 5e here (Juan,
+// 2026-10-28). It is a predicate rather than a mutation because nothing in this file touches a
+// character, and it is exported so that every way of coming back — a heal, a hit die, a long rest
+// — asks the same question instead of each deciding for itself.
+export const clearsDeathSaves = (hpBefore, hpAfter) => num(hpBefore) <= 0 && num(hpAfter) > 0;
+
 export function applyHealing(ch, amount) {
   const max = maxHp(ch);
-  const hp = clamp(num(ch.hp) + Math.max(0, num(amount)), 0, max);
-  return { hp, healed: hp - clamp(num(ch.hp), 0, max) };
+  const before = clamp(num(ch.hp), 0, max);
+  const hp = clamp(before + Math.max(0, num(amount)), 0, max);
+  return { hp, healed: hp - before, revived: clearsDeathSaves(before, hp) };
 }
 export function applyTempHp(ch, amount) {
   const next = Math.max(0, num(amount));
@@ -1172,6 +1187,7 @@ export function spendHitDie(ch, die, roll) {
   const hp = clamp(before + regained, 0, maxHp(ch));
   return {
     die: row.die, roll: num(roll), con, regained, healed: hp - before, hp,
+    revived: clearsDeathSaves(before, hp),
     hitDiceUsed: { ...(ch?.hitDiceUsed || {}), [row.die]: row.used + 1 },
     left: row.left - 1,
   };

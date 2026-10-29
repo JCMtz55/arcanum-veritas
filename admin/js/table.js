@@ -92,6 +92,24 @@ function renderTable() {
   return h;
 }
 
+// A portrait where the player chose one, their initials where they did not — never an empty hole,
+// which is the same bargain the sheet makes.
+const initials = n => String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2)
+  .map(w => w[0].toUpperCase()).join("");
+
+// A stored portrait path is a player's data, so it is encoded before it goes inside a url() inside
+// an attribute — one apostrophe in it would otherwise end the url and the attribute early.
+const urlAttr = u => escQ(encodeURI(String(u || "")).replace(/'/g, "%27"));
+
+// Opened by id rather than by passing the path through an inline handler: a number cannot carry a
+// quote, and the card already holds everything the lightbox needs. `portraitArt` is the full plate;
+// a portrait with no full version opens the crop itself rather than nothing.
+function partyArt(id) {
+  const c = PARTY.cards.find(x => x.id === id);
+  if (!c?.portrait) return;
+  lightbox(`../sheet/${c.portraitArt || c.portrait}`, c.name);
+}
+
 function partyCardHtml(c) {
   const max = Math.max(1, c.maxHp);
   const pct = Math.max(0, Math.min(100, Math.round((c.hp / max) * 100)));
@@ -103,6 +121,11 @@ function partyCardHtml(c) {
 
   return `<section class="pty-card${busy}">
     <header class="pty-id">
+      ${c.portrait
+        ? `<button class="pty-por" onclick="partyArt(${c.id})" title="See ${escQ(c.name)}'s plate whole"
+             style="background-image:url('../sheet/${urlAttr(c.portrait)}')"
+             aria-label="See ${escQ(c.name)}'s plate whole"></button>`
+        : `<span class="pty-por" aria-hidden="true">${esc(initials(c.name))}</span>`}
       <b>${esc(c.name)}</b>
       ${c.userId && UI.sec === "table"
         ? `<button class="pty-who as-link" onclick="go('players',${c.userId},'character')"

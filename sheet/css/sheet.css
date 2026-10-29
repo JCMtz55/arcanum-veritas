@@ -115,19 +115,93 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 .pv b{font-size:12px;color:var(--bone)}
 
 /* ── centre: vitals ──────────────────────────────────────────────────── */
-.vitals{display:grid;grid-template-columns:auto minmax(0,1.1fr) minmax(0,2fr);gap:9px;flex:none}
-.hp{--hpc:var(--verdant)}
-.hp.low{--hpc:var(--brass)} .hp.crit{--hpc:var(--ember)} .hp.out{--hpc:var(--mute)}
-.hp-btn{width:100%;height:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  padding:10px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;justify-content:center}
-.hp-btn:hover{border-color:var(--hpc)}
-.hp-n{font-family:var(--sans);font-size:28px;line-height:1;color:var(--hpc)}
+/* The vitals panel takes the larger share now that it carries the Damage and Heal controls as well
+   as the plate and the bars; the seven tiles beside it are 3 columns of numbers and shrink well. */
+.vitals{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1.45fr);gap:9px;flex:none}
+
+/* ── the vitals panel ────────────────────────────────────────────────────
+   Who you are and how you are doing, in one panel (Juan, 2026-10-28). They were two cards side by
+   side, and the portrait is the thing that says WHOSE hit points these are — a plate in its own
+   box beside a number in another box made the reader join them up every time. The health state
+   rides on `--hpc`, which the number, both bars and the Damage button all read. */
+.vital{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px 10px;
+  --hpc:var(--verdant);transition:border-color .15s ease}
+.vital.low{--hpc:var(--brass)} .vital.crit{--hpc:var(--ember)} .vital.out{--hpc:var(--mute)}
+/* A size container, so the Damage and Heal buttons can carry their WORDS when this panel is wide
+   and fall back to their icons when it is not. A viewport query cannot answer that question: the
+   panel's width depends on the rail, the tiles beside it and the character's own name. */
+.vital-b{display:flex;flex-direction:column;gap:6px;min-width:0;justify-content:center;
+  container-type:inline-size}
+
+/* The number is a button in its own right: the dialog behind it still owns temp, crits and the
+   maximum, and the quickest way to those is to click the number they are about. The ⋯ beside it
+   opens the same thing, for anyone who does not expect a number to be a button. */
+.hp-top{display:flex;align-items:center;gap:6px}
+.hp-n{flex:1;min-width:0;text-align:left;padding:0;background:none;border:0;font-family:var(--sans);
+  font-size:28px;line-height:1;color:var(--hpc)}
 .hp-n em{font-style:normal;font-size:15px;color:var(--mute)}
 .hp-n u{text-decoration:none;font-size:14px;color:var(--steel);margin-left:6px}
+.hp-n:hover em,.hp-n:hover u{color:var(--bone2)}
+
+/* ── at zero: the death saves take the number's place ────────────────────
+   A 0 is the one number on this panel that tells you nothing — it is always 0. What the table
+   needs to see is how close this character is to dying, so the pips sit where the number was.
+   It fits the same 28px line, so nothing below it moves when a character goes down. */
+.dsave{flex:1;min-width:0;display:flex;align-items:center;gap:7px;height:28px}
+/* The label shrinks and the pips never do: the DC is also on the Death DC tile an inch away, and
+   the marks are the part of this line nobody can infer from anywhere else. */
+.dsave-k{flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap;padding:0;background:none;
+  border:0;text-align:left;font-family:var(--sans);font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--mute)}
+.dsave-k:hover{color:var(--bone)}
+.dsave.stable .dsave-k{color:var(--verdant);font-size:13px;letter-spacing:.04em}
+.dsave.dead .dsave-k{color:var(--ember);font-size:13px;letter-spacing:.04em}
+.dsave-g{flex:none;display:inline-flex;align-items:center;gap:4px;color:var(--mute)}
+.dsave-g .ic{font-size:8.5px;opacity:.6}
+/* Hollow until it is marked, so three empty circles read as "none yet" rather than "three". */
+.dpip{width:13px;height:13px;flex:none;padding:0;border-radius:50%;background:none;
+  border:1.5px solid var(--line);transition:background .15s ease,border-color .15s ease}
+.dpip.ok:hover{border-color:var(--verdant)}
+.dpip.no:hover{border-color:var(--ember)}
+.dpip.ok.on{background:var(--verdant);border-color:var(--verdant)}
+.dpip.no.on{background:var(--ember);border-color:var(--ember)}
+/* Below this the label goes entirely and the pips take the line — six marks and two signs read
+   perfectly well on their own, and the DC is still on the tile beside them. */
+@container (max-width:175px){ .dsave-k{display:none} }
+
+/* Two bars, not one with a tail: temporary hit points are a separate pool spent first, and drawing
+   them as an extension of your own made a character look healthier than they are. Same maximum
+   underneath both, so the lengths are comparable at a glance. */
+.hp-bars{display:flex;flex-direction:column;gap:3px}
 .hp-bar{display:block;width:100%;height:7px;border-radius:5px;background:#1b2027;overflow:hidden;
   box-shadow:inset 0 0 0 1px var(--line)}
 .hp-bar i{display:block;height:100%;background:var(--hpc);transition:width .22s ease}
-.hp-lbl{font-family:var(--sans);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute)}
+.hp-bar.temp{height:4px}
+.hp-bar.temp i{background:var(--steel)}
+
+/* Damage and healing, in reach. The field sits BETWEEN the two buttons so the number you typed is
+   never further from either of them, and the same typed number serves both. */
+.hp-do{display:flex;align-items:stretch;gap:5px;margin-top:1px}
+.hp-go{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 8px;
+  font-family:var(--sans);font-size:11px;color:var(--bone2);transition:border-color .15s ease,color .15s ease}
+/* Hidden until the panel is wide enough to say them without clipping — see the container above.
+   The icon, the colour and the tooltip carry it on their own at any width.
+   `:not(.ic)` because the icon is a <span> too: hiding every span in here hid the icons with the
+   words, and left two empty boxes. */
+.hp-go span:not(.ic){display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container (min-width:210px){ .hp-go span:not(.ic){display:inline} }
+.hp-go.dmg:hover{border-color:var(--ember);color:var(--ember)}
+.hp-go.heal:hover{border-color:var(--verdant);color:var(--verdant)}
+/* `.hp-do .hp-in` and not `.hp-in`: `.txt` sets `width:100%` and is declared later in this file,
+   so a single class loses the tie and the field eats the row. */
+.hp-do .hp-in{width:54px;flex:none;text-align:center;padding:5px 4px;font-family:var(--sans);
+  font-size:14px;-moz-appearance:textfield}
+.hp-in::-webkit-outer-spin-button,.hp-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.hp-more{flex:none;width:24px;height:22px;background:none;border:1px solid transparent;
+  border-radius:7px;color:var(--mute);font-size:11px;padding:0}
+.hp-more:hover{border-color:var(--line);color:var(--bone)}
 
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 4px;
@@ -315,6 +389,23 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .dlg-b{padding:12px 13px;overflow-y:auto;scrollbar-width:thin}
 .dlg-b>p{margin:0 0 9px;font-size:14px;line-height:1.5}
 .dlg-f{display:flex;align-items:center;gap:7px;padding:10px 13px;border-top:1px solid var(--line)}
+
+/* ── the lightbox ────────────────────────────────────────────────────────
+   The whole painting or nothing: `contain` always, since being able to see all of it is the entire
+   point of opening it. It fills the viewport rather than sitting in a box, so the art has the room.
+   Display is set on `[open]` ONLY, for the same reason `.dlg` does it — see the note above. */
+dialog.lbox{margin:0;border:0;padding:28px;width:100vw;height:100dvh;max-width:100vw;
+  max-height:100dvh;background:none;place-items:center;cursor:zoom-out;overflow:hidden}
+dialog.lbox[open]{display:grid}
+dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
+.lbox img{max-width:min(1100px,94vw);max-height:84dvh;object-fit:contain;border-radius:10px;
+  box-shadow:0 30px 90px rgba(0,0,0,.8)}
+.lbox figcaption{position:absolute;left:0;right:0;bottom:26px;text-align:center;pointer-events:none;
+  font-family:var(--serif);font-style:italic;font-size:15px;color:var(--bone2);
+  text-shadow:0 2px 8px rgba(0,0,0,.95)}
+.lbox-x{position:absolute;top:16px;right:22px;pointer-events:none;font-size:30px;line-height:1;
+  color:var(--mute)}
+@media (max-width:620px){ dialog.lbox{padding:14px} .lbox img{max-height:76dvh} }
 
 .rollout{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-bottom:9px}
 .rolltotal{display:flex;align-items:baseline;gap:7px}
@@ -592,19 +683,36 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 
 /* ── round 3: the portrait on the sheet, conditions up top, the turn's pips ── */
 
-/* The portrait is the first thing on the sheet now, not a 26px chip in the bar. It is a button,
-   because the quickest way to change it should be to click the thing you want changed. */
-.face{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--panel);
-  border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;
-  width:124px;transition:border-color .15s ease}
-.face:hover{border-color:var(--accent,var(--brass))}
-.face .por.xl{width:106px;height:106px;border-radius:9px;font-size:30px;
+/* The portrait is the first thing on the sheet, not a 26px chip in the bar. Clicking the plate
+   opens the painting whole (Juan, 2026-10-28) — the plate is a 106px square crop of art worth
+   looking at, and that is what people reach for first. Changing it is the small control in the
+   corner, which appears on hover or focus, so the common act is a click on the thing itself and
+   the rare one is still one click away. Two buttons, which is why `.vital` is a <div>: a button
+   cannot contain a button.
+   The plate's own box is gone — `.vital` above is the box now, and it holds the health too. */
+/* `line-height:0` because the plate is an inline-flex box: without it the button is 7px taller than
+   the image it holds, and the corner mark anchored to its bottom floats off the picture. */
+/* `align-self:center` so the plate does not stretch to the panel's height: a stretched button is
+   taller than the picture in it, and the corner mark anchored to its bottom floats off the art. */
+.face-p{display:block;align-self:center;padding:0;background:none;border:0;border-radius:9px;
+  position:relative;line-height:0;cursor:zoom-in}
+.vital .por.xl{width:106px;height:106px;border-radius:9px;font-size:30px;
   box-shadow:0 1px 10px rgba(0,0,0,.35)}
-.face-n{display:flex;flex-direction:column;align-items:center;gap:1px;max-width:106px}
-.face-n b{font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--bone);
-  max-width:106px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Both corner marks: present but quiet, and only insistent once you are pointing at the panel. */
+.face-z,.face-edit{position:absolute;display:grid;place-items:center;width:21px;height:21px;
+  border-radius:6px;border:0;background:rgba(14,17,21,.72);color:var(--bone2);font-size:10px;
+  opacity:0;transition:opacity .15s ease,color .15s ease}
+.face-z{right:5px;bottom:5px;pointer-events:none}
+/* Anchored to the PLATE, not the panel, now that the panel is far wider than the picture. */
+.vital .face-edit{top:14px;right:auto;left:92px;padding:0;cursor:pointer}
+.vital:hover .face-z,.vital:hover .face-edit,.vital:focus-within .face-z,.face-edit:focus{opacity:1}
+.face-edit:hover{color:var(--accent,var(--brass))}
+.face-p:focus-visible .face-z{opacity:1}
+.face-n{display:flex;flex-direction:column;gap:1px;min-width:0}
+.face-n b{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--bone);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .face-n em{font-style:normal;font-family:var(--sans);font-size:9px;text-transform:uppercase;
-  letter-spacing:.07em;color:var(--mute);max-width:106px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  letter-spacing:.07em;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Conditions sit with the vitals, so they stay on screen whichever tab is open. One line. */
 .condbar{display:flex;align-items:center;gap:8px;flex:none;background:var(--panel);
@@ -648,12 +756,12 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
   .tab.on .ic{opacity:1}
 }
 @media (max-width:1120px){
-  .face{width:96px}
-  .face .por.xl{width:78px;height:78px;font-size:24px}
-  .face-n,.face-n b,.face-n em{max-width:78px}
+  .vital .por.xl{width:78px;height:78px;font-size:24px}
+  .vital .face-edit{left:64px}
+  .hp-n{font-size:24px}
 }
 @media (max-width:900px){
-  .vitals{grid-template-columns:auto minmax(0,1fr)}
+  .vitals{grid-template-columns:minmax(0,1fr)}
   .vitals .tiles{grid-column:1 / -1}
 }
 
@@ -672,10 +780,12 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 .btn.pri:hover{filter:brightness(1.08)}
 .card.hi{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
 
-/* The portrait wears it permanently — it is the character's own frame, not a hover state. */
-.face{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
-.face:hover{border-color:var(--accent)}
-.face .por{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 1px 10px rgba(0,0,0,.35)}
+/* The vitals panel wears it permanently — it is the character's own frame, not a hover state.
+   The HEALTH state stays on the number and the bars: a panel that turned ember at a quarter hit
+   points would say the same thing three times and take the character's colour away to do it. */
+.vital{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.vital:hover{border-color:var(--accent)}
+.vital .por{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 1px 10px rgba(0,0,0,.35)}
 
 /* Every card heading and zone heading, which is what carries the colour across the whole sheet. */
 .card h3 .ic{color:var(--accent);opacity:.85}
@@ -687,7 +797,7 @@ dialog.dlg::backdrop{background:rgba(10,12,15,.66)}
 
 /* Where a browser cannot do color-mix, the solid accent still reads; only the washes fall back. */
 @supports not (color: color-mix(in srgb, red 50%, blue)){
-  .face{border-color:var(--accent)}
+  .vital{border-color:var(--accent)}
   .zone-h h2{color:var(--accent)}
   .card.hi{background:transparent}
 }

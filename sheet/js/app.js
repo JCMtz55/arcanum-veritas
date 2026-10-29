@@ -7,16 +7,21 @@
 import * as rules from "./rules.js";
 import * as store from "./store.js";
 import { state, derived, mutate } from "./store.js";
-import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, ACTION_COST,
-  toggleHtml, TAB_ORDER } from "./view.js";
+import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, fullArtUrl,
+  portraitOf, ACTION_COST, toggleHtml, TAB_ORDER } from "./view.js";
 import * as compendium from "./compendium.js";
 import * as ephemer from "./ephemer.js";
 import { esc, sign, toast, popAt, closePop, popKey, popContains, dialog, closeDialog,
-  rollCheck, rollDice, rollHtml, parseDice } from "./pop.js";
+  lightbox, rollCheck, rollDice, rollHtml, parseDice } from "./pop.js";
 import { icon } from "./icons.js";
 
 const ch = () => derived();
 const uid = () => Math.random().toString(36).slice(2, 10);
+
+// Regaining a hit point from zero clears the death saves (Juan, 2026-10-28 — Ephemer follows 5e).
+// Every way back writes it through here — a quick heal, the hit point dialog, a hit die and a long
+// rest, which carries it in its own preview — so the ruling is one line, not four.
+const clearDeathSaves = s => { s.deathSaveSuccesses = 0; s.deathSaveFailures = 0; };
 
 // ── boot ────────────────────────────────────────────────────────────────
 store.onChange(renderAll);
@@ -303,6 +308,35 @@ const ACTS = {
   field: () => {},   // handled by the input listener
 
   // ── hit points ──
+  // Damage and healing without opening anything, because they are what happens to this sheet most
+  // and they used to cost a dialog each time. The dialog is still there behind the ⋯ for the rest
+  // of it — temporary hit points, a critical, and the maximum — and the rules are the same calls,
+  // so the two paths cannot drift apart.
+  "hp-quick": el => {
+    const input = document.getElementById("hpQuick");
+    const n = Number(input?.value) || 0;
+    if (!n) return input?.focus();
+    // Emptied and focused BEFORE the redraw, not after: renderCentre carries this field's value and
+    // its focus across every redraw, so what it finds here is what survives. Clearing afterwards
+    // would be undone by the save landing a moment later and redrawing again.
+    input.value = "";
+    input.focus();
+    const cur = ch();
+    if (el.dataset.id === "dmg") {
+      const r = rules.applyDamage(cur, n);
+      mutate(s => { s.hp = r.hp; s.tempHp = r.tempHp; });
+      toast(`${r.absorbed ? `${r.absorbed} absorbed — ` : ""}${r.dealt} damage. Concentration DC ${r.concentrationDC}.`);
+      // A Wound is never applied for you: at most one lands per turn however many triggers fired,
+      // and the DM may rule otherwise. The prompt is the same one the dialog shows.
+      if (r.woundTriggers.length) dialog("Wound trigger", woundPrompt(r.woundTriggers));
+    } else {
+      const r = rules.applyHealing(cur, n);
+      mutate(s => { s.hp = r.hp; if (r.revived) clearDeathSaves(s); });
+      toast(r.healed
+        ? `Healed ${r.healed}.${r.revived ? " Up, and the death saves are cleared." : ""}`
+        : "Already at full hit points.");
+    }
+  },
   hp: el => {
     const c = ch(), max = rules.maxHp(c);
     dialog("Hit points", `<div class="hpdlg">
@@ -345,8 +379,9 @@ const ACTS = {
           ${r.woundTriggers.length ? woundPrompt(r.woundTriggers) : ""}`;
       } else if (b.value === "heal") {
         const r = rules.applyHealing(cur, n);
-        mutate(s => { s.hp = r.hp; });
-        out.innerHTML = `<p class="hint">Healed ${r.healed}.</p>`;
+        mutate(s => { s.hp = r.hp; if (r.revived) clearDeathSaves(s); });
+        out.innerHTML = `<p class="hint">Healed ${r.healed}.${r.revived
+          ? " You are above zero again, so the death saves are cleared." : ""}</p>`;
       } else {
         const r = rules.applyTempHp(cur, n);
         mutate(s => { s.tempHp = r.tempHp; });
@@ -398,7 +433,14 @@ const ACTS = {
         <button class="btn sm" data-act="ds-clear">Clear</button></div>`, { pin: true, key: "ds" });
   },
   ds: el => bump(el.dataset.k, +el.dataset.d, 0, 3),
-  "ds-clear": () => mutate(s => { s.deathSaveSuccesses = 0; s.deathSaveFailures = 0; }),
+  // The pips on the vitals panel: click the third and you have three, click it again and you have
+  // two. A rating, not a counter — at a table you mark a save and occasionally unmark a misclick,
+  // and both should be one press.
+  "ds-set": el => {
+    const k = el.dataset.k, i = Number(el.dataset.i) || 0;
+    mutate(s => { s[k] = (Number(s[k]) || 0) === i ? i - 1 : i; });
+  },
+  "ds-clear": () => mutate(s => clearDeathSaves(s)),
   "roll-death": () => {
     closePop(true);
     const c = ch(), unhealed = c.injuries.filter(i => i && !i.healed).length;
@@ -738,6 +780,15 @@ const ACTS = {
       <p class="hint">The party's plates. A new one is a file dropped into
         <code>sheet/img/portraits/</code> plus a line in <code>PORTRAITS</code>
         in <code>sheet/js/view.js</code>.</p>`, { wide: true });
+  },
+  // Clicking the plate at the head of the sheet opens the painting whole. A plate with no full
+  // version opens the crop itself rather than nothing, and an empty frame opens the picker —
+  // whatever is there, clicking it does the obvious thing.
+  "portrait-art": () => {
+    const c = ch();
+    if (!c.portrait) return ACTS.portrait();
+    const p = portraitOf(c);
+    lightbox(p?.art ? fullArtUrl(p.art) : c.portrait, p?.name || state.current?.name || "");
   },
   "portrait-pick": el => { closeDialog(); mutate(s => { s.portrait = portraitUrl(el.dataset.id); }); },
   "portrait-clear": () => mutate(s => { s.portrait = ""; }),
@@ -1218,7 +1269,7 @@ function spendOneHitDie(die) {
   const r = rollDice(`1d${die}`);
   const out = rules.spendHitDie(ch(), die, Number(r?.total) || 0);
   if (!out) { toast(`No d${die} left to spend.`); return null; }
-  mutate(s => { s.hitDiceUsed = out.hitDiceUsed; s.hp = out.hp; });
+  mutate(s => { s.hitDiceUsed = out.hitDiceUsed; s.hp = out.hp; if (out.revived) clearDeathSaves(s); });
   return out;
 }
 
