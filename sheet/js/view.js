@@ -9,7 +9,7 @@ import * as rules from "./rules.js";
 import * as ephemer from "./ephemer.js";
 import { state, derived, openUnlocks, pendingLevel } from "./store.js";
 import { esc, sign } from "./pop.js";
-import { icon } from "./icons.js";
+import { icon, dieIcon } from "./icons.js";
 
 const $ = id => document.getElementById(id);
 
@@ -128,19 +128,25 @@ function renderLeft() {
   const pb = rules.proficiencyBonus(ch.level);
   const q = (state.skillQuery || "").toLowerCase();
 
+  // Anything granted to every ability check, which the CHECK button carries and the score and the
+  // save do not — a bonus to checks is not a bonus to the ability.
+  const onCheck = rules.abilityCheckContributions(ch);
   const ability = id => {
     const score = rules.abilityScore(ch, id);
-    const mod = rules.abilityModifier(ch, id);
+    const mod = rules.abilityCheckTotal(ch, id);
     const base = ch.abilities[id];
     const buffed = score !== base;
     const dm = id === "dream";
     const name = rules.ABILITY_NAME[id];
     const onScore = buffsOn(ch, `ability:${id}`);
-    const onSave = buffsOn(ch, `save:${id}`);
+    // This save's own effects AND anything granted to all of them, so the mark on the number and
+    // the tooltip under it answer "why is my save +9" whichever way the bonus was written.
+    const onSave = rules.saveContributions(ch, id)
+      .sort((a, b) => Number(b.permanent) - Number(a.permanent));
     return `<div class="ab2 ${dm ? "dream" : ""}${buffed ? " buffed" : ""}">
       <button class="ab2-roll" data-act="roll-ability" data-id="${id}"
-        title="${esc(buffTitle(`Roll a ${name} check`, onScore))}">
-        <i>${esc(name.slice(0, 3))}</i><b>${sign(mod)}</b></button>
+        title="${esc(buffTitle(`Roll a ${name} check`, [...onCheck, ...onScore]))}">
+        <i>${esc(name.slice(0, 3))}</i><b>${sign(mod)}</b>${buffMark(onCheck)}</button>
       <button class="ab2-score" data-act="edit-ability" data-id="${id}"
         title="${esc(buffTitle(dm ? `Dream is your DM's to set — base ${base}`
           : `Set the score, or add an effect — base ${base}`, onScore))}"
@@ -158,7 +164,9 @@ function renderLeft() {
       const multi = s.abilities.length > 1;
       const use = (multi && ch.skillAbility?.[s.id]) || s.abilities[0];
       const dream = s.abilities[0] === "dream";
-      const on = [...buffsOn(ch, `skill:${s.id}`), ...buffsOn(ch, `ability:${use}`)];
+      // This skill, every skill, every check, and the ability it leans on — the four ways a number
+      // in this column can have moved.
+      const on = [...rules.skillContributions(ch, s.id), ...buffsOn(ch, `ability:${use}`)];
       return `<div class="sk ${dream ? "dream" : ""}">
         <button class="sk-prof p${prof}" data-act="cycle-prof" data-id="${s.id}"
           title="${prof === 2 ? "Expertise" : prof === 1 ? "Proficient" : "Not proficient"} — click to change"
@@ -221,8 +229,10 @@ function renderCentre() {
 
   // `target` is optional: give one and the tile carries the mark and the breakdown of whatever is
   // changing that number, so hovering AC answers "why is it 12" without opening anything.
+  // `target` takes a list as readily as one name, because initiative is moved by two different
+  // things — its own effects and anything granted to every ability check, which it is one of.
   const tile = (act, ic, label, value, title, target) => {
-    const on = target ? buffsOn(ch, target) : [];
+    const on = [].concat(target || []).flatMap(t => buffsOn(ch, t));
     return `<button class="tile" data-act="${act}" title="${esc(buffTitle(title, on))}">
       <i>${icon(ic)}${label}</i><b>${value}${buffMark(on)}</b></button>`;
   };
@@ -278,12 +288,15 @@ function renderCentre() {
             <button class="hp-go heal" data-act="hp-quick" data-id="heal" title="Heal that much">
               ${icon("heal")}<span>Heal</span></button>
           </div>
+          ${incomingChip(ch)}
         </div>
         <button class="face-edit" data-act="portrait" title="Change portrait" aria-label="Change portrait">${icon("pickPlate")}</button>
       </div>
       <div class="tiles">
         ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), `Armour Class — base ${ch.ac}`, "ac")}
-        ${tile("roll-init", "initiative", "Init", sign(rules.initiative(ch)), "Roll initiative", "initiative")}
+        ${tile("roll-init", "initiative", "Init", sign(rules.initiative(ch)),
+          "Roll initiative — a Dexterity check, so a bonus to ability checks counts",
+          ["initiative", rules.CHECK_ALL])}
         ${tile("edit-speed", "speed", "Speed", rules.speed(ch), `Speed in feet — base ${ch.speed}`, "speed")}
         ${tile("verum", "saveDC", "Verum DC", rules.verumDC(ch),
           `8 + proficiency ${sign(rules.proficiencyBonus(ch.level))} + highest non-Dream modifier ${sign(rules.verumModifier(ch))} + Dream ${sign(rules.abilityModifier(ch, "dream"))}`,
@@ -299,6 +312,7 @@ function renderCentre() {
     </div>
 
     ${conditionBar(ch)}
+    ${defenceBar(ch)}
 
     <div class="tabs">${Object.entries(TABS).map(([k, label]) =>
       `<button class="tab ${state.view === k ? "on" : ""}" data-act="tab" data-id="${k}"
@@ -351,6 +365,173 @@ function deathSaves(ch, unhealed) {
     <span class="dsave-g" title="Successes — ${ok} of 3">${icon("dsOk")}${pips("deathSaveSuccesses", ok, "ok")}</span>
     <span class="dsave-g" title="Failures — ${no} of 3">${icon("dsNo")}${pips("deathSaveFailures", no, "no")}</span>
   </div>`;
+}
+
+// ── what is hitting you ─────────────────────────────────────────────────
+// The damage field knows how much; this says what KIND, and it is the whole reason the defences can
+// be applied rather than remembered. It appears only for a character who has a defence recorded:
+// for everyone else the type of an incoming hit changes no number on this sheet, and a control that
+// never does anything is a control in the way.
+//
+// It is session state, not the character's — `state.dmgType` — because what is hitting you is not a
+// fact about you, and the next blow is as likely to be something else. It does stick between hits,
+// since a dragon tends to breathe twice.
+function incomingChip(ch) {
+  if (!rules.defenceList(ch).length) return "";
+  const type = state.dmgType || "";
+  const abs = !!state.dmgAbsolute;
+  const d = type ? rules.defence(ch, type) : null;
+  const t = type ? rules.DAMAGE_BY_ID[type] : null;
+  const red = d ? rules.absoluteReduction(ch, d.standing) : 0;
+  // What it will do, in the fewest words that are still true — read before the hit, not after.
+  const says = !t ? "" : !d ? "nothing of yours applies"
+    : d.cancelled ? "cancelled out"
+    : t.irresistible ? "irresistible"
+    : d.standing === "vulnerable" ? "doubled"
+    : abs ? `−${red}`
+    : d.standing === "immune" ? "no damage" : "halved";
+  return `<div class="incoming">
+    <span class="incoming-k">Incoming</span>
+    <button class="chip ${type ? "on" : ""} ${d ? d.standing : ""}" data-act="dmg-type"
+      title="What kind of damage is coming in. Anything typed here meets your defences before it lands — and a seal from Rank IV arrives Absolute, which is the toggle inside.">
+      ${icon("defence")}${type ? esc(rules.damageTypeName(type, abs)) : "Untyped"}${says ? ` · ${esc(says)}` : ""}</button>
+    ${type ? `<button class="x" data-act="dmg-untype" title="Back to untyped" aria-label="Back to untyped">×</button>` : ""}
+  </div>`;
+}
+
+// ── the defences, and what you can see with ─────────────────────────────
+// Each chip says the same thing twice on purpose: what the ordinary type costs you, and what the
+// Absolute form costs you. Those two answers are different numbers under this campaign's ruleset
+// and the table needs both — at level 17 a printed immunity stops being a wall and becomes a toll.
+// One defence, as a chip. Written once and used in the bar, because a defence that read one way
+// above the tabs and another way inside them would be two answers to one question.
+function defenceChips(ch) {
+  return rules.defenceList(ch).map(r => {
+    const st = rules.STANDING_BY_ID[r.standing];
+    const red = rules.absoluteReduction(ch, r.standing);
+    // A defence against something irresistible is kept and shown as doing nothing, rather than
+    // refused when it is typed in: it is still true of the character, and the sheet saying so is
+    // more use at a table than the sheet arguing about it.
+    const dead = !!r.irresistible && r.standing !== "vulnerable";
+    // A record that is cancelled by another one on the same type reads as struck through too: it
+    // is true of the character and worth nothing this moment, which is the same thing to say.
+    const net = rules.defence(ch, r.type);
+    const moot = !dead && net.cancelled;
+    // NOTATION, not prose (Juan, 2026-10-29: four of them took too much room). "halved · Infernal
+    // −4" is 150px of a bar that has to hold five; `½ · −4` is 80 and says the same two things —
+    // what the ordinary form costs you, and what the Absolute one does. The words are all still
+    // there on the tooltip, which is where a number that needs explaining belongs.
+    //
+    // The standing's own glyph went with them: the symbol IS the standing now, so ½, 0 and ×2 tell
+    // the three apart without the colour and without an icon ahead of the name.
+    const says = dead ? "—"
+      : r.standing === "vulnerable" ? "×2"
+      : `${r.standing === "immune" ? "0" : "½"} · −${red}`;
+    // What a screen reader gets, since the chip's own text is now symbols.
+    const spoken = dead ? `${r.name} — ${st.name}, no effect`
+      : r.standing === "vulnerable" ? `${r.name} — vulnerable, doubled`
+      : `${r.name} — ${st.name}, ${st.ordinary}, ${red} off Absolute damage`;
+    const title = [
+      `${r.name} → ${r.absolute}${r.born ? " (born Absolute)" : ""} — ${st.name}`,
+      r.rounds == null ? "Lasting — it is simply true of you."
+        : `${r.rounds} round${r.rounds === 1 ? "" : "s"} left, counting down when you confirm a round.`,
+      dead ? `${r.name} is irresistible. Nothing resists, reduces or absorbs it, so this never applies.`
+        : `Ordinary ${r.name.toLowerCase()}: ${st.ordinary}.`,
+      dead || r.standing === "vulnerable" ? "" : `${r.absolute}: ${red} off the roll, never below 0.`,
+      moot ? `Cancelled while your other ${r.name.toLowerCase()} record stands — a resistance and a vulnerability cancel.` : "",
+      r.why ? `Source: ${r.why}` : "No source recorded — click to add one.",
+      r.note || "",
+    ].filter(Boolean).join("\n");
+    return `<button class="dfn ${r.standing}${dead || moot ? " dead" : ""}" data-act="def-open" data-id="${esc(r.id)}"
+      title="${esc(title)}" aria-label="${esc(spoken)}">
+      <b>${esc(r.name)}</b><em aria-hidden="true">${esc(says)}</em>
+      ${r.rounds == null ? "" : `<span class="dfn-r">${icon("timed")}${r.rounds}r</span>`}</button>`;
+  }).join("");
+}
+
+// Defences ride beside the conditions, above the tabs (Juan, 2026-10-29) — and for the same reason
+// conditions do: **what the world's harm is worth against you is read as often as what you are
+// suffering from**, and neither should disappear the moment somebody opens their spells. It is the
+// bar's own idiom throughout: one line, chips that scroll sideways rather than wrapping the layout
+// taller, and an Add at the end.
+//
+// A type whose records cancel gets one chip of its own at the end rather than a line under them —
+// the bar has no room for a paragraph, and "why did that not halve" still has to be answerable
+// without opening anything.
+function defenceBar(ch) {
+  const chips = defenceChips(ch);
+  const cancelled = rules.defenceTypes(ch).filter(t => t.cancelled);
+  const net = cancelled.map(t => `<button class="chip warn" data-act="def-open" data-id="${esc(
+    (rules.defenceList(ch).find(r => r.type === t.id) || {}).id || "")}"
+    title="${esc(`${t.name}: a resistance and a vulnerability on one type cancel, so ${
+      t.name.toLowerCase()} damage lands whole.`)}">${icon("vulnerable")}${esc(t.name)} cancels</button>`).join("");
+
+  return `<div class="condbar dfnbar${chips ? " live" : ""}">
+    <span class="condbar-k" title="What the world's harm is worth against you. Typed damage is mitigated as it lands — pick the kind beside the damage field.">
+      ${icon("defence")}Defences</span>
+    <div class="chips">
+      ${chips || `<span class="hint">Nothing recorded — damage lands whole</span>`}
+      ${net}
+    </div>
+    <button class="btn sm" data-act="def-add" title="Resistance, immunity or vulnerability to a damage type — lasting, or for a few rounds">Add</button>
+  </div>`;
+}
+
+// What is left of CS-032 once the defences moved up to their own bar. Senses are read far less
+// often than a resistance is and never change mid-fight, so they stay inside the tab — one row,
+// with Ephemer's own sense derived rather than recorded.
+function sensesCard(ch) {
+  const senses = rules.senseList(ch).map((s, i) =>
+    `<button class="chip on" data-act="sense-open" data-id="${i}"
+      title="${esc(s.why ? `${s.name} — ${s.why}` : `${s.name} — click to change or remove`)}">
+      ${esc(s.name)}${s.range ? ` ${s.range} ft` : ""}</button>`).join("");
+
+  return `<section class="card">
+    <h3>${icon("senses")} Senses <span class="r">
+      <button class="btn sm" data-act="sense-add" title="Darkvision, Blindsight, Truesight…">Add</button></span></h3>
+    <div class="chips">${senses || `<span class="hint">Sight only.</span>`}
+      <button class="chip" data-act="cog-sense"
+        title="Ephemer's own sense, derived rather than recorded: Dream 18 or better grants a second use.">
+        Cognitive Sense ×${rules.cognitiveSenseUses(ch)}</button></div>
+    ${rules.defenceList(ch).length ? `<p class="hint">Your <b>defences</b> are in the bar above the
+      tabs, where they stay whichever tab you are on. From Rank IV a seal arrives <b>Absolute</b>:
+      resistance stops halving and starts subtracting ${rules.absoluteReduction(ch, "resistant")},
+      immunity ${rules.absoluteReduction(ch, "immune")}.</p>` : ""}
+  </section>`;
+}
+
+// ── Inspiration ─────────────────────────────────────────────────────────
+// Six dice, each its own button: press one to take a die of that kind or to spend one you hold.
+// The count rides on the die itself, and an hourglass appears the moment any of them is on a clock,
+// because a d6 that expires in two rounds and a d6 that waits forever are not the same die — the
+// same distinction the buffed numbers make everywhere else on this sheet.
+function inspirationCard(ch) {
+  const held = rules.inspirationHeld(ch);
+  const dice = rules.INSPIRATION_DICE.map(die => {
+    const mine = rules.inspirationOf(ch, die);
+    const timed = mine.filter(d => d.rounds != null);
+    const title = mine.length
+      ? `${mine.length} ${die}${mine.length === 1 ? "" : "s"} — ${mine.map(d =>
+          `${d.why || "unnamed"}${d.rounds == null ? " (until used)" : ` (${d.rounds}r)`}`).join(", ")}`
+      : `No ${die}. Click to take one.`;
+    return `<button class="insp ${mine.length ? "have" : ""}" data-act="insp" data-id="${die}"
+      title="${esc(title)}" aria-label="${die}${mine.length ? `, ${mine.length} held` : ""}">
+      ${dieIcon(die)}
+      ${mine.length ? `<u>${mine.length}</u>` : ""}
+      ${timed.length ? `<span class="bmark timed" aria-hidden="true">${icon("timed")}</span>` : ""}
+    </button>`;
+  }).join("");
+
+  return `<section class="card insp-card">
+    <h3>${icon("inspiration")} Inspiration ${held.length ? `<span class="r"><b class="fate-n">${held.length}</b></span>` : ""}</h3>
+    <div class="insps">${dice}</div>
+    ${held.length ? `<div class="chips">` + held.map(d => `
+      <button class="chip on" data-act="insp-open" data-id="${esc(d.id)}"
+        title="${esc(`${d.die}${d.why ? ` — ${d.why}` : ""} · ${d.rounds == null ? "until used" : `${d.rounds} round${d.rounds === 1 ? "" : "s"} left`}`)}">
+        ${esc(d.die)}${d.why ? ` ${esc(d.why)}` : ""}${d.rounds == null ? "" : ` · ${d.rounds}r`}</button>`).join("") + `</div>`
+      : `<p class="hint">A die someone handed you — Bless, a Bard's note, a DM's nod. Press one to
+         take it <b>until used</b> or for a few rounds, and press it again to spend it.</p>`}
+  </section>`;
 }
 
 // Conditions belong with the vitals rather than inside the Combat tab: what you are suffering from
@@ -456,6 +637,8 @@ function combatPanel(ch) {
       <h3>${icon("attack")} Attacks <span class="r"><button class="btn sm" data-act="atk-add">Add</button></span></h3>
       <div class="atks">${attacks}</div>
     </section>
+
+    ${sensesCard(ch)}
 
     <section class="card">
       <h3>${icon("action")} Actions <span class="r">
@@ -1233,6 +1416,9 @@ function renderRight() {
   const all = rules.activeModifiers(ch).filter(m => m && m.active !== false);
   const active = all.filter(m => m.rounds != null);
   const lasting = all.length - active.length;
+  // A borrowed resistance runs on this clock too, so it belongs in the one place that answers
+  // "what runs out this round" — Absorb Elements is not a different kind of thing from Bless.
+  const timedDefences = rules.defenceList(ch).filter(r => r.rounds != null);
 
   const step = (act, ic, label, value, max, title) => `
     <span class="trk" title="${esc(title)}"><i>${icon(ic)}${label}</i>
@@ -1250,12 +1436,20 @@ function renderRight() {
         <button class="btn pri" data-act="next-round">Next round</button>
         <button class="btn sm" data-act="end-combat">End combat</button>
       </div>
-      ${active.length ? `<div class="mods">` + active.map(m => `
+      ${active.length || timedDefences.length ? `<div class="mods">` + active.map(m => `
         <div class="mod">
           <span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
           <span class="mod-w" title="${esc(m.reason)}">${esc(m.reason)}</span>
           <span class="mod-r">${icon("timed")}${m.rounds}r</span>
-          <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button></div>`).join("") + `</div>`
+          <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button></div>`).join("")
+        + timedDefences.map(r => `
+        <div class="mod dfn-mod ${r.standing}">
+          <span class="mod-n">${icon(r.standing)} ${esc(r.name)}</span>
+          <span class="mod-w" title="${esc(r.why || rules.STANDING_BY_ID[r.standing].name)}">${
+            esc(r.why || rules.STANDING_BY_ID[r.standing].name.toLowerCase())}</span>
+          <span class="mod-r">${icon("timed")}${r.rounds}r</span>
+          <button class="x" data-act="def-del" data-id="${esc(r.id)}" aria-label="Remove">×</button></div>`).join("")
+        + `</div>`
         : `<p class="hint">Nothing running. A timed effect counts down when you confirm a round.</p>`}
       ${lasting ? `<button class="lastlink" data-act="tab" data-id="character"
         title="They do not expire, so they do not belong beside a countdown">
@@ -1308,6 +1502,8 @@ function renderRight() {
         gets it as a penalty, and a tie is nothing.</p>
     </section>
 
+    ${inspirationCard(ch)}
+
     <section class="card fate">
       <h3>${icon("fate")} Fate <span class="r"><b class="fate-n">${c.fate}</b></span></h3>
       <button class="btn sm" data-act="emphasis" ${c.fate > 0 ? "" : "disabled"}>Roll with Emphasis</button>
@@ -1347,18 +1543,26 @@ export function targetLabel(target) {
   if (!target) return "";
   const [kind, id] = String(target).split(":");
   if (kind === "ability") return rules.ABILITY_NAME[id] || id;
-  if (kind === "save") return `${rules.ABILITY_NAME[id] || id} save`;
-  if (kind === "skill") return rules.SKILL_BY_ID[id]?.name || id;
+  if (kind === "save") return id === "all" ? "all saves" : `${rules.ABILITY_NAME[id] || id} save`;
+  if (kind === "check") return "all checks";
+  if (kind === "skill") return id === "all" ? "all skills" : (rules.SKILL_BY_ID[id]?.name || id);
   return { ac: "AC", speed: "Speed", initiative: "Initiative", maxHp: "Max HP",
            attack: "Attack", damage: "Damage", saveDc: "Save DC" }[kind] || kind;
 }
 
+// The three blankets come before the lists they stand in front of, because they are what a spell or
+// an item nearly always grants: Bless and an aura give saves, Guidance gives a check, a cloak gives
+// every save at once. The one-at-a-time entries are for the rarer, more specific thing.
 export const MOD_TARGETS = [
+  { value: rules.CHECK_ALL, label: "All ability checks" },
   ...rules.ABILITIES.map(id => ({ value: `ability:${id}`, label: rules.ABILITY_NAME[id] })),
   { value: "ac", label: "AC" }, { value: "speed", label: "Speed" },
   { value: "initiative", label: "Initiative" }, { value: "maxHp", label: "Maximum HP" },
   { value: "attack", label: "Attack rolls" }, { value: "damage", label: "Damage" },
   { value: "saveDc", label: "Your save DCs" },
+  // First of the saves, because it is the one most things actually grant — Bless, an aura, a cloak.
+  { value: rules.SAVE_ALL, label: "All saving throws" },
   ...rules.ABILITIES.map(id => ({ value: `save:${id}`, label: `${rules.ABILITY_NAME[id]} save` })),
+  { value: rules.SKILL_ALL, label: "All skills" },
   ...rules.SKILLS.map(s => ({ value: `skill:${s.id}`, label: s.name })),
 ];

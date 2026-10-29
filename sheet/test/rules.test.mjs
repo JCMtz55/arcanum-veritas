@@ -1312,3 +1312,292 @@ test("casting spends the slot you choose, which is all upcasting is", () => {
     ["8d6", "1d4"]);
   assert.deepEqual(R.diceInText(""), []);
 });
+
+// ── A bonus to every saving throw at once ───────────────────────────────
+// Bless, a Paladin's aura, a Cloak of Protection: almost every save bonus in play is "+X to saving
+// throws", not "+X to your Dexterity save", and an item can only say it this way (Juan, 2026-10-29).
+test("a save bonus can be written once and reach all seven", () => {
+  const base = pc({ level: 9, abilities: { dex: 16, wis: 14 }, saves: { dex: true } });
+  assert.equal(R.saveTotal(base, "dex"), 7, "+3 Dexterity, +4 proficiency");
+  assert.equal(R.saveTotal(base, "wis"), 2, "no proficiency there");
+
+  const blessed = { ...base, modifiers: [
+    { id: "m1", target: R.SAVE_ALL, amount: 2, reason: "Aura of Protection", rounds: null, active: true },
+    { id: "m2", target: "save:dex", amount: 1, reason: "a ring", rounds: 10, active: true },
+  ] };
+  assert.equal(R.saveTotal(blessed, "dex"), 10, "both the blanket and the one");
+  assert.equal(R.saveTotal(blessed, "wis"), 4, "the blanket alone");
+  assert.equal(R.saveTotal(blessed, "dream"), 2, "and Dream is a save like the others");
+
+  // The one save first, then the blanket — the order the number, its tooltip and the roll's
+  // breakdown all read, because they ask the same function.
+  assert.deepEqual(R.saveContributions(blessed, "dex").map(c => [c.reason, c.amount]),
+    [["a ring", 1], ["Aura of Protection", 2]]);
+  assert.deepEqual(R.saveContributions(blessed, "wis").map(c => c.reason), ["Aura of Protection"]);
+
+  // It expires like anything else with rounds on it, and nothing else does.
+  const { list } = R.tickTimed(blessed.modifiers, 1);
+  assert.equal(list.find(m => m.id === "m1").rounds, null);
+  assert.equal(list.find(m => m.id === "m2").rounds, 9);
+
+  // An ITEM can say it too, which is the half that was impossible before: equipping a cloak moves
+  // every save, and the breakdown carries the cloak's own name.
+  const cloaked = pc({ level: 9, abilities: { dex: 16 }, saves: { dex: true },
+    equipment: { back: { name: "Cloak of Protection", equipped: true,
+      effects: [{ target: R.SAVE_ALL, amount: 1 }] } } });
+  assert.equal(R.saveTotal(cloaked, "dex"), 8);
+  assert.equal(R.saveTotal(cloaked, "cha"), 1);
+  assert.equal(R.saveContributions(cloaked, "cha")[0].reason, "Cloak of Protection");
+});
+
+// ── A bonus to every check, and to every skill ──────────────────────────
+// The same gap on the other side of the sheet, and the distinction 5e makes: a SKILL check is an
+// ABILITY check, so `check:all` reaches the skills and `skill:all` stops at them.
+test("a check bonus reaches the skills; a skill bonus does not reach the checks", () => {
+  const base = pc({ level: 9, abilities: { dex: 16, int: 14 }, skills: { stealth: 1, arcana: 2 } });
+  assert.equal(R.abilityCheckTotal(base, "dex"), 3);
+  assert.equal(R.skillTotal(base, "stealth"), 7, "+3 Dexterity, +4 proficiency");
+  assert.equal(R.skillTotal(base, "arcana"), 10, "+2 Intelligence, +8 expertise");
+
+  const guided = { ...base, modifiers: [
+    { id: "m1", target: R.CHECK_ALL, amount: 2, reason: "Guidance", rounds: 10, active: true },
+    { id: "m2", target: R.SKILL_ALL, amount: 1, reason: "Gloves", rounds: null, active: true },
+    { id: "m3", target: "skill:stealth", amount: 3, reason: "a cloak", rounds: null, active: true },
+  ] };
+  assert.equal(R.abilityCheckTotal(guided, "dex"), 5, "the check blanket only");
+  assert.equal(R.skillTotal(guided, "stealth"), 13, "7 + 3 + 1 + 2");
+  assert.equal(R.skillTotal(guided, "arcana"), 13, "10 + 1 + 2");
+  assert.equal(R.passiveScore(guided, "perception"), 13, "a passive is 10 + the skill");
+
+  // What it must NOT reach: the saves, the spell DCs, the attack bonus and the ability score.
+  assert.equal(R.saveTotal(guided, "dex"), 3, "a check bonus is not a save bonus");
+  assert.equal(R.abilityScore(guided, "dex"), 16);
+  assert.equal(R.abilityModifier(guided, "dex"), 3);
+  assert.equal(R.verumDC(guided), 8 + 4 + 3 + 0);
+
+  // Initiative IS a Dexterity check, so it does take the check blanket.
+  assert.equal(R.initiative(guided), 5);
+  assert.equal(R.initiative(base), 3);
+
+  // The order the number, the tooltip and the roll all read: this skill, every skill, every check.
+  assert.deepEqual(R.skillContributions(guided, "stealth").map(c => [c.reason, c.amount]),
+    [["a cloak", 3], ["Gloves", 1], ["Guidance", 2]]);
+  assert.deepEqual(R.abilityCheckContributions(guided).map(c => c.reason), ["Guidance"]);
+
+  // And Guidance runs out like anything else with rounds on it.
+  const { list, ended } = R.tickTimed(guided.modifiers, 1);
+  assert.equal(list.find(m => m.id === "m1").rounds, 9);
+  assert.deepEqual(ended, []);
+  assert.equal(R.skillTotal({ ...guided, modifiers: list.map(m => m.id === "m1" ? { ...m, active: false } : m) },
+    "arcana"), 11, "once Guidance is gone, the gloves alone");
+});
+
+// ── Defences and the Absolute ───────────────────────────────────────────
+// Transcribed from Homebrew/Rulesets/Absolute Damage.md, which is the owning note: resistance
+// halves ordinary damage and SUBTRACTS 2 x the defender's proficiency bonus from Absolute damage;
+// immunity negates the ordinary and subtracts 4 x PB; vulnerability doubles either; Void and
+// All-Mighty are born Absolute and irresistible.
+const resistant = (type, over = {}) => pc({ level: 9, defences: { [type]: { standing: "resistant", why: "test" } }, ...over });
+
+test("the sixteen types each carry their Absolute name", () => {
+  assert.equal(R.DAMAGE_TYPES.length, 16);
+  assert.equal(R.damageTypeName("fire"), "Fire");
+  assert.equal(R.damageTypeName("fire", true), "Infernal");
+  assert.equal(R.damageTypeName("slashing", true), "Vorpal");
+  // Born Absolute: there is no gentler name to fall back to, with or without the flag.
+  assert.equal(R.damageTypeName("void"), "Void");
+  assert.equal(R.damageTypeName("all-mighty", false), "All-Mighty");
+  assert.equal(R.damageTypeName("nonsense", true), "");
+});
+
+test("ordinary damage: resistance halves, immunity negates, vulnerability doubles", () => {
+  assert.equal(R.mitigate(resistant("fire"), 21, { type: "fire" }).dealt, 10, "halving rounds down");
+  assert.equal(R.mitigate(resistant("fire"), 21, { type: "cold" }).dealt, 21, "another type is untouched");
+  assert.equal(R.mitigate(resistant("fire"), 21, {}).dealt, 21, "no type named, nothing applied");
+
+  const immune = pc({ level: 9, defences: { poison: { standing: "immune" } } });
+  assert.equal(R.mitigate(immune, 30, { type: "poison" }).dealt, 0);
+  assert.equal(R.mitigate(immune, 30, { type: "poison" }).applied, "negated");
+
+  const weak = pc({ level: 9, defences: { radiant: { standing: "vulnerable" } } });
+  assert.equal(R.mitigate(weak, 12, { type: "radiant" }).dealt, 24);
+});
+
+test("Absolute damage: resistance subtracts 2 x PB, immunity 4 x PB, never below zero", () => {
+  // The worked example from the note, at a defender with proficiency +4: a 70-point seal against
+  // fire resistance deals 35 at Rank III and 62 at Rank IV.
+  const fiend = resistant("fire");
+  assert.equal(R.proficiencyBonus(fiend.level), 4);
+  assert.equal(R.mitigate(fiend, 70, { type: "fire" }).dealt, 35);
+  const abs = R.mitigate(fiend, 70, { type: "fire", absolute: true });
+  assert.equal(abs.dealt, 62);
+  assert.equal(abs.by, 8);
+  assert.equal(abs.name, "Infernal");
+  assert.equal(abs.applied, "reduced");
+
+  // It scales with the DEFENDER, not the attack: the same resistance at level 17 takes 12 off.
+  assert.equal(R.absoluteReduction(pc({ level: 17 }), "resistant"), 12);
+  assert.equal(R.absoluteReduction(pc({ level: 17 }), "immune"), 24);
+  assert.equal(R.absoluteReduction(pc({ level: 9 }), "vulnerable"), 0);
+
+  // Immunity stops negating and starts subtracting — and never goes below zero.
+  const immune = pc({ level: 9, defences: { necrotic: { standing: "immune" } } });
+  assert.equal(R.mitigate(immune, 30, { type: "necrotic", absolute: true }).dealt, 14);
+  assert.equal(R.mitigate(immune, 10, { type: "necrotic", absolute: true }).dealt, 0);
+
+  // Vulnerability was never a defence, so the Absolute rules leave it exactly as it was.
+  const weak = pc({ level: 9, defences: { cold: { standing: "vulnerable" } } });
+  assert.equal(R.mitigate(weak, 12, { type: "cold", absolute: true }).dealt, 24);
+});
+
+test("Void and All-Mighty are irresistible, and a defence against them is kept and worth nothing", () => {
+  const warded = pc({ level: 17, defences: {
+    void: { standing: "immune", why: "a god's own ward" },
+    "all-mighty": { standing: "resistant" },
+  } });
+  const v = R.mitigate(warded, 40, { type: "void" });
+  assert.equal(v.dealt, 40, "nothing resists, reduces or absorbs it");
+  assert.equal(v.absolute, true, "born Absolute without being told");
+  assert.equal(v.applied, "irresistible");
+  assert.equal(R.mitigate(warded, 40, { type: "all-mighty" }).dealt, 40);
+  // The record survives, because it is still true of the character — the sheet says it does
+  // nothing rather than refusing to hold it.
+  assert.equal(R.defence(warded, "void").standing, "immune");
+  assert.equal(R.defenceList(warded).length, 2);
+
+  // "Ignores resistance": the halving before Rank IV, the reduction after it.
+  const fiend = resistant("fire");
+  assert.equal(R.mitigate(fiend, 70, { type: "fire", ignoresResistance: true }).dealt, 70);
+  assert.equal(R.mitigate(fiend, 70, { type: "fire", absolute: true, ignoresResistance: true }).dealt, 70);
+});
+
+test("a defence is tolerant of how it was written, and strict about what it means", () => {
+  // A bare string is a standing, and a map keyed by type is a sheet saved before a defence could
+  // run out — both are still read, and both come back as lasting records.
+  const terse = pc({ defences: { fire: "resistant" } });
+  assert.equal(R.defence(terse, "fire").standing, "resistant");
+  assert.equal(R.defence(terse, "fire").rounds, null);
+  assert.equal(R.defence(terse, "FIRE").standing, "resistant", "the type id is case-insensitive");
+  assert.deepEqual(R.defenceRecords(pc({ defences: { cold: { standing: "immune", why: "a ward" } } })),
+    [{ id: "d:cold", type: "cold", standing: "immune", why: "a ward", rounds: null, active: true }]);
+  // Anything that is not one of the three standings is not a defence.
+  assert.equal(R.defence(pc({ defences: { fire: { standing: "immunish" } } }), "fire"), null);
+  assert.equal(R.defence(pc({ defences: [{ id: "x", type: "nonsense", standing: "immune" }] }), "nonsense"), null);
+  assert.equal(R.defence(pc(), "fire"), null);
+  assert.deepEqual(R.defenceList(pc()), []);
+});
+
+// ── A defence that runs out ─────────────────────────────────────────────
+// Absorb Elements, a Rage, a potion, a Grimm's gift: a resistance can be borrowed for a few rounds,
+// and it lands ON TOP of what the character already is. So defences are records on the same clock
+// as every other timed thing, and more than one can touch the same damage type.
+test("a borrowed defence counts down, and several on one type resolve to one answer", () => {
+  const ch = pc({ level: 9, defences: [
+    { id: "a", type: "fire", standing: "resistant", why: "Tiefling", rounds: null, active: true },
+    { id: "b", type: "fire", standing: "resistant", why: "Absorb Elements", rounds: 1, active: true },
+    { id: "c", type: "cold", standing: "immune", why: "a potion", rounds: 10, active: true },
+    { id: "d", type: "radiant", standing: "vulnerable", why: "a curse", rounds: null, active: true },
+    { id: "e", type: "radiant", standing: "resistant", why: "a ward", rounds: 3, active: true },
+  ] });
+
+  // Multiple instances of one standing count as one — three sources of fire resistance is still half.
+  assert.equal(R.defence(ch, "fire").standing, "resistant");
+  assert.equal(R.mitigate(ch, 21, { type: "fire" }).dealt, 10);
+  // The chip shows the shortest fuse among the records that decided it, because when THAT runs out
+  // the answer may change — here it does not, since the Tiefling's own resistance is lasting.
+  assert.equal(R.defence(ch, "fire").rounds, 1);
+  assert.equal(R.defence(ch, "fire").temporary, false, "one of the two is simply true of them");
+  assert.equal(R.defence(ch, "cold").temporary, true);
+
+  // A resistance and a vulnerability on one type cancel: the damage lands whole, and the sheet says
+  // which it was rather than quietly doing nothing.
+  const rad = R.defence(ch, "radiant");
+  assert.equal(rad.standing, "none");
+  assert.equal(rad.cancelled, true);
+  const m = R.mitigate(ch, 12, { type: "radiant" });
+  assert.equal(m.dealt, 12);
+  assert.equal(m.applied, "cancelled");
+  assert.match(R.mitigationLine(m), /cancel/);
+
+  // Immunity beats both, however they were written.
+  const warded = pc({ defences: [
+    { id: "a", type: "fire", standing: "vulnerable", active: true },
+    { id: "b", type: "fire", standing: "resistant", active: true },
+    { id: "c", type: "fire", standing: "immune", rounds: 2, active: true },
+  ] });
+  assert.equal(R.defence(warded, "fire").standing, "immune");
+  assert.equal(R.mitigate(warded, 30, { type: "fire" }).dealt, 0);
+
+  // One confirmed round: Absorb Elements ends, the potion counts down, the Tiefling is unchanged —
+  // the same tick the modifiers, the actions, the grants and the Inspiration dice run on.
+  const { list, ended } = R.tickTimed(R.defenceRecords(ch), 1);
+  assert.deepEqual(ended.map(r => r.id), ["b"]);
+  assert.equal(list.find(r => r.id === "c").rounds, 9);
+  assert.equal(list.find(r => r.id === "a").rounds, null);
+
+  // And once it has gone, the character is still resistant — which is the whole reason these are
+  // records rather than one standing per type.
+  const after = pc({ level: 9, defences: list.filter(r => r.active !== false) });
+  assert.equal(R.defence(after, "fire").standing, "resistant");
+  assert.equal(R.defence(after, "fire").rounds, null);
+  assert.equal(R.defenceRecords(after).length, 4);
+
+  // The types a picker offers: one row per type, each carrying its resolved answer.
+  // In the order the sixteen are written, not the order they were added.
+  assert.deepEqual(R.defenceTypes(ch).map(t => [t.id, t.standing]),
+    [["cold", "immune"], ["fire", "resistant"], ["radiant", "none"]]);
+});
+
+test("typed damage meets the defences before hit points, temporary ones included", () => {
+  const ch = resistant("fire", { hp: 94, maxHp: 94, tempHp: 10 });
+  // 50 fire against resistance is 25 landing: the temporary pool absorbs 10 of THAT, and the
+  // half-maximum Wound trigger reads what landed rather than what was rolled.
+  const r = R.applyDamage(ch, 50, { type: "fire" });
+  assert.equal(r.mitigation.dealt, 25);
+  assert.equal(r.absorbed, 10);
+  assert.equal(r.hp, 79);
+  assert.equal(r.tempHp, 0);
+  assert.deepEqual(r.woundTriggers, [], "25 is not half of 94");
+  assert.equal(r.concentrationDC, 12, "10 or half the damage that landed");
+
+  // Untyped, the same blow is the whole 50 — which fires the trigger it always did.
+  const raw = R.applyDamage(ch, 50);
+  assert.equal(raw.hp, 54);
+  assert.deepEqual(raw.woundTriggers, ["halfMaxHp"]);
+  assert.equal(raw.mitigation.applied, "none");
+
+  // Immunity to the ordinary form means a hit that changes nothing at all.
+  const immune = pc({ hp: 40, maxHp: 40, defences: { poison: { standing: "immune" } } });
+  assert.equal(R.applyDamage(immune, 18, { type: "poison" }).hp, 40);
+
+  // And the line the table reads afterwards names the form, not the type.
+  assert.match(R.mitigationLine(R.mitigate(resistant("fire"), 70, { type: "fire", absolute: true })),
+    /Infernal/);
+  assert.equal(R.mitigationLine(R.mitigate(pc(), 10, {})), "", "nothing to say about untyped damage");
+});
+
+// ── Inspiration ─────────────────────────────────────────────────────────
+// A pool of dice rather than one token: a d4 of Bless, a Bard's d8 and a DM's "have a d6" are the
+// same act at this table. Each die is the same shape as a modifier, so it keeps the same clock.
+test("inspiration is a pool, and the die about to run out is spent first", () => {
+  const ch = pc({ inspiration: [
+    { id: "a", die: "d6", rounds: null, why: "a DM's nod", active: true },
+    { id: "b", die: "d6", rounds: 3, why: "Bless", active: true },
+    { id: "c", die: "d6", rounds: 1, why: "Guidance", active: true },
+    { id: "d", die: "d8", rounds: null, why: "Bardic Inspiration", active: true },
+    { id: "e", die: "d4", rounds: 2, active: false },
+  ] });
+  assert.equal(R.inspirationHeld(ch).length, 4, "an inactive die is not held");
+  assert.equal(R.inspirationOf(ch, "d6").length, 3);
+  assert.equal(R.inspirationNext(ch, "d6").id, "c", "the shortest fuse goes first");
+  assert.equal(R.inspirationNext(ch, "d8").id, "d", "until used, when that is all there is");
+  assert.equal(R.inspirationNext(ch, "d12"), null);
+  assert.deepEqual(R.INSPIRATION_DICE, ["d4", "d6", "d8", "d10", "d12", "d20"]);
+
+  // One confirmed round: Guidance ends, Bless counts down, the DM's nod is untouched.
+  const { list, ended } = R.tickTimed(ch.inspiration, 1);
+  assert.deepEqual(ended.map(d => d.id), ["c"]);
+  assert.equal(list.find(d => d.id === "b").rounds, 2);
+  assert.equal(list.find(d => d.id === "a").rounds, null);
+  assert.equal(R.inspirationHeld({ inspiration: list }).length, 3);
+});

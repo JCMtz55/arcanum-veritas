@@ -77,7 +77,8 @@ export const profContribution = (pb, prof) => num(pb) * Math.min(2, Math.max(0, 
 // removing one restores the original without remembering what it was.
 //
 // `target` is "ac" | "speed" | "initiative" | "maxHp" | "attack" | "damage" | "saveDc"
-//   | "ability:<id>" | "save:<id>" | "skill:<id>".
+//   | "ability:<id>" | "save:<id>" | "save:all" | "skill:<id>".
+// "save:all" is every saving throw at once — see saveTotal.
 // `rounds` null means permanent. `active: false` is an expired or suspended record kept for history,
 // which is why expiry blanks a modifier in place rather than deleting it.
 export function modifierTotal(modifiers, target) {
@@ -150,26 +151,69 @@ export function abilityModifier(ch, id) {
   return abilityMod(abilityScore(ch, id));
 }
 
+// The two blankets on the other side of the sheet from `save:all`, and the distinction between them
+// is the one 5e makes: **a skill check IS an ability check**, so anything granted to every ability
+// check reaches the skills as well, while `skill:all` stops at the skills. Guidance and Enhance
+// Ability are the first; a pair of Gloves of Thievery is the second (Juan, 2026-10-29).
+export const CHECK_ALL = "check:all";
+export const SKILL_ALL = "skill:all";
+
+// An ability CHECK, which is not the same number as the ability modifier — and the reason this is
+// its own function rather than something added inside `abilityModifier`: that one feeds the saves,
+// the spell DCs, the attack bonuses and the hit dice, and a bonus to checks must reach none of them.
+export function abilityCheckTotal(ch, id) {
+  return abilityModifier(ch, id) + modifierTotal(activeModifiers(ch), CHECK_ALL);
+}
+export const abilityCheckContributions = ch => contributions(activeModifiers(ch), CHECK_ALL);
+
 // A skill's total, for one chosen eligible ability. Pass `ability` to settle Harvesting; omitted, the
 // first eligible one is used.
 export function skillTotal(ch, skillId, ability) {
   const sk = SKILL_BY_ID[skillId];
   if (!sk) return 0;
   const use = sk.abilities.includes(ability) ? ability : sk.abilities[0];
+  const mods = activeModifiers(ch);
   return abilityModifier(ch, use)
     + profContribution(proficiencyBonus(ch.level), ch.skills?.[skillId])
-    + modifierTotal(activeModifiers(ch), `skill:${skillId}`);
+    + modifierTotal(mods, `skill:${skillId}`)
+    + modifierTotal(mods, SKILL_ALL)
+    + modifierTotal(mods, CHECK_ALL);
 }
+// This skill's own effects, then every skill, then every check — the order the number, the tooltip
+// and the roll's breakdown all read, because they ask this and never assemble it themselves.
+export function skillContributions(ch, skillId) {
+  const mods = activeModifiers(ch);
+  return [...contributions(mods, `skill:${skillId}`), ...contributions(mods, SKILL_ALL),
+    ...contributions(mods, CHECK_ALL)];
+}
+// Every save at once, which is what a save bonus nearly always is: Bless, a Paladin's aura, a
+// Cloak of Protection, Resistance, Magic Resistance. Seven separate records to say "+2 to saving
+// throws" is six too many, and an ITEM could not say it at all — its effects are the same
+// `{target, amount}` pairs, so a cloak had no way to reach more than one save (Juan, 2026-10-29).
+export const SAVE_ALL = "save:all";
 export function saveTotal(ch, abilityId) {
+  const mods = activeModifiers(ch);
   return abilityModifier(ch, abilityId)
     + (ch.saves?.[abilityId] ? proficiencyBonus(ch.level) : 0)
-    + modifierTotal(activeModifiers(ch), `save:${abilityId}`);
+    + modifierTotal(mods, `save:${abilityId}`)
+    + modifierTotal(mods, SAVE_ALL);
+}
+// What is moving one save, named — the one save and the blanket together, in that order, so the
+// number, its tooltip and the roll's breakdown cannot assemble the pair differently.
+export function saveContributions(ch, abilityId) {
+  const mods = activeModifiers(ch);
+  return [...contributions(mods, `save:${abilityId}`), ...contributions(mods, SAVE_ALL)];
 }
 export const passiveScore = (ch, skillId, ability) => 10 + skillTotal(ch, skillId, ability);
 
 export const armorClass = ch => num(ch.ac) + modifierTotal(activeModifiers(ch), "ac");
 export const speed = ch => num(ch.speed) + modifierTotal(activeModifiers(ch), "speed");
-export const initiative = ch => abilityModifier(ch, "dex") + modifierTotal(activeModifiers(ch), "initiative");
+// Initiative takes the check blanket too, because initiative IS a Dexterity ability check — so a
+// table that hands out "+2 to ability checks" and then rolls for order would otherwise have to
+// remember this one by hand. ⬜ One line to undo if Ephemer rules it apart.
+export const initiative = ch => abilityModifier(ch, "dex")
+  + modifierTotal(activeModifiers(ch), "initiative")
+  + modifierTotal(activeModifiers(ch), CHECK_ALL);
 export const maxHp = ch => Math.max(0, num(ch.maxHp) + modifierTotal(activeModifiers(ch), "maxHp"));
 
 // ── Honor and Morality ──────────────────────────────────────────────────
@@ -814,13 +858,255 @@ export function starForceTransition(ch, { dmEpiphany = false } = {}) {
   };
 }
 
+// ── Damage types, and the Absolute ──────────────────────────────────────
+// The sixteen types Ephemer deals, each with the name it takes at its zenith — Homebrew/Rulesets/
+// Absolute Damage.md, which is the owning note. Families and order are the vault's.
+//
+// WHETHER A HIT IS ABSOLUTE IS NEVER THE DEFENDER'S TO KNOW. It depends on the attacker's Rank,
+// their Cognition and sometimes one Verum of it, and none of that is on this sheet. So the absolute
+// NAME is data here and the sheet asks — one toggle on the damage it takes — rather than guessing
+// from the character's own level, which would be wrong in both directions.
+//
+// `born` is a type with no gentler form; `irresistible` is one that nothing may reduce. Today they
+// are the same two types and they are still two fields, because they are two different claims.
+//
+// NOTE — Slashing's zenith is **Vorpal** in the owning note and **"Severe"** in the builder's own
+// table (js/card.js). The note wins here and the contradiction is logged for Juan rather than
+// quietly settled in code.
+export const DAMAGE_TYPES = [
+  { id: "bludgeoning", name: "Bludgeoning", absolute: "Tectonic", family: "physical" },
+  { id: "piercing", name: "Piercing", absolute: "Impale", family: "physical" },
+  { id: "slashing", name: "Slashing", absolute: "Vorpal", family: "physical" },
+  { id: "acid", name: "Acid", absolute: "Corrosive", family: "elemental" },
+  { id: "cold", name: "Cold", absolute: "Everfrost", family: "elemental" },
+  { id: "fire", name: "Fire", absolute: "Infernal", family: "elemental" },
+  { id: "lightning", name: "Lightning", absolute: "Voltaic", family: "elemental" },
+  { id: "thunder", name: "Thunder", absolute: "Sonic", family: "elemental" },
+  { id: "poison", name: "Poison", absolute: "Toxin", family: "elemental" },
+  { id: "force", name: "Force", absolute: "Astral", family: "arcane" },
+  { id: "necrotic", name: "Necrotic", absolute: "Doom", family: "arcane" },
+  { id: "radiant", name: "Radiant", absolute: "Holy", family: "arcane" },
+  { id: "psychic", name: "Psychic", absolute: "Neural", family: "arcane" },
+  // Purely vital: resistance to necrotic, poison or physical damage does not touch it, and only a
+  // creature with no blood — or one under a divine anti-hemomancy ward — can be immune at all.
+  { id: "sanguine", name: "Sanguine", absolute: "Hemal", family: "beyond",
+    note: "Purely vital. Resistance to necrotic, poison or physical damage does not mitigate it, and only a creature with no blood, or divine anti-hemomancy, can be immune." },
+  { id: "void", name: "Void", absolute: "Void", family: "beyond", born: true, irresistible: true,
+    note: "Born Absolute and irresistible. Nothing resists, reduces or absorbs it — not resistance, not immunity, not temporary hit points, not a god's own ward." },
+  { id: "all-mighty", name: "All-Mighty", absolute: "All-Mighty", family: "beyond", born: true, irresistible: true,
+    note: "Born Absolute. It ignores every form of resistance, reduction and immunity unless a rule explicitly says otherwise." },
+];
+export const DAMAGE_BY_ID = Object.fromEntries(DAMAGE_TYPES.map(d => [d.id, d]));
+export const DAMAGE_FAMILIES = [
+  { id: "physical", name: "Physical" }, { id: "elemental", name: "Elemental" },
+  { id: "arcane", name: "Arcane & Spirit" }, { id: "beyond", name: "Beyond" },
+];
+// What to call the damage on the way in. Fire is Infernal when it arrives Absolute, and a type born
+// there has one name only, so there is nothing to switch.
+export function damageTypeName(id, absolute = false) {
+  const t = DAMAGE_BY_ID[String(id || "").toLowerCase()];
+  if (!t) return "";
+  return absolute || t.born ? t.absolute : t.name;
+}
+
+// What a defence is worth, in both regimes. Protective text keeps the ordinary name — "resistance to
+// fire" is still fire — so one record answers for both, and which one applies is decided per hit.
+export const DEFENCE_STANDINGS = [
+  { id: "resistant", name: "Resistant", ordinary: "halved", absolute: "reduced by 2 x PB" },
+  { id: "immune", name: "Immune", ordinary: "no damage", absolute: "reduced by 4 x PB" },
+  { id: "vulnerable", name: "Vulnerable", ordinary: "doubled", absolute: "still doubled" },
+];
+export const STANDING_BY_ID = Object.fromEntries(DEFENCE_STANDINGS.map(s => [s.id, s]));
+
+// What a standing subtracts from Absolute damage. Read from the DEFENDER's proficiency bonus and
+// nothing else, which is the reason the ruleset subtracts rather than halves: a resistant creature
+// shrugs off a cantrip exactly as hard as it shrugs off a 17th-level seal.
+export const absoluteReduction = (ch, standing) =>
+  (standing === "immune" ? 4 : standing === "resistant" ? 2 : 0) * proficiencyBonus(ch?.level);
+
+// A defence is a RECORD, not a column: `{ id, type, standing, why, rounds, active }` — the same
+// shape as a modifier, a granted action, a turn grant and a die of Inspiration, so it counts down
+// through `tickTimed` with them and needs no clock of its own. `rounds: null` is lasting.
+//
+// WHY A LIST RATHER THAN ONE STANDING PER TYPE. Because a defence can run out (Juan, 2026-10-29):
+// Absorb Elements, a Rage, a potion and a Grimm's gift all hand out a resistance for a while, and
+// they land ON TOP of what a character already is. A map keyed by type can hold only one answer, so
+// the temporary one would overwrite the permanent one and never give it back.
+//
+// Typed by hand rather than derived: a resistance arrives from an ancestry, a class feature, a worn
+// item, a spell or a DM's ruling, and only the last of those is anywhere the sheet could read. An
+// item's `{target, amount}` effects cannot express "halves fire" — hence its own record.
+export function defenceRecords(ch) {
+  const d = ch?.defences;
+  const ok = r => r && r.active !== false && STANDING_BY_ID[r.standing]
+    && DAMAGE_BY_ID[String(r.type || "").toLowerCase()];
+  if (Array.isArray(d)) return d.filter(ok).map(r => ({ ...r, type: String(r.type).toLowerCase(),
+    rounds: r.rounds ?? null }));
+  // A sheet saved before a defence could run out: one standing per type, keyed by the type, and
+  // every one of them lasting. Read rather than migrated, so nothing is lost by opening the sheet;
+  // the first edit writes the list back in the new shape.
+  return Object.entries(d || {}).map(([type, row]) => ({
+    id: `d:${type}`, type: String(type).toLowerCase(),
+    standing: typeof row === "string" ? row : row?.standing,
+    why: (typeof row === "string" ? "" : row?.why) || "",
+    rounds: null, active: true,
+  })).filter(ok);
+}
+
+// What this character IS against one type, once every record that touches it has had its say.
+//
+// Multiple instances of the same standing count as one, which is 5e's own rule and the only one
+// that survives contact with a table: three sources of fire resistance is still half. A resistance
+// and a vulnerability CANCEL — the reading every table already uses — and immunity beats both,
+// because nothing else is worth saying about a hit that does not land.
+export function defence(ch, typeId) {
+  const id = String(typeId || "").toLowerCase();
+  const rows = defenceRecords(ch).filter(r => r.type === id);
+  if (!rows.length) return null;
+  const has = s => rows.some(r => r.standing === s);
+  const standing = has("immune") ? "immune"
+    : has("resistant") && has("vulnerable") ? "none"
+    : has("resistant") ? "resistant"
+    : has("vulnerable") ? "vulnerable" : "none";
+  // The ones that actually decided it, so the sheet can name them rather than naming all of them.
+  const deciding = standing === "none" ? rows : rows.filter(r => r.standing === standing);
+  const timed = deciding.filter(r => r.rounds != null);
+  return {
+    standing, rows, deciding,
+    cancelled: standing === "none",
+    why: deciding.map(r => r.why).filter(Boolean).join(" · "),
+    // The shortest fuse among them: when THAT runs out the answer may change, and it is the only
+    // number worth putting on a chip.
+    rounds: timed.length ? Math.min(...timed.map(r => num(r.rounds))) : null,
+    temporary: timed.length > 0 && timed.length === deciding.length,
+  };
+}
+// Every record, in the order the types are written, lasting ones first within a type — the same
+// sort every other list on this sheet uses, because a thing that is simply true of you reads
+// differently from a thing with two rounds left.
+export function defenceList(ch) {
+  const order = DAMAGE_TYPES.map(t => t.id);
+  return defenceRecords(ch)
+    .map(r => ({ ...DAMAGE_BY_ID[r.type], ...r }))
+    .sort((a, b) => (order.indexOf(a.type) - order.indexOf(b.type))
+      || (Number(a.rounds != null) - Number(b.rounds != null)));
+}
+// The types this character has anything recorded against, each with its resolved answer — what the
+// incoming-damage picker offers, and what the card groups by.
+export function defenceTypes(ch) {
+  const seen = [];
+  for (const r of defenceList(ch)) if (!seen.includes(r.type)) seen.push(r.type);
+  return seen.map(id => ({ ...DAMAGE_BY_ID[id], ...defence(ch, id) }));
+}
+
+// What this hit actually does to this character, and why. Pure arithmetic, so it is applied rather
+// than asked about — unlike a Wound, there is no judgement in it. With no type named nothing
+// happens at all, which is what "22 damage" at a table usually is.
+//
+// Against ORDINARY damage: resistance halves, immunity negates, vulnerability doubles.
+// Against ABSOLUTE damage: resistance subtracts 2 x PB, immunity subtracts 4 x PB, never below 0 —
+// halving scales with the attack, subtracting scales with the defender, which is the whole point of
+// crossing into Rank IV.
+export function mitigate(ch, amount, { type = "", absolute = false, ignoresResistance = false } = {}) {
+  const before = Math.max(0, num(amount));
+  const t = DAMAGE_BY_ID[String(type || "").toLowerCase()] || null;
+  const abs = !!t?.born || !!absolute;
+  const d = t ? defence(ch, t.id) : null;
+  const out = {
+    before, dealt: before, by: 0, type: t?.id || "", absolute: abs,
+    name: t ? damageTypeName(t.id, abs) : "", standing: d?.standing || "none",
+    why: d?.why || "", applied: "none", note: t?.note || "",
+  };
+  if (!t || !d) return out;
+  // A resistance and a vulnerability on the same type cancel, and the sheet says so rather than
+  // quietly doing nothing — "why did that not halve" is a question worth answering unprompted.
+  if (d.standing === "none") { out.applied = d.cancelled ? "cancelled" : "none"; return out; }
+
+  // Vulnerability was never a defence, so none of the Absolute rules touch it: it doubles in both
+  // regimes, and it doubles even what nothing else can resist.
+  if (d.standing === "vulnerable") {
+    out.dealt = before * 2; out.by = -before; out.applied = "doubled";
+    return out;
+  }
+  // Irresistible is checked before anything is subtracted, because there is nothing there to
+  // reduce. A recorded resistance to Void is kept — it is true of the character — and does nothing.
+  if (t.irresistible) { out.applied = "irresistible"; return out; }
+  if (ignoresResistance) { out.applied = "ignored"; return out; }
+  if (abs) {
+    const by = absoluteReduction(ch, d.standing);
+    out.dealt = Math.max(0, before - by);
+    out.by = before - out.dealt;
+    out.applied = "reduced";
+    return out;
+  }
+  if (d.standing === "immune") { out.dealt = 0; out.by = before; out.applied = "negated"; return out; }
+  out.dealt = Math.floor(before / 2); out.by = before - out.dealt; out.applied = "halved";
+  return out;
+}
+
+// The one line the table needs after a hit: what arrived, what it cost, and why the number moved.
+export function mitigationLine(m) {
+  if (!m || !m.type) return "";
+  const nm = m.name || "";
+  if (m.applied === "none") return `${nm}${m.absolute ? " (Absolute)" : ""} — nothing of yours applies.`;
+  if (m.applied === "cancelled") return `${nm} — your resistance and your vulnerability cancel, so all ${m.dealt} lands.`;
+  if (m.applied === "doubled") return `${nm} — vulnerable, so ${m.before} doubles to ${m.dealt}.`;
+  if (m.applied === "irresistible") return `${nm} — irresistible. Nothing resists, reduces or absorbs it, so all ${m.dealt} lands.`;
+  if (m.applied === "ignored") return `${nm} — the source ignores ${m.standing === "immune" ? "immunity" : "resistance"}, so all ${m.dealt} lands.`;
+  if (m.applied === "negated") return `${nm} — immune, so none of it lands.`;
+  if (m.applied === "halved") return `${nm} — resistant, so ${m.before} halves to ${m.dealt}.`;
+  return `${nm} — ${m.standing === "immune" ? "immunity" : "resistance"} against Absolute damage takes ${m.by} off ${m.before}, leaving ${m.dealt}.`;
+}
+
+// ── Senses ──────────────────────────────────────────────────────────────
+// The ranges are the standard ones, offered as a starting number and editable, because an ancestry
+// and a spell hand out the same sense at different distances.
+export const SENSES = [
+  { id: "darkvision", name: "Darkvision", range: 60 },
+  { id: "superiorDarkvision", name: "Superior Darkvision", range: 120 },
+  { id: "blindsight", name: "Blindsight", range: 10 },
+  { id: "tremorsense", name: "Tremorsense", range: 30 },
+  { id: "truesight", name: "Truesight", range: 30 },
+  { id: "devilsSight", name: "Devil's Sight", range: 120 },
+];
+export const SENSE_BY_ID = Object.fromEntries(SENSES.map(s => [s.id, s]));
+export const senseList = ch => (ch?.senses || [])
+  .filter(s => s && s.name)
+  .map(s => ({ id: s.id || "", name: s.name, range: num(s.range), why: s.why || "" }));
+
+// ── Inspiration ─────────────────────────────────────────────────────────
+// A pool of dice someone handed you, rather than the single yes-or-no token 2014 prints: at this
+// table a d4 of Bless, a Bard's d8 and a DM's "have a d6 for that" are all the same act, and the
+// sheet should be able to hold three of them at once and say where each came from.
+//
+// A die is `{ id, die, rounds, why, active }` — the same shape as a modifier, a granted action and
+// a turn grant, which is why it counts down through `tickTimed` with them and needs no clock of its
+// own. `rounds: null` means until used.
+export const INSPIRATION_DICE = ["d4", "d6", "d8", "d10", "d12", "d20"];
+export const inspirationHeld = ch => (ch?.inspiration || []).filter(d => d && d.active !== false && d.die);
+export const inspirationOf = (ch, die) => inspirationHeld(ch).filter(d => d.die === die);
+
+// Which one to spend: the one about to run out. A die with rounds on it is worth less than one that
+// waits, so the perishable goes first and "until used" is kept for later — and among timed ones the
+// shortest fuse goes first.
+export function inspirationNext(ch, die) {
+  const soonest = (a, b) => (a.rounds == null ? Infinity : num(a.rounds)) - (b.rounds == null ? Infinity : num(b.rounds));
+  return [...inspirationOf(ch, die)].sort(soonest)[0] || null;
+}
+
 // ── Hit points ──────────────────────────────────────────────────────────
 // Healing never exceeds the maximum; temporary HP replaces rather than stacks unless a campaign rule
 // says otherwise (CS-030); damage eats temporary HP first. Returns the next values plus the Wound
 // triggers this event may have fired, flagged for adjudication rather than applied — the sheet asks,
 // it does not decide (HB-010, RES-02).
-export function applyDamage(ch, amount, { critical = false } = {}) {
-  const dmg = Math.max(0, num(amount));
+//
+// A damage type turns the defences on: `mitigate` runs FIRST and everything downstream reads the
+// number that actually landed — temporary hit points, the half-maximum Wound trigger and the
+// concentration DC all answer to the damage taken, not to the damage rolled.
+export function applyDamage(ch, amount, { critical = false, type = "", absolute = false,
+                                          ignoresResistance = false } = {}) {
+  const mitigation = mitigate(ch, amount, { type, absolute, ignoresResistance });
+  const dmg = mitigation.dealt;
   const temp = num(ch.tempHp);
   const absorbed = Math.min(temp, dmg);
   const hp = clamp(num(ch.hp) - (dmg - absorbed), 0, maxHp(ch));
@@ -832,6 +1118,7 @@ export function applyDamage(ch, amount, { critical = false } = {}) {
     hp, tempHp: temp - absorbed, absorbed, dealt: dmg,
     woundTriggers: triggers,
     concentrationDC: concentrationDC(dmg, ch.wounds, ch.injuries?.length ?? ch.injuries),
+    mitigation,
   };
 }
 // Regaining a hit point from zero clears the death saves — Ephemer follows 5e here (Juan,
@@ -1454,6 +1741,11 @@ export function blankCharacter() {
     deathSaveSuccesses: 0, deathSaveFailures: 0,
     exhaustion: 0, dreamExhaustion: 0, wounds: 0, injuries: [], safeHavenRests: 0,
     honor: { order: 0, chaos: 0 }, morality: { good: 0, evil: 0 },
+    // What the world's harm is worth against this character, and what they can see with. Defences
+    // are records with their own fuses — see the Damage types section.
+    defences: [], senses: [],
+    // Dice someone handed you, each with its own fuse. See the Inspiration section.
+    inspiration: [],
     corruption: 0,
     fate: 0,
     attuned: [], attunementBonus: 0,

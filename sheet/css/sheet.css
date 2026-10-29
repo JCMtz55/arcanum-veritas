@@ -971,6 +971,103 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .hd-roll b{font-family:var(--sans);font-size:19px;line-height:1;color:var(--verdant)}
 .hd-roll span{font-family:var(--sans);font-size:10px;color:var(--mute)}
 
+/* ── the defences, and what is hitting you ───────────────────────────────
+   Three standings, three colours, in a ladder that reads without being learned: brass for an
+   immunity, verdant for a resistance, ember for a vulnerability. Each chip carries its own glyph as
+   well, because a chip that said "Fire" in red and "Fire" in green is one glance from being read
+   backwards at a table — and the one thing this card must never do is tell you the wrong way round.
+   The second line is the Absolute form, and it is always there: under this campaign's ruleset those
+   are two different numbers and the table needs both at once. */
+/* The chip is NOTATION now: `Fire ½ · −4` rather than `Fire halved · Infernal −4`, because four of
+   them in prose filled the bar (Juan, 2026-10-29). The standing is told by the symbol — ½, 0, ×2 —
+   so it survives without the colour, and the glyph that used to sit before the name is gone with
+   the words. Everything removed is still on the tooltip. */
+.dfns{display:flex;flex-wrap:wrap;gap:5px}
+.dfn{display:flex;align-items:baseline;gap:5px;padding:3px 8px 4px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:8px;text-align:left}
+.dfn b{font-family:var(--sans);font-size:11.5px;font-weight:500;white-space:nowrap}
+.dfn em{font-family:var(--sans);font-size:10px;font-style:normal;color:var(--bone2);
+  white-space:nowrap;letter-spacing:.02em}
+.dfn:hover{border-color:var(--bone2)}
+/* Colour on the whole chip, since there is no icon to carry it any more. */
+.dfn.resistant{border-color:#3f8065} .dfn.resistant em{color:var(--verdant)}
+.dfn.immune{border-color:#6b5631} .dfn.immune em{color:var(--brass)}
+.dfn.vulnerable{border-color:#8a4535} .dfn.vulnerable em{color:var(--ember)}
+/* A defence against something irresistible — or one its opposite cancels: kept, shown, and
+   visibly worth nothing. */
+.dfn.dead{opacity:.55} .dfn.dead b{text-decoration:line-through}
+/* A borrowed one — Absorb Elements, a Rage, a potion — wears what is left of it. */
+.dfn-r{display:inline-flex;align-items:center;gap:3px;margin-left:1px;
+  font-family:var(--sans);font-size:9px;color:var(--brass)}
+.dfn-r .ic{font-size:8px}
+.dfn-mod .mod-n{display:inline-flex;align-items:center;gap:5px}
+.dfn-mod .mod-n .ic{font-size:10px;opacity:.85}
+.dfn-mod.resistant .mod-n .ic{color:var(--verdant)}
+.dfn-mod.immune .mod-n .ic{color:var(--brass)}
+.dfn-mod.vulnerable .mod-n .ic{color:var(--ember)}
+
+/* The defences ride in a bar beside the conditions (Juan, 2026-10-29), so the chips sit in a line
+   that scrolls sideways rather than wrapping the whole layout taller — the same trade the condition
+   bar makes, and the reason this sheet still fits one screen.
+   `live` is NOT the condition bar's ember: that tint means "you are suffering something", and a
+   resistance is the opposite kind of news. Steel, which is what the shield is. */
+.dfnbar.live{border-color:#4a5a63;background:rgba(110,139,151,.07)}
+/* The one place this bar does NOT follow the condition bar: its chips WRAP rather than scrolling
+   out of sight. A condition is a thing you just took and are about to look at; a defence is a
+   standing fact, and a character at this level has four or five — a line that silently hides two
+   of them is worse at a table than a bar two lines tall. The label sits at the top of the stack. */
+.dfnbar{align-items:flex-start}
+.dfnbar .condbar-k{padding-top:4px}
+.dfnbar>.btn{align-self:flex-start}
+.dfnbar .chips{flex-wrap:wrap;overflow:visible;gap:4px}
+/* On a phone it goes back to one scrolling line: five defences wrapped is 142px of an 812px screen
+   before anything else is read, and swiping a row of chips sideways is the one gesture a phone has
+   that a desktop does not. */
+@media (max-width:900px){
+  .dfnbar{align-items:center}
+  .dfnbar .condbar-k{padding-top:0}
+  .dfnbar>.btn{align-self:auto}
+  .dfnbar .chips{flex-wrap:nowrap;overflow-x:auto}
+}
+.condbar .dfn{flex:none;padding:2px 8px 3px}
+.condbar .dfn em{font-size:9px}
+/* A type whose records cancel each other out: its own chip at the end of the line, because the bar
+   has no room for the paragraph the card used to carry. */
+.chip.warn{border-color:#8a4535;color:#e4927f;background:rgba(192,85,63,.1)}
+.chip.warn .ic{font-size:9px;margin-right:4px}
+
+/* The incoming type, under the damage field. It only exists for a character with a defence, so it
+   is never decoration — and it is deliberately a chip rather than a select: it has to be readable
+   from across the table while somebody else is rolling. */
+.incoming{display:flex;align-items:center;gap:6px;margin-top:4px}
+.incoming-k{font-family:var(--sans);font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mute);flex:none}
+.incoming .chip{font-size:10.5px;padding:2px 8px}
+.incoming .chip.resistant{border-color:#3f8065;background:rgba(78,140,106,.14)}
+.incoming .chip.immune{border-color:#6b5631;background:rgba(176,136,66,.14)}
+.incoming .chip.vulnerable{border-color:#8a4535;background:rgba(192,85,63,.16)}
+.incoming .x{border:0;background:none;color:var(--mute);padding:0 2px;line-height:1}
+.incoming .x:hover{color:var(--bone)}
+
+/* ── Inspiration: six dice, each its own button ──────────────────────────
+   The shapes are inline SVG because Font Awesome Free has only d6 and d20 (see icons.js). An empty
+   die is drawn in the muted line colour and a held one in the character's accent, so "what do I
+   have" is answered by the row's colour before anything is read: the count is confirmation. */
+.insps{display:flex;flex-wrap:wrap;gap:5px}
+.insp{position:relative;width:38px;height:38px;display:grid;place-items:center;padding:0;
+  background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:#5c646e}
+.insp:hover{border-color:var(--bone2);color:var(--bone2)}
+.insp.have{color:var(--accent);border-color:var(--accent);background:#20262e}
+.dieg{width:24px;height:24px;display:block}
+.dieg text{font-family:var(--sans);font-weight:700}
+.insp u{position:absolute;bottom:-2px;right:-2px;min-width:15px;height:15px;padding:0 3px;
+  display:grid;place-items:center;border-radius:8px;text-decoration:none;
+  background:var(--accent);color:#1b1f26;font-family:var(--sans);font-size:9.5px;font-weight:700}
+.insp .bmark{position:absolute;top:1px;right:3px;margin:0;vertical-align:baseline}
+.insp-card .chips{margin-top:8px}
+.insp-card .chip{font-size:10px}
+.snq{margin-bottom:9px}
+
 /* Inside one spell's dialog: how you have it, and what casting it costs. */
 .spl-stand{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
 .spl-cast{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}

@@ -222,16 +222,19 @@ const ACTS = {
   // ── rolls ──
   "roll-ability": el => {
     const id = el.dataset.id, c = ch();
-    showRoll(`${rules.ABILITY_NAME[id]} check`, rules.abilityModifier(c, id),
+    showRoll(`${rules.ABILITY_NAME[id]} check`, rules.abilityCheckTotal(c, id),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[id]} modifier`, amount: rules.abilityMod(c.abilities[id]) },
-        ...rules.contributions(rules.activeModifiers(c), `ability:${id}`).map(m => ({ reason: m.reason, amount: Math.floor(m.amount / 2) || m.amount }))]));
+        // An effect on the SCORE is worth half of itself to the modifier; one on the check is worth
+        // what it says, which is why the two are listed through different arithmetic.
+        ...rules.contributions(rules.activeModifiers(c), `ability:${id}`).map(m => ({ reason: m.reason, amount: Math.floor(m.amount / 2) || m.amount })),
+        ...rules.abilityCheckContributions(c)]));
   },
   "roll-save": el => {
     const id = el.dataset.id, c = ch();
     showRoll(`${rules.ABILITY_NAME[id]} save`, rules.saveTotal(c, id),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[id]} modifier`, amount: rules.abilityModifier(c, id) },
         { reason: "Proficiency", amount: c.saves?.[id] ? rules.proficiencyBonus(c.level) : 0 },
-        ...rules.contributions(rules.activeModifiers(c), `save:${id}`)]));
+        ...rules.saveContributions(c, id)]));
   },
   "roll-skill": el => {
     const id = el.dataset.id, c = ch(), sk = rules.SKILL_BY_ID[id];
@@ -240,13 +243,15 @@ const ACTS = {
     showRoll(sk.name, rules.skillTotal(c, id, use),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[use]} modifier`, amount: rules.abilityModifier(c, use) },
         { reason: prof === 2 ? "Expertise" : "Proficiency", amount: rules.profContribution(rules.proficiencyBonus(c.level), prof) },
-        ...rules.contributions(rules.activeModifiers(c), `skill:${id}`)]));
+        ...rules.skillContributions(c, id)]));
   },
   "roll-init": () => {
     const c = ch();
     showRoll("Initiative", rules.initiative(c),
       breakdownFor([{ reason: "Dexterity modifier", amount: rules.abilityModifier(c, "dex") },
-        ...rules.contributions(rules.activeModifiers(c), "initiative")]));
+        ...rules.contributions(rules.activeModifiers(c), "initiative"),
+        // Initiative is a Dexterity check, so what every check gets, it gets.
+        ...rules.abilityCheckContributions(c)]));
   },
   "roll-cogst": () => {
     const c = ch(), src = rules.cognitiveSavingThrowSources(c);
@@ -323,9 +328,13 @@ const ACTS = {
     input.focus();
     const cur = ch();
     if (el.dataset.id === "dmg") {
-      const r = rules.applyDamage(cur, n);
+      // The type and the Absolute mark are whatever the chip beside this field says, so the
+      // defences apply to the quick path and the dialog identically — one call, one answer.
+      const r = rules.applyDamage(cur, n, { type: state.dmgType, absolute: state.dmgAbsolute });
       mutate(s => { s.hp = r.hp; s.tempHp = r.tempHp; });
-      toast(`${r.absorbed ? `${r.absorbed} absorbed — ` : ""}${r.dealt} damage. Concentration DC ${r.concentrationDC}.`);
+      const line = rules.mitigationLine(r.mitigation);
+      toast(`${line ? `${line} ` : ""}${r.absorbed ? `${r.absorbed} absorbed — ` : ""}${
+        r.dealt} damage. Concentration DC ${r.concentrationDC}.`);
       // A Wound is never applied for you: at most one lands per turn however many triggers fired,
       // and the DM may rule otherwise. The prompt is the same one the dialog shows.
       if (r.woundTriggers.length) dialog("Wound trigger", woundPrompt(r.woundTriggers));
@@ -339,6 +348,20 @@ const ACTS = {
   },
   hp: el => {
     const c = ch(), max = rules.maxHp(c);
+    // The same defended types the chip offers, and for the same reason: a type this character has
+    // nothing against changes no number here either. The row is absent when there are none.
+    const defended = rules.defenceTypes(c);
+    const typeRow = defended.length ? `<div class="tgls">
+        <select class="txt sm" id="hpType" aria-label="What kind of damage">
+          <option value="">Untyped</option>
+          ${defended.map(t => `<option value="${t.id}" ${state.dmgType === t.id ? "selected" : ""}>${
+            esc(t.name)} — ${esc(t.cancelled ? "cancelled out"
+              : rules.STANDING_BY_ID[t.standing].name.toLowerCase())}${
+            t.rounds == null ? "" : `, ${t.rounds}r`}</option>`).join("")}
+        </select>
+        ${toggleHtml(`id="hpAbs"`, !!state.dmgAbsolute, "crit", "It arrives Absolute — a seal from Rank IV")}
+        <span class="hint">your defences are applied as it lands</span>
+      </div>` : "";
     dialog("Hit points", `<div class="hpdlg">
         <div class="stats">
           <div class="stat"><b>${c.hp}</b><i>now</i></div>
@@ -354,6 +377,7 @@ const ACTS = {
           </div>
           <div class="tgls">${toggleHtml(`id="hpCrit"`, false, "crit", "It was a critical hit")}
             <span class="hint">a critical hit, which is its own Wound trigger</span></div>
+          ${typeRow}
         </form>
         <div id="hpOut"></div>
       </div>`, {
@@ -372,9 +396,18 @@ const ACTS = {
       const crit = critBtn.classList.contains("on");
       const cur = ch();
       if (b.value === "dmg") {
-        const r = rules.applyDamage(cur, n, { critical: crit });
+        // The dialog's own picker is also the session's: choosing Infernal here leaves the chip
+        // beside the damage field saying Infernal, because it is the same incoming blow.
+        const typeEl = document.getElementById("hpType");
+        const absEl = document.getElementById("hpAbs");
+        if (typeEl) state.dmgType = typeEl.value;
+        if (absEl) state.dmgAbsolute = absEl.classList.contains("on");
+        const r = rules.applyDamage(cur, n, { critical: crit,
+          type: state.dmgType, absolute: state.dmgAbsolute });
         mutate(s => { s.hp = r.hp; s.tempHp = r.tempHp; });
-        out.innerHTML = `<p class="hint">${r.absorbed ? `${r.absorbed} absorbed by temporary hit points. ` : ""}
+        const line = rules.mitigationLine(r.mitigation);
+        out.innerHTML = `${line ? `<p class="prose">${esc(line)}</p>` : ""}
+          <p class="hint">${r.absorbed ? `${r.absorbed} absorbed by temporary hit points. ` : ""}
           Concentration DC <b>${r.concentrationDC}</b> if you were holding something.</p>
           ${r.woundTriggers.length ? woundPrompt(r.woundTriggers) : ""}`;
       } else if (b.value === "heal") {
@@ -391,13 +424,18 @@ const ACTS = {
       critBtn.classList.remove("on");
       critBtn.setAttribute("aria-pressed", "false");
     });
-    document.getElementById("hpCrit").onclick = e => {
-      e.preventDefault();
-      const b = e.currentTarget;
-      const on = !b.classList.contains("on");
-      b.classList.toggle("on", on);
-      b.setAttribute("aria-pressed", String(on));
-    };
+    // Both flags in this dialog are plain lit squares with an id rather than a data-act, so they
+    // toggle here instead of through the dispatcher — one handler for the two of them.
+    for (const id of ["hpCrit", "hpAbs"]) {
+      const b = document.getElementById(id);
+      if (!b) continue;
+      b.onclick = e => {
+        e.preventDefault();
+        const on = !b.classList.contains("on");
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      };
+    }
     document.getElementById("hpMax").onclick = () => {
       const v = Number(prompt("Maximum hit points", String(ch().maxHp)) || 0);
       if (v > 0) mutate(s => { s.maxHp = v; s.hp = Math.min(s.hp, v); });
@@ -509,6 +547,101 @@ const ACTS = {
     if (name) mutate(s => { s.conditions = [...(s.conditions || []), { id: `x:${uid()}`, name: name.slice(0, 40) }]; });
   },
   "cond-del": el => mutate(s => { s.conditions.splice(+el.dataset.id, 1); }),
+
+  // ── defences, and what is coming in ──
+  // What kind of damage is arriving is session state, not the character's: it is a fact about the
+  // dragon, not about you. It sticks between hits because a dragon tends to breathe twice.
+  "dmg-type": el => incomingPop(el),
+  "dmg-pick": el => {
+    state.dmgType = el.dataset.id;
+    closePop(true);
+    renderAll();
+  },
+  "dmg-absolute": () => {
+    state.dmgAbsolute = !state.dmgAbsolute;
+    renderAll();
+    // Reopened on the chip, because the toggle changes what every row in that list is worth and the
+    // reader is mid-decision — closing it would make them find it again to see the new numbers.
+    // Closed first: opening a pinned pop with the same key is how popAt TOGGLES it shut, so without
+    // this the mark went on and the list vanished.
+    closePop(true);
+    const chip = document.querySelector('[data-act="dmg-type"]');
+    if (chip) incomingPop(chip);
+  },
+  "dmg-untype": () => { state.dmgType = ""; renderAll(); },
+
+  "def-add": () => defenceDialog(""),
+  "def-open": el => defenceDialog(el.dataset.id),
+  "def-del": el => {
+    closeDialog();
+    const id = el.dataset.id;
+    const row = rules.defenceRecords(ch()).find(r => r.id === id);
+    mutate(s => { s.defences = rules.defenceRecords(s).filter(r => r.id !== id); });
+    // The chip beside the damage field may now point at a type nothing answers for.
+    if (row && state.dmgType === row.type && !rules.defence(ch(), row.type)) state.dmgType = "";
+    toast(`${row ? rules.DAMAGE_BY_ID[row.type].name : "That"} — defence removed.`);
+  },
+
+  "sense-add": () => senseDialog(-1),
+  "sense-open": el => senseDialog(+el.dataset.id),
+  "sense-del": el => {
+    closeDialog();
+    mutate(s => { s.senses = (s.senses || []).filter((_, i) => i !== +el.dataset.id); });
+  },
+  "cog-sense": el => {
+    const c = ch();
+    popAt(el, `<div class="pop-h"><b>Cognitive Sense</b><span class="tag">×${rules.cognitiveSenseUses(c)}</span></div>
+      <div class="pop-b"><p class="hint">Derived from your Dream score rather than recorded here:
+        <b>Dream ${rules.abilityScore(c, "dream")}</b> grants
+        ${rules.cognitiveSenseUses(c)} use${rules.cognitiveSenseUses(c) === 1 ? "" : "s"}, and
+        Dream 18 is where the second one arrives.</p></div>`, { pin: true, key: "cogsense" });
+  },
+
+  // ── Inspiration: a die someone handed you ──
+  insp: el => inspirationPop(el.dataset.id),
+  "insp-add": el => {
+    const die = el.dataset.id;
+    const dur = document.getElementById("inspDur")?.value ?? "";
+    const why = (document.getElementById("inspWhy")?.value || "").trim();
+    const row = { id: uid(), die, why, rounds: dur ? Number(dur) : null, active: true };
+    mutate(s => { s.inspiration = [...(s.inspiration || []), row]; });
+    toast(`${die}${why ? ` — ${why}` : ""} · ${row.rounds == null ? "until used" : `${row.rounds} rounds`}`);
+    // Reopened on the same die — the redraw replaced the button this was anchored to — so taking
+    // two in a row is two clicks rather than two journeys.
+    inspirationPop(die, { reopen: true });
+  },
+  "insp-spend": el => {
+    const die = el.dataset.id;
+    const one = el.dataset.k
+      ? rules.inspirationHeld(ch()).find(d => d.id === el.dataset.k)
+      : rules.inspirationNext(ch(), die);
+    if (!one) return toast(`No ${die} to spend.`);
+    const r = rollDice(`1${one.die}`);
+    mutate(s => { s.inspiration = (s.inspiration || []).filter(d => d.id !== one.id); });
+    toast(`${one.die}${one.why ? ` — ${one.why}` : ""} → ${r.total}`);
+    inspirationPop(one.die, { reopen: true, rolled: { die: one.die, total: r.total, why: one.why } });
+  },
+  "insp-open": el => {
+    const d = rules.inspirationHeld(ch()).find(x => x.id === el.dataset.id);
+    if (!d) return;
+    popAt(el, `<div class="pop-h"><b>${esc(d.die)}</b>
+        ${d.rounds == null ? `<span class="tag">until used</span>` : `<span class="tag k">${d.rounds} round${d.rounds === 1 ? "" : "s"} left</span>`}</div>
+      <div class="pop-b">${d.why ? `<p class="prose">${esc(d.why)}</p>`
+        : `<p class="hint">No source recorded.</p>`}</div>
+      <div class="pop-f">
+        <button class="btn sm pri" data-act="insp-spend" data-id="${esc(d.die)}" data-k="${esc(d.id)}">Spend it</button>
+        ${d.rounds == null ? "" : `<button class="btn sm" data-act="insp-extend" data-id="${esc(d.id)}">+1 round</button>`}
+        <button class="btn sm warn" data-act="insp-del" data-id="${esc(d.id)}">Give it back</button></div>`,
+      { pin: true, key: `insp:${d.id}` });
+  },
+  "insp-extend": el => mutate(s => {
+    const d = (s.inspiration || []).find(x => x.id === el.dataset.id);
+    if (d && d.rounds != null) d.rounds += 1;
+  }),
+  "insp-del": el => {
+    closePop(true);
+    mutate(s => { s.inspiration = (s.inspiration || []).filter(d => d.id !== el.dataset.id); });
+  },
 
   // ── spell slots ──
   slot: el => {
@@ -653,12 +786,27 @@ const ACTS = {
     const mods = rules.tickTimed(c.modifiers, c.round);
     const acts = rules.tickTimed(c.actions, c.round);
     const gr = rules.tickTimed(c.grants, c.round);
+    // A die of Inspiration and a borrowed resistance keep the same clock, which is the reason they
+    // are the same shape as a modifier: "it lasts three rounds" means one thing on this sheet, in
+    // one place. Defences are read through the engine first, so a sheet still holding the old
+    // keyed-by-type map ticks correctly and is written back as a list.
+    const insp = rules.tickTimed(c.inspiration, c.round);
+    const defs = rules.tickTimed(rules.defenceRecords(c), c.round);
     mutate(s => {
       s.modifiers = mods.list; s.actions = acts.list; s.grants = gr.list;
+      // An expired defence is gone rather than kept as history: what a character WAS resistant to
+      // for two rounds is not a thing anyone reads back, and the card is a list of what is true.
+      s.defences = defs.list.filter(r => r && r.active !== false);
+      // An expired die is gone rather than kept as history: a d6 that ran out is not a record
+      // anyone reads, and the pool is counted by what is in it.
+      s.inspiration = insp.list.filter(d => d && d.active !== false);
       s.round = c.round + 1; s.inCombat = true; s.used = {};
     });
     const ended = [...mods.ended.map(m => m.reason), ...acts.ended.map(a => a.name),
-      ...gr.ended.map(g => g.why || `extra ${g.kind}`)];
+      ...gr.ended.map(g => g.why || `extra ${g.kind}`),
+      ...insp.ended.map(d => `${d.die}${d.why ? ` (${d.why})` : ""}`),
+      ...defs.ended.map(r => `${rules.DAMAGE_BY_ID[r.type]?.name || r.type} ${r.standing}${
+        r.why ? ` (${r.why})` : ""}`)];
     if (ended.length) toast(`Ended: ${ended.join(", ")}`);
   },
   "end-combat": () => mutate(s => {
@@ -668,6 +816,11 @@ const ACTS = {
     s.modifiers = (s.modifiers || []).map(drop);
     s.actions = (s.actions || []).map(drop);
     s.grants = (s.grants || []).map(drop);
+    // A die that was good for a few rounds ends with the fight; one held "until used" is still
+    // yours afterwards, because nothing about the fight ending spends it. A borrowed resistance
+    // goes the same way, while what you simply ARE resistant to stays.
+    s.inspiration = (s.inspiration || []).filter(d => d && d.rounds == null);
+    s.defences = rules.defenceRecords(s).filter(r => r.rounds == null);
   }),
   "mod-add": () => modifierDialog(),
   "mod-del": el => mutate(s => {
@@ -936,6 +1089,213 @@ function rollDamage(a, crit) {
 // An extra slot in the turn's own economy — Haste's Action, a second Reaction, a Quick Action the
 // table handed out. Not the same thing as an entry in the Actions card: that is something you can
 // DO, this is permission to do one more thing this turn.
+// ── what is hitting you ─────────────────────────────────────────────────
+// Only the types this character has a defence for, because those are the only ones that change a
+// number: picking "cold" with no cold defence would be a click that does nothing, and a list of
+// sixteen to find the two that matter is slower than the arithmetic it was meant to save.
+function incomingPop(el) {
+  const c = ch();
+  const abs = !!state.dmgAbsolute;
+  // One row per TYPE, carrying the answer every record on it adds up to — not one row per record.
+  // What the reader needs here is "what does fire do to me", and two chips saying different things
+  // about fire is the question, not the answer.
+  const rows = rules.defenceTypes(c).map(t => {
+    const st = rules.STANDING_BY_ID[t.standing];
+    const says = t.cancelled ? "they cancel — nothing applies"
+      : t.irresistible && t.standing !== "vulnerable" ? "nothing applies"
+      : t.standing === "vulnerable" ? "doubled"
+      : abs ? `${rules.absoluteReduction(c, t.standing)} off`
+      : t.standing === "immune" ? "no damage" : "halved";
+    const left = t.rounds == null ? "" : ` · ${t.rounds}r left`;
+    return `<button class="listrow ${state.dmgType === t.id ? "on" : ""}" data-act="dmg-pick" data-id="${t.id}">
+      <b>${esc(rules.damageTypeName(t.id, abs))}</b><span>${esc(
+        (t.cancelled ? says : `${st.name} · ${says}`) + left)}</span></button>`;
+  }).join("");
+
+  popAt(el, `<div class="pop-h"><b>What is hitting you</b>
+      ${toggleHtml(`data-act="dmg-absolute"`, abs, "crit",
+        "It arrives Absolute — a seal from Rank IV, or a Verum that gets there sooner")}</div>
+    <div class="pop-b list">
+      <button class="listrow ${state.dmgType ? "" : "on"}" data-act="dmg-pick" data-id="">
+        <b>Untyped</b><span>nothing is applied</span></button>
+      ${rows}</div>
+    <p class="hint">${abs
+      ? `<b>Absolute.</b> Resistance stops halving and subtracts ${rules.absoluteReduction(c, "resistant")},
+         immunity ${rules.absoluteReduction(c, "immune")} — twice and four times your proficiency bonus,
+         never below 0. Vulnerability still doubles.`
+      : `Ordinary damage: resistance halves it, immunity stops it, vulnerability doubles it.
+         Turn on the mark above for a seal that arrives Absolute.`}</p>`,
+    { pin: true, key: "dmgtype" });
+}
+
+// One defence: a type, how it lands, and where it came from — which is the inspectable source
+// CS-032 asks for. Typed rather than derived, because a resistance arrives from an ancestry, a
+// feature, a worn item or a ruling, and only the last of those is anywhere this sheet can read.
+function defenceDialog(recordId) {
+  const c = ch();
+  const cur = recordId ? rules.defenceRecords(c).find(r => r.id === recordId) : null;
+  const typeId = cur?.type || "";
+  const opts = rules.DAMAGE_FAMILIES.map(f =>
+    `<optgroup label="${esc(f.name)}">` + rules.DAMAGE_TYPES.filter(t => t.family === f.id).map(t =>
+      `<option value="${t.id}" ${t.id === typeId ? "selected" : ""}>${esc(t.name)}${
+        t.born ? " — born Absolute" : ` → ${t.absolute}`}</option>`).join("") + `</optgroup>`).join("");
+  // The same ladder the effects, the actions and the Inspiration dice offer, because they are the
+  // same question — Absorb Elements is a round, a Rage is ten, a potion is a hundred.
+  const durations = [["", "Lasting — it is simply true of me"], ["1", "1 round"], ["2", "2 rounds"],
+    ["3", "3 rounds"], ["10", "10 rounds (1 minute)"], ["100", "100 rounds (10 minutes)"]];
+  const dur = cur?.rounds == null ? "" : String(cur.rounds);
+
+  dialog(cur ? `${rules.DAMAGE_BY_ID[typeId].name} — how it lands` : "Add a defence",
+    `<form class="fields" id="df">
+      <label>Damage type<select class="txt" id="dfType">${opts}</select></label>
+      <label>How it lands on you<select class="txt" id="dfStanding">${rules.DEFENCE_STANDINGS.map(s =>
+        `<option value="${s.id}" ${cur?.standing === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>
+      <label>How long you have it<select class="txt" id="dfDur">${durations.map(([v, label]) =>
+        `<option value="${v}" ${v === dur ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+      <label>Where it comes from<input class="txt" id="dfWhy" maxlength="60" autocomplete="off"
+        value="${esc(cur?.why || "")}" placeholder="Drow, Rage, Absorb Elements, a DM ruling…"></label>
+      <button class="btn pri" type="submit">${cur ? "Save" : "Add"}</button></form>
+    <div id="dfNote"></div>`, {
+      footer: cur ? `<button class="btn sm warn" data-act="def-del" data-id="${esc(recordId)}">Remove</button>
+        <span class="sp"></span><button class="btn sm" data-act="dlg-close">Done</button>` : "",
+    });
+
+  const type = document.getElementById("dfType");
+  const standing = document.getElementById("dfStanding");
+  const note = document.getElementById("dfNote");
+  // Both regimes, spelled out for the pair actually chosen, before anything is saved — the whole
+  // reason this is not a tickbox: "immune to fire" means two different things either side of level 17.
+  const draw = () => {
+    const t = rules.DAMAGE_BY_ID[type.value];
+    const st = rules.STANDING_BY_ID[standing.value];
+    const red = rules.absoluteReduction(c, st.id);
+    const dead = t.irresistible && st.id !== "vulnerable";
+    // A born-Absolute type gets ONE row, not two: there is no ordinary void to halve, and printing
+    // "ordinary void — halved" above "Void — no effect" is the sheet contradicting itself.
+    note.innerHTML = `<ul class="why">
+        ${t.born ? "" : `<li><span>Ordinary ${esc(t.name.toLowerCase())}</span><b>${esc(st.ordinary)}</b></li>`}
+        <li><span>${esc(t.absolute)}${t.born ? " — born Absolute" : " (Absolute)"}</span><b>${
+          dead ? "no effect" : st.id === "vulnerable" ? "still doubled" : `${red} off`}</b></li>
+      </ul>
+      ${t.note ? `<p class="hint${dead ? " hot" : ""}">${esc(t.note)}</p>` : ""}
+      ${dead ? `<p class="hint hot">Recorded all the same — it is true of this character, and the
+        sheet saying it does nothing is more use at a table than the sheet refusing it.</p>` : ""}`;
+  };
+  draw();
+  type.onchange = draw;
+  standing.onchange = draw;
+
+  document.getElementById("df").onsubmit = ev => {
+    ev.preventDefault();
+    const durVal = document.getElementById("dfDur").value;
+    const row = {
+      id: cur?.id || `df:${uid()}`, type: type.value, standing: standing.value,
+      why: document.getElementById("dfWhy").value.trim(),
+      rounds: durVal ? Number(durVal) : null, active: true,
+    };
+    closeDialog();
+    // Written back as a LIST however it was stored, which is what migrates a sheet saved under the
+    // old one-standing-per-type map: it is read in that shape and saved in this one.
+    mutate(s => {
+      const list = rules.defenceRecords(s).filter(r => r.id !== row.id);
+      s.defences = [...list, row];
+    });
+    toast(`${rules.DAMAGE_BY_ID[row.type].name} — ${rules.STANDING_BY_ID[row.standing].name.toLowerCase()}${
+      row.rounds == null ? "" : `, ${row.rounds} round${row.rounds === 1 ? "" : "s"}`}.`);
+  };
+}
+
+// A sense, with the six standard ones as one-click fills. The range is editable because an ancestry
+// and a spell hand out the same sense at different distances.
+function senseDialog(i) {
+  const list = rules.senseList(ch());
+  const cur = i >= 0 ? list[i] : null;
+  dialog(cur ? cur.name : "Add a sense",
+    `<div class="chips snq">${rules.SENSES.map(s =>
+      `<button type="button" class="chip" data-sn="${s.id}">${esc(s.name)} ${s.range} ft</button>`).join("")}</div>
+    <form class="fields" id="sf">
+      <label>What it is<input class="txt" id="sfName" maxlength="40" required autocomplete="off"
+        value="${esc(cur?.name || "")}"></label>
+      <label>Range in feet<input class="txt" id="sfRange" type="number" min="0" max="999"
+        value="${cur?.range || 0}"></label>
+      <label>Where it comes from<input class="txt" id="sfWhy" maxlength="60" autocomplete="off"
+        value="${esc(cur?.why || "")}" placeholder="Drow, a Grimm's gift, a potion…"></label>
+      <button class="btn pri" type="submit">${cur ? "Save" : "Add"}</button></form>
+    <p class="hint">The six above fill both boxes at their standard range — change the number where
+      your version differs. A range of 0 is shown as the sense alone.</p>`, {
+      footer: cur ? `<button class="btn sm warn" data-act="sense-del" data-id="${i}">Remove</button>
+        <span class="sp"></span><button class="btn sm" data-act="dlg-close">Done</button>` : "",
+    });
+
+  document.querySelectorAll(".snq [data-sn]").forEach(b => b.onclick = () => {
+    const s = rules.SENSE_BY_ID[b.dataset.sn];
+    document.getElementById("sfName").value = s.name;
+    document.getElementById("sfRange").value = s.range;
+    document.getElementById("sfName").focus();
+  });
+
+  document.getElementById("sf").onsubmit = ev => {
+    ev.preventDefault();
+    const name = document.getElementById("sfName").value.trim();
+    if (!name) return;
+    const row = {
+      id: rules.SENSES.find(s => s.name === name)?.id || `x:${uid()}`,
+      name,
+      range: Math.max(0, Math.min(999, Number(document.getElementById("sfRange").value) || 0)),
+      why: document.getElementById("sfWhy").value.trim(),
+    };
+    closeDialog();
+    mutate(s => {
+      const next = [...(s.senses || [])];
+      if (i >= 0) next[i] = row; else next.push(row);
+      s.senses = next;
+    });
+  };
+}
+
+// One die of Inspiration: take one, or spend one you hold. Both live in the same popover because
+// they are the same gesture on the same die — which is how Juan asked for it, and it is right: the
+// question "do I have a d6" and the act of using it should not be two different journeys.
+function inspirationPop(die, { rolled = null, reopen = false } = {}) {
+  // Every path here redraws the sheet first, which replaces the button this hangs from, so the
+  // anchor is found rather than passed. Opening a pinned pop with the same key TOGGLES it shut,
+  // which is what the die wants and the opposite of what a spend wants.
+  const el = document.querySelector(`[data-act="insp"][data-id="${die}"]`);
+  if (!el) return;
+  if (reopen) closePop(true);
+  const c = ch();
+  const mine = rules.inspirationOf(c, die);
+  const next = rules.inspirationNext(c, die);
+
+  popAt(el, `<div class="pop-h"><b>${esc(die)}</b>
+      ${mine.length ? `<span class="tag">${mine.length} held</span>` : ""}</div>
+    <div class="pop-b">
+      ${rolled ? `<div class="hd-roll"><b>${rolled.total}</b>
+        <span>${esc(rolled.die)}${rolled.why ? ` — ${esc(rolled.why)}` : ""} · spent</span></div>` : ""}
+      ${mine.length ? `<div class="chips">${mine.map(d =>
+        `<button class="chip on" data-act="insp-open" data-id="${esc(d.id)}"
+          title="${esc(d.why || "No source recorded")}">${d.rounds == null ? "until used" : `${d.rounds}r`}${
+          d.why ? ` · ${esc(d.why)}` : ""}</button>`).join("")}</div>` : ""}
+      <label class="ck-col">How long it lasts<select class="txt" id="inspDur">
+          <option value="">Until used</option>
+          <option value="1">1 round</option><option value="2">2 rounds</option>
+          <option value="3">3 rounds</option><option value="10">10 rounds (1 minute)</option>
+          <option value="100">100 rounds (10 minutes)</option>
+        </select></label>
+      <label class="ck-col">Where it came from<input class="txt" id="inspWhy" maxlength="40"
+        autocomplete="off" placeholder="Bless, Bardic Inspiration, a DM's nod…"></label>
+    </div>
+    <div class="pop-f">
+      <button class="btn sm pri" data-act="insp-add" data-id="${esc(die)}">Take a ${esc(die)}</button>
+      <button class="btn sm" data-act="insp-spend" data-id="${esc(die)}" ${mine.length ? "" : "disabled"}
+        title="${esc(next ? `Rolls it and lets it go — ${next.why || "unnamed"}${
+          next.rounds == null ? ", until used" : `, ${next.rounds}r left`}` : `No ${die} to spend`)}">Spend</button>
+    </div>
+    ${mine.length > 1 ? `<p class="hint">Spend takes the one about to run out — a die with rounds on
+      it is worth less than one that waits. Pick a particular one above to spend that instead.</p>` : ""}`,
+    { pin: true, key: `inspd:${die}` });
+}
+
 function grantDialog() {
   dialog("Another one this turn", `<form class="fields" id="gf">
       <label>What you get more of<select class="txt" id="gfKind">${rules.TURN_KINDS.map(k =>

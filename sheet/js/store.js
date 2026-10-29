@@ -18,6 +18,11 @@ export const state = {
   view: "combat",      // which centre tab
   inInsomnia: false,   // where the character is standing, which the attunement rules care about
   classPlan: null,     // what the classes imply, derived; null until the catalogue has answered
+  // What is hitting you. Session state, never the character's: the type of the next blow is a fact
+  // about the dragon, not about the person taking it. It sticks between hits, because a dragon
+  // tends to breathe twice.
+  dmgType: "",         // a damage type id, or "" for untyped — nothing is mitigated while it is ""
+  dmgAbsolute: false,  // the incoming hit arrives Absolute (a seal from Rank IV, or sooner)
   // Ephemer's own systems, which live on the ACCOUNT rather than on the character — the DM grants
   // them to a player, not to a sheet. Null until the Dream tab has asked for them once.
   cognitions: null,    // the Cognitions this account has been granted
@@ -102,8 +107,12 @@ function normalise(character) {
                    "coins"])
     sheet[k] = { ...blank[k], ...(character.sheet?.[k] || {}) };
   for (const k of ["modifiers", "actions", "grants", "injuries", "attacks", "features", "inventory",
-                   "attuned", "conditions", "carried", "anatomy"])
+                   "attuned", "conditions", "carried", "anatomy", "senses", "inspiration"])
     sheet[k] = Array.isArray(character.sheet?.[k]) ? character.sheet[k] : (blank[k] || []);
+  // `defences` was a map keyed by damage type before a defence could run out, and the engine still
+  // reads that shape — so an older sheet is left exactly as it is rather than emptied here. The
+  // first edit writes the list back.
+  sheet.defences = character.sheet?.defences ?? blank.defences;
   return { ...character, sheet };
 }
 
