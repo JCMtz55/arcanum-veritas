@@ -75,12 +75,16 @@ export async function syncClasses(nextClasses, write) {
     const pool = rules.hitDicePool(classes, defs);
     if (pool) s.hitDice = pool;
     // Saving throws come from the FIRST class only: 2014 multiclassing grants armour, weapons and
-    // tools, never a second set of saves. Nothing on the sheet sets them by hand, so they are
-    // derived outright rather than merged with something a player might have typed.
+    // tools, never a second set of saves. They live in `savesFromClass`, derived and rewritten
+    // whole, so that **what a player set by hand survives a class change** — Resilient, an
+    // ancestry, a Grimm, a DM's word (Juan, 2026-10-29). `saves` is theirs alone now.
+    //
+    // A sheet saved before that split has its class's saves sitting in `saves` with no list beside
+    // them: there is no way to tell those from a hand-set one, so the first sync after the upgrade
+    // clears them exactly as every sync used to, and from then on the two are kept apart.
     if (primary) {
-      s.saves = s.saves || {};
-      for (const id of Object.keys(s.saves)) delete s.saves[id];
-      for (const id of prof.saves) s.saves[id] = true;
+      if (!Array.isArray(s.savesFromClass)) s.saves = {};
+      s.savesFromClass = [...prof.saves];
       s.skillChoices = prof.skills.length ? { from: prof.skills, pick: primary.numSkills || 0 } : null;
     }
     // Slots are written only where they are known exactly. With two casting classes the 2014

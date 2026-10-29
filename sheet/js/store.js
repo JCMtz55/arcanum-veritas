@@ -107,7 +107,8 @@ function normalise(character) {
                    "coins"])
     sheet[k] = { ...blank[k], ...(character.sheet?.[k] || {}) };
   for (const k of ["modifiers", "actions", "grants", "injuries", "attacks", "features", "inventory",
-                   "attuned", "conditions", "carried", "anatomy", "senses", "inspiration"])
+                   "attuned", "conditions", "carried", "anatomy", "senses", "inspiration",
+                   "savesFromClass"])
     sheet[k] = Array.isArray(character.sheet?.[k]) ? character.sheet[k] : (blank[k] || []);
   // `defences` was a map keyed by damage type before a defence could run out, and the engine still
   // reads that shape — so an older sheet is left exactly as it is rather than emptied here. The

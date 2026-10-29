@@ -131,6 +131,23 @@ function renderLeft() {
   // Anything granted to every ability check, which the CHECK button carries and the score and the
   // save do not — a bonus to checks is not a bonus to the ability.
   const onCheck = rules.abilityCheckContributions(ch);
+  // The save's own pip, which is the one proficiency on this sheet that had no control at all:
+  // saves were whatever the first class granted, and a Resilient feat, an ancestry or a DM's word
+  // could not be written down (Juan, 2026-10-29). Its own button, left of the number, because the
+  // number rolls — and a button cannot contain a button.
+  const savePip = (c, id, name) => {
+    const src = rules.saveProficiencySource(c, id);
+    const on = src === "class" || src === "hand";
+    const why = { class: `Proficient — from your class. Click to take it away.`,
+      hand: `Proficient — set by hand. Click to clear it.`,
+      removed: `Your class grants this one and it has been taken away by hand. Click to restore it.`,
+      none: `Not proficient in ${name} saves. Click if you are.` }[src];
+    return `<button class="ab2-prof ${on ? "on" : ""}${src === "hand" ? " hand" : ""}${
+      src === "removed" ? " off" : ""}" data-act="save-prof" data-id="${id}"
+      title="${esc(why)}" aria-pressed="${on ? "true" : "false"}"
+      aria-label="${esc(`${name} save proficiency`)}">${on ? "●" : src === "removed" ? "◌" : "○"}</button>`;
+  };
+
   const ability = id => {
     const score = rules.abilityScore(ch, id);
     const mod = rules.abilityCheckTotal(ch, id);
@@ -138,6 +155,7 @@ function renderLeft() {
     const buffed = score !== base;
     const dm = id === "dream";
     const name = rules.ABILITY_NAME[id];
+    const prof = rules.saveProficient(ch, id);
     const onScore = buffsOn(ch, `ability:${id}`);
     // This save's own effects AND anything granted to all of them, so the mark on the number and
     // the tooltip under it answer "why is my save +9" whichever way the bonus was written.
@@ -151,8 +169,9 @@ function renderLeft() {
         title="${esc(buffTitle(dm ? `Dream is your DM's to set — base ${base}`
           : `Set the score, or add an effect — base ${base}`, onScore))}"
         ${dm ? "disabled" : ""}>${score}${buffMark(onScore)}</button>
-      <button class="ab2-save ${ch.saves?.[id] ? "on" : ""}" data-act="roll-save" data-id="${id}"
-        title="${esc(buffTitle(`${name} saving throw${ch.saves?.[id] ? " · proficient" : ""}`,
+      ${savePip(ch, id, name)}
+      <button class="ab2-save ${prof ? "on" : ""}" data-act="roll-save" data-id="${id}"
+        title="${esc(buffTitle(`${name} saving throw${prof ? " · proficient" : ""}`,
           [...onSave, ...onScore]))}">${sign(rules.saveTotal(ch, id))}${buffMark(onSave)}</button>
     </div>`;
   };
@@ -184,7 +203,7 @@ function renderLeft() {
   $("left").innerHTML = `
     <div class="zone-h"><h2>Scores</h2><span class="pbtag" title="Proficiency bonus">PB ${sign(pb)}</span></div>
     <div class="abs">${rules.ABILITIES.map(ability).join("")}</div>
-    <div class="legend"><i>mod</i><i>score</i><i>save</i></div>
+    <div class="legend"><i>mod</i><i>score</i><i></i><i>save</i></div>
 
     <div class="zone-h"><h2>Skills</h2>
       <input class="txt sm" id="skillQ" placeholder="Find" value="${esc(state.skillQuery || "")}"

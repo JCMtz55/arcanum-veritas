@@ -191,10 +191,31 @@ export function skillContributions(ch, skillId) {
 // throws" is six too many, and an ITEM could not say it at all — its effects are the same
 // `{target, amount}` pairs, so a cloak had no way to reach more than one save (Juan, 2026-10-29).
 export const SAVE_ALL = "save:all";
+// Whether this save is proficient, which has TWO sources and keeps them apart (Juan, 2026-10-29:
+// "where is proficiency for saving throws?" — there was nowhere, and a class was the only thing
+// that could grant one).
+//
+// `savesFromClass` is derived and rewritten whole every time the class list changes; `saves` is
+// what a hand set. A hand-set `true` adds one the class never gave — **Resilient**, an ancestry, a
+// Grimm, a DM's word — and a hand-set `false` takes away one it did, which is why this is three
+// states and not a boolean. Absent means "whatever the class says", so changing class moves it.
+export function saveProficient(ch, abilityId) {
+  const own = ch?.saves?.[abilityId];
+  if (own === true || own === false) return own;
+  return (ch?.savesFromClass || []).includes(abilityId);
+}
+export function saveProficiencySource(ch, abilityId) {
+  const own = ch?.saves?.[abilityId];
+  const fromClass = (ch?.savesFromClass || []).includes(abilityId);
+  if (own === true) return fromClass ? "class" : "hand";
+  if (own === false) return "removed";
+  return fromClass ? "class" : "none";
+}
+
 export function saveTotal(ch, abilityId) {
   const mods = activeModifiers(ch);
   return abilityModifier(ch, abilityId)
-    + (ch.saves?.[abilityId] ? proficiencyBonus(ch.level) : 0)
+    + (saveProficient(ch, abilityId) ? proficiencyBonus(ch.level) : 0)
     + modifierTotal(mods, `save:${abilityId}`)
     + modifierTotal(mods, SAVE_ALL);
 }
@@ -1736,7 +1757,9 @@ export function blankCharacter() {
   return {
     name: "", level: 1, classes: [], ancestry: "", background: "",
     abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, dream: DREAM_START },
-    saves: {}, skills: {}, skillAbility: {},
+    // `saves` is what a hand set — true adds one, false takes one away; `savesFromClass` is
+    // derived from the first class and rewritten whole. See saveProficient.
+    saves: {}, savesFromClass: [], skills: {}, skillAbility: {},
     hp: 1, maxHp: 1, tempHp: 0, ac: 10, speed: 30, hitDice: "", hitDiceUsed: {},
     deathSaveSuccesses: 0, deathSaveFailures: 0,
     exhaustion: 0, dreamExhaustion: 0, wounds: 0, injuries: [], safeHavenRests: 0,

@@ -297,6 +297,19 @@ const ACTS = {
     const id = el.dataset.id;
     mutate(s => { s.skills[id] = ((Number(s.skills[id]) || 0) + 1) % 3; });
   },
+  // A save's proficiency, which only a class could grant until now. Writing the state back as
+  // "whatever the class says" when it AGREES with the class is what keeps a hand-set record from
+  // outliving the reason for it: pick up Resilient, change class to one that grants the same save,
+  // and the hand-set copy quietly disappears rather than surviving the next class change too.
+  "save-prof": el => {
+    const id = el.dataset.id;
+    const next = !rules.saveProficient(ch(), id);
+    mutate(s => {
+      s.saves = { ...(s.saves || {}) };
+      if (next === (s.savesFromClass || []).includes(id)) delete s.saves[id];
+      else s.saves[id] = next;
+    });
+  },
   "pick-skill-ability": (el, e) => {
     e.stopPropagation();
     const id = el.dataset.id, sk = rules.SKILL_BY_ID[id];

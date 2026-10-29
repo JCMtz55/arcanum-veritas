@@ -1350,6 +1350,44 @@ test("a save bonus can be written once and reach all seven", () => {
   assert.equal(R.saveContributions(cloaked, "cha")[0].reason, "Cloak of Protection");
 });
 
+// ── Save proficiency has two sources ────────────────────────────────────
+// A class grants two and nothing else could, so Resilient, an ancestry, a Grimm or a DM's word had
+// nowhere to go — and a hand-set one was wiped the next time the class list changed.
+test("a save proficiency can be granted by the class or set by hand, and they survive each other", () => {
+  const fighter = pc({ level: 9, abilities: { con: 14 }, savesFromClass: ["str", "con"] });
+  assert.equal(R.saveProficient(fighter, "con"), true);
+  assert.equal(R.saveProficient(fighter, "wis"), false);
+  assert.equal(R.saveTotal(fighter, "con"), 6, "+2 Constitution, +4 proficiency");
+  assert.equal(R.saveTotal(fighter, "wis"), 0);
+
+  // Resilient (Wisdom): the class never granted it, so it is a hand-set true.
+  const resilient = { ...fighter, saves: { wis: true } };
+  assert.equal(R.saveProficient(resilient, "wis"), true);
+  assert.equal(R.saveTotal(resilient, "wis"), 4);
+  assert.equal(R.saveProficiencySource(resilient, "wis"), "hand");
+  assert.equal(R.saveProficiencySource(resilient, "con"), "class");
+
+  // And the other direction: one the class granted, taken away by hand.
+  const cursed = { ...fighter, saves: { con: false } };
+  assert.equal(R.saveProficient(cursed, "con"), false);
+  assert.equal(R.saveTotal(cursed, "con"), 2);
+  assert.equal(R.saveProficiencySource(cursed, "con"), "removed");
+
+  // Absent means "whatever the class says", so a class change moves it and the hand-set one stays.
+  const reclassed = { ...resilient, savesFromClass: ["dex", "int"] };
+  assert.equal(R.saveProficient(reclassed, "con"), false, "the old class's is gone");
+  assert.equal(R.saveProficient(reclassed, "dex"), true, "the new class's is here");
+  assert.equal(R.saveProficient(reclassed, "wis"), true, "and Resilient survived it");
+
+  // A sheet saved before the split has its class's saves in `saves` and no list beside them —
+  // read exactly as they always were.
+  const old = pc({ level: 9, saves: { str: true, con: true } });
+  assert.equal(R.saveProficient(old, "con"), true);
+  assert.equal(R.saveProficient(old, "wis"), false);
+  assert.equal(R.saveProficiencySource(old, "con"), "hand");
+  assert.deepEqual(R.blankCharacter().savesFromClass, []);
+});
+
 // ── A bonus to every check, and to every skill ──────────────────────────
 // The same gap on the other side of the sheet, and the distinction 5e makes: a SKILL check is an
 // ABILITY check, so `check:all` reaches the skills and `skill:all` stops at them.

@@ -70,7 +70,10 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 
 /* ── left: the seven scores ──────────────────────────────────────────── */
 .abs{display:flex;flex-direction:column;gap:4px}
-.ab2{display:grid;grid-template-columns:1fr 46px 42px;gap:4px}
+/* Four cells since 2026-10-29: the save's proficiency pip sits between the score and the save,
+   attached to the number it changes. It is the skills' own `.sk-prof` idiom — a bare circle, no
+   box — so it reads as a mark on the row rather than a fourth button competing with three. */
+.ab2{display:grid;grid-template-columns:1fr 44px 16px 42px;gap:4px;align-items:stretch}
 .ab2 button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 6px;
   display:flex;align-items:center;gap:5px;min-height:34px}
 .ab2 button:hover:not(:disabled){border-color:var(--mute)}
@@ -83,10 +86,20 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 .ab2-score{color:var(--bone2)}
 .ab2-save{font-size:12px;color:var(--mute)}
 .ab2-save.on{color:var(--bone);border-color:var(--brass);background:rgba(176,136,66,.14)}
+/* The pip overrides `.ab2 button`: no panel, no border, no 34px floor — it is a mark, not a key. */
+.ab2 .ab2-prof{background:none;border:0;padding:0;min-height:0;justify-content:center;
+  color:#4f5761;font-size:10px;line-height:1;border-radius:5px}
+.ab2 .ab2-prof:hover{background:var(--panel2);color:var(--bone2)}
+.ab2 .ab2-prof.on{color:var(--brass)}
+/* Set by hand rather than granted by the class — verdant, the colour this sheet already uses for
+   "someone chose this", and the same one expertise wears in the skills. */
+.ab2 .ab2-prof.on.hand{color:var(--verdant)}
+/* Granted by the class and taken away by hand: present, visibly off. */
+.ab2 .ab2-prof.off{color:#6b4a3a}
 .ab2.dream .ab2-roll b{color:var(--dream)}
 .ab2.dream .ab2-roll i{color:#7fbfd6}
 .ab2.buffed .ab2-score{color:var(--verdant);border-color:#3f8065}
-.legend{display:grid;grid-template-columns:1fr 46px 42px;gap:4px;margin-top:3px}
+.legend{display:grid;grid-template-columns:1fr 44px 16px 42px;gap:4px;margin-top:3px}
 .legend i{font-style:normal;font-family:var(--sans);font-size:8px;text-transform:uppercase;
   letter-spacing:.1em;color:#5d656e;text-align:center}
 .legend i:first-child{text-align:right}
