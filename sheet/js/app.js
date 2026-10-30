@@ -1474,8 +1474,15 @@ function itemDialog(where) {
     document.querySelectorAll("[data-fx]").forEach(row => {
       const i = Number(row.dataset.fx);
       if (!d.effects[i]) return;
-      d.effects[i] = { target: row.querySelector("select").value,
-        amount: Number(row.querySelector("input").value) || 0 };
+      // Which controls are in the row depends on whether this one is derived, so each is read by
+      // its own class rather than by position — `querySelector("select")` used to mean the target
+      // and would now mean whichever select came first.
+      const from = row.querySelector(".fx-f").value;
+      d.effects[i] = from
+        ? { target: row.querySelector(".fx-t").value, amount: 0,
+            from, times: Number(row.querySelector(".fx-x")?.value) || 1 }
+        : { target: row.querySelector(".fx-t").value,
+            amount: Number(row.querySelector(".fx-a")?.value) || 0 };
     });
   };
 
@@ -1512,14 +1519,28 @@ function itemDialog(where) {
           <div class="zone-h sm"><h4>What it does to your numbers</h4></div>
           ${d.effects.length ? d.effects.map((e, i) => `
             <div class="fx" data-fx="${i}">
-              <select class="txt">${MOD_TARGETS.map(t =>
+              <select class="txt fx-t">${MOD_TARGETS.map(t =>
                 `<option value="${t.value}" ${t.value === e.target ? "selected" : ""}>${esc(t.label)}</option>`).join("")}</select>
-              <input class="txt" type="number" min="-20" max="20" value="${e.amount}">
+              <select class="txt fx-f" data-fx-from="${i}">
+                <option value="">a flat number</option>
+                ${rules.DERIVE_FROM.map(s =>
+                  `<option value="${s.id}" ${s.id === e.from ? "selected" : ""}>my ${esc(s.name)}</option>`).join("")}
+              </select>
+              ${e.from
+                ? `<select class="txt fx-x">${rules.DERIVE_TIMES.map(t =>
+                    `<option value="${t.value}" ${t.value === (Number(e.times) || 1) ? "selected" : ""}>${
+                      esc(t.name ? `${t.name} it` : "just it")}</option>`).join("")}
+                   </select>
+                   <span class="fx2-n">= ${sign(rules.modifierAmount(ch(), e))}</span>`
+                : `<input class="txt fx-a" type="number" min="-20" max="20" value="${e.amount}">`}
               <button class="x" type="button" data-fx-del="${i}" aria-label="Remove this effect">×</button>
             </div>`).join("")
             : `<p class="hint">Nothing yet. Add one and it counts the moment the item is in a
                slot — the same path a hand-written effect takes, so it shows in the breakdown with
                the item's own name on it.</p>`}
+          ${d.effects.some(e => e.from) ? `<p class="hint">A derived amount is worked out every time
+            the number is read, so it follows the score behind it — and it only counts while the
+            item is in a slot, like any other effect of its.</p>` : ""}
           <button class="btn sm" type="button" id="itFxAdd">+ Add an effect</button>
           <button class="btn pri" type="submit">Save</button>
         </form>`,
@@ -1538,6 +1559,9 @@ function itemDialog(where) {
     dlg.querySelectorAll("[data-fx-del]").forEach(b => b.onclick = () => {
       collect(); d.effects.splice(Number(b.dataset.fxDel), 1); draw();
     });
+    // Choosing a source swaps the number box for a multiplier, so the row is redrawn — collect
+    // first, exactly as the flags and the delete do, or the other rows lose what was typed in them.
+    dlg.querySelectorAll("[data-fx-from]").forEach(s => s.onchange = () => { collect(); draw(); });
     document.getElementById("itFxAdd").onclick = () => {
       collect(); d.effects.push({ target: "ac", amount: 1 }); draw();
     };
@@ -1572,7 +1596,9 @@ function itemDialog(where) {
       notes: d.notes, magical: d.magical, requiresAttunement: d.requiresAttunement,
       attuned: d.attuned, insomniaOnly: d.insomniaOnly,
       charges: d.charges.max ? { ...d.charges } : null,
-      effects: d.effects.filter(e => e.target && e.amount) };
+      // A DERIVED effect has no amount of its own — dropping anything falsy here would throw every
+      // one of them away on the way to being saved, which is the same trap `itemEffectList` had.
+      effects: d.effects.filter(e => e.target && (e.from || e.amount)) };
     if (isNew) mutate(s => { s.carried = [...(s.carried || []), item]; });
     else if (slotId) mutate(s => { s.equipment = { ...(s.equipment || {}), [slotId]: item }; });
     else mutate(s => { s.carried = (s.carried || []).map((x, i) => (i === found.index ? item : x)); });
@@ -1585,10 +1611,22 @@ function itemDialog(where) {
 // A named change with a reason and a duration. The reason is not optional dressing — it is the whole
 // point of the feature: six weeks later a +2 nobody can explain is worse than no +2 at all.
 function modifierDialog() {
+  const c = ch();
   dialog("Add an effect", `<form class="fields" id="mf">
       <label>What it changes<select class="txt" id="mfT">${MOD_TARGETS.map(t =>
         `<option value="${esc(t.value)}">${esc(t.label)}</option>`).join("")}</select></label>
-      <label>By how much<input class="txt" id="mfA" type="number" value="1" min="-30" max="30" required></label>
+      <label>By how much<select class="txt" id="mfF">
+          <option value="">a flat number</option>
+          ${rules.DERIVE_FROM.map(d => `<option value="${d.id}">my ${esc(d.name)}</option>`).join("")}
+        </select></label>
+      <div class="fx2">
+        <input class="txt" id="mfA" type="number" value="1" min="-30" max="30" required
+          aria-label="How much">
+        <select class="txt" id="mfX" hidden aria-label="How many times">${rules.DERIVE_TIMES.map(t =>
+          `<option value="${t.value}" ${t.value === 1 ? "selected" : ""}>${
+            esc(t.name ? `${t.name} it` : "just it")}</option>`).join("")}</select>
+        <span class="fx2-n" id="mfNow"></span>
+      </div>
       <label>Why<input class="txt" id="mfR" maxlength="80" required placeholder="Shield of Faith, Bless, a curse…"></label>
       <label>For how long<select class="txt" id="mfD">
           <option value="">Until I remove it</option>
@@ -1598,17 +1636,46 @@ function modifierDialog() {
         </select></label>
       <button class="btn pri" type="submit">Add</button></form>
     <p class="hint">Your base scores are never changed — removing an effect puts everything back.
-      Timed effects count down when you confirm a round.</p>`);
+      Timed effects count down when you confirm a round.</p>
+    <p class="hint" id="mfWhy">A derived amount is worked out <b>every time the number is read</b>,
+      so it follows the score behind it — raise the Charisma it leans on, or gain a level, and it
+      moves on its own. Halves round down. It is measured against your scores as they stand, minus
+      any other derived effect.</p>`);
+
+  const from = document.getElementById("mfF");
+  const flat = document.getElementById("mfA");
+  const times = document.getElementById("mfX");
+  const now = document.getElementById("mfNow");
+  const why = document.getElementById("mfWhy");
+  // What it is worth RIGHT NOW, beside the control that decides it — a derived amount is the one
+  // kind of effect you cannot check by reading it back.
+  const draw = () => {
+    const derived = !!from.value;
+    flat.hidden = derived;
+    flat.required = !derived;
+    times.hidden = !derived;
+    why.hidden = !derived;
+    now.textContent = derived
+      ? `= ${sign(rules.modifierAmount(c, { from: from.value, times: Number(times.value) }))} right now`
+      : "";
+  };
+  draw();
+  from.onchange = draw;
+  times.onchange = draw;
+
   document.getElementById("mf").onsubmit = ev => {
     ev.preventDefault();
     const reason = document.getElementById("mfR").value.trim();
-    const amount = Number(document.getElementById("mfA").value) || 0;
-    if (!reason || !amount) return toast("An effect needs an amount and a reason.");
+    const derived = from.value;
+    const amount = derived ? 0 : Number(flat.value) || 0;
+    if (!reason || (!derived && !amount)) return toast("An effect needs an amount and a reason.");
     const rounds = document.getElementById("mfD").value ? Number(document.getElementById("mfD").value) : null;
-    const m = { id: uid(), target: document.getElementById("mfT").value, amount, reason, rounds, active: true };
+    const m = { id: uid(), target: document.getElementById("mfT").value, amount, reason, rounds,
+      active: true, ...(derived ? { from: derived, times: Number(times.value) || 1 } : {}) };
     closeDialog();
     mutate(s => { s.modifiers = [...(s.modifiers || []), m]; });
-    toast(`${sign(amount)} ${targetLabel(m.target)} — ${reason}`);
+    toast(`${sign(rules.modifierAmount(ch(), m))} ${targetLabel(m.target)} — ${reason}${
+      derived ? ` (${rules.derivationLabel(m)})` : ""}`);
   };
 }
 

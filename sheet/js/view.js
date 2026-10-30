@@ -119,7 +119,8 @@ export function buffMark(list) {
 export function buffTitle(base, list) {
   if (!list.length) return base;
   return `${base}\n` + list.map(c =>
-    `${sign(c.amount)} ${c.reason || "unnamed"} — ${c.permanent ? "lasting" : `${c.rounds} round${c.rounds === 1 ? "" : "s"}`}`).join("\n");
+    `${sign(c.amount)} ${c.reason || "unnamed"}${c.from ? ` (${rules.derivationLabel(c)})` : ""} — ${
+      c.permanent ? "lasting" : `${c.rounds} round${c.rounds === 1 ? "" : "s"}`}`).join("\n");
 }
 
 // ── left: the seven scores, saves, skills ───────────────────────────────
@@ -1080,7 +1081,10 @@ export const ACTION_COST = {
 function itemLine(ch, r) {
   const fx = rules.itemEffectList(r.item);
   const live = rules.itemIsActive(ch, r.item, r.where);
-  const bits = fx.map(e => `${sign(e.amount)} ${targetLabel(e.target)}`);
+  // A derived one is printed at what it is worth RIGHT NOW, with the short form of where it comes
+  // from after it — "+4 AC 2×PB" — since the number alone would look typed.
+  const bits = fx.map(e => `${sign(rules.modifierAmount(ch, e))} ${targetLabel(e.target)}${
+    e.from ? ` ${rules.derivationShort(e)}` : ""}`);
   if (r.item.qty > 1) bits.unshift(`×${r.item.qty}`);
   if (r.item.weight) bits.push(`${rules.itemWeightTotal(r.item)} lb`);
   if (!bits.length) return r.item.notes ? esc(r.item.notes) : "";
@@ -1224,9 +1228,10 @@ function lastingCard(ch) {
   const fromItems = all.filter(rules.isItemModifier);
   const written = all.filter(m => !rules.isItemModifier(m));
 
-  const row = m => `<div class="mod${rules.isItemModifier(m) ? " item" : ""}">
-    <span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
-    <span class="mod-w" title="${esc(m.reason)}">${esc(m.reason)}</span>
+  const row = m => `<div class="mod${rules.isItemModifier(m) ? " item" : ""}${m.from ? " derived" : ""}">
+    <span class="mod-n" title="${esc(m.from ? rules.derivationLabel(m) : "")}">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
+    <span class="mod-w" title="${esc(m.from ? `${m.reason} — ${rules.derivationLabel(m)}` : m.reason)}">${esc(m.reason)}${
+      m.from ? ` <em class="mod-d">${esc(rules.derivationLabel(m))}</em>` : ""}</span>
     ${rules.isItemModifier(m)
       ? `<span class="mod-r" title="Worn — it goes when the item does">${icon("gear")}</span><span class="x"></span>`
       : `<span class="mod-r" title="No duration — it does not expire">${icon("lasting")}</span>
@@ -1456,9 +1461,9 @@ function renderRight() {
         <button class="btn sm" data-act="end-combat">End combat</button>
       </div>
       ${active.length || timedDefences.length ? `<div class="mods">` + active.map(m => `
-        <div class="mod">
-          <span class="mod-n">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
-          <span class="mod-w" title="${esc(m.reason)}">${esc(m.reason)}</span>
+        <div class="mod${m.from ? " derived" : ""}">
+          <span class="mod-n" title="${esc(m.from ? rules.derivationLabel(m) : "")}">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
+          <span class="mod-w" title="${esc(m.from ? `${m.reason} — ${rules.derivationLabel(m)}` : m.reason)}">${esc(m.reason)}</span>
           <span class="mod-r">${icon("timed")}${m.rounds}r</span>
           <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button></div>`).join("")
         + timedDefences.map(r => `

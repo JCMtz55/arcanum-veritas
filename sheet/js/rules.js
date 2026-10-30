@@ -81,6 +81,9 @@ export const profContribution = (pb, prof) => num(pb) * Math.min(2, Math.max(0, 
 // "save:all" is every saving throw at once — see saveTotal.
 // `rounds` null means permanent. `active: false` is an expired or suspended record kept for history,
 // which is why expiry blanks a modifier in place rather than deleting it.
+//
+// `amount` is a flat number — UNLESS the record carries `from`, in which case the amount is derived
+// and `amount` is ignored (Juan, 2026-10-29). See DERIVE_FROM.
 export function modifierTotal(modifiers, target) {
   return contributions(modifiers, target).reduce((t, m) => t + m.amount, 0);
 }
@@ -91,7 +94,63 @@ export function contributions(modifiers, target) {
     // a thing that is simply true of you read completely differently at the table, and a list that
     // mixes them without saying which is which is a list nobody can act on.
     .map(m => ({ amount: num(m.amount), reason: m.reason || "", rounds: m.rounds ?? null,
-      id: m.id, source: m.source || "", permanent: m.rounds == null }));
+      id: m.id, source: m.source || "", permanent: m.rounds == null,
+      // Carried so the tooltip can say WHY the number is what it is — "+6, twice your proficiency
+      // bonus" — rather than printing a 6 that moves on its own next level.
+      from: m.from || "", times: m.from ? (num(m.times) || 1) : 0 }));
+}
+
+// ── An effect whose amount is derived ───────────────────────────────────
+// "A bonus equal to my Charisma modifier." "Twice my proficiency bonus." Almost every real bonus in
+// this campaign is one of those rather than a number somebody worked out once — Aura of Protection,
+// the Absolute reductions, half your proficiency on a skill — and a number worked out once is wrong
+// the moment the score behind it moves.
+//
+// A record carries `from` (an ability id, or "prof") and `times`; `amount` is then ignored.
+export const DERIVE_FROM = [
+  { id: "prof", name: "proficiency bonus", short: "PB" },
+  ...ABILITIES.map(id => ({ id, name: `${ABILITY_NAME[id]} modifier`, short: ABILITY_NAME[id].slice(0, 3) })),
+];
+export const DERIVE_TIMES = [
+  { value: 0.5, name: "half" }, { value: 1, name: "" },
+  { value: 2, name: "twice" }, { value: 3, name: "three times" },
+];
+
+// WHY THE DERIVED ONES ARE EXCLUDED FROM WHAT A DERIVATION READS. Without this, an effect worth
+// "my Charisma modifier" asks for Charisma, which asks for every modifier on Charisma, which asks
+// for that effect again — and a bonus to Charisma itself worth "my Charisma modifier" would never
+// return at all. So a derivation is measured against the scores as they stand MINUS anything that
+// is itself derived: one level deep, which both terminates and gets the common case right (a flat
+// +2 from a worn belt counts; a second derived effect does not pile on).
+function plainModifiers(ch) {
+  return [...(ch?.modifiers || []), ...itemEffects(ch)].filter(m => m && m.active !== false && !m.from);
+}
+export function deriveValue(ch, from) {
+  if (from === "prof") return proficiencyBonus(ch?.level);
+  if (!ABILITIES.includes(from)) return 0;
+  return abilityMod(num(ch?.abilities?.[from]) + modifierTotal(plainModifiers(ch), `ability:${from}`));
+}
+// Rounded DOWN, which is 5e's rule everywhere and the only one that matters here: half of a +5
+// proficiency bonus is +2.
+export function modifierAmount(ch, m) {
+  if (!m?.from) return num(m?.amount);
+  return Math.floor(deriveValue(ch, m.from) * (num(m.times) || 1));
+}
+// The same thing in the fewest characters, for a line that is already dense: "2×PB", "½×PB", "Cha".
+export function derivationShort(m) {
+  if (!m?.from) return "";
+  const src = DERIVE_FROM.find(d => d.id === m.from);
+  if (!src) return "";
+  const t = num(m.times) || 1;
+  return `${t === 1 ? "" : t === 0.5 ? "½×" : `${t}×`}${src.short}`;
+}
+// "twice your proficiency bonus" — the words under a number that moves on its own.
+export function derivationLabel(m) {
+  if (!m?.from) return "";
+  const src = DERIVE_FROM.find(d => d.id === m.from);
+  if (!src) return "";
+  const times = DERIVE_TIMES.find(t => t.value === (num(m.times) || 1));
+  return `${times?.name ? `${times.name} your` : "your"} ${src.name}`;
 }
 
 // One confirmed round of the character's own tracker. Anything carrying `rounds` counts down and
@@ -678,9 +737,12 @@ export function itemCharges(it) {
 }
 export const itemWeightTotal = it =>
   Math.round(num(it?.weight) * Math.max(1, num(it?.qty) || 1) * 100) / 100;
+// A DERIVED effect carries no amount of its own, so "amount is not zero" would throw every one of
+// them away — an item worth "your proficiency bonus" would simply never appear (Juan, 2026-10-30).
 export const itemEffectList = it =>
-  (it?.effects || []).filter(e => e && e.target && num(e.amount) !== 0)
-    .map(e => ({ target: String(e.target), amount: num(e.amount) }));
+  (it?.effects || []).filter(e => e && e.target && (e.from || num(e.amount) !== 0))
+    .map(e => ({ target: String(e.target), amount: num(e.amount),
+      ...(e.from ? { from: String(e.from), times: num(e.times) || 1 } : {}) }));
 
 // Every item on the character, and where it is, so one piece of code can walk them all. `where` is
 // the address the interface hands back when it wants to change one.
@@ -716,6 +778,9 @@ export function itemEffects(ch) {
     if (!itemIsActive(ch, r.item, r.where)) continue;
     for (const e of itemEffectList(r.item))
       out.push({ id: `itm:${r.where}:${e.target}`, target: e.target, amount: e.amount,
+        // Carried through, so a worn item's effect can be worth a stat exactly as a written one
+        // can — `activeModifiers` resolves both at the same door.
+        ...(e.from ? { from: e.from, times: e.times } : {}),
         reason: r.item.name, rounds: null, active: true, source: "item", where: r.where });
   }
   return out;
@@ -724,7 +789,12 @@ export function itemEffects(ch) {
 // Everything adjusting this character right now: what someone wrote down, and what their equipment
 // implies. Every total in this file reads THIS rather than the stored list, which is why equipping
 // a +1 cloak moves the AC without anything being written into the sheet twice.
-export const activeModifiers = ch => [...(ch?.modifiers || []), ...itemEffects(ch)];
+//
+// It is also where a DERIVED amount becomes a number. Every total, tooltip and roll breakdown on
+// this sheet comes through here, so resolving it once at this door means "equal to my Charisma
+// modifier" reaches all of them and none of them had to learn what `from` means.
+export const activeModifiers = ch => [...(ch?.modifiers || []), ...itemEffects(ch)]
+  .map(m => (m && m.from ? { ...m, amount: modifierAmount(ch, m) } : m));
 export const isItemModifier = m => typeof m?.id === "string" && m.id.startsWith("itm:");
 
 export function spendCharges(it, n = 1) {

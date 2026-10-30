@@ -1350,6 +1350,94 @@ test("a save bonus can be written once and reach all seven", () => {
   assert.equal(R.saveContributions(cloaked, "cha")[0].reason, "Cloak of Protection");
 });
 
+// ── An effect whose amount is derived ───────────────────────────────────
+// "A bonus equal to my Charisma modifier." "Twice my proficiency bonus." (Juan, 2026-10-29.) Almost
+// every real bonus is one of those rather than a number worked out once — and a number worked out
+// once is wrong the moment the score behind it moves.
+test("an effect can be worth an ability modifier or a proficiency bonus, times a multiplier", () => {
+  const pal = pc({ level: 9, abilities: { cha: 18, con: 14 },
+    saves: { cha: true }, savesFromClass: ["wis", "cha"] });
+  assert.equal(R.proficiencyBonus(pal.level), 4);
+
+  const aura = { id: "m1", target: R.SAVE_ALL, from: "cha", times: 1,
+    reason: "Aura of Protection", rounds: null, active: true };
+  assert.equal(R.modifierAmount(pal, aura), 4, "Charisma 18 is +4");
+  assert.equal(R.derivationLabel(aura), "your Charisma modifier");
+
+  const twicePb = { ...aura, id: "m2", from: "prof", times: 2, reason: "a seal's reduction" };
+  assert.equal(R.modifierAmount(pal, twicePb), 8);
+  assert.equal(R.derivationLabel(twicePb), "twice your proficiency bonus");
+  assert.equal(R.derivationLabel({ ...twicePb, times: 0.5 }), "half your proficiency bonus");
+
+  // Halves round down, 5e's rule everywhere.
+  assert.equal(R.modifierAmount({ ...pal, level: 5 }, { from: "prof", times: 0.5 }), 1, "half of +3");
+  assert.equal(R.modifierAmount(pal, { from: "prof", times: 0.5 }), 2, "half of +4");
+
+  // It reaches every total through activeModifiers, so nothing else had to learn what `from` means.
+  const blessed = { ...pal, modifiers: [aura] };
+  assert.equal(R.saveTotal(blessed, "con"), 6, "+2 Constitution, +4 from the aura");
+  assert.equal(R.saveTotal(blessed, "cha"), 12, "+4 Charisma, +4 proficiency, +4 from the aura");
+  assert.equal(R.contributions(R.activeModifiers(blessed), R.SAVE_ALL)[0].amount, 4);
+  assert.equal(R.contributions(R.activeModifiers(blessed), R.SAVE_ALL)[0].from, "cha");
+
+  // It FOLLOWS the score: raise the Charisma and the aura rises with it, which is the whole point.
+  const ascended = { ...blessed, abilities: { ...blessed.abilities, cha: 20 } };
+  assert.equal(R.saveTotal(ascended, "con"), 7);
+  // Including a flat effect on that ability — a worn belt counts.
+  const belted = { ...blessed, modifiers: [aura,
+    { id: "m3", target: "ability:cha", amount: 2, reason: "a belt", rounds: null, active: true }] };
+  assert.equal(R.saveTotal(belted, "con"), 7, "Charisma 20 through the belt is +5");
+
+  // And it TERMINATES, which is the part that could have gone wrong: a derivation is measured
+  // against the scores minus anything itself derived, so neither of these loops.
+  const circular = { ...pal, modifiers: [
+    { id: "a", target: "ability:cha", from: "cha", times: 1, reason: "a strange curse", active: true },
+    { id: "b", target: "save:all", from: "cha", times: 1, reason: "the aura", active: true },
+  ] };
+  assert.equal(R.abilityScore(circular, "cha"), 22, "18 + its own +4, once");
+  assert.equal(R.saveTotal(circular, "con"), 6, "the aura still reads the plain +4, not the +6");
+
+  // A record with no `from` is untouched, and an unknown source is worth nothing.
+  assert.equal(R.modifierAmount(pal, { amount: 3 }), 3);
+  assert.equal(R.modifierAmount(pal, { from: "nonsense", times: 2 }), 0);
+  assert.equal(R.derivationLabel({ amount: 3 }), "");
+});
+
+// An ITEM's effects take a derived amount the same way (Juan, 2026-10-30) — which is the half that
+// needed care, because a derived effect carries no amount and the old filter threw away anything
+// worth zero.
+test("a worn item's effect can be derived too, and only while it is worn", () => {
+  const cloak = { name: "Cloak of the Sworn", equipped: true,
+    effects: [{ target: R.SAVE_ALL, from: "prof", times: 2 }, { target: "ac", amount: 1 }] };
+  const pal = pc({ level: 9, abilities: { cha: 18 }, equipment: { back: cloak } });
+  assert.equal(R.proficiencyBonus(pal.level), 4);
+
+  // It survives the list at all, which it did not before.
+  assert.deepEqual(R.itemEffectList(cloak).map(e => [e.target, e.amount, e.from || "", e.times || 0]),
+    [["save:all", 0, "prof", 2], ["ac", 1, "", 0]]);
+
+  assert.equal(R.saveTotal(pal, "con"), 8, "+8 from twice the proficiency bonus");
+  assert.equal(R.armorClass(pal), 11);
+  const fx = R.contributions(R.activeModifiers(pal), R.SAVE_ALL)[0];
+  assert.equal(fx.amount, 8);
+  assert.equal(fx.reason, "Cloak of the Sworn", "named by the item, as every item effect is");
+  assert.equal(R.derivationShort(fx), "2×PB");
+  assert.equal(R.derivationShort({ from: "cha" }), "Cha");
+  assert.equal(R.derivationShort({ from: "prof", times: 0.5 }), "½×PB");
+
+  // Take it off and both go, derived or not.
+  const off = pc({ level: 9, equipment: { back: { ...cloak, equipped: true, requiresAttunement: true } } });
+  assert.equal(R.saveTotal(off, "con"), 0, "it needs attunement and has none");
+
+  // And a derived item effect is excluded from what another derivation reads, exactly as a written
+  // one is — so an item worth "your Charisma" cannot feed an effect worth "your Charisma".
+  const odd = pc({ level: 9, abilities: { cha: 18 },
+    equipment: { back: { name: "Odd cloak", equipped: true,
+      effects: [{ target: "ability:cha", from: "cha", times: 1 }] } },
+    modifiers: [{ id: "m", target: "save:all", from: "cha", times: 1, reason: "aura", active: true }] });
+  assert.equal(R.saveTotal(odd, "con"), 4, "the aura reads the plain +4, not the cloak's doubling");
+});
+
 // ── Save proficiency has two sources ────────────────────────────────────
 // A class grants two and nothing else could, so Resilient, an ancestry, a Grimm or a DM's word had
 // nowhere to go — and a hand-set one was wiped the next time the class list changed.
