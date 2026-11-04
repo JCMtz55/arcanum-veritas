@@ -32,6 +32,34 @@
   .lib-out{font-family:var(--sans);font-size:11px;color:var(--mute);text-decoration:none;
     border:1px solid var(--line);border-radius:6px;padding:4px 9px;white-space:nowrap}
   .lib-out:hover{color:var(--bone);border-color:var(--mute)}
+
+  /* ── the copy-link button ──────────────────────────────────────────────
+     It sits OVER the frame rather than in the bar, because the bar already carries "Open in a new
+     tab" and two links a hand's width apart read as one choice. Over the frame it reads as a thing
+     you do to what you are looking at.
+
+     `pointer-events:none` on the layer and `auto` on the button: the layer spans the frame only to
+     POSITION the button, and lets every pointer through. Only the button's own 88x29 takes the
+     mouse — without that, the top corner of the Library would be dead to it. */
+  .lib-copy-layer{position:absolute;inset:0;z-index:2;pointer-events:none}
+  .lib-copy{position:absolute;top:10px;right:14px;pointer-events:auto;
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--sans);font-size:11px;color:var(--mute);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+    padding:5px 10px;cursor:pointer;white-space:nowrap;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    opacity:.34;transition:opacity .13s ease,color .13s,border-color .13s}
+  /* ⚠️ IT RESTS AT .34 RATHER THAN 0, AND THAT IS NOT TIMIDITY — IT IS THE IFRAME.
+     A cross-origin frame takes the pointer the moment it enters, and the parent page's `:hover`
+     does not follow it in: `.lib-wrap:hover` never fires while you are reading. A button hidden at
+     0 and revealed by hovering the frame would therefore be invisible and unreachable, every time.
+     So it rests faint over the Library's own margin and comes up full when the pointer reaches IT
+     — which is the same gesture, triggered by the only element that can still feel one. */
+  .lib-copy:hover,.lib-copy:focus-visible{opacity:1;color:var(--bone);border-color:var(--mute)}
+  .lib-copy.done{opacity:1;color:var(--brass);border-color:var(--brass)}
+  /* A pointer that cannot hover never earns the bright state, so a touch screen gets it outright. */
+  @media (hover:none){.lib-copy{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.lib-copy{transition:none}}
 </style>
 </head>
 <body>
@@ -61,6 +89,14 @@
           src="https://publish.obsidian.md/once-upon-a-star"
           referrerpolicy="no-referrer"
           allow="clipboard-write"></iframe>
+  <!-- Over the frame, not in it: this is OUR button on OUR page. The layer is click-through so
+       only the button itself takes the mouse. -->
+  <div class="lib-copy-layer">
+    <button class="lib-copy" id="libCopy" type="button"
+            title="Copy the Library's address — publish.obsidian.md/once-upon-a-star">
+      <span aria-hidden="true">⧉</span><span class="lib-copy-t">Copy link</span>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -74,6 +110,68 @@
   const fit = () => document.documentElement.style.setProperty("--lib-bar", bar.offsetHeight + "px");
   fit();
   new ResizeObserver(fit).observe(bar);
+
+  // ── Copy link ─────────────────────────────────────────────────────────
+  // The address is READ from the bar's own link rather than written here a fifth time. It already
+  // appears in the iframe's src, the fallback and that link; a copy button that is a fifth copy is
+  // a fifth thing to forget when the vault is republished under another name.
+  //
+  // ⚠️ It is deliberately the LIBRARY'S address and not the note being read: this frame is
+  // cross-origin, so the page can never be told which note is open — `contentWindow.location`
+  // throws. Anyone who wants to link one note deep uses Obsidian's own copy-link inside the frame.
+  const copy = document.getElementById("libCopy");
+  const label = copy.querySelector(".lib-copy-t");
+  const href = document.querySelector(".lib-out").href;
+  let back;
+
+  const say = (text, ok) => {
+    clearTimeout(back);
+    label.textContent = text;
+    copy.classList.toggle("done", !!ok);
+    back = setTimeout(() => { label.textContent = "Copy link"; copy.classList.remove("done"); }, 1800);
+  };
+
+  // The last resort, when the browser will not hand over the clipboard at all: put the address on
+  // screen, selected, where the button was. One ctrl+C and it is yours.
+  //
+  // ⚠️ NOT `window.prompt`, which was the first thing written here and threw outright —
+  // "prompt() is not supported" — in the very browser used to test it. A fallback that raises an
+  // exception is worse than no fallback: it fails silently to the reader and loudly to nobody.
+  const offerToCopy = () => {
+    const field = document.createElement("input");
+    field.className = "lib-copy";
+    field.value = href;
+    field.readOnly = true;
+    field.style.cssText = "width:min(320px,60vw);opacity:1;cursor:text";
+    field.addEventListener("blur", () => { field.remove(); copy.hidden = false; }, { once: true });
+    copy.hidden = true;
+    copy.parentNode.appendChild(field);
+    field.focus();
+    field.select();
+  };
+
+  copy.addEventListener("click", async () => {
+    // `writeText` needs a real click behind it, so this only ever runs from one.
+    try {
+      await navigator.clipboard.writeText(href);
+      return say("Copied", true);
+    } catch { /* an insecure origin, a refused permission, or an older browser */ }
+
+    try {
+      const field = document.createElement("input");
+      field.value = href;
+      field.readOnly = true;
+      field.style.cssText = "position:fixed;top:-100px;left:0;opacity:0";
+      document.body.appendChild(field);
+      field.select();
+      const done = document.execCommand && document.execCommand("copy");
+      field.remove();
+      if (done) return say("Copied", true);
+    } catch { /* execCommand is gone in newer browsers; fall through */ }
+
+    say("Press ctrl+C");
+    offerToCopy();
+  });
 </script>
 
 </body>
