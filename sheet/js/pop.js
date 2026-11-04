@@ -178,7 +178,10 @@ export function rollDice(expr, { crit = false } = {}) {
 }
 
 // A d20 check: one die, a modifier, and optional advantage or disadvantage.
-export function rollCheck(modifier, { advantage = false, disadvantage = false } = {}) {
+// `critOn` is the lowest natural roll that counts as a critical hit — 20 unless something has
+// widened the range (CS-097). It is passed in rather than read here, because a d20 does not know
+// whose hand it is in.
+export function rollCheck(modifier, { advantage = false, disadvantage = false, critOn = 20 } = {}) {
   const a = d(20), b = (advantage || disadvantage) ? d(20) : null;
   const natural = b == null ? a : (advantage ? Math.max(a, b) : Math.min(a, b));
   return {
@@ -186,7 +189,8 @@ export function rollCheck(modifier, { advantage = false, disadvantage = false } 
     modifier: Number(modifier) || 0,
     total: natural + (Number(modifier) || 0),
     advantage, disadvantage,
-    crit: natural === 20, fumble: natural === 1,
+    crit: natural >= Math.min(20, Math.max(2, Number(critOn) || 20)), fumble: natural === 1,
+    critOn: Math.min(20, Math.max(2, Number(critOn) || 20)),
   };
 }
 

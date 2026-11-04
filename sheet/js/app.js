@@ -147,9 +147,9 @@ function askNumber(el, { title, value, min = 0, max = 999, hint = "", onSet }) {
 
 // Every d20 roll lands in the same dialog, with its breakdown, and can be rerolled with advantage
 // or disadvantage without re-deriving the modifier.
-function showRoll(label, modifier, breakdown) {
+function showRoll(label, modifier, breakdown, { critOn = 20 } = {}) {
   const draw = opts => {
-    const r = rollCheck(modifier, opts);
+    const r = rollCheck(modifier, { ...opts, critOn });
     const d = dialog(label, rollHtml(r, { label, breakdown }), {
       footer: `<button class="btn sm" data-reroll="adv">Advantage</button>
         <button class="btn sm" data-reroll="dis">Disadvantage</button>
@@ -515,13 +515,17 @@ const ACTS = {
   "atk-add": () => attackDialog(null),
   "atk-del": el => mutate(s => { s.attacks.splice(+el.dataset.id, 1); }),
   "atk-roll": el => {
-    const a = ch().attacks[+el.dataset.id];
-    showRoll(`${a.name || "Attack"} — to hit`, (Number(a.bonus) || 0) + rules.modifierTotal(rules.activeModifiers(ch()), "attack"),
+    const c = ch();
+    // Resolved to the level first, because a stepped weapon's bonus may move with its dice.
+    const a = rules.attackAtLevel(c, c.attacks[+el.dataset.id]);
+    showRoll(`${a.name || "Attack"} — to hit`, (Number(a.bonus) || 0) + rules.modifierTotal(rules.activeModifiers(c), "attack"),
       breakdownFor([{ reason: "Attack bonus", amount: Number(a.bonus) || 0 },
-        ...rules.contributions(rules.activeModifiers(ch()), "attack")]));
+        ...rules.contributions(rules.activeModifiers(c), "attack")]),
+      // A widened critical range belongs to the character, not the die (CS-097).
+      { critOn: rules.critRange(c) });
   },
-  "atk-dmg": el => rollDamage(ch().attacks[+el.dataset.id], false),
-  "atk-crit": el => rollDamage(ch().attacks[+el.dataset.id], true),
+  "atk-dmg": el => rollDamage(rules.attackAtLevel(ch(), ch().attacks[+el.dataset.id]), false),
+  "atk-crit": el => rollDamage(rules.attackAtLevel(ch(), ch().attacks[+el.dataset.id]), true),
 
   // ── action economy ──
   // Clicking the nth pip means "I have spent n+1 of these", and clicking a spent one hands it back
@@ -586,11 +590,15 @@ const ACTS = {
 
   "def-add": () => defenceDialog(""),
   "def-open": el => defenceDialog(el.dataset.id),
+  // A defence the gear grants is not edited here — it is a fact about the item, so the chip opens
+  // the ITEM instead. Taking the armour off is how you remove it, which is the behaviour the whole
+  // of CS-104 is for.
+  "def-item": el => itemDialog(el.dataset.id),
   "def-del": el => {
     closeDialog();
     const id = el.dataset.id;
     const row = rules.defenceRecords(ch()).find(r => r.id === id);
-    mutate(s => { s.defences = rules.defenceRecords(s).filter(r => r.id !== id); });
+    mutate(s => { s.defences = rules.ownDefenceRecords(s).filter(r => r.id !== id); });
     // The chip beside the damage field may now point at a type nothing answers for.
     if (row && state.dmgType === row.type && !rules.defence(ch(), row.type)) state.dmgType = "";
     toast(`${row ? rules.DAMAGE_BY_ID[row.type].name : "That"} — defence removed.`);
@@ -805,7 +813,9 @@ const ACTS = {
     // one place. Defences are read through the engine first, so a sheet still holding the old
     // keyed-by-type map ticks correctly and is written back as a list.
     const insp = rules.tickTimed(c.inspiration, c.round);
-    const defs = rules.tickTimed(rules.defenceRecords(c), c.round);
+    // The character's OWN records only: an item's defence has no fuse to tick and must never be
+    // written onto the sheet, or it would outlive the armour that granted it.
+    const defs = rules.tickTimed(rules.ownDefenceRecords(c), c.round);
     mutate(s => {
       s.modifiers = mods.list; s.actions = acts.list; s.grants = gr.list;
       // An expired defence is gone rather than kept as history: what a character WAS resistant to
@@ -834,7 +844,7 @@ const ACTS = {
     // yours afterwards, because nothing about the fight ending spends it. A borrowed resistance
     // goes the same way, while what you simply ARE resistant to stays.
     s.inspiration = (s.inspiration || []).filter(d => d && d.rounds == null);
-    s.defences = rules.defenceRecords(s).filter(r => r.rounds == null);
+    s.defences = rules.ownDefenceRecords(s).filter(r => r.rounds == null);
   }),
   "mod-add": () => modifierDialog(),
   "mod-del": el => mutate(s => {
@@ -856,6 +866,29 @@ const ACTS = {
       <p class="hint">Your seal attack bonus is <b>${sign(rules.sealAttackBonus(c))}</b>, and you may
         draw <b>${rules.sealUses(c)}</b> seals per long rest — each one also costs a spell slot.</p></div>`,
       { pin: true, key: "verum" });
+  },
+
+  // ── the critical range, spelled out ──
+  // There is nothing to EDIT here, which is the point: a sheet does not own a critical range the
+  // way it owns an AC, it starts at 20 and only something granted moves it. So this lists what is
+  // moving it and offers the one way to add another — a real effect, with a reason and a duration,
+  // which is what makes "18–20 for a minute" end on its own.
+  crit: el => {
+    const c = ch(), n = rules.critRange(c), on = rules.contributions(rules.activeModifiers(c), "crit");
+    popAt(el, `<div class="pop-h"><b>Critical range</b><span class="tag">${rules.critRangeSays(c)}</span></div>
+      <div class="pop-b"><ul class="why">
+        <li><span>Every sheet starts at</span><b>20</b></li>
+        ${/* The amounts are written against that 20, so the column adds up on the page: a crit
+              effect of +2 is "wider by two", which is the threshold falling by two. */""}
+        ${on.map(m => `<li><span>${esc(m.reason)}${m.permanent ? "" : " — while it lasts"}</span>
+          <b>${sign(-m.amount)}</b></li>`).join("")}
+      </ul>
+      <p class="hint">${n >= 20
+        ? "Only a natural 20 crits. Anything that widens the window — an item, a Cognition, a minute of Spiral Fang — adds to it here."
+        : `A natural <b>${n}</b> or more is a critical hit: ${20 - n} wider than a bare 20.`}
+        ${n <= rules.CRIT_FLOOR ? ` It will go no lower than ${rules.CRIT_FLOOR}.` : ""}</p></div>
+      <div class="pop-f"><button class="btn sm" data-act="mod-add">Add an effect</button></div>`,
+      { pin: true, key: "crit" });
   },
 
   // ── actions: things you can DO, permanent or for a few rounds ──
@@ -917,6 +950,26 @@ const ACTS = {
     s.coins = { ...(s.coins || {}) };
     s.coins[el.dataset.id] = Math.max(0, Number(el.value) || 0);
   }),
+  // Arming a conditional effect (CS-092). One click, from the Gear tab, because the condition it
+  // waits on is a thing that changes mid-session — the sun comes up, the shield goes down — and
+  // anything that needs a dialog will not get used at a table.
+  "fx-when": el => {
+    const where = el.dataset.id, i = Number(el.dataset.i);
+    const found = rules.findItem(ch(), where);
+    const e = found && (found.item.effects || [])[i];
+    if (!e) return;
+    const on = !e.on;
+    writeItem(where, it => {
+      const fx = [...(it.effects || [])];
+      fx[i] = { ...fx[i], on };
+      if (!on) delete fx[i].on;
+      return { ...it, effects: fx };
+    });
+    toast(on
+      ? `${e.when} — ${sign(rules.modifierAmount(ch(), e))} ${targetLabel(e.target)} is counting.`
+      : `${e.when} — off.`);
+  },
+
   "slot-flag": el => mutate(s => {
     const it = (s.equipment || {})[el.dataset.id];
     if (it) it[el.dataset.k] = !it[el.dataset.k];
@@ -987,9 +1040,26 @@ const ACTS = {
           <label>Comes back<select class="txt" id="ftReset">${rules.FEATURE_RESET.map(r =>
             `<option value="${r.id}">${esc(r.name)}</option>`).join("")}</select></label>
         </div>
-        <p class="hint">A feature that says how it recharges comes back with the rest that matches
-          it — the same path a class resource takes. One that says nothing is left alone rather than
-          guessed at, which means you clear it yourself.</p>
+        <label>…or as many as<select class="txt" id="ftFrom">
+          <option value="">— a flat number, above —</option>
+          ${rules.DERIVE_FROM.map(s => `<option value="${s.id}">my ${esc(s.name)}</option>`).join("")}
+        </select></label>
+        <p class="hint">Pick a score here and the pool is worked out every time it is read, so
+          "a number of times equal to your proficiency bonus" grows with you instead of going stale
+          at the next level. It overrides the number above.</p>
+        <label>Its own save DC<input class="txt" id="ftDc" type="number" min="0" max="40"
+          placeholder="leave empty unless the feature states one"></label>
+        <p class="hint">A DC here is the <b>feature's</b> number, not yours — the 18 an item's own
+          blast makes its victims beat. Nothing that raises your spell save DC moves it, which is
+          exactly why it needs somewhere of its own to live.</p>
+        <label>If it comes back after a set time, say how long<input class="txt" id="ftAfter"
+          maxlength="40" placeholder="12 hours, 24 hours, 7 days…"></label>
+        <p class="hint">A feature that recharges on a <b>rest</b> comes back with the rest that
+          matches it. <b>Each session</b>, <b>once per week</b> and <b>once per Cycle</b> are the
+          DM's to hand back — they get their own buttons under the list, because a long rest is not
+          a week. <b>Recharge 5–6</b> gets a die beside its pips. And a set time the sheet cannot
+          see is at least named, so the tooltip tells the truth instead of saying nothing gives it
+          back.</p>
         <label>What it does<textarea class="txt ta" id="ftText" rows="4"></textarea></label>
         <button class="btn pri" type="submit">Add</button></form>`);
     document.getElementById("ft").onsubmit = ev => {
@@ -998,8 +1068,15 @@ const ACTS = {
       if (!name) return;
       const f = { id: uid(), name,
         source: document.getElementById("ftSrc").value.trim(),
-        uses: Number(document.getElementById("ftUses").value) || 0, used: 0,
+        // A derived pool wins over the typed number, because choosing a score is the more specific
+        // statement — the box above is what you fall back to when no score fits.
+        uses: document.getElementById("ftFrom").value
+          ? { from: document.getElementById("ftFrom").value, times: 1 }
+          : Number(document.getElementById("ftUses").value) || 0,
+        used: 0,
         reset: document.getElementById("ftReset").value,
+        after: document.getElementById("ftAfter").value.trim(),
+        dc: Number(document.getElementById("ftDc").value) || 0,
         text: document.getElementById("ftText").value.trim() };
       closeDialog();
       mutate(s => { s.features = [...(s.features || []), f]; });
@@ -1115,6 +1192,29 @@ const ACTS = {
         .then(() => toast(`${c.name} dropped.`)).catch(err => toast(err.message));
     };
   },
+  // Time the sheet cannot see passing (CS-096): a new session, a week, a Cycle. The DM says so and
+  // every feature waiting on that one comes back — and nothing else moves, which is the whole
+  // reason this is not a button on the rest dialog.
+  "time-passes": el => {
+    const kind = el.dataset.id;
+    const out = rules.timePasses(ch(), kind);
+    if (!out.features.length) return;
+    mutate(s => { Object.assign(s, rules.timePasses(s, kind).next); });
+    const r = rules.FEATURE_RESET_BY_ID[kind];
+    toast(`${r ? r.name : kind} — ${out.features.map(f => f.name).join(", ")} back.`);
+  },
+  // Recharge 5–6, rolled rather than assumed. The whole feature returns on a hit, which is what a
+  // published recharge does; the toast shows the die so nobody has to take the sheet's word for it.
+  "feat-recharge": (el, e) => {
+    e.stopPropagation();
+    const i = +el.dataset.id;
+    const f = ch().features?.[i];
+    if (!f) return;
+    const out = rules.rollRecharge(f, rollDice("1d6")?.total);
+    if (out.hit) mutate(s => { if (s.features[i]) s.features[i].used = 0; });
+    toast(`${f.name} — d6 rolled ${out.roll}. ${out.hit ? "Back." : `Needs ${out.on} or more; still spent.`}`);
+  },
+
   // A use spent out of a feature's pool, the same pip idiom as the spell slots: clicking the nth pip
   // means "I have spent n+1 of these", and clicking a spent one hands it back.
   "feat-use": (el, e) => {
@@ -1123,7 +1223,10 @@ const ACTS = {
     mutate(s => {
       const f = s.features[i];
       if (!f) return;
-      f.used = n < (Number(f.used) || 0) ? n : n + 1;
+      // Clamped against the pool as it stands, because a DERIVED pool can shrink: a feature worth
+      // "your Charisma modifier" spent to the brim and then drained of a point would otherwise
+      // keep a used count the pips cannot show.
+      f.used = Math.min(n < (Number(f.used) || 0) ? n : n + 1, rules.featureUses(s, f));
     });
   },
 
@@ -1296,7 +1399,7 @@ function defenceDialog(recordId) {
     // Written back as a LIST however it was stored, which is what migrates a sheet saved under the
     // old one-standing-per-type map: it is read in that shape and saved in this one.
     mutate(s => {
-      const list = rules.defenceRecords(s).filter(r => r.id !== row.id);
+      const list = rules.ownDefenceRecords(s).filter(r => r.id !== row.id);
       s.defences = [...list, row];
     });
     toast(`${rules.DAMAGE_BY_ID[row.type].name} — ${rules.STANDING_BY_ID[row.standing].name.toLowerCase()}${
@@ -1543,6 +1646,13 @@ function itemDialog(where) {
     dream: rules.itemDream(src),
     charges: c0 ? { ...c0 } : { max: 0, used: 0, recharge: "manual", regain: "all" },
     effects: rules.itemEffectList(src),
+    // Carried through the dialog untouched: a defence is granted by the item and edited on the
+    // note, not here, but it must survive a Save or the first edit would strip the armour's
+    // resistances off it.
+    defences: Array.isArray(src.defences) ? src.defences.map(x => ({ ...x })) : [],
+    // Like the defences: granted by the item, authored on the note, and it must survive a Save or
+    // the first edit would strip the armour's own armour class off it.
+    baseAc: src.baseAc ? { ...src.baseAc } : null,
     id: src.id || uid(),
     // Its page in the Obsidian vault, and whatever the last read of that page brought back. The
     // features and attacks are held here rather than written as they arrive, so cancelling the
@@ -1573,11 +1683,17 @@ function itemDialog(where) {
       // its own class rather than by position — `querySelector("select")` used to mean the target
       // and would now mean whichever select came first.
       const from = row.querySelector(".fx-f").value;
+      // The condition, and whether it is armed. `on` is read off the record rather than the DOM —
+      // it is switched from the Gear tab, not from here — and it is dropped the moment the
+      // condition is cleared, because an effect with nothing to wait for must not stay waiting.
+      const when = (row.querySelector(".fx-w")?.value || "").trim().slice(0, 120);
+      const on = when ? !!d.effects[i].on : false;
       d.effects[i] = from
         ? { target: row.querySelector(".fx-t").value, amount: 0,
             from, times: Number(row.querySelector(".fx-x")?.value) || 1 }
         : { target: row.querySelector(".fx-t").value,
             amount: Number(row.querySelector(".fx-a")?.value) || 0 };
+      if (when) Object.assign(d.effects[i], { when, ...(on ? { on: true } : {}) });
     });
   };
 
@@ -1652,6 +1768,9 @@ function itemDialog(where) {
                    <span class="fx2-n">= ${sign(rules.modifierAmount(ch(), e))}</span>`
                 : `<input class="txt fx-a" type="number" min="-20" max="20" value="${e.amount}">`}
               <button class="x" type="button" data-fx-del="${i}" aria-label="Remove this effect">×</button>
+              <input class="txt fx-w" maxlength="120" value="${esc(e.when || "")}"
+                placeholder="only when… — leave empty and it always counts"
+                title="A condition in your own words. The sheet never checks it; an effect that has one starts switched off and is armed from the Gear tab.">
             </div>`).join("")
             : `<p class="hint">Nothing yet. Add one and it counts the moment the item is in a
                slot — the same path a hand-written effect takes, so it shows in the breakdown with
@@ -1660,6 +1779,18 @@ function itemDialog(where) {
             the number is read, so it follows the score behind it — and it only counts while the
             item is in a slot, like any other effect of its.</p>` : ""}
           <button class="btn sm" type="button" id="itFxAdd">+ Add an effect</button>
+          ${d.baseAc && Number(d.baseAc.base) ? `<div class="zone-h sm"><h4>Armour class it sets</h4></div>
+            <ul class="why"><li><span>Base AC</span><b>${rules.resolveBaseAc(ch(), d.baseAc)}</b></li></ul>
+            <p class="hint">This <b>replaces</b> the AC on your sheet rather than adding to it, and
+              only while the item is in force. Whichever is higher wins, so your own number is
+              still there underneath — and a shield's <code>+2</code> lands on top of this.</p>` : ""}
+          ${(d.defences || []).length ? `<div class="zone-h sm"><h4>Defences it grants</h4></div>
+            <ul class="why">${d.defences.map(x => `<li>
+              <span>${esc(rules.DAMAGE_BY_ID[x.type]?.name || x.type)}</span>
+              <b>${esc(rules.STANDING_BY_ID[x.standing]?.name || x.standing)}</b></li>`).join("")}</ul>
+            <p class="hint">These come from the item's own note and are edited there. They are in
+              force exactly while the item is — <b>and they leave when it comes off</b>, which a
+              resistance typed into the bar by hand never does.</p>` : ""}
           <button class="btn pri" type="submit">Save</button>
         </form>`,
       { footer: [
@@ -1743,6 +1874,8 @@ function itemDialog(where) {
       // A DERIVED effect has no amount of its own — dropping anything falsy here would throw every
       // one of them away on the way to being saved, which is the same trap `itemEffectList` had.
       effects: d.effects.filter(e => e.target && (e.from || e.amount)),
+      defences: (d.defences || []).filter(x => x && x.type && x.standing),
+      ...(d.baseAc && Number(d.baseAc.base) ? { baseAc: { ...d.baseAc } } : {}),
       // Stored as typed rather than as parsed, so a half-finished paste is not lost; the row only
       // renders it as a link once it really is one.
       vault: d.vault };
@@ -1774,7 +1907,8 @@ function applyImport(d, entry, note) {
   Object.assign(d, {
     name: it.name, qty: it.qty, weight: it.weight, value: it.value, notes: it.notes,
     magical: it.magical, requiresAttunement: it.requiresAttunement, dream: it.dream,
-    effects: it.effects, vault: it.vault || note.page,
+    effects: it.effects, defences: it.defences || [], baseAc: it.baseAc || null,
+    vault: it.vault || note.page,
     newFeatures: entry.features, newAttacks: entry.attacks, warnings: entry.warnings,
   });
   d.attuned = d.attuned || it.attuned;
@@ -1827,7 +1961,10 @@ function vaultDialog() {
           <b>${sign(rules.modifierAmount(ch(), x))}${x.from ? ` ${esc(rules.derivationShort(x))}` : ""}</b></li>`).join("")}</ul>` : ""}
       ${e.features.length ? `<div class="zone-h sm"><h4>Features it adds</h4></div>
         ${e.features.map(f => `<p class="cmp-t"><b>${esc(f.name)}</b>${
-          f.uses ? ` <span class="tag">${f.uses} uses</span>` : ""} ${esc(f.text)}</p>`).join("")}` : ""}
+          f.uses && typeof f.uses === "object"
+            ? ` <span class="tag">uses = ${esc(rules.derivationLabel(f.uses))}</span>`
+            : f.uses ? ` <span class="tag">${f.uses} uses</span>` : ""}${
+          f.dc ? ` <span class="tag dc">DC ${f.dc}</span>` : ""} ${esc(f.text)}</p>`).join("")}` : ""}
       ${e.attacks.length ? `<div class="zone-h sm"><h4>Attacks it adds</h4></div>
         <ul class="why">${e.attacks.map(a => `<li><span>${esc(a.name)}</span>
           <b>${esc(a.damage)}${a.type ? ` ${esc(a.type)}` : ""} · ${sign(a.bonus)} to hit</b></li>`).join("")}</ul>` : ""}

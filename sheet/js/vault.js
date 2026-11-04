@@ -56,6 +56,7 @@ export const SITE = {
 const MAX_NOTE = 1_000_000;
 const MAX_FEATURES = 24;
 const MAX_EFFECTS = 12;
+const MAX_DEFENCES = 16;                               // one per damage type is the honest ceiling
 const MAX_ATTACKS = 6;
 
 // ── the link ────────────────────────────────────────────────────────────
@@ -207,6 +208,15 @@ const nearestTimes = v => {
   return { times: best, exact: best === n };
 };
 
+// A condition in words, off an effect. It is never read as a rule — the sheet cannot check "under
+// the sun" — so all this does is carry the sentence through and leave the effect DISARMED. The
+// block is deliberately given no way to say `on`: whether a condition holds right now is a fact
+// about this moment at the table, not about the item, so a read must never arm one. (CS-092)
+const when = e => {
+  const w = line(e?.when ?? e?.only ?? e?.condition, 120);
+  return w ? { when: w } : {};
+};
+
 export function normalizeBlock(raw, { page = "" } = {}) {
   const warn = [];
   const name = line(raw.name ?? raw.item ?? raw.title, 80);
@@ -270,14 +280,14 @@ export function normalizeBlock(raw, { page = "" } = {}) {
       }
       const { times, exact } = nearestTimes(e.times ?? 1);
       if (!exact) warn.push(`${target} can be derived at half, once, twice or three times — ${e.times} became ${times}.`);
-      effects.push({ target, amount: 0, from, times });
+      effects.push({ target, amount: 0, from, times, ...when(e) });
     } else {
       const amount = int(e.amount, -20, 20, 0);
       if (!amount) {
         warn.push(`${target} has no amount, so that effect is left out.`);
         continue;
       }
-      effects.push({ target, amount });
+      effects.push({ target, amount, ...when(e) });
     }
   }
 
@@ -291,23 +301,110 @@ export function normalizeBlock(raw, { page = "" } = {}) {
     if (!fName) continue;
     // How it recharges, in the engine's own vocabulary. A note that does not say is left saying
     // nothing, and the rest preview then leaves that feature alone rather than guessing (CS-089).
-    let reset = line(f.reset ?? f.recharge, 8).toLowerCase();
+    let reset = line(f.reset ?? f.recharge, 12).toLowerCase();
     if (reset === "short") reset = "s";
     if (reset === "long") reset = "l";
     if (reset === "day" || reset === "daily") reset = "dawn";
+    // CS-096, built 2026-11-04: the vocabulary the Item Vault actually uses. Six entries say
+    // "once per week", one "per session", one "per Cycle", two carry a Recharge 5–6, and nine
+    // name a stretch of real time. Each is now a value rather than a shrug.
+    if (reset === "weekly" || reset === "week") reset = "week";
+    if (reset === "per session" || reset === "session") reset = "session";
+    if (reset === "per cycle" || reset === "cycle") reset = "cycle";
+    if (reset === "recharge" || reset === "d6") reset = "d6";
+    if (reset === "hours" || reset === "time") reset = "after";
     if (reset && !rules.FEATURE_RESET_BY_ID[reset]) {
       warn.push(`"${f.reset ?? f.recharge}" is not a recharge for ${fName}, so it comes back by hand.`);
       reset = "";
+    }
+    // Uses: a plain number, or DERIVED the way an effect's amount is — `"uses": { "from": "prof" }`
+    // — because "a number of times equal to your proficiency bonus" is how nineteen entries in the
+    // Item Vault word it (CS-088), and a count written out once goes stale at the next level.
+    let uses = int(f.uses, 0, 12, 0);
+    const uRaw = f.uses && typeof f.uses === "object" ? f.uses : null;
+    if (uRaw) {
+      const uFrom = line(uRaw.from, 12).toLowerCase();
+      if (!DERIVABLE.has(uFrom)) {
+        warn.push(`"${uRaw.from ?? "(blank)"}" is not a score ${fName}'s uses can come from, so it has none.`);
+      } else {
+        const { times, exact } = nearestTimes(uRaw.times ?? 1);
+        if (!exact) warn.push(`${fName}'s uses can be derived at half, once, twice or three times — ${uRaw.times} became ${times}.`);
+        uses = { from: uFrom, times };
+      }
     }
     features.push({
       id: `${prefix}${slug(fName)}`,
       name: fName,
       source: "item",
       text: body(f.text ?? f.description, 2000),
-      uses: int(f.uses, 0, 12, 0),
+      uses,
       used: 0,
       reset,
+      // The words for a recharge the sheet has no clock for — "12 hours", "7 days". Carried only
+      // where it means something, so an ordinary rest feature stays clean.
+      ...(reset === "after" ? { after: line(f.after ?? f.time, 40) } : {}),
+      // Which face a Recharge 5–6 needs. 5 unless the note says otherwise, since that is what
+      // nearly every published one asks for.
+      ...(reset === "d6" ? { rechargeOn: int(f.rechargeOn ?? f.on, 2, 6, 5) } : {}),
+      // The feature's OWN save DC, which is never the character's (CS-093). Carried so it can be
+      // shown on the pip row instead of being buried in prose — nineteen items state one.
+      dc: int(f.dc ?? f.saveDc, 0, 40, 0),
     });
+  }
+
+  // Defences the item GRANTS (CS-104). Sixteen entries in the Item Vault hand one out — the
+  // Steeldoor Harness alone grants four — and until this existed every one had to be typed into the
+  // Defences bar by hand and then remembered when the armour came off, which is the half nobody
+  // ever does. Read from a slot like any other effect, so it leaves with the item.
+  //
+  // A note writes the standing the way a rulebook does — "resistance", "immunity" — and the three
+  // the engine actually holds are `resistant` / `immune` / `vulnerable`, so both are accepted.
+  const defences = [];
+  for (const d of (Array.isArray(raw.defences) ? raw.defences : []).slice(0, MAX_DEFENCES)) {
+    if (!d || typeof d !== "object") continue;
+    const type = line(d.type ?? d.damage, 24).toLowerCase();
+    let standing = line(d.standing ?? d.as, 16).toLowerCase();
+    if (standing === "resistance") standing = "resistant";
+    if (standing === "immunity") standing = "immune";
+    if (standing === "vulnerability") standing = "vulnerable";
+    if (!rules.DAMAGE_BY_ID[type]) {
+      warn.push(`"${type || "(blank)"}" is not a damage type this sheet knows, so that defence is left out.`);
+      continue;
+    }
+    if (!rules.STANDING_BY_ID[standing]) {
+      warn.push(`"${standing || "(blank)"}" is not a standing — write resistant, immune or vulnerable. ${
+        rules.DAMAGE_BY_ID[type].name} is left out.`);
+      continue;
+    }
+    defences.push({ type, standing });
+  }
+
+  // Armour that SETS the base AC rather than adding to it (CS-108). Ten of the twenty-nine
+  // entries in `Item Vault/Armor` do this — "your AC is 13 + your Dexterity modifier", "+2 Plate
+  // (base AC 20)" — and `ac` could never say it, because `ac` ADDS to the number already typed.
+  //
+  // `{ base, from, cap, from2 }`: a number, an ability to add, a ceiling on that ability (medium
+  // armour caps Dexterity at +2, and Ferracortex says so), and a second ability for Merigold's,
+  // which reads both Intelligence and Wisdom.
+  let baseAc = null;
+  const bRaw = raw.baseAc ?? raw.baseAC ?? raw.armorClass;
+  if (bRaw && typeof bRaw === "object") {
+    const base = int(bRaw.base ?? bRaw.ac, 0, 30, 0);
+    if (!base) {
+      warn.push("The base AC has no number, so the item sets none and your own stands.");
+    } else {
+      const pick = (k, capK) => {
+        const id = line(bRaw[k], 12).toLowerCase();
+        if (!id) return {};
+        if (!DERIVABLE.has(id)) {
+          warn.push(`"${bRaw[k]}" is not a score a base AC can read, so it is left out of the total.`);
+          return {};
+        }
+        const cap = bRaw[capK];
+        return { [k]: id, ...(cap == null || cap === "" ? {} : { [capK]: int(cap, 0, 10, 0) }) };
+      };
+      baseAc = { base, ...pick("from", "cap"), ...pick("from2", "cap2") };
+    }
   }
 
   // Attacks, for the reason the example link Juan sent is a weapon: an imported Flagship blade that
@@ -321,12 +418,29 @@ export function normalizeBlock(raw, { page = "" } = {}) {
     const damage = line(a.damage ?? a.dmg, 40);
     if (!damage) continue;
     const aName = line(a.name, 60) || name;
+    // A weapon whose dice grow with the character (CS-087). "1d8, 2d8 at 11th, 3d8 at 17th" is
+    // nine entries' wording, and the row used to be frozen at the first step with the rest in
+    // prose — authoritative and wrong for most of the party.
+    const steps = [];
+    for (const s of (Array.isArray(a.steps) ? a.steps : []).slice(0, 8)) {
+      if (!s || typeof s !== "object") continue;
+      const at = int(s.at ?? s.level, 1, 20, 0);
+      if (!at) {
+        warn.push(`A step on ${aName} names no level, so it is left out.`);
+        continue;
+      }
+      const dmg = line(s.damage ?? s.dmg, 40);
+      const bonus = s.bonus == null ? null : int(s.bonus, -20, 30, 0);
+      if (!dmg && bonus == null) continue;
+      steps.push({ at, ...(dmg ? { damage: dmg } : {}), ...(bonus == null ? {} : { bonus }) });
+    }
     attacks.push({
       id: `${atkPrefix}${slug(aName)}`,
       name: aName,
       bonus: int(a.bonus, -20, 30, 0),
       damage,
       type: line(a.type ?? a.damageType, 24),
+      ...(steps.length ? { steps: steps.sort((x, y) => x.at - y.at) } : {}),
     });
   }
 
@@ -342,6 +456,8 @@ export function normalizeBlock(raw, { page = "" } = {}) {
     dream,
     charges,
     effects,
+    defences,
+    ...(baseAc ? { baseAc } : {}),
     // The link travels WITH the item, so the row on the Gear tab can open the note it came from and
     // a later re-read needs nothing typed again.
     vault: page || line(raw.vault ?? raw.link, 500),

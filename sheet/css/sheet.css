@@ -732,6 +732,37 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .fx .fx-x{flex:none;width:96px}
 .fx .fx2-n{flex:none}
 .fx .x{border:0;background:none;margin-left:auto}
+/* The condition, on its own line under the row it belongs to — it is a sentence, and wedging it
+   between two selects would squeeze both to nothing. */
+.fx .fx-w{flex:1 1 100%;font-size:12px}
+
+/* ── only when… ──────────────────────────────────────────────────────────
+   Conditional effects, as switches. Off by default and visibly so: the sheet has no way to know
+   whether the sun is up, so an unarmed one must not read like a bonus you have. */
+.conds{display:flex;flex-direction:column;gap:4px}
+.cond{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 9px;align-items:baseline;
+  width:100%;text-align:left;padding:6px 9px;border-radius:8px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--mute)}
+.cond:hover{border-color:var(--brass)}
+.cond-w{font-family:var(--sans);font-size:12px}
+.cond-n{font-family:var(--sans);font-size:12px;font-variant-numeric:tabular-nums}
+.cond em{grid-column:1/-1;font-style:normal;font-size:10px;color:#4e565f}
+/* Armed: the whole row wakes up, and the number is the accent so it reads as live at a glance. */
+.cond.on{background:color-mix(in srgb, var(--accent) 10%, var(--panel2));
+  border-color:var(--accent);color:var(--bone2)}
+.cond.on .cond-n{color:var(--accent);font-weight:500}
+/* Armed but the item is not in force — in the pack, unattuned, or Dreamlike while awake. Saying so
+   is the whole point: an armed switch that quietly does nothing is worse than no switch. */
+.cond.dead{border-style:dashed}
+.cond.dead .cond-n{color:var(--mute);text-decoration:line-through}
+
+/* A defence the GEAR grants. Marked so nobody hunts for a Remove that is not there — you take the
+   armour off instead, which is the whole point of it being readable from the item. */
+.dfn.worn{border-style:dashed}
+
+/* A weapon whose dice still have somewhere to go. The caret is deliberately quiet — it answers
+   "is this the final number?", which is a question you ask once, not every round. */
+.atk-step{font-style:normal;font-size:8px;color:var(--brass);margin-left:3px;vertical-align:super}
 .mod.item .mod-r{color:var(--mute)}
 .mod.item .x{width:14px}
 
@@ -926,6 +957,26 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .uses{display:inline-flex;align-items:center;gap:3px}
 .uses .pip{width:11px;height:11px}
 .uses em{font-style:normal;font-family:var(--sans);font-size:9.5px;color:var(--mute);margin-left:2px}
+/* A pool whose size is DERIVED — "uses equal to your proficiency bonus". The count is brass rather
+   than grey, which is this sheet's existing signal for a number that works itself out; the words
+   are on the tooltip, because a pip row has no space for a sentence. */
+.uses.drv em{color:var(--brass)}
+/* Recharge 5–6: the die is the way it comes back, so it sits with the pips rather than in a menu. */
+.pip-roll{width:17px;height:17px;border-radius:5px;background:none;border:1px solid var(--line);
+  color:var(--mute);font-size:9px;padding:0;margin-left:4px}
+.pip-roll:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Time the sheet cannot see passing — a session, a week, a Cycle. Only drawn when a feature on
+   this character waits on one, which on most sheets is never. */
+.timepass{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
+.timepass-k{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:10px;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.timepass .chip[disabled]{opacity:.45}
+.timepass .chip.on{border-color:var(--brass);color:var(--bone2)}
+.timepass .chip em{font-style:normal;font-size:9px;color:var(--brass);margin-left:3px}
+/* A feature's OWN save DC. Deliberately not styled like the character's numbers — it is the item's
+   figure, and nothing the player has moves it. */
+.tag.dc{color:var(--mute);border-color:var(--line);letter-spacing:.06em}
 
 /* ── Ignitions ───────────────────────────────────────────────────────────
    One written for you, and switched on. The Cognitions it burns ride underneath, because "every

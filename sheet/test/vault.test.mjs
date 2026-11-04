@@ -187,14 +187,172 @@ test("a feature's recharge is translated, and a nonsense one comes back by hand"
   assert.equal(f("dusk").features[0].reset, "dusk");
   assert.equal(f(undefined).features[0].reset, "");
 
-  // Weekly is CS-096 and is not built, so it must be refused loudly rather than silently becoming
-  // a long rest — The Compact would come back seven times too often.
-  const weekly = f("weekly");
-  assert.equal(weekly.features[0].reset, "");
-  assert.match(weekly.warnings[0], /not a recharge for F/);
+  // CS-096, built 2026-11-04: the five the Item Vault actually asks for are values now, not
+  // shrugs. Before this, "weekly" was refused loudly — which was right at the time, because
+  // silently making it a long rest would hand The Compact back seven times too often.
+  assert.equal(f("weekly").features[0].reset, "week");
+  assert.equal(f("week").features[0].reset, "week");
+  assert.equal(f("per session").features[0].reset, "session");
+  assert.equal(f("per Cycle").features[0].reset, "cycle");
+  assert.equal(f("recharge").features[0].reset, "d6");
+  assert.equal(f("weekly").warnings.length, 0);
+
+  // And a nonsense one is still refused loudly rather than guessed at.
+  const junk = f("whenever");
+  assert.equal(junk.features[0].reset, "");
+  assert.match(junk.warnings[0], /not a recharge for F/);
+
+  // The companion fields ride only where they mean something.
+  const timed = V.normalizeBlock({ name: "X",
+    features: [{ name: "Solar Flare", uses: 1, reset: "hours", after: "24 hours" }] });
+  assert.equal(timed.features[0].reset, "after");
+  assert.equal(timed.features[0].after, "24 hours");
+
+  const die = V.normalizeBlock({ name: "X",
+    features: [{ name: "Ghost Step", uses: 1, reset: "recharge" }] });
+  assert.equal(die.features[0].rechargeOn, 5);                 // 5–6 unless the note says otherwise
+  assert.equal(die.features[0].after, undefined);              // no stray fields
+  assert.equal(f("l").features[0].rechargeOn, undefined);
+});
+
+// ── CS-108: armour that sets the base AC ────────────────────────────────
+test("a block can set a base AC, with a cap and a second ability", () => {
+  const b = spec => V.normalizeBlock({ name: "Armour", baseAc: spec }).item.baseAc;
+  assert.deepEqual(b({ base: 13, from: "dex" }), { base: 13, from: "dex" });
+  assert.deepEqual(b({ base: 20 }), { base: 20 });
+  assert.deepEqual(b({ base: 20, from: "dex", cap: 2 }), { base: 20, from: "dex", cap: 2 });
+  assert.deepEqual(b({ base: 12, from: "int", from2: "wis" }),
+    { base: 12, from: "int", from2: "wis" });
+
+  // No number means no base: the player's own AC stands, and they are told.
+  const none = V.normalizeBlock({ name: "X", baseAc: { from: "dex" } });
+  assert.equal(none.item.baseAc, undefined);
+  assert.match(none.warnings[0], /base AC has no number/);
+
+  // A score the sheet cannot read is dropped from the total, and the base survives.
+  const bad = V.normalizeBlock({ name: "X", baseAc: { base: 13, from: "evil" } });
+  assert.deepEqual(bad.item.baseAc, { base: 13 });
+  assert.match(bad.warnings[0], /not a score a base AC can read/);
+
+  // An item that says nothing about AC carries no field at all.
+  assert.equal(V.normalizeBlock({ name: "Rope" }).item.baseAc, undefined);
+});
+
+// ── CS-087: steps ───────────────────────────────────────────────────────
+test("an attack's steps are read, sorted and checked", () => {
+  const { attacks, warnings } = V.normalizeBlock({ name: "Ring of Dual Flow", attacks: [
+    { name: "Arcane-Assault Link", damage: "1d8", type: "force",
+      steps: [{ at: 17, damage: "3d8" }, { at: 11, damage: "2d8" }] },
+  ] });
+  // Sorted on the way in, so nothing downstream has to.
+  assert.deepEqual(attacks[0].steps, [{ at: 11, damage: "2d8" }, { at: 17, damage: "3d8" }]);
+  assert.equal(warnings.length, 0);
+
+  // A step with no level cannot be placed, so it is dropped and reported.
+  const nolevel = V.normalizeBlock({ name: "X",
+    attacks: [{ name: "A", damage: "1d6", steps: [{ damage: "2d6" }] }] });
+  assert.equal(nolevel.attacks[0].steps, undefined);
+  assert.match(nolevel.warnings[0], /names no level/);
+
+  // An attack with no steps carries no field.
+  assert.equal(V.normalizeBlock({ name: "X",
+    attacks: [{ name: "A", damage: "1d6" }] }).attacks[0].steps, undefined);
+});
+
+// ── CS-104: a defence the item grants ───────────────────────────────────
+test("an item can grant a defence, written the way a rulebook words it", () => {
+  const { item, warnings } = V.normalizeBlock({ name: "Steeldoor Harness", defences: [
+    { type: "bludgeoning", standing: "resistance" },
+    { type: "slashing", standing: "resistant" },
+    { type: "fire", as: "immunity" },
+    { type: "radiant", standing: "vulnerability" },
+  ] });
+  assert.deepEqual(item.defences, [
+    { type: "bludgeoning", standing: "resistant" },
+    { type: "slashing", standing: "resistant" },
+    { type: "fire", standing: "immune" },
+    { type: "radiant", standing: "vulnerable" },
+  ]);
+  assert.equal(warnings.length, 0);
+
+  // A type or a standing the sheet does not know is dropped and reported, never guessed.
+  const bad = V.normalizeBlock({ name: "X", defences: [
+    { type: "sadness", standing: "resistant" },
+    { type: "fire", standing: "quite good against" },
+  ] });
+  assert.deepEqual(bad.item.defences, []);
+  assert.match(bad.warnings[0], /not a damage type/);
+  assert.match(bad.warnings[1], /not a standing/);
 });
 
 test("an item with no charges says so by having none, not by having zero", () => {
   assert.equal(V.normalizeBlock({ name: "Plain Rope" }).item.charges, null);
   assert.equal(V.normalizeBlock({ name: "Wand", charges: { max: 0 } }).item.charges, null);
+});
+
+// ── CS-092: a condition in words ────────────────────────────────────────
+test("an effect can carry a condition, and a read never arms it", () => {
+  const { item } = V.normalizeBlock({ name: "Solar Scarf", effects: [
+    { target: "ac", amount: 2 },
+    { target: "saveDc", amount: 1, when: "under the sun" },
+    { target: "attack", from: "prof", times: 1, only: "while you carry no shield" },
+  ] });
+  assert.equal(item.effects[0].when, undefined);
+  assert.equal(item.effects[1].when, "under the sun");
+  assert.equal(item.effects[2].when, "while you carry no shield");   // `only` is accepted too
+
+  // WHETHER A CONDITION HOLDS IS A FACT ABOUT THIS MOMENT, NOT ABOUT THE ITEM. A note must never
+  // be able to switch one on, however it words it.
+  for (const e of item.effects) assert.equal(e.on, undefined);
+  const forced = V.normalizeBlock({ name: "Cheat",
+    effects: [{ target: "ac", amount: 2, when: "always", on: true }] });
+  assert.equal(forced.item.effects[0].on, undefined);
+});
+
+// ── CS-088: uses sized by a score ───────────────────────────────────────
+test("a feature's uses can be a number or a derivation", () => {
+  const ok = V.normalizeBlock({ name: "Vambrace", features: [
+    { name: "Fixed", uses: 3 },
+    { name: "Derived", uses: { from: "prof" } },
+    { name: "Scaled", uses: { from: "cha", times: 2 } },
+  ] });
+  assert.equal(ok.features[0].uses, 3);
+  assert.deepEqual(ok.features[1].uses, { from: "prof", times: 1 });
+  assert.deepEqual(ok.features[2].uses, { from: "cha", times: 2 });
+  assert.equal(ok.warnings.length, 0);
+
+  // A score the sheet cannot derive from is refused loudly, and the feature keeps no pips rather
+  // than a wrong count — the same rule the effects follow.
+  const bad = V.normalizeBlock({ name: "X",
+    features: [{ name: "Evil", uses: { from: "evil" } }] });
+  assert.equal(bad.features[0].uses, 0);
+  assert.match(bad.warnings[0], /not a score Evil's uses can come from/);
+
+  // A multiplier the engine does not have is snapped and reported, not silently rounded. 1.5 sits
+  // exactly between ×1 and ×2, and the tie goes to the LOWER — a block asking for something the
+  // sheet cannot do should not end up granting more than it asked for.
+  const odd = V.normalizeBlock({ name: "Y",
+    features: [{ name: "Odd", uses: { from: "prof", times: 1.5 } }] });
+  assert.deepEqual(odd.features[0].uses, { from: "prof", times: 1 });
+  assert.match(odd.warnings[0], /half, once, twice or three times/);
+});
+
+// ── CS-093: the feature's own save DC ───────────────────────────────────
+test("a feature can carry its own save DC, clamped and never confused with yours", () => {
+  const { features, item } = V.normalizeBlock({ name: "Steeldoor Harness",
+    effects: [{ target: "saveDc", amount: 1 }],
+    features: [
+      { name: "Fail-Safe", dc: 16 },
+      { name: "Spelled out", saveDc: 22 },
+      { name: "Nonsense", dc: 400 },
+      { name: "None" },
+    ] });
+  assert.equal(features[0].dc, 16);
+  assert.equal(features[1].dc, 22);
+  assert.equal(features[2].dc, 40);                 // clamped, not dropped
+  assert.equal(features[3].dc, 0);                  // absent means absent
+
+  // The two must not bleed into each other: the item's own effect still targets the CHARACTER's
+  // spell save DC, and the features' numbers are theirs alone.
+  assert.deepEqual(item.effects, [{ target: "saveDc", amount: 1 }]);
 });

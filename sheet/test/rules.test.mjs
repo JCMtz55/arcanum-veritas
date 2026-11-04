@@ -210,6 +210,307 @@ test("a no-attunement item is in force from a slot without being ticked", () => 
   assert.equal(R.armorClass(ch), base + 2);
 });
 
+// ── CS-092: conditional effects ─────────────────────────────────────────
+// 27 of the 127 Item Vault items carry a bonus that only applies sometimes — "under the sun",
+// "while you carry no shield", "at half hit points or fewer". The sheet cannot evaluate any of
+// those, so it does not try: an effect that names a condition starts disarmed and waits for a
+// click. The whole mechanism is the `active` flag `contributions` has always honoured.
+test("an effect with a condition is worth nothing until it is armed", () => {
+  const base = R.armorClass(pc({}));
+  const worn = e => pc({ equipment: { chest: { name: "Solar Scarf", effects: [e] } } });
+
+  // Unconditional: counts the moment it is in a slot, exactly as before.
+  assert.equal(R.armorClass(worn({ target: "ac", amount: 2 })), base + 2);
+
+  // Conditional and not armed: nothing, anywhere.
+  const waiting = worn({ target: "ac", amount: 2, when: "under the sun" });
+  assert.equal(R.armorClass(waiting), base);
+  assert.equal(R.modifierTotal(R.activeModifiers(waiting), "ac"), 0);
+  assert.equal(R.contributions(R.activeModifiers(waiting), "ac").length, 0);
+
+  // Armed: an ordinary effect, and the breakdown says WHY it is counting.
+  const armed = worn({ target: "ac", amount: 2, when: "under the sun", on: true });
+  assert.equal(R.armorClass(armed), base + 2);
+  const [row] = R.contributions(R.activeModifiers(armed), "ac");
+  assert.equal(row.amount, 2);
+  assert.equal(row.reason, "Solar Scarf — under the sun");
+});
+
+test("a conditional effect obeys the item as well as its own switch", () => {
+  const base = R.armorClass(pc({}));
+  const fx = { target: "ac", amount: 2, when: "under the sun", on: true };
+
+  // Armed, but the item is in the PACK — effects only count from a slot.
+  const packed = pc({ carried: [{ name: "Solar Scarf", effects: [fx] }] });
+  assert.equal(R.armorClass(packed), base);
+
+  // Armed, worn, but Dreamlike and the bearer is awake.
+  const dreaming = pc({ equipment: { chest: { name: "Solar Scarf", dream: "dreamlike", effects: [fx] } } });
+  assert.equal(R.armorClass(dreaming), base);
+  assert.equal(R.armorClass({ ...dreaming, inInsomnia: true }), base + 2);
+});
+
+test("conditionalEffects lists every condition with the address that toggles it", () => {
+  const ch = pc({ equipment: {
+    chest: { name: "Solar Scarf", effects: [
+      { target: "ac", amount: 2 },                                   // not conditional
+      { target: "saveDc", amount: 2, when: "under the sun" },        // waiting
+    ] },
+    hands: { name: "Gauntlet", effects: [{ target: "ac", amount: 2, when: "no shield", on: true }] },
+  } });
+  const list = R.conditionalEffects(ch);
+  assert.deepEqual(list.map(c => c.when), ["under the sun", "no shield"]);
+  // The unconditional effect is index 0, so the conditional one must report index 1 — getting this
+  // wrong would toggle the wrong effect.
+  assert.deepEqual(list.map(c => [c.where, c.fx]), [["slot:chest", 1], ["slot:hands", 0]]);
+  assert.deepEqual(list.map(c => c.on), [false, true]);
+  assert.deepEqual(list.map(c => c.live), [false, true]);
+});
+
+// ── CS-088: uses sized by a score ───────────────────────────────────────
+// 19 items word a pool as "a number of times equal to your proficiency bonus". A count written
+// out once goes stale at the next level, so it is derived the way an effect's amount is.
+test("a feature's uses can be derived, and follow the score behind them", () => {
+  const derived = { name: "Binding Verdict", uses: { from: "prof" }, used: 0 };
+  assert.equal(R.featureUses(pc({ level: 1 }), derived), 2);
+  assert.equal(R.featureUses(pc({ level: 5 }), derived), 3);
+  assert.equal(R.featureUses(pc({ level: 13 }), derived), 5);
+
+  // An ability, and a multiplier, exactly as an effect takes them.
+  const cha = { name: "Blood for Power", uses: { from: "cha", times: 1 } };
+  assert.equal(R.featureUses(pc({ abilities: { cha: 18 } }), cha), 4);
+  const half = { name: "Half", uses: { from: "prof", times: 0.5 } };
+  assert.equal(R.featureUses(pc({ level: 13 }), half), 2);          // 5 halved, rounded down
+
+  // A plain number still means exactly itself.
+  assert.equal(R.featureUses(pc({ level: 13 }), { uses: 3 }), 3);
+  assert.equal(R.featureUses(pc({}), { uses: 0 }), 0);
+  assert.equal(R.featureUses(pc({}), {}), 0);
+
+  assert.equal(R.featureUsesLabel(derived), "your proficiency bonus");
+  assert.equal(R.featureUsesLabel({ uses: 3 }), "");
+});
+
+test("a rest gives back a derived pool, same as a fixed one", () => {
+  const ch = pc({ level: 13, features: [
+    { id: "f1", name: "Binding Verdict", uses: { from: "prof" }, used: 4, reset: "l" },
+  ] });
+  const long = R.restPreview(ch, { kind: "long" });
+  assert.ok(long.changes.some(c => c.label === "Features come back"));
+  assert.equal(long.next.features[0].used, 0);
+
+  // And a short rest still leaves a long-rest feature alone.
+  assert.equal(R.restPreview(ch, { kind: "short" }).next.features, undefined);
+});
+
+// ── CS-104: a defence the item grants ───────────────────────────────────
+// Sixteen items hand one out, the Steeldoor Harness alone granting four. Before this they were
+// typed into the bar by hand — and left there when the armour came off, which is the half nobody
+// remembers.
+test("a defence an item grants arrives with it and leaves with it", () => {
+  const harness = { name: "Steeldoor Harness", requiresAttunement: true, attuned: true,
+    defences: [{ type: "fire", standing: "resistant" }, { type: "radiant", standing: "immune" }] };
+
+  const worn = pc({ equipment: { chest: harness } });
+  assert.equal(R.defence(worn, "fire").standing, "resistant");
+  assert.equal(R.defence(worn, "radiant").standing, "immune");
+  assert.deepEqual(R.defenceTypes(worn).map(t => t.id), ["fire", "radiant"]);
+
+  // In the pack it grants nothing, exactly as its effects would not.
+  const packed = pc({ carried: [harness] });
+  assert.equal(R.defence(packed, "fire"), null);
+
+  // Worn but NOT attuned, when the item says it needs to be.
+  const unattuned = pc({ equipment: { chest: { ...harness, attuned: false } } });
+  assert.equal(R.defence(unattuned, "fire"), null);
+
+  // Dreamlike follows the plane, like everything else the item grants.
+  const dreamt = pc({ equipment: { chest: { ...harness, dream: "dreamlike" } } });
+  assert.equal(R.defence(dreamt, "fire"), null);
+  assert.equal(R.defence({ ...dreamt, inInsomnia: true }, "fire").standing, "resistant");
+});
+
+test("an item's defence stacks with the character's own and never gets written onto them", () => {
+  const ch = pc({
+    defences: [{ id: "own", type: "fire", standing: "vulnerable", why: "a curse" }],
+    equipment: { chest: { name: "Everflame Plate", defences: [{ type: "fire", standing: "resistant" }] } },
+  });
+  // Resistance and vulnerability on one type CANCEL — the 2026-10-29 ruling — and the item's
+  // record takes part in that exactly as a typed one does.
+  assert.equal(R.defence(ch, "fire").cancelled, true);
+
+  // THE WRITE PATH IS THE DANGEROUS HALF. `ownDefenceRecords` is what every save uses, and it must
+  // never hand back the item's record — written to the sheet it would outlive the armour.
+  const own = R.ownDefenceRecords(ch);
+  assert.deepEqual(own.map(r => r.id), ["own"]);
+  assert.equal(R.defenceRecords(ch).length, 2);
+  assert.ok(R.defenceRecords(ch).some(r => r.source === "item" && r.why === "Everflame Plate"));
+});
+
+// ── CS-096: the recharges that were missing ─────────────────────────────
+test("a rest gives back only the rest-driven recharges", () => {
+  const spent = (reset, extra = {}) => pc({ level: 5, features: [
+    { id: "f", name: "F", uses: 2, used: 2, reset, ...extra } ] });
+
+  for (const r of ["s", "l", "dawn", "dusk"]) {
+    const opts = { kind: "long", dawn: r === "dawn", dusk: r === "dusk" };
+    assert.ok(R.featureComesBack({ reset: r }, opts), `${r} should come back on a rest`);
+  }
+  // None of the new ones does — a long rest is not a week, and sleeping does not roll your d6.
+  for (const r of ["session", "week", "cycle", "d6", "after"]) {
+    assert.equal(R.featureComesBack({ reset: r }, { kind: "long", dawn: true, dusk: true }), false,
+      `${r} must not come back on a rest`);
+    assert.equal(R.restPreview(spent(r), { kind: "long", dawn: true, dusk: true }).next.features,
+      undefined, `${r} must not be returned by the rest preview`);
+  }
+});
+
+test("the DM's own button returns a week, a session or a Cycle — and only that one", () => {
+  const ch = pc({ features: [
+    { id: "a", name: "The Compact", uses: 1, used: 1, reset: "week" },
+    { id: "b", name: "Orison", uses: 2, used: 2, reset: "session" },
+    { id: "c", name: "Solar Storm", uses: 1, used: 1, reset: "cycle" },
+    { id: "d", name: "Smite", uses: 1, used: 1, reset: "l" },
+  ] });
+
+  const week = R.timePasses(ch, "week");
+  assert.deepEqual(week.features.map(f => f.name), ["The Compact"]);
+  assert.deepEqual(week.next.features.map(f => f.used), [0, 2, 1, 1]);
+
+  assert.deepEqual(R.timePasses(ch, "session").features.map(f => f.name), ["Orison"]);
+  assert.deepEqual(R.timePasses(ch, "cycle").features.map(f => f.name), ["Solar Storm"]);
+
+  // Nothing spent on that clock means nothing happens — and no `next` to apply.
+  assert.deepEqual(R.timePasses(pc({}), "week").features, []);
+  assert.deepEqual(R.timePasses(pc({}), "week").next, {});
+});
+
+test("Recharge 5–6 is rolled, not assumed", () => {
+  const f = { name: "Ghost Step", uses: 1, used: 1, reset: "d6" };
+  assert.equal(R.rollRecharge(f, 4).hit, false);
+  assert.equal(R.rollRecharge(f, 4).next, null);
+  assert.equal(R.rollRecharge(f, 5).hit, true);
+  assert.deepEqual(R.rollRecharge(f, 6).next, { used: 0 });    // the whole feature, not one use
+  // A weapon asking for 6 alone, or 4–6, is the same machinery.
+  assert.equal(R.rollRecharge({ ...f, rechargeOn: 6 }, 5).hit, false);
+  assert.equal(R.rollRecharge({ ...f, rechargeOn: 4 }, 4).hit, true);
+});
+
+test("every recharge says what it is, so no tooltip has to lie", () => {
+  assert.match(R.featureResetSays({ reset: "l" }), /long rest/);
+  assert.match(R.featureResetSays({ reset: "week" }), /once per week/);
+  assert.match(R.featureResetSays({ reset: "d6" }), /Recharge 5/);
+  // The one the sheet genuinely cannot do still tells the truth, in the entry's own words.
+  assert.match(R.featureResetSays({ reset: "after", after: "12 hours" }), /after 12 hours/);
+  assert.match(R.featureResetSays({ reset: "" }), /clear them yourself/);
+});
+
+// ── CS-108: armour that SETS the base AC ────────────────────────────────
+test("armour can replace the base AC instead of adding to it", () => {
+  const dex16 = { abilities: { dex: 16 } };                    // +3
+  const armoured = spec => pc({ ...dex16, ac: 10,
+    equipment: { chest: { name: "Sludgeveil Carapace", baseAc: spec } } });
+
+  // "Your AC is 13 + your Dexterity modifier" — 16, not 10 + 13.
+  assert.equal(R.armorClass(armoured({ base: 13, from: "dex" })), 16);
+  // Flat plate ignores Dexterity entirely.
+  assert.equal(R.armorClass(armoured({ base: 20 })), 20);
+  // A cap on the ability, as medium armour has: 20 + min(3, 2).
+  assert.equal(R.armorClass(armoured({ base: 20, from: "dex", cap: 2 })), 22);
+  // Two abilities, which only Merigold's asks for: 12 + Int + Wis.
+  const merigold = pc({ abilities: { int: 18, wis: 14 }, ac: 10,
+    equipment: { chest: { name: "Merigold's Rainment", baseAc: { base: 12, from: "int", from2: "wis" } } } });
+  assert.equal(R.armorClass(merigold), 12 + 4 + 2);
+
+  // WHICHEVER IS HIGHER — the entry's own rule, and 5e's for Unarmored Defense.
+  assert.equal(R.armorClass(pc({ ...dex16, ac: 18,
+    equipment: { chest: { name: "Robe", baseAc: { base: 13, from: "dex" } } } })), 18);
+
+  // A shield's +2 is a BONUS and lands on top of whichever base won.
+  const withShield = pc({ ...dex16, ac: 10, equipment: {
+    chest: { name: "Robe", baseAc: { base: 13, from: "dex" } },
+    offHand: { name: "Shield", effects: [{ target: "ac", amount: 2 }] } } });
+  assert.equal(R.armorClass(withShield), 18);
+
+  // And it follows the item: in the pack, the typed number stands again.
+  assert.equal(R.armorClass(pc({ ...dex16, ac: 10,
+    carried: [{ name: "Robe", baseAc: { base: 13, from: "dex" } }] })), 10);
+});
+
+test("the AC tile can say what is setting the base", () => {
+  const plain = pc({ ac: 15 });
+  assert.equal(R.baseArmorClass(plain).from, "");
+  assert.equal(R.baseArmorClass(plain).value, 15);
+
+  const ch = pc({ abilities: { dex: 16 }, ac: 10,
+    equipment: { chest: { name: "Century", baseAc: { base: 15, from: "dex" } } } });
+  const b = R.baseArmorClass(ch);
+  assert.equal(b.from, "Century");
+  assert.equal(b.value, 18);
+  assert.equal(b.where, "slot:chest");
+});
+
+// ── CS-087: a weapon whose dice grow with you ───────────────────────────
+test("an attack can step by character level", () => {
+  const a = { name: "Arcane-Assault Link", damage: "1d8", type: "force",
+    steps: [{ at: 11, damage: "2d8" }, { at: 17, damage: "3d8" }] };
+
+  assert.equal(R.attackAtLevel(pc({ level: 5 }), a).damage, "1d8");   // below the first step
+  assert.equal(R.attackAtLevel(pc({ level: 11 }), a).damage, "2d8");  // exactly on it
+  assert.equal(R.attackAtLevel(pc({ level: 13 }), a).damage, "2d8");
+  assert.equal(R.attackAtLevel(pc({ level: 20 }), a).damage, "3d8");  // past the last
+
+  // It says what is still coming, so the row need not send anyone to the note.
+  assert.equal(R.attackAtLevel(pc({ level: 5 }), a).nextStep.at, 11);
+  assert.equal(R.attackAtLevel(pc({ level: 20 }), a).nextStep, null);
+
+  // A step may move the BONUS too — The Unheld's +2/+3/+4/+5 by band.
+  const unheld = { name: "The Cuts", damage: "1d8", bonus: 2,
+    steps: [{ at: 10, bonus: 3 }, { at: 15, bonus: 4 }, { at: 20, bonus: 5 }] };
+  assert.equal(R.attackAtLevel(pc({ level: 12 }), unheld).bonus, 3);
+  assert.equal(R.attackAtLevel(pc({ level: 12 }), unheld).damage, "1d8");  // untouched by the step
+
+  // An attack with no steps is returned exactly as it was.
+  const plain = { name: "Dagger", damage: "1d4" };
+  assert.equal(R.attackAtLevel(pc({ level: 9 }), plain), plain);
+});
+
+// ── CS-097: a critical range ────────────────────────────────────────────
+test("a critical range is an ordinary effect, so it derives and it switches", () => {
+  assert.equal(R.critRange(pc({})), 20);
+
+  // Black Raze: crits on 18-20.
+  const raze = pc({ equipment: { mainHand: { name: "Black Raze",
+    effects: [{ target: "crit", amount: 2 }] } } });
+  assert.equal(R.critRange(raze), 18);
+
+  // Two sources stack, as two bonuses to anything else would.
+  const both = pc({ equipment: {
+    mainHand: { name: "Black Raze", effects: [{ target: "crit", amount: 2 }] },
+    offHand: { name: "Nocturne", effects: [{ target: "crit", amount: 1 }] } } });
+  assert.equal(R.critRange(both), 17);
+
+  // ⭐ And it inherits `when` for free — Spiral Fang's 15-20 lasts a minute, so it waits.
+  const fang = e => pc({ equipment: { mainHand: { name: "Spiral Fang", effects: [e] } } });
+  assert.equal(R.critRange(fang({ target: "crit", amount: 5, when: "Infinity Drive" })), 20);
+  assert.equal(R.critRange(fang({ target: "crit", amount: 5, when: "Infinity Drive", on: true })), 15);
+
+  // The floor is a guard against a runaway build, not a rule anything in the vault reaches.
+  assert.equal(R.critRange(pc({ modifiers: [{ target: "crit", amount: 40, active: true }] })), R.CRIT_FLOOR);
+});
+
+// The tile a player actually reads. A bare 20 is ONE number, not a range: "20–20" would be the
+// sheet telling a lie about having been upgraded.
+test("the critical range says 20 bare, and a window once anything widens it", () => {
+  assert.equal(R.critRangeSays(pc({})), "20");
+  const wider = n => R.critRangeSays(pc({ modifiers: [{ target: "crit", amount: n, active: true }] }));
+  assert.equal(wider(1), "19–20");
+  assert.equal(wider(2), "18–20");
+  assert.equal(wider(6), "14–20");
+  // A NARROWING effect cannot push it past 20 and start reading backwards.
+  assert.equal(wider(-3), "20");
+});
+
 test("a Lucidlike item's effects do not stop when its bearer wakes up", () => {
   const worn = (slot, item) => pc({ equipment: { [slot]: item } });
   const lucid = { name: "Dreammaker", dream: "lucidlike", effects: [{ target: "ac", amount: 2 }] };

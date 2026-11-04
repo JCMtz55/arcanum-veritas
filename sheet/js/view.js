@@ -32,6 +32,35 @@ export const ACCENTS = [
 ];
 export const accentOf = ch => ACCENTS.find(a => a.id === ch?.accent)?.value || "";
 
+// What the AC tile says when you hover it. A base the ARMOUR is setting has to name itself and
+// show its working (CS-108), because "why is my AC 17" is unanswerable otherwise — and because
+// the number the player typed is still sitting there underneath, losing to it.
+function acTitle(ch) {
+  const b = rules.baseArmorClass(ch);
+  if (!b.from) return `Armour Class — base ${ch.ac || 0}`;
+  const s = b.spec || {};
+  const parts = [String(s.base)];
+  for (const [k, cap] of [["from", s.cap], ["from2", s.cap2]]) {
+    if (!s[k]) continue;
+    const name = s[k] === "prof" ? "proficiency bonus"
+      : `${rules.ABILITY_NAME[s[k]] || s[k]} modifier`;
+    parts.push(`${name}${cap != null && cap !== "" ? ` (max +${cap})` : ""}`);
+  }
+  const typed = Number(ch.ac) || 0;
+  return `Armour Class — base ${b.value} from ${b.from}: ${parts.join(" + ")}.`
+    + (typed ? ` Your own ${typed} is lower, so the armour's base wins.` : "");
+}
+
+// What the Crit tile says. The widened case names the width as well as the number, because at a
+// table the two sentences are asked separately: "what do I need" mid-roll, "how much wider am I"
+// when the minute is about to run out. `buffTitle` then lists each source under this line.
+function critTitle(ch) {
+  const n = rules.critRange(ch);
+  return n >= 20
+    ? "Critical hits on a natural 20 — anything widening the range says so here"
+    : `Critical hits on a natural ${n} or more — ${20 - n} wider than a bare 20`;
+}
+
 export function renderAll() {
   renderBar();
   if (!state.current) return renderEmpty();
@@ -313,7 +342,7 @@ function renderCentre() {
         <button class="face-edit" data-act="portrait" title="Change portrait" aria-label="Change portrait">${icon("pickPlate")}</button>
       </div>
       <div class="tiles">
-        ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), `Armour Class — base ${ch.ac}`, "ac")}
+        ${tile("edit-ac", "ac", "AC", rules.armorClass(ch), acTitle(ch), "ac")}
         ${tile("roll-init", "initiative", "Init", sign(rules.initiative(ch)),
           "Roll initiative — a Dexterity check, so a bonus to ability checks counts",
           ["initiative", rules.CHECK_ALL])}
@@ -321,6 +350,7 @@ function renderCentre() {
         ${tile("verum", "saveDC", "Verum DC", rules.verumDC(ch),
           `8 + proficiency ${sign(rules.proficiencyBonus(ch.level))} + highest non-Dream modifier ${sign(rules.verumModifier(ch))} + Dream ${sign(rules.abilityModifier(ch, "dream"))}`,
           "saveDc")}
+        ${tile("crit", "crit", "Crit", rules.critRangeSays(ch), critTitle(ch), "crit")}
         ${tile("hit-dice", "hitDice", "Hit dice", esc(hitDiceLeft(ch) || "—"),
           hd.used ? `${hd.left} of ${hd.total} left — your pool is ${hd.pool}`
             : "Spend a hit die on a short rest, or with a Quick Action")}
@@ -459,11 +489,17 @@ function defenceChips(ch) {
         : `Ordinary ${r.name.toLowerCase()}: ${st.ordinary}.`,
       dead || r.standing === "vulnerable" ? "" : `${r.absolute}: ${red} off the roll, never below 0.`,
       moot ? `Cancelled while your other ${r.name.toLowerCase()} record stands — a resistance and a vulnerability cancel.` : "",
-      r.why ? `Source: ${r.why}` : "No source recorded — click to add one.",
+      // A defence the GEAR is granting says so, and says the one thing that matters about it: it
+      // is not yours to edit, and it leaves when the item does. That is the whole point of CS-104
+      // — a typed-in resistance is the thing people forget to remove.
+      r.source === "item" ? `From ${r.why} — it arrives and leaves with the item, so it is not edited here.`
+        : r.why ? `Source: ${r.why}` : "No source recorded — click to add one.",
       r.note || "",
     ].filter(Boolean).join("\n");
-    return `<button class="dfn ${r.standing}${dead || moot ? " dead" : ""}" data-act="def-open" data-id="${esc(r.id)}"
-      title="${esc(title)}" aria-label="${esc(spoken)}">
+    const worn = r.source === "item";
+    return `<button class="dfn ${r.standing}${dead || moot ? " dead" : ""}${worn ? " worn" : ""}"
+      ${worn ? `data-act="def-item" data-id="${esc(r.where || "")}"` : `data-act="def-open" data-id="${esc(r.id)}"`}
+      title="${esc(title)}" aria-label="${esc(spoken)}${worn ? `, from ${r.why}` : ""}">
       <b>${esc(r.name)}</b><em aria-hidden="true">${esc(says)}</em>
       ${r.rounds == null ? "" : `<span class="dfn-r">${icon("timed")}${r.rounds}r</span>`}</button>`;
   }).join("");
@@ -588,13 +624,25 @@ function panelHtml(ch) {
 }
 
 function combatPanel(ch) {
-  const attacks = ch.attacks.length ? ch.attacks.map((a, i) => `
+  // Resolved to the character's level first (CS-087), so the row shows the die this character is
+  // actually holding rather than the one the weapon started with.
+  const critOn = rules.critRange(ch);
+  const attacks = ch.attacks.length ? rules.attackList(ch).map((a, i) => `
     <div class="atk">
-      <button class="atk-nm" data-act="atk-roll" data-id="${i}" title="Roll to hit">
+      <button class="atk-nm" data-act="atk-roll" data-id="${i}" title="Roll to hit${
+        critOn < 20 ? ` — critical on ${critOn} or more` : ""}">
         <b>${esc(a.name || "Attack")}</b><span>${sign(a.bonus || 0)} to hit</span></button>
-      <button class="atk-dmg" data-act="atk-dmg" data-id="${i}" title="Roll damage">
-        ${esc(a.damage || "—")}${a.type ? ` <em>${esc(a.type)}</em>` : ""}</button>
-      <button class="atk-crit" data-act="atk-crit" data-id="${i}" title="Critical — doubles the dice, not the modifier">crit</button>
+      <button class="atk-dmg" data-act="atk-dmg" data-id="${i}"
+        title="${esc(a.nextStep
+          ? `Roll damage — ${a.damage}. It becomes ${a.nextStep.damage || "more"} at level ${a.nextStep.at}.`
+          : a.stepAt ? `Roll damage — ${a.damage}, the step that began at level ${a.stepAt}.`
+          : "Roll damage")}">
+        ${esc(a.damage || "—")}${a.type ? ` <em>${esc(a.type)}</em>` : ""}${
+          a.nextStep ? `<i class="atk-step" title="Grows at level ${a.nextStep.at}">▴</i>` : ""}</button>
+      <button class="atk-crit" data-act="atk-crit" data-id="${i}"
+        title="Critical — doubles the dice, not the modifier${
+          critOn < 20 ? `. This character crits on ${critOn} or more.` : ""}">${
+        critOn < 20 ? `crit ${critOn}+` : "crit"}</button>
       <button class="x" data-act="atk-del" data-id="${i}" aria-label="Remove ${esc(a.name || "attack")}">×</button>
     </div>`).join("") : `<p class="hint">No attacks yet. Add the ones you actually use — they roll from here.</p>`;
 
@@ -1078,13 +1126,51 @@ export const ACTION_COST = {
 // What an item is doing, in the fewest words that are still true: its effects while they are in
 // force, and a greyed version of them while they are not, because "this ring does nothing right now"
 // is a thing a player needs to be able to see without taking it off to check.
+// Conditional effects, as switches (CS-092). The sheet cannot see the sky, your off hand, or how
+// badly you are hurt — so it does not pretend to. Each one sits here with its condition in the
+// entry's own words and a switch beside it: armed, it is an ordinary effect and reaches every
+// total, tooltip and roll breakdown on the sheet; disarmed, it costs nothing anywhere.
+//
+// The card only exists when something on the character has a condition, which on most sheets is
+// never. It is the one place in this app where the honest answer was a question rather than a
+// calculation.
+function conditionalCard(ch) {
+  const list = rules.conditionalEffects(ch);
+  if (!list.length) return "";
+  const armedButDead = list.filter(c => c.on && !c.live);
+  return `<section class="card">
+      <h3>${icon("effect")} Only when…</h3>
+      <div class="conds">${list.map(c => `
+        <button class="cond ${c.on ? "on" : ""}${c.on && !c.live ? " dead" : ""}"
+          data-act="fx-when" data-id="${esc(c.where)}" data-i="${c.fx}"
+          title="${esc(c.item.name)} — ${esc(c.on ? "in force; click to switch it off"
+            : "not counting; click to arm it")}">
+          <span class="cond-w">${esc(c.when)}</span>
+          <span class="cond-n">${sign(c.amount)} ${esc(targetLabel(c.target))}</span>
+          <em>${esc(c.item.name)}</em>
+        </button>`).join("")}</div>
+      <p class="hint">Arm one while its condition holds and it counts everywhere at once, named in
+        the breakdown. Switch it off and it is worth nothing — which is why it starts off.
+        ${armedButDead.length ? `<b class="hot">${armedButDead.length === 1
+          ? "One armed effect is not in force"
+          : `${armedButDead.length} armed effects are not in force`}</b> — the item is in the pack,
+          unattuned, or Dreamlike while you are awake.` : ""}</p>
+    </section>`;
+}
+
 function itemLine(ch, r) {
   const fx = rules.itemEffectList(r.item);
   const live = rules.itemIsActive(ch, r.item, r.where);
   // A derived one is printed at what it is worth RIGHT NOW, with the short form of where it comes
   // from after it — "+4 AC 2×PB" — since the number alone would look typed.
-  const bits = fx.map(e => `${sign(rules.modifierAmount(ch, e))} ${targetLabel(e.target)}${
-    e.from ? ` ${rules.derivationShort(e)}` : ""}`);
+  // A conditional effect that has not been armed is shown IN PARENTHESES — the item can do it,
+  // it is not doing it now. Spelling the condition out here would cost the line its density; it is
+  // one tap away on the "Only when…" card, which is where you arm it.
+  const bits = fx.map(e => {
+    const s = `${sign(rules.modifierAmount(ch, e))} ${targetLabel(e.target)}${
+      e.from ? ` ${rules.derivationShort(e)}` : ""}`;
+    return e.when && !e.on ? `(${s})` : s;
+  });
   if (r.item.qty > 1) bits.unshift(`×${r.item.qty}`);
   if (r.item.weight) bits.push(`${rules.itemWeightTotal(r.item)} lb`);
   if (!bits.length) return r.item.notes ? esc(r.item.notes) : "";
@@ -1224,6 +1310,8 @@ function gearPanel(ch) {
         no slot in either pool, whichever plane it belongs to.</p>
     </section>
 
+    ${conditionalCard(ch)}
+
     <section class="card">
       <h3>${icon("compendium")} Carried <span class="r">
         <button class="btn sm" data-act="vault-add"
@@ -1317,6 +1405,56 @@ function lastingCard(ch) {
 // the next sync would read as a bug.
 const FEATURE_GROUPS = { ancestry: "Ancestry", background: "Background", feat: "Feats", item: "Items" };
 
+// The pips, and the one line that says where the count came from. A derived pool — "uses equal to
+// your proficiency bonus" (CS-088) — is drawn exactly like a fixed one, because at the table it
+// behaves identically; the difference is in the tooltip, where it belongs, and in the fact that it
+// quietly grows at the next level instead of going stale.
+function featurePips(ch, f) {
+  const n = rules.featureUses(ch, f);
+  if (!n) return "";
+  const derived = rules.featureUsesLabel(f);
+  const title = [
+    rules.featureResetSays(f),
+    derived ? `${n} right now — ${derived}` : "",
+    rules.FEATURE_RESET_BY_ID[f.reset || ""]?.hint || "",
+  ].filter(Boolean).join(" · ");
+  // A Recharge 5–6 feature gets its die, because the die IS how it comes back — leaving it to be
+  // cleared by hand would be the sheet refusing to do the one thing it can actually do here.
+  const die = f.reset === "d6" && (f.used || 0) > 0
+    ? `<button class="pip-roll" data-act="feat-recharge" data-id="${f.i}"
+         title="${esc(`Roll a d6 — on ${f.rechargeOn || 5} or more it comes back whole`)}"
+         aria-label="Roll the recharge for ${esc(f.name)}">${icon("hitDice")}</button>`
+    : "";
+  return `<span class="uses${derived ? " drv" : ""}" title="${esc(title)}">${
+    Array.from({ length: Math.min(12, n) }, (_, k) =>
+      `<button class="pip ${k < (f.used || 0) ? "used" : ""}" data-act="feat-use" data-id="${f.i}" data-i="${k}"
+        aria-label="${esc(f.name)} use ${k + 1}"></button>`).join("")}<em>${n - (f.used || 0)}/${n}</em>${die}</span>`;
+}
+
+// Time the sheet cannot see passing (CS-096). Six items want "once per week", one wants "per
+// session", one "per Cycle" — and a long rest is none of those, so the rest dialog must never give
+// them back. The DM's own button does instead.
+//
+// The row only appears when the character HAS a feature waiting on one, so most sheets never see
+// it. Each button says how many it would return, because a button that might do nothing is a
+// button nobody trusts.
+function timePassesRow(ch) {
+  const rows = rules.TABLE_RESETS
+    .map(r => ({ r, back: rules.timePasses(ch, r.id).features }))
+    .filter(x => (ch.features || []).some(f => f && f.reset === x.r.id));
+  if (!rows.length) return "";
+  return `<div class="timepass">
+    <span class="timepass-k" title="A rest is not a week. These come back when you say they do.">
+      ${icon("timed")}Time passes</span>
+    ${rows.map(({ r, back }) => `<button class="chip${back.length ? " on" : ""}"
+      data-act="time-passes" data-id="${r.id}" ${back.length ? "" : "disabled"}
+      title="${esc(back.length
+        ? `Gives back: ${back.map(f => f.name).join(", ")}`
+        : `Nothing is spent that ${r.says.toLowerCase().replace(/^comes back /, "comes back ")}`)}"
+      >${esc(r.name)}${back.length ? ` <em>${back.length}</em>` : ""}</button>`).join("")}
+  </div>`;
+}
+
 function featureList(ch) {
   const all = (ch.features || []).map((f, i) => ({ ...f, i })).filter(f => f && f.name);
   if (!all.length) return `<p class="hint">Nothing yet.</p>`;
@@ -1339,12 +1477,8 @@ function featureList(ch) {
       <div class="ab3"><div class="ab3-h" data-act="feat-open" data-id="${f.i}">
           <span class="nm">${esc(f.name)}</span>
           ${f.level ? `<span class="tag">Lv ${f.level}</span>` : ""}
-          ${f.uses ? `<span class="uses" title="${esc(rules.FEATURE_RESET_BY_ID[f.reset || ""]?.short
-              ? `Comes back on a ${rules.FEATURE_RESET_BY_ID[f.reset].short}`
-              : "Nothing gives these back — clear them yourself")}">${
-            Array.from({ length: Math.min(12, f.uses) }, (_, n) =>
-            `<button class="pip ${n < (f.used || 0) ? "used" : ""}" data-act="feat-use" data-id="${f.i}" data-i="${n}"
-              aria-label="${esc(f.name)} use ${n + 1}"></button>`).join("")}<em>${(f.uses - (f.used || 0))}/${f.uses}</em></span>` : ""}
+          ${f.dc ? `<span class="tag dc" title="This feature's own save DC. It is the item's number, not yours — nothing that raises your spell save DC moves it.">DC ${f.dc}</span>` : ""}
+          ${featurePips(ch, f)}
           ${rules.isDerivedFeature(f) ? "" :
             `<button class="x" data-act="feat-del" data-id="${f.i}" aria-label="Remove ${esc(f.name)}">×</button>`}
         </div>
@@ -1475,6 +1609,7 @@ function characterPanel(ch) {
     <section class="card">
       <h3>${icon("effect")} Features &amp; traits <span class="r"><button class="btn sm" data-act="feat-add">Add</button></span></h3>
       ${featureList(ch)}
+      ${timePassesRow(ch)}
       <p class="hint">A feature with a class beside it is derived from that class and follows it — it
         arrives with the level that grants it and goes if the level is taken back, so there is
         nothing to remove by hand. What you have spent of a pool is yours and survives both.</p>
@@ -1691,7 +1826,9 @@ export function targetLabel(target) {
   if (kind === "skill") return id === "all" ? "all skills" : (rules.SKILL_BY_ID[id]?.name || id);
   return { ac: "AC", speed: "Speed", initiative: "Initiative", maxHp: "Max HP",
            attack: "Attack", damage: "Damage", spellAttack: "Spell attack",
-           spellDamage: "Spell damage", saveDc: "Save DC" }[kind] || kind;
+           spellDamage: "Spell damage", saveDc: "Save DC",
+           // "+2 crit" would be read as the number, so the dense rows say what it widens.
+           crit: "Crit range" }[kind] || kind;
 }
 
 // The menu an effect's target is chosen from. The LIST and its order are the engine's
@@ -1706,6 +1843,9 @@ const MOD_TARGET_LABEL = {
   // one lifts every attack, the other only a spell's.
   spellAttack: "Spell attack rolls", spellDamage: "Spell damage",
   saveDc: "Your spell save DCs",
+  // Worded as what you TYPE, not what you get: +2 here means 18–20, and a menu saying "critical
+  // range" would be read as the number you need.
+  crit: "Critical range — wider by",
   // First of the saves, because it is the one most things actually grant — Bless, an aura, a cloak.
   [rules.SAVE_ALL]: "All saving throws",
   [rules.SKILL_ALL]: "All skills",

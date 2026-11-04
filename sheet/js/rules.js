@@ -269,7 +269,11 @@ export const MOD_TARGET_IDS = [
   // which of its dice are damage (`spellDamageOf`). Nothing infers that: not one of the 317 SRD
   // spells carries the `roll` field the parser would have read, and half the dice in a spell's
   // text are healing or duration — a +4 that lands on a Cure Wounds is worse than no target.
-  "ac", "speed", "initiative", "maxHp", "attack", "damage", "spellAttack", "spellDamage", "saveDc",
+  // `crit` is how much WIDER the critical range is, not the number you need: +2 means 18–20. It is
+  // an ordinary effect target on purpose (CS-097), which hands it three things for free — it can
+  // be derived, it can carry a `when` for the ones that last a minute, and it names its source in
+  // the breakdown like everything else.
+  "ac", "speed", "initiative", "maxHp", "attack", "damage", "spellAttack", "spellDamage", "saveDc", "crit",
   SAVE_ALL,
   ...ABILITIES.map(id => `save:${id}`),
   SKILL_ALL,
@@ -311,7 +315,24 @@ export function saveContributions(ch, abilityId) {
 }
 export const passiveScore = (ch, skillId, ability) => 10 + skillTotal(ch, skillId, ability);
 
-export const armorClass = ch => num(ch.ac) + modifierTotal(activeModifiers(ch), "ac");
+// The lowest natural roll that still crits (CS-097). Eight items widen it — Black Raze and the
+// Last Ligonier Glaive to 18, Spiral Fang to 15 for a minute, Midas to 14 — and the sheet held no
+// such number at all, so every one of them was a line of prose the player had to remember.
+//
+// The FLOOR is a guard rather than a rule: nothing in the vault goes below 14, and a range that
+// has run away to 2 is a bug, not a build.
+export const CRIT_FLOOR = 10;
+export const critRange = ch =>
+  clamp(20 - modifierTotal(activeModifiers(ch), "crit"), CRIT_FLOOR, 20);
+// How a table SAYS it: "20" while it is one number, "18–20" once it is a window. Every sheet starts
+// at 20 — there is no base to type, because a critical range is not a thing you have, it is a thing
+// something gives you, so the number is the modifiers and nothing else.
+export const critRangeSays = ch => {
+  const n = critRange(ch);
+  return n >= 20 ? "20" : `${n}–20`;
+};
+
+export const armorClass = ch => baseArmorClass(ch).value + modifierTotal(activeModifiers(ch), "ac");
 export const speed = ch => num(ch.speed) + modifierTotal(activeModifiers(ch), "speed");
 // Initiative takes the check blanket too, because initiative IS a Dexterity ability check — so a
 // table that hands out "+2 to ability checks" and then rolls for order would otherwise have to
@@ -363,18 +384,96 @@ export function corruptionSaveModifier(axes) {
 //
 // `dawn` and `dusk` are here because a table says "once per day" far more often than it says "once
 // per long rest", and the rest preview is already told whether the rest carried the party through
-// either. A WEEKLY recharge is still missing and is CS-096 — True Tome of Salem's Compact needs it.
+// either.
+//
+// THE FIVE BELOW THEM ARE CS-096, and the Item Vault wanted them badly: blocking all 127 items
+// turned up EIGHT recharges the sheet could not name, on 16 of them. They divide into three kinds,
+// and the kind decides how a use comes back:
+//
+//   `rest`  — the rest dialog gives it back.                           s · l · dawn · dusk
+//   `table` — nothing on this sheet knows a week has passed, so the    session · week · cycle
+//             DM's own button does. A rest must NEVER return these.
+//   `roll`  — a die decides, so the player rolls it.                   d6 (Recharge 5–6)
+//   `clock` — real time the sheet cannot see. Named anyway, because    after (12 hours, 7 days…)
+//             "comes back after 12 hours" is the truth and "nothing
+//             gives these back" was a lie.
 export const FEATURE_RESET = [
-  { id: "", name: "By hand only", short: "", hint: "Nothing gives these back on its own." },
-  { id: "s", name: "Short or long rest", short: "short rest" },
-  { id: "l", name: "Long rest", short: "long rest" },
-  { id: "dawn", name: "At dawn", short: "dawn", hint: "A long rest gives these back only if it carried you through dawn." },
-  { id: "dusk", name: "At dusk", short: "dusk" },
+  { id: "", name: "By hand only", short: "", kind: "", says: "Nothing gives these back — clear them yourself" },
+  { id: "s", name: "Short or long rest", short: "short rest", kind: "rest", says: "Comes back on a short or long rest" },
+  { id: "l", name: "Long rest", short: "long rest", kind: "rest", says: "Comes back on a long rest" },
+  { id: "dawn", name: "At dawn", short: "dawn", kind: "rest", says: "Comes back at dawn",
+    hint: "A long rest gives these back only if it carried you through dawn." },
+  { id: "dusk", name: "At dusk", short: "dusk", kind: "rest", says: "Comes back at dusk" },
+  { id: "session", name: "Each session", short: "session", kind: "table", says: "Comes back each session" },
+  { id: "week", name: "Once per week", short: "week", kind: "table", says: "Comes back once per week" },
+  { id: "cycle", name: "Once per Cycle", short: "Cycle", kind: "table", says: "Comes back once per Cycle" },
+  { id: "d6", name: "Recharge 5–6", short: "a d6", kind: "roll", says: "Recharge 5–6 — roll the die",
+    hint: "Roll a d6 at the start of your turn; on a 5 or 6 the feature is back." },
+  { id: "after", name: "After a set time", short: "time", kind: "clock",
+    says: "Comes back after a set time — the sheet has no clock, so clear it yourself" },
 ];
 export const FEATURE_RESET_BY_ID = Object.fromEntries(FEATURE_RESET.map(r => [r.id, r]));
+// The resets the DM's own button returns, and the ones a die returns.
+export const TABLE_RESETS = FEATURE_RESET.filter(r => r.kind === "table");
 
+// What the tooltip says about how a feature comes back — in a whole sentence, because half of
+// these need one. `after` carries its own words, so "comes back after 12 hours" is exact.
+export function featureResetSays(f) {
+  const r = FEATURE_RESET_BY_ID[f?.reset || ""];
+  if (!r) return FEATURE_RESET_BY_ID[""].says;
+  if (r.id === "after") {
+    const w = String(f?.after || "").trim();
+    return w ? `Comes back after ${w} — the sheet has no clock, so clear it yourself` : r.says;
+  }
+  return r.says;
+}
+
+// How many uses a feature has. A plain number, or DERIVED the way an effect's amount is — because
+// "a number of times equal to your proficiency bonus" is how nineteen items in the Item Vault word
+// it (CS-088), and a number worked out once goes stale at the next level.
+//
+// The shape is the same `{ from, times }` an effect carries, so the two read alike and one helper
+// resolves both. Everything that draws a pip, spends one or hands one back comes through here, so
+// a Charisma-sized pool grows the moment the Charisma does.
+export function featureUses(ch, f) {
+  const u = f?.uses;
+  if (u && typeof u === "object") return clamp(modifierAmount(ch, u), 0, 99);
+  return clamp(num(u), 0, 99);
+}
+// The words under the pips, for a feature whose count moves: "equal to your proficiency bonus".
+export const featureUsesLabel = f =>
+  (f?.uses && typeof f.uses === "object") ? derivationLabel(f.uses) : "";
+
+// A stretch of time the sheet cannot see passing — a new session, a week, a Cycle. The DM says it
+// happened and this is what it returns, in the same preview-then-confirm shape a rest uses, so the
+// player can see what is about to come back before anything changes.
+export function timePasses(ch, kind) {
+  const spent = (ch?.features || []).filter(f =>
+    f && String(f.reset || "") === kind && featureUses(ch, f) > 0 && num(f.used) > 0);
+  return {
+    kind,
+    features: spent,
+    next: spent.length
+      ? { features: (ch.features || []).map(f => (spent.includes(f) ? { ...f, used: 0 } : f)) }
+      : {},
+  };
+}
+
+// Recharge 5–6, rolled. The whole feature comes back on a hit, which is what a published recharge
+// does — it is not a per-use trickle. The roll is returned so the toast can show the die rather
+// than asserting the result.
+export function rollRecharge(f, roll) {
+  const on = num(f?.rechargeOn) || 5;
+  const hit = num(roll) >= on;
+  return { roll: num(roll), on, hit, next: hit ? { used: 0 } : null };
+}
+
+// A REST gives back only the rest-driven recharges. `session`, `week`, `cycle`, `d6` and `after`
+// all fall through to false on purpose — a long rest is not a week, and a night's sleep does not
+// roll your d6 for you. Each of those has its own way back, below.
 export function featureComesBack(f, { kind = "long", dawn = false, dusk = false } = {}) {
   const r = String(f?.reset || "").toLowerCase();
+  if (FEATURE_RESET_BY_ID[r] && FEATURE_RESET_BY_ID[r].kind !== "rest") return false;
   if (r === "s") return true;                 // every rest includes a short one
   if (r === "l") return kind !== "short";
   if (r === "dawn") return !!dawn;
@@ -583,7 +682,7 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
   // came back — so every feature imported from an item had to be cleared by hand, forever (CS-089).
   // The rule was never "class resources recharge"; it was "what says how it recharges, recharges".
   const spent = (ch.features || []).filter(f =>
-    f && num(f.uses) > 0 && num(f.used) > 0 && featureComesBack(f, { kind, dawn, dusk }));
+    f && featureUses(ch, f) > 0 && num(f.used) > 0 && featureComesBack(f, { kind, dawn, dusk }));
   if (spent.length) {
     next.features = (ch.features || []).map(f => (spent.includes(f) ? { ...f, used: 0 } : f));
     changes.push({ label: "Features come back", detail: spent.map(f => f.name).join(", ") });
@@ -934,10 +1033,23 @@ export const itemWeightTotal = it =>
   Math.round(num(it?.weight) * Math.max(1, num(it?.qty) || 1) * 100) / 100;
 // A DERIVED effect carries no amount of its own, so "amount is not zero" would throw every one of
 // them away — an item worth "your proficiency bonus" would simply never appear (Juan, 2026-10-30).
+// `when` is A CONDITION IN WORDS, and the sheet never evaluates it (CS-092). "Under the sun",
+// "while you carry no shield", "at half hit points or fewer" — 27 items in the Item Vault carry a
+// bonus like that, and the sheet cannot see the sky, the off hand or the party's composition.
+//
+// So it does the honest thing instead of guessing: an effect that names a condition starts
+// SWITCHED OFF and waits for a click. The condition travels with it — onto the chip, into the
+// tooltip, and into the reason line of every breakdown the bonus appears in — so the player reads
+// the rule at the moment they arm it. A flat +2 that is simply true carries no `when` and is in
+// force the moment the item is in a slot, exactly as before.
+export const effectInForce = e => !e?.when || !!e.on;
+
 export const itemEffectList = it =>
   (it?.effects || []).filter(e => e && e.target && (e.from || num(e.amount) !== 0))
     .map(e => ({ target: String(e.target), amount: num(e.amount),
-      ...(e.from ? { from: String(e.from), times: num(e.times) || 1 } : {}) }));
+      ...(e.from ? { from: String(e.from), times: num(e.times) || 1 } : {}),
+      ...(e.when ? { when: String(e.when).slice(0, 120) } : {}),
+      ...(e.on ? { on: true } : {}) }));
 
 // Every item on the character, and where it is, so one piece of code can walk them all. `where` is
 // the address the interface hands back when it wants to change one.
@@ -975,12 +1087,111 @@ export function itemEffects(ch) {
   const out = [];
   for (const r of allItems(ch)) {
     if (!itemIsActive(ch, r.item, r.where)) continue;
-    for (const e of itemEffectList(r.item))
-      out.push({ id: `itm:${r.where}:${e.target}`, target: e.target, amount: e.amount,
+    // Indexed rather than keyed on the target, because an item may carry two effects on the same
+    // one — and because the index is the address the toggle hands back.
+    itemEffectList(r.item).forEach((e, i) => {
+      out.push({ id: `itm:${r.where}:${i}`, target: e.target, amount: e.amount,
         // Carried through, so a worn item's effect can be worth a stat exactly as a written one
         // can — `activeModifiers` resolves both at the same door.
         ...(e.from ? { from: e.from, times: e.times } : {}),
-        reason: r.item.name, rounds: null, active: true, source: "item", where: r.where });
+        // A conditional effect names its condition in the reason, so the breakdown reads
+        // "Solar Scarf — under the sun +2" rather than leaving the player to remember why.
+        reason: e.when ? `${r.item.name} — ${e.when}` : r.item.name,
+        // `contributions` drops anything with `active: false`, so a disarmed conditional effect
+        // costs nothing anywhere — no total, no tooltip, no roll. It is still listed, because an
+        // effect you cannot see is an effect you will never remember to switch on.
+        rounds: null, active: effectInForce(e), source: "item", where: r.where,
+        when: e.when || "", fx: i });
+    });
+  }
+  return out;
+}
+
+// ── armour that SETS the base AC ────────────────────────────────────────
+// CS-108. Ten of the twenty-nine entries in `Item Vault/Armor` state a whole armour class rather
+// than a bonus — "your AC is 13 + your Dexterity modifier", "+2 Plate (base AC 20)", and
+// Merigold's "12 + your Intelligence modifier + your Wisdom modifier", which takes two abilities.
+//
+// `ac` could never express that: it ADDS to the number you typed, so `ac +13` would stack on top
+// of it. `baseAc` replaces that number instead, and `ac` bonuses then land on the result — which
+// is the right order, and the reason a shield still works over a robe that sets its own base.
+//
+// `{ base, from, cap, from2 }` — a number, an ability to add, an optional ceiling on that ability
+// (Ferracortex caps Dexterity at +2, as medium armour does), and a second ability for the one
+// entry that wants two.
+export function resolveBaseAc(ch, b) {
+  let v = num(b?.base);
+  for (const [key, capKey] of [["from", "cap"], ["from2", "cap2"]]) {
+    const id = b?.[key];
+    if (!id) continue;
+    let mod = id === "prof" ? proficiencyBonus(ch?.level) : abilityModifier(ch, id);
+    const cap = b?.[capKey];
+    if (cap != null && cap !== "") mod = Math.min(mod, num(cap));
+    v += mod;
+  }
+  return v;
+}
+
+// The base this character is actually using, and what is setting it. WHICHEVER IS HIGHER wins —
+// which is both 5e's own convention for Unarmored Defense and what Midnight Regalia says in as
+// many words: "This replaces Unarmored Defense if you have it; take whichever is higher." The
+// number the player typed is just another candidate.
+export function baseArmorClass(ch) {
+  let best = { value: num(ch?.ac), from: "", where: "", spec: null };
+  for (const r of allItems(ch)) {
+    if (!itemIsActive(ch, r.item, r.where)) continue;
+    const b = r.item.baseAc;
+    if (!b || !num(b.base)) continue;
+    const value = resolveBaseAc(ch, b);
+    if (value > best.value) best = { value, from: r.item.name, where: r.where, spec: b };
+  }
+  return best;
+}
+
+// ── a weapon whose dice grow with you ───────────────────────────────────
+// CS-087. "An extra 1d8 force damage, 2d8 at 11th level, 3d8 at 17th" is how nine entries word it,
+// and until now the block had to name all three steps in prose and leave the row at the first —
+// which is worse than no row, because a row looks authoritative.
+//
+// `steps` is `[{ at, damage, bonus }]` and the one in force is the highest `at` the character has
+// reached. Anything a step does not name is left as the row has it, so a step can move the dice,
+// the bonus, or both.
+export function attackAtLevel(ch, a) {
+  const steps = (Array.isArray(a?.steps) ? a.steps : []).filter(s => s && num(s.at) > 0);
+  if (!steps.length) return a;
+  const lv = num(ch?.level) || 1;
+  const sorted = [...steps].sort((x, y) => num(x.at) - num(y.at));
+  const live = sorted.filter(s => num(s.at) <= lv).pop();
+  return {
+    ...a,
+    // Below the first step the row keeps its own dice — the steps are what it BECOMES, and the
+    // first one is not always level 1.
+    ...(live?.damage ? { damage: String(live.damage) } : {}),
+    ...(live?.bonus == null ? {} : { bonus: num(live.bonus) }),
+    ...(live ? { stepAt: num(live.at) } : {}),
+    // What is still coming, and when — so the row can say "2d8 at 11th" without sending anyone
+    // back to the note. This is set whether or not a step is live yet, which is the whole point
+    // for a character who has not reached the first one.
+    nextStep: sorted.find(s => num(s.at) > lv) || null,
+  };
+}
+// Every attack, resolved to the level the character is at. One door, so the row, the damage roll
+// and the crit all agree about which die this character is holding.
+export const attackList = ch => (ch?.attacks || []).map(a => attackAtLevel(ch, a));
+
+// Every conditional effect on the character, armed or not, with the address that toggles it. The
+// Gear tab reads this to draw one switch per condition.
+export function conditionalEffects(ch) {
+  const out = [];
+  for (const r of allItems(ch)) {
+    itemEffectList(r.item).forEach((e, i) => {
+      if (!e.when) return;
+      out.push({ where: r.where, fx: i, item: r.item, slot: r.slot || null,
+        target: e.target, when: e.when, on: !!e.on,
+        amount: modifierAmount(ch, e),
+        // In force needs BOTH: armed, and the item itself counting at all.
+        live: !!e.on && itemIsActive(ch, r.item, r.where) });
+    });
   }
   return out;
 }
@@ -1240,25 +1451,57 @@ export const absoluteReduction = (ch, standing) =>
 // they land ON TOP of what a character already is. A map keyed by type can hold only one answer, so
 // the temporary one would overwrite the permanent one and never give it back.
 //
-// Typed by hand rather than derived: a resistance arrives from an ancestry, a class feature, a worn
-// item, a spell or a DM's ruling, and only the last of those is anywhere the sheet could read. An
-// item's `{target, amount}` effects cannot express "halves fire" — hence its own record.
+// A defence an ITEM grants (CS-104). Sixteen entries in the Item Vault hand one out — the Steeldoor
+// Harness alone grants four — and until this existed every one of them had to be typed into the
+// bar by hand AND REMEMBERED WHEN THE ARMOUR CAME OFF, which is the half nobody ever does.
+//
+// Read exactly like an item's effects: only from a slot, only while attuned where the item says so,
+// and only on the plane a Dreamlike item belongs to. So it arrives when the armour does and leaves
+// when it does, with no record left behind to go stale.
+//
+// Deliberately LASTING while the item is in force, never timed. A defence with a fuse — Overforge's
+// minute of fire immunity, Justice's minute of resistance to everything — is a hand-typed record
+// with `rounds`, because the fuse belongs to the moment it was lit and not to the item.
+export function itemDefences(ch) {
+  const out = [];
+  for (const r of allItems(ch)) {
+    if (!itemIsActive(ch, r.item, r.where)) continue;
+    (r.item.defences || []).forEach((d, i) => {
+      const type = String(d?.type || "").toLowerCase();
+      if (!DAMAGE_BY_ID[type] || !STANDING_BY_ID[d?.standing]) return;
+      out.push({ id: `itmdef:${r.where}:${i}`, type, standing: d.standing,
+        why: r.item.name, rounds: null, active: true, source: "item", where: r.where });
+    });
+  }
+  return out;
+}
+
+// Typed by hand OR granted by an item. A resistance arrives from an ancestry, a class feature, a
+// worn item, a spell or a DM's ruling — the item is the one the sheet can now read for itself, and
+// the rest still carry their reason in the player's own words.
 export function defenceRecords(ch) {
   const d = ch?.defences;
   const ok = r => r && r.active !== false && STANDING_BY_ID[r.standing]
     && DAMAGE_BY_ID[String(r.type || "").toLowerCase()];
-  if (Array.isArray(d)) return d.filter(ok).map(r => ({ ...r, type: String(r.type).toLowerCase(),
-    rounds: r.rounds ?? null }));
+  const worn = itemDefences(ch);
+  if (Array.isArray(d)) return [...d.filter(ok).map(r => ({ ...r, type: String(r.type).toLowerCase(),
+    rounds: r.rounds ?? null })), ...worn];
   // A sheet saved before a defence could run out: one standing per type, keyed by the type, and
   // every one of them lasting. Read rather than migrated, so nothing is lost by opening the sheet;
   // the first edit writes the list back in the new shape.
-  return Object.entries(d || {}).map(([type, row]) => ({
+  return [...Object.entries(d || {}).map(([type, row]) => ({
     id: `d:${type}`, type: String(type).toLowerCase(),
     standing: typeof row === "string" ? row : row?.standing,
     why: (typeof row === "string" ? "" : row?.why) || "",
     rounds: null, active: true,
-  })).filter(ok);
+  })).filter(ok), ...worn];
 }
+
+// The character's OWN records, without what their gear is granting. EVERY WRITE BACK TO THE SHEET
+// MUST GO THROUGH THIS. Writing `defenceRecords` back would copy an item's defence onto the
+// character, where it would survive the armour coming off — which is precisely the failure CS-104
+// exists to end, reintroduced by the save path instead of the read path.
+export const ownDefenceRecords = ch => defenceRecords(ch).filter(r => r.source !== "item");
 
 // What this character IS against one type, once every record that touches it has had its say.
 //
