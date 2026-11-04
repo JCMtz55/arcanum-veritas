@@ -514,6 +514,49 @@ Revoking a Cognition closes its Devotion and unswears it. Closing a Devotion uns
 
 The old model kept ability sets in the `paragon_builds` table and typed them into an editor on the Admin page. Both are gone: the table is left standing so nothing a DM already wrote is destroyed, and nothing reads it. `js/paragon-examples.js` is an empty pointer — the three worked examples now live in the Devotion file with `"example": true`. `server/paragon-seed.json` is no longer read.
 
+## Items from the Obsidian vault
+
+Every magic item in this campaign already has a note in the vault — Dreammaker has eleven kilobytes of it. The **Gear** tab can read one: paste the item's page link, press **Read the note**, and the item arrives with its weight, its flags, its charges, what it does to your numbers, its features and its attack already filled in. The link stays on the item afterwards, as a 📖 beside its flags, so the entry is one click away from the row.
+
+**How a note carries that.** An Obsidian comment — `%% … %%` — is never rendered, in the app or on publish.obsidian.md, but it *is* in the raw markdown. So the block is invisible to a player reading the page and plain text to the tool reading the file:
+
+````markdown
+%%av-item
+{ "name": "Ring of Arcane Potency", "slot": "ring1", "weight": 0.1, "magical": true,
+  "charges": { "max": 3, "recharge": "long", "regain": "1d3" },
+  "effects": [{ "target": "saveDc", "amount": 1 }],
+  "features": [{ "name": "Potency", "uses": 3, "text": "Spend a charge to reroll one damage die." }] }
+%%
+````
+
+HTML comments work the same way, and the JSON may sit inside a ```` ```json ```` fence. The full field list is in the vault at **Homebrew/Rulesets/Vault Item Blocks.md**; a worked example is at the bottom of **Item Vault/Flagship/Dreammaker.md**.
+
+**Why this needs no server.** Obsidian Publish serves the raw markdown of every published note from `publish-01.obsidian.md/access/<site-uid>/<path>.md`, with `Access-Control-Allow-Origin: *` on it — so the browser reads the note directly. Nothing proxies, nothing caches, and it behaves the same on Railway and on a static copy. The site uid is the one line in `sheet/js/vault.js` that would have to change if the published site were ever torn down and rebuilt; it is in `window.siteInfo` on any page of the site.
+
+**What it will not do.** Only links to our own site are accepted — a URL field that reaches arbitrary pages is not a feature. Nothing from a note is trusted as written: every number is clamped, every slot, recharge, effect target and derivation is checked against the engine's own lists (`rules.MOD_TARGET_IDS` is the same list the effect dialog builds its menu from), and anything that does not survive is reported in orange on the import dialog rather than dropped in silence. The note never decides whether a character is **attuned** or how many charges they have already spent — those are facts about the character. Reading a note a second time **replaces** the features it put there rather than adding a second copy of each, so an item stays in step with canon after its entry is rewritten.
+
+`sheet/js/vault.js` is the reader, `sheet/test/vault.test.mjs` its tests — twelve of them, no network, run with `node --test sheet/test/vault.test.mjs`.
+
+---
+
+## The dream axis
+
+An item's standing in the dream is **three values, not a flag** (`rules.ITEM_DREAM`), and the three cost different things:
+
+| `dream` | Where it works | Attunement |
+|---|---|---|
+| *(empty)* | Ephemer and Insomnia alike | one baseline slot |
+| `dreamlike` | **Insomnia only** — inactive the moment its bearer wakes | one of Insomnia's three |
+| `lucidlike` | **Both planes at once**, always in force | **one baseline slot *and* one Insomnia slot** |
+
+So a Lucidlike item is listed **twice** on the Attunement card, once per pool, tagged `both`. That is the cost of two-plane existence, not a double count. In the slot row the dream pip **cycles** through the three — a square that lights up can only say two — and the item dialog has an **In the dream** select with a line of explanation that follows the choice.
+
+**Why it was a boolean until 2026-11-03.** `Character Sheet Requirements v1.5` wrote the two kinds as one thing in **DM-14**, **HB-018** and **fixture 5**, all saying inactive off-plane, and the engine implemented exactly that — down to a test fixture named "Lucidlike Mirror" that went dark in Ephemer. The item canon says the opposite in three places: `Artificing Dream Items.md` ("can exist in both Insomnia and Ephemer simultaneously"), `Lucidite.md` ("able to exist in Insomnia and Ephemer at once") and the Glossary ("Dreamlike items cannot return to Ephemer; Lucidlike ones can"). Juan ruled for the item canon, and the spec was corrected — **DM-15** is the new entry, with fixture 5 split into 5 and 5a.
+
+**Migration is deliberately inert.** `rules.itemDream()` reads the retired `insomniaOnly: true` as **Dreamlike**, which is exactly what that boolean meant, so no live sheet moves by itself; an item becomes Lucidlike only when somebody says so. Nothing rewrites a stored flag behind a player's back — the axis is written only when that item is next edited.
+
+---
+
 ## Admin
 
 Everything the DM keeps lives in **`admin/`**, a section of its own beside `sheet/`, `grimms/` and `map/`, reached from the Admin card on the front page or the ★ tool strip. It is **not a tab in the builder**, for two reasons: administration has nothing to do with composing a seal, and while it lived inside the builder every player's browser downloaded the whole DM interface. Now none of it is shipped to them. `admin.html` at the root is a 301 to `admin/`, because that was the URL for a year.

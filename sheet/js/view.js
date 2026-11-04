@@ -1103,6 +1103,31 @@ function chargeChip(r) {
       c.left ? " · click to spend one" : ""}`)}">${c.left}/${c.max}</button>`;
 }
 
+// An item that was read out of the vault keeps the link it came from, and the row offers it as a
+// place to go. Rendered as a link only when it really is one: the field accepts whatever is typed,
+// and a half-finished URL must never become a clickable anchor.
+const vaultHref = v =>
+  /^https:\/\/publish\.obsidian\.md\/[^"'<>\s]+$/i.test(String(v || "")) ? String(v) : "";
+const vaultLink = it => {
+  const href = vaultHref(it?.vault);
+  return href
+    ? `<a class="pipx lnk" href="${esc(href)}" target="_blank" rel="noopener noreferrer"
+        title="Read its entry in the vault">${icon("vault")}</a>`
+    : "";
+};
+
+// Where an item stands on the dream axis, as one pip that CYCLES — of Ephemer → Dreamlike →
+// Lucidlike → back. Three states will not fit a square that lights up, and a select in the middle
+// of a flag strip would be the only dropdown on the Gear tab; the glyph changes with the state and
+// the tooltip names it, which is how the rest of this strip already works.
+const dreamPip = (slotId, it) => {
+  const kind = rules.itemDream(it);
+  const d = rules.DREAM_BY_ID[kind];
+  return `<button class="pipx ${kind ? "dream" : ""}${kind === "lucidlike" ? " lucid" : ""}"
+    data-act="slot-dream" data-id="${esc(slotId)}"
+    title="${esc(`${d.name} — ${d.hint} Click to change.`)}">${icon(kind === "lucidlike" ? "lucid" : "dream")}</button>`;
+};
+
 function gearPanel(ch) {
   const att = rules.attunement(ch, { inInsomnia: state.inInsomnia });
   const row = s => {
@@ -1119,12 +1144,12 @@ function gearPanel(ch) {
           : `<em>empty</em>`}</button>
       ${filled ? chargeChip(r) : `<span></span>`}
       ${filled ? `<span class="slot-f">
+          ${vaultLink(it)}
           <button class="pipx ${it.magical ? "on" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="magical"
             title="Magical">${icon("effect")}</button>
           <button class="pipx ${it.attuned ? "on" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="attuned"
             title="${it.requiresAttunement ? "Attuned — this one needs it to work" : "Attuned"}">${icon("attunement")}</button>
-          <button class="pipx ${it.insomniaOnly ? "dream" : ""}" data-act="slot-flag" data-id="${s.id}" data-k="insomniaOnly"
-            title="Dreamlike or Lucidlike — uses an Insomnia-only attunement slot">${icon("dream")}</button>
+          ${dreamPip(s.id, it)}
         </span>` : `<span class="slot-f"></span>`}
     </div>`;
   };
@@ -1133,17 +1158,42 @@ function gearPanel(ch) {
   const wielded = rules.slotsFor(ch, rules.WIELDED_SLOTS).map(row).join("");
   const anatomy = rules.WORN_SLOTS.filter(s => s.optional);
 
-  const attRow = (list, cap, label, dream) => `
-    <div class="attn-grp ${dream ? "dream" : ""}">
+  // One group per POOL, and a Lucidlike item is in both of them — it pays into both, so showing it
+  // once would hide half its cost. The repeat is tagged `both` rather than left to look like a
+  // duplicate, and only the Dreamlike chips go quiet while awake: a Lucidlike item is in force in
+  // Ephemer, which is the entire difference between the two kinds.
+  const attRow = (list, cap, label, insomnia) => {
+    const sleeping = insomnia && !state.inInsomnia;
+    return `
+    <div class="attn-grp ${insomnia ? "dream" : ""}">
       <div class="attn-h"><b>${label}</b><span>${list.length}/${cap}</span>
-        ${dream && !state.inInsomnia ? `<span class="tag">inactive while awake</span>` : ""}</div>
-      ${list.length ? `<div class="chips">` + list.map(i =>
-        `<span class="chip ${dream && !state.inInsomnia ? "dim" : "on"}">${esc(i.name)}</span>`).join("") + `</div>`
+        ${sleeping && list.some(rules.isDreamlike)
+          ? `<span class="tag">Dreamlike ones inactive while awake</span>` : ""}</div>
+      ${list.length ? `<div class="chips">` + list.map(i => {
+        const lucid = rules.isLucidlike(i);
+        return `<span class="chip ${sleeping && !lucid ? "dim" : "on"}${lucid ? " lucid" : ""}"
+          title="${esc(rules.DREAM_BY_ID[rules.itemDream(i)].hint)}">${esc(i.name)}${
+          lucid ? `<em>both</em>` : ""}</span>`;
+      }).join("") + `</div>`
         : `<p class="hint">None.</p>`}
     </div>`;
+  };
 
-  const normal = rules.attunedItems(ch).filter(i => !i.insomniaOnly);
-  const dreamish = rules.attunedItems(ch).filter(i => i.insomniaOnly);
+  // Bonded and costing nothing — Juan, 2026-11-03: "no attunement require means it does not take a
+  // attunement slot". The group only appears when there is one, because on most sheets there is
+  // not; but when there is, it is SHOWN rather than quietly left out of the count. A slot that goes
+  // uncharged without being mentioned is how a player stops believing the number above it.
+  const freeRow = list => !list.length ? "" : `
+    <div class="attn-grp">
+      <div class="attn-h"><b>Costs no slot</b><span>${list.length}</span></div>
+      <div class="chips">${list.map(i => {
+        const dark = rules.isDreamlike(i) && !state.inInsomnia;
+        return `<span class="chip ${dark ? "dim" : "on"}"
+          title="Needs no attunement, so it draws on neither pool.${
+            dark ? " Dreamlike, so it is still inactive while you are awake." : ""}"
+          >${esc(i.name)}</span>`;
+      }).join("")}</div>
+    </div>`;
 
   return `<section class="card">
       <h3>${icon("gear")} Worn <span class="r">
@@ -1162,15 +1212,23 @@ function gearPanel(ch) {
 
     <section class="card">
       <h3>${icon("attunement")} Attunement</h3>
-      ${attRow(normal, att.baseline, "Attuned", false)}
-      ${attRow(dreamish, rules.ATTUNEMENT_INSOMNIA, "Dream attuned", true)}
+      ${attRow(att.onBaseline, att.baseline, "Attuned", false)}
+      ${attRow(att.onInsomnia, rules.ATTUNEMENT_INSOMNIA, "Dream attuned", true)}
+      ${freeRow(att.free)}
       ${att.over ? `<p class="hint hot">${att.over} more than your slots allow — choose which are active.</p>` : ""}
-      <p class="hint">Three slots, and three more in Insomnia for Dreamlike and Lucidlike items.
-        Leaving Insomnia does not break those attunements; their effects just go inactive.</p>
+      ${att.insomniaOver ? `<p class="hint hot">${att.insomniaOver} more than Insomnia's three allow.</p>` : ""}
+      <p class="hint">Three slots, and three more in Insomnia. A <b>Dreamlike</b> item takes one of
+        the Insomnia three and does nothing while you are awake; a <b>Lucidlike</b> one works in
+        both planes and so takes <b>one of each</b>, which is why it is listed twice.
+        Leaving Insomnia never breaks an attunement. An item that <b>needs no attunement</b> costs
+        no slot in either pool, whichever plane it belongs to.</p>
     </section>
 
     <section class="card">
       <h3>${icon("compendium")} Carried <span class="r">
+        <button class="btn sm" data-act="vault-add"
+          title="Read an item out of the vault — its weight, charges, effects and features in one go"
+          >${icon("vault")} From the vault</button>
         <button class="btn sm" data-act="carry-add">Add</button></span></h3>
       ${(ch.carried || []).length ? `<div class="carry">` + ch.carried.map((it, i) => {
         const r = { item: it, where: `pack:${i}`, index: i };
@@ -1180,6 +1238,7 @@ function gearPanel(ch) {
             title="${esc(it.notes || "Open it")}">
             <b>${esc(it.name)}</b>${line ? `<span>${line}</span>` : ""}</button>
           ${chargeChip(r)}
+          ${vaultLink(it)}
           <button class="btn sm" data-act="item-equip" data-id="${esc(r.where)}"
             title="Put it in a slot, where its effects count">Equip</button>
           <button class="x" data-act="carry-del" data-id="${i}" aria-label="Remove ${esc(it.name)}">×</button>
@@ -1280,7 +1339,10 @@ function featureList(ch) {
       <div class="ab3"><div class="ab3-h" data-act="feat-open" data-id="${f.i}">
           <span class="nm">${esc(f.name)}</span>
           ${f.level ? `<span class="tag">Lv ${f.level}</span>` : ""}
-          ${f.uses ? `<span class="uses">${Array.from({ length: Math.min(12, f.uses) }, (_, n) =>
+          ${f.uses ? `<span class="uses" title="${esc(rules.FEATURE_RESET_BY_ID[f.reset || ""]?.short
+              ? `Comes back on a ${rules.FEATURE_RESET_BY_ID[f.reset].short}`
+              : "Nothing gives these back — clear them yourself")}">${
+            Array.from({ length: Math.min(12, f.uses) }, (_, n) =>
             `<button class="pip ${n < (f.used || 0) ? "used" : ""}" data-act="feat-use" data-id="${f.i}" data-i="${n}"
               aria-label="${esc(f.name)} use ${n + 1}"></button>`).join("")}<em>${(f.uses - (f.used || 0))}/${f.uses}</em></span>` : ""}
           ${rules.isDerivedFeature(f) ? "" :
@@ -1408,6 +1470,8 @@ function characterPanel(ch) {
 
     ${lastingCard(ch)}
 
+    ${corruptionCard(ch)}
+
     <section class="card">
       <h3>${icon("effect")} Features &amp; traits <span class="r"><button class="btn sm" data-act="feat-add">Add</button></span></h3>
       ${featureList(ch)}
@@ -1425,6 +1489,59 @@ function characterPanel(ch) {
     <section class="card">
       <h3>History <span class="r"><button class="btn sm" data-act="history">Open</button></span></h3>
       <p class="hint">Every level, Dream event, Fate use and unlock, with who did it and when.</p>
+    </section>`;
+}
+
+// ── Corruption, in two places ───────────────────────────────────────────
+// The rail gets the SCORE and nothing else (Juan, 2026-11-03 — the full ladder was eating the side
+// bar). Mid-fight the only Corruption question is "what is it now", and one more point is one
+// click; everything you read rather than nudge lives on the Character tab, where there is room for
+// it, reached by the same `lastlink` idiom the Round card already uses for lasting effects.
+function corruptionRail(ch) {
+  const score = rules.corruptionScore(ch);
+  const n = rules.CORRUPTION_NATURE_BY_ID[rules.corruptionNature(ch)];
+  const due = rules.corruptionNatureDue(ch);
+  return `<section class="card corr${score ? " on" : ""}">
+      <h3>${icon("corruption")} Corruption <span class="r">
+        <button class="btn sm" data-act="corruption"
+          title="${esc(`${score} of ${rules.CORRUPTION_MAX}${n ? ` · ${n.name}` : ""} — click to change it`)}">
+          <b class="corr-n">${score}</b>${n ? ` ${n.mark}` : ""}</button></span></h3>
+      ${due ? `<p class="hint hot">Choose a Nature.</p>` : ""}
+    </section>`;
+}
+
+// The whole of it, on the Character tab. What is IN FORCE is listed rather than the ladder: at
+// Corruption 6 a player needs the six things that are true of them now, not a ten-row table to read
+// across. A row carries its Nature's rider only once a Nature is chosen, which is the ruleset's own
+// rule — rows 1–4 are foreshadowing until then.
+function corruptionCard(ch) {
+  const score = rules.corruptionScore(ch);
+  const nature = rules.corruptionNature(ch);
+  const n = nature ? rules.CORRUPTION_NATURE_BY_ID[nature] : null;
+  const due = rules.corruptionNatureDue(ch);
+  const inForce = rules.corruptionInForce(ch);
+
+  return `<section class="card corr${score ? " on" : ""}">
+      <h3>${icon("corruption")} Corruption <span class="r">
+        <button class="btn sm" data-act="corruption">${score ? "Change" : "Record some"}</button></span></h3>
+      ${score ? `
+        <div class="corr-h">
+          <span class="chip on"><b class="corr-n">${score}</b>/${rules.CORRUPTION_MAX}</span>
+          ${n ? `<span class="chip on">${n.mark} ${esc(n.name)}</span>` : ""}
+          ${ch.corruptionVile ? `<span class="chip">${esc(ch.corruptionVile)}</span>` : ""}
+          <span class="chip" title="[(Good − Evil) + (Order − Chaos)] ÷ 2, rounded down — your own score does not feed it">
+            ${sign(rules.corruptionSaveBonus(ch))} save</span>
+        </div>
+        ${due ? `<p class="hint hot">Score ${rules.CORRUPTION_NATURE_AT} — your soul is dissolving toward
+          something. <b>Choose a Nature</b>, and it cannot be changed without a soul-cleansing ritual.</p>` : ""}
+        <div class="corr-l">${inForce.map(t => `
+          <div class="corr-r"><b>${t.score}</b><span>${esc(t.shared)}${
+            t.nature ? ` <em>${esc(t.natureName)}:</em> ${esc(t.nature)}` : ""}</span></div>`).join("")}</div>
+        <p class="hint">Everything at or below your score is in force at once.
+          ${n ? `The ${esc(n.name)} line on each row is yours because of the Nature you chose.`
+            : `Choose a Nature and each row gains its own consequence as well.`}</p>`
+        : `<p class="hint">None. It rises from Forbidden Spells, cursed weapons, Pure Vile Coins and
+           what they cost — and it is not Honor or Morality, which is why it has its own score.</p>`}
     </section>`;
 }
 
@@ -1526,6 +1643,8 @@ function renderRight() {
         gets it as a penalty, and a tie is nothing.</p>
     </section>
 
+    ${corruptionRail(ch)}
+
     ${inspirationCard(ch)}
 
     <section class="card fate">
@@ -1571,22 +1690,25 @@ export function targetLabel(target) {
   if (kind === "check") return "all checks";
   if (kind === "skill") return id === "all" ? "all skills" : (rules.SKILL_BY_ID[id]?.name || id);
   return { ac: "AC", speed: "Speed", initiative: "Initiative", maxHp: "Max HP",
-           attack: "Attack", damage: "Damage", saveDc: "Save DC" }[kind] || kind;
+           attack: "Attack", damage: "Damage", spellAttack: "Spell attack",
+           spellDamage: "Spell damage", saveDc: "Save DC" }[kind] || kind;
 }
 
-// The three blankets come before the lists they stand in front of, because they are what a spell or
-// an item nearly always grants: Bless and an aura give saves, Guidance gives a check, a cloak gives
-// every save at once. The one-at-a-time entries are for the rarer, more specific thing.
-export const MOD_TARGETS = [
-  { value: rules.CHECK_ALL, label: "All ability checks" },
-  ...rules.ABILITIES.map(id => ({ value: `ability:${id}`, label: rules.ABILITY_NAME[id] })),
-  { value: "ac", label: "AC" }, { value: "speed", label: "Speed" },
-  { value: "initiative", label: "Initiative" }, { value: "maxHp", label: "Maximum HP" },
-  { value: "attack", label: "Attack rolls" }, { value: "damage", label: "Damage" },
-  { value: "saveDc", label: "Your save DCs" },
+// The menu an effect's target is chosen from. The LIST and its order are the engine's
+// (`rules.MOD_TARGET_IDS`), so that the one place a target can be applied is the one place it can be
+// offered — and so the vault importer can check a note's effects against the same list without
+// reaching into the view. Only the handful of labels that want more room than a dense row gets are
+// spelled out here; the rest are `targetLabel`'s own.
+const MOD_TARGET_LABEL = {
+  [rules.CHECK_ALL]: "All ability checks",
+  maxHp: "Maximum HP", attack: "Attack rolls",
+  // Named apart from "Attack rolls" so the menu makes the distinction before a mistake is made:
+  // one lifts every attack, the other only a spell's.
+  spellAttack: "Spell attack rolls", spellDamage: "Spell damage",
+  saveDc: "Your spell save DCs",
   // First of the saves, because it is the one most things actually grant — Bless, an aura, a cloak.
-  { value: rules.SAVE_ALL, label: "All saving throws" },
-  ...rules.ABILITIES.map(id => ({ value: `save:${id}`, label: `${rules.ABILITY_NAME[id]} save` })),
-  { value: rules.SKILL_ALL, label: "All skills" },
-  ...rules.SKILLS.map(s => ({ value: `skill:${s.id}`, label: s.name })),
-];
+  [rules.SAVE_ALL]: "All saving throws",
+  [rules.SKILL_ALL]: "All skills",
+};
+export const MOD_TARGETS = rules.MOD_TARGET_IDS.map(value =>
+  ({ value, label: MOD_TARGET_LABEL[value] || targetLabel(value) }));

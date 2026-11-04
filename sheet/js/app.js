@@ -11,6 +11,7 @@ import { renderAll, targetLabel, MOD_TARGETS, ACCENTS, PORTRAITS, portraitUrl, f
   portraitOf, ACTION_COST, toggleHtml, TAB_ORDER } from "./view.js";
 import * as compendium from "./compendium.js";
 import * as ephemer from "./ephemer.js";
+import * as vault from "./vault.js";
 import { esc, sign, toast, popAt, closePop, popKey, popContains, dialog, closeDialog,
   lightbox, rollCheck, rollDice, rollHtml, parseDice } from "./pop.js";
 import { icon } from "./icons.js";
@@ -920,6 +921,22 @@ const ACTS = {
     const it = (s.equipment || {})[el.dataset.id];
     if (it) it[el.dataset.k] = !it[el.dataset.k];
   }),
+  // The dream axis has three values, so its pip cycles rather than toggling: of Ephemer →
+  // Dreamlike → Lucidlike → round again. The toast names what it landed on, because the three
+  // cost different slots and "I clicked the moon once" is not an answer at a table.
+  "slot-dream": el => {
+    const order = rules.ITEM_DREAM.map(d => d.id);
+    const current = rules.itemDream((ch().equipment || {})[el.dataset.id]);
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    mutate(s => {
+      const it = (s.equipment || {})[el.dataset.id];
+      if (!it) return;
+      it.dream = next;
+      // Cleared as the axis is set, so nothing carries a stale boolean disagreeing with it.
+      delete it.insomniaOnly;
+    });
+    toast(`${rules.DREAM_BY_ID[next].name} — ${rules.DREAM_BY_ID[next].hint}`);
+  },
   anatomy: el => {
     const have = ch().anatomy || [];
     popAt(el, `<div class="pop-h"><b>Body slots</b></div>
@@ -935,6 +952,7 @@ const ACTS = {
       ? s.anatomy.filter(x => x !== id) : [...(s.anatomy || []), id];
   }),
   "carry-add": () => itemDialog("pack:new"),
+  "vault-add": () => vaultDialog(),
   "carry-del": el => mutate(s => { s.carried.splice(+el.dataset.id, 1); }),
 
   // ── portrait and accent ──
@@ -964,7 +982,14 @@ const ACTS = {
     dialog("Add a feature", `<form class="fields" id="ft">
         <label>Name<input class="txt" id="ftName" maxlength="80" required></label>
         <label>Source<input class="txt" id="ftSrc" maxlength="40" placeholder="class, feat, item, ancestry"></label>
-        <label>Uses<input class="txt" id="ftUses" type="number" min="0" max="99" placeholder="leave empty if unlimited"></label>
+        <div class="fields grid2">
+          <label>Uses<input class="txt" id="ftUses" type="number" min="0" max="99" placeholder="leave empty if unlimited"></label>
+          <label>Comes back<select class="txt" id="ftReset">${rules.FEATURE_RESET.map(r =>
+            `<option value="${r.id}">${esc(r.name)}</option>`).join("")}</select></label>
+        </div>
+        <p class="hint">A feature that says how it recharges comes back with the rest that matches
+          it — the same path a class resource takes. One that says nothing is left alone rather than
+          guessed at, which means you clear it yourself.</p>
         <label>What it does<textarea class="txt ta" id="ftText" rows="4"></textarea></label>
         <button class="btn pri" type="submit">Add</button></form>`);
     document.getElementById("ft").onsubmit = ev => {
@@ -974,11 +999,72 @@ const ACTS = {
       const f = { id: uid(), name,
         source: document.getElementById("ftSrc").value.trim(),
         uses: Number(document.getElementById("ftUses").value) || 0, used: 0,
+        reset: document.getElementById("ftReset").value,
         text: document.getElementById("ftText").value.trim() };
       closeDialog();
       mutate(s => { s.features = [...(s.features || []), f]; });
     };
   },
+  // The third axis. The score is a stepper rather than a typed box because it moves one point at a
+  // time, by something that just happened at the table; the Nature is asked for once at five and
+  // then kept, because the ruleset says it cannot change without a soul-cleansing ritual — the
+  // sheet still lets it be changed, since a ritual is a thing that can happen, but it says so.
+  corruption: () => {
+    const draw = () => {
+      const c = ch();
+      const score = rules.corruptionScore(c);
+      const nature = rules.corruptionNature(c);
+      const dlg = dialog("Corruption", `
+          <div class="trks">
+            <span class="trk"><i title="Soul damage — not Honor, not Morality">Score</i>
+              <span class="step"><button data-corr="-1" aria-label="Lower Corruption">–</button>
+                <span>${score}<em>/${rules.CORRUPTION_MAX}</em></span>
+                <button data-corr="1" aria-label="Raise Corruption">+</button></span></span>
+          </div>
+          <p class="hint">Corruption save modifier <b>${sign(rules.corruptionSaveBonus(c))}</b>
+            — <code>[(Good − Evil) + (Order − Chaos)] ÷ 2</code>, rounded down. Your own score does
+            not feed it.</p>
+
+          <div class="zone-h sm"><h4>Nature</h4></div>
+          ${score >= rules.CORRUPTION_NATURE_AT || nature ? `
+            <div class="list">${rules.CORRUPTION_NATURES.map(n => `
+              <button class="listrow ${n.id === nature ? "on" : ""}" type="button" data-nature="${n.id}">
+                <b>${n.mark} ${esc(n.name)}</b><span>${esc(n.blurb)}</span></button>`).join("")}</div>
+            ${nature ? `<p class="hint">Chosen. It cannot be changed without a complete soul-cleansing
+              ritual — pick the other one only if that is what happened.</p>` : ""}`
+            : `<p class="hint">Asked at score ${rules.CORRUPTION_NATURE_AT}, when a soul begins
+               visibly dissolving toward one of the two. Not yet.</p>`}
+
+          <div class="zone-h sm"><h4>Dominant Vile Emotion</h4></div>
+          <input class="txt" id="corrVile" maxlength="40" value="${esc(c.corruptionVile || "")}"
+            placeholder="Wrath, Envy, Greed…" ${score >= rules.CORRUPTION_NATURE_AT ? "" : "disabled"}>
+          <p class="hint">${score >= rules.CORRUPTION_NATURE_AT
+            ? "It names your Rebound Curse, your transformation, and whatever you become at ten."
+            : `Assigned at score ${rules.CORRUPTION_NATURE_AT} and above.`}</p>
+          ${score ? `<p class="hint">Everything in force at ${score} — all ${score} thresholds, with
+            your Nature's own consequence on each — is on the <b>Character</b> tab. The rail only
+            carries the number.</p>` : ""}`,
+        { wide: true });
+
+      const vile = document.getElementById("corrVile");
+      const keepVile = () => { if (vile && !vile.disabled) mutate(s => { s.corruptionVile = vile.value.trim(); }); };
+      dlg.querySelectorAll("[data-corr]").forEach(b => b.onclick = () => {
+        keepVile();
+        mutate(s => { s.corruption = Math.max(0, Math.min(rules.CORRUPTION_MAX,
+          rules.corruptionScore(s) + Number(b.dataset.corr))); });
+        draw();
+      });
+      dlg.querySelectorAll("[data-nature]").forEach(b => b.onclick = () => {
+        keepVile();
+        // Clicking the one already chosen clears it, which is the only way back from a mis-click.
+        mutate(s => { s.corruptionNature = s.corruptionNature === b.dataset.nature ? "" : b.dataset.nature; });
+        draw();
+      });
+      if (vile) vile.onchange = keepVile;
+    };
+    draw();
+  },
+
   "feat-open": el => el.parentNode.classList.toggle("open"),
   "feat-del": (el, e) => { e.stopPropagation(); mutate(s => { s.features.splice(+el.dataset.id, 1); }); },
 
@@ -1385,8 +1471,8 @@ const ITEM_FLAGS = [
   { id: "requiresAttunement", icon: "needsAttunement", short: "needs attunement",
     label: "Needs attunement — it does nothing until you are attuned" },
   { id: "attuned", icon: "attunement", short: "attuned", label: "Attuned to it" },
-  { id: "insomniaOnly", icon: "dream", short: "Dreamlike",
-    label: "Dreamlike or Lucidlike — an Insomnia-only slot, and inactive while awake" },
+  // Where an item stands on the dream axis is NOT here any more: it has three values, and a square
+  // that lights up can only say two. It is the select below the flags (`rules.ITEM_DREAM`).
 ];
 
 // Writing one item back, wherever it lives. Every change to an item goes through here so the two
@@ -1452,10 +1538,17 @@ function itemDialog(where) {
     name: src.name || "", qty: Number(src.qty) || 1, weight: Number(src.weight) || 0,
     value: Number(src.value) || 0, notes: src.notes || "",
     magical: !!src.magical, requiresAttunement: !!src.requiresAttunement,
-    attuned: !!src.attuned, insomniaOnly: !!src.insomniaOnly,
+    attuned: !!src.attuned,
+    // Read through `itemDream`, so an item saved under the old boolean opens as Dreamlike.
+    dream: rules.itemDream(src),
     charges: c0 ? { ...c0 } : { max: 0, used: 0, recharge: "manual", regain: "all" },
     effects: rules.itemEffectList(src),
     id: src.id || uid(),
+    // Its page in the Obsidian vault, and whatever the last read of that page brought back. The
+    // features and attacks are held here rather than written as they arrive, so cancelling the
+    // dialog really does cancel the import — the same bargain the effect list already makes.
+    vault: src.vault || "",
+    newFeatures: [], newAttacks: [], warnings: [],
   };
 
   const fieldId = k => `it${k[0].toUpperCase()}${k.slice(1)}`;
@@ -1466,6 +1559,8 @@ function itemDialog(where) {
     d.weight = Math.max(0, Number(v("weight").value) || 0);
     d.value = Math.max(0, Number(v("value").value) || 0);
     d.notes = v("notes").value.trim();
+    d.vault = v("vault").value.trim();
+    d.dream = rules.DREAM_BY_ID[v("dream").value] ? v("dream").value : "";
     // The four flags are not read back from the DOM: they are squares that light up, and the click
     // that lights one is what changes `d`. Only the typed fields are collected here.
     d.charges = { max: Math.max(0, Number(v("max").value) || 0), used: d.charges.used,
@@ -1498,11 +1593,34 @@ function itemDialog(where) {
             <label>Value, gp<input class="txt" id="itValue" type="number" min="0" step="0.01" value="${d.value}"></label>
           </div>
           <label>Notes<input class="txt" id="itNotes" maxlength="160" value="${esc(d.notes)}"></label>
+
+          <label>Vault link<input class="txt" id="itVault" maxlength="500" value="${esc(d.vault)}"
+            autocomplete="off" spellcheck="false"
+            placeholder="https://publish.obsidian.md/once-upon-a-star/…"></label>
+          <div class="vaultrow">
+            <button class="btn sm" type="button" id="itVaultRead">${icon("vault")} Read the note</button>
+            ${vaultHref(d.vault)
+              ? `<a class="btn sm" href="${esc(vaultHref(d.vault))}" target="_blank"
+                   rel="noopener noreferrer">Open the page</a>` : ""}
+            <span class="hint">${d.newFeatures.length || d.newAttacks.length
+              ? `Read from the vault — ${[
+                  d.newFeatures.length && `${d.newFeatures.length} feature${d.newFeatures.length > 1 ? "s" : ""}`,
+                  d.newAttacks.length && `${d.newAttacks.length} attack${d.newAttacks.length > 1 ? "s" : ""}`,
+                ].filter(Boolean).join(" and ")} land on the sheet when you save.`
+              : `Its page on publish.obsidian.md. Reading it fills this dialog in from the note's
+                 hidden <code>av-item</code> block, which the page itself never shows.`}</span>
+          </div>
+          ${d.warnings.length ? `<p class="hint hot">${d.warnings.map(esc).join(" ")}</p>` : ""}
+
           <div class="tgls">
             ${ITEM_FLAGS.map(f => toggleHtml(`data-tgl="${f.id}"`, d[f.id], f.icon, f.label)).join("")}
-            <span class="hint">${esc(ITEM_FLAGS.filter(f => d[f.id]).map(f => f.short).join(" · ")
-              || "none of these")}</span>
+            <span class="hint">${esc([...ITEM_FLAGS.filter(f => d[f.id]).map(f => f.short),
+              rules.DREAM_BY_ID[d.dream].short].filter(Boolean).join(" · ") || "none of these")}</span>
           </div>
+
+          <label>In the dream<select class="txt" id="itDream">${rules.ITEM_DREAM.map(x =>
+            `<option value="${x.id}" ${x.id === d.dream ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+          <p class="hint">${esc(rules.DREAM_BY_ID[d.dream].hint)}</p>
 
           <div class="zone-h sm"><h4>Charges</h4></div>
           <div class="fields grid3">
@@ -1562,12 +1680,35 @@ function itemDialog(where) {
     // Choosing a source swaps the number box for a multiplier, so the row is redrawn — collect
     // first, exactly as the flags and the delete do, or the other rows lose what was typed in them.
     dlg.querySelectorAll("[data-fx-from]").forEach(s => s.onchange = () => { collect(); draw(); });
+    // Changing the dream kind redraws, so the line under it always describes the kind now chosen —
+    // the whole reason it is a select is that the three cost different things.
+    const dreamSel = document.getElementById("itDream");
+    if (dreamSel) dreamSel.onchange = () => { collect(); draw(); };
     document.getElementById("itFxAdd").onclick = () => {
       collect(); d.effects.push({ target: "ac", amount: 1 }); draw();
     };
     document.getElementById("itf").onsubmit = ev => { ev.preventDefault(); save(); };
 
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.onclick = fn; };
+    // Re-reading the note is how an item stays in step with canon after Juan rewrites its entry:
+    // everything typed here is overwritten from the block, and nothing is saved until Save.
+    on("itVaultRead", async () => {
+      collect();
+      const b = document.getElementById("itVaultRead");
+      b.disabled = true; b.textContent = "Reading…";
+      try {
+        const { entries, note } = await vault.readItemsFromNote(d.vault);
+        // A note covering a set hands back several; take the one already named here if it is among
+        // them, so re-reading a Knight's Standard does not quietly turn it into a different one.
+        const pick = entries.find(e => e.item.name.toLowerCase() === d.name.toLowerCase()) || entries[0];
+        applyImport(d, pick, note);
+        draw();
+        toast(`${pick.item.name} — read from the vault.`);
+      } catch (err) {
+        toast(err.message);
+        b.disabled = false; b.innerHTML = `${icon("vault")} Read the note`;
+      }
+    });
     on("itUse", () => {
       const charges = rules.spendCharges({ charges: d.charges }, 1);
       if (!charges) return toast("No charges left.");
@@ -1594,15 +1735,181 @@ function itemDialog(where) {
     }
     const item = { id: d.id, name: d.name, qty: d.qty, weight: d.weight, value: d.value,
       notes: d.notes, magical: d.magical, requiresAttunement: d.requiresAttunement,
-      attuned: d.attuned, insomniaOnly: d.insomniaOnly,
+      attuned: d.attuned,
+      // Written as the axis and never as the retired boolean, so no record can end up carrying two
+      // answers that disagree. `itemDream` is what reads an older one.
+      dream: d.dream,
       charges: d.charges.max ? { ...d.charges } : null,
       // A DERIVED effect has no amount of its own — dropping anything falsy here would throw every
       // one of them away on the way to being saved, which is the same trap `itemEffectList` had.
-      effects: d.effects.filter(e => e.target && (e.from || e.amount)) };
+      effects: d.effects.filter(e => e.target && (e.from || e.amount)),
+      // Stored as typed rather than as parsed, so a half-finished paste is not lost; the row only
+      // renders it as a link once it really is one.
+      vault: d.vault };
     if (isNew) mutate(s => { s.carried = [...(s.carried || []), item]; });
     else if (slotId) mutate(s => { s.equipment = { ...(s.equipment || {}), [slotId]: item }; });
     else mutate(s => { s.carried = (s.carried || []).map((x, i) => (i === found.index ? item : x)); });
+    writeImported(item.name, d.newFeatures, d.newAttacks);
+    d.newFeatures = []; d.newAttacks = [];
     if (keepOpen) draw(); else closeDialog();
+  };
+
+  draw();
+}
+
+// ── the vault ───────────────────────────────────────────────────────────
+// Every item in this campaign already has an Obsidian note. These three functions are the bridge:
+// `vault.js` reads the note and hands back sheet records; this decides what happens to them.
+//
+// Only a link that parses is offered as one. The field itself accepts anything — losing a paste
+// half-way through typing it would be worse than a dead button — but nothing unparseable is ever
+// rendered as an anchor.
+const vaultHref = v => { try { return vault.parseVaultLink(v).page; } catch { return ""; } };
+
+// What a read brings back, folded into an open item dialog. Two things the note is NOT allowed to
+// decide, because they are facts about this character rather than about the item: whether they have
+// spent an attunement slot on it, and how many charges they have already burned at the table.
+function applyImport(d, entry, note) {
+  const it = entry.item;
+  Object.assign(d, {
+    name: it.name, qty: it.qty, weight: it.weight, value: it.value, notes: it.notes,
+    magical: it.magical, requiresAttunement: it.requiresAttunement, dream: it.dream,
+    effects: it.effects, vault: it.vault || note.page,
+    newFeatures: entry.features, newAttacks: entry.attacks, warnings: entry.warnings,
+  });
+  d.attuned = d.attuned || it.attuned;
+  d.charges = it.charges
+    ? { ...it.charges, used: Math.min(d.charges?.used || 0, it.charges.max) }
+    : { max: 0, used: 0, recharge: "manual", regain: "all" };
+}
+
+// The features and attacks an imported item brings with it. Keyed on the item's name, so reading
+// the same note a second time REPLACES its own rows rather than adding a second Dawnbreak — which
+// is the whole reason a re-read is safe after Juan rewrites an entry.
+function writeImported(name, features = [], attacks = []) {
+  if (!features.length && !attacks.length) return;
+  const fp = vault.featurePrefix(name), ap = vault.attackPrefix(name);
+  mutate(s => {
+    if (features.length)
+      s.features = [...(s.features || []).filter(f => !String(f?.id || "").startsWith(fp)), ...features];
+    if (attacks.length)
+      s.attacks = [...(s.attacks || []).filter(a => !String(a?.id || "").startsWith(ap)), ...attacks];
+  });
+}
+
+// Reading an item in from scratch. The item dialog can do this too, but somebody who has just been
+// handed a sword has no item to open yet — so this is their door: paste the link, read what the
+// note actually says, then put it in the pack or straight into its slot.
+function vaultDialog() {
+  let found = null;      // { note, entries } once a note has answered
+  let chosen = 0;
+
+  const flagsOf = it => ITEM_FLAGS.filter(f => it[f.id]).map(f => f.short).join(" · ");
+
+  const previewHtml = e => {
+    const slot = e.slot ? rules.SLOT_BY_ID[e.slot] : null;
+    const flags = flagsOf(e.item);
+    const c = e.item.charges;
+    return `<h4 class="vprev-n">${esc(e.item.name)}</h4>
+      ${e.item.notes ? `<p class="cmp-body">${esc(e.item.notes)}</p>` : ""}
+      <ul class="why">
+        <li><span>Goes</span><b>${esc(slot ? slot.name : "in the pack")}</b></li>
+        <li><span>Weight</span><b>${e.item.weight || 0} lb</b></li>
+        ${e.item.value ? `<li><span>Value</span><b>${e.item.value} gp</b></li>` : ""}
+        ${e.item.qty > 1 ? `<li><span>How many</span><b>${e.item.qty}</b></li>` : ""}
+        ${c ? `<li><span>Charges</span><b>${c.max} · ${esc(rules.RECHARGE_BY_ID[c.recharge].label.toLowerCase())}</b></li>` : ""}
+        ${flags ? `<li><span>It is</span><b>${esc(flags)}</b></li>` : ""}
+        ${e.item.dream ? `<li><span>In the dream</span>
+          <b title="${esc(rules.DREAM_BY_ID[e.item.dream].hint)}">${esc(rules.DREAM_BY_ID[e.item.dream].name)}</b></li>` : ""}
+      </ul>
+      ${e.item.effects.length ? `<div class="zone-h sm"><h4>What it does to your numbers</h4></div>
+        <ul class="why">${e.item.effects.map(x => `<li><span>${esc(targetLabel(x.target))}</span>
+          <b>${sign(rules.modifierAmount(ch(), x))}${x.from ? ` ${esc(rules.derivationShort(x))}` : ""}</b></li>`).join("")}</ul>` : ""}
+      ${e.features.length ? `<div class="zone-h sm"><h4>Features it adds</h4></div>
+        ${e.features.map(f => `<p class="cmp-t"><b>${esc(f.name)}</b>${
+          f.uses ? ` <span class="tag">${f.uses} uses</span>` : ""} ${esc(f.text)}</p>`).join("")}` : ""}
+      ${e.attacks.length ? `<div class="zone-h sm"><h4>Attacks it adds</h4></div>
+        <ul class="why">${e.attacks.map(a => `<li><span>${esc(a.name)}</span>
+          <b>${esc(a.damage)}${a.type ? ` ${esc(a.type)}` : ""} · ${sign(a.bonus)} to hit</b></li>`).join("")}</ul>` : ""}
+      ${e.warnings.length ? `<p class="hint hot">${e.warnings.map(esc).join(" ")}</p>` : ""}
+      ${!e.features.length && !e.item.effects.length && !e.attacks.length
+        ? `<p class="hint">The block carries no effects, features or attacks — just the item itself.</p>` : ""}`;
+  };
+
+  // Putting it on the sheet. Whatever was in the slot goes to the pack, exactly as equipping by
+  // hand does, so an import can never make an item disappear.
+  const add = slotId => {
+    const e = found.entries[chosen];
+    const item = { id: uid(), ...e.item };
+    mutate(s => {
+      if (slotId) {
+        const displaced = (s.equipment || {})[slotId];
+        s.equipment = { ...(s.equipment || {}), [slotId]: item };
+        if (displaced?.name) s.carried = [...(s.carried || []), displaced];
+      } else {
+        s.carried = [...(s.carried || []), item];
+      }
+    });
+    writeImported(item.name, e.features, e.attacks);
+    closeDialog();
+    const extra = [
+      e.features.length && `${e.features.length} feature${e.features.length > 1 ? "s" : ""}`,
+      e.attacks.length && `${e.attacks.length} attack${e.attacks.length > 1 ? "s" : ""}`,
+    ].filter(Boolean).join(" and ");
+    toast(`${item.name} — ${slotId ? rules.SLOT_BY_ID[slotId].name : "in your pack"}${
+      extra ? `, with ${extra}` : ""}.`);
+  };
+
+  const draw = (link = "") => {
+    const e = found?.entries[chosen];
+    const slot = e?.slot ? rules.SLOT_BY_ID[e.slot] : null;
+    const dlg = dialog("From the vault", found ? `
+        ${found.entries.length > 1 ? `<div class="list vpick">${found.entries.map((x, i) => `
+          <button class="listrow ${i === chosen ? "on" : ""}" type="button" data-vpick="${i}">
+            <b>${esc(x.item.name)}</b><span>${esc(x.item.notes || "")}</span></button>`).join("")}</div>
+          <p class="hint">That note declares ${found.entries.length} items. One at a time.</p>` : ""}
+        <div class="vprev">${previewHtml(e)}</div>`
+      : `<form class="fields" id="vf">
+          <label>The note's link<input class="txt" id="vfUrl" maxlength="500" value="${esc(link)}"
+            autocomplete="off" spellcheck="false" required
+            placeholder="https://publish.obsidian.md/once-upon-a-star/…"></label>
+          <p class="hint">An item's page on <code>publish.obsidian.md/once-upon-a-star</code>, or
+            just its path in the vault. The sheet reads the note's hidden <code>av-item</code>
+            block — the page itself shows no such thing, in Obsidian or on the site.</p>
+          <button class="btn pri" type="submit">${icon("vault")} Read the note</button>
+        </form>`,
+      { wide: !!found, footer: found ? [
+        `<button class="btn sm pri" id="vfPack">Put it in the pack</button>`,
+        slot ? `<button class="btn sm" id="vfSlot">Equip — ${esc(slot.name)}</button>` : "",
+        `<span class="sp"></span>`,
+        `<a class="btn sm" href="${esc(found.note.page)}" target="_blank"
+           rel="noopener noreferrer">Open the page</a>`,
+        `<button class="btn sm" id="vfBack">Another note</button>`,
+      ].filter(Boolean).join("") : "" });
+
+    const form = document.getElementById("vf");
+    if (form) form.onsubmit = async ev => {
+      ev.preventDefault();
+      const url = document.getElementById("vfUrl").value.trim();
+      const btn = form.querySelector(".btn.pri");
+      btn.disabled = true; btn.textContent = "Reading…";
+      try {
+        found = await vault.readItemsFromNote(url);
+        chosen = 0;
+        draw();
+      } catch (err) {
+        // Redrawn with what was typed still in the field: the link is usually RIGHT and the note
+        // merely has no block yet, so the next attempt is one click away rather than another paste.
+        toast(err.message);
+        draw(url);
+      }
+    };
+    dlg.querySelectorAll("[data-vpick]").forEach(b =>
+      b.onclick = () => { chosen = Number(b.dataset.vpick); draw(); });
+    const on = (id, fn) => { const b = document.getElementById(id); if (b) b.onclick = fn; };
+    on("vfPack", () => add(null));
+    on("vfSlot", () => add(e.slot));
+    on("vfBack", () => { const back = found.note.page; found = null; draw(back); });
   };
 
   draw();
@@ -1823,10 +2130,52 @@ function restDialog(kind) {
 }
 
 // ── one spell ───────────────────────────────────────────────────────────
-const setStanding = (id, standing) => mutate(s => {
+// Writing one entry of the spellbook, wherever it is in the list — the same idiom `writeItem` uses
+// for equipment, so a change to a spell is one call rather than a spread in four places.
+const writeSpell = (id, fn) => mutate(s => {
   s.spells = { ...(s.spells || {}) };
-  s.spells.book = (s.spells.book || []).map(x => (x.id === id ? { ...x, standing } : x));
+  s.spells.book = (s.spells.book || []).map(x => (x.id === id ? fn(x) : x));
 });
+const setStanding = (id, standing) => writeSpell(id, x => ({ ...x, standing }));
+
+// A spell's damage, which the sheet only knows because somebody told it. The catalogue cannot:
+// Fight Club's `<roll>` element would have carried it and not one of the 317 SRD spells ships with
+// it, so the alternative to asking is reading the text and guessing which `8d6` is damage and which
+// is healing. The dice already scraped out of the text are offered as one click each — assistance,
+// not a guess — and the answer is kept on the character's own spellbook entry.
+//
+// Once it is set, THIS is the roll a `spellDamage` modifier reaches, and the loose "dice in its
+// text" buttons below it stay what they always were: raw dice, nothing added.
+function spellDamageRow(s, dice) {
+  const dmg = rules.spellDamageOf(s);
+  const bonus = rules.spellDamageBonus(ch());
+  if (dmg) return `<div class="spl-dmg">
+      <button class="btn pri" data-sp-dmg="0">${icon("damage")} Roll damage · ${esc(dmg)}${
+        bonus ? ` ${sign(bonus)}` : ""}${s.damageType ? ` ${esc(s.damageType)}` : ""}</button>
+      <button class="btn sm" data-sp-dmg="1" title="Doubles the dice, not the modifier">crit</button>
+      <button class="btn sm" data-sp-dmg-clear="1" title="Forget what its damage is">Clear</button>
+    </div>`;
+  return `<div class="spl-dmg set">
+      <span class="hint">${dice.length
+        ? "Which of these is its <b>damage</b>? Say once, and this spell gains a damage roll that your spell damage bonuses reach."
+        : "No dice in its text. Type its damage and this spell gains a damage roll."}</span>
+      ${dice.map(d => `<button class="btn sm" data-sp-dmg-pick="${esc(d)}">${esc(d)}</button>`).join("")}
+      <input class="txt sm" id="spDmgX" maxlength="40" placeholder="or type 8d6" autocomplete="off">
+      <input class="txt sm" id="spDmgT" maxlength="24" placeholder="fire" autocomplete="off"
+        value="${esc(s.damageType || "")}" aria-label="Damage type">
+      <button class="btn sm" data-sp-dmg-pick="">Set</button>
+    </div>`;
+}
+
+function rollSpellDamage(s, crit) {
+  const r = rollDice(rules.spellDamageOf(s), { crit });
+  if (!r) return toast("That is not a dice expression.");
+  const parts = rules.contributions(rules.activeModifiers(ch()), "spellDamage");
+  const extra = rules.spellDamageBonus(ch());
+  dialog(`${s.name} — damage${crit ? " (critical)" : ""}`,
+    rollHtml({ ...r, total: r.total + extra }, { label: s.damageType || "", breakdown: parts }) +
+    (crit ? `<p class="hint">The dice are doubled; the flat modifier is not.</p>` : ""));
+}
 
 // Read it and cast it, in one place. The sheet stores a spell's compact fields and not its prose, so
 // the rules text is fetched from the catalogue when the spell is opened — which means a spell whose
@@ -1883,8 +2232,11 @@ async function spellDialog(id) {
             <b>${sign(c.attack)}</b><i>${esc(c.className)} attack</i></button>
           <div class="stat"><b>${c.dc}</b><i>${esc(c.className)} save DC</i></div>`).join("")}</div>` : ""}
 
+        ${spellDamageRow(s, dice)}
+
         ${dice.length ? `<div class="spl-dice"><span class="hint">Dice in its text</span>
           ${dice.map(d => `<button class="btn sm" data-sp-roll="${esc(d)}">${esc(d)}</button>`).join("")}
+          <span class="hint">Rolled as they are — no modifier of yours is added to these.</span>
           </div>` : ""}
 
         ${conc ? `<p class="hint">${ch().concentrating === s.name
@@ -1904,13 +2256,33 @@ async function spellDialog(id) {
     });
     d.querySelectorAll("[data-sp-atk]").forEach(b => b.onclick = () => {
       const a = b.dataset.spAtk;
+      // The breakdown carries whatever is lifting it, by name — the same courtesy a weapon attack
+      // gets. Without this, a tome's +4 would just make the number four bigger than the two terms
+      // beside it, which is how a player stops trusting the sheet.
       showRoll(`${s.name} — spell attack`, rules.spellAttackBonus(ch(), a),
         [{ reason: `Proficiency`, amount: rules.proficiencyBonus(ch().level) },
-         { reason: rules.ABILITY_NAME[a], amount: rules.abilityModifier(ch(), a) }]);
+         { reason: rules.ABILITY_NAME[a], amount: rules.abilityModifier(ch(), a) },
+         ...rules.contributions(rules.activeModifiers(ch()), "spellAttack")]);
     });
     d.querySelectorAll("[data-sp-roll]").forEach(b => b.onclick = () => {
       const r = rollDice(b.dataset.spRoll);
       if (r) dialog(`${s.name} — ${b.dataset.spRoll}`, rollHtml(r, { label: "from its text" }));
+    });
+    // Saying which dice are its damage, and of what type. A picked button fills the expression; the
+    // bare Set button takes whatever was typed. Either way the type field comes along.
+    d.querySelectorAll("[data-sp-dmg-pick]").forEach(b => b.onclick = () => {
+      const typed = document.getElementById("spDmgX")?.value.trim() || "";
+      const damage = b.dataset.spDmgPick || typed;
+      if (!damage) return toast("Pick one of its dice, or type the expression.");
+      if (!parseDice(damage)) return toast(`"${damage}" is not a dice expression.`);
+      const damageType = document.getElementById("spDmgT")?.value.trim() || "";
+      writeSpell(id, sp => ({ ...sp, damage, damageType }));
+      draw();
+    });
+    d.querySelectorAll("[data-sp-dmg]").forEach(b => b.onclick = () => rollSpellDamage(open(), b.dataset.spDmg === "1"));
+    d.querySelectorAll("[data-sp-dmg-clear]").forEach(b => b.onclick = () => {
+      writeSpell(id, sp => ({ ...sp, damage: "", damageType: "" }));
+      draw();
     });
     d.querySelectorAll("[data-sp-cast]").forEach(b => b.onclick = () => castSpell(s, b.dataset.spCast));
     d.querySelector("[data-sp-del]").onclick = () => {

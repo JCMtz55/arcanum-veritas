@@ -100,13 +100,20 @@ test("fixture 4 — general Fabricate is the skill, crafting adds Intelligence",
 });
 
 // ── 5. Attunement across planes ─────────────────────────────────────────
-// "In Ephemer, 3 baseline magic slots; in Insomnia, three additional eligible Dreamlike/Lucidlike
-//  slots become available. Leaving Insomnia deactivates their extra-pool effects but preserves the
-//  attunement records."
-test("fixture 5 — Insomnia-only attunement goes inactive off-plane without being lost", () => {
+// "In Ephemer, 3 baseline magic slots; in Insomnia, three additional Dreamlike slots become
+//  available. Leaving Insomnia deactivates a Dreamlike item's effects but preserves the attunement
+//  records. A Lucidlike item is in force in both planes and holds one slot in EACH pool."
+//
+// REVISED 2026-11-03. v1.5 originally wrote "Dreamlike/Lucidlike" as one thing in DM-14, HB-018 and
+// this fixture, and the engine implemented it — down to a fixture item named "Lucidlike Mirror"
+// that went dark in Ephemer. The item canon says the opposite in three places (Artificing Dream
+// Items, Lucidite, the Glossary of Ephemer: "Dreamlike items cannot return to Ephemer; Lucidlike
+// ones can"). Juan ruled for the item canon, and the spec was corrected rather than the engine
+// bent around it.
+test("fixture 5 — a Dreamlike attunement goes inactive off-plane without being lost", () => {
   const ch = pc({ attuned: [
     { name: "Etherium Twin Daggers" }, { name: "Cloak" }, { name: "Ring" },
-    { name: "Dreamlike Lantern", insomniaOnly: true }, { name: "Lucidlike Mirror", insomniaOnly: true },
+    { name: "Dreamlike Lantern", dream: "dreamlike" }, { name: "Dreamlike Censer", dream: "dreamlike" },
   ] });
 
   const awake = R.attunement(ch, { inInsomnia: false });
@@ -120,6 +127,272 @@ test("fixture 5 — Insomnia-only attunement goes inactive off-plane without bei
   assert.equal(dreaming.active.length, 5);
   assert.equal(dreaming.inactive.length, 0);
   assert.equal(dreaming.insomniaSlots, 3);
+});
+
+test("fixture 5a — a Lucidlike item works in both planes and holds a slot in each pool", () => {
+  const ch = pc({ attuned: [
+    { name: "Cloak" },
+    { name: "Dreammaker", dream: "lucidlike" },
+    { name: "Dreamlike Lantern", dream: "dreamlike" },
+  ] });
+
+  const awake = R.attunement(ch, { inInsomnia: false });
+  // The baseline pool holds the ordinary item AND the Lucidlike one; the Insomnia pool holds the
+  // Dreamlike one AND the Lucidlike one. That double cost is what two-plane existence buys.
+  assert.equal(awake.used, 2);
+  assert.equal(awake.insomniaUsed, 2);
+  assert.deepEqual(awake.onBaseline.map(i => i.name), ["Cloak", "Dreammaker"]);
+  assert.deepEqual(awake.onInsomnia.map(i => i.name), ["Dreammaker", "Dreamlike Lantern"]);
+  // Awake, only the Dreamlike one is suspended — the Lucidlike item is still in force.
+  assert.deepEqual(awake.inactive.map(i => i.name), ["Dreamlike Lantern"]);
+  assert.ok(awake.active.some(i => i.name === "Dreammaker"));
+
+  const dreaming = R.attunement(ch, { inInsomnia: true });
+  assert.equal(dreaming.inactive.length, 0);
+  assert.equal(dreaming.active.length, 3);
+});
+
+// Juan, 2026-11-03: "no attunement require means it does not take a attunement slot."
+// Solomon's Scarf is Dreamlike and says "Requires no Attunement" twice; the Dream Bag is the same
+// shape; The First Thorn is permanently Soul Attuned and "requires no Attunement Slot". All three
+// were costing a slot the moment anyone ticked the attuned square.
+test("an item that needs no attunement costs no slot in either pool", () => {
+  const ch = pc({ attuned: [
+    { name: "Cloak", requiresAttunement: true },
+    { name: "Solomon's Scarf", requiresAttunement: false, dream: "dreamlike" },
+    { name: "The First Thorn", requiresAttunement: false },
+    { name: "Free Lucid Thing", requiresAttunement: false, dream: "lucidlike" },
+  ] });
+
+  const awake = R.attunement(ch, { inInsomnia: false });
+  assert.equal(awake.used, 1);                                   // only the Cloak is paid for
+  assert.equal(awake.insomniaUsed, 0);                           // the free Dreamlike one is free
+  assert.deepEqual(awake.free.map(i => i.name),
+    ["Solomon's Scarf", "The First Thorn", "Free Lucid Thing"]);
+  assert.equal(awake.over, 0);
+  assert.equal(awake.insomniaOver, 0);
+
+  // Free is about the SLOT, never about where the thing works: the Dreamlike scarf is still
+  // suspended while awake, and still listed rather than lost.
+  assert.deepEqual(awake.inactive.map(i => i.name), ["Solomon's Scarf"]);
+  assert.ok(awake.active.some(i => i.name === "The First Thorn"));
+  assert.ok(awake.active.some(i => i.name === "Free Lucid Thing"));
+  assert.ok(!awake.active.some(i => i.name === "Solomon's Scarf"));
+
+  const dreaming = R.attunement(ch, { inInsomnia: true });
+  assert.equal(dreaming.insomniaUsed, 0);
+  assert.equal(dreaming.inactive.length, 0);
+  assert.ok(dreaming.active.some(i => i.name === "Solomon's Scarf"));
+});
+
+// The other half of the same ruling, and the reason `costsASlot` asks "is it explicitly false"
+// rather than "is it truthy": the v1.5 fixtures and every sheet written before today record an
+// attunement with NO requiresAttunement flag. Reading absence as "free" would have handed three
+// slots back to all of them in silence.
+test("a record that never wrote the flag down still costs a slot", () => {
+  assert.equal(R.costsASlot({ name: "Legacy" }), true);
+  assert.equal(R.costsASlot({ name: "Says yes", requiresAttunement: true }), true);
+  assert.equal(R.costsASlot({ name: "Says no", requiresAttunement: false }), false);
+
+  const legacy = pc({ attuned: [{ name: "A" }, { name: "B" }, { name: "C" }, { name: "D" }] });
+  const att = R.attunement(legacy, { inInsomnia: false });
+  assert.equal(att.used, 4);
+  assert.equal(att.free.length, 0);
+  assert.equal(att.over, 1);                                     // and it still reports the excess
+});
+
+// An item in a slot that needs no attunement has always been in force without the tick; the ruling
+// must not have changed that, since it is what makes a free item usable at all.
+test("a no-attunement item is in force from a slot without being ticked", () => {
+  const ch = pc({ equipment: { shoulders: {
+    name: "Solomon's Scarf", requiresAttunement: false, effects: [{ target: "ac", amount: 2 }] } } });
+  const base = R.armorClass(pc({}));
+  assert.equal(R.armorClass(ch), base + 2);
+});
+
+test("a Lucidlike item's effects do not stop when its bearer wakes up", () => {
+  const worn = (slot, item) => pc({ equipment: { [slot]: item } });
+  const lucid = { name: "Dreammaker", dream: "lucidlike", effects: [{ target: "ac", amount: 2 }] };
+  const dreamy = { name: "Lantern", dream: "dreamlike", effects: [{ target: "ac", amount: 2 }] };
+
+  assert.equal(R.itemIsActive({ inInsomnia: false }, lucid, "slot:mainHand"), true);
+  assert.equal(R.itemIsActive({ inInsomnia: true }, lucid, "slot:mainHand"), true);
+  assert.equal(R.itemIsActive({ inInsomnia: false }, dreamy, "slot:neck"), false);
+  assert.equal(R.itemIsActive({ inInsomnia: true }, dreamy, "slot:neck"), true);
+
+  // And it reaches the totals awake: the Lucidlike +2 is on the AC in both planes, while the
+  // Dreamlike one is only there while dreaming.
+  const base = R.armorClass(pc({}));
+  const l = worn("mainHand", lucid), d = worn("neck", dreamy);
+  assert.equal(R.armorClass({ ...l, inInsomnia: false }), base + 2);
+  assert.equal(R.armorClass({ ...l, inInsomnia: true }), base + 2);
+  assert.equal(R.armorClass({ ...d, inInsomnia: false }), base);
+  assert.equal(R.armorClass({ ...d, inInsomnia: true }), base + 2);
+});
+
+test("an item saved under the retired insomniaOnly boolean still reads as Dreamlike", () => {
+  // Eight live sheets carry that flag, and it meant exactly one of the three kinds. Nothing on an
+  // old sheet may move until somebody marks a specific item Lucidlike by hand.
+  const old = { name: "Old Lantern", insomniaOnly: true };
+  assert.equal(R.itemDream(old), "dreamlike");
+  assert.equal(R.isDreamlike(old), true);
+  assert.equal(R.isLucidlike(old), false);
+  assert.equal(R.itemIsActive({ inInsomnia: false }, old, "slot:neck"), false);
+
+  // An explicit axis always wins over the legacy boolean, however they disagree.
+  assert.equal(R.itemDream({ dream: "lucidlike", insomniaOnly: true }), "lucidlike");
+  assert.equal(R.itemDream({ name: "Plain" }), "");
+  assert.equal(R.itemDream({ dream: "nonsense" }), "");
+});
+
+// ── CS-089: a rest restores ANY feature that says how it recharges ──────
+// It used to restore only class resources — ids beginning `cls:` or `res:` — so every feature read
+// out of an item's vault entry had to be cleared by hand, forever.
+test("CS-089 — a rest gives back an item feature's uses, not only a class resource's", () => {
+  const feats = [
+    { id: "cls:Fighter:Second Wind", name: "Second Wind", uses: 1, used: 1, reset: "s" },
+    { id: "item:dreammaker:dawnbreak", name: "Dawnbreak", source: "item", uses: 1, used: 1, reset: "s" },
+    { id: "item:silksong:dance", name: "Dance of the Silken Fang", source: "item", uses: 1, used: 1, reset: "l" },
+    { id: "item:tome:compact", name: "The Compact", source: "item", uses: 1, used: 1, reset: "" },
+    { id: "own-1", name: "Something I typed in", uses: 2, used: 2, reset: "dawn" },
+  ];
+  const ch = pc({ features: feats, hp: 10, maxHp: 40 });
+  const backAfter = (opts) => {
+    const next = R.restPreview(ch, opts).next.features;
+    return (next || feats).filter(f => (f.used || 0) === 0).map(f => f.name);
+  };
+
+  // A short rest: the two that say "short", and nothing else.
+  assert.deepEqual(backAfter({ kind: "short" }), ["Second Wind", "Dawnbreak"]);
+
+  // A long rest includes a short one, so it also brings back the long-rest feature.
+  assert.deepEqual(backAfter({ kind: "long" }),
+    ["Second Wind", "Dawnbreak", "Dance of the Silken Fang"]);
+
+  // Dawn only counts when the rest actually carried them through it.
+  assert.ok(!backAfter({ kind: "long" }).includes("Something I typed in"));
+  assert.ok(backAfter({ kind: "long", dawn: true }).includes("Something I typed in"));
+
+  // A feature whose rule is written nowhere is LEFT ALONE rather than guessed at — the same
+  // bargain the item charges make.
+  for (const o of [{ kind: "short" }, { kind: "long" }, { kind: "long", dawn: true, dusk: true }])
+    assert.ok(!backAfter(o).includes("The Compact"));
+});
+
+test("CS-089 — featureComesBack reads the vocabulary and refuses anything else", () => {
+  const on = (reset, opts) => R.featureComesBack({ reset }, opts);
+  assert.equal(on("s", { kind: "short" }), true);
+  assert.equal(on("s", { kind: "long" }), true);
+  assert.equal(on("l", { kind: "short" }), false);
+  assert.equal(on("l", { kind: "long" }), true);
+  assert.equal(on("dawn", { kind: "long" }), false);
+  assert.equal(on("dawn", { kind: "long", dawn: true }), true);
+  assert.equal(on("dusk", { kind: "long", dusk: true }), true);
+  assert.equal(on("", { kind: "long", dawn: true, dusk: true }), false);
+  assert.equal(on("weekly", { kind: "long", dawn: true }), false);   // CS-096, not built yet
+  assert.equal(R.featureComesBack(null, { kind: "long" }), false);
+});
+
+// ── CS-090: a spell attack is its own target ────────────────────────────
+// Tome of Salem grants +4 "to spell attacks"; before this it lifted every weapon swing and never
+// reached the spell attack at all — wrong in both directions at once.
+test("CS-090 — spellAttack reaches the spell attack and nothing else", () => {
+  const worn = fx => ({ ...R.blankCharacter(), level: 5, ac: 10,
+    abilities: { ...R.blankCharacter().abilities, int: 16 },
+    equipment: { mainHand: { name: "Tome of Salem", effects: fx } } });
+
+  const bare = worn([]);
+  const base = R.spellAttackBonus(bare, "int");         // proficiency + Intelligence
+  assert.equal(base, R.proficiencyBonus(5) + R.abilityModifier(bare, "int"));
+
+  // The spell-specific target lifts the spell attack...
+  const tome = worn([{ target: "spellAttack", amount: 4 }]);
+  assert.equal(R.spellAttackBonus(tome, "int"), base + 4);
+  // ...and leaves every ordinary attack and damage roll exactly where they were.
+  assert.equal(R.modifierTotal(R.activeModifiers(tome), "attack"), 0);
+  assert.equal(R.modifierTotal(R.activeModifiers(tome), "damage"), 0);
+
+  // And the general target still does NOT reach a spell attack, which is the other half of the bug.
+  const blade = worn([{ target: "attack", amount: 4 }]);
+  assert.equal(R.spellAttackBonus(blade, "int"), base);
+  assert.equal(R.modifierTotal(R.activeModifiers(blade), "attack"), 4);
+
+  // It is offerable, so a note can ask for it, and it is a real contribution with the item's name.
+  assert.ok(R.MOD_TARGET_IDS.includes("spellAttack"));
+  assert.deepEqual(R.contributions(R.activeModifiers(tome), "spellAttack").map(c => c.reason),
+    ["Tome of Salem"]);
+
+  assert.ok(R.MOD_TARGET_IDS.includes("spellDamage"));
+});
+
+test("CS-090 — a spell has no damage until somebody says which dice are damage", () => {
+  // Nothing infers it: not one SRD spell carries the `roll` field the parser would have read, and
+  // half the dice in a spell's text are healing or duration. So the record starts empty and says so.
+  const fresh = R.spellRecord({ name: "Fireball", level: 3 });
+  assert.equal(fresh.damage, "");
+  assert.equal(fresh.damageType, "");
+  assert.equal(R.spellDamageOf(fresh), "");
+
+  // A spell saved before this field existed answers the same as one simply not told yet.
+  assert.equal(R.spellDamageOf({ name: "Old Spell" }), "");
+  assert.equal(R.spellDamageOf({ name: "Fireball", damage: " 8d6 " }), "8d6");
+
+  // The bonus is the character's, and reaches nothing else.
+  const ch = { ...R.blankCharacter(), ac: 10,
+    equipment: { mainHand: { name: "Tome of Salem",
+      effects: [{ target: "spellDamage", amount: 4 }] } } };
+  assert.equal(R.spellDamageBonus(ch), 4);
+  assert.equal(R.modifierTotal(R.activeModifiers(ch), "damage"), 0);
+  assert.equal(R.modifierTotal(R.activeModifiers(ch), "attack"), 0);
+  assert.equal(R.spellAttackBonus(ch, "int"), R.proficiencyBonus(ch.level) + R.abilityModifier(ch, "int"));
+  assert.equal(R.spellDamageBonus(R.blankCharacter()), 0);
+});
+
+test("CS-090 — a Dreamlike tome lifts no spell attack while its bearer is awake", () => {
+  // The spell attack now reads item effects, so it inherits the dream axis too — worth pinning,
+  // because it is the first number outside the equipment code to depend on where you are standing.
+  const ch = { ...R.blankCharacter(), level: 5,
+    equipment: { mainHand: { name: "Dreamt Tome", dream: "dreamlike",
+      effects: [{ target: "spellAttack", amount: 4 }] } } };
+  const base = R.proficiencyBonus(5) + R.abilityModifier(ch, "int");
+  assert.equal(R.spellAttackBonus({ ...ch, inInsomnia: false }, "int"), base);
+  assert.equal(R.spellAttackBonus({ ...ch, inInsomnia: true }, "int"), base + 4);
+});
+
+// ── Corruption, the third axis ──────────────────────────────────────────
+// It was a field on the blank sheet that nothing read, showed or changed.
+test("Corruption is a score, a Nature owed at five, and a save modifier off the other two axes", () => {
+  const clean = pc({});
+  assert.equal(R.corruptionScore(clean), 0);
+  assert.equal(R.corruptionNature(clean), "");
+  assert.equal(R.corruptionNatureDue(clean), false);
+  assert.deepEqual(R.corruptionInForce(clean), []);
+
+  // The score is clamped to the ladder the ruleset actually documents.
+  assert.equal(R.corruptionScore(pc({ corruption: 99 })), R.CORRUPTION_MAX);
+  assert.equal(R.corruptionScore(pc({ corruption: -4 })), 0);
+
+  // A Nature is owed at five and not before, and only the two the ruleset names are accepted.
+  assert.equal(R.corruptionNatureDue(pc({ corruption: 4 })), false);
+  assert.equal(R.corruptionNatureDue(pc({ corruption: 5 })), true);
+  assert.equal(R.corruptionNatureDue(pc({ corruption: 5, corruptionNature: "demon" })), false);
+  assert.equal(R.corruptionNature(pc({ corruptionNature: "seraph" })), "");
+
+  // What is IN FORCE is every threshold at or below the score — six rows at six, not a ten-row table.
+  const six = pc({ corruption: 6, corruptionNature: "nightmare" });
+  const force = R.corruptionInForce(six);
+  assert.equal(force.length, 6);
+  assert.equal(force[5].score, 6);
+  assert.match(force[5].nature, /consume dreams/);
+  assert.equal(force[5].natureName, "Nightmare");
+
+  // Below a chosen Nature the rows carry no nature text — they are foreshadowing, says the ruleset.
+  assert.equal(R.corruptionInForce(pc({ corruption: 3 }))[0].nature, "");
+
+  // The save modifier is Honor and Morality, never Corruption's own score (HB-024).
+  const axes = pc({ corruption: 9, honor: { order: 6, chaos: 2 }, morality: { good: 1, evil: 4 } });
+  assert.equal(R.corruptionSaveBonus(axes), Math.floor(((1 - 4) + (6 - 2)) / 2));
+  assert.equal(R.corruptionSaveBonus(pc({ corruption: 10 })), 0);
 });
 
 // ── 6. Level authority and allocations ──────────────────────────────────
@@ -946,7 +1219,9 @@ test("an equipped item's effects reach every total, and a carried one's do not",
 
   // A Dreamlike item is inactive while awake and in force in Insomnia, without the attunement
   // breaking either way (DM-14, RES-09).
-  const dreamy = worn("neck", { name: "Lucid Pendant", insomniaOnly: true,
+  // Written with the retired boolean on purpose, because that is the shape eight live sheets are
+  // in: it still means Dreamlike, and still behaves exactly as it did.
+  const dreamy = worn("neck", { name: "Dreamt Pendant", insomniaOnly: true,
     effects: [{ target: "ability:dream", amount: 2 }] });
   assert.equal(R.abilityScore(dreamy, "dream"), R.DREAM_START);
   assert.equal(R.abilityScore({ ...dreamy, inInsomnia: true }, "dream"), R.DREAM_START + 2);

@@ -50,6 +50,9 @@ export const ICONS = {
   dreamExhaustion: "moon",
   dream: "moon",
   honor: "scale-balanced",
+  // Corruption is erosion, not death — a creeping dark rather than the skull `deathDC` already
+  // wears, and nothing that could be mistaken for Wounds or either exhaustion track.
+  corruption: "smog",
   fate: "dice-d20",
   round: "hourglass-half",
   rest: "bed",
@@ -83,6 +86,13 @@ export const ICONS = {
   ignition: "fire",
   paragon: "certificate",
   attunement: "link",
+  // An item's own page in the Obsidian vault. A book rather than the usual outward arrow, because
+  // what is on the other side is an entry to read and not a tool to use.
+  vault: "book-open",
+  // The two dream kinds, told apart by SHAPE and not only by colour: a Dreamlike item wears the
+  // moon this sheet already gives the dream, and a Lucidlike one a half-filled circle — the thing
+  // that is in both planes at once, half lit and half dark.
+  lucid: "circle-half-stroke",
 
   // equipment slots
   "slot.head": "hat-wizard",

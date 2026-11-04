@@ -250,6 +250,31 @@ export function skillContributions(ch, skillId) {
 // throws" is six too many, and an ITEM could not say it at all — its effects are the same
 // `{target, amount}` pairs, so a cloak had no way to reach more than one save (Juan, 2026-10-29).
 export const SAVE_ALL = "save:all";
+
+// Everything an effect may point at, in the order the sheet offers them. The ENGINE owns this list
+// rather than the view: a target nothing can apply must not be offerable, and the vault importer
+// checks a note's effects against the same list the dialog builds its menu from — so a hidden block
+// can never ask for a row the sheet does not have. The labels are the view's business, in
+// `MOD_TARGETS`. The three blankets come first, because they are what a spell or an item nearly
+// always grants: Bless and an aura give saves, Guidance gives a check, a cloak gives every save.
+export const MOD_TARGET_IDS = [
+  CHECK_ALL,
+  ...ABILITIES.map(id => `ability:${id}`),
+  // `attack` and `damage` are EVERY attack and every damage roll. `spellAttack` reaches only the
+  // spell attack roll, because an item that says "+4 to spell attacks" should not lift a bow
+  // (CS-090) — Tome of Salem and Mother's Touch III both say exactly that. Its partner `saveDc` is
+  // already spell-specific in practice: `spellSaveDC` is the only thing that reads it.
+  //
+  // `spellDamage` reaches only a spell's OWN damage roll, which a spell has once somebody has said
+  // which of its dice are damage (`spellDamageOf`). Nothing infers that: not one of the 317 SRD
+  // spells carries the `roll` field the parser would have read, and half the dice in a spell's
+  // text are healing or duration — a +4 that lands on a Cure Wounds is worse than no target.
+  "ac", "speed", "initiative", "maxHp", "attack", "damage", "spellAttack", "spellDamage", "saveDc",
+  SAVE_ALL,
+  ...ABILITIES.map(id => `save:${id}`),
+  SKILL_ALL,
+  ...SKILLS.map(s => `skill:${s.id}`),
+];
 // Whether this save is proficient, which has TWO sources and keeps them apart (Juan, 2026-10-29:
 // "where is proficiency for saving throws?" — there was nowhere, and a class was the only thing
 // that could grant one).
@@ -330,6 +355,122 @@ export function corruptionSaveModifier(axes) {
   const a = axes || {};
   return Math.floor(((num(a.good) - num(a.evil)) + (num(a.order) - num(a.chaos))) / 2);
 }
+
+// ── When a feature's uses come back ─────────────────────────────────────
+// The vocabulary a feature uses to say how it recharges. `""` means it does not — a feature whose
+// rule is written nowhere is left alone rather than guessed at, which is the same bargain the item
+// charges and the rest preview already make.
+//
+// `dawn` and `dusk` are here because a table says "once per day" far more often than it says "once
+// per long rest", and the rest preview is already told whether the rest carried the party through
+// either. A WEEKLY recharge is still missing and is CS-096 — True Tome of Salem's Compact needs it.
+export const FEATURE_RESET = [
+  { id: "", name: "By hand only", short: "", hint: "Nothing gives these back on its own." },
+  { id: "s", name: "Short or long rest", short: "short rest" },
+  { id: "l", name: "Long rest", short: "long rest" },
+  { id: "dawn", name: "At dawn", short: "dawn", hint: "A long rest gives these back only if it carried you through dawn." },
+  { id: "dusk", name: "At dusk", short: "dusk" },
+];
+export const FEATURE_RESET_BY_ID = Object.fromEntries(FEATURE_RESET.map(r => [r.id, r]));
+
+export function featureComesBack(f, { kind = "long", dawn = false, dusk = false } = {}) {
+  const r = String(f?.reset || "").toLowerCase();
+  if (r === "s") return true;                 // every rest includes a short one
+  if (r === "l") return kind !== "short";
+  if (r === "dawn") return !!dawn;
+  if (r === "dusk") return !!dusk;
+  return false;
+}
+
+// ── Corruption ──────────────────────────────────────────────────────────
+// The third axis of spiritual integrity, beside Honor and Morality (Corruption Ruleset.md). It was
+// a field on the blank sheet that NOTHING read, showed or changed — declared and then forgotten —
+// which is not the same as being tracked (Juan, 2026-11-03).
+//
+// Two things are the character's and are recorded here: the SCORE, and the NATURE a soul dissolves
+// toward once the score reaches five. The Nature cannot be changed without a soul-cleansing ritual,
+// so the sheet asks once and then keeps it. The Dominant Vile Emotion is free text because it is
+// the player's word for their own ruin, not a list to pick from.
+export const CORRUPTION_MAX = 10;
+export const CORRUPTION_NATURE_AT = 5;
+export const CORRUPTION_NATURES = [
+  { id: "demon", name: "Demon", mark: "🔴",
+    blurb: "Chaos given sentience — raw, consuming, boundless. They do not become mindless; they become too much." },
+  { id: "nightmare", name: "Nightmare", mark: "🔵",
+    blurb: "Vile Imagination given form — fear made flesh. They do not lose intelligence; they gain a terrible new one." },
+];
+export const CORRUPTION_NATURE_BY_ID = Object.fromEntries(CORRUPTION_NATURES.map(n => [n.id, n]));
+
+// The ladder, condensed to what a table needs mid-session. The full text, with every rider and
+// every Affinity, is Corruption Ruleset.md in the vault; this is the reminder, not the ruleset.
+export const CORRUPTION_THRESHOLDS = [
+  { score: 1,
+    shared: "You hear faint voices of past victims. Disadvantage on Insight checks to judge your own intentions.",
+    demon: "The voices argue about what you should destroy.",
+    nightmare: "The voices whisper your fears back in the voices of people you love." },
+  { score: 2,
+    shared: "You detect as Undead or Cursed. Holy beings are uneasy near you.",
+    demon: "Divine detection reads a minor Demon; celestials treat you as hostile.",
+    nightmare: "Dream Lords read a Nightmare; sleepers within 30 ft dream your Vile Emotion." },
+  { score: 3,
+    shared: "+2 DC resisting Binding and Wicked Curses. You attract Vile Emotion auras.",
+    demon: "Resistance to force damage, but your proficiency bonus does not apply to Charisma checks about trust, contracts or oaths.",
+    nightmare: "Resistance to psychic damage, but animals, children and Dream-sensitive creatures recoil from you." },
+  { score: 4,
+    shared: "Morality above 15 drops by 1. You automatically fail Honor or Morality checks about forgiveness or empathy.",
+    demon: "A failed Concentration check detonates the spell — 10-ft radius, its level × 1d6, its own type.",
+    nightmare: "You sense sleepers within 60 ft and feel their dream-state. You cannot turn it off." },
+  { score: 5,
+    shared: "At dawn, roll d6. On a 1, a Rebound Curse of your Dominant Vile Emotion until your next long rest.",
+    demon: "Partial Demonification — visible chaotic alterations, and one Demon Surge.",
+    nightmare: "Partial Nightmarification — visible nightmare alterations, and one Nightmare Intrusion." },
+  { score: 6,
+    shared: "A Charisma save to remain on hallowed ground; on a failure, disadvantage on all checks while there.",
+    demon: "A natural 1 on an attack releases a 15-ft Chaos Burst — 2d8, random type, Dex save DC 12 + half your score.",
+    nightmare: "You consume dreams instead of having them: no dream restoration, and a Corruption save DC 14 or you pull a CR ≤ 3 nightmare into waking." },
+  { score: 7,
+    shared: "You are Haunted. Undead and Fiends have advantage on attacks against you.",
+    demon: "Lesser demons will not attack unprovoked; greater ones want to consume you. You read as a Chaotic Outsider.",
+    nightmare: "Denizens are unsettled, Dream Lords know your name — and you may redirect a fear effect to a creature within 30 ft, no save." },
+  { score: 8,
+    shared: "You cast no reflection and are immune to scrying, Locate Creature and Sending unless your exact place is known.",
+    demon: "Once a day, a Wisdom save DC 10 + your score or be Reckless for a minute — you cannot stop yourself.",
+    nightmare: "Once a day, seeing extreme fear, a Wisdom save DC 10 + your score or you Feed: 5 temporary hit points, and they may be frightened of you for an hour." },
+  { score: 9,
+    shared: "Non-magical creatures must make an Intelligence check to remember your name each day. Records fade you out.",
+    demon: "Once per long rest, Phase as a reaction — incorporeal until the end of your next turn, then a Corruption save DC 18 or a level of exhaustion.",
+    nightmare: "You see through mundane and magical darkness; anything with Dream-sight sees your Nightmare form over your own." },
+  { score: 10,
+    shared: "Curse Incarnate. Only necrotic sources heal you, Honor and Morality cannot be regained, and anything dying within 30 ft has a 25% chance to rise as your Wraith. Slain, you return in 1d6 days unless buried or cleansed.",
+    demon: "Full Demonification. You count as a Demon for all purposes; divine detection reads only ancient Chaos.",
+    nightmare: "Full Nightmarification. You count as a Nightmare; you stand in Ephemer and on Insomnia's border at once." },
+];
+
+export const corruptionScore = ch => clamp(ch?.corruption, 0, CORRUPTION_MAX);
+export const corruptionNature = ch =>
+  CORRUPTION_NATURE_BY_ID[ch?.corruptionNature] ? ch.corruptionNature : "";
+// A Nature is owed once the score reaches five and has not been chosen.
+export const corruptionNatureDue = ch =>
+  corruptionScore(ch) >= CORRUPTION_NATURE_AT && !corruptionNature(ch);
+
+// Every threshold at or below the score, with the right column already resolved — so a sheet shows
+// what is IN FORCE rather than a table to read across. Below five the Nature rows are foreshadowing
+// and are marked as such, because the ruleset says they only take effect once a Nature is chosen.
+export function corruptionInForce(ch) {
+  const score = corruptionScore(ch);
+  const nature = corruptionNature(ch);
+  return CORRUPTION_THRESHOLDS.filter(t => t.score <= score).map(t => ({
+    score: t.score,
+    shared: t.shared,
+    nature: nature ? t[nature] : "",
+    natureName: nature ? CORRUPTION_NATURE_BY_ID[nature].name : "",
+  }));
+}
+
+// The save modifier, read off the character rather than off a loose bag of axes. Corruption's own
+// score does not feed it — Honor and Morality do (HB-024).
+export const corruptionSaveBonus = ch =>
+  corruptionSaveModifier({ ...(ch?.honor || {}), ...(ch?.morality || {}) });
 
 // A DM-granted increase in OVERALL character level issues one Honor and one Morality allocation,
 // regardless of how the level splits across classes (RES-10, HB-007). Only the DM may call this;
@@ -434,15 +575,18 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
   // the interface's job, and the preview says so instead of pretending to know the number.
   const roll = [];
 
-  // A class resource whose recharge rule IS written down — the compendium's `reset` says short or
-  // long — comes back here. One whose rule is written nowhere is still left alone rather than
-  // guessed at; this only spends what the data already states.
+  // ANY feature whose recharge rule is written down — a class resource from the compendium, a
+  // feature read out of an item's vault entry, or one somebody typed in. One whose rule is written
+  // nowhere is still left alone rather than guessed at; this only spends what the data states.
+  //
+  // This used to test `isDerivedFeature` as well, which meant only ids beginning `cls:` or `res:`
+  // came back — so every feature imported from an item had to be cleared by hand, forever (CS-089).
+  // The rule was never "class resources recharge"; it was "what says how it recharges, recharges".
   const spent = (ch.features || []).filter(f =>
-    isDerivedFeature(f) && num(f.uses) > 0 && num(f.used) > 0 &&
-    (f.reset === "s" || (kind !== "short" && f.reset === "l")));
+    f && num(f.uses) > 0 && num(f.used) > 0 && featureComesBack(f, { kind, dawn, dusk }));
   if (spent.length) {
     next.features = (ch.features || []).map(f => (spent.includes(f) ? { ...f, used: 0 } : f));
-    changes.push({ label: "Class resources come back", detail: spent.map(f => f.name).join(", ") });
+    changes.push({ label: "Features come back", detail: spent.map(f => f.name).join(", ") });
   }
 
   // Spell slots. Every expended slot comes back on a long rest — and on a SHORT rest for a class
@@ -647,9 +791,60 @@ export const cognitionUnderstandingBonus = ch => abilityModifier(ch, "dream");
 // ── Attunement ──────────────────────────────────────────────────────────
 // Three baseline slots plus feature overrides, and three more that exist only in Insomnia for
 // Dreamlike and Lucidlike items. Leaving Insomnia does NOT unattune anything — the records stay and
-// the extra-slot effects go inactive until the character is eligible again (DM-14, RES-09).
+// a DREAMLIKE item's effects go inactive until the bearer is in Insomnia again (DM-14, RES-09).
 export const ATTUNEMENT_BASELINE = 3;
 export const ATTUNEMENT_INSOMNIA = 3;
+
+// ── The dream axis ──────────────────────────────────────────────────────
+// WHY THIS IS THREE VALUES AND NOT A BOOLEAN. It was `insomniaOnly`, one flag covering both kinds of
+// dream item, because Character Sheet Requirements v1.5 wrote them as one: DM-14 and HB-018 both
+// say "Dreamlike/Lucidlike" and both say inactive off-plane. The item canon says otherwise, in
+// three places — `Artificing Dream Items.md` ("can exist in both Insomnia and Ephemer
+// simultaneously"), `Lucidite.md` ("able to exist in Insomnia and Ephemer at once") and the
+// Glossary ("Dreamlike items cannot return to Ephemer; Lucidlike ones can"). Juan ruled for the
+// item canon on 2026-11-03, and the spec and its fixture 5 were corrected to match:
+//
+//   (none)      Ephemer and Insomnia alike      one baseline slot
+//   dreamlike   Insomnia only, inactive awake   one Insomnia slot
+//   lucidlike   BOTH planes, always in force    one baseline AND one Insomnia slot
+//
+// Lucidlike holds a slot in each pool whether or not the bearer is dreaming — that permanent double
+// cost is what two-plane existence is paid for with, and it is why the Attunement card shows a
+// Lucidlike item in both of its groups rather than looking like it counted something twice.
+export const ITEM_DREAM = [
+  { id: "", name: "Of Ephemer", short: "", hint: "An ordinary item — one baseline attunement slot." },
+  { id: "dreamlike", name: "Dreamlike", short: "Dreamlike",
+    hint: "Insomnia only — it cannot leave, and its effects stop while you are awake. One Insomnia slot." },
+  { id: "lucidlike", name: "Lucidlike", short: "Lucidlike",
+    hint: "Both planes at once, awake or dreaming. Costs one baseline slot AND one Insomnia slot." },
+];
+export const DREAM_BY_ID = Object.fromEntries(ITEM_DREAM.map(d => [d.id, d]));
+
+// Read safely, and read the LEGACY flag too: every item saved before the axis had three values
+// carries `insomniaOnly`, and that boolean meant exactly Dreamlike — "an Insomnia-only slot, and
+// inactive while awake". So an old sheet keeps behaving exactly as it did until somebody marks a
+// specific item Lucidlike, which is the only safe way to migrate eight live characters.
+export function itemDream(it) {
+  const d = String(it?.dream || "").toLowerCase();
+  if (d === "dreamlike" || d === "lucidlike") return d;
+  return it?.insomniaOnly ? "dreamlike" : "";
+}
+export const isDreamlike = it => itemDream(it) === "dreamlike";
+export const isLucidlike = it => itemDream(it) === "lucidlike";
+// Does a bonded item draw on a pool at all? `requiresAttunement` is the slot-cost flag — Juan,
+// 2026-11-03: "no attunement require means it does not take a attunement slot". So an item bonded
+// some other way is listed, is in force, and costs nothing: Solomon's Scarf needs no attunement,
+// and The First Thorn is permanently Soul Attuned and its entry says plainly that it "requires no
+// Attunement Slot". The dream kind says WHERE an item works; this says whether it is paid for.
+//
+// The question is asked this way round ON PURPOSE. Only an item that SAYS it needs no attunement is
+// free; a record that never wrote the flag down — the legacy `attuned` list, and the v1.5 fixtures
+// themselves — keeps costing a slot, because "nobody recorded it" is not a ruling. That is the
+// difference between reading a ruling and quietly handing three slots back to every old sheet.
+export const costsASlot = it => it?.requiresAttunement !== false;
+// Which of the two pools a PAID item draws on. Lucidlike draws on both; that is the point.
+export const usesBaselineSlot = it => costsASlot(it) && itemDream(it) !== "dreamlike";
+export const usesInsomniaSlot = it => costsASlot(it) && itemDream(it) !== "";
 
 // ── Equipment slots ─────────────────────────────────────────────────────
 // From Equipment Ruleset.md, which owns them: one item per slot unless a feature says otherwise.
@@ -763,12 +958,16 @@ export const findItem = (ch, where) => allItems(ch).find(r => r.where === where)
 // anything; attuned, where the item says it needs to be; and awake-or-dreaming, because a Dreamlike
 // item goes inactive outside Insomnia without the attunement breaking (DM-14, RES-09).
 //
+// Only DREAMLIKE is gated here. A Lucidlike item exists in both planes at once and keeps working
+// while its bearer is awake — that is the whole difference between the two, and the thing the old
+// single `insomniaOnly` flag could not say (Juan, 2026-11-03).
+//
 // The attunement CAP is deliberately not enforced here. The sheet reports being over it and leaves
 // the choice to the player, the way it reports every other thing it will not referee.
 export function itemIsActive(ch, it, where) {
   if (!it || !it.name || !String(where || "").startsWith("slot:")) return false;
   if (it.requiresAttunement && !it.attuned) return false;
-  if (it.insomniaOnly && !ch?.inInsomnia) return false;
+  if (isDreamlike(it) && !ch?.inInsomnia) return false;
   return true;
 }
 
@@ -875,16 +1074,33 @@ export function encumbrance(ch) {
 
 export function attunement(ch, { inInsomnia = false } = {}) {
   const baseline = ATTUNEMENT_BASELINE + num(ch.attunementBonus);
-  const items = attunedItems(ch);
-  const dreamish = items.filter(i => i && i.insomniaOnly);
-  const normal = items.filter(i => i && !i.insomniaOnly);
+  const items = attunedItems(ch).filter(Boolean);
+  const dreamlike = items.filter(isDreamlike);
+  const lucidlike = items.filter(isLucidlike);
+  // The two pools, each holding everything that draws on it. A Lucidlike item is in BOTH lists, on
+  // purpose — it pays into both, awake or dreaming.
+  const onBaseline = items.filter(usesBaselineSlot);
+  const onInsomnia = items.filter(usesInsomniaSlot);
+  // Bonded and unpaid-for. Shown rather than dropped: an item that costs nothing is still something
+  // the player is attuned to, and a slot silently not being charged is how a count stops being
+  // trusted. Its dream kind still decides which plane it works in.
+  const free = items.filter(i => !costsASlot(i));
   return {
-    baseline, used: normal.length, insomniaSlots: ATTUNEMENT_INSOMNIA,
-    insomniaUsed: dreamish.length, inInsomnia,
+    baseline, used: onBaseline.length, insomniaSlots: ATTUNEMENT_INSOMNIA,
+    insomniaUsed: onInsomnia.length, inInsomnia,
+    dreamlike, lucidlike, onBaseline, onInsomnia, free,
     // "Active" is the distinction the ruling asks for: owned, equipped, attuned — and in effect.
-    active: [...normal.slice(0, baseline), ...(inInsomnia ? dreamish.slice(0, ATTUNEMENT_INSOMNIA) : [])],
-    inactive: inInsomnia ? [] : dreamish,
-    over: Math.max(0, normal.length - baseline),
+    // Lucidlike items are inside `onBaseline`, so they are here in both planes without a second
+    // clause; only the Dreamlike ones wait to be dreaming. A free item is in force without paying,
+    // and answers to the same plane rule.
+    active: [
+      ...onBaseline.slice(0, baseline),
+      ...(inInsomnia ? onInsomnia.filter(isDreamlike).slice(0, ATTUNEMENT_INSOMNIA) : []),
+      ...free.filter(i => !isDreamlike(i) || inInsomnia),
+    ],
+    inactive: inInsomnia ? [] : dreamlike,
+    over: Math.max(0, onBaseline.length - baseline),
+    insomniaOver: Math.max(0, onInsomnia.length - ATTUNEMENT_INSOMNIA),
   };
 }
 
@@ -1671,14 +1887,21 @@ export function castingAbilityId(name) {
   return CASTING_ABILITY[String(name || "").trim().toLowerCase()] || "";
 }
 
-// Temporary attack and damage modifiers are deliberately NOT folded in here, the same way the seal
-// attack bonus leaves them out: this is the number printed on the sheet, and a round of Bless is
-// shown on the roll that uses it rather than quietly rewritten into the character's statistics.
+// The general `attack` and `damage` modifiers are deliberately NOT folded in here, the same way the
+// seal attack bonus leaves them out: a round of Bless is shown on the roll that uses it rather than
+// quietly rewritten into the character's printed statistics.
+//
+// The two SPELL-SPECIFIC targets are another matter and are folded in, because they are what an
+// item means when it says "+4 to spell attacks and spell save DC" — a standing property of the
+// tome in your hand, not a round of something. `saveDc` always worked this way; `spellAttack`
+// joined it when CS-090 was built, which is why the spell attack bonus is no longer bare
+// proficiency plus ability.
 export const spellSaveDC = (ch, abilityId) =>
   8 + proficiencyBonus(ch.level) + abilityModifier(ch, abilityId)
   + modifierTotal(activeModifiers(ch), "saveDc");
 export const spellAttackBonus = (ch, abilityId) =>
-  proficiencyBonus(ch.level) + abilityModifier(ch, abilityId);
+  proficiencyBonus(ch.level) + abilityModifier(ch, abilityId)
+  + modifierTotal(activeModifiers(ch), "spellAttack");
 
 // One row per casting class, in the order the classes sit on the sheet. `plan` is a featurePlan —
 // passed in, because which classes cast comes from the catalogue and nothing here may fetch.
@@ -1739,7 +1962,18 @@ export const spellRecord = (e, standing = "known") => ({
   components: e?.components || "", duration: e?.duration || "",
   ritual: e?.ritual || "", classes: e?.classes || "", source: e?.source || "",
   standing: SPELL_STANDING[standing] ? standing : "known",
+  // Which of its dice are DAMAGE, and of what type. The catalogue cannot say: Fight Club's `<roll>`
+  // element would have, and not one of the 317 SRD spells ships with it. So this is the character's
+  // own note about their own spell — set once from the dice the dialog scraped out of the text, or
+  // typed — and it is what `spellDamage` modifiers land on. Empty means the sheet does not know,
+  // and it asks rather than guessing (CS-090).
+  damage: "", damageType: "",
 });
+
+// A spell's damage expression, if its owner has said what it is. Separate from `spellRecord` so a
+// spell saved before this existed answers the same as one that simply has not been told yet.
+export const spellDamageOf = s => String(s?.damage || "").trim();
+export const spellDamageBonus = ch => modifierTotal(activeModifiers(ch), "spellDamage");
 
 // The book, grouped the way a sheet reads it: cantrips first, then one row per level the character
 // actually has a spell at. Levels with nothing in them are left out rather than printed empty.
@@ -1839,7 +2073,9 @@ export function blankCharacter() {
     defences: [], senses: [],
     // Dice someone handed you, each with its own fuse. See the Inspiration section.
     inspiration: [],
-    corruption: 0,
+    // Corruption is the third axis beside Honor and Morality: the score, the Nature a soul
+    // dissolves toward once it reaches five, and the player's own word for what is eating them.
+    corruption: 0, corruptionNature: "", corruptionVile: "",
     fate: 0,
     attuned: [], attunementBonus: 0,
     equipment: {}, carried: [], anatomy: [],
