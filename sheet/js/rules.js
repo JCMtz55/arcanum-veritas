@@ -315,6 +315,54 @@ export function saveContributions(ch, abilityId) {
 }
 export const passiveScore = (ch, skillId, ability) => 10 + skillTotal(ch, skillId, ability);
 
+// ── What a feature COSTS, and which ones belong on the Combat tab ───────
+// An imported item's features all land under "Items" on the Character tab, which is right for
+// "what does this thing do" and wrong for "it is my turn". The ones you ACT with belong beside the
+// attacks, with the charges you spend them from.
+//
+// 📊 Counted across the Item Vault's 550 features before this was written, because the answer
+// decides the design: **173 state a cost in their own prose**, 189 open with "Passive.", and
+// **60 state no cost at all and still carry charges**. So the words are read where they are
+// there — and a feature with pips is a thing you DO whatever its prose forgot to say.
+export const COST_IDS = ["action", "bonus", "reaction", "quick", "grand", "pair", "free", "passive"];
+// First match wins, so "as a bonus action" is settled before the bare word "action" can claim it.
+const COST_SAID = [
+  ["passive",  /^\s*passive\b/i],
+  ["bonus",    /\bas a bonus action\b|^\s*bonus action\b|\ba bonus action\b/i],
+  ["reaction", /\bas a reaction\b|^\s*reaction\b|\b(?:your|their|a) reaction\b/i],
+  ["quick",    /\bquick action\b/i],
+  ["grand",    /\bgrand action\b/i],
+  ["pair",     /\bpair action\b/i],
+  ["free",     /\bfree action\b|\bno action required\b|\bneed no action\b|\bcosts? you nothing\b/i],
+  ["action",   /\bas an action\b|^\s*action\b|\ban action\b|\btake the attack action\b/i],
+];
+// A note may say it outright — `"cost": "bonus"` — and that always beats the prose, because a
+// field is a statement and a regex is a reading.
+export function featureCost(f) {
+  const said = String(f?.cost || "").trim().toLowerCase();
+  if (COST_IDS.includes(said)) return said;
+  const hit = COST_SAID.find(([, re]) => re.test(String(f?.text || "")));
+  return hit ? hit[0] : "";
+}
+
+// The item features worth putting on the Combat tab, each carrying `i` — its index in `ch.features`
+// — so its pips fire the SAME `feat-use` handler the Character tab's do. Nothing is copied onto the
+// character and nothing is written: this is read at draw time, so the two tabs can never drift.
+//
+// ⬜ Deliberately items only. A class's features would fill this list with thirty rows and bury the
+// three an item just handed you, which is the thing Juan could not find.
+export function itemActions(ch) {
+  return (ch?.features || [])
+    .map((f, i) => ({ ...f, i }))
+    .filter(f => f && f.name && f.source === "item")
+    .map(f => ({ ...f, cost: featureCost(f), pool: featureUses(ch, f) }))
+    // Either it says it costs something, or it has charges to spend. The four features in the vault
+    // that open "Passive." AND carry charges are kept — Ironmaw's Centripetal Core is passive with
+    // a once-per-rest leap inside it — but they are not labelled with a cost they do not have.
+    .filter(f => (f.cost && f.cost !== "passive") || f.pool > 0)
+    .map(f => ({ ...f, cost: f.cost === "passive" ? "" : f.cost }));
+}
+
 // The lowest natural roll that still crits (CS-097). Eight items widen it — Black Raze and the
 // Last Ligonier Glaive to 18, Spiral Fang to 15 for a minute, Midas to 14 — and the sheet held no
 // such number at all, so every one of them was a line of prose the player had to remember.

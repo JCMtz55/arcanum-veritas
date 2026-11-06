@@ -678,6 +678,9 @@ function combatPanel(ch) {
   // a Grimm ability granted them for a minute. The timed ones count down on the same confirmed
   // round the modifiers do, so one button moves the whole sheet forward.
   const live = (ch.actions || []).filter(a => a && a.active !== false);
+  // ⚠️ The empty line has to know about the gear below it. "Nothing here yet" printed above six
+  // rows of an item's own doings is the card arguing with itself.
+  const gear = rules.itemActions(ch).length;
   const actions = live.length ? live.map(a => `
     <div class="act2 ${a.cost || ""}">
       <button class="act2-b" data-act="action-open" data-id="${esc(a.id)}" title="${esc(a.text || a.name)}">
@@ -687,8 +690,11 @@ function combatPanel(ch) {
       </button>
       <button class="x" data-act="action-del" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">×</button>
     </div>`).join("")
-    : `<p class="hint">Nothing here yet. Add the things you can <em>do</em> — a Quick Action, a
-       Grimm ability, something a spell granted you for a minute.</p>`;
+    : gear
+      ? `<p class="hint">Nothing you have added yourself. Your gear's own doings are below —
+         <b>Add</b> is for a Quick Action, a Grimm ability, something a spell granted you.</p>`
+      : `<p class="hint">Nothing here yet. Add the things you can <em>do</em> — a Quick Action, a
+         Grimm ability, something a spell granted you for a minute.</p>`;
 
   // This turn comes first: it is the thing you look at on every one of your turns, and the thing
   // you reach for before you have decided which attack to make.
@@ -713,7 +719,33 @@ function combatPanel(ch) {
         <button class="btn sm" data-act="action-add">Add</button></span></h3>
       <div class="acts2">${actions}</div>
       ${live.some(a => a.rounds != null) ? `<p class="hint">Timed ones run out when you confirm a round.</p>` : ""}
+      ${gearActions(ch)}
     </section>`;
+}
+
+// What your GEAR lets you do, on the tab where you do it. An imported item's features all land
+// under "Items" on the Character tab — right for "what does this thing do", wrong for "it is my
+// turn" — so the ones you act with are repeated here, with the charges you spend them from.
+//
+// 🔑 NOTHING IS COPIED ONTO THE CHARACTER. `rules.itemActions` reads `ch.features` at draw time and
+// each row carries that feature's own index, so the pips below fire the SAME `feat-use` the
+// Character tab's do: spend one here and it is spent there, because they are one pool drawn twice.
+// A second copy on the sheet would have been two pools and one of them always wrong.
+function gearActions(ch) {
+  const list = rules.itemActions(ch);
+  if (!list.length) return "";
+  return `<div class="gearacts">
+    <div class="zone-h sm"><h4>${icon("needsAttunement")} From your gear</h4></div>
+    ${list.map(f => `
+      <div class="act2 ${f.cost || ""}">
+        <button class="act2-b" data-act="gear-open" data-id="${f.i}" title="${esc(f.text || f.name)}">
+          <span class="act2-n">${esc(f.name)}</span>
+          ${f.cost ? `<span class="tag">${esc(ACTION_COST[f.cost] || f.cost)}</span>` : ""}
+          ${f.dc ? `<span class="tag dc" title="This feature's own save DC — the item's number, not yours.">DC ${f.dc}</span>` : ""}
+        </button>
+        ${featurePips(ch, f)}
+      </div>`).join("")}
+  </div>`;
 }
 
 function spellPanel(ch) {

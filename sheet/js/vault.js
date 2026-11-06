@@ -317,6 +317,15 @@ export function normalizeBlock(raw, { page = "" } = {}) {
       warn.push(`"${f.reset ?? f.recharge}" is not a recharge for ${fName}, so it comes back by hand.`);
       reset = "";
     }
+    // What it costs to use. Optional, and refused loudly rather than guessed at: a cost the engine
+    // has no row for would put the feature on the Combat tab wearing a label nothing understands.
+    let cost = line(f.cost ?? f.action, 12).toLowerCase();
+    if (cost === "bonus action") cost = "bonus";
+    if (cost === "an action" || cost === "full") cost = "action";
+    if (cost && !rules.COST_IDS.includes(cost)) {
+      warn.push(`"${f.cost ?? f.action}" is not an action cost for ${fName}, so its own words are read instead.`);
+      cost = "";
+    }
     // Uses: a plain number, or DERIVED the way an effect's amount is — `"uses": { "from": "prof" }`
     // — because "a number of times equal to your proficiency bonus" is how nineteen entries in the
     // Item Vault word it (CS-088), and a count written out once goes stale at the next level.
@@ -349,6 +358,11 @@ export function normalizeBlock(raw, { page = "" } = {}) {
       // The feature's OWN save DC, which is never the character's (CS-093). Carried so it can be
       // shown on the pip row instead of being buried in prose — nineteen items state one.
       dc: int(f.dc ?? f.saveDc, 0, 40, 0),
+      // What it costs to use, which puts it on the Combat tab beside the attacks. Optional: 173 of
+      // the vault's 550 features already say it in their own prose and `rules.featureCost` reads
+      // that, so a note only needs this where the words are ambiguous — or where it is "Passive."
+      // and the reader should not go looking.
+      ...(cost ? { cost } : {}),
     });
   }
 

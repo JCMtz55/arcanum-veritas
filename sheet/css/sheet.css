@@ -612,6 +612,16 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .act2.quick,.act2.grand,.act2.pair{border-color:var(--brass)}
 .tag.k{color:var(--accent);border-color:var(--accent)}
 
+/* What your gear lets you do, under the actions you added yourself. Same chip as an action,
+   because at the table it IS one — the only difference is that this one arrived with an item and
+   is spent from that item's own charges, which ride along on the right. */
+.gearacts{margin-top:9px}
+.gearacts .act2{margin:0 5px 5px 0;padding-right:7px}
+/* The pips sit INSIDE the chip rather than under it: a row that wrapped its charges onto a second
+   line read as two separate things on a narrow sheet. */
+.gearacts .uses{padding-left:2px;border-left:1px solid var(--line);margin-left:2px}
+.gearacts .uses .pip{width:10px;height:10px}
+
 /* ── equipment ───────────────────────────────────────────────────────── */
 .slots2{display:flex;flex-direction:column;gap:3px}
 .slot{display:grid;grid-template-columns:22px 86px minmax(0,1fr) auto auto;gap:7px;align-items:center;

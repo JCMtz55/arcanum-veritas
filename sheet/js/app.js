@@ -905,6 +905,25 @@ const ACTS = {
         <button class="btn sm warn" data-act="action-del" data-id="${esc(a.id)}">Remove</button></div>`,
       { pin: true, key: `act:${a.id}` });
   },
+  // An item's feature read from the Combat tab, where it has no body to unfold — `feat-open` only
+  // toggles one open on the Character tab, so clicking a gear row there would do nothing at all.
+  // Same popover as an action, because on this card it IS one.
+  "gear-open": el => {
+    const c = ch(), f = (c.features || [])[+el.dataset.id];
+    if (!f) return;
+    const cost = rules.featureCost(f), pool = rules.featureUses(c, f);
+    popAt(el, `<div class="pop-h"><b>${esc(f.name)}</b>
+        ${cost && cost !== "passive" ? `<span class="tag">${esc(ACTION_COST[cost] || cost)}</span>` : ""}
+        ${f.dc ? `<span class="tag dc">DC ${f.dc}</span>` : ""}</div>
+      <div class="pop-b">
+        ${f.text ? `<p class="prose">${esc(f.text)}</p>` : `<p class="hint">No description.</p>`}
+        ${pool ? `<p class="hint">${pool - (f.used || 0)} of ${pool} left — ${esc(rules.featureResetSays(f))}</p>` : ""}
+      </div>
+      <p class="hint" style="padding:0 11px 9px">It came with an item, so it lives under
+        <b>Items</b> on the Character tab. Taking the item off does not remove it — re-read the
+        note, or delete it there.</p>`,
+      { pin: true, key: `gear:${f.id || el.dataset.id}` });
+  },
   "action-extend": el => mutate(s => {
     const a = s.actions.find(x => x.id === el.dataset.id);
     if (a && a.rounds != null) a.rounds += 1;

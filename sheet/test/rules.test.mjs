@@ -499,6 +499,57 @@ test("a critical range is an ordinary effect, so it derives and it switches", ()
   assert.equal(R.critRange(pc({ modifiers: [{ target: "crit", amount: 40, active: true }] })), R.CRIT_FLOOR);
 });
 
+// ── An item's features on the Combat tab ────────────────────────────────
+test("a feature's cost is stated if the note says so, and read from its words if not", () => {
+  // The field always wins: it is a statement, where the prose is a reading.
+  assert.equal(R.featureCost({ cost: "reaction", text: "Passive. Nothing at all." }), "reaction");
+  // A cost the engine has no row for is not a cost.
+  assert.equal(R.featureCost({ cost: "interrupt", text: "As an action, swing." }), "action");
+
+  assert.equal(R.featureCost({ text: "Passive. +3 to attack rolls." }), "passive");
+  assert.equal(R.featureCost({ text: "Bonus action, speaking the command word." }), "bonus");
+  assert.equal(R.featureCost({ text: "Once per long rest, as a reaction when hit." }), "reaction");
+  assert.equal(R.featureCost({ text: "Three per dawn, as an Action." }), "action");
+  assert.equal(R.featureCost({ text: "GRAND ACTION, once per long rest, over two turns." }), "grand");
+  assert.equal(R.featureCost({ text: "Nothing here names a cost." }), "");
+
+  // ⭐ The ordering is the whole trick: "as a bonus action" contains the word "action", so a naive
+  // ladder would call every bonus action an Action and quietly cost the player their turn.
+  assert.equal(R.featureCost({ text: "As a bonus action, take the Attack action." }), "bonus");
+});
+
+test("the Combat tab takes an item's doings and leaves its passives behind", () => {
+  const ch = pc({ level: 13, features: [
+    { name: "Keen Edge", source: "item", text: "Passive. Crits on 18-20." },
+    { name: "Cursed Warning", source: "item", text: "Proficiency bonus per long rest, as an Action.",
+      uses: { from: "prof" }, reset: "l" },
+    { name: "Perfect Grace", source: "item", text: "Once per long rest, for 1 minute: walk on water.",
+      uses: 1, reset: "l" },
+    { name: "Centripetal Core", source: "item", text: "Passive. Immune to fall damage. Once per short rest you may leap.",
+      uses: 1, reset: "s" },
+    { name: "Second Wind", source: "class", text: "Bonus action, regain hit points." },
+  ] });
+  const got = R.itemActions(ch);
+  assert.deepEqual(got.map(f => f.name),
+    ["Cursed Warning", "Perfect Grace", "Centripetal Core"]);
+
+  // It names the cost it could read, and stays silent where it could not.
+  assert.equal(got[0].cost, "action");
+  assert.equal(got[1].cost, "");           // "Once per long rest" says when, never what it costs
+  // 📐 Passive AND charged: kept for the charges, but NOT labelled with a cost it does not have.
+  assert.equal(got[2].cost, "");
+
+  // The index is the point — these pips must fire the Character tab's own handler.
+  assert.equal(ch.features[got[0].i].name, "Cursed Warning");
+  // And the pool is the real one, derived and all: proficiency at level 13 is 5.
+  assert.equal(got[0].pool, 5);
+
+  // A class feature is not gear, however much it looks like an action.
+  assert.ok(!got.some(f => f.name === "Second Wind"));
+  // A sheet with no items shows nothing rather than an empty card.
+  assert.deepEqual(R.itemActions(pc({})), []);
+});
+
 // The tile a player actually reads. A bare 20 is ONE number, not a range: "20–20" would be the
 // sheet telling a lie about having been upgraded.
 test("the critical range says 20 bare, and a window once anything widens it", () => {
