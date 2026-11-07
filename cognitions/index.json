@@ -8,7 +8,7 @@
       "category": "elemental",
       "tier": "I",
       "opposing": "metal",
-      "ready": false
+      "ready": true
     },
     {
       "id": "air",
@@ -28,7 +28,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "peace",
-      "ready": false
+      "ready": true
     },
     {
       "id": "apathy",
@@ -49,7 +49,7 @@
       "tier": "III",
       "requires": [ "Law", "Freedom" ],
       "opposing": "chaos",
-      "ready": false
+      "ready": true
     },
     {
       "id": "beast",
@@ -91,7 +91,7 @@
       "tier": "III",
       "requires": [ "Blood", "Hate", "Pain" ],
       "opposing": "harmony",
-      "ready": false
+      "ready": true
     },
     {
       "id": "civilization",
@@ -153,7 +153,7 @@
       "tier": "III",
       "requires": [ "Craft", "Emotion" ],
       "opposing": "destruction",
-      "ready": false
+      "ready": true
     },
     {
       "id": "crystal",
@@ -206,7 +206,7 @@
       "tier": "III",
       "requires": [ "Grief", "Apathy" ],
       "opposing": "hope",
-      "ready": false
+      "ready": true
     },
     {
       "id": "destruction",
@@ -227,7 +227,7 @@
       "category": "fate",
       "tier": "I",
       "opposing": "protection",
-      "ready": false
+      "ready": true
     },
     {
       "id": "disgust",
@@ -237,7 +237,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "love",
-      "ready": false
+      "ready": true
     },
     {
       "id": "dream",
@@ -248,7 +248,7 @@
       "tier": "IV",
       "requires": [ "Emotion", "Fear", "Hope" ],
       "opposing": "nightmare",
-      "ready": false
+      "ready": true
     },
     {
       "id": "earth",
@@ -281,7 +281,7 @@
       "tier": "III",
       "requires": [ "Hope", "Will" ],
       "opposing": "despair",
-      "ready": false
+      "ready": true
     },
     {
       "id": "fate",
@@ -292,7 +292,7 @@
       "tier": "III",
       "requires": [ "Fortune", "Misfortune" ],
       "opposing": "freedom",
-      "ready": false
+      "ready": true
     },
     {
       "id": "fear",
@@ -302,7 +302,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "heroism",
-      "ready": false
+      "ready": true
     },
     {
       "id": "fire",
@@ -352,7 +352,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "carnage",
-      "ready": false
+      "ready": true
     },
     {
       "id": "gravity",
@@ -362,7 +362,7 @@
       "category": "cosmical",
       "tier": "II",
       "opposing": "levity",
-      "ready": false
+      "ready": true
     },
     {
       "id": "grief",
@@ -394,7 +394,7 @@
       "tier": "III",
       "requires": [ "Balance", "Peace" ],
       "opposing": "carnage",
-      "ready": false
+      "ready": true
     },
     {
       "id": "hate",
@@ -404,7 +404,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "love",
-      "ready": false
+      "ready": true
     },
     {
       "id": "healing",
@@ -414,7 +414,7 @@
       "category": "vital",
       "tier": "II",
       "opposing": "pain",
-      "ready": false
+      "ready": true
     },
     {
       "id": "heroism",
@@ -445,7 +445,7 @@
       "tier": "V",
       "requires": [ "Soul", "Void" ],
       "opposing": "night",
-      "ready": false
+      "ready": true
     },
     {
       "id": "hope",
@@ -456,7 +456,7 @@
       "tier": "III",
       "requires": [ "Joy", "Will" ],
       "opposing": "despair",
-      "ready": false
+      "ready": true
     },
     {
       "id": "hunger",
@@ -467,7 +467,7 @@
       "tier": "III",
       "requires": [ "Beast", "Void" ],
       "opposing": "apathy",
-      "ready": false
+      "ready": true
     },
     {
       "id": "ice",
@@ -488,7 +488,7 @@
       "tier": "IV",
       "requires": [ "History", "Clarity" ],
       "opposing": "oblivion",
-      "ready": false
+      "ready": true
     },
     {
       "id": "isolation",
@@ -508,7 +508,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "despair",
-      "ready": false
+      "ready": true
     },
     {
       "id": "justice",
@@ -519,7 +519,7 @@
       "tier": "III",
       "requires": [ "Law", "Truth" ],
       "opposing": "corruption",
-      "ready": false
+      "ready": true
     },
     {
       "id": "knowledge",
@@ -530,7 +530,7 @@
       "tier": "III",
       "requires": [ "Clarity", "History" ],
       "opposing": "ignorance",
-      "ready": false
+      "ready": true
     },
     {
       "id": "law",
@@ -540,7 +540,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "freedom",
-      "ready": false
+      "ready": true
     },
     {
       "id": "life",
@@ -583,7 +583,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "hate",
-      "ready": false
+      "ready": true
     },
     {
       "id": "loyalty",
@@ -593,7 +593,7 @@
       "category": "mores",
       "tier": "I",
       "opposing": "betrayal",
-      "ready": false
+      "ready": true
     },
     {
       "id": "luck",
@@ -603,7 +603,7 @@
       "category": "fate",
       "tier": "I",
       "opposing": "misfortune",
-      "ready": false
+      "ready": true
     },
     {
       "id": "lunar",
@@ -615,7 +615,7 @@
       "tier": "III",
       "requires": [ "Night", "Water" ],
       "opposing": "chaos",
-      "ready": false
+      "ready": true
     },
     {
       "id": "melancholy",
@@ -668,7 +668,7 @@
       "tier": "III",
       "requires": [ "Darkness", "Fear" ],
       "opposing": "sun",
-      "ready": false
+      "ready": true
     },
     {
       "id": "nightmare",
@@ -680,7 +680,7 @@
       "requires": [ "Fear", "Shadow", "Insanity" ],
       "favorite": true,
       "opposing": "dream",
-      "ready": false
+      "ready": true
     },
     {
       "id": "nullity",
@@ -734,7 +734,7 @@
       "requires": [ "Vinculum", "Truth" ],
       "divineLaw": "The Upholding Law of Promises",
       "opposing": "betrayal",
-      "ready": false
+      "ready": true
     },
     {
       "id": "protection",
@@ -754,7 +754,7 @@
       "category": "mores",
       "tier": "II",
       "opposing": "joy",
-      "ready": false
+      "ready": true
     },
     {
       "id": "secrets",
@@ -807,7 +807,7 @@
       "tier": "IV",
       "requires": [ "Gravity", "Travel" ],
       "opposing": "time",
-      "ready": false
+      "ready": true
     },
     {
       "id": "speed",
@@ -817,7 +817,7 @@
       "category": "dominion",
       "tier": "I",
       "opposing": "stagnation",
-      "ready": false
+      "ready": true
     },
     {
       "id": "sun",
@@ -852,7 +852,7 @@
       "requires": [ "Memory", "Travel" ],
       "divineLaw": "The Universal Law of Time",
       "opposing": "space",
-      "ready": false
+      "ready": true
     },
     {
       "id": "toxin",
@@ -862,7 +862,7 @@
       "category": "elemental",
       "tier": "II",
       "opposing": "life",
-      "ready": false
+      "ready": true
     },
     {
       "id": "travel",
@@ -882,7 +882,7 @@
       "category": "dominion",
       "tier": "II",
       "opposing": "truth",
-      "ready": false
+      "ready": true
     },
     {
       "id": "truth",
@@ -893,7 +893,7 @@
       "tier": "III",
       "requires": [ "Clarity", "Light" ],
       "opposing": "lies",
-      "ready": false
+      "ready": true
     },
     {
       "id": "vileness",
@@ -914,7 +914,7 @@
       "tier": "IV",
       "requires": [ "Darkness", "Silence" ],
       "opposing": "abundance",
-      "ready": false
+      "ready": true
     },
     {
       "id": "water",
@@ -955,7 +955,7 @@
       "tier": "III",
       "requires": [ "Knowledge", "Clarity" ],
       "opposing": "ignorance",
-      "ready": false
+      "ready": true
     }
   ]
 }
