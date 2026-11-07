@@ -12,8 +12,6 @@ function setView(v) {
     document.getElementById(id).className = "tab" + (k === v ? " on" : ""));
   // Rings, Damage and Emotion live in the Reference menu — its button stands in for their tab
   document.getElementById("refBtn").className = "tab" + (["rings", "damage", "conditions", "actions", "emotion"].includes(v) ? " on" : "");
-  // Learning lives in the account menu — its button stands in for the tab
-  document.getElementById("whoBtn").classList.toggle("on", v === "learn");
   if (v === "codex") {
     if (!state.codexId) {
       const first = state.core || (INDEX.find(c => c.ready) || {}).id;
