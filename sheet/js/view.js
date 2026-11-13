@@ -18,6 +18,12 @@ const $ = id => document.getElementById(id);
 // belongs to which plate. Re-exported here because the sheet has always asked view.js for them.
 export { PORTRAITS, portraitUrl, fullArtUrl, portraitOf, artUrl } from "./plates.js";
 
+// The effect-target menu lives in `targets.js` for the same reason: the server serves it to the
+// Arcanum builder, whose plain <script> files cannot import a module, and the server cannot import
+// this one. Re-exported because the sheet has always asked view.js for them.
+import { targetLabel, MOD_TARGETS } from "./targets.js";
+export { targetLabel, MOD_TARGETS };
+
 // Eight accents, every one of them already a token in the app's palette, so a character can look
 // like themselves without any of them looking out of place beside the rest of Ephemer.
 export const ACCENTS = [
@@ -493,13 +499,20 @@ function defenceChips(ch) {
       // is not yours to edit, and it leaves when the item does. That is the whole point of CS-104
       // — a typed-in resistance is the thing people forget to remove.
       r.source === "item" ? `From ${r.why} — it arrives and leaves with the item, so it is not edited here.`
+        : r.source === "granted" ? `From ${r.why} — another player's seal is holding it over you. Click to drop it.`
         : r.why ? `Source: ${r.why}` : "No source recorded — click to add one.",
       r.note || "",
     ].filter(Boolean).join("\n");
     const worn = r.source === "item";
-    return `<button class="dfn ${r.standing}${dead || moot ? " dead" : ""}${worn ? " worn" : ""}"
-      ${worn ? `data-act="def-item" data-id="${esc(r.where || "")}"` : `data-act="def-open" data-id="${esc(r.id)}"`}
-      title="${esc(title)}" aria-label="${esc(spoken)}${worn ? `, from ${r.why}` : ""}">
+    const given = r.source === "granted";
+    // A granted defence is not on this sheet, so the chip asks the server to end the row rather
+    // than cutting something out of the player's own list — the same door the modifier rows use.
+    const act = worn ? `data-act="def-item" data-id="${esc(r.where || "")}"`
+      : given ? `data-act="effect-end" data-id="${esc(r.grantedId)}"`
+      : `data-act="def-open" data-id="${esc(r.id)}"`;
+    return `<button class="dfn ${r.standing}${dead || moot ? " dead" : ""}${worn ? " worn" : ""}${given ? " granted" : ""}"
+      ${act}
+      title="${esc(title)}" aria-label="${esc(spoken)}${worn || given ? `, from ${r.why}` : ""}">
       <b>${esc(r.name)}</b><em aria-hidden="true">${esc(says)}</em>
       ${r.rounds == null ? "" : `<span class="dfn-r">${icon("timed")}${r.rounds}r</span>`}</button>`;
   }).join("");
@@ -627,30 +640,69 @@ function combatPanel(ch) {
   // Resolved to the character's level first (CS-087), so the row shows the die this character is
   // actually holding rather than the one the weapon started with.
   const critOn = rules.critRange(ch);
-  const attacks = ch.attacks.length ? rules.attackList(ch).map((a, i) => `
-    <div class="atk">
-      <button class="atk-nm" data-act="atk-roll" data-id="${i}" title="Roll to hit${
-        critOn < 20 ? ` — critical on ${critOn} or more` : ""}">
-        <b>${esc(a.name || "Attack")}</b><span>${sign(a.bonus || 0)} to hit</span></button>
+  const attacks = ch.attacks.length ? rules.attackList(ch).map((a, i) => {
+    // Worked out rather than read off the row (CS-021): the ability, the proficiency, the
+    // weapon's enhancement and whatever is lifting every attack right now. The tooltip carries
+    // every term by name, because a number a player cannot take apart is a number they have to
+    // trust, and nobody trusts a character sheet.
+    const hit = rules.attackBonus(ch, a);
+    const groups = rules.damageGroups(ch, a);
+    const why = hit.parts.filter(p => p.amount)
+      .map(p => `${p.reason} ${sign(p.amount)}`).join(" · ");
+    // An attack whose weapon is in the pack, unattuned, or gone. It still rolls — the sheet
+    // referees nothing — but it says so, and its enhancement is already out of the number above.
+    const link = rules.attackItem(ch, a);
+    const stowed = link && !link.active;
+    // What rolls every time, and what waits to be asked for. A conditional rider is NOT in
+    // `groups` until it is armed at the roll, so it is counted separately or the row would say
+    // nothing about dice the weapon plainly has.
+    const riders = groups.slice(1);
+    const waiting = rules.conditionalRiders(a);
+    return `
+    <div class="atk${stowed ? " stowed" : ""}">
+      <button class="atk-nm" data-act="atk-roll" data-id="${i}" title="${esc(
+        `Roll to hit — ${why || "nothing is adding to this"}${
+          critOn < 20 ? `. Critical on ${critOn} or more` : ""}${
+          stowed ? `. ${link.missing ? `${link.name} is not on this character` : `${link.name} is not in a slot`}` : ""}`)}">
+        <b>${esc(a.name || "Attack")}</b><span>${sign(hit.total)} to hit${
+          stowed ? " · stowed" : ""}${hit.legacy ? " · typed" : ""}</span></button>
       <button class="atk-dmg" data-act="atk-dmg" data-id="${i}"
-        title="${esc(a.nextStep
-          ? `Roll damage — ${a.damage}. It becomes ${a.nextStep.damage || "more"} at level ${a.nextStep.at}.`
-          : a.stepAt ? `Roll damage — ${a.damage}, the step that began at level ${a.stepAt}.`
-          : "Roll damage")}">
-        ${esc(a.damage || "—")}${a.type ? ` <em>${esc(a.type)}</em>` : ""}${
+        title="${esc([
+          `Roll damage — ${rules.damageSays(ch, a) || "nothing to roll"}.`,
+          groups[0]?.why.length ? groups[0].why.map(w => `${w.reason} ${sign(w.amount)}`).join(" · ") : "",
+          waiting.length ? `Offered at the roll: ${waiting.map(r =>
+            `${r.dice} ${r.type || "damage"} when ${r.when}`).join("; ")}.` : "",
+          a.nextStep ? `The dice become ${a.nextStep.damage || "more"} at level ${a.nextStep.at}.`
+            : a.stepAt ? `This is the step that began at level ${a.stepAt}.` : "",
+        ].filter(Boolean).join(" "))}">
+        ${esc(rules.groupExpr(groups[0] || { flat: 0 }))}${
+          groups[0]?.type ? ` <em>${esc(groups[0].type)}</em>` : ""}${
+          riders.length ? `<i class="atk-plus" title="${esc(riders.map(g =>
+            `${rules.groupExpr(g)} ${g.type || "damage"}${g.label ? ` — ${g.label}` : ""}`).join(" · "))}">+${riders.length}</i>` : ""}${
+          // A question mark, not a count: these are dice the weapon has and this swing may not.
+          waiting.length ? `<i class="atk-when" title="${esc(waiting.map(r =>
+            `${r.dice} ${r.type || "damage"}${r.label ? ` — ${r.label}` : ""}, when ${r.when}`).join(" · "))}">?</i>` : ""}${
           a.nextStep ? `<i class="atk-step" title="Grows at level ${a.nextStep.at}">▴</i>` : ""}</button>
+      ${a.versatile ? `<button class="atk-alt" data-act="atk-alt" data-id="${i}"
+        title="${esc(`${a.versatileName || "Two-handed"} — ${rules.damageSays(ch, a, { versatile: true })}`)}">${
+        esc((a.versatileName || "Two-handed").slice(0, 2).toLowerCase())}</button>` : ""}
       <button class="atk-crit" data-act="atk-crit" data-id="${i}"
-        title="Critical — doubles the dice, not the modifier${
+        title="Critical — doubles every damage die, including the riders, and never a modifier${
           critOn < 20 ? `. This character crits on ${critOn} or more.` : ""}">${
         critOn < 20 ? `crit ${critOn}+` : "crit"}</button>
+      <button class="atk-ed" data-act="atk-edit" data-id="${i}"
+        title="What this attack is made of" aria-label="Edit ${esc(a.name || "attack")}">${icon("more")}</button>
       <button class="x" data-act="atk-del" data-id="${i}" aria-label="Remove ${esc(a.name || "attack")}">×</button>
-    </div>`).join("") : `<p class="hint">No attacks yet. Add the ones you actually use — they roll from here.</p>`;
+    </div>`;
+  }).join("") : `<p class="hint">No attacks yet. Add the ones you actually use — they roll from here.</p>`;
 
   // The turn's allowance, which is no longer always one of each: Haste grants an Action, a Grimm
   // may grant a second Reaction, and a grant can be permanent or run for a few rounds. Each slot is
   // its own pip, so "I have two Actions and have spent one" is a thing the tracker can say.
   const allow = rules.turnAllowance(ch);
-  const grantsFor = k => (ch.grants || []).filter(g => g && g.active !== false && g.kind === k);
+  // Yours and anything a seal is holding over you, in the order the allowance counted them, so the
+  // pip a player clicks is the grant the × beside it gives back.
+  const grantsFor = k => rules.allTurnGrants(ch).filter(g => g && g.active !== false && g.kind === k);
   const econ = Object.keys(allow).filter(k => allow[k] > 0).map(k => {
     const used = rules.turnUsed(ch, k);
     const gs = grantsFor(k);
@@ -666,12 +718,19 @@ function combatPanel(ch) {
     return `<div class="econ ${used >= allow[k] ? "done" : ""}">
       <span class="econ-n">${esc(ACTION_COST[k] || k)}</span>
       <span class="epips">${pips}</span>
-      ${gs.length ? `<button class="x" data-act="grant-del" data-id="${esc(gs[gs.length - 1].id)}"
-        title="Give back ${esc(gs[gs.length - 1].why || "the extra")}" aria-label="Remove the extra">×</button>` : ""}
+      ${gs.length ? (() => {
+        const last = gs[gs.length - 1];
+        // A granted one is not on this sheet, so giving it back is a word with the server.
+        const act = last.source === "granted"
+          ? `data-act="effect-end" data-id="${esc(last.grantedId)}"`
+          : `data-act="grant-del" data-id="${esc(last.id)}"`;
+        return `<button class="x" ${act}
+          title="Give back ${esc(last.why || "the extra")}" aria-label="Remove the extra">×</button>`;
+      })() : ""}
     </div>`;
   }).join("");
 
-  const timedGrants = (ch.grants || []).filter(g => g && g.active !== false && g.rounds != null);
+  const timedGrants = rules.allTurnGrants(ch).filter(g => g && g.active !== false && g.rounds != null);
 
   // Things this character can DO, as opposed to things they can hit with. Some are permanent — a
   // class feature, a Quick Action they always have — and some last a few rounds, because a spell or
@@ -1407,12 +1466,19 @@ function lastingCard(ch) {
   const fromItems = all.filter(rules.isItemModifier);
   const written = all.filter(m => !rules.isItemModifier(m));
 
-  const row = m => `<div class="mod${rules.isItemModifier(m) ? " item" : ""}${m.from ? " derived" : ""}">
+  const row = m => `<div class="mod${rules.isItemModifier(m) ? " item" : ""}${
+    rules.isGrantedModifier(m) ? " granted" : ""}${m.from ? " derived" : ""}">
     <span class="mod-n" title="${esc(m.from ? rules.derivationLabel(m) : "")}">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
     <span class="mod-w" title="${esc(m.from ? `${m.reason} — ${rules.derivationLabel(m)}` : m.reason)}">${esc(m.reason)}${
       m.from ? ` <em class="mod-d">${esc(rules.derivationLabel(m))}</em>` : ""}</span>
     ${rules.isItemModifier(m)
       ? `<span class="mod-r" title="Worn — it goes when the item does">${icon("gear")}</span><span class="x"></span>`
+      // Granted by somebody else's seal: it is not in this sheet, so the × asks the server to end
+      // the row rather than cutting something out of the player's own list.
+      : rules.isGrantedModifier(m)
+      ? `<span class="mod-r" title="Granted by another character's seal">${icon("dream")}</span>
+         <button class="x" data-act="effect-end" data-id="${esc(m.grantedId)}"
+           aria-label="Drop this">×</button>`
       : `<span class="mod-r" title="No duration — it does not expire">${icon("lasting")}</span>
          <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button>`}</div>`;
 
@@ -1744,12 +1810,59 @@ function renderRight() {
         <button class="btn pri" data-act="next-round">Next round</button>
         <button class="btn sm" data-act="end-combat">End combat</button>
       </div>
+      ${(() => {
+        // Offered, not applied: a heal is a choice about WHEN and temporary hit points are a choice
+        // about WHETHER, because they replace rather than stack. Nothing about this character is
+        // different until the button is pressed — and pressing it is this client writing its own
+        // sheet, which is the only way hit points can be written without racing the autosave.
+        const pend = rules.pendingGrants(ch);
+        if (!pend.length) return "";
+        return `<div class="zone-h sm"><h4>${icon("heal")} Offered to you</h4></div>
+          <div class="mods">${pend.map(g => `
+            <div class="mod offer">
+              <span class="mod-n">${esc(g.payload?.dice || "")}</span>
+              <span class="mod-w" title="${esc(`${g.label}${g.player ? ` — ${g.player}` : ""}`)}">${
+                esc(g.kind === "heal" ? "healing" : "temporary HP")} · ${esc(g.label)}</span>
+              <button class="btn sm pri" data-act="effect-apply" data-id="${g.id}"
+                title="${esc(g.kind === "heal" ? "Roll it and take the hit points"
+                  : "Roll it — temporary HP replaces what you have if it is higher")}">Take it</button>
+              <button class="x" data-act="effect-end" data-id="${g.id}" aria-label="Decline">×</button>
+            </div>`).join("")}
+          </div>`;
+      })()}
+      ${(() => {
+        // Advantage is not a number, so it is in none of the modifier lists — and a buff nobody can
+        // see is a buff nobody trusts. It gets its own rows, which say what they are pointed at and
+        // carry the same × as everything else granted.
+        const adv = rules.grantedAdvantage(ch);
+        if (!adv.length) return "";
+        return `<div class="zone-h sm"><h4>${icon("dice")} Advantage</h4></div>
+          <div class="mods">${adv.map(a => `
+            <div class="mod granted">
+              <span class="mod-n">adv</span>
+              <span class="mod-w" title="${esc(a.why)}">${esc(targetLabel(a.target))} — ${esc(a.why)}</span>
+              ${a.rounds == null ? `<span class="mod-r">${icon("lasting")}</span>`
+                : `<span class="mod-r">${icon("timed")}${a.rounds}r</span>`}
+              <button class="x" data-act="effect-end" data-id="${esc(a.grantedId)}"
+                aria-label="Drop this">×</button></div>`).join("")}
+          </div>`;
+      })()}
+      ${state.out.length ? `<div class="zone-h sm"><h4>${icon("concentration")} What you have out</h4></div>
+        <div class="mods">${state.out.map(o => `
+          <div class="mod out">
+            <span class="mod-n">${esc(o.label)}</span>
+            <span class="mod-w" title="${esc(o.onWhom)}">on ${esc(o.onWhom)}</span>
+            <button class="x" data-act="conc-end" data-id="${esc(o.group)}"
+              title="Concentration broke — end it everywhere" aria-label="End it everywhere">×</button></div>`).join("")}
+        </div>` : ""}
       ${active.length || timedDefences.length ? `<div class="mods">` + active.map(m => `
-        <div class="mod${m.from ? " derived" : ""}">
+        <div class="mod${m.from ? " derived" : ""}${rules.isGrantedModifier(m) ? " granted" : ""}">
           <span class="mod-n" title="${esc(m.from ? rules.derivationLabel(m) : "")}">${sign(m.amount)} ${esc(targetLabel(m.target))}</span>
           <span class="mod-w" title="${esc(m.from ? `${m.reason} — ${rules.derivationLabel(m)}` : m.reason)}">${esc(m.reason)}</span>
           <span class="mod-r">${icon("timed")}${m.rounds}r</span>
-          <button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button></div>`).join("")
+          ${rules.isGrantedModifier(m)
+            ? `<button class="x" data-act="effect-end" data-id="${esc(m.grantedId)}" aria-label="Drop this">×</button>`
+            : `<button class="x" data-act="mod-del" data-id="${esc(m.id)}" aria-label="Remove">×</button>`}</div>`).join("")
         + timedDefences.map(r => `
         <div class="mod dfn-mod ${r.standing}">
           <span class="mod-n">${icon(r.standing)} ${esc(r.name)}</span>
@@ -1849,38 +1962,5 @@ function axisRow(label, axes, a, b, unspent) {
 
 const cap = s => s[0].toUpperCase() + s.slice(1);
 
-export function targetLabel(target) {
-  if (!target) return "";
-  const [kind, id] = String(target).split(":");
-  if (kind === "ability") return rules.ABILITY_NAME[id] || id;
-  if (kind === "save") return id === "all" ? "all saves" : `${rules.ABILITY_NAME[id] || id} save`;
-  if (kind === "check") return "all checks";
-  if (kind === "skill") return id === "all" ? "all skills" : (rules.SKILL_BY_ID[id]?.name || id);
-  return { ac: "AC", speed: "Speed", initiative: "Initiative", maxHp: "Max HP",
-           attack: "Attack", damage: "Damage", spellAttack: "Spell attack",
-           spellDamage: "Spell damage", saveDc: "Save DC",
-           // "+2 crit" would be read as the number, so the dense rows say what it widens.
-           crit: "Crit range" }[kind] || kind;
-}
-
-// The menu an effect's target is chosen from. The LIST and its order are the engine's
-// (`rules.MOD_TARGET_IDS`), so that the one place a target can be applied is the one place it can be
-// offered — and so the vault importer can check a note's effects against the same list without
-// reaching into the view. Only the handful of labels that want more room than a dense row gets are
-// spelled out here; the rest are `targetLabel`'s own.
-const MOD_TARGET_LABEL = {
-  [rules.CHECK_ALL]: "All ability checks",
-  maxHp: "Maximum HP", attack: "Attack rolls",
-  // Named apart from "Attack rolls" so the menu makes the distinction before a mistake is made:
-  // one lifts every attack, the other only a spell's.
-  spellAttack: "Spell attack rolls", spellDamage: "Spell damage",
-  saveDc: "Your spell save DCs",
-  // Worded as what you TYPE, not what you get: +2 here means 18–20, and a menu saying "critical
-  // range" would be read as the number you need.
-  crit: "Critical range — wider by",
-  // First of the saves, because it is the one most things actually grant — Bless, an aura, a cloak.
-  [rules.SAVE_ALL]: "All saving throws",
-  [rules.SKILL_ALL]: "All skills",
-};
-export const MOD_TARGETS = rules.MOD_TARGET_IDS.map(value =>
-  ({ value, label: MOD_TARGET_LABEL[value] || targetLabel(value) }));
+// `targetLabel`, `MOD_TARGET_LABEL` and `MOD_TARGETS` moved to `targets.js` — see the re-export at
+// the top of this file.

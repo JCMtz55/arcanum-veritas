@@ -66,21 +66,179 @@
    the first one, so the panel doesn't open with a gap. */
 .rem-body > .cdx-sec:first-child{margin-top:14px}
 
+/* ── THE TABLE: one row per character ───────────────────────
+ * This was a grid of 272px cards. A card is the right shape for a thing you pick ONE of; a party is
+ * a thing you SCAN — who is bloodied, who still has Fate, who is carrying a Wound — and scanning is
+ * reading down one column, which a grid of squares cannot give you at any width. So: one row each,
+ * the same field in the same place on every row, the plate a strip down the left so the eye finds
+ * the person before it reads the numbers, and everything else folded underneath until asked for.
+ *
+ * Two columns: the plate, then the body. The open half spans both, so the row's own border wraps
+ * the controls and there is never a question which character they belong to. */
+.ptr-list{display:flex; flex-direction:column; gap:7px; margin-top:12px}
+.ptr{display:grid; grid-template-columns:76px minmax(0,1fr); align-items:stretch;
+  background:var(--panel2); border:1px solid var(--line); border-radius:10px; overflow:hidden;
+  transition:border-color .15s ease}
+.ptr:hover{border-color:#47525F}
+.ptr.open{border-color:var(--brass)}
+.ptr.busy{opacity:.55}
+/* The band a row is in, as one edge down the inside of the plate. On the plate's own border rather
+   than the row's, because the plate fills that column and would cover a line drawn under it — and
+   it reads better there anyway: the colour is beside the face, where the eye already is. Readable
+   across the room without colouring the whole row, which would make its numbers harder to read. */
+.ptr.low  .ptr-por{border-right:3px solid var(--brass)}
+.ptr.crit .ptr-por{border-right:3px solid var(--ember)}
+.ptr.out  .ptr-por{border-right:3px solid var(--mute)}
+
+/* The player's own plate, at a size you can recognise rather than merely notice. `top` and not
+   `center`: the plates are 2:3 and every face sits in the top third, so a strip anchored to the
+   middle would be a column of chestplates. Clicking it opens the painting whole. */
+.ptr-por{align-self:stretch; min-height:92px; padding:0; border:0; border-right:1px solid var(--line);
+  background:var(--panel) center top/cover no-repeat; display:grid; place-items:center;
+  font-family:var(--sans); font-size:17px; letter-spacing:.04em; color:var(--mute)}
+button.ptr-por{cursor:zoom-in}
+button.ptr-por:hover{filter:brightness(1.12)}
+.ptr-por.none{background:var(--panel)}
+
+.ptr-body{display:flex; flex-direction:column; gap:7px; min-width:0; padding:9px 11px 10px}
+.ptr-line{display:flex; flex-wrap:wrap; align-items:center; gap:7px; min-width:0}
+.ptr-gap{flex:1 1 auto}
+
+/* ── The identity line ──*/
+.ptr-name{font-family:var(--sans); font-size:16px; letter-spacing:.01em; color:var(--bone)}
+.ptr-player{font-family:var(--sans); font-size:10px; text-transform:uppercase; letter-spacing:.09em;
+  color:var(--mute); max-width:14ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ptr-lv{font-family:var(--sans); font-size:10.5px; letter-spacing:.07em; color:var(--brass); white-space:nowrap}
+/* An allowed level, waiting on its player. The arrow is the whole point: the number has not moved. */
+.ptr-lv u{text-decoration:none; color:var(--bone); opacity:.9}
+.ptr-who .chip{font-size:9.5px; padding:1px 7px; margin:0}
+.ptr-wait{font-family:var(--sans); font-size:10px; color:var(--brass); white-space:nowrap}
+.ptr-x{flex:none; width:26px; height:26px; padding:0; cursor:pointer; background:var(--panel);
+  border:1px solid var(--line); border-radius:6px; color:var(--mute); font-size:11px; line-height:1}
+.ptr-x:hover{color:var(--brass); border-color:var(--brass)}
+
+/* ── Hit points and the numbers ──
+ * The bar is the thing you glance at, the number is the thing you quote, and the two buttons beside
+ * them are the thing you press forty times a session. */
+.ptr-stats{gap:12px}
+.ptr-hp{display:flex; align-items:center; gap:9px; flex:1 1 330px; min-width:280px; --hpc:var(--verdant)}
+.ptr.low  .ptr-hp{--hpc:var(--brass)}
+.ptr.crit .ptr-hp{--hpc:var(--ember)}
+.ptr.out  .ptr-hp{--hpc:var(--mute)}
+.ptr-bar{flex:1 1 auto; min-width:60px; height:9px; border-radius:5px; background:#1b2027;
+  overflow:hidden; box-shadow:inset 0 0 0 1px var(--line)}
+.ptr-bar i{display:block; height:100%; background:var(--hpc); transition:width .22s ease}
+.ptr-hpn{font-family:var(--sans); font-size:17px; color:var(--hpc); white-space:nowrap}
+.ptr-hpn em{font-style:normal; font-size:11px; color:var(--mute)}
+.ptr-hpn u{text-decoration:none; font-size:11px; color:var(--steel); margin-left:4px}
+.ptr-quick{display:flex; align-items:center; gap:4px; flex:none}
+.ptr-quick .tiny{width:52px; height:28px; padding:0 6px; text-align:center;
+  font-family:var(--sans); font-size:13px; -moz-appearance:textfield}
+.ptr-quick .tiny::-webkit-outer-spin-button,
+.ptr-quick .tiny::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.ptr-dmg,.ptr-hl{width:28px; height:28px; padding:0; cursor:pointer; border-radius:6px;
+  font-family:var(--sans); font-size:15px; line-height:1; background:var(--panel);
+  border:1px solid var(--line); color:var(--bone2)}
+.ptr-dmg:hover{border-color:var(--ember); color:#E8927C; background:rgba(192,85,63,.14)}
+.ptr-hl:hover{border-color:var(--verdant); color:#7BC2A4; background:rgba(78,140,106,.14)}
+
+.ptr-nums{display:flex; gap:4px; flex:1 1 320px; min-width:0}
+.ptr-n{flex:1 1 0; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:7px;
+  padding:3px 4px; text-align:center; display:flex; flex-direction:column; gap:1px}
+.ptr-n i{font-style:normal; font-family:var(--sans); font-size:8.5px; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ptr-n b{font-family:var(--sans); font-size:14px; color:var(--bone)}
+
+/* ── The tag line: the tracks, the conditions, what is running on them ──*/
+.ptr-tags{gap:5px}
+.ptr-t{display:flex; align-items:baseline; gap:4px; background:var(--panel); border:1px solid var(--line);
+  border-radius:20px; padding:2px 8px; font-family:var(--sans); font-size:10px; color:var(--mute)}
+.ptr-t.hot{border-color:#6d4036; color:#e4927f; background:rgba(192,85,63,.12)}
+.ptr-t i{font-style:normal; text-transform:uppercase; letter-spacing:.07em}
+.ptr-t b{font-size:12px; color:var(--bone)}
+.ptr-t.hot b{color:#f0b3a3}
+.ptr-t b em{font-style:normal; font-size:9px; color:var(--mute)}
+.ptr-t u{text-decoration:none; font-size:9.5px; opacity:.85}
+.ptr-tags .chip{margin:0; font-size:10px; padding:2px 9px}
+
+/* ── The open half ──
+ * Panels across the width of the row, each one topic, each one the DM's to write. A card grid
+ * INSIDE a row rather than a second page, so the control you press stays in sight of the number it
+ * changes. Two of them want the width: the effects form, and the ability grid. */
+.ptr-more{grid-column:1 / -1; display:grid; gap:8px; padding:10px 11px 12px;
+  grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+  background:var(--slate); border-top:1px solid var(--line)}
+.ptr-p{background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:9px 11px 11px}
+.ptr-p.wide{grid-column:1 / -1}
+.ptr-p h3{margin:0 0 8px; font-family:var(--sans); font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--brass)}
+.ptr-p h3 i{font-style:normal; font-weight:400; text-transform:none; letter-spacing:.02em;
+  color:var(--mute); margin-left:7px}
+.ptr-p h3:not(:first-child){margin-top:14px; padding-top:11px; border-top:1px solid var(--line)}
+.ptr-ctl{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.ptr-ctl .pair{display:flex; align-items:center; gap:5px}
+.ptr-ctl .lbl{font-family:var(--sans); font-size:9px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--mute)}
+.ptr-ctl .mini{margin-left:0}
+.ptr-ctl .search{flex:1 1 150px; min-width:120px}
+.ptr-ctl select.search{flex:0 1 auto}
+.ptr-chips{margin:0}
+.ptr-chips .chip{margin:3px 3px 0 0; cursor:pointer}
+.ptr-none{margin:7px 0 0; font-family:var(--sans); font-size:11px; color:var(--mute)}
+.ptr-mod{font-family:var(--sans); font-size:11px; color:var(--steel); min-width:2.2ch}
+.ptr-p .step button[disabled]{opacity:.3; cursor:default}
+
+/* The lists inside a panel — injuries, and what is running on them. */
+.ptr-injs,.ptr-fxs{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
+.ptr-inj,.ptr-fx{display:flex; align-items:center; gap:7px; font-family:var(--sans); font-size:11.5px;
+  color:var(--bone2); background:var(--slate); border:1px solid var(--line); border-radius:7px;
+  padding:3px 4px 3px 8px}
+.ptr-inj > span,.ptr-fx > span{flex:1 1 auto; min-width:0}
+.ptr-inj i,.ptr-fx i{font-style:italic; color:var(--mute); font-size:10.5px}
+.ptr-inj.healed{opacity:.55}
+.ptr-inj.healed > span{text-decoration:line-through}
+.ptr-fx b{font-family:var(--sans); color:var(--bone); font-weight:500}
+.ptr-inj .mini,.ptr-fx .mini{margin-left:0; flex:none; padding:1px 7px; font-size:10px}
+
+/* The seven ability columns: score, modifier, save. One strip rather than a table — a table would
+   put three heading rows above twelve numbers. */
+.ptr-abs{display:grid; grid-template-columns:repeat(auto-fit,minmax(74px,1fr)); gap:5px}
+.ptr-ab{display:flex; flex-direction:column; align-items:center; gap:1px; padding:5px 3px 6px;
+  background:var(--slate); border:1px solid var(--line); border-radius:8px; font-family:var(--sans)}
+.ptr-ab i{font-style:normal; font-size:8.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--mute)}
+.ptr-ab b{font-size:17px; color:var(--bone); line-height:1.1}
+.ptr-ab u{text-decoration:none; font-size:11px; color:var(--bone2)}
+.ptr-ab span{font-size:10px; color:var(--mute)}
+.ptr-ab span.prof{color:var(--brass)}
+
+/* The board's own line: the reason for the next change, and the two things you do to the whole list. */
+.ptr-head{display:flex; align-items:center; gap:8px; margin-top:4px}
+.ptr-head .search{flex:1 1 auto; min-width:0}
+.ptr-head .mini{margin-left:0; flex:none}
+
+/* Narrow. The plate goes to a corner thumbnail rather than a strip, because a 76px column out of
+   360px is a fifth of the screen spent on a picture. */
+@media (max-width:860px){
+  .ptr{grid-template-columns:52px minmax(0,1fr)}
+  .ptr-por{min-height:0; font-size:13px}
+  .ptr-nums{flex-basis:100%}
+  .ptr-hp{min-width:0; flex-basis:100%}
+  .ptr-more{grid-template-columns:1fr}
+}
+
 /* ── Odds and ends ──────────────────────────────────────────*/
-/* The board is a grid of cards and wants the window; the reading pages stay at their 920px. */
+/* The board is a list across the window; the reading pages stay at their 920px. */
 .cdx.wide{max-width:none}
 .adm-line.wide{max-width:none}
-/* One character on their own page — the grid's minmax would otherwise stretch it across the width */
-.pty.one{grid-template-columns:repeat(auto-fill,minmax(272px,340px))}
 
-/* A button that reads as a link: the jump from a card to its player, and from a player to their
+/* A button that reads as a link: the jump from a row to its player, and from a player to their
    Grimm's full page. A real <button> because it changes the view rather than going anywhere. */
 .as-link{padding:0; background:none; border:0; cursor:pointer; font:inherit; color:var(--brass);
   text-align:left}
 .as-link:hover{color:#E0B050; text-decoration:underline}
-.pty-who.as-link{font-family:var(--sans); font-size:10px; text-transform:uppercase;
+.ptr-player.as-link{font-family:var(--sans); font-size:10px; text-transform:uppercase;
   letter-spacing:.09em; color:var(--mute)}
-.pty-who.as-link:hover{color:var(--brass)}
+.ptr-player.as-link:hover{color:var(--brass)}
 
 /* The header's right-hand jump — Grimm → its holder, and back */
 .cdx-hd{gap:16px}

@@ -122,8 +122,11 @@ export const DERIVE_TIMES = [
 // return at all. So a derivation is measured against the scores as they stand MINUS anything that
 // is itself derived: one level deep, which both terminates and gets the common case right (a flat
 // +2 from a worn belt counts; a second derived effect does not pile on).
+// A granted effect counts here: its amount was frozen flat at the cast, so it is as plain as a worn
+// belt's +2 and a derivation that ignored it would read the wrong Charisma.
 function plainModifiers(ch) {
-  return [...(ch?.modifiers || []), ...itemEffects(ch)].filter(m => m && m.active !== false && !m.from);
+  return [...(ch?.modifiers || []), ...itemEffects(ch), ...grantedEffects(ch)]
+    .filter(m => m && m.active !== false && !m.from);
 }
 export function deriveValue(ch, from) {
   if (from === "prof") return proficiencyBonus(ch?.level);
@@ -185,12 +188,16 @@ export const TURN_BASE = { action: 1, bonus: 1, reaction: 1 };
 
 export function turnAllowance(ch) {
   const out = { ...TURN_BASE };
-  for (const g of ch?.grants || []) {
+  // The character's own grants, then any a seal is holding over them. Both are the same record, so
+  // the allowance never has to know which is which.
+  for (const g of [...(ch?.grants || []), ...grantedTurns(ch)]) {
     if (!g || g.active === false || !TURN_KINDS.includes(g.kind)) continue;
     out[g.kind] = (out[g.kind] || 0) + Math.max(1, num(g.n) || 1);
   }
   return out;
 }
+// Every grant the tracker should DRAW, which is the same list the allowance counts.
+export const allTurnGrants = ch => [...(ch?.grants || []), ...grantedTurns(ch)];
 
 // `used` was a set of booleans before grants existed, and a sheet saved then is still a sheet.
 export function turnUsed(ch, kind) {
@@ -1216,6 +1223,11 @@ export function attackAtLevel(ch, a) {
     // first one is not always level 1.
     ...(live?.damage ? { damage: String(live.damage) } : {}),
     ...(live?.bonus == null ? {} : { bonus: num(live.bonus) }),
+    // A step may move the ENHANCEMENT as well, which is a different thing from the bonus: it
+    // lifts the damage too. *Dreammaker's* Soul Bonded is +1 at 4th rising to +5 at 20th and says
+    // "to attack and damage" in as many words, while *The Unheld's* Standing says "the attack
+    // BONUS" and means only the to-hit. Both exist, so a step must be able to say which it is.
+    ...(live?.magic == null ? {} : { magic: num(live.magic) }),
     ...(live ? { stepAt: num(live.at) } : {}),
     // What is still coming, and when — so the row can say "2d8 at 11th" without sending anyone
     // back to the note. This is set whether or not a step is live yet, which is the whole point
@@ -1226,6 +1238,221 @@ export function attackAtLevel(ch, a) {
 // Every attack, resolved to the level the character is at. One door, so the row, the damage roll
 // and the crit all agree about which die this character is holding.
 export const attackList = ch => (ch?.attacks || []).map(a => attackAtLevel(ch, a));
+
+// ── What an attack is MADE OF ───────────────────────────────────────────
+// CS-021 / CS-025. Until now an attack row was a number somebody worked out at the table and a
+// dice expression with their modifier already written into it — `+9 to hit, 1d8+5`. Both go stale
+// the moment anything moves: a level, a score, a +1 sword picked up, a round of Bless. It was the
+// one row on this sheet that nothing recomputed, and it LOOKED authoritative, which is worse than
+// looking blank.
+//
+// So a row now says what it is made of and the engine does the arithmetic:
+//
+//   ability        which modifier drives it — an ability id, `finesse` (the better of Strength and
+//                  Dexterity, chosen fresh every time), `verum` (the highest of the six, what a
+//                  seal rolls), or "" for none
+//   proficient     whether the proficiency bonus applies
+//   magic          the weapon's enhancement: it lifts the to-hit AND the damage, which is the one
+//                  thing a plain `bonus` could never say, because it only ever reached one of them
+//   bonus          whatever is left that nothing else models — and, on a legacy row, the WHOLE
+//                  to-hit
+//   item           the name of the item this attack comes out of, if any
+//   spell          a spell attack, so it answers to `spellAttack` / `spellDamage` as well
+//   damageAbility  false to keep the ability modifier off the damage — a bow you are not drawing,
+//                  an off-hand swing without the fighting style
+//   versatile      a second damage expression: two-handed, or a weapon's other form
+//   extra          riders — [{ dice, type, label }], each its own damage type
+//
+// 🔴 EVERY ONE OF THEM IS OPTIONAL, AND A ROW CARRYING NONE BEHAVES EXACTLY AS IT DID BEFORE:
+// `bonus` is the whole to-hit, `damage` is rolled as typed, and nothing is added that was not
+// added yesterday. That is not caution for its own sake — the party's sheets are full of rows
+// written the old way, with the modifier already inside the number, and a migration that guessed
+// which part of a +9 was Dexterity would hand somebody the wrong to-hit in the middle of a fight.
+// The row says so itself and the player upgrades it when they next open it.
+export const ATTACK_ABILITIES = [
+  { id: "", name: "Nothing", short: "—",
+    hint: "No ability. Whatever you type below is the whole of the to-hit — how every row written before this worked." },
+  ...ABILITIES.map(id => ({ id, name: ABILITY_NAME[id], short: ABILITY_NAME[id].slice(0, 3),
+    hint: `Your ${ABILITY_NAME[id]} modifier.` })),
+  { id: "finesse", name: "Finesse", short: "Fin",
+    hint: "The better of Strength and Dexterity, read fresh every time — so it follows an ASI instead of going stale." },
+  // The pairs the vault actually asks for. Any other is still sayable by hand as `best:a,b` — see
+  // `bestOfIds` — these are only the ones worth a line in the menu.
+  { id: "best:dex,int", name: "Dexterity or Intelligence", short: "D/I",
+    hint: "Whichever of the two is higher, read fresh every time — Dreammaker's ruling, for a blade that is also a focus." },
+  { id: "best:str,cha", name: "Strength or Charisma", short: "S/C",
+    hint: "Whichever of the two is higher, read fresh every time." },
+  { id: "verum", name: "Verum", short: "Ver",
+    hint: "The highest of your six, which is what a seal attack rolls." },
+];
+export const ATTACK_ABILITY_BY_ID = Object.fromEntries(ATTACK_ABILITIES.map(a => [a.id, a]));
+
+// Which ability this row is ACTUALLY rolling, and what to call it in a breakdown. Finesse and
+// Verum are resolved here rather than stored, which is the whole point of them: a row that says
+// "finesse" is still right the morning after Strength overtakes Dexterity.
+// "The better of two" is not only a Finesse weapon. *Dreammaker* is an Aethkasar — in no weapon
+// table — and Juan's ruling is that it swings on **Dexterity or Intelligence**. Rather than add a
+// second hard-coded pair, `best:<id>,<id>…` names whichever abilities a weapon answers to, and
+// `finesse` is simply the one that earned a word of its own. Resolved every time, like finesse, so
+// it follows an ASI instead of freezing whichever was higher the day somebody wrote the note.
+export const bestOfIds = id => String(id || "").startsWith("best:")
+  ? String(id).slice(5).split(",").map(s => s.trim().toLowerCase()).filter(x => ABILITIES.includes(x))
+  : [];
+// Every form `ability` may take: one of the listed ids, or a well-formed `best:` of real abilities.
+// The importer and the dialog both ask HERE, so a note and a menu cannot disagree about what is
+// sayable.
+export const isAttackAbility = id =>
+  !id || !!ATTACK_ABILITY_BY_ID[id] || bestOfIds(id).length > 1;
+
+export function attackAbility(ch, a) {
+  const id = String(a?.ability || "");
+  if (id === "finesse") {
+    const str = abilityModifier(ch, "str"), dex = abilityModifier(ch, "dex");
+    const best = dex > str ? "dex" : "str";
+    return { id: best, mod: Math.max(str, dex), label: `${ABILITY_NAME[best]} modifier (finesse)` };
+  }
+  const pair = bestOfIds(id);
+  if (pair.length) {
+    // Ties go to the one named first, which is the only stable answer and keeps the label honest.
+    const best = pair.reduce((x, y) => (abilityModifier(ch, y) > abilityModifier(ch, x) ? y : x));
+    return { id: best, mod: abilityModifier(ch, best),
+      label: `${ABILITY_NAME[best]} modifier (the better of ${pair.map(x => ABILITY_NAME[x]).join(" and ")})` };
+  }
+  if (id === "verum") return { id: "verum", mod: verumModifier(ch), label: "Verum — your highest modifier" };
+  if (!ABILITIES.includes(id)) return { id: "", mod: 0, label: "" };
+  return { id, mod: abilityModifier(ch, id), label: `${ABILITY_NAME[id]} modifier` };
+}
+
+// The item an attack comes out of, if it names one. Matched on NAME, which is the handle
+// `writeImported` already uses to keep an imported weapon's attacks together — an index would move
+// the first time anything else was unequipped, and silently point at the wrong sword.
+export function attackItem(ch, a) {
+  const want = String(a?.item || "").trim().toLowerCase();
+  if (!want) return null;
+  const r = allItems(ch).find(x => String(x.item?.name || "").trim().toLowerCase() === want);
+  if (!r) return { item: null, where: "", slot: null, active: false, missing: true, name: String(a.item) };
+  return { ...r, active: itemIsActive(ch, r.item, r.where), missing: false, name: r.item.name };
+}
+
+// Whether this attack is in your hands. A row that names no item is ALWAYS armed: nothing on the
+// sheet can say otherwise, and a row that refused to roll would be worse than one that does.
+// A row that names an item follows the item — which is the whole bargain of linking one, and the
+// same rule `itemIsActive` already applies to a worn ring's effects.
+export function attackArmed(ch, a) {
+  const link = attackItem(ch, a);
+  return !link || link.active;
+}
+
+// Which modifier targets a given row answers to. `attack` and `damage` are every attack and every
+// damage roll; the spell-specific pair reaches only a row that says it is a spell attack, which is
+// the distinction CS-090 drew for the spell attack bonus and the same one applies here.
+export const attackHitTargets = a => (a?.spell ? ["attack", "spellAttack"] : ["attack"]);
+export const attackDamageTargets = a => (a?.spell ? ["damage", "spellDamage"] : ["damage"]);
+
+// The to-hit, and every term in it by name. ONE door: the row, the tooltip and the dialog that
+// rolls it all read this, so none of them can disagree about what the number is.
+export function attackBonus(ch, a) {
+  const mods = activeModifiers(ch);
+  const ability = attackAbility(ch, a);
+  const armed = attackArmed(ch, a);
+  const magic = num(a?.magic);
+  const parts = [];
+  if (ability.id) parts.push({ reason: ability.label, amount: ability.mod });
+  if (a?.proficient) parts.push({ reason: "Proficiency bonus", amount: proficiencyBonus(ch?.level) });
+  // An enhancement you are not holding is not an enhancement. The term is dropped rather than
+  // zeroed so the breakdown does not carry a line saying the sword gives +0.
+  if (armed && magic) parts.push({ reason: `${a?.item || a?.name || "Magic"} — enhancement`, amount: magic });
+  if (num(a?.bonus)) {
+    parts.push({ reason: ability.id || a?.proficient || magic ? "Extra" : "Attack bonus", amount: num(a.bonus) });
+  }
+  for (const t of attackHitTargets(a)) parts.push(...contributions(mods, t));
+  return {
+    total: parts.reduce((t, p) => t + num(p.amount), 0),
+    parts, armed, ability,
+    // A row that carries none of the new fields. The view says so quietly rather than correcting
+    // it, because the number in it may be perfectly right and only its owner knows.
+    legacy: !ability.id && !a?.proficient && !magic && !a?.item,
+  };
+}
+
+// ── The damage, in the groups a table actually calls out ────────────────
+// "Seven slashing and four fire" is how damage is said out loud, and it is also the only shape
+// that survives contact with resistance — one number cannot be half-resisted. So damage comes back
+// as GROUPS: a dice expression, a flat amount and a type each.
+//
+// The ability modifier, the enhancement and the general `damage` effects all land on the FIRST
+// group, which is the weapon's own damage. That is 5e's rule and the reason riders are their own
+// rows at all: a rider's +1d6 of fire is not lifted by your Strength, and doubling it on a crit
+// must not double your Strength with it.
+// ── A rider that only sometimes applies ─────────────────────────────────
+// Three of the four weapons this was built for do NOT add their dice every swing: Shadow Strike's
+// 6d6 wants advantage, Orcish Fury's 1d6 wants you at half hit points, Vantaclash's 3d6 wants a
+// target that has not seen you. A rider that rolled every time would quietly inflate every attack
+// those characters make, which is worse than the prose it replaced.
+//
+// So a rider may carry a `when`, in the player's own words, exactly as an item effect does
+// (CS-092) — and like one, IT STARTS OFF. The difference is where it is armed. An item's
+// condition is a standing fact about the fight *(the sun is up, you are holding a shield)* and
+// lives on a switch in the Gear tab; a rider's is a fact about THIS SWING *(you had advantage on
+// it)*, so a switch would be left on and forgotten. It is offered at the roll instead, as a
+// button on the damage dialog that rolls again with it counted.
+export const conditionalRiders = a => (Array.isArray(a?.extra) ? a.extra : [])
+  .map((e, i) => ({ key: `x${i}`, dice: String(e?.dice || "").trim(),
+    type: String(e?.type || ""), label: String(e?.label || ""), when: String(e?.when || "") }))
+  .filter(r => r.dice && r.when);
+
+// `armed` names the conditional riders counted this time, by key. Nothing else consults it, so a
+// row with no conditional rider behaves identically whether it is passed or not.
+export function damageGroups(ch, a, { versatile = false, armed = [] } = {}) {
+  const on = new Set(armed || []);
+  const groups = [];
+  const alt = versatile && a?.versatile;
+  const base = String((alt ? a.versatile : a?.damage) || "").trim();
+  const ability = attackAbility(ch, a);
+  // ⚠️ `inHand` is whether the WEAPON is in a slot; `armed` above is which conditional riders the
+  // caller asked for. Two different questions that both wanted the word "armed".
+  const inHand = attackArmed(ch, a);
+  const magic = num(a?.magic);
+  const why = [];
+  let flat = 0;
+  const add = (reason, amount) => { if (num(amount)) { flat += num(amount); why.push({ reason, amount: num(amount) }); } };
+  // Only when the row names an ability. A legacy row has the modifier inside its dice expression
+  // already, and adding it here would hand that character their Strength twice.
+  if (ability.id && a?.damageAbility !== false) add(ability.label, ability.mod);
+  if (inHand && magic) add(`${a?.item || a?.name || "Magic"} — enhancement`, magic);
+  for (const t of attackDamageTargets(a)) {
+    for (const c of contributions(activeModifiers(ch), t)) add(c.reason || "Damage modifier", c.amount);
+  }
+  if (base || flat) {
+    groups.push({ key: "base", dice: base, flat, type: String(a?.type || ""),
+      label: alt ? String(a.versatileName || "Two-handed") : "", why });
+  }
+  (Array.isArray(a?.extra) ? a.extra : []).forEach((e, i) => {
+    const dice = String(e?.dice || "").trim();
+    if (!dice) return;
+    const key = `x${i}`;
+    const when = String(e?.when || "");
+    // A conditional rider is left out until it is asked for. Silence is the right default: a
+    // rider you forgot to switch off is a lie about every attack after it.
+    if (when && !on.has(key)) return;
+    groups.push({ key, dice, flat: 0, type: String(e?.type || ""),
+      label: String(e?.label || ""), when, why: [] });
+  });
+  return groups;
+}
+
+// One group as an expression the dice parser will take. A group with no dice is still a number.
+export function groupExpr(g) {
+  const flat = num(g?.flat);
+  const dice = String(g?.dice || "").trim();
+  if (!dice) return String(flat);
+  return flat ? `${dice}${flat > 0 ? "+" : ""}${flat}` : dice;
+}
+
+// What the row PRINTS: compact, because it sits in a 110-pixel button — "1d8+5 slashing · +1d6
+// fire". The prose belongs on the tooltip.
+export const damageSays = (ch, a, opts) => damageGroups(ch, a, opts)
+  .map(g => `${groupExpr(g)}${g.type ? ` ${g.type}` : ""}`).join(" · ");
 
 // Every conditional effect on the character, armed or not, with the address that toggles it. The
 // Gear tab reads this to draw one switch per condition.
@@ -1251,9 +1478,114 @@ export function conditionalEffects(ch) {
 // It is also where a DERIVED amount becomes a number. Every total, tooltip and roll breakdown on
 // this sheet comes through here, so resolving it once at this door means "equal to my Charisma
 // modifier" reaches all of them and none of them had to learn what `from` means.
-export const activeModifiers = ch => [...(ch?.modifiers || []), ...itemEffects(ch)]
-  .map(m => (m && m.from ? { ...m, amount: modifierAmount(ch, m) } : m));
+// ── What somebody else's seal is doing to you ───────────────────────────
+// A benefit granted by another player's seal. It does NOT live in this character's sheet: it is a
+// row on the server, owned by the cast that made it, and `store.derived()` hangs the open ones on
+// `ch.granted` before the engine ever sees them.
+//
+// WHY IT IS NOT IN THE SHEET. The sheet autosaves itself whole, on a debounce, against a version.
+// A caster writing into the recipient's `modifiers` would either lose whatever the recipient was
+// editing or hand them a 409 they did nothing to cause — four times over, mid-initiative, every
+// time somebody casts Bless. So the recipient's JSON is never touched and the two lists meet here
+// instead, exactly as a worn item's effects do.
+//
+// `amount` is already flat: it was resolved against the CASTER's sheet at the moment of the cast
+// and frozen (see targets.js `resolveBenefit`), so nothing here re-derives it against the wrong
+// character — and the number stays true if the caster later levels, or drops, or dies.
+// A benefit says what KIND it is, and each kind lands through the structure that already models it
+// — a modifier here, a resistance in defenceRecords, an extra Action in turnAllowance. Healing and
+// temporary hit points are not here at all: they are one-time, so they are offered and the
+// recipient's own client writes them to their own sheet. See `pendingGrants`.
+const grantsOfKind = (ch, kind) =>
+  (ch?.granted || []).filter(g => g && (g.kind || "modifier") === kind);
+
+export function grantedEffects(ch) {
+  return grantsOfKind(ch, "modifier").map(g => ({
+    id: `gr:${g.id}`,
+    target: g.target,
+    amount: num(g.amount),
+    // The whole reason the feature is worth having is that six weeks later somebody can say where
+    // the +2 came from. Who cast it is part of that, and so is the formula behind a derived one.
+    reason: [g.label, g.player, g.formula].filter(Boolean).join(" — "),
+    rounds: g.rounds ?? null,
+    active: true,
+    source: "granted",
+    grantedId: g.id,
+    concentrationGroup: g.concentrationGroup || "",
+  }));
+}
+
+export const activeModifiers = ch =>
+  [...(ch?.modifiers || []), ...itemEffects(ch), ...grantedEffects(ch)]
+    .map(m => (m && m.from ? { ...m, amount: modifierAmount(ch, m) } : m));
 export const isItemModifier = m => typeof m?.id === "string" && m.id.startsWith("itm:");
+export const isGrantedModifier = m => typeof m?.id === "string" && m.id.startsWith("gr:");
+
+// A resistance somebody's seal is holding over you. Read exactly like a worn item's defence: it
+// arrives when the seal lands and leaves when it ends, with no record left on the sheet to go
+// stale — which is why `ownDefenceRecords` must drop it as carefully as it drops an item's.
+export function grantedDefences(ch) {
+  return grantsOfKind(ch, "defence").map(g => ({
+    id: `grdef:${g.id}`,
+    type: String(g.payload?.dtype || "").toLowerCase(),
+    standing: g.payload?.standing,
+    why: [g.label, g.player].filter(Boolean).join(" — "),
+    rounds: g.rounds ?? null, active: true, source: "granted", grantedId: g.id,
+  })).filter(r => DAMAGE_BY_ID[r.type] && STANDING_BY_ID[r.standing]);
+}
+
+// An Action, a Reaction, a Quick — the action economy a seal can hand somebody for a few rounds.
+// Same record `ch.grants` already holds, so turnAllowance counts it without knowing where it came
+// from, and the tracker draws it like any other.
+export function grantedTurns(ch) {
+  return grantsOfKind(ch, "turn").map(g => ({
+    id: `grturn:${g.id}`,
+    kind: g.payload?.turnKind,
+    n: Math.max(1, num(g.payload?.n) || 1),
+    why: [g.label, g.player].filter(Boolean).join(" — "),
+    rounds: g.rounds ?? null, active: true, source: "granted", grantedId: g.id,
+  })).filter(g => TURN_KINDS.includes(g.kind));
+}
+
+// The one-time ones, still waiting to be taken: healing, and temporary hit points. Not merged into
+// anything — nothing about the character is different until the player presses the button, because
+// a heal is a choice about when and temp HP is a choice about whether.
+export const pendingGrants = ch =>
+  (ch?.granted || []).filter(g => g && (g.kind === "heal" || g.kind === "tempHp"));
+
+// ── Advantage ───────────────────────────────────────────────────────────
+// Advantage is not a number, so it is not a modifier — but it is pointed at the SAME things a
+// modifier is pointed at, and that is what makes it fit: "advantage on Perception" and
+// "+2 Perception" name one target between them. So it carries a MOD_TARGET_ID and nothing else,
+// because the second d20 is the amount.
+//
+// WHAT A ROLL ASKS FOR. A skill check answers to three scopes at once — this skill, every skill,
+// every check — exactly as `skillContributions` reads three. The caller names them; this only says
+// which of the character's grants are pointed at any of them. Nothing here rolls anything.
+export function grantedAdvantage(ch) {
+  const ok = new Set(MOD_TARGET_IDS);
+  return (ch?.granted || [])
+    .filter(g => g && g.kind === "advantage" && ok.has(g.target))
+    .map(g => ({
+      id: `gradv:${g.id}`, target: g.target,
+      why: [g.label, g.player].filter(Boolean).join(" — "),
+      rounds: g.rounds ?? null, active: true, source: "granted", grantedId: g.id,
+    }));
+}
+export function advantageOn(ch, ...scopes) {
+  const want = new Set(scopes.flat().filter(Boolean));
+  return grantedAdvantage(ch).filter(a => want.has(a.target));
+}
+// The scopes each kind of d20 roll answers to, written once so the roll dialog and anything that
+// later asks "would this have advantage" cannot disagree. Mirrors `skillContributions`.
+export const ADVANTAGE_SCOPES = {
+  ability: id => [`ability:${id}`, CHECK_ALL],
+  save: id => [`save:${id}`, SAVE_ALL],
+  skill: id => [`skill:${id}`, SKILL_ALL, CHECK_ALL],
+  initiative: () => ["initiative", CHECK_ALL],   // initiative is a Dexterity check
+  attack: () => ["attack"],
+  spellAttack: () => ["spellAttack", "attack"],
+};
 
 export function spendCharges(it, n = 1) {
   const c = itemCharges(it);
@@ -1531,7 +1863,7 @@ export function defenceRecords(ch) {
   const d = ch?.defences;
   const ok = r => r && r.active !== false && STANDING_BY_ID[r.standing]
     && DAMAGE_BY_ID[String(r.type || "").toLowerCase()];
-  const worn = itemDefences(ch);
+  const worn = [...itemDefences(ch), ...grantedDefences(ch)];
   if (Array.isArray(d)) return [...d.filter(ok).map(r => ({ ...r, type: String(r.type).toLowerCase(),
     rounds: r.rounds ?? null })), ...worn];
   // A sheet saved before a defence could run out: one standing per type, keyed by the type, and
@@ -1545,11 +1877,14 @@ export function defenceRecords(ch) {
   })).filter(ok), ...worn];
 }
 
-// The character's OWN records, without what their gear is granting. EVERY WRITE BACK TO THE SHEET
-// MUST GO THROUGH THIS. Writing `defenceRecords` back would copy an item's defence onto the
-// character, where it would survive the armour coming off — which is precisely the failure CS-104
-// exists to end, reintroduced by the save path instead of the read path.
-export const ownDefenceRecords = ch => defenceRecords(ch).filter(r => r.source !== "item");
+// The character's OWN records, without what their gear is granting — or what somebody's seal is.
+// EVERY WRITE BACK TO THE SHEET MUST GO THROUGH THIS. Writing `defenceRecords` back would copy an
+// item's defence onto the character, where it would survive the armour coming off — which is
+// precisely the failure CS-104 exists to end, reintroduced by the save path instead of the read
+// path. A GRANTED defence is the same trap with a second door: it would survive the seal ending,
+// and the player would have a resistance nobody can account for and nobody can remove.
+export const ownDefenceRecords = ch =>
+  defenceRecords(ch).filter(r => r.source !== "item" && r.source !== "granted");
 
 // What this character IS against one type, once every record that touches it has had its say.
 //

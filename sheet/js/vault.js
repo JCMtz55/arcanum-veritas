@@ -445,15 +445,54 @@ export function normalizeBlock(raw, { page = "" } = {}) {
       }
       const dmg = line(s.damage ?? s.dmg, 40);
       const bonus = s.bonus == null ? null : int(s.bonus, -20, 30, 0);
-      if (!dmg && bonus == null) continue;
-      steps.push({ at, ...(dmg ? { damage: dmg } : {}), ...(bonus == null ? {} : { bonus }) });
+      // `magic` on a step lifts the damage as well as the to-hit; `bonus` lifts only the to-hit.
+      // Dreammaker needs the first, The Unheld the second, and the words of each entry say which.
+      const magic = s.magic == null ? null : int(s.magic ?? s.enhancement, -5, 10, 0);
+      if (!dmg && bonus == null && magic == null) continue;
+      steps.push({ at, ...(dmg ? { damage: dmg } : {}), ...(bonus == null ? {} : { bonus }),
+        ...(magic == null ? {} : { magic }) });
     }
+    // What the attack is MADE of (CS-021). A note that says `"ability": "dex", "proficient": true,
+    // "magic": 2` gets a row that follows its owner's Dexterity and proficiency instead of a
+    // number frozen at whatever level the note was written for. A block that says none of them
+    // imports exactly as it always did — `bonus` is the whole to-hit.
+    // A listed id, or a `best:dex,int` pair — the engine owns which forms are real, so a note can
+    // never ask for one the sheet cannot resolve.
+    const asked = line(a.ability, 40).toLowerCase();
+    const ability = rules.isAttackAbility(asked) ? asked : "";
+    if (a.ability && !ability) warn.push(`${aName} asks for an ability the sheet does not have, so none is set.`);
+    // Riders: extra damage of their own type, which eight weapons in the vault word as "plus 1d6
+    // fire". They were going into the prose and out of the roll before this.
+    const extra = [];
+    for (const x of (Array.isArray(a.extra) ? a.extra : []).slice(0, 6)) {
+      if (!x || typeof x !== "object") continue;
+      const dice = line(x.damage ?? x.dice ?? x.dmg, 24);
+      if (!dice) continue;
+      // `when` keeps a rider OUT of the damage until it is asked for at the roll. Four weapons
+      // in this vault word their extra dice as "when you attack with advantage" or "while you
+      // are at half hit points" — without it they would land on every swing.
+      const when = line(x.when ?? x.condition, 120);
+      extra.push({ dice, type: line(x.type ?? x.damageType, 24), label: line(x.label ?? x.name, 40),
+        ...(when ? { when } : {}) });
+    }
+    const versatile = line(a.versatile ?? a.twoHanded, 40);
     attacks.push({
       id: `${atkPrefix}${slug(aName)}`,
       name: aName,
       bonus: int(a.bonus, -20, 30, 0),
       damage,
       type: line(a.type ?? a.damageType, 24),
+      // The item this came out of, so equipping and unequipping it arms the row. The note is the
+      // item's own page, so the item is this one — nothing to guess.
+      item: name,
+      ...(ability ? { ability } : {}),
+      ...(bool(a.proficient) ? { proficient: true } : {}),
+      ...(bool(a.spell ?? a.spellAttack) ? { spell: true } : {}),
+      ...(ability && a.damageAbility === false ? { damageAbility: false } : {}),
+      ...(int(a.magic ?? a.enhancement, -5, 10, 0) ? { magic: int(a.magic ?? a.enhancement, -5, 10, 0) } : {}),
+      ...(versatile ? { versatile } : {}),
+      ...(versatile && line(a.versatileName, 24) ? { versatileName: line(a.versatileName, 24) } : {}),
+      ...(extra.length ? { extra } : {}),
       ...(steps.length ? { steps: steps.sort((x, y) => x.at - y.at) } : {}),
     });
   }

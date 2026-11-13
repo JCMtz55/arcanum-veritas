@@ -15,6 +15,10 @@ import * as rules from "../sheet/js/rules.js";
 // the list of which painting sits behind which plate should exist once. Pure data and four
 // functions — view.js re-exports these, but view.js touches the DOM and cannot be imported here.
 import * as plates from "../sheet/js/plates.js";
+// The effect-target menu and the rules for one seal's granted benefit. Lifted out of view.js for
+// this exact reason: the Arcanum builder is plain <script> files that cannot import a module, so it
+// asks for the list over the wire and the server is what answers.
+import * as targets from "../sheet/js/targets.js";
 // Reading a Fight Club compendium XML. The same module sheet/tools/build-srd.mjs uses offline, so a
 // class the DM imports tonight is shaped exactly like the SRD classes that shipped with the repo.
 import { convert as convertCompendium, KINDS as COMPENDIUM_KINDS } from "../sheet/js/fc5e.mjs";
@@ -1150,7 +1154,10 @@ function publicCharacter(row) {
 
 // The character as rules.js wants it: the DM's columns win over anything the JSON happens to hold,
 // so a stale `level` left in an old save can never beat the column the DM set.
-function forRules(row) {
+// `granted` is what another player's seal is doing to them. It comes from its own table rather than
+// the sheet, so it has to be handed in — and it MUST be, or the board's AC and the player's sheet
+// disagree about the same character, which is the one thing this function exists to prevent.
+function forRules(row, granted = []) {
   const s = parseSheet(row);
   return {
     ...rules.blankCharacter(), ...s,
@@ -1158,14 +1165,15 @@ function forRules(row) {
     level: row.level, fate: row.fate,
     honor: { order: row.honor_order, chaos: row.honor_chaos },
     morality: { good: row.morality_good, evil: row.morality_evil },
+    granted,
   };
 }
 
 // The condensed line the DM's party board reads: what matters mid-combat and nothing else. Computed
 // here rather than in the browser so every card agrees, and so no part of a player's private notes
 // rides along with it.
-function partyCard(row, displayName) {
-  const ch = forRules(row);
+function partyCard(row, displayName, granted = []) {
+  const ch = forRules(row, granted);
   const injuries = Array.isArray(ch.injuries) ? ch.injuries.length : 0;
   const unhealed = Array.isArray(ch.injuries) ? ch.injuries.filter(i => i && !i.healed).length : 0;
   const de = rules.dreamExhaustion(ch.dreamExhaustion);
@@ -1194,8 +1202,47 @@ function partyCard(row, displayName) {
     fate: row.fate,
     unspent: { honor: row.honor_unspent, morality: row.morality_unspent },
     conditions: Array.isArray(ch.conditions) ? ch.conditions : [],
+    // ── What the row opens onto ──
+    // The board used to send exactly what fitted on a card. A row that expands asks four more
+    // questions of the same sheet — what are their numbers, what are they carrying, where are their
+    // axes, what are they still owed — and every one of them is answered here, by the same engine,
+    // rather than by the DM alt-tabbing to the player's own sheet.
+    prof: rules.proficiencyBonus(row.level),
+    abilities: Object.fromEntries(rules.ABILITIES.map(id => [id, {
+      score: rules.abilityScore(ch, id),
+      mod: rules.abilityModifier(ch, id),
+      save: rules.saveTotal(ch, id),
+      proficient: rules.saveProficient(ch, id),
+    }])),
+    hitDice: (({ pool, total, used, left }) => ({ pool, total, used, left }))(rules.hitDiceState(ch)),
+    // The four sub-scores, their sums and the modifier each side of each axis is worth. A board that
+    // showed Order 4 / Chaos 6 and left the DM to work out the +2 would be showing bookkeeping.
+    honor: { order: row.honor_order, chaos: row.honor_chaos,
+             total: rules.honorTotal({ order: row.honor_order, chaos: row.honor_chaos }),
+             orderMod: rules.axisModifier({ order: row.honor_order, chaos: row.honor_chaos }, "order"),
+             chaosMod: rules.axisModifier({ order: row.honor_order, chaos: row.honor_chaos }, "chaos") },
+    morality: { good: row.morality_good, evil: row.morality_evil,
+                total: rules.moralityTotal({ good: row.morality_good, evil: row.morality_evil }),
+                goodMod: rules.axisModifier({ good: row.morality_good, evil: row.morality_evil }, "good"),
+                evilMod: rules.axisModifier({ good: row.morality_good, evil: row.morality_evil }, "evil") },
+    corruptionSave: rules.corruptionSaveModifier({
+      order: row.honor_order, chaos: row.honor_chaos, good: row.morality_good, evil: row.morality_evil }),
+    // The dice somebody handed them, the injuries by name, and what the DM has running on them —
+    // each with the id its own control needs, so the row can take one away as well as show it.
+    inspiration: rules.inspirationHeld(ch)
+      .map(d => ({ id: d.id || "", die: d.die, rounds: d.rounds ?? null, why: d.why || "" })),
+    injuryList: (Array.isArray(ch.injuries) ? ch.injuries : []).filter(Boolean).map((i, n) => ({
+      id: i.id || "", name: i.name || `Injury ${n + 1}`, healed: !!i.healed, why: i.why || "" })),
+    effects: granted.map(g => ({
+      id: g.id ?? null, label: g.label, player: g.player || "", rounds: g.rounds ?? null,
+      says: targets.benefitSays(g), fromDm: !g.player })),
     round: ch.round, inCombat: !!ch.inCombat,
     activeModifiers: (ch.modifiers || []).filter(m => m && m.active !== false).length,
+    // What another player's seal is doing to them. Counted separately from their own modifiers
+    // because the DM asking "why is their AC 21" wants to know it came from somebody else — and
+    // `grantedFrom` names which seal and which caster, so the answer is on the card.
+    granted: granted.length,
+    grantedFrom: [...new Set(granted.map(g => `${g.label}${g.player ? ` (${g.player})` : ""}`))].join(", "),
     updatedAt: row.updated_at,
   };
 }
@@ -1240,7 +1287,33 @@ async function partyBoard() {
               WHERE k.character_id = c.id AND k.consumed_at IS NULL) AS open_unlocks
        FROM characters c JOIN users u ON u.id = c.user_id
       WHERE c.archived = false ORDER BY u.display_name, c.id`);
-  return rows.map(r => partyCard(r, r.display_name));
+
+  // Every open granted effect at the table, in one query rather than one per card. They are handed
+  // to the engine, not merely counted: a board that showed AC 10 beside a sheet showing AC 12 would
+  // be worse than a board that said nothing at all.
+  const { rows: fx } = await db.query(
+    `SELECT e.id, e.character_id, e.label, e.formula, e.kind, e.payload, e.target, e.amount, e.rounds,
+            e.concentration_group, fc.name AS caster_name
+       FROM character_effects e
+       LEFT JOIN characters fc ON fc.id = e.from_character_id
+       JOIN characters c ON c.id = e.character_id
+      WHERE c.archived = false AND e.ended_at IS NULL AND e.dismissed_at IS NULL
+        AND e.applied_at IS NULL
+      ORDER BY e.id`);
+  const byCharacter = new Map();
+  for (const r of fx) {
+    if (!byCharacter.has(r.character_id)) byCharacter.set(r.character_id, []);
+    byCharacter.get(r.character_id).push({
+      // The id rides along so the board can END one. Everything else here is what the engine needs
+      // to merge it; this is the one field that exists for the interface.
+      id: r.id,
+      label: r.label, formula: r.formula, player: r.caster_name || "",
+      kind: r.kind || "modifier", payload: safeJson(r.payload),
+      target: r.target, amount: r.amount, rounds: r.rounds,
+      concentrationGroup: r.concentration_group,
+    });
+  }
+  return rows.map(r => partyCard(r, r.display_name, byCharacter.get(r.id) || []));
 }
 // Registered BEFORE "/api/characters/:id", or ":id" would swallow "party" and answer 404 for the DM.
 app.get("/api/characters/party", requireUser, requireDm, async (req, res) =>
@@ -1415,6 +1488,209 @@ app.put("/api/characters/:id/fate", requireUser, requireDm, async (req, res) => 
   res.json({ character: publicCharacter(rows[0]) });
 });
 
+// ── What the DM may set ON THE SHEET ────────────────────────
+// Everything above writes a COLUMN the DM owns. The three routes below reach into the sheet JSON,
+// which is the player's own document, and that is a deliberate exception rather than a loosening.
+//
+// The reason is the table. The DM is the one holding the damage roll, and a board that shows hit
+// points but cannot change them is a board that gets read once and then replaced by "Rory, you're
+// on 38" shouted across the room. Wounds, Exhaustion and a condition are adjudications — the DM
+// decides them out loud and then somebody has to type them.
+//
+// So it is narrow, and the narrowness is the design:
+//
+//   * A WHITELIST of keys, each bounded by the engine's own constants. A key not named here is a
+//     400, never a silent no-op — a typo should fail loudly rather than look like it worked.
+//   * `version` is bumped, so a player with that sheet open is TOLD it changed somewhere else and
+//     offered the server's copy, instead of quietly saving their stale hit points back over it
+//     (CS-004). This is also why the sheet's own poller re-reads these keys: see store.js.
+//   * Every change lands in character_events with the actor, the before and the after, exactly as
+//     a level or a Dream score does. Nothing the DM does here is anonymous.
+//
+// What is NOT reachable from here, on purpose: abilities, classes, the inventory, the spellbook,
+// the journal — anything that is a player's authorship rather than a table adjudication.
+const vitalStr = (v, n) => String(v ?? "").trim().slice(0, n);
+const vitalId = (v, prefix) => vitalStr(v, 40) || `${prefix}:${randomBytes(4).toString("hex")}`;
+
+// A condition keeps its engine id when it names one of the campaign's four rewritten conditions, so
+// the sheet does not stack a rewritten condition on its 5e namesake (RES-08). Anything else is a
+// free-text condition, which is what the sheet's own "+ condition" writes.
+const cleanConditions = list => (Array.isArray(list) ? list : []).map(c => {
+  const raw = typeof c === "string" ? { name: c } : (c || {});
+  const known = rules.CONDITIONS[vitalStr(raw.id, 40)] || rules.CONDITIONS[vitalStr(raw.name, 40).toLowerCase()];
+  const name = vitalStr(known ? known.name : raw.name, 40);
+  if (!name) return null;
+  return { id: known ? known.id : vitalId(raw.id, "x"), name };
+}).filter(Boolean).slice(0, 24);
+
+// An injury is a named thing that heals, not a counter: the DCs read the UNHEALED ones, and the
+// sheet's own list is what the player reads back later.
+const cleanInjuries = list => (Array.isArray(list) ? list : []).map(i => {
+  if (!i || typeof i !== "object") return null;
+  return { id: vitalId(i.id, "inj"), name: vitalStr(i.name, 80) || "Injury",
+           why: vitalStr(i.why, 160), healed: !!i.healed };
+}).filter(Boolean).slice(0, 24);
+
+// `{ id, die, rounds, why, active }` — the shape rules.js counts down through tickTimed with the
+// modifiers and the turn grants. `rounds: null` means until used, which is what a DM's nod is.
+const cleanInspiration = list => (Array.isArray(list) ? list : []).map(d => {
+  const die = vitalStr(d?.die, 4);
+  if (!rules.INSPIRATION_DICE.includes(die)) return null;
+  return { id: vitalId(d?.id, "insp"), die,
+           rounds: int(d?.rounds, 1, 100) ? d.rounds : null,
+           why: vitalStr(d?.why, 60), active: d?.active !== false };
+}).filter(Boolean).slice(0, 12);
+
+// The eight keys above, read back. This is what makes the board's writes ARRIVE: a player's sheet
+// holds its own JSON and never re-reads it, so without this a DM's "you're on 38" would sit in the
+// database until the player reloaded, and their next autosave would be a conflict rather than a
+// correction. Small on purpose — it is polled beside the unlocks and the granted effects, and the
+// one thing it must not do is send a whole sheet every five seconds.
+//
+// `version` is here so the client can tell "nothing has changed" from "something has", without
+// comparing eight values itself. Not DM-only: it is the player's OWN sheet they are reading.
+const VITAL_KEYS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
+                    "conditions", "injuries", "inspiration"];
+
+app.get("/api/characters/:id/vitals", requireUser, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const sheet = parseSheet(row);
+  res.json({
+    version: row.version,
+    vitals: Object.fromEntries(VITAL_KEYS.map(k => [k, sheet[k] ?? null])),
+  });
+});
+
+app.put("/api/characters/:id/vitals", requireUser, requireDm, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+
+  const patch = req.body?.vitals;
+  if (!patch || typeof patch !== "object" || Array.isArray(patch))
+    return res.status(400).json({ error: "Nothing to set." });
+
+  const sheet = parseSheet(row);
+  // Bounded by what the engine says the sheet's own maximum is — modifiers and granted effects
+  // included, so a Bless that raised the ceiling raises what may be typed into it.
+  const top = Math.max(1, rules.maxHp(forRules(row)));
+  const next = {}, before = {};
+
+  for (const [key, value] of Object.entries(patch)) {
+    switch (key) {
+      case "hp":
+        if (!int(value, 0, top)) return res.status(400).json({ error: `Hit points are 0 to ${top}.` });
+        next.hp = value; break;
+      case "tempHp":
+        if (!int(value, 0, 999)) return res.status(400).json({ error: "Temporary hit points are 0 to 999." });
+        next.tempHp = value; break;
+      case "wounds":
+        if (!int(value, 0, 20)) return res.status(400).json({ error: "Wounds are 0 to 20." });
+        next.wounds = value; break;
+      case "exhaustion":
+        if (!int(value, 0, 6)) return res.status(400).json({ error: "Exhaustion is 0 to 6." });
+        next.exhaustion = value; break;
+      case "dreamExhaustion":
+        if (!int(value, 0, rules.DREAM_EXHAUSTION_MAX))
+          return res.status(400).json({ error: `Dream Exhaustion is 0 to ${rules.DREAM_EXHAUSTION_MAX}.` });
+        next.dreamExhaustion = value; break;
+      case "conditions":
+        if (!Array.isArray(value)) return res.status(400).json({ error: "Conditions are a list." });
+        next.conditions = cleanConditions(value); break;
+      case "injuries":
+        if (!Array.isArray(value)) return res.status(400).json({ error: "Injuries are a list." });
+        next.injuries = cleanInjuries(value); break;
+      case "inspiration":
+        if (!Array.isArray(value)) return res.status(400).json({ error: "Inspiration is a list of dice." });
+        next.inspiration = cleanInspiration(value); break;
+      default:
+        return res.status(400).json({ error: `The board does not set "${vitalStr(key, 40)}".` });
+    }
+    before[key] = sheet[key] ?? null;
+  }
+
+  const { rows } = await db.query(
+    `UPDATE characters SET sheet = $1, version = version + 1, updated_at = now()
+      WHERE id = $2 RETURNING *`, [JSON.stringify({ ...sheet, ...next }), row.id]);
+  await logEvent(row.id, req.user.id, "vitals.set", { before, after: next }, req.body?.note);
+  res.json({ character: publicCharacter(rows[0]) });
+});
+
+// Honor and Morality, set outright. `allocate` above is the player spending one point inside an
+// axis, one at a time, from what a level issued; this is the DM writing the score — a campaign
+// event that cost somebody three Order, or a number being brought in line with the paper sheet.
+// The unspent counters are settable for the same reason: an allocation granted by mistake has to be
+// takeable back without inventing an event to spend it on.
+app.put("/api/characters/:id/axes", requireUser, requireDm, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+
+  const COLUMN = { order: "honor_order", chaos: "honor_chaos",
+                   good: "morality_good", evil: "morality_evil",
+                   honorUnspent: "honor_unspent", moralityUnspent: "morality_unspent" };
+  const axes = req.body?.axes;
+  if (!axes || typeof axes !== "object" || Array.isArray(axes))
+    return res.status(400).json({ error: "Nothing to set." });
+
+  const sets = [], vals = [], before = {}, after = {};
+  for (const [key, value] of Object.entries(axes)) {
+    const col = COLUMN[key];
+    if (!col) return res.status(400).json({ error: `Not an axis: "${vitalStr(key, 40)}".` });
+    if (!int(value, 0, 99)) return res.status(400).json({ error: "An axis is 0 to 99." });
+    vals.push(value);
+    sets.push(`${col} = $${vals.length}`);
+    before[key] = row[col]; after[key] = value;
+  }
+  if (!sets.length) return res.status(400).json({ error: "Nothing to set." });
+
+  vals.push(row.id);
+  const { rows } = await db.query(
+    `UPDATE characters SET ${sets.join(", ")}, updated_at = now()
+      WHERE id = $${vals.length} RETURNING *`, vals);
+  await logEvent(row.id, req.user.id, "axes.set", { before, after }, req.body?.note);
+  res.json({ character: publicCharacter(rows[0]) });
+});
+
+// A benefit the DM hands somebody directly — an aura, a blessing, a ruling that lasts three rounds.
+// It is the SAME row a player's seal makes, through the same contract in targets.js, with no caster
+// behind it: `from_character_id` is null and the board says "the DM" where a cast says a name.
+//
+// Written this way rather than as a sheet patch for the reason the whole effects table exists: an
+// ongoing bonus read from outside the sheet never races the player's autosave, and it can be ended
+// later by one row going quiet instead of a second patch that has to remember what it changed.
+app.post("/api/characters/:id/effects", requireUser, requireDm, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+
+  const label = String(req.body?.label || "").trim().slice(0, 60);
+  if (!label) return res.status(400).json({ error: "Name it — that name is what their sheet shows." });
+
+  const benefits = targets.cleanBenefits(req.body?.benefits);
+  if (!benefits.length) return res.status(400).json({ error: "That grants nothing." });
+  // Resolved against the RECIPIENT. A derivation means "the caster's own modifier" and there is no
+  // caster here, so what the DM writes is a flat number and this only freezes it.
+  const resolved = benefits.map(b => targets.resolveBenefit(forRules(row), b))
+    .filter(b => !targets.benefitIsEmpty(b));
+  if (!resolved.length) return res.status(400).json({ error: "That works out to nothing right now." });
+
+  const group = `dm-${Date.now().toString(36)}-${randomBytes(4).toString("hex")}`;
+  const made = [];
+  for (const b of resolved) {
+    const { rows } = await db.query(
+      `INSERT INTO character_effects
+         (character_id, from_character_id, from_user_id, label, formula, note,
+          kind, payload, target, amount, rounds, concentration_group)
+       VALUES ($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+      [row.id, req.user.id, label, b.formula, b.note,
+       b.kind, JSON.stringify(b.payload || {}), b.target, b.amount, b.rounds, group]);
+    made.push(rows[0].id);
+    await logEvent(row.id, req.user.id, "effect.granted",
+      { effectId: rows[0].id, label, from: "the DM", kind: b.kind,
+        says: targets.benefitSays(b), rounds: b.rounds, group }, req.body?.note);
+  }
+  res.json({ granted: made.length, group });
+});
+
 // ── What the player may spend ───────────────────────────────
 // A Fate use. The player calls it — there is no approval gate (DM-04) — but the charge is spent
 // server-side, once, and the balance can never go below zero or be restored by anything here.
@@ -1545,6 +1821,214 @@ app.post("/api/characters/:id/unlocks/:unlockId/consume", requireUser, async (re
 });
 
 function safeJson(t) { try { return JSON.parse(t || "{}"); } catch { return {}; } }
+
+// ── What one player's seal does to another's character ──────────────────
+// A seal carries what it grants, written in the builder and saved with the build. Casting it at the
+// party lands one row per target per benefit, and the recipient's sheet is never touched: see the
+// note on `character_effects` in db.js for why that is the whole design.
+//
+// The menu the builder writes a benefit against. Served rather than bundled so that the one list a
+// target can be applied from is the one list it can be offered from — the builder cannot import the
+// engine, and a hand-copied list is how a seal ends up granting a row the sheet does not have.
+app.get("/api/mod-targets", requireUser, (req, res) => res.json({
+  targets: targets.MOD_TARGETS,
+  rounds: targets.BENEFIT_ROUNDS,
+  max: targets.BENEFITS_MAX,
+  // Everything else a benefit may be, and the vocabulary each kind picks from. Served for the same
+  // reason the targets are: the builder cannot import the engine, and a hand-copied list of damage
+  // types is how a seal ends up granting resistance to something that does not exist.
+  kinds: targets.BENEFIT_KINDS,
+  damageTypes: rules.DAMAGE_TYPES.map(d => ({ id: d.id, name: d.name })),
+  standings: [{ id: "resistant", name: "resistant to" }, { id: "immune", name: "immune to" }],
+  turnKinds: rules.TURN_KINDS,
+  // The four conditions this campaign REWROTE, and the Inspiration dice. Here for the same reason
+  // as everything above it: the Admin board hands these out from a row, it is a plain script that
+  // cannot import rules.js, and a hand-copied list is how a board ends up writing a condition id
+  // the sheet has no text for. The standard conditions are not listed — they work as printed, and
+  // the board writes those as free text, exactly as the sheet's own "+ condition" does.
+  conditions: Object.values(rules.CONDITIONS).map(c => ({ id: c.id, name: c.name, note: c.note || "" })),
+  inspirationDice: rules.INSPIRATION_DICE,
+}));
+
+// Who may be granted to. The player's answer to the DM's party board, and deliberately much
+// thinner: names and faces, no stats. A DM's own characters are not on it — they are the NPCs and
+// the monsters, and a player's seal does not reach them from here.
+const GRANTABLE = `FROM characters c JOIN users u ON u.id = c.user_id
+                   WHERE c.archived = false AND u.role <> 'dm'`;
+
+app.get("/api/party/roster", requireUser, async (req, res) => {
+  const { rows } = await db.query(
+    `SELECT c.id, c.name, c.user_id, u.display_name, c.sheet ${GRANTABLE} ORDER BY u.display_name, c.id`);
+  res.json({ roster: rows.map(r => {
+    const s = safeJson(r.sheet);
+    return { id: r.id, name: r.name, player: r.display_name,
+             portrait: s.portrait || "", mine: r.user_id === req.user.id };
+  }) });
+});
+
+const CAST_TARGETS_MAX = 8;
+
+// One cast: one caster, up to eight targets, up to six benefits, one concentration group so that
+// dropping it ends every row the cast made at once.
+app.post("/api/effects", requireUser, async (req, res) => {
+  const casterId = parseInt(req.body?.fromCharacterId, 10) || 0;
+  const { rows: mine } = await db.query(
+    `SELECT * FROM characters WHERE id = $1 AND user_id = $2 AND archived = false`,
+    [casterId, req.user.id]);
+  const caster = mine[0];
+  if (!caster) return res.status(403).json({ error: "That is not your character." });
+
+  const label = String(req.body?.label || "").trim().slice(0, 60);
+  if (!label) return res.status(400).json({ error: "A cast needs the seal's name." });
+
+  // Cleaned against the engine's own list, so a hand-edited save cannot put a row the sheet could
+  // not apply into somebody else's modifiers.
+  const benefits = targets.cleanBenefits(req.body?.benefits);
+  if (!benefits.length) return res.status(400).json({ error: "That seal grants nothing." });
+
+  const ids = [...new Set((Array.isArray(req.body?.targets) ? req.body.targets : [])
+    .map(n => parseInt(n, 10) || 0).filter(Boolean))];
+  if (!ids.length) return res.status(400).json({ error: "Choose who it lands on." });
+  if (ids.length > CAST_TARGETS_MAX)
+    return res.status(400).json({ error: `One cast reaches ${CAST_TARGETS_MAX} characters.` });
+
+  // Every target has to be grantable on its own terms — not archived, and not the DM's.
+  const { rows: ok } = await db.query(
+    `SELECT c.id, c.name ${GRANTABLE} AND c.id = ANY($1::int[])`, [ids]);
+  if (ok.length !== ids.length)
+    return res.status(400).json({ error: "One of those isn't a character you can grant to." });
+
+  // Resolved against the CASTER, once, here. A benefit worth "my Dream modifier" is worth the
+  // caster's Dream modifier on every sheet it lands on, and goes on being worth it after the caster
+  // levels, or drops, or dies.
+  const casterSheet = forRules(caster);
+  const resolved = benefits.map(b => targets.resolveBenefit(casterSheet, b))
+    .filter(b => !targets.benefitIsEmpty(b));
+  if (!resolved.length) return res.status(400).json({ error: "Every one of those works out to zero right now." });
+
+  const group = `cast-${Date.now().toString(36)}-${randomBytes(4).toString("hex")}`;
+  const made = [];
+  for (const t of ok) for (const b of resolved) {
+    const { rows } = await db.query(
+      `INSERT INTO character_effects
+         (character_id, from_character_id, from_user_id, label, formula, note,
+          kind, payload, target, amount, rounds, concentration_group)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+      [t.id, caster.id, req.user.id, label, b.formula, b.note,
+       b.kind, JSON.stringify(b.payload || {}), b.target, b.amount, b.rounds, group]);
+    made.push(rows[0].id);
+    // On the RECIPIENT's log, because that is the sheet it changed — and the one whose player will
+    // be asking in six weeks where the +2 came from.
+    await logEvent(t.id, req.user.id, "effect.granted",
+      { effectId: rows[0].id, label, from: caster.name, kind: b.kind,
+        says: targets.benefitSays(b), rounds: b.rounds, group });
+  }
+  res.json({ granted: made.length, group, targets: ok.map(t => t.name) });
+});
+
+const publicEffect = r => ({
+  id: r.id, label: r.label, formula: r.formula, note: r.note,
+  kind: r.kind || "modifier", payload: safeJson(r.payload),
+  target: r.target, amount: r.amount, rounds: r.rounds,
+  concentrationGroup: r.concentration_group,
+  player: r.caster_name || "", fromCharacterId: r.from_character_id,
+  grantedAt: r.granted_at, appliedAt: r.applied_at || null,
+});
+
+// What is on me right now. The recipient's own sheet polls this beside its unlocks.
+//
+// A one-time grant that has been taken (`applied_at`) is left out: it is spent, and the sheet it
+// landed on has the hit points to show for it. An ongoing one stays until it ends or is dropped.
+app.get("/api/characters/:id/effects", requireUser, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const { rows } = await db.query(
+    `SELECT e.*, c.name AS caster_name FROM character_effects e
+       LEFT JOIN characters c ON c.id = e.from_character_id
+      WHERE e.character_id = $1 AND e.ended_at IS NULL AND e.dismissed_at IS NULL
+        AND e.applied_at IS NULL
+      ORDER BY e.id`, [row.id]);
+  res.json({ effects: rows.map(publicEffect) });
+});
+
+// Taking a one-time grant: healing, or temporary hit points. The recipient's OWN client writes the
+// hit points to their own sheet — this only records that the offer is spent, so the same heal
+// cannot be taken twice and the table can see afterwards what it was worth.
+//
+// `applied_at IS NULL` in the predicate is the whole mechanism, exactly as `consumed_at` is for an
+// unlock: a double tap or a retried request finds nothing to update and changes nothing.
+app.post("/api/effects/:id/apply", requireUser, async (req, res) => {
+  const id = parseInt(req.params.id, 10) || 0;
+  const { rows: found } = await db.query(
+    `SELECT e.*, c.user_id AS owner_id FROM character_effects e
+       JOIN characters c ON c.id = e.character_id WHERE e.id = $1`, [id]);
+  const e = found[0];
+  if (!e) return res.status(404).json({ error: "No such effect." });
+  if (e.owner_id !== req.user.id)
+    return res.status(403).json({ error: "That is not yours to take." });
+  if (e.kind !== "heal" && e.kind !== "tempHp")
+    return res.status(400).json({ error: "That one is not something you take — it is already on you." });
+
+  const note = String(req.body?.note || "").slice(0, 80);
+  const { rows } = await db.query(
+    `UPDATE character_effects SET applied_at = now(), applied_note = $1
+      WHERE id = $2 AND applied_at IS NULL AND ended_at IS NULL AND dismissed_at IS NULL
+      RETURNING id`, [note, id]);
+  if (!rows[0]) return res.status(400).json({ error: "That one is already taken." });
+  await logEvent(e.character_id, req.user.id, "effect.applied",
+    { effectId: id, label: e.label, kind: e.kind, note });
+  res.json({ ok: true });
+});
+
+// Dropped by the recipient, or taken back by the caster. Both are the same row going quiet, and
+// which of the two columns is set is the only record of who ended it.
+app.delete("/api/effects/:id", requireUser, async (req, res) => {
+  const id = parseInt(req.params.id, 10) || 0;
+  const { rows } = await db.query(
+    `SELECT e.*, c.user_id AS owner_id FROM character_effects e
+       JOIN characters c ON c.id = e.character_id WHERE e.id = $1`, [id]);
+  const e = rows[0];
+  if (!e) return res.status(404).json({ error: "No such effect." });
+  const recipient = e.owner_id === req.user.id;
+  const caster = e.from_user_id === req.user.id;
+  if (!recipient && !caster && req.user.role !== "dm")
+    return res.status(403).json({ error: "That is not yours to end." });
+  const column = recipient && !caster ? "dismissed_at" : "ended_at";
+  await db.query(`UPDATE character_effects SET ${column} = now()
+                   WHERE id = $1 AND ended_at IS NULL AND dismissed_at IS NULL`, [id]);
+  await logEvent(e.character_id, req.user.id,
+    recipient && !caster ? "effect.dismissed" : "effect.ended", { effectId: id, label: e.label });
+  res.json({ ok: true });
+});
+
+// Concentration broke. Every row that one cast made ends together, wherever it landed — which is
+// the only reason the group id exists.
+app.post("/api/effects/concentration/:group/end", requireUser, async (req, res) => {
+  const group = String(req.params.group || "").slice(0, 60);
+  const { rows } = await db.query(
+    `UPDATE character_effects SET ended_at = now()
+      WHERE concentration_group = $1 AND from_user_id = $2 AND ended_at IS NULL
+      RETURNING id, character_id, label`, [group, req.user.id]);
+  for (const r of rows)
+    await logEvent(r.character_id, req.user.id, "effect.ended", { effectId: r.id, label: r.label, group });
+  res.json({ ended: rows.length });
+});
+
+// What this character still has out on other people, so a caster can see their own concentration
+// and end it without hunting for whoever is carrying it.
+app.get("/api/characters/:id/effects/out", requireUser, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+  const { rows } = await db.query(
+    `SELECT e.concentration_group, e.label, min(e.granted_at) AS granted_at,
+            count(*)::int AS rows_out, string_agg(DISTINCT c.name, ', ') AS on_whom
+       FROM character_effects e JOIN characters c ON c.id = e.character_id
+      WHERE e.from_character_id = $1 AND e.ended_at IS NULL AND e.dismissed_at IS NULL
+        AND e.applied_at IS NULL
+      GROUP BY e.concentration_group, e.label ORDER BY min(e.granted_at) DESC`, [row.id]);
+  res.json({ out: rows.map(r => ({ group: r.concentration_group, label: r.label,
+    onWhom: r.on_whom, count: r.rows_out, grantedAt: r.granted_at })) });
+});
 
 // ── The compendium the DM imported ──────────────────────────────────────
 // The SRD ships as files under sheet/data/ because it is openly licensed. Everything else lives

@@ -165,7 +165,179 @@ function buildComposer(coreCog, tier) {
     if (free > 0) c += `<p class="hint">${free} more sigil${free > 1 ? "s" : ""} available — add from the list on the left.</p>`;
     h += block("Sigils", c || `<p class="hint">No sigils yet. Add up to ${maxComps()} from the list on the left.</p>`);
   }
+
+  h += benefitsBlock();
   return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WHAT THE SEAL GRANTS
+// ═══════════════════════════════════════════════════════════
+// A seal that helps somebody else writes down what it hands them, once, here — and the character
+// sheet casts it at the party. Everything else about a save is a recipe that grows with you; this
+// is the one part that DOES something, so it is the one part the sheet reads back.
+//
+// The menu is the ENGINE's list, served from /api/mod-targets. It is never written out again in
+// this file: a seal that could grant a row the sheet has no place for is the failure the engine
+// warns about beside MOD_TARGET_IDS, and one list is the only defence against it.
+let benefitMenuAsked = false;
+function ensureBenefitMenu() {
+  if (state.benefitMenu || benefitMenuAsked || !API) return;
+  benefitMenuAsked = true;
+  api("GET", "api/mod-targets")
+    .then(m => { state.benefitMenu = m; renderMain(); })
+    .catch(() => { benefitMenuAsked = false; });   // a static host simply never shows the block
+}
+
+function benefitsBlock() {
+  ensureBenefitMenu();
+  const M = state.benefitMenu;
+  // No API behind this page means no sheets to cast at either, so the block is not a broken
+  // control — it is simply not part of what this deployment does.
+  if (!API || !M) return "";
+  const list = state.benefits || [];
+  const derives = [{ id: "", name: "a flat number" },
+    { id: "prof", name: "my proficiency bonus" },
+    ...["str", "dex", "con", "int", "wis", "cha", "dream"].map(id =>
+      ({ id, name: `my ${ABIL_LONG[id]} modifier` }))];
+
+  let b = `<p class="hint">Written once, cast from your character sheet: pick who it lands on and
+    the sheet applies it for you. Leave it empty for a seal that only does what the card says.</p>`;
+
+  const dur = (i, x) => `<select class="search ben-d" onchange="setBenefit(${i},'rounds',this.value)">
+      <option value=""${x.rounds == null ? " selected" : ""}>until it is dropped</option>${
+      (M.rounds || [1, 2, 3, 10, 100]).map(r =>
+        `<option value="${r}"${Number(x.rounds) === r ? " selected" : ""}>${r} round${r > 1 ? "s" : ""}${
+          r === 10 ? " (1 minute)" : r === 100 ? " (10 minutes)" : ""}</option>`).join("")}</select>`;
+
+  b += list.map((x, i) => {
+    const kind = x.kind || "modifier";
+    // One row per kind, because they are genuinely different things: a bonus has a target and an
+    // amount, a heal has dice and no duration, a resistance has a damage type, an extra Action has
+    // a count. A single row that tried to be all four would be wrong three times out of four.
+    let controls;
+    if (kind === "heal" || kind === "tempHp") {
+      controls = `<input class="search ben-dice" maxlength="12" placeholder="3d8, 2d6+4, 10"
+          value="${escAttr(x.dice || "")}" aria-label="How much"
+          onchange="setBenefit(${i},'dice',this.value)">
+        <span class="ben-once">one-time — they roll it and take it</span>`;
+    } else if (kind === "defence") {
+      controls = `<select class="search ben-f" onchange="setBenefit(${i},'standing',this.value)">${
+          (M.standings || []).map(s => `<option value="${s.id}"${s.id === x.standing ? " selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+        <select class="search ben-t" onchange="setBenefit(${i},'dtype',this.value)">${
+          (M.damageTypes || []).map(d => `<option value="${d.id}"${d.id === x.dtype ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
+        ${dur(i, x)}`;
+    } else if (kind === "advantage") {
+      // Pointed at the same things a bonus is pointed at — the second d20 is the amount, so there
+      // is no number to ask for.
+      controls = `<select class="search ben-t" onchange="setBenefit(${i},'target',this.value)">${
+          M.targets.map(t => `<option value="${escAttr(t.value)}"${t.value === x.target ? " selected" : ""}>${esc(t.label)}</option>`).join("")}</select>
+        ${dur(i, x)}`;
+    } else if (kind === "turn") {
+      controls = `<select class="search ben-t" onchange="setBenefit(${i},'turnKind',this.value)">${
+          (M.turnKinds || []).map(k => `<option value="${k}"${k === x.turnKind ? " selected" : ""}>${esc(k)}</option>`).join("")}</select>
+        <select class="search ben-a" aria-label="How many" onchange="setBenefit(${i},'n',this.value)">${
+          [1, 2, 3].map(n => `<option value="${n}"${Number(x.n || 1) === n ? " selected" : ""}>${n} extra</option>`).join("")}</select>
+        ${dur(i, x)}`;
+    } else {
+      const flat = !x.from;
+      controls = `<select class="search ben-t" onchange="setBenefit(${i},'target',this.value)">${
+          M.targets.map(t => `<option value="${escAttr(t.value)}"${t.value === x.target ? " selected" : ""}>${esc(t.label)}</option>`).join("")}</select>
+        <select class="search ben-f" onchange="setBenefit(${i},'from',this.value)">${
+          derives.map(d => `<option value="${d.id}"${d.id === (x.from || "") ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
+        ${flat
+          ? `<input class="search ben-a" type="number" min="-30" max="30" value="${Number(x.amount) || 0}"
+               aria-label="How much" onchange="setBenefit(${i},'amount',this.value)">`
+          : `<select class="search ben-a" aria-label="How many times" onchange="setBenefit(${i},'times',this.value)">${
+              [[0.5, "half of it"], [1, "just it"], [2, "twice it"], [3, "three times it"]].map(([v, n]) =>
+                `<option value="${v}"${Number(x.times || 1) === v ? " selected" : ""}>${n}</option>`).join("")}</select>`}
+        ${dur(i, x)}`;
+    }
+
+    return `<div class="ben">
+      <div class="ben-r">
+        <select class="search ben-k" onchange="setBenefit(${i},'kind',this.value)">${
+          (M.kinds || []).map(k => `<option value="${k.id}"${k.id === kind ? " selected" : ""}>${esc(k.name)}</option>`).join("")}</select>
+        <button class="mini" onclick="dropBenefit(${i})" title="Remove this benefit">✕</button>
+      </div>
+      <div class="ben-r">${controls}</div>
+      <input class="search ben-n" maxlength="80" placeholder="A word about it — what the table hears"
+        value="${escAttr(x.note || "")}" onchange="setBenefit(${i},'note',this.value)"></div>`;
+  }).join("");
+
+  const max = M.max || 6;
+  b += list.length < max
+    ? `<button class="mini on" onclick="addBenefit()">+ what it grants</button>`
+    : `<p class="hint">${max} is as much as one seal carries.</p>`;
+  if (list.some(x => x.from))
+    b += `<p class="hint">A derived amount is worked out against <b>you</b>, at the moment you cast
+      it, and the number that lands is frozen there — it stays what it was worth even after you
+      level, or go down.</p>`;
+  return block("What it grants", b);
+}
+
+const ABIL_LONG = { str: "Strength", dex: "Dexterity", con: "Constitution",
+  int: "Intelligence", wis: "Wisdom", cha: "Charisma", dream: "Dream" };
+
+function addBenefit() {
+  const M = state.benefitMenu;
+  state.benefits = [...(state.benefits || []),
+    { kind: "modifier", target: M?.targets?.[0]?.value || "ac", amount: 1, rounds: 10, note: "" }];
+  renderMain();
+}
+function dropBenefit(i) {
+  state.benefits = (state.benefits || []).filter((_, n) => n !== i);
+  renderMain();
+}
+
+// A fresh row of each kind, with the sensible thing already filled in. A heal starts at the Ring's
+// OWN healing for this slot — the scaling table has been sitting right there saying "3d8 + VM" and
+// making somebody retype it would be the app asking a question it can answer.
+function blankOfKind(kind, M) {
+  if (kind === "advantage")
+    return { kind, target: M?.targets?.[0]?.value || "ac", rounds: 10, note: "" };
+  if (kind === "heal" || kind === "tempHp")
+    return { kind, dice: kind === "heal" ? ringHealing() : "", note: "" };
+  if (kind === "defence")
+    return { kind, standing: "resistant", dtype: M?.damageTypes?.[0]?.id || "fire", rounds: 10, note: "" };
+  if (kind === "turn")
+    return { kind, turnKind: "action", n: 1, rounds: 1, note: "" };
+  return { kind: "modifier", target: M?.targets?.[0]?.value || "ac", amount: 1, rounds: 10, note: "" };
+}
+
+// What this Ring heals at this slot, as dice, with the Verum modifier already worked in. Returns ""
+// for a Ring with no healing column, which is every Ring but Self and Ally.
+function ringHealing() {
+  const sub = COMP_DATA[state.compType]?.subtypes?.[state.compSub];
+  if (!sub) return "";
+  const i = ["Healing", "Healing / Target", "Absorb"].map(c => sub.columns.indexOf(c)).find(n => n >= 0);
+  const row = sub.rows.find(r => r[0] === ORDINALS[state.slotLevel]);
+  if (i == null || i < 0 || !row) return "";
+  // "3d8 + VM" with the bar's Verum modifier substituted, which is what `resolve` is for.
+  return String(resolve(row[i])).replace(/\s+/g, "");
+}
+
+function setBenefit(i, key, value) {
+  const list = [...(state.benefits || [])];
+  let x = { ...list[i] };
+  if (key === "kind") {
+    // A different kind is a different shape. Starting from a blank of the new kind is the only way
+    // the row cannot keep a field that no longer means anything — a `target` left on a heal would
+    // be invisible here and refused by the server.
+    x = { ...blankOfKind(value, state.benefitMenu), note: x.note || "" };
+  } else if (key === "amount") x.amount = Math.max(-30, Math.min(30, Math.trunc(Number(value) || 0)));
+  else if (key === "n") x.n = Math.max(1, Math.min(3, Math.trunc(Number(value) || 1)));
+  else if (key === "times") x.times = Number(value) || 1;
+  else if (key === "rounds") x.rounds = value === "" ? null : Number(value);
+  else if (key === "from") {
+    // Switching between a flat number and a derived one swaps which control is shown, so this is
+    // the one change inside a kind that has to redraw.
+    if (value) { x.from = value; x.times = x.times || 1; x.amount = 0; }
+    else { delete x.from; delete x.times; x.amount = x.amount || 1; }
+  } else x[key] = value;
+  list[i] = x;
+  state.benefits = list;
+  if (key === "from" || key === "kind") renderMain();   // the others are already what the control says
 }
 
 function bumpSlotTo(n) {
@@ -195,7 +367,7 @@ async function toggleCog(id) {
   if (state.core === id) {
     // Deselect core → reset everything
     state.core = null; state.coreVerum = null; state.sealName = "";
-    state.compType = null; state.compSub = null; state.complements = [];
+    state.compType = null; state.compSub = null; state.complements = []; state.benefits = [];
   } else if (state.complements.some(x => x.id === id)) {
     // Remove complement
     state.complements = state.complements.filter(x => x.id !== id);
@@ -229,7 +401,7 @@ function clearAll() {
   const clear = mode().clear;   // Ignition puts every Burn out; the Paragon lets its Devotions go
   if (clear) { clear(); renderCogList(); renderMain(); return; }
   state.core = null; state.coreVerum = null; state.sealName = "";
-  state.compType = null; state.compSub = null; state.complements = [];
+  state.compType = null; state.compSub = null; state.complements = []; state.benefits = [];
   renderCogList(); renderMain();
 }
 

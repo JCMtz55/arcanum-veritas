@@ -284,6 +284,11 @@ export function parseAbilityLine(line) {
 
 const tagged = (tag, name) => `${tag}: ${name}`;
 
+// Fight Club writes a weapon's damage type as one letter. Nothing else in the sheet speaks that
+// alphabet — a defence, a rider and a called-out damage type are all words — so it is translated
+// at the one door weapons come through.
+const DMG_LETTER = { S: "slashing", P: "piercing", B: "bludgeoning" };
+
 // A class's <proficiency> is one comma-separated list holding two different things: the saving
 // throws it grants outright ("Dexterity Saving Throws") and the skills it may CHOOSE from. Reading
 // it as a flat list of abilities is how a Rogue ends up with no proficient saves at all.
@@ -370,13 +375,26 @@ export async function applyEntry(kind, name) {
   if (kind === "item") {
     // Only a weapon becomes an attack; everything else would be an attack with nothing to roll.
     if (!e.dmg1) return toast(`${e.name} has no damage — keep it in your notes for now.`);
+    // The catalogue already knows what the old dialog made the player work out (CS-021): a
+    // Rapier is Finesse because its properties say F, a Longbow is Dexterity because it is a
+    // ranged weapon, and a Battleaxe's V and `dmg2` are its two-handed mode. Reading them here
+    // is the difference between a row that follows the character and a row that says +0.
+    const props = String(e.property || "").toUpperCase().split(/\s*,\s*/).filter(Boolean);
+    const ranged = /ranged/i.test(e.type || "");
+    const ability = props.includes("F") ? "finesse" : ranged ? "dex" : "str";
     mutate(s => {
       s.attacks = [...(s.attacks || []), {
         id: `it-${e.name}`, name: e.name, bonus: 0,
-        damage: e.dmg1, type: e.dmgType || "",
+        damage: e.dmg1, type: DMG_LETTER[e.dmgType] || e.dmgType || "",
+        ability,
+        // Assumed, because somebody adding a weapon to their own sheet almost always is — and
+        // it is one tick to take back, which a number they had to work out never was.
+        proficient: true,
+        ...(props.includes("V") && e.dmg2 ? { versatile: e.dmg2, versatileName: "Two-handed" } : {}),
       }];
     });
-    return toast(`${e.name} added — set its to-hit bonus on the card.`);
+    return toast(`${e.name} added — ${ability === "finesse" ? "finesse" : ability === "dex" ? "Dexterity" : "Strength"}
+      and proficiency are in it. Open the row if either is wrong.`);
   }
 }
 

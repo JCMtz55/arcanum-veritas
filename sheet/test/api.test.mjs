@@ -460,6 +460,159 @@ test("the party board is DM-only and computes the DCs the Wounds push up", async
   assert.equal(card.activeModifiers, 1);
 });
 
+// ── What the DM may set ON the sheet ────────────────────────────────────
+// The board writes hit points, conditions, the Wounds and the rest into the player's own JSON,
+// which is the one place the DM reaches into a document they do not own. These are the tests that
+// keep it narrow: a whitelist, the engine's bounds, DM only, and an audit row for every change.
+//
+// An account may hold 24 characters and this suite makes a lot of them, so these four tests get an
+// account of their own rather than spending "tester"'s remaining budget — the same reason the kind
+// tests below share one pair.
+let BOARD = null;
+async function board() {
+  if (!BOARD) BOARD = (async () => {
+    await api("dm", "POST", "/api/admin/users",
+      { username: "board", displayName: "Board", password: PLAYER_PASSWORD }).catch(() => {});
+    await signIn("board", "board", PLAYER_PASSWORD);
+  })();
+  await BOARD;
+}
+
+async function sheetWith(name, extra) {
+  await board();
+  const { character } = await makeCharacter("board", name);
+  const fresh = await api("board", "GET", `/api/characters/${character.id}`);
+  await api("board", "PUT", `/api/characters/${character.id}`, {
+    version: fresh.character.version,
+    sheet: { ...fresh.character.sheet, ...extra },
+  });
+  return character.id;
+}
+
+test("the DM sets what the table adjudicates, and nothing else", async () => {
+  const id = await sheetWith("Adjudicated", { hp: 40, maxHp: 40 });
+
+  // A player cannot reach it at all, whosever sheet it is.
+  assert.equal((await api("board", "PUT", `/api/characters/${id}/vitals`, { vitals: { hp: 1 } })).status, 403);
+  assert.equal((await api("other", "PUT", `/api/characters/${id}/vitals`, { vitals: { hp: 1 } })).status, 403);
+
+  await api("dm", "PUT", `/api/characters/${id}/vitals`, {
+    vitals: { hp: 12, tempHp: 4, wounds: 2, exhaustion: 1, dreamExhaustion: 3,
+              conditions: [{ id: "stunned" }, { name: "Prone" }],
+              injuries: [{ name: "Broken rib" }],
+              inspiration: [{ die: "d6", why: "held the line" }] },
+    note: "the dragon's second breath",
+  });
+
+  const card = (await api("dm", "GET", "/api/characters/party")).party.find(c => c.id === id);
+  assert.equal(card.hp, 12);
+  assert.equal(card.tempHp, 4);
+  assert.equal(card.wounds, 2);
+  assert.equal(card.exhaustion, 1);
+  assert.equal(card.dreamExhaustion, 3);
+  assert.equal(card.unhealedInjuries, 1);
+  assert.equal(card.inspiration.length, 1);
+  assert.equal(card.inspiration[0].die, "d6");
+  // A rewritten condition keeps the engine's own id; anything else is free text with a made-up one.
+  assert.deepEqual(card.conditions.map(c => c.id), ["stunned", card.conditions[1].id]);
+  assert.equal(card.conditions[0].name, "Stunned");
+  assert.equal(card.conditions[1].name, "Prone");
+  assert.ok(card.conditions[1].id.startsWith("x:"));
+  // Two Wounds and one unhealed Injury: 10 + 2 + 1.
+  assert.equal(card.deathSaveDC, 13);
+
+  // Out of bounds, and off the whitelist. Both refused rather than clamped or ignored.
+  assert.equal((await api("dm", "PUT", `/api/characters/${id}/vitals`, { vitals: { hp: 999 } })).status, 400);
+  assert.equal((await api("dm", "PUT", `/api/characters/${id}/vitals`, { vitals: { exhaustion: 9 } })).status, 400);
+  assert.equal((await api("dm", "PUT", `/api/characters/${id}/vitals`, { vitals: { abilities: { str: 20 } } })).status, 400);
+  assert.equal((await api("dm", "PUT", `/api/characters/${id}/vitals`, { vitals: { level: 9 } })).status, 400);
+  // And nothing it refused landed.
+  const again = (await api("dm", "GET", "/api/characters/party")).party.find(c => c.id === id);
+  assert.equal(again.hp, 12);
+  assert.equal(again.exhaustion, 1);
+
+  const { events } = await api("dm", "GET", `/api/characters/${id}/events`);
+  const logged = events.find(e => e.action === "vitals.set");
+  assert.equal(logged.actor, "Dungeon Master");
+  assert.equal(logged.note, "the dragon's second breath");
+  assert.equal(logged.detail.before.hp, 40);
+  assert.equal(logged.detail.after.hp, 12);
+});
+
+test("the player's own sheet is told what the DM changed", async () => {
+  const id = await sheetWith("Told", { hp: 30, maxHp: 30 });
+  const before = (await api("board", "GET", `/api/characters/${id}`)).character.version;
+
+  await api("dm", "PUT", `/api/characters/${id}/vitals`, { vitals: { hp: 7, wounds: 1 } });
+
+  // The small read the open sheet polls: the eight keys, and a version that says it moved.
+  const seen = await api("board", "GET", `/api/characters/${id}/vitals`);
+  assert.equal(seen.vitals.hp, 7);
+  assert.equal(seen.vitals.wounds, 1);
+  assert.ok(seen.version > before);
+  // Somebody else's sheet is still a 404, exactly as the full read is.
+  assert.equal((await api("other", "GET", `/api/characters/${id}/vitals`)).status, 404);
+
+  // A client that had the sheet open and saves the old hit points back is refused rather than
+  // winning — the DM's write bumped the version, which is the whole point of bumping it.
+  const stale = await api("board", "PUT", `/api/characters/${id}`, { version: before, sheet: { hp: 30 } });
+  assert.equal(stale.status, 409);
+});
+
+test("Honor and Morality are the DM's to set outright", async () => {
+  await board();
+  const { character } = await makeCharacter("board", "Aligned");
+  assert.equal((await api("board", "PUT", `/api/characters/${character.id}/axes`,
+    { axes: { order: 9 } })).status, 403);
+
+  const out = await api("dm", "PUT", `/api/characters/${character.id}/axes`, {
+    axes: { order: 4, chaos: 6, good: 3, evil: 1, honorUnspent: 2, moralityUnspent: 0 },
+    note: "the Lion's court",
+  });
+  assert.equal(out.character.honor.order, 4);
+  assert.equal(out.character.morality.good, 3);
+  assert.equal(out.character.unspent.honor, 2);
+
+  const card = (await api("dm", "GET", "/api/characters/party")).party.find(c => c.id === character.id);
+  assert.equal(card.honor.total, 10);
+  assert.equal(card.honor.chaosMod, 2);            // Chaos 6 over Order 4
+  assert.equal(card.honor.orderMod, -2);
+  assert.equal(card.morality.total, 4);
+  assert.equal(card.corruptionSave, 0);            // ((3-1) + (4-6)) / 2
+
+  assert.equal((await api("dm", "PUT", `/api/characters/${character.id}/axes`, { axes: { order: 200 } })).status, 400);
+  assert.equal((await api("dm", "PUT", `/api/characters/${character.id}/axes`, { axes: { luck: 3 } })).status, 400);
+});
+
+test("the DM can grant a benefit with no caster behind it, and end it", async () => {
+  const id = await sheetWith("Blessed", { hp: 20, maxHp: 20, ac: 15 });
+
+  assert.equal((await api("other", "POST", `/api/characters/${id}/effects`,
+    { label: "Not theirs", benefits: [{ kind: "modifier", target: "ac", amount: 2 }] })).status, 403);
+
+  const made = await api("dm", "POST", `/api/characters/${id}/effects`, {
+    label: "The Lion's regard", note: "knelt at the throne",
+    benefits: [{ kind: "modifier", target: "ac", amount: 2, rounds: 10 }],
+  });
+  assert.equal(made.granted, 1);
+
+  // It reaches the recipient's own sheet like any cast — and the board counts it in the AC.
+  const mine = (await api("board", "GET", `/api/characters/${id}/effects`)).effects;
+  assert.equal(mine.length, 1);
+  assert.equal(mine[0].label, "The Lion's regard");
+  assert.equal(mine[0].player, "");                // nobody cast it
+  const card = (await api("dm", "GET", "/api/characters/party")).party.find(c => c.id === id);
+  assert.equal(card.ac, 17);
+  assert.equal(card.effects[0].fromDm, true);
+
+  await api("dm", "DELETE", `/api/effects/${mine[0].id}`);
+  assert.equal((await api("board", "GET", `/api/characters/${id}/effects`)).effects.length, 0);
+
+  assert.equal((await api("dm", "POST", `/api/characters/${id}/effects`, { label: "" })).status, 400);
+  assert.equal((await api("dm", "POST", `/api/characters/${id}/effects`,
+    { label: "Nothing at all", benefits: [{ kind: "modifier", target: "ac", amount: 0 }] })).status, 400);
+});
+
 test("archiving hides a character without deleting it", async () => {
   const { character } = await makeCharacter("tester", "Retired");
   await api("tester", "POST", `/api/characters/${character.id}/archive`, { archived: true });
@@ -517,6 +670,202 @@ test("only the DM can import, and a preview changes nothing", async () => {
   assert.equal((await api("dm", "POST", "/api/compendium/import", { xml: "nope" })).status, 400);
   assert.equal((await api("dm", "POST", "/api/compendium/import",
     { xml: "<compendium></compendium>" })).status, 400);
+});
+
+// ── One player's seal on another player's character ─────────────────────
+// This is the first thing in the app that lets a player change somebody else's numbers, so every
+// edge of it is tried here rather than trusted to the dialog that offers it.
+test("a seal's benefit lands on another player's character without touching their sheet", async () => {
+  const mine = (await makeCharacter("tester", "Caster")).character;
+  const theirs = (await makeCharacter("other", "Recipient")).character;
+
+  const cast = await api("tester", "POST", "/api/effects", {
+    fromCharacterId: mine.id, label: "Bless",
+    targets: [theirs.id], benefits: [{ target: "ac", amount: 2, rounds: 10 }],
+  });
+  assert.equal(cast.status, 200);
+  assert.equal(cast.granted, 1);
+
+  // The recipient sees it on their own character...
+  const on = await api("other", "GET", `/api/characters/${theirs.id}/effects`);
+  assert.equal(on.effects.length, 1);
+  assert.equal(on.effects[0].amount, 2);
+  assert.equal(on.effects[0].label, "Bless");
+  assert.equal(on.effects[0].player, "Caster");       // who cast it, by character
+
+  // ...and their SHEET is untouched, which is the whole point: no version moved, so nothing they
+  // were editing was lost and no save of theirs will come back a conflict.
+  const after = await api("other", "GET", `/api/characters/${theirs.id}`);
+  assert.equal(after.character.version, theirs.version);
+  assert.deepEqual(after.character.sheet.modifiers, []);
+
+  // The DM's board says so too, and names the seal and the caster rather than only counting —
+  // "why is their AC 21" is the question it exists to answer.
+  const board = await api("dm", "GET", "/api/characters/party");
+  const card = board.party.find(p => p.id === theirs.id);
+  assert.equal(card.granted, 1);
+  assert.equal(card.grantedFrom, "Bless (Caster)");
+  assert.equal(card.ac, 12);                          // and the number already has it in
+
+  // The caster keeps the cast on their own side, as one thing, so concentration can end it.
+  const out = await api("tester", "GET", `/api/characters/${mine.id}/effects/out`);
+  assert.equal(out.out.length, 1);
+  assert.equal(out.out[0].onWhom, "Recipient");
+  assert.equal((await api("tester", "POST",
+    `/api/effects/concentration/${out.out[0].group}/end`)).ended, 1);
+  assert.equal((await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects.length, 0);
+});
+
+test("a derived benefit is worth the CASTER's number, and stays worth it", async () => {
+  const mine = (await makeCharacter("tester", "Dreamer")).character;
+  const theirs = (await makeCharacter("other", "Blessed")).character;
+  // Dream moves only with the event that moved it (DM-02), note included.
+  await api("dm", "PUT", `/api/characters/${mine.id}/dream`, { dream: 20, note: "a test" });  // +5
+
+  const cast = await api("tester", "POST", "/api/effects", {
+    fromCharacterId: mine.id, label: "Gate of Caelum", targets: [theirs.id],
+    benefits: [{ target: "saveDc", from: "dream", times: 2 }],
+  });
+  assert.equal(cast.status, 200, JSON.stringify(cast));
+  const [e] = (await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects;
+  assert.equal(e.amount, 10);                          // twice the caster's +5
+  assert.equal(e.formula, "twice your Dream modifier");
+
+  // The caster's Dream falling does not reach back into what already landed.
+  await api("dm", "PUT", `/api/characters/${mine.id}/dream`, { dream: 10, note: "and back" });
+  assert.equal((await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects[0].amount, 10);
+});
+
+test("a cast can only come from your own character, and only reach a player's", async () => {
+  const mine = (await makeCharacter("tester", "Mine")).character;
+  const theirs = (await makeCharacter("other", "Theirs")).character;
+  const dms = (await makeCharacter("dm", "A Monster")).character;
+  const ok = { label: "X", benefits: [{ target: "ac", amount: 2 }] };
+
+  // Casting FROM somebody else's character is refused outright.
+  assert.equal((await api("tester", "POST", "/api/effects",
+    { ...ok, fromCharacterId: theirs.id, targets: [mine.id] })).status, 403);
+
+  // The DM's own characters are not on the roster and cannot be granted to — a player's seal does
+  // not reach the NPCs from here.
+  const roster = await api("tester", "GET", "/api/party/roster");
+  assert.ok(roster.roster.some(r => r.id === theirs.id));
+  assert.ok(!roster.roster.some(r => r.id === dms.id));
+  assert.equal((await api("tester", "POST", "/api/effects",
+    { ...ok, fromCharacterId: mine.id, targets: [dms.id] })).status, 400);
+
+  // A target the engine has no row for never becomes one.
+  assert.equal((await api("tester", "POST", "/api/effects",
+    { fromCharacterId: mine.id, label: "X", targets: [theirs.id],
+      benefits: [{ target: "morale", amount: 2 }] })).status, 400);
+  // Nor does a forged amount.
+  assert.equal((await api("tester", "POST", "/api/effects",
+    { fromCharacterId: mine.id, label: "X", targets: [theirs.id],
+      benefits: [{ target: "ac", amount: 500 }] })).status, 400);
+});
+
+test("either end can drop a granted effect, and nobody else can", async () => {
+  const mine = (await makeCharacter("tester", "Giver")).character;
+  const theirs = (await makeCharacter("other", "Taker")).character;
+  const cast = async () => {
+    await api("tester", "POST", "/api/effects", { fromCharacterId: mine.id, label: "Aid",
+      targets: [theirs.id], benefits: [{ target: "maxHp", amount: 5 }] });
+    return (await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects.at(-1);
+  };
+
+  // The recipient drops one that is on them.
+  let e = await cast();
+  assert.equal((await api("other", "DELETE", `/api/effects/${e.id}`)).status, 200);
+  assert.equal((await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects.length, 0);
+
+  // The caster takes one back.
+  e = await cast();
+  assert.equal((await api("tester", "DELETE", `/api/effects/${e.id}`)).status, 200);
+
+  // A third player can do neither.
+  e = await cast();
+  await api("dm", "POST", "/api/admin/users",
+    { username: "third", displayName: "Third", password: PLAYER_PASSWORD }).catch(() => {});
+  await signIn("third", "third", PLAYER_PASSWORD);
+  assert.equal((await api("third", "DELETE", `/api/effects/${e.id}`)).status, 403);
+  assert.equal((await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects.length, 1);
+});
+
+// An account may hold 24 characters, and this suite makes a lot of them — so the kind tests share
+// one pair rather than each minting its own and walking the whole file into that ceiling.
+let KINDS = null;
+async function kindsPair() {
+  if (!KINDS) KINDS = {
+    mine: (await makeCharacter("tester", "Giver2")).character,
+    theirs: (await makeCharacter("other", "Taker2")).character,
+  };
+  return KINDS;
+}
+
+test("a seal can hand over healing, a resistance and an extra action, each as its own kind", async () => {
+  const { mine, theirs } = await kindsPair();
+  const cast = await api("tester", "POST", "/api/effects", {
+    fromCharacterId: mine.id, label: "Mercy", targets: [theirs.id],
+    benefits: [
+      { kind: "heal", dice: "3d8" },
+      { kind: "defence", dtype: "fire", standing: "resistant", rounds: 10 },
+      { kind: "turn", turnKind: "bonus", n: 1, rounds: 3 },
+      { kind: "advantage", target: "skill:perception", rounds: 10 },
+    ],
+  });
+  assert.equal(cast.status, 200, JSON.stringify(cast));
+  assert.equal(cast.granted, 4);
+
+  const { effects } = await api("other", "GET", `/api/characters/${theirs.id}/effects`);
+  const byKind = Object.fromEntries(effects.map(e => [e.kind, e]));
+  assert.deepEqual(byKind.heal.payload, { dice: "3d8" });
+  assert.deepEqual(byKind.defence.payload, { dtype: "fire", standing: "resistant" });
+  assert.deepEqual(byKind.turn.payload, { turnKind: "bonus", n: 1 });
+  // Advantage rides in the target column beside a modifier's, and carries no amount.
+  assert.equal(byKind.advantage.target, "skill:perception");
+  assert.equal(byKind.advantage.amount, 0);
+
+  // The ongoing three reach the DM's board through the engine, like any other granted effect.
+  const board = await api("dm", "GET", "/api/characters/party");
+  const card = board.party.find(p => p.id === theirs.id);
+  assert.equal(card.granted, 4);
+});
+
+test("a one-time grant is taken once, by its recipient, and never twice", async () => {
+  const { mine, theirs } = await kindsPair();
+  await api("tester", "POST", "/api/effects", {
+    fromCharacterId: mine.id, label: "Mercy", targets: [theirs.id],
+    benefits: [{ kind: "heal", dice: "2d4" }, { kind: "ac-bonus-that-is-not", target: "ac", amount: 2 }],
+  });
+  const open = (await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects;
+  const heal = open.find(e => e.kind === "heal");
+  const mod = open.find(e => e.kind === "modifier");
+
+  // The caster cannot take it for them, and neither can anybody else.
+  assert.equal((await api("tester", "POST", `/api/effects/${heal.id}/apply`)).status, 403);
+  // An ongoing effect is not something you "take" — it is already on you.
+  assert.equal((await api("other", "POST", `/api/effects/${mod.id}/apply`)).status, 400);
+
+  assert.equal((await api("other", "POST", `/api/effects/${heal.id}/apply`, { note: "9 healed" })).status, 200);
+  // Spent: it leaves the open list, and a second press changes nothing.
+  const after = (await api("other", "GET", `/api/characters/${theirs.id}/effects`)).effects;
+  assert.ok(!after.some(e => e.id === heal.id));
+  assert.ok(after.some(e => e.id === mod.id));          // the ongoing one is untouched
+  assert.equal((await api("other", "POST", `/api/effects/${heal.id}/apply`)).status, 400);
+});
+
+test("a benefit the engine has no row for never becomes a grant, whatever its kind", async () => {
+  const { mine, theirs } = await kindsPair();
+  const bad = b => api("tester", "POST", "/api/effects",
+    { fromCharacterId: mine.id, label: "X", targets: [theirs.id], benefits: [b] });
+
+  assert.equal((await bad({ kind: "heal", dice: "lots" })).status, 400);
+  assert.equal((await bad({ kind: "defence", dtype: "sadness", standing: "resistant" })).status, 400);
+  // A seal hands out benefits, so a vulnerability is refused even though it is a real standing.
+  assert.equal((await bad({ kind: "defence", dtype: "fire", standing: "vulnerable" })).status, 400);
+  assert.equal((await bad({ kind: "turn", turnKind: "interlude" })).status, 400);
+  // Advantage is scoped by the modifier targets, so it cannot be pointed at something no roll asks.
+  assert.equal((await bad({ kind: "advantage", target: "vibes" })).status, 400);
 });
 
 test("bad input is refused rather than coerced", async () => {

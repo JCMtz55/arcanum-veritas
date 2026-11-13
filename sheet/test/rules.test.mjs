@@ -473,6 +473,247 @@ test("an attack can step by character level", () => {
   // An attack with no steps is returned exactly as it was.
   const plain = { name: "Dagger", damage: "1d4" };
   assert.equal(R.attackAtLevel(pc({ level: 9 }), plain), plain);
+
+  // A step may move the ENHANCEMENT instead, which lifts the damage as well as the to-hit —
+  // Dreammaker's Soul Bonded says "to attack and damage" where The Unheld's Standing says only
+  // "the attack BONUS". Both shapes have to be sayable, so a step can carry either.
+  const dreammaker = { name: "Dreammaker", damage: "2d6", type: "radiant", proficient: true,
+    steps: [{ at: 4, magic: 1 }, { at: 8, magic: 2 }, { at: 12, magic: 3 },
+            { at: 16, magic: 4 }, { at: 20, magic: 5 }] };
+  const at = lv => R.attackAtLevel(pc({ level: lv }), dreammaker);
+  assert.equal(at(3).magic, undefined);          // below the first step it has none
+  assert.equal(at(4).magic, 1);
+  assert.equal(at(11).magic, 2);
+  assert.equal(at(20).magic, 5);
+
+  // And it reaches BOTH rolls, which is the whole difference from `bonus`.
+  const ch16 = pc({ level: 16, abilities: { str: 16 } });
+  const live = R.attackAtLevel(ch16, dreammaker);
+  assert.equal(R.attackBonus(ch16, live).total, R.proficiencyBonus(16) + 4);
+  assert.equal(R.groupExpr(R.damageGroups(ch16, live)[0]), "2d6+4");
+  // The Unheld's stepped `bonus` still reaches only the to-hit.
+  const cuts = R.attackAtLevel(pc({ level: 12 }), { name: "The Cuts", damage: "1d8", bonus: 2,
+    steps: [{ at: 10, bonus: 3 }] });
+  assert.equal(cuts.bonus, 3);
+  assert.equal(cuts.magic, undefined);
+});
+
+// ── CS-021 / CS-025: an attack is made of parts ─────────────────────────
+// The row used to be a number somebody worked out and a dice expression with their modifier
+// already written into it. These are the tests that say it is arithmetic now — and, first of all,
+// that nothing written the old way moved under its owner.
+test("CS-021 — a legacy attack row behaves exactly as it did before", () => {
+  const c = pc({ level: 8, abilities: { str: 18, dex: 14 } });
+  const old = { name: "Etherium Dagger", bonus: 9, damage: "1d4+5", type: "piercing" };
+
+  // The typed bonus is the WHOLE to-hit. No ability, no proficiency, nothing inferred.
+  const hit = R.attackBonus(c, old);
+  assert.equal(hit.total, 9);
+  assert.equal(hit.parts.length, 1);
+  assert.equal(hit.parts[0].reason, "Attack bonus");
+  assert.equal(hit.legacy, true);
+
+  // And the damage is rolled exactly as typed — the +5 inside it is not joined by a +4 for
+  // Strength, which is the one way a migration could have hurt somebody.
+  const g = R.damageGroups(c, old);
+  assert.equal(g.length, 1);
+  assert.equal(R.groupExpr(g[0]), "1d4+5");
+  assert.equal(g[0].type, "piercing");
+});
+
+test("CS-021 — to-hit is ability, proficiency, enhancement and what is lifting every attack", () => {
+  const c = pc({ level: 8, abilities: { str: 18, dex: 14 } });          // PB +3, STR +4
+  const a = { name: "Vaultbrand Saber", ability: "str", proficient: true, magic: 2, damage: "1d8", type: "slashing" };
+
+  const hit = R.attackBonus(c, a);
+  assert.equal(hit.total, 4 + 3 + 2);
+  assert.deepEqual(hit.parts.map(p => p.amount), [4, 3, 2]);
+  assert.equal(hit.legacy, false);
+
+  // The damage takes the ability and the enhancement, and nothing takes proficiency.
+  assert.equal(R.groupExpr(R.damageGroups(c, a)[0]), "1d8+6");
+
+  // `damageAbility: false` keeps the modifier on the to-hit only — an off-hand swing.
+  assert.equal(R.groupExpr(R.damageGroups(c, { ...a, damageAbility: false })[0]), "1d8+2");
+
+  // A round of Bless reaches it through the ordinary `attack` target, named in the breakdown.
+  const blessed = { ...c, modifiers: [{ target: "attack", amount: 2, reason: "Bless", rounds: 3 }] };
+  const lifted = R.attackBonus(blessed, a);
+  assert.equal(lifted.total, 11);
+  assert.ok(lifted.parts.some(p => p.reason === "Bless"));
+});
+
+test("CS-021 — finesse and Verum are resolved every time, never stored", () => {
+  const strong = pc({ level: 5, abilities: { str: 18, dex: 12 } });
+  const quick = pc({ level: 5, abilities: { str: 12, dex: 18 } });
+  const a = { name: "Rapier", ability: "finesse", proficient: true, damage: "1d8" };
+
+  // The same row, two characters, the better modifier each time.
+  assert.equal(R.attackAbility(strong, a).id, "str");
+  assert.equal(R.attackAbility(quick, a).id, "dex");
+  assert.equal(R.attackBonus(strong, a).total, 4 + 3);
+  assert.equal(R.attackBonus(quick, a).total, 4 + 3);
+
+  // And it follows an ASI rather than going stale: move Dexterity past Strength and the row moves.
+  const asi = pc({ level: 5, abilities: { str: 18, dex: 20 } });
+  assert.equal(R.attackAbility(asi, a).id, "dex");
+  assert.equal(R.attackBonus(asi, a).total, 5 + 3);
+
+  // Verum is the highest of the six — what a seal rolls — and Dream is not among them.
+  const seal = pc({ level: 5, abilities: { str: 10, dex: 10, cha: 18 }, dream: 20 });
+  assert.equal(R.attackAbility(seal, { ability: "verum" }).mod, 4);
+});
+
+test("CS-025 — a weapon may answer to a NAMED pair, not only to Finesse", () => {
+  // Dreammaker is an Aethkasar — in no weapon table — and Juan's ruling is Dexterity OR
+  // Intelligence. `best:` says that without a second hard-coded special case.
+  const bladed = { ability: "best:dex,int" };
+  const quick = pc({ level: 8, abilities: { dex: 20, int: 12 } });
+  const clever = pc({ level: 8, abilities: { dex: 12, int: 20 } });
+  assert.equal(R.attackAbility(quick, bladed).id, "dex");
+  assert.equal(R.attackAbility(clever, bladed).id, "int");
+  assert.equal(R.attackAbility(quick, bladed).mod, 5);
+  assert.equal(R.attackAbility(clever, bladed).mod, 5);
+  // A tie goes to the one named first, so the label never flickers.
+  assert.equal(R.attackAbility(pc({ abilities: { dex: 16, int: 16 } }), bladed).id, "dex");
+  // It is read fresh, so an ASI moves it — the whole reason it is not stored as one ability.
+  assert.equal(R.attackAbility(pc({ abilities: { dex: 16, int: 18 } }), bladed).id, "int");
+
+  // Which forms are real, asked once so a note and the dialog's menu cannot disagree.
+  assert.equal(R.isAttackAbility("best:dex,int"), true);
+  assert.equal(R.isAttackAbility("finesse"), true);
+  assert.equal(R.isAttackAbility(""), true);
+  assert.equal(R.isAttackAbility("best:dex"), false);        // a pair needs two
+  assert.equal(R.isAttackAbility("best:luck,int"), false);   // and both must be real
+  assert.equal(R.isAttackAbility("luck"), false);
+  // Junk resolves to no ability rather than to a wrong one.
+  assert.equal(R.attackAbility(quick, { ability: "best:luck,fortune" }).id, "");
+});
+
+test("CS-021 — a linked weapon arms the row, and takes its enhancement with it", () => {
+  const sword = { name: "Vaultbrand Saber", magical: true, requiresAttunement: true, attuned: true };
+  const a = { name: "Vaultbrand Saber", item: "Vaultbrand Saber",
+    ability: "str", proficient: true, magic: 2, damage: "1d8" };
+
+  const held = pc({ level: 8, abilities: { str: 18 }, equipment: { mainHand: sword } });
+  assert.equal(R.attackArmed(held, a), true);
+  assert.equal(R.attackBonus(held, a).total, 4 + 3 + 2);
+  assert.equal(R.groupExpr(R.damageGroups(held, a)[0]), "1d8+6");
+
+  // In the pack: the row still rolls — this sheet referees nothing — but the sword's +2 is not in
+  // it, on either roll, exactly as a ring in a pack adds no AC.
+  const packed = pc({ level: 8, abilities: { str: 18 }, carried: [sword] });
+  assert.equal(R.attackArmed(packed, a), false);
+  assert.equal(R.attackBonus(packed, a).total, 4 + 3);
+  assert.equal(R.groupExpr(R.damageGroups(packed, a)[0]), "1d8+4");
+
+  // Held but not attuned, when the item says it must be: the same answer.
+  const unattuned = pc({ level: 8, abilities: { str: 18 },
+    equipment: { mainHand: { ...sword, attuned: false } } });
+  assert.equal(R.attackArmed(unattuned, a), false);
+
+  // A row naming an item the character does not have says so rather than pretending.
+  assert.equal(R.attackItem(pc({}), a).missing, true);
+  // And a row naming no item is always armed.
+  assert.equal(R.attackArmed(pc({}), { name: "Unarmed", damage: "1d4" }), true);
+});
+
+test("CS-025 — riders are their own damage type, and the ability never reaches them", () => {
+  const c = pc({ level: 8, abilities: { str: 18 } });
+  const a = { name: "Everflame Glaive", ability: "str", proficient: true, magic: 1,
+    damage: "1d10", type: "slashing",
+    extra: [{ dice: "1d6", type: "fire", label: "Everflame" }, { dice: "2d4", type: "radiant" }] };
+
+  const g = R.damageGroups(c, a);
+  assert.equal(g.length, 3);
+  // The weapon's own group carries Strength and the enhancement...
+  assert.equal(R.groupExpr(g[0]), "1d10+5");
+  assert.equal(g[0].type, "slashing");
+  // ...and the riders carry neither. A +1d6 of fire is not lifted by your Strength.
+  assert.equal(R.groupExpr(g[1]), "1d6");
+  assert.equal(g[1].type, "fire");
+  assert.equal(R.groupExpr(g[2]), "2d4");
+  assert.equal(g[2].type, "radiant");
+
+  // What the row prints.
+  assert.equal(R.damageSays(c, a), "1d10+5 slashing · 1d6 fire · 2d4 radiant");
+
+  // A rider with no dice is not a rider.
+  assert.equal(R.damageGroups(c, { ...a, extra: [{ type: "fire" }] }).length, 1);
+});
+
+test("CS-025 — a rider with a condition stays OUT until it is asked for", () => {
+  const c = pc({ level: 8, abilities: { dex: 18 } });
+  // Black Raze: 6d6 only when you attacked with advantage.
+  const a = { name: "Black Raze", ability: "finesse", proficient: true, magic: 3,
+    damage: "1d4", type: "piercing",
+    extra: [{ dice: "6d6", type: "piercing", label: "Shadow Strike", when: "you attacked with advantage" }] };
+
+  // 🔴 The whole point: by default it is not there. A rider you forgot to switch off is a lie
+  // about every attack after it.
+  const bare = R.damageGroups(c, a);
+  assert.equal(bare.length, 1);
+  assert.equal(R.damageSays(c, a), "1d4+7 piercing");
+
+  // Asked for by key, it joins — as its own group, its own type, no ability modifier on it.
+  const withIt = R.damageGroups(c, a, { armed: ["x0"] });
+  assert.equal(withIt.length, 2);
+  assert.equal(R.groupExpr(withIt[1]), "6d6");
+  assert.equal(withIt[1].why.length, 0);
+
+  // The sheet says what is waiting, so the row can offer it without re-reading the note.
+  assert.deepEqual(R.conditionalRiders(a).map(r => [r.key, r.dice, r.when]),
+    [["x0", "6d6", "you attacked with advantage"]]);
+
+  // An UNconditional rider is unaffected by any of this — it is simply always there.
+  const bow = { name: "Hailfrost", ability: "dex", proficient: true, damage: "1d8", type: "piercing",
+    extra: [{ dice: "2d6", type: "cold" }] };
+  assert.equal(R.damageGroups(c, bow).length, 2);
+  assert.equal(R.conditionalRiders(bow).length, 0);
+  // And arming a key that names nothing changes nothing.
+  assert.equal(R.damageGroups(c, bow, { armed: ["x9"] }).length, 2);
+});
+
+test("CS-025 — a versatile weapon is one row with two modes", () => {
+  const c = pc({ level: 8, abilities: { str: 18 } });
+  const a = { name: "Battleaxe", ability: "str", proficient: true, damage: "1d8",
+    versatile: "1d10", versatileName: "Two-handed", type: "slashing" };
+
+  assert.equal(R.groupExpr(R.damageGroups(c, a)[0]), "1d8+4");
+  assert.equal(R.groupExpr(R.damageGroups(c, a, { versatile: true })[0]), "1d10+4");
+  // The mode is named on the group, so the roll can say which one it was.
+  assert.equal(R.damageGroups(c, a, { versatile: true })[0].label, "Two-handed");
+  // Asking for a mode a weapon does not have falls back to its own dice rather than to nothing.
+  assert.equal(R.groupExpr(R.damageGroups(c, { ...a, versatile: "" }, { versatile: true })[0]), "1d8+4");
+});
+
+test("CS-090 holds on the new row — a spell attack is its own target", () => {
+  const tome = { name: "Tome of Salem", effects: [
+    { target: "spellAttack", amount: 4 }, { target: "spellDamage", amount: 2 }] };
+  const c = pc({ level: 8, abilities: { int: 18 }, equipment: { mainHand: tome } });
+
+  const bolt = { name: "Chill Touch", ability: "int", proficient: true, spell: true, damage: "1d8", type: "necrotic" };
+  const bow = { name: "Shortbow", ability: "dex", proficient: true, damage: "1d6", type: "piercing" };
+
+  // The tome reaches the spell attack...
+  assert.equal(R.attackBonus(c, bolt).total, 4 + 3 + 4);
+  assert.equal(R.groupExpr(R.damageGroups(c, bolt)[0]), "1d8+6");   // Int +4, spellDamage +2
+  // ...and not the bow, which is the half of CS-090 that was wrong in both directions.
+  assert.equal(R.attackBonus(c, bow).total, R.abilityModifier(c, "dex") + 3);
+
+  // A general `attack` effect still reaches both, because `attack` means every attack.
+  const banner = pc({ level: 8, abilities: { int: 18, dex: 14 },
+    equipment: { mainHand: tome, offHand: { name: "Banner", effects: [{ target: "attack", amount: 1 }] } } });
+  assert.equal(R.attackBonus(banner, bolt).total, 4 + 3 + 4 + 1);
+  assert.equal(R.attackBonus(banner, bow).total, 2 + 3 + 1);
+});
+
+test("CS-021 — a stepped weapon's growth still lands, and the engine reads the step", () => {
+  const c = pc({ level: 11, abilities: { str: 18 } });
+  const a = R.attackAtLevel(c, { name: "Arcane-Assault Link", ability: "str", proficient: true,
+    damage: "1d8", type: "force", steps: [{ at: 11, damage: "2d8" }, { at: 17, damage: "3d8" }] });
+  assert.equal(R.groupExpr(R.damageGroups(c, a)[0]), "2d8+4");
+  assert.equal(R.attackBonus(c, a).total, 4 + 4);                   // PB at 11 is +4
 });
 
 // ── CS-097: a critical range ────────────────────────────────────────────
@@ -2353,4 +2594,187 @@ test("inspiration is a pool, and the die about to run out is spent first", () =>
   assert.equal(list.find(d => d.id === "b").rounds, 2);
   assert.equal(list.find(d => d.id === "a").rounds, null);
   assert.equal(R.inspirationHeld({ inspiration: list }).length, 3);
+});
+
+// ── What somebody else's seal is doing to you ───────────────────────────
+// `granted` is hung on the character from OUTSIDE the sheet — the rows are the server's — and the
+// engine has to treat them as first-class modifiers without any of it reaching the player's JSON.
+const granted = rows => ({ ...R.blankCharacter(), ac: 10, granted: rows });
+
+test("a granted effect counts exactly as a written one, and says who cast it", () => {
+  const ch = granted([{ id: 7, label: "Bless", player: "Salomon", formula: "", target: "ac",
+    amount: 2, rounds: 10 }]);
+  assert.equal(R.armorClass(ch), 12);
+
+  // It is a real contribution, and the breakdown names the seal and the caster — the whole reason
+  // the feature is worth having is that six weeks later somebody can say where the +2 came from.
+  const [c] = R.contributions(R.activeModifiers(ch), "ac");
+  assert.equal(c.amount, 2);
+  assert.equal(c.reason, "Bless — Salomon");
+  assert.equal(c.source, "granted");
+
+  // And it is NOT in the sheet: nothing here was written into `modifiers`, which is what keeps one
+  // player's cast from racing another player's autosave.
+  assert.deepEqual(ch.modifiers, []);
+});
+
+test("a granted effect is marked apart from a written one and from an item's", () => {
+  const [g] = R.grantedEffects(granted([{ id: 3, label: "Aid", target: "maxHp", amount: 5 }]));
+  assert.equal(g.id, "gr:3");
+  assert.equal(g.grantedId, 3);
+  assert.ok(R.isGrantedModifier(g));
+  assert.ok(!R.isItemModifier(g));
+  // `rounds` absent means it stands until somebody drops it, the same as a written effect's null.
+  assert.equal(g.rounds, null);
+});
+
+test("a granted amount is flat, so a derivation reads it but never re-derives it", () => {
+  // The caster's "twice my proficiency bonus" was resolved to 6 at the cast. On the recipient it is
+  // a 6 — not twice THEIR proficiency bonus — and it counts toward what a derivation measures.
+  const ch = { ...granted([{ id: 1, label: "Gate of Caelum", player: "Salomon",
+    formula: "twice your proficiency bonus", target: "ability:cha", amount: 6 }]),
+    level: 1, abilities: { ...R.blankCharacter().abilities, cha: 10 },
+    modifiers: [{ id: "m", target: "saveDc", from: "cha", times: 1, active: true }] };
+
+  // Charisma 10 + a granted 6 is 16, a +3 modifier — and the derived effect reads that 3.
+  assert.equal(R.abilityModifier(ch, "cha"), 3);
+  assert.equal(R.modifierAmount(ch, ch.modifiers[0]), 3);
+  // The formula travels with it so the row can still explain itself.
+  assert.ok(R.grantedEffects(ch)[0].reason.includes("twice your proficiency bonus"));
+});
+
+test("granted effects ride the same blanket targets as everything else", () => {
+  // Bless is one row, not seven: a seal grants "all saving throws" the same way a cloak does.
+  const ch = granted([{ id: 9, label: "Bless", player: "Zeke", target: R.SAVE_ALL, amount: 2 }]);
+  for (const id of R.STANDARD_ABILITIES)
+    assert.equal(R.saveTotal(ch, id), R.saveTotal({ ...ch, granted: [] }, id) + 2);
+});
+
+test("a character with nothing granted is exactly the character it was", () => {
+  const bare = R.blankCharacter();
+  assert.deepEqual(R.grantedEffects(bare), []);
+  assert.equal(R.armorClass({ ...bare, granted: undefined }), R.armorClass(bare));
+});
+
+// ── the other four kinds, where each one lands ──────────────────────────
+test("a granted resistance reads as a defence and is NOT the character's own", () => {
+  const ch = granted([{ id: 4, kind: "defence", label: "Kindled", player: "Salomon",
+    payload: { dtype: "fire", standing: "resistant" }, rounds: 10 }]);
+  assert.equal(R.defence(ch, "fire").standing, "resistant");
+  assert.equal(R.defenceList(ch).length, 1);
+
+  // ⚠️ THE TRAP CS-104 EXISTS TO CLOSE, with a second door. `ownDefenceRecords` is what every write
+  // back to the sheet goes through; if a granted defence appeared in it, the player's next edit
+  // would copy it onto their own sheet, where it would outlive the seal and nobody could remove it.
+  assert.deepEqual(R.ownDefenceRecords(ch), []);
+});
+
+test("a granted Action is counted and drawn exactly like one of your own", () => {
+  const base = R.turnAllowance(R.blankCharacter());
+  assert.equal(base.action, 1);
+  assert.equal(base.reaction, 1);
+
+  const ch = granted([{ id: 5, kind: "turn", label: "Hasted", player: "Zeke",
+    payload: { turnKind: "action", n: 1 }, rounds: 10 }]);
+  assert.equal(R.turnAllowance(ch).action, 2);
+  assert.equal(R.turnAllowance(ch).reaction, 1);
+  // And the tracker draws the same list the allowance counted, or a pip would have no × .
+  assert.equal(R.allTurnGrants(ch).length, 1);
+  assert.equal(R.allTurnGrants(ch)[0].source, "granted");
+});
+
+test("a granted turn names a real cost, and junk is dropped rather than counted", () => {
+  const junk = granted([{ id: 6, kind: "turn", payload: { turnKind: "interlude", n: 1 } }]);
+  assert.deepEqual(R.grantedTurns(junk), []);
+  assert.equal(R.turnAllowance(junk).action, 1);
+});
+
+test("healing and temp HP are offered, never merged — nothing about the sheet moves on its own", () => {
+  const ch = granted([
+    { id: 7, kind: "heal", label: "Mercy", player: "Zeke", payload: { dice: "3d8" } },
+    { id: 8, kind: "tempHp", label: "Ward", player: "Zeke", payload: { dice: "2d6" } },
+  ]);
+  assert.equal(R.pendingGrants(ch).length, 2);
+  // They are not modifiers, not defences and not actions: the sheet is untouched until the player
+  // presses the button, because a heal is a choice about when and temp HP is a choice about whether.
+  assert.deepEqual(R.grantedEffects(ch), []);
+  assert.deepEqual(R.grantedDefences(ch), []);
+  assert.deepEqual(R.grantedTurns(ch), []);
+  assert.equal(R.armorClass(ch), 10);
+  assert.equal(ch.hp, R.blankCharacter().hp);
+  assert.equal(ch.tempHp, 0);
+});
+
+// ── Advantage ───────────────────────────────────────────────────────────
+test("granted advantage is pointed at a modifier target, and junk is not advantage", () => {
+  const ch = granted([
+    { id: 1, kind: "advantage", target: "skill:perception", label: "Kindled", player: "Salomon" },
+    { id: 2, kind: "advantage", target: "vibes", label: "Nonsense" },
+  ]);
+  const adv = R.grantedAdvantage(ch);
+  assert.equal(adv.length, 1);
+  assert.equal(adv[0].target, "skill:perception");
+  assert.equal(adv[0].why, "Kindled — Salomon");
+  assert.equal(adv[0].grantedId, 1);
+});
+
+test("a roll answers to every scope it is in, and to no others", () => {
+  const perception = granted([{ id: 1, kind: "advantage", target: "skill:perception", label: "A" }]);
+  // The skill it names...
+  assert.equal(R.advantageOn(perception, R.ADVANTAGE_SCOPES.skill("perception")).length, 1);
+  // ...and not another skill, nor a save, nor an attack.
+  assert.equal(R.advantageOn(perception, R.ADVANTAGE_SCOPES.skill("stealth")).length, 0);
+  assert.equal(R.advantageOn(perception, R.ADVANTAGE_SCOPES.save("wis")).length, 0);
+  assert.equal(R.advantageOn(perception, R.ADVANTAGE_SCOPES.attack()).length, 0);
+});
+
+test("a blanket reaches every roll under it, the way a blanket modifier does", () => {
+  const everyCheck = granted([{ id: 1, kind: "advantage", target: R.CHECK_ALL, label: "Guidance" }]);
+  assert.equal(R.advantageOn(everyCheck, R.ADVANTAGE_SCOPES.skill("stealth")).length, 1);
+  assert.equal(R.advantageOn(everyCheck, R.ADVANTAGE_SCOPES.ability("str")).length, 1);
+  // Initiative is a Dexterity check, so it is under that blanket too.
+  assert.equal(R.advantageOn(everyCheck, R.ADVANTAGE_SCOPES.initiative()).length, 1);
+  // A saving throw is not a check, and never has been.
+  assert.equal(R.advantageOn(everyCheck, R.ADVANTAGE_SCOPES.save("dex")).length, 0);
+
+  const everySave = granted([{ id: 2, kind: "advantage", target: R.SAVE_ALL, label: "Aura" }]);
+  for (const id of R.STANDARD_ABILITIES)
+    assert.equal(R.advantageOn(everySave, R.ADVANTAGE_SCOPES.save(id)).length, 1);
+  assert.equal(R.advantageOn(everySave, R.ADVANTAGE_SCOPES.skill("arcana")).length, 0);
+});
+
+test("a spell attack is an attack, but an attack is not a spell attack", () => {
+  const anyAttack = granted([{ id: 1, kind: "advantage", target: "attack", label: "A" }]);
+  assert.equal(R.advantageOn(anyAttack, R.ADVANTAGE_SCOPES.attack()).length, 1);
+  assert.equal(R.advantageOn(anyAttack, R.ADVANTAGE_SCOPES.spellAttack()).length, 1);
+
+  // The spell-specific one does NOT lift a bow — the same distinction CS-090 draws for the bonus.
+  const spellOnly = granted([{ id: 2, kind: "advantage", target: "spellAttack", label: "B" }]);
+  assert.equal(R.advantageOn(spellOnly, R.ADVANTAGE_SCOPES.spellAttack()).length, 1);
+  assert.equal(R.advantageOn(spellOnly, R.ADVANTAGE_SCOPES.attack()).length, 0);
+});
+
+test("advantage is not a modifier and changes no total anywhere", () => {
+  const ch = granted([{ id: 1, kind: "advantage", target: "ac", label: "A" }]);
+  assert.equal(R.armorClass(ch), 10);
+  assert.deepEqual(R.grantedEffects(ch), []);
+  assert.deepEqual(R.pendingGrants(ch), []);
+  assert.deepEqual(R.grantedTurns(ch), []);
+});
+
+test("the four kinds keep to themselves when they arrive together", () => {
+  const ch = granted([
+    { id: 1, kind: "modifier", target: "ac", amount: 2, label: "A" },
+    { id: 2, kind: "defence", payload: { dtype: "cold", standing: "immune" }, label: "B" },
+    { id: 3, kind: "turn", payload: { turnKind: "bonus", n: 1 }, label: "C" },
+    { id: 4, kind: "heal", payload: { dice: "1d4" }, label: "D" },
+  ]);
+  assert.equal(R.armorClass(ch), 12);
+  assert.equal(R.defence(ch, "cold").standing, "immune");
+  assert.equal(R.turnAllowance(ch).bonus, 2);
+  assert.equal(R.pendingGrants(ch).length, 1);
+  // One row each, and no row counted twice anywhere.
+  assert.equal(R.grantedEffects(ch).length, 1);
+  assert.equal(R.grantedDefences(ch).length, 1);
+  assert.equal(R.grantedTurns(ch).length, 1);
 });

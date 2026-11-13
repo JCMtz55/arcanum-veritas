@@ -146,9 +146,10 @@ function tabCharacter(u, chars) {
         <strong>Character Sheet</strong>; the level, the Dream score and any Fate are yours to grant
         once it exists.</p></div></div>`;
   return `<div class="cdx-sec"><h2>Character — live</h2>
-    <p class="cdx-rings">The same card the board shows, and the same controls. Every figure is computed
-      by the server from the sheet's own rules, so this and their sheet cannot disagree.</p>
-    <div class="pty one">` + chars.map(partyCardHtml).join("") + `</div></div>`;
+    <p class="cdx-rings">The same row the board shows, and the same controls — open it to set anything
+      on it. Every figure is computed by the server from the sheet's own rules, so this and their
+      sheet cannot disagree.</p>
+    <div class="ptr-list">` + chars.map(partyRowHtml).join("") + `</div></div>`;
 }
 
 // ── Cognitions ─────────────────────────────────────────────

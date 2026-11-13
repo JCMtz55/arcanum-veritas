@@ -464,6 +464,8 @@ function buildPlayCardHTML(coreCog, tier) {
   const foot = [];
   if (riders.length) foot.push("Sigil conditions last until the end of the target's next turn.");
   if (foot.length) h += `<div class="c-foot">${foot.join(" ")}</div>`;
+  // A Supportive seal reaches other people by design, so the card is where you cast it from.
+  h += castSection();
   return h + `</div>`;
 }
 

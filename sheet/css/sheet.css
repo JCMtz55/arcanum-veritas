@@ -271,7 +271,12 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 
 /* ── centre: attacks, action economy ─────────────────────────────────── */
 .atks{display:flex;flex-direction:column;gap:5px}
-.atk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,110px) auto auto;gap:5px;align-items:stretch}
+/* Flex rather than a fixed grid: the row's middle buttons come and go — a versatile weapon has a
+   second mode, most do not — and a grid of four named columns pushed the fifth onto its own line. */
+.atk{display:flex;gap:5px;align-items:stretch}
+.atk>.atk-nm{flex:1 1 auto;min-width:0}
+.atk>.atk-dmg{flex:0 1 112px;min-width:0}
+.atk>.atk-alt,.atk>.atk-crit,.atk>.atk-ed{flex:none}
 .atk button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px;
   font-family:var(--sans);font-size:11px;text-align:left}
 .atk button:hover{border-color:var(--mute)}
@@ -281,6 +286,21 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 .atk-dmg{text-align:center;color:var(--bone2)}
 .atk-dmg em{font-style:normal;color:var(--mute);font-size:10px}
 .atk-crit{color:var(--brass)}
+/* The weapon's other mode — two-handed, or a second form. Two letters, because it sits between
+   the damage and the crit and a word there would push both off the row on a phone. */
+.atk-alt{color:var(--bone2);text-transform:uppercase;font-size:10px;letter-spacing:.06em}
+.atk-ed{color:var(--mute);padding:5px 6px}
+.atk-ed:hover{color:var(--bone2)}
+/* A rider's count, beside the weapon's own dice: the types are on the tooltip, because three
+   damage types spelled out do not fit and the first one is the one you say out loud. */
+.atk-plus{font-style:normal;font-size:9px;color:var(--brass);margin-left:3px;vertical-align:super}
+/* Dice the weapon has and THIS swing may not — offered at the roll, never counted into the row's
+   printed damage. A question mark rather than a number, because the number is not knowable here. */
+.atk-when{font-style:normal;font-size:9px;color:var(--mute);margin-left:3px;vertical-align:super}
+/* The weapon is not in a slot. It still rolls — this sheet referees nothing — but an attack you
+   are not holding must not read like one you are. */
+.atk.stowed .atk-nm b{color:var(--mute)}
+.atk.stowed .atk-nm span{color:#59616b}
 .atk .x{border:0;background:none;align-self:center}
 
 .econs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -745,6 +765,14 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 /* The condition, on its own line under the row it belongs to — it is a sentence, and wedging it
    between two selects would squeeze both to nothing. */
 .fx .fx-w{flex:1 1 100%;font-size:12px}
+/* A damage rider reuses the same row — dice, type, and what to call it. Without widths of their
+   own the three inherit `.txt{width:100%}` and stack into three lines, which reads as three
+   separate riders rather than one. */
+.fx .xd-d{flex:none;width:80px}
+.fx .xd-t{flex:1 1 104px;min-width:0}
+.fx .xd-l{flex:2 1 132px;min-width:0}
+/* A rider's condition, on its own line under it, for the reason an effect's is: it is a sentence. */
+.fx .xd-w{flex:1 1 100%;font-size:12px}
 
 /* ── only when… ──────────────────────────────────────────────────────────
    Conditional effects, as switches. Off by default and visibly so: the sheet has no way to know
@@ -775,6 +803,27 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .atk-step{font-style:normal;font-size:8px;color:var(--brass);margin-left:3px;vertical-align:super}
 .mod.item .mod-r{color:var(--mute)}
 .mod.item .x{width:14px}
+
+/* ── granted by somebody else's seal ─────────────────────────────────────
+   Marked apart from the rows you wrote yourself, because the question a player asks about one of
+   these is never "what did I put here" — it is "who did this to me", and the answer is already in
+   the row's reason. The left edge is the whole signal; the row is otherwise an ordinary one. */
+.mod.granted{border-left:2px solid var(--iris,var(--brass))}
+.mod.granted .mod-n{color:var(--iris,var(--brass))}
+.mod.granted .mod-w{color:var(--bone2)}
+/* A cast of your own, still standing on other people. It has no amount of its own — it is a handle
+   for ending the whole thing at once — so the name takes the space the number would have had. */
+.mod.out .mod-n{color:var(--bone);flex:none}
+.mod.out .mod-w{font-style:italic}
+/* Casting is the builder's: a Supportive seal is cast from the seal card, where the seal is. The
+   sheet shows what landed and what is still out, and both are ordinary .mod rows. */
+/* Offered, not yet taken — healing and temporary hit points. Indigo rather than the brass the
+   running effects use, because this row is a question and the others are statements. */
+.mod.offer{border-color:#46527d}
+.mod.offer .mod-n{color:var(--indigo,#8fa0d8);font-weight:600}
+.mod.offer .btn{flex:none;padding:2px 9px}
+/* A defence another player's seal is holding over you, marked the way a worn one is. */
+.dfn.granted{border-style:dashed}
 
 /* ── the popover's own way out ───────────────────────────────────────── */
 .pop-x{position:absolute;top:5px;right:6px;z-index:2;width:22px;height:22px;border-radius:6px;

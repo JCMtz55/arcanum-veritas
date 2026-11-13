@@ -34,6 +34,12 @@ export const state = {
   ignitions: null,     // the custom Ignitions written for this player and switched on by the DM
   paragon: null,       // whether the path is open, the pool, and which Devotions are sworn
   ephemerError: "",
+  // What somebody else's seal is doing to this character, and what this character has out on other
+  // people. NEVER part of the sheet: these are server rows, polled, and merged by the engine at
+  // `activeModifiers`. Writing them into the sheet would mean one player's cast racing another
+  // player's autosave — see the note on `character_effects` in db.js.
+  effects: [],         // open rows ON me: [{ id, label, target, amount, rounds, player, formula }]
+  out: [],             // casts of mine still standing: [{ group, label, onWhom, count }]
 };
 
 const listeners = new Set();
@@ -85,7 +91,10 @@ export async function select(id) {
   const { character } = await api("GET", `../api/characters/${id}`);
   state.current = normalise(character);
   try { localStorage.setItem("ouas-sheet:last", String(id)); } catch {}
-  await loadUnlocks();
+  // Effects belong to the character, not the account, so switching characters re-asks. A sheet that
+  // opened showing the last one's Bless would be worse than one that showed none.
+  state.effects = []; state.out = [];
+  await Promise.all([loadUnlocks(), loadEffects()]);
   state.save = "idle"; state.saveError = "";
   emit();
 }
@@ -127,6 +136,9 @@ export function derived() {
     abilities: { ...c.sheet.abilities, dream: c.dream },
     level: c.level, fate: c.fate,
     honor: c.honor, morality: c.morality,
+    // Granted by somebody else's seal. Handed to the engine the same way the DM's columns are —
+    // from outside the sheet, so no part of it is ever written back into the player's JSON.
+    granted: state.effects,
     // Where the character is standing travels with them, because an item's effects depend on it: a
     // Dreamlike item is inactive while awake, and the engine must not have to be told twice.
     inInsomnia: state.inInsomnia,
@@ -219,15 +231,89 @@ export async function loadUnlocks() {
 // So the open tokens are re-read on a slow timer: only this one small list, never the sheet, which
 // the player may be editing. A redraw happens only when the set has actually changed, and nothing
 // polls at all while the tab is in the background.
-const UNLOCK_POLL = 25_000;
-let unlockKey = "";
+// Granted effects ride the same timer, because they have the same promise to keep: a Bless cast on
+// the other side of the table has to turn up here without anybody being told to reload. They move
+// far faster than an unlock does, though — an unlock arrives between sessions, a buff arrives in
+// the middle of somebody's turn — so in combat they are asked for on every tick and the unlocks
+// only on every fifth. Out of combat both go slow, and nothing polls at all in a background tab.
+const TICK = 5_000, SLOW = 5;
+let unlockKey = "", effectKey = "", tick = 0;
+
+export async function loadEffects() {
+  if (!state.current) return;
+  try {
+    const [mine, out] = await Promise.all([
+      api("GET", `../api/characters/${state.current.id}/effects`),
+      api("GET", `../api/characters/${state.current.id}/effects/out`),
+    ]);
+    state.effects = mine.effects || [];
+    state.out = out.out || [];
+  } catch { /* a deployment with no API is a sheet with no grants, not a broken one */ }
+}
+const keyOf = () => state.effects.map(e => `${e.id}:${e.amount}`).join(",") + "|" +
+  state.out.map(o => o.group).join(",");
+
+// ── what the DM set on this sheet ───────────────────────────────────────
+// The eight keys the DM's party board may write: hit points, temporary hit points, the conditions,
+// the Wounds, both Exhaustions, the Injuries and the Inspiration dice. Everything else on this
+// sheet is the player's alone and is never read back.
+//
+// WHY THIS IS READ AT ALL. This file holds the sheet in memory and saves it on a debounce; it has
+// never re-read it, because there was never anybody else writing it. There is now: at the table the
+// DM is the one holding the damage roll, and the board that shows hit points can change them. So
+// the keys it can change — and only those — are polled beside the unlocks and the granted effects.
+//
+// WHEN IT IS TAKEN. Only when this client has nothing of its own in flight: no queued edit, not
+// mid-save, not already in conflict. A player typing their own hit points at the same moment keeps
+// what they typed, and the ordinary optimistic-concurrency path takes it from there — their save is
+// refused against the newer version and they are offered the server's copy, which is exactly what
+// that mechanism is for (CS-004). This poll is the quiet case, which is almost every case.
+const DM_VITALS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
+                   "conditions", "injuries", "inspiration"];
+
+export async function loadVitals() {
+  if (!state.current || pending || state.save === "saving" || state.save === "conflict") return false;
+  const id = state.current.id, version = state.current.version;
+  let got;
+  try {
+    got = await api("GET", `../api/characters/${id}/vitals`);
+  } catch { return false; }        // a deployment with no API has no DM writing to it either
+  // The character may have been switched, or an edit queued, while that request was in the air.
+  if (!state.current || state.current.id !== id || state.current.version !== version) return false;
+  if (!Number.isInteger(got.version) || got.version === version) return false;
+
+  for (const k of DM_VITALS) {
+    const v = got.vitals?.[k];
+    if (v !== null && v !== undefined) state.current.sheet[k] = v;
+  }
+  state.current.version = got.version;
+  return true;
+}
+
 setInterval(async () => {
   if (document.hidden || !state.current || state.save === "conflict") return;
-  const before = unlockKey;
-  await loadUnlocks();
-  unlockKey = openUnlocks().map(u => `${u.id}:${u.target_level || ""}`).join(",");
-  if (unlockKey !== before) emit();
-}, UNLOCK_POLL);
+  tick++;
+  const slow = tick % SLOW === 0;
+  let changed = false;
+
+  if (slow) {
+    const before = unlockKey;
+    await loadUnlocks();
+    unlockKey = openUnlocks().map(u => `${u.id}:${u.target_level || ""}`).join(",");
+    if (unlockKey !== before) changed = true;
+  }
+  // The DM's writes keep the same clock as a granted effect, and for the same reason: a Bless cast
+  // across the table and a hit point taken off by the DM both have to turn up here without anybody
+  // being told to reload. In combat that is every tick; out of it, every fifth.
+  if (slow || state.current.sheet?.inCombat) {
+    const before = effectKey;
+    await loadEffects();
+    effectKey = keyOf();
+    if (effectKey !== before) changed = true;
+    if (await loadVitals()) changed = true;
+  }
+  if (changed) emit();
+}, TICK);
 export const openUnlocks = () => state.unlocks.filter(u => !u.consumed_at);
 // The level the DM has allowed and the player has not taken yet — what the LEVEL UP button is for.
 // There is at most one open at a time (the server refuses a second), and the lowest one goes first
@@ -268,6 +354,34 @@ export async function spendFate({ emphasis, original, note }) {
   state.current.fate = out.fate;
   emit();
   return out;
+}
+
+// ── Ending what a seal did ──────────────────────────────────────────────
+// Casting happens in the Arcanum builder, on the seal card — a Supportive seal is the thing that
+// reaches other people, and the builder is where it is drawn. The sheet owns the other end: what
+// has landed on you, and what you still have out.
+//
+// Dropping one that is on me, or taking back one of mine. The server decides which it was from who
+// is asking; this end only has to say which row.
+export async function endEffect(id) {
+  await api("DELETE", `../api/effects/${id}`);
+  await loadEffects();
+  emit();
+}
+
+// Taking a one-time grant. The server only records that the offer is spent — the hit points are
+// written by the caller, on this character's own sheet, through the ordinary save path.
+export async function applyGrant(id, note) {
+  await api("POST", `../api/effects/${id}/apply`, { note });
+  await loadEffects();
+  emit();
+}
+
+// Concentration broke: every row this cast made, wherever it landed.
+export async function endConcentration(group) {
+  await api("POST", `../api/effects/concentration/${encodeURIComponent(group)}/end`);
+  await loadEffects();
+  emit();
 }
 
 export async function events(limit = 40) {

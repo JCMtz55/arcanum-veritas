@@ -29,6 +29,12 @@ const state = {
   phase:       0,          // where a cycling Core (Lunar) stands in its cycle
   sealName:    "",         // the player's own name for the seal (optional)
   track:       { marks: [], now: "gold" }, // a tracker Core (Sun): activations logged this window, and this one
+  // What this seal GRANTS, if it grants anything: [{target, amount, from, times, rounds, note}].
+  // Written here, saved with the build, and cast at the party from the character sheet — the sheet
+  // is where the characters are. The target ids come from the engine over `/api/mod-targets`, never
+  // from a list typed out again here.
+  benefits:    [],
+  benefitMenu: null,       // the served menu, fetched once the block is first opened
 };
 
 // Which Verum / Complement pool a Ring draws from.

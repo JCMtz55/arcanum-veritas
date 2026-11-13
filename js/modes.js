@@ -29,10 +29,13 @@ const MODES = {
     snapshot: () => sealSnapshot(),
     name: { get: () => state.sealName, set: v => state.sealName = v },
     ids:  d => [d.core, ...(d.complements || []).map(c => c.id)],
+    // `benefits` has to come back out, or loading a seal and saving it again silently drops what it
+    // grants — the save would still look right and the cast would hand out nothing.
     load: (d, name) => Object.assign(state, {
       slotLevel: Math.min(9, Math.max(1, d.slotLevel | 0)), core: d.core, coreVerum: d.coreVerum || null,
       compType: d.compType, compSub: d.compSub, complements: d.complements || [],
       shape: d.shape || "sphere", manner: d.manner || "standard", phase: d.phase || 0, sealName: name,
+      benefits: Array.isArray(d.benefits) ? d.benefits : [],
     }),
   },
   ign: {

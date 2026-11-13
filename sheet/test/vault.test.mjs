@@ -260,6 +260,66 @@ test("an attack's steps are read, sorted and checked", () => {
 });
 
 // ── CS-104: a defence the item grants ───────────────────────────────────
+// ── CS-021 / CS-025: a block can say what an attack is MADE of ──────────
+test("an attack block carries its ability, proficiency, enhancement, modes and riders", () => {
+  const { attacks, warnings } = V.normalizeBlock({ name: "Vaultbrand Saber", attacks: [{
+    name: "Vaultbrand Saber", damage: "1d8", type: "slashing",
+    ability: "str", proficient: true, magic: 2,
+    versatile: "1d10", versatileName: "Two-handed",
+    extra: [{ damage: "1d6", type: "fire", label: "Everflame" }, { dice: "2d4", type: "radiant" }],
+  }] });
+  assert.equal(warnings.length, 0);
+  const a = attacks[0];
+  assert.equal(a.ability, "str");
+  assert.equal(a.proficient, true);
+  assert.equal(a.magic, 2);
+  assert.equal(a.versatile, "1d10");
+  assert.equal(a.versatileName, "Two-handed");
+  assert.deepEqual(a.extra, [
+    { dice: "1d6", type: "fire", label: "Everflame" },
+    { dice: "2d4", type: "radiant", label: "" },
+  ]);
+  // The row ties itself to the item whose note it came from, so equipping that item arms it.
+  assert.equal(a.item, "Vaultbrand Saber");
+  // A rider with no dice is not a rider.
+  assert.equal(V.normalizeBlock({ name: "X",
+    attacks: [{ name: "A", damage: "1d6", extra: [{ type: "fire" }] }] }).attacks[0].extra, undefined);
+});
+
+test("a rider can carry the condition the entry words it with", () => {
+  const { attacks } = V.normalizeBlock({ name: "Black Raze", attacks: [{
+    name: "Black Raze", damage: "1d4", type: "piercing",
+    extra: [{ damage: "6d6", type: "piercing", label: "Shadow Strike",
+      when: "you attacked with advantage" }],
+  }] });
+  assert.equal(attacks[0].extra[0].when, "you attacked with advantage");
+  // And a rider without one carries no `when` at all, so it rolls every time.
+  const plain = V.normalizeBlock({ name: "X",
+    attacks: [{ name: "A", damage: "1d8", extra: [{ damage: "2d6", type: "cold" }] }] });
+  assert.equal(plain.attacks[0].extra[0].when, undefined);
+});
+
+test("an ability the engine does not have is reported, never guessed at", () => {
+  const { attacks, warnings } = V.normalizeBlock({ name: "X",
+    attacks: [{ name: "A", damage: "1d6", ability: "luck" }] });
+  assert.equal(attacks[0].ability, undefined);
+  assert.ok(warnings.some(w => /ability/i.test(w)));
+});
+
+test("a block written the old way imports exactly as it always did", () => {
+  // 🔴 The regression that matters: every attack block in the Item Vault is this shape.
+  const { attacks } = V.normalizeBlock({ name: "Etherium Dagger",
+    attacks: [{ name: "Etherium Dagger", damage: "1d4+5", type: "piercing", bonus: 9 }] });
+  const a = attacks[0];
+  assert.equal(a.bonus, 9);
+  assert.equal(a.damage, "1d4+5");
+  // None of the new fields is invented for it, so the engine reads the typed bonus as the whole
+  // to-hit and adds nothing of its own.
+  for (const k of ["ability", "proficient", "magic", "versatile", "extra", "spell", "damageAbility"]) {
+    assert.equal(a[k], undefined, `${k} must not be invented`);
+  }
+});
+
 test("an item can grant a defence, written the way a rulebook words it", () => {
   const { item, warnings } = V.normalizeBlock({ name: "Steeldoor Harness", defences: [
     { type: "bludgeoning", standing: "resistance" },

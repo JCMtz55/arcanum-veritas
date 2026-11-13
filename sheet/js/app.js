@@ -147,20 +147,37 @@ function askNumber(el, { title, value, min = 0, max = 999, hint = "", onSet }) {
 
 // Every d20 roll lands in the same dialog, with its breakdown, and can be rerolled with advantage
 // or disadvantage without re-deriving the modifier.
-function showRoll(label, modifier, breakdown, { critOn = 20 } = {}) {
+//
+// `scopes` is what this particular roll answers to — a skill check answers to this skill, every
+// skill and every check. If somebody's seal has granted advantage on any of them, THE FIRST ROLL IS
+// ALREADY MADE WITH IT, and the dialog says whose seal. The alternative is a buff that only works
+// when the player remembers they have it, which is the same as not having it.
+function showRoll(label, modifier, breakdown, { critOn = 20, scopes = [] } = {}) {
+  const given = rules.advantageOn(ch(), scopes);
   const draw = opts => {
     const r = rollCheck(modifier, { ...opts, critOn });
-    const d = dialog(label, rollHtml(r, { label, breakdown }), {
+    // Said only when the advantage was GIVEN rather than asked for, because a player who just
+    // pressed the Advantage button does not need telling why they have it.
+    const why = opts.advantage && opts.given
+      ? `<p class="hint">Advantage from <b>${esc(given.map(a => a.why).join(", "))}</b>.</p>` : "";
+    const d = dialog(label, rollHtml(r, { label, breakdown }) + why, {
       footer: `<button class="btn sm" data-reroll="adv">Advantage</button>
         <button class="btn sm" data-reroll="dis">Disadvantage</button>
-        <span class="sp"></span><button class="btn sm pri" data-reroll="again">Roll again</button>`,
+        <span class="sp"></span><button class="btn sm${given.length ? "" : " pri"}" data-reroll="again">
+          ${given.length ? "Roll flat" : "Roll again"}</button>
+        ${given.length ? `<button class="btn sm pri" data-reroll="keep">Roll again</button>` : ""}`,
     });
     d.querySelectorAll("[data-reroll]").forEach(b => b.onclick = () => {
       const k = b.dataset.reroll;
-      draw(k === "adv" ? { advantage: true } : k === "dis" ? { disadvantage: true } : {});
+      draw(k === "adv" ? { advantage: true }
+        : k === "dis" ? { disadvantage: true }
+        // "Roll again" keeps whatever the seal gave you; "Roll flat" is how you decline it for one
+        // roll, which is a thing a table does and should not need the effect dropped to do.
+        : k === "keep" && given.length ? { advantage: true, given: true }
+        : {});
     });
   };
-  draw({});
+  draw(given.length ? { advantage: true, given: true } : {});
 }
 
 const breakdownFor = (parts) => parts.filter(p => p && p.amount);
@@ -228,14 +245,16 @@ const ACTS = {
         // An effect on the SCORE is worth half of itself to the modifier; one on the check is worth
         // what it says, which is why the two are listed through different arithmetic.
         ...rules.contributions(rules.activeModifiers(c), `ability:${id}`).map(m => ({ reason: m.reason, amount: Math.floor(m.amount / 2) || m.amount })),
-        ...rules.abilityCheckContributions(c)]));
+        ...rules.abilityCheckContributions(c)]),
+      { scopes: rules.ADVANTAGE_SCOPES.ability(id) });
   },
   "roll-save": el => {
     const id = el.dataset.id, c = ch();
     showRoll(`${rules.ABILITY_NAME[id]} save`, rules.saveTotal(c, id),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[id]} modifier`, amount: rules.abilityModifier(c, id) },
         { reason: "Proficiency", amount: c.saves?.[id] ? rules.proficiencyBonus(c.level) : 0 },
-        ...rules.saveContributions(c, id)]));
+        ...rules.saveContributions(c, id)]),
+      { scopes: rules.ADVANTAGE_SCOPES.save(id) });
   },
   "roll-skill": el => {
     const id = el.dataset.id, c = ch(), sk = rules.SKILL_BY_ID[id];
@@ -244,7 +263,8 @@ const ACTS = {
     showRoll(sk.name, rules.skillTotal(c, id, use),
       breakdownFor([{ reason: `${rules.ABILITY_NAME[use]} modifier`, amount: rules.abilityModifier(c, use) },
         { reason: prof === 2 ? "Expertise" : "Proficiency", amount: rules.profContribution(rules.proficiencyBonus(c.level), prof) },
-        ...rules.skillContributions(c, id)]));
+        ...rules.skillContributions(c, id)]),
+      { scopes: rules.ADVANTAGE_SCOPES.skill(id) });
   },
   "roll-init": () => {
     const c = ch();
@@ -252,7 +272,8 @@ const ACTS = {
       breakdownFor([{ reason: "Dexterity modifier", amount: rules.abilityModifier(c, "dex") },
         ...rules.contributions(rules.activeModifiers(c), "initiative"),
         // Initiative is a Dexterity check, so what every check gets, it gets.
-        ...rules.abilityCheckContributions(c)]));
+        ...rules.abilityCheckContributions(c)]),
+      { scopes: rules.ADVANTAGE_SCOPES.initiative() });
   },
   "roll-cogst": () => {
     const c = ch(), src = rules.cognitiveSavingThrowSources(c);
@@ -506,23 +527,30 @@ const ACTS = {
       onSet: v => {
         const dc = rules.concentrationDC(v, c.wounds, unhealed);
         showRoll(`Concentration · DC ${dc}`, rules.saveTotal(c, "con"),
-          [{ reason: "Constitution save", amount: rules.saveTotal(c, "con") }]);
+          [{ reason: "Constitution save", amount: rules.saveTotal(c, "con") }],
+          { scopes: rules.ADVANTAGE_SCOPES.save("con") });
       } });
   },
   "conc-drop": () => mutate(s => { s.concentrating = ""; }),
 
   // ── attacks ──
   "atk-add": () => attackDialog(null),
+  "atk-edit": el => attackDialog(Number(el.dataset.id)),
+  "atk-alt": el => rollDamage(rules.attackAtLevel(ch(), ch().attacks[+el.dataset.id]), false, true),
   "atk-del": el => mutate(s => { s.attacks.splice(+el.dataset.id, 1); }),
   "atk-roll": el => {
     const c = ch();
     // Resolved to the level first, because a stepped weapon's bonus may move with its dice.
     const a = rules.attackAtLevel(c, c.attacks[+el.dataset.id]);
-    showRoll(`${a.name || "Attack"} — to hit`, (Number(a.bonus) || 0) + rules.modifierTotal(rules.activeModifiers(c), "attack"),
-      breakdownFor([{ reason: "Attack bonus", amount: Number(a.bonus) || 0 },
-        ...rules.contributions(rules.activeModifiers(c), "attack")]),
-      // A widened critical range belongs to the character, not the die (CS-097).
-      { critOn: rules.critRange(c) });
+    // The engine owns the arithmetic now (CS-021). It hands back the total AND every term by
+    // name, so the breakdown under the die is the same list the row's tooltip shows — the player
+    // reads one account of where a +11 came from, not two that could drift apart.
+    const hit = rules.attackBonus(c, a);
+    showRoll(`${a.name || "Attack"} — to hit`, hit.total, breakdownFor(hit.parts),
+      // A widened critical range belongs to the character, not the die (CS-097). A spell attack
+      // answers to the advantage somebody's seal put on spell attacks as well as on attacks.
+      { critOn: rules.critRange(c),
+        scopes: a.spell ? rules.ADVANTAGE_SCOPES.spellAttack() : rules.ADVANTAGE_SCOPES.attack() });
   },
   "atk-dmg": el => rollDamage(rules.attackAtLevel(ch(), ch().attacks[+el.dataset.id]), false),
   "atk-crit": el => rollDamage(rules.attackAtLevel(ch(), ch().attacks[+el.dataset.id]), true),
@@ -850,6 +878,25 @@ const ACTS = {
   "mod-del": el => mutate(s => {
     s.modifiers = s.modifiers.map(m => m.id === el.dataset.id ? { ...m, active: false } : m);
   }),
+
+  // ── what another player's seal is doing to you ──
+  // None of these touch the sheet: the rows are the server's, and a × here asks it to end one.
+  // That is the whole reason a grant cannot collide with an autosave.
+  //
+  // There is no CAST here on purpose. A Supportive seal is cast from the Arcanum builder's seal
+  // card, where the seal is — the sheet's business is what has landed on you, and what you still
+  // have out on other people.
+  "effect-end": el => store.endEffect(Number(el.dataset.id))
+    .then(() => toast("Dropped."))
+    .catch(err => toast(err.message)),
+
+  // Taking a heal or temporary hit points that somebody's seal offered. The dice are rolled HERE,
+  // in front of the player, and the result is written to their own sheet by their own client —
+  // which is both why it cannot collide with anything and why the table gets to see the roll.
+  "effect-apply": el => applyOffer(Number(el.dataset.id)),
+  "conc-end": el => store.endConcentration(el.dataset.id)
+    .then(r => toast(`Ended — ${r?.ended || 0} effect${r?.ended === 1 ? "" : "s"} gone.`))
+    .catch(err => toast(err.message)),
 
   // ── the Verum DC, spelled out ──
   verum: el => {
@@ -1275,36 +1322,347 @@ function woundPrompt(triggers) {
     <button class="btn sm warn" data-act="wound-take">Take one Wound</button></div>`;
 }
 
-function attackDialog() {
-  dialog("Add an attack", `<form class="fields" id="ak">
-      <label>Name<input class="txt" id="akName" maxlength="60" required placeholder="Etherium Dagger"></label>
-      <label>To hit<input class="txt" id="akBonus" type="number" min="-5" max="30" value="0"></label>
-      <label>Damage<input class="txt" id="akDmg" maxlength="40" placeholder="1d4+5"></label>
-      <label>Type<input class="txt" id="akType" maxlength="24" placeholder="piercing"></label>
-      <button class="btn pri" type="submit">Add</button></form>
-    <p class="hint">A critical doubles the dice, never the flat modifier.</p>`);
-  document.getElementById("ak").onsubmit = ev => {
-    ev.preventDefault();
-    const name = document.getElementById("akName").value.trim();
-    const damage = document.getElementById("akDmg").value.trim();
-    if (!name) return;
-    if (damage && !parseDice(damage)) return toast("That damage expression will not roll.");
-    const a = { id: uid(), name, bonus: Number(document.getElementById("akBonus").value) || 0,
-      damage, type: document.getElementById("akType").value.trim() };
-    closeDialog();
-    mutate(s => { s.attacks = [...(s.attacks || []), a]; });
+// ── What an attack is made of ───────────────────────────────────────────
+// CS-021 / CS-025. The old dialog asked for a to-hit number and a damage expression, which meant
+// the player did the arithmetic and the sheet stored the answer. This one asks for the PARTS and
+// shows the answer as they type — so a level-up, an ASI or a +1 sword moves the row instead of
+// leaving it quietly wrong.
+//
+// It also edits, which the old one could not: a row could be added and deleted and nothing else.
+// Without editing, the new fields would be unreachable for every attack already on every sheet.
+function attackDialog(index) {
+  const editing = Number.isInteger(index);
+  const src = editing ? (ch().attacks || [])[index] : null;
+  if (editing && !src) return toast("That attack is gone.");
+
+  const d = {
+    id: src?.id || uid(),
+    name: src?.name || "",
+    item: src?.item || "",
+    ability: src?.ability || "",
+    proficient: !!src?.proficient,
+    spell: !!src?.spell,
+    damageAbility: src?.damageAbility !== false,
+    magic: Number(src?.magic) || 0,
+    bonus: Number(src?.bonus) || 0,
+    damage: src?.damage || "",
+    type: src?.type || "",
+    versatile: src?.versatile || "",
+    versatileName: src?.versatileName || "",
+    extra: Array.isArray(src?.extra) ? src.extra.map(x => ({ ...x })) : [],
+    // Carried through untouched. A stepped weapon's growth is authored on its vault note, not
+    // here, and a first edit must not strip it off (the same bargain itemDialog makes with an
+    // item's defences and its base AC).
+    steps: Array.isArray(src?.steps) ? src.steps.map(x => ({ ...x })) : [],
   };
+
+  const v = id => document.getElementById(id);
+  const collect = () => {
+    d.name = v("akName").value.trim();
+    d.item = v("akItem").value;
+    d.ability = v("akAbility").value;
+    d.magic = Number(v("akMagic").value) || 0;
+    d.bonus = Number(v("akBonus").value) || 0;
+    d.damage = v("akDmg").value.trim();
+    d.type = v("akType").value.trim();
+    d.versatile = v("akVers").value.trim();
+    d.versatileName = v("akVersName").value.trim();
+    document.querySelectorAll("[data-xd]").forEach(row => {
+      const i = Number(row.dataset.xd);
+      if (!d.extra[i]) return;
+      d.extra[i] = { dice: row.querySelector(".xd-d").value.trim(),
+        type: row.querySelector(".xd-t").value.trim(),
+        label: row.querySelector(".xd-l").value.trim(),
+        when: row.querySelector(".xd-w").value.trim().slice(0, 120) };
+    });
+  };
+
+  // The row as it would be if saved, so the preview is the real engine rather than a second
+  // arithmetic that could disagree with it.
+  const provisional = () => rules.attackAtLevel(ch(), { ...d });
+
+  const draw = () => {
+    const c = ch();
+    const a = provisional();
+    const hit = rules.attackBonus(c, a);
+    const groups = rules.damageGroups(c, a);
+    const link = rules.attackItem(c, a);
+    const owned = rules.allItems(c).map(r => r.item.name);
+    // An item named on the row that is not on the character any more stays in the menu, or
+    // opening the dialog would silently unlink it.
+    const names = [...new Set([...owned, ...(d.item && !owned.includes(d.item) ? [d.item] : [])])];
+    // A note may name a `best:` pair the menu does not list. It is added rather than dropped —
+    // otherwise opening this dialog and pressing Save would quietly wipe the row's ability.
+    const listed = rules.ATTACK_ABILITIES.some(x => x.id === d.ability);
+    const pair = rules.bestOfIds(d.ability);
+    const abilities = listed ? rules.ATTACK_ABILITIES : [...rules.ATTACK_ABILITIES,
+      ...(pair.length > 1 ? [{ id: d.ability, short: "±",
+        name: `The better of ${pair.map(x => rules.ABILITY_NAME[x]).join(" and ")}`,
+        hint: "Whichever of those is higher, read fresh every time. Written on this row's own note." }] : [])];
+    const ability = abilities.find(x => x.id === d.ability) || rules.ATTACK_ABILITIES[0];
+
+    const dlg = dialog(editing ? (d.name || "Attack") : "Add an attack", `
+        <form class="fields" id="ak">
+          <label>Name<input class="txt" id="akName" maxlength="60" required autocomplete="off"
+            value="${esc(d.name)}" placeholder="Etherium Dagger"></label>
+
+          <label>It comes from<select class="txt" id="akItem">
+            <option value="">nothing — it is always in hand</option>
+            ${names.map(n => `<option value="${esc(n)}" ${n === d.item ? "selected" : ""}>${esc(n)}</option>`).join("")}
+          </select></label>
+          <p class="hint">${d.item
+            ? link?.missing
+              ? `<b class="hot">${esc(d.item)} is not on this character.</b> The row still rolls, without its enhancement.`
+              : link?.active
+                ? `${esc(link.name)} is in your <b>${esc(link.slot ? rules.SLOT_BY_ID[link.slot]?.name || link.slot : "pack")}</b>, so this attack is armed.`
+                : `${esc(link.name)} is not in a slot${link.item?.requiresAttunement && !link.item?.attuned ? " and is not attuned" : ""}, so the row reads <b>stowed</b> and its enhancement is out of both rolls.`
+            : `Link it to a weapon and the row arms and disarms with that weapon — put the sword
+               away and its <b>+2</b> leaves the to-hit by itself.`}</p>
+
+          <div class="zone-h sm"><h4>What the to-hit is made of</h4></div>
+          <div class="fields grid2">
+            <label>Ability<select class="txt" id="akAbility">${abilities.map(x =>
+              `<option value="${esc(x.id)}" ${x.id === d.ability ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+            <label>Enhancement<input class="txt" id="akMagic" type="number" min="-5" max="10" value="${d.magic}"></label>
+          </div>
+          <p class="hint">${esc(ability.hint)} <b>Enhancement</b> is the weapon's own <code>+N</code>
+            — it lifts the to-hit <em>and</em> the damage, which is the one thing the old bonus box
+            could never say.</p>
+
+          <div class="tgls">
+            ${toggleHtml(`data-tgl="proficient"`, d.proficient, "character", "You are proficient")}
+            ${toggleHtml(`data-tgl="spell"`, d.spell, "spells", "It is a spell attack")}
+            ${toggleHtml(`data-tgl="damageAbility"`, d.damageAbility, "damage", "Add the ability to damage")}
+            <span class="hint">${esc([
+              d.proficient ? `proficient ${sign(rules.proficiencyBonus(c.level))}` : "not proficient",
+              d.spell ? "spell attack" : "",
+              d.ability ? (d.damageAbility ? "ability on damage" : "ability on the to-hit only") : "",
+            ].filter(Boolean).join(" · "))}</span>
+          </div>
+          ${d.spell ? `<p class="hint">A spell attack answers to <b>spell attack</b> and <b>spell
+            damage</b> effects as well as the general ones — a tome's "+4 to spell attacks" reaches
+            this row and leaves your bow alone.</p>` : ""}
+
+          <label>Anything else<input class="txt" id="akBonus" type="number" min="-20" max="30" value="${d.bonus}"></label>
+          <p class="hint">${hit.legacy && d.bonus
+            ? `<b>This row was written the old way</b> — the number above is the whole to-hit, with
+               the ability and proficiency already inside it. Name them above and take them back out
+               of this box, and the row will follow your character from then on.`
+            : `For what nothing above models — a Fighting Style, a DM's ruling. Bless and a worn
+               item reach this row on their own; do not type those in twice.`}</p>
+
+          <div class="zone-h sm"><h4>Damage</h4></div>
+          <div class="fields grid2">
+            <label>Dice<input class="txt" id="akDmg" maxlength="40" autocomplete="off"
+              value="${esc(d.damage)}" placeholder="1d8"></label>
+            <label>Type<input class="txt" id="akType" maxlength="24" autocomplete="off" list="akTypes"
+              value="${esc(d.type)}" placeholder="slashing"></label>
+          </div>
+          <datalist id="akTypes">${rules.DAMAGE_TYPES.map(t =>
+            `<option value="${esc(t.name.toLowerCase())}"></option>`).join("")}</datalist>
+          <p class="hint">Dice only — <b>no modifier</b>. ${d.ability
+            ? `Your ${esc(ability.name.toLowerCase())} ${d.damageAbility ? "is added for you" : "is kept off this roll"}.`
+            : `Name an ability above and it will be added for you; a row with none keeps whatever
+               you type here, which is how every older row works.`}</p>
+
+          <div class="fields grid2">
+            <label>Other mode<input class="txt" id="akVers" maxlength="40" autocomplete="off"
+              value="${esc(d.versatile)}" placeholder="1d10"></label>
+            <label>Called<input class="txt" id="akVersName" maxlength="24" autocomplete="off"
+              value="${esc(d.versatileName)}" placeholder="Two-handed"></label>
+          </div>
+          <p class="hint">A second damage expression for the same weapon — two-handed, or a form it
+            changes into. It gets its own small button on the row rather than a row of its own.</p>
+
+          <div class="zone-h sm"><h4>On top of that</h4></div>
+          ${d.extra.length ? d.extra.map((x, i) => `
+            <div class="fx" data-xd="${i}">
+              <input class="txt xd-d" maxlength="24" value="${esc(x.dice || "")}" placeholder="1d6" autocomplete="off">
+              <input class="txt xd-t" maxlength="24" value="${esc(x.type || "")}" placeholder="fire" list="akTypes" autocomplete="off">
+              <input class="txt xd-l" maxlength="40" value="${esc(x.label || "")}" placeholder="Everflame" autocomplete="off">
+              <button class="x" type="button" data-xd-del="${i}" aria-label="Remove this rider">×</button>
+              <input class="txt xd-w" maxlength="120" value="${esc(x.when || "")}" autocomplete="off"
+                placeholder="only when… — leave empty and it rolls every time"
+                title="A condition in your own words. The sheet never checks it: a rider that has one is kept OUT of the damage and offered as a button on the roll.">
+            </div>`).join("")
+            : `<p class="hint">Nothing. A rider is extra damage of its OWN type — Everflame's
+               <code>1d6</code> of fire, a Zealot's radiant. It is rolled and called separately,
+               doubles on a critical, and your ability modifier is never added to it.</p>`}
+          ${d.extra.some(x => x.when) ? `<p class="hint">A rider with a condition is <b>left out of
+            the row's damage</b> and offered as a button when you roll — so a 6d6 that wants
+            advantage never quietly lands on a swing that did not have it.</p>` : ""}
+          <button class="btn sm" type="button" id="akXAdd">+ Add damage of another type</button>
+
+          <div class="zone-h sm"><h4>As it stands</h4></div>
+          <ul class="why">
+            <li><span>To hit</span><b>${sign(hit.total)}</b></li>
+            ${hit.parts.filter(p => p.amount).map(p =>
+              `<li><span>— ${esc(p.reason)}</span><b>${sign(p.amount)}</b></li>`).join("")}
+            <li><span>Damage</span><b>${esc(rules.damageSays(c, a) || "—")}</b></li>
+            ${d.versatile ? `<li><span>${esc(d.versatileName || "Two-handed")}</span>
+              <b>${esc(rules.damageSays(c, a, { versatile: true }))}</b></li>` : ""}
+            ${groups.length > 1 ? `<li><span>Called as</span><b>${esc(groups.map(g =>
+              g.type || "damage").join(" + "))}</b></li>` : ""}
+          </ul>
+          ${d.steps.length ? `<p class="hint">Its dice grow with you — ${esc(d.steps.map(s =>
+            `${s.damage || `${sign(s.bonus)}`} at ${s.at}`).join(", "))}. That comes from the item's
+            note and is left alone by this dialog.</p>` : ""}
+
+          <button class="btn pri" type="submit">${editing ? "Save" : "Add"}</button>
+        </form>`,
+      { footer: editing ? `<span class="sp"></span>
+          <button class="btn sm warn" id="akDel">Remove</button>` : "" });
+
+    // Anything that changes what the rest of the form SAYS redraws it — the preview at the bottom
+    // is the whole point of the dialog, and a preview that only updates on save is a preview of
+    // the last thing you typed.
+    //
+    // ⚠️ A redraw replaces the form, so the box somebody was working in is a different element
+    // afterwards and the cursor lands back at the top of the dialog. Every redraw therefore puts
+    // the focus back where it was, at the end of the text — without this, tabbing out of the dice
+    // box throws you to the top of the form and the next Tab goes somewhere else entirely.
+    const redraw = () => {
+      const id = document.activeElement?.id || "";
+      collect();
+      draw();
+      const back = id && document.getElementById(id);
+      if (!back) return;
+      back.focus();
+      // A number input has no selection to set — asking for one throws in Firefox and Safari.
+      if (back.type !== "number" && back.setSelectionRange) {
+        const n = back.value.length;
+        try { back.setSelectionRange(n, n); } catch { /* not a text field */ }
+      }
+    };
+
+    dlg.querySelectorAll("[data-tgl]").forEach(b => b.onclick = () => {
+      collect(); d[b.dataset.tgl] = !d[b.dataset.tgl]; draw();
+    });
+    dlg.querySelectorAll("[data-xd-del]").forEach(b => b.onclick = () => {
+      collect(); d.extra.splice(Number(b.dataset.xdDel), 1); draw();
+    });
+    // On commit rather than per keystroke — a redraw on every letter would fight the typist even
+    // with the focus put back.
+    ["akAbility", "akItem", "akMagic", "akBonus", "akDmg", "akType", "akVers"]
+      .forEach(id => { v(id).onchange = redraw; });
+    v("akXAdd").onclick = () => { collect(); d.extra.push({ dice: "1d6", type: "", label: "" }); draw(); };
+    v("ak").onsubmit = ev => { ev.preventDefault(); save(); };
+    const del = document.getElementById("akDel");
+    if (del) del.onclick = () => {
+      closeDialog();
+      mutate(s => { s.attacks = (s.attacks || []).filter((_, i) => i !== index); });
+      toast(`${d.name || "It"} is gone.`);
+    };
+  };
+
+  const save = () => {
+    collect();
+    if (!d.name) return toast("Give it a name.");
+    if (d.damage && !parseDice(d.damage)) return toast("That damage expression will not roll.");
+    if (d.versatile && !parseDice(d.versatile)) return toast("The other mode's expression will not roll.");
+    const bad = d.extra.find(x => x.dice && !parseDice(x.dice));
+    if (bad) return toast(`"${bad.dice}" will not roll.`);
+
+    // Only what is actually set is written. A row that names no ability, no item and no
+    // enhancement comes back out of here in exactly the shape it went in, which is what keeps
+    // every sheet written before today reading the same as it did yesterday.
+    const a = {
+      id: d.id, name: d.name, bonus: d.bonus, damage: d.damage, type: d.type,
+      ...(d.item ? { item: d.item } : {}),
+      ...(d.ability ? { ability: d.ability } : {}),
+      ...(d.proficient ? { proficient: true } : {}),
+      ...(d.spell ? { spell: true } : {}),
+      ...(d.ability && !d.damageAbility ? { damageAbility: false } : {}),
+      ...(d.magic ? { magic: d.magic } : {}),
+      ...(d.versatile ? { versatile: d.versatile } : {}),
+      ...(d.versatile && d.versatileName ? { versatileName: d.versatileName } : {}),
+      ...(d.extra.some(x => x.dice) ? { extra: d.extra.filter(x => x.dice).map(x => ({
+        dice: x.dice, type: x.type, label: x.label, ...(x.when ? { when: x.when } : {}) })) } : {}),
+      ...(d.steps.length ? { steps: d.steps } : {}),
+    };
+    closeDialog();
+    mutate(s => {
+      const list = [...(s.attacks || [])];
+      if (editing) list[index] = a; else list.push(a);
+      s.attacks = list;
+    });
+  };
+
+  draw();
 }
 
-function rollDamage(a, crit) {
-  const r = rollDice(a.damage, { crit });
-  if (!r) return toast("No damage expression on that attack.");
-  const extra = rules.modifierTotal(rules.activeModifiers(ch()), "damage");
-  const total = r.total + extra;
-  dialog(`${a.name || "Attack"} — damage${crit ? " (critical)" : ""}`,
-    rollHtml({ ...r, total }, { label: a.type || "",
-      breakdown: extra ? [{ reason: "Damage modifiers", amount: extra }] : [] }) +
-    (crit ? `<p class="hint">The dice are doubled; the flat modifier is not.</p>` : ""));
+// Damage, rolled in the groups a table says out loud: "nine slashing and four fire". Each group
+// is its own expression, so a critical doubles every rider's dice without doubling anybody's
+// Strength — and so the player can hand the DM the split, which is the only form that survives a
+// resistance. One number cannot be half-resisted.
+function rollDamage(a, crit, versatile = false, armed = []) {
+  const c = ch();
+  const groups = rules.damageGroups(c, a, { versatile, armed });
+  // The riders that wait to be asked for — Shadow Strike's 6d6 wants advantage, Orcish Fury's
+  // wants you bloodied. Offered as buttons that roll AGAIN with the rider counted, rather than
+  // as a switch somewhere that would be left on and forgotten.
+  const waiting = rules.conditionalRiders(a);
+  const on = new Set(armed);
+  const rolled = groups.map(g => ({ g, r: rollDice(rules.groupExpr(g), { crit }) })).filter(x => x.r);
+  if (!rolled.length) return toast("No damage expression on that attack.");
+
+  const total = rolled.reduce((t, x) => t + x.r.total, 0);
+  // The dice of every group in one tray, each labelled with what it is — `rollHtml` draws
+  // `r.parts` when a roll carries no single d20, which is exactly this shape.
+  const parts = rolled.flatMap(x => x.r.parts.map(p => ({
+    ...p, label: `${p.label}${x.g.type ? ` ${x.g.type}` : ""}` })));
+
+  // One line per damage type, which is what gets called across the table. A group with no type
+  // named is left as plain damage rather than guessed at.
+  const byType = [];
+  for (const { g, r } of rolled) {
+    const name = g.type || "damage";
+    const row = byType.find(t => t.reason === name);
+    if (row) row.amount += r.total; else byType.push({ reason: name, amount: r.total });
+  }
+
+  // The modifiers that lifted the weapon's own group, by name — the same courtesy the to-hit
+  // breakdown gives. Shown under the split, because "where did the +5 come from" and "how much
+  // fire was it" are two different questions.
+  const why = (groups[0]?.why || []).filter(w => w.amount);
+
+  const mode = versatile ? ` · ${a.versatileName || "two-handed"}` : "";
+  const d = dialog(`${a.name || "Attack"} — damage${crit ? " (critical)" : ""}${mode}`,
+    rollHtml({ total, parts, crit }, {
+      label: byType.length > 1 ? "" : (byType[0]?.reason === "damage" ? "" : byType[0]?.reason || ""),
+      breakdown: byType.length > 1 ? byType : why,
+    }) +
+    // ⚠️ Kept visually apart from the per-type lines above. Run together they read as one column
+    // of numbers that does not add up — "slashing 9" and "Strength modifier +4" are an answer and
+    // a working, and a reader cannot tell which is which when they share a list.
+    (byType.length > 1 && why.length
+      ? `<div class="zone-h sm"><h4>What is inside the first of those</h4></div>
+         <ul class="why">${why.map(w =>
+           `<li><span>${esc(w.reason)}</span><b>${sign(w.amount)}</b></li>`).join("")}</ul>`
+      : "") +
+    (byType.length > 1
+      ? `<p class="hint">Call the types separately — <b>${esc(byType.map(t =>
+          `${t.amount} ${t.reason}`).join(", "))}</b>. A resistance lands on one of them, not on the total.</p>`
+      : "") +
+    (crit ? `<p class="hint">Every die is doubled, riders included; no modifier is.</p>` : "") +
+    (rules.attackArmed(c, a) ? "" : `<p class="hint hot">${esc(a.item || "That item")} is not in a
+       slot, so its enhancement is not in this roll.</p>`),
+    {
+      // One button per conditional rider, saying the condition in the note's own words. Pressing
+      // one rolls the whole thing again with that rider counted — the dice are re-rolled rather
+      // than added to the result, because a roll somebody has already seen must not grow.
+      footer: waiting.map(r => `<button class="btn sm${on.has(r.key) ? " on" : ""}"
+          data-rider="${esc(r.key)}"
+          title="${esc(`${r.dice} ${r.type || "damage"} — ${r.when}`)}">${
+          on.has(r.key) ? "−" : "+"} ${esc(r.label || r.dice)}</button>`).join(""),
+    });
+
+  d.querySelectorAll("[data-rider]").forEach(b => b.onclick = () => {
+    const k = b.dataset.rider;
+    const next = new Set(on);
+    if (next.has(k)) next.delete(k); else next.add(k);
+    rollDamage(a, crit, versatile, [...next]);
+  });
 }
 
 // An extra slot in the turn's own economy — Haste's Action, a second Reaction, a Quick Action the
@@ -2142,6 +2500,50 @@ function modifierDialog() {
   };
 }
 
+// ── taking what a seal offered ──────────────────────────────────────────
+// Healing and temporary hit points are the two kinds that are NOT merged from outside the sheet:
+// they are one-time, so they land in the player's own JSON, written by the player's own client.
+//
+// The roll happens here rather than on the server for the reason every roll in this tool happens
+// here: a number that arrived already decided is a number nobody at the table saw.
+function applyOffer(id) {
+  const g = state.effects.find(e => e.id === id);
+  if (!g) return;
+  const r = rollDice(g.payload?.dice || "");
+  if (!r) return toast("That one does not say how much.");
+  const c = ch();
+
+  if (g.kind === "heal") {
+    const before = c.hp;
+    const after = Math.min(rules.maxHp(c), before + r.total);
+    mutate(s => {
+      s.hp = after;
+      // Coming back from zero clears the death saves, the same as every other way back does.
+      if (before <= 0 && after > 0) clearDeathSaves(s);
+    });
+    store.applyGrant(id, `${r.total} healed`).catch(err => toast(err.message));
+    dialog(`${g.label} — healing`, rollHtml(r, { label: "healed" }) +
+      `<p class="hint">${esc(g.player || "A seal")} healed you for <b>${r.total}</b> —
+        ${before} → <b>${after}</b>${after === rules.maxHp(c) ? " (full)" : ""}.</p>`);
+    return;
+  }
+
+  // 5e: temporary hit points REPLACE rather than stack, and taking fewer than you have would be
+  // strictly worse — so the sheet says so instead of quietly doing it.
+  const have = Number(c.tempHp) || 0;
+  if (r.total <= have) {
+    store.applyGrant(id, `${r.total} declined — had ${have}`).catch(err => toast(err.message));
+    return dialog(`${g.label} — temporary HP`, rollHtml(r, { label: "rolled" }) +
+      `<p class="hint">You already have <b>${have}</b> temporary hit points, and temporary hit
+        points replace rather than stack — so this one changes nothing. It has been marked spent.</p>`);
+  }
+  mutate(s => { s.tempHp = r.total; });
+  store.applyGrant(id, `${r.total} temp HP`).catch(err => toast(err.message));
+  dialog(`${g.label} — temporary HP`, rollHtml(r, { label: "temporary HP" }) +
+    `<p class="hint">${esc(g.player || "A seal")} gave you <b>${r.total}</b> temporary hit points${
+      have ? `, replacing the ${have} you had` : ""}.</p>`);
+}
+
 // ── hit dice ────────────────────────────────────────────────────────────
 // Spending one is the same job in two places — the tile's popover, and the short rest — so the rows,
 // the roll and the note are written once and each caller wires its own buttons. The pool itself is
@@ -2418,7 +2820,8 @@ async function spellDialog(id) {
       showRoll(`${s.name} — spell attack`, rules.spellAttackBonus(ch(), a),
         [{ reason: `Proficiency`, amount: rules.proficiencyBonus(ch().level) },
          { reason: rules.ABILITY_NAME[a], amount: rules.abilityModifier(ch(), a) },
-         ...rules.contributions(rules.activeModifiers(ch()), "spellAttack")]);
+         ...rules.contributions(rules.activeModifiers(ch()), "spellAttack")],
+        { scopes: rules.ADVANTAGE_SCOPES.spellAttack() });
     });
     d.querySelectorAll("[data-sp-roll]").forEach(b => b.onclick = () => {
       const r = rollDice(b.dataset.spRoll);

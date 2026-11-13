@@ -317,6 +317,56 @@ const SCHEMA = [
      added_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
      UNIQUE (kind, name, source, version)
    )`,
+  // What somebody else's seal is doing to you. A player builds a seal, writes down what it grants,
+  // and casts it at other players' characters; each benefit that lands is one row here.
+  //
+  // It is NOT written into the recipient's sheet. The sheet autosaves itself whole against a
+  // version, so a caster reaching into another player's JSON would either lose what they were
+  // editing or hand them a 409 they did nothing to cause — four times over, every time somebody
+  // casts Bless mid-initiative. The recipient's client reads these rows beside their unlocks and
+  // the engine merges them where a worn item's effects already merge.
+  //
+  // `amount` is flat and already resolved: a benefit authored as "my Dream modifier" is worked out
+  // against the CASTER at the cast and frozen here, because re-deriving it on the recipient would
+  // quietly make it theirs. `formula` is what to say about it afterwards.
+  //
+  // Nothing is deleted. An effect that runs out is `ended_at`; one the recipient drops is
+  // `dismissed_at`; the row stays either way, which is how the party board can answer "where did
+  // that +2 come from" a week later.
+  `CREATE TABLE IF NOT EXISTS character_effects (
+     id                  SERIAL PRIMARY KEY,
+     character_id        INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+     from_character_id   INTEGER REFERENCES characters(id) ON DELETE SET NULL,
+     from_user_id        INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     label               TEXT NOT NULL,
+     formula             TEXT NOT NULL DEFAULT '',
+     note                TEXT NOT NULL DEFAULT '',
+     target              TEXT NOT NULL,
+     amount              SMALLINT NOT NULL,
+     rounds              SMALLINT,
+     concentration_group TEXT,
+     granted_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+     ended_at            TIMESTAMPTZ,
+     dismissed_at        TIMESTAMPTZ
+   )`,
+  // The only query that runs often: what is on me right now, polled by every open sheet.
+  `CREATE INDEX IF NOT EXISTS character_effects_open ON character_effects (character_id)
+     WHERE ended_at IS NULL AND dismissed_at IS NULL`,
+  // Ending a whole cast at once when the caster drops concentration.
+  `CREATE INDEX IF NOT EXISTS character_effects_conc ON character_effects (concentration_group)
+     WHERE ended_at IS NULL`,
+  // What KIND of thing was granted. Everything was a modifier at first — a flat number on a stat —
+  // which covered Bless and an aura and nothing else, while the Supportive Rings are built around a
+  // healing column. The kinds and their shapes are in sheet/js/targets.js; `payload` holds whatever
+  // a kind needs beyond these columns, so the table does not grow a column per kind and a row
+  // written last month still means what it meant.
+  `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'modifier'`,
+  `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS payload TEXT NOT NULL DEFAULT '{}'`,
+  // Healing and temporary hit points are one-time: they are OFFERED, and the recipient's own client
+  // writes them to their own sheet. This is when they took it — and it is what stops the same heal
+  // being taken twice from one cast.
+  `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS applied_at TIMESTAMPTZ`,
+  `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS applied_note TEXT NOT NULL DEFAULT ''`,
 ];
 
 export async function migrate(db) {

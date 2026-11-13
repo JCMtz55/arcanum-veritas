@@ -95,8 +95,12 @@ function savedHome() {
 
 function sealSnapshot() {
   if (!state.core || !state.compType || !state.compSub) return null;
-  const { slotLevel, core, coreVerum, compType, compSub, complements, shape, manner, phase } = state;
-  return { slotLevel, core, coreVerum, compType, compSub, complements, shape, manner, phase };
+  const { slotLevel, core, coreVerum, compType, compSub, complements, shape, manner, phase,
+          benefits } = state;
+  // `benefits` is the one part of a save that is not just a recipe — it is what the seal hands to
+  // somebody else, and the sheet reads it straight off the save to cast it.
+  return { slotLevel, core, coreVerum, compType, compSub, complements, shape, manner, phase,
+           benefits: benefits || [] };
 }
 function eidonSnapshot() {
   const I = state.ign;
