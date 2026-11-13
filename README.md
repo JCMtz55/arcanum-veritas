@@ -29,7 +29,7 @@ The builder itself is plain browser code with no build step. It is hosted on **R
 
 **Character numbers.** Level, Verum mod and Dream mod are remembered with the account: change them on the bar and they are there at the next sign-in, on any device. The slot is not remembered — it belongs to the seal being drawn, and is kept in a saved seal.
 
-**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds accounts, grants, trackers and saved builds (`users`, `user_cognitions`, `learning`, `saves`, `sessions`). The server serves `index.html`, `arcanum.html`, `css/`, `js/` and — only to someone signed in — `grimms/`; `cognitions/` is only reachable through the signed-in API. The Grimm Companion still keeps what a player tracks in their own browser, not in the database. What the DM controls there — each Grimm's chains, which of its abilities may be composed, and whether its Reality Shift is revealed — is in the database, and the Grimm data is filtered per reader so an unrevealed Reality Shift never reaches a player's browser.
+**Where things live.** The Cognitions stay as JSON files in `cognitions/`. The database holds accounts, grants, trackers and saved builds (`users`, `user_cognitions`, `learning`, `saves`, `sessions`), and the fight on the table (`init_state` — one row, ever — with `init_encounters` for lineups kept for later). The server serves `index.html`, `arcanum.html`, `css/`, `js/` and — only to someone signed in — `grimms/`; `cognitions/` is only reachable through the signed-in API. The Grimm Companion still keeps what a player tracks in their own browser, not in the database. What the DM controls there — each Grimm's chains, which of its abilities may be composed, and whether its Reality Shift is revealed — is in the database, and the Grimm data is filtered per reader so an unrevealed Reality Shift never reaches a player's browser.
 
 **Deploying on Railway.**
 1. New project → *Deploy from GitHub repo* → this repo. Railway runs `npm start`.
@@ -59,6 +59,10 @@ admin/              ← The DM's own section: the table's board, the players, th
   js/players.js     ← One page per player, tabbed
   js/grimms.js      ← The chains, the two reveals, the ability grids
   js/compendium.js  ← Importing the 5e content the Character Sheet offers
+initiative/         ← The fight on the table: the DM's board and the room's second screen
+  index.html        ← Both faces; which one you are served is decided by /api/initiative
+  css/init.css      ← Only what this tool adds; the rest is css/app.css
+  js/init.js        ← The board, the clock, the add form, the lineups and the room's view
 grimms/             ← The Grimm Companion (see grimms/README.md)
 css/
   app.css           ← Every style
@@ -579,6 +583,32 @@ The whole section draws itself from one call, `GET /api/admin/overview` — the 
 The location hash is the route: `#/table`, `#/players/7/paragon`, `#/grimms/gate-of-caelum`. A reload keeps you where you were, and a note in the vault can link at a particular player's tab.
 
 The Grimm controls used to sit in a `Grimms · DM` tab inside the Companion. They moved here, so the Companion now only *reads* that state. A denied ability leaves the player's loadout the next time their Companion loads, which is what `fitLoadout` already does on every render of their sheet.
+
+## Initiative — the fight on the table
+
+**`initiative/`**, reached from the front page or the ★ tool strip. Modelled on what [Improved Initiative](https://improvedinitiative.app/) gets right — one list always in order, a second screen for the room, every number one keystroke away — and on nothing else about it.
+
+**Two faces, one URL.** The DM is served the board; everybody else is served the running order and nothing more. That is decided by `GET /api/initiative`, not by the page: a combatant the DM has hidden is **not in the response at all**, so there is nothing on the room's screen to inspect. `#player` forces the second screen for the DM too, which is what the **Player view ↗** button opens — so the television and the laptop are the same page and the same link.
+
+**The party is not typed in.** A PC on this board is a *pointer* at their character sheet (`kind: "pc"`, their character id, their initiative, whether they are on screen). Hit points, AC, save DC, conditions, Wounds and both Exhaustion ladders arrive live through `partyCard` — the same engine their own sheet reads — and damage typed on this board is written to that sheet (`PUT /api/characters/:id/vitals`), so their screen has it within five seconds. The board never keeps a second copy of a player's hit points, which is the only way it cannot drift from them.
+
+**Adding is a drawer, not a panel.** *Add to the fight* lives off the right edge and slides in over the margin (Juan, 2026-11-12) — a fight is read far more often than it is added to, so the running order keeps the page. **+ Add** on the clock or the `A` key opens it, `Esc` or a click outside shuts it, and whether it is open is remembered per browser. It stays open while monsters go in one after another, with the cursor back in **Name** after each. Below 900px it covers the board and dims it; above, the board narrows so no row ends up underneath it. An empty board opens it once, unasked.
+
+**A monster is five boxes.** Name, HP, AC, save DC and a face (Juan, 2026-11-12); everything else is optional, because the rest of the stat block is in the session note the DM is already reading. **How many** adds a group at once, named *Glassling 1 … 4* so the DM can say which one is bleeding. A picture is downscaled in the browser to a 192px square before it is ever sent — it rides in every save of the board and has to cross the room to a screen.
+
+**The damage box** takes `12` off, `+12` puts it back, `t8` is temporary hit points and `=40` sets the number. Damage goes through the temporary pool first and never below zero.
+
+**One clock for the table.** Pressing **Next** past the last turn moves the round — and with *Drive the table's clock* on (the default), `POST /api/initiative/clock` writes `round` and `inCombat` onto every sheet at the table. Each sheet picks the new round up on the poll it was already making and runs **its own** expiry through `rules.tickTimed`, so a three-round blessing, a borrowed resistance and an extra Bonus Action somebody handed out all end on the round they should. The round is handed to the sheet as an *event*, not merged as a value (`store.onClock`), because arriving at round four has to expire three rounds of effects on the way; it only ever moves forward, so a DM stepping back a round never un-expires anything. The player's own **next round** button still works and is still theirs.
+
+**Monsters roll in groups.** Six Redcaps with the same name and the same modifier take **one** roll between them — six separate numbers for them is six turns the DM has to remember instead of one. A monster with a number already keeps it; clear the cell to re-roll.
+
+**What the room sees** is a dialog of its own: faces, Armour Class, conditions, and monster hit points as **words** (*Unhurt · Grazed · Hurt · Bloodied · Reeling · Down*), numbers, or nothing. Words is the default — a number on the wall tells the table how many rounds are left in the boss, which is the DM's to say by describing it. The party is always shown their own numbers, because those are on their sheets anyway.
+
+**Conditions** offer 5e's fourteen plus the four this campaign rewrote, marked ★ with their ruling on the tooltip (served from `rules.CONDITIONS`, so the board and the sheet cannot disagree). On a monster a condition can carry a fuse — *ends after N rounds* — which burns down when the round turns, and what went out is named in the toast. A condition set on a PC is written to their sheet.
+
+**Lineups** keep the monsters of a fight by name (`init_encounters`), and only the monsters: the party is whoever is at the table that night, and a saved fight that remembered last month's hit points would be a lie the DM has to spot.
+
+**Keys.** Space, `N` or `→` for the next turn; `B` or `←` to go back; `R` to roll the monsters; `A` for the add drawer, `Esc` to shut it (the one key that works while a field has the cursor). The board polls every four seconds while a fight is running and every twelve while it is not, and nothing polls in a background tab.
 
 ## Layout
 

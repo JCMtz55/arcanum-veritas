@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Initiative — Ephemer</title>
+<meta name="description" content="Once Upon a Star ★ — the fight on the table: the running order, hit points and conditions, with a second screen for the room.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/init.css?v=2026-11-12b">
+<!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
+<script src="../js/tools.js"></script>
+</head>
+<body>
+
+<div class="bar" id="bar">
+  <nav class="tools" data-tool="initiative" aria-label="Ephemer tools"></nav>
+  <div class="brand">Initiative<em>the fight on the table</em></div>
+  <div class="live">
+    <span class="ini-pill" id="roundPill" hidden></span>
+    <details class="more" id="who" hidden>
+      <summary class="mini" id="whoBtn" title="Your account"></summary>
+      <div class="more-menu" onclick="this.parentNode.open = false">
+        <button onclick="openAccount()">Change password</button>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══ THE DM'S BOARD ═══ -->
+<main class="ini-shell" id="board" hidden>
+
+  <!-- The clock. Everything that moves the fight forward, and nothing else. -->
+  <div class="ini-clock" id="clock"></div>
+
+  <!-- The running order. One row per combatant, the current one lit. -->
+  <div class="ini-order" id="order"></div>
+
+  <!-- Who else is coming. The party, a monster typed in, a lineup kept from last time.
+       A drawer, not a panel under the order: a fight is read far more often than it is added to,
+       so the order keeps the page and this slides in over the margin when somebody walks in. -->
+  <aside class="ini-side" id="side" aria-label="Add to the fight">
+    <header class="side-hd">
+      <h2>Add to the fight</h2>
+      <button class="mini" onclick="toggleAdd(false)" title="Close — A or Esc">✕</button>
+    </header>
+    <section class="ini-add" id="add"></section>
+  </aside>
+  <!-- On a narrow screen the drawer covers the board, so a tap outside it closes it again. -->
+  <div class="ini-scrim" id="scrim" onclick="toggleAdd(false)"></div>
+
+</main>
+
+<!-- ═══ THE SECOND SCREEN ═══ -->
+<!-- What the room sees. Built from what the server sent, which is already only what it may see —
+     a hidden combatant was never in the response, so there is nothing here to inspect. -->
+<main class="ini-room" id="room" hidden>
+  <header class="room-hd">
+    <h1 id="roomRound">Initiative</h1>
+    <p id="roomSub"></p>
+  </header>
+  <ol class="room-list" id="roomList"></ol>
+  <p class="room-foot" id="roomFoot"></p>
+</main>
+
+<div class="gate" id="gate" hidden>
+  <form class="gate-box" onsubmit="return signIn(event)">
+    <h1>Ephemer</h1>
+    <p>Sign in to see the order.</p>
+    <label for="gateUser">Name</label>
+    <input class="search" id="gateUser" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="gatePass">Password</label>
+    <input class="search" id="gatePass" type="password" autocomplete="current-password" required>
+    <p class="gate-err" id="gateErr" hidden></p>
+    <button class="gate-go" type="submit">Sign in</button>
+  </form>
+</div>
+
+<div class="board" id="locked" hidden>
+  <section class="codex">
+    <div class="cdx"><div class="cdx-hd"><div>
+      <h1>Nothing is running</h1>
+      <p class="cdx-desc" id="lockedWhy"></p>
+    </div></div></div>
+  </section>
+</div>
+
+<dialog class="acct" id="acct">
+  <form onsubmit="return changePassword(event)">
+    <h2 id="acctName"></h2>
+    <label for="acctCur">Current password</label>
+    <input class="search" id="acctCur" type="password" autocomplete="current-password" required>
+    <label for="acctNew">New password</label>
+    <input class="search" id="acctNew" type="password" autocomplete="new-password" minlength="8" required>
+    <p class="gate-err" id="acctErr" hidden></p>
+    <div class="acct-row">
+      <button class="mini on" type="submit">Change password</button>
+      <button class="mini" type="button" onclick="document.getElementById('acct').close()">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- One dialog, three jobs: the conditions on a row, the note on a row, and the lineups. Each is
+     drawn into it when it opens — a fight has one thing in front of you at a time. -->
+<dialog class="ini-dlg" id="dlg">
+  <header><h2 id="dlgTitle"></h2><button class="mini" onclick="closeDlg()">Close</button></header>
+  <div id="dlgBody"></div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/init.js?v=2026-11-12b"></script>
+</body>
+</html>

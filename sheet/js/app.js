@@ -182,6 +182,28 @@ function showRoll(label, modifier, breakdown, { critOn = 20, scopes = [] } = {})
 
 const breakdownFor = (parts) => parts.filter(p => p && p.amount);
 
+// ── one clock for the table ─────────────────────────────────────────────
+// The DM's initiative board writes the round onto every sheet (POST /api/initiative/clock), and
+// store.js hands it here rather than merging it, because arriving at round four has to EXPIRE three
+// rounds of timed things on the way. So this presses the sheet's own buttons: the arithmetic stays
+// in one place, and whatever ran out is announced in the same toast the player would have seen if
+// they had pressed it themselves.
+//
+// It only ever moves FORWARD. A board that is behind this sheet — a DM who stepped back a round to
+// correct themselves — must not un-expire anything, so it is ignored; the number catches up on the
+// next round. The player's own button is untouched and still works.
+store.onClock((round, inCombat) => {
+  if (inCombat === false && ch().inCombat) {
+    ACTS["end-combat"]();
+    toast("The fight ended.");
+    return;
+  }
+  if (round == null) return;
+  // A guard rather than a trusted number: 20 rounds of catching up is already far more than a tab
+  // left open through a fight, and an unbounded loop here would be a frozen sheet.
+  for (let n = 0; n < 20 && (Number(ch().round) || 1) < round; n++) ACTS["next-round"]();
+});
+
 // ── the actions ─────────────────────────────────────────────────────────
 const ACTS = {
   "dlg-close": () => closeDialog(),

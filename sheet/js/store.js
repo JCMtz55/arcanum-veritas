@@ -271,6 +271,17 @@ const keyOf = () => state.effects.map(e => `${e.id}:${e.amount}`).join(",") + "|
 const DM_VITALS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
                    "conditions", "injuries", "inspiration"];
 
+// ── the table's clock ───────────────────────────────────────────────────
+// The DM's initiative board writes `round` and `inCombat` onto every sheet at the table. Those two
+// are deliberately NOT in the list above: arriving at round four is an EVENT, not a value. The
+// timed things on this sheet — a three-round blessing, a borrowed resistance, an extra Bonus Action
+// somebody handed out — have to EXPIRE on the way there, and the code that expires them is the same
+// code the sheet's own "next round" button runs. So the clock is handed to whoever registered for
+// it and the sheet advances itself, rather than having a round number dropped into its JSON with
+// three rounds of dead effects still hanging off it.
+let CLOCK = null;
+export function onClock(fn) { CLOCK = fn; }
+
 export async function loadVitals() {
   if (!state.current || pending || state.save === "saving" || state.save === "conflict") return false;
   const id = state.current.id, version = state.current.version;
@@ -287,6 +298,11 @@ export async function loadVitals() {
     if (v !== null && v !== undefined) state.current.sheet[k] = v;
   }
   state.current.version = got.version;
+  // Last, and after the version is taken: the handler mutates this sheet, and a save of its own is
+  // the ordinary path from there.
+  const round = Number.isInteger(got.vitals?.round) ? got.vitals.round : null;
+  const inCombat = typeof got.vitals?.inCombat === "boolean" ? got.vitals.inCombat : null;
+  if (CLOCK && (round !== null || inCombat !== null)) CLOCK(round, inCombat);
   return true;
 }
 

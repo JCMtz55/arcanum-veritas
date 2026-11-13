@@ -260,7 +260,11 @@ app.disable("x-powered-by");
 const SMALL_JSON = express.json({ limit: "20kb" });
 const BRINGS_OWN_PARSER = req =>
   (req.method === "PUT" && /^\/api\/characters\/\d+$/.test(req.path)) ||
-  (req.method === "POST" && /^\/api\/compendium\/import(-bundle)?$/.test(req.path));
+  (req.method === "POST" && /^\/api\/compendium\/import(-bundle)?$/.test(req.path)) ||
+  // The initiative board carries a portrait per combatant (INIT_JSON, 4mb). Twelve of those is
+  // well past 20kb, and a board that 413s mid-fight is a board nobody trusts again.
+  (req.method === "PUT" && req.path === "/api/initiative") ||
+  (req.method === "POST" && req.path === "/api/initiative/encounters");
 app.use((req, res, next) => (BRINGS_OWN_PARSER(req) ? next() : SMALL_JSON(req, res, next)));
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 
@@ -1549,8 +1553,13 @@ const cleanInspiration = list => (Array.isArray(list) ? list : []).map(d => {
 //
 // `version` is here so the client can tell "nothing has changed" from "something has", without
 // comparing eight values itself. Not DM-only: it is the player's OWN sheet they are reading.
+// `round` and `inCombat` joined them when the initiative board became the table's clock: the DM's
+// "next round" writes them onto every sheet (POST /api/initiative/clock) and each sheet picks the
+// new round up here, on the poll it was already making, and runs its own expiry. The sheet's own
+// button still works and is still the player's — this is a second hand on the same clock, not a
+// replacement for it.
 const VITAL_KEYS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
-                    "conditions", "injuries", "inspiration"];
+                    "conditions", "injuries", "inspiration", "round", "inCombat"];
 
 app.get("/api/characters/:id/vitals", requireUser, async (req, res) => {
   const row = await loadCharacter(req.params.id, req.user);
@@ -2138,6 +2147,300 @@ app.post("/api/compendium/import", requireUser, requireDm, IMPORT_JSON, async (r
   res.json({ imported: written, counts, source });
 });
 
+// ═══════════════════════════════════════════════════════════
+//  INITIATIVE — the fight on the table
+// ═══════════════════════════════════════════════════════════
+// One board, two faces. The DM's is the whole fight; a player's is the running order and nothing
+// else — and the difference is made HERE, not by hiding rows in the page. A hidden row in the markup
+// is one Inspect away from the ambush it was hiding, and the player view is meant to be left open on
+// a screen in the room all evening.
+//
+// WHAT IS STORED is the DM's board: one row, `init_state`, holding the whole fight as JSON. One
+// writer, whole writes, no part of it ever queried on its own.
+//
+// WHAT A PC CONTRIBUTES to it is three things — their character id, their initiative, and whether
+// they are on screen. Their hit points, AC, portrait, conditions and both Exhaustions are read live
+// from `characters` on every poll, through the same `partyCard` the Admin board uses. So the number
+// on the DM's screen, the number on the player's own sheet and the word on the television cannot
+// disagree, and a fight that ran long never leaves a stale copy of somebody's hit points behind.
+const INIT_MAX = 60;                 // combatants on one board
+const INIT_IMG_MAX = 160_000;        // one portrait as a data URL — roughly 120kb of image
+// A portrait is either a plate this app already serves or a picture the DM dropped on the page,
+// which the browser downscales before it is ever sent. An arbitrary remote URL is NOT accepted: the
+// player view hangs on a screen in the room, and it has no business fetching from anywhere else.
+const INIT_IMG_OK = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+// Twelve portraits is a bigger body than the 20kb the global parser allows, so this route brings its
+// own — and is named in BRINGS_OWN_PARSER above, or the global one would answer first and 413 it.
+const INIT_JSON = express.json({ limit: "4mb" });
+
+const initBlank = () => ({
+  round: 0, turnId: "", inCombat: false,
+  // Whether this board is the table's clock. On by default — that is the point of it — and a
+  // switch rather than a rule, because a DM running a fight on paper should be able to stop it
+  // writing to seven character sheets.
+  clock: true,
+  // What the room is allowed to see. Hit points as WORDS is the default because a number on the wall
+  // tells the table exactly how many rounds are left in the boss.
+  show: { portraits: true, ac: true, dc: false, hp: "words", conditions: true },
+  combatants: [],
+});
+
+async function loadInit() {
+  const { rows } = await db.query("SELECT data, updated_at FROM init_state WHERE id = 1");
+  let state = initBlank();
+  if (rows[0]) { try { state = { ...state, ...JSON.parse(rows[0].data) }; } catch { /* keep blank */ } }
+  return state;
+}
+async function saveInit(state) {
+  await db.query(
+    `INSERT INTO init_state (id, data, updated_at) VALUES (1, $1, now())
+       ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
+    [JSON.stringify(state)]);
+}
+
+const iNum = (v, lo, hi, dflt = 0) =>
+  Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : dflt;
+const iStr = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
+const iId = v => iStr(v, 40).replace(/[^\w.:-]/g, "") || randomBytes(6).toString("hex");
+
+// A condition on an NPC, with the round it dies on. `rounds: null` is "until somebody says
+// otherwise", which is most of them — a fuse is a thing the DM sets deliberately.
+function cleanInitConditions(list) {
+  return (Array.isArray(list) ? list : []).slice(0, 12).map(c => ({
+    name: iStr(c?.name, 40),
+    rounds: c?.rounds == null ? null : iNum(c.rounds, 1, 99, 1),
+  })).filter(c => c.name);
+}
+
+function cleanCombatant(c) {
+  const kind = c?.kind === "pc" ? "pc" : "npc";
+  const base = {
+    id: iId(c?.id), kind,
+    // The initiative itself. `null` is "has not rolled yet" and sorts to the bottom, which is what
+    // a reinforcement that just walked in actually is.
+    init: c?.init == null || c?.init === "" ? null : iNum(c.init, -20, 999, 0),
+    initMod: iNum(c?.initMod, -20, 20, 0),
+    hidden: !!c?.hidden,
+    note: iStr(c?.note, 400),
+  };
+  // A PC is a POINTER. Nothing about their sheet is copied in, so nothing about it can go stale.
+  if (kind === "pc") return { ...base, charId: iNum(c?.charId, 1, 10 ** 9, 0) };
+
+  const img = String(c?.img || "");
+  return {
+    ...base,
+    name: iStr(c?.name, 60) || "Unnamed",
+    img: img.length <= INIT_IMG_MAX && INIT_IMG_OK.test(img) ? img
+       : /^\/?(sheet|grimms|resources)\//.test(img) ? iStr(img, 300) : "",
+    hpMax: iNum(c?.hpMax, 0, 99_999, 0),
+    hp: iNum(c?.hp, -999, 99_999, 0),
+    tempHp: iNum(c?.tempHp, 0, 9_999, 0),
+    ac: c?.ac == null || c?.ac === "" ? null : iNum(c.ac, 0, 99, 10),
+    dc: c?.dc == null || c?.dc === "" ? null : iNum(c.dc, 0, 99, 10),
+    conditions: cleanInitConditions(c?.conditions),
+    // Not "deleted": a monster that went down is part of the fight's history until the fight ends,
+    // and it may well stand back up.
+    down: !!c?.down,
+  };
+}
+
+function cleanInit(body) {
+  const s = body && typeof body === "object" ? body : {};
+  const show = s.show && typeof s.show === "object" ? s.show : {};
+  const seen = new Set();
+  return {
+    round: iNum(s.round, 0, 999, 0),
+    turnId: iStr(s.turnId, 40),
+    inCombat: !!s.inCombat,
+    clock: s.clock !== false,
+    show: {
+      portraits: show.portraits !== false,
+      ac: show.ac !== false,
+      dc: !!show.dc,
+      hp: ["words", "numbers", "none"].includes(show.hp) ? show.hp : "words",
+      conditions: show.conditions !== false,
+    },
+    combatants: (Array.isArray(s.combatants) ? s.combatants : []).slice(0, INIT_MAX)
+      .map(cleanCombatant)
+      // Two rows with one id would be one row the DM cannot damage separately — the thing that
+      // happens the moment somebody adds four Glasslings by copying a row.
+      .filter(c => !seen.has(c.id) && seen.add(c.id)),
+  };
+}
+
+// How hurt something is, in a word. The player view says this instead of a number, because a number
+// on the wall tells the table how many rounds are left in the boss — which is the DM's to reveal by
+// describing it, not the tool's to leak by arithmetic.
+function hpWord(hp, max) {
+  if (hp <= 0) return "Down";
+  if (!max || hp >= max) return "Unhurt";
+  const f = hp / max;
+  if (f >= 0.75) return "Grazed";
+  if (f >= 0.5) return "Hurt";
+  if (f >= 0.25) return "Bloodied";
+  return "Reeling";
+}
+
+// The board resolved: every combatant with the numbers that are true right now, in turn order.
+// Both faces are built from this one list, so they can never disagree about whose turn it is.
+function initRows(state, party) {
+  const byId = new Map((party || []).map(p => [p.id, p]));
+  const rows = state.combatants.map(c => {
+    if (c.kind !== "pc") return { ...c, player: "" };
+    const p = byId.get(c.charId);
+    // A character that was archived, or a player who left, leaves a row with nothing behind it.
+    // It is shown as a stub rather than dropped: silently losing somebody from the order mid-fight
+    // is worse than a row the DM can see and remove.
+    if (!p) return { ...c, name: "(gone)", gone: true, hp: 0, hpMax: 0, tempHp: 0,
+                     ac: null, dc: null, conditions: [], down: false, player: "" };
+    return {
+      ...c,
+      name: p.name, player: p.player, level: p.level,
+      img: p.portraitArt || p.portrait || "",
+      hp: p.hp, hpMax: p.maxHp, tempHp: p.tempHp,
+      ac: p.ac, dc: p.saveDc, initMod: p.initiative,
+      conditions: (p.conditions || []).map(x => ({ name: typeof x === "string" ? x : iStr(x?.name, 40),
+                                                   rounds: null })).filter(x => x.name),
+      down: p.hp <= 0,
+      // What only a PC has, and what the DM wants on the row rather than in another tab.
+      wounds: p.wounds, deathSaveDC: p.deathSaveDC,
+      exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
+      dreamExhaustionName: p.dreamExhaustionName,
+      fate: p.fate, speed: p.speed, round: p.round, inCombat: p.inCombat,
+    };
+  });
+  // Highest first; nobody who has not rolled yet is above somebody who has; ties keep the order the
+  // DM put them in, which is how a tie is settled at a table — by the DM saying so.
+  return rows.sort((a, b) =>
+    (a.init == null) - (b.init == null) || (b.init ?? 0) - (a.init ?? 0) ||
+    (b.initMod ?? 0) - (a.initMod ?? 0) || String(a.name).localeCompare(String(b.name)));
+}
+
+// What the room sees. Built by LEAVING THINGS OUT of the resolved board, so a thing the DM has not
+// revealed was never in the response at all.
+function initPlayerView(state, party) {
+  const rows = initRows(state, party).filter(r => !r.hidden);
+  const show = state.show;
+  return {
+    round: state.round, inCombat: state.inCombat, turnId: state.turnId,
+    show: { portraits: show.portraits, ac: show.ac, conditions: show.conditions, hp: show.hp },
+    order: rows.map(r => ({
+      id: r.id, kind: r.kind, name: r.name, player: r.kind === "pc" ? r.player : "",
+      init: r.init, down: r.down,
+      img: show.portraits ? r.img : "",
+      ac: show.ac ? r.ac : null,
+      // A PC's own hit points are their business and already on their sheet, so the party is shown
+      // in numbers; a monster is shown in a word, or not at all.
+      hp: show.hp === "none" ? null
+        : r.kind === "pc" ? { hp: r.hp, max: r.hpMax, temp: r.tempHp, word: hpWord(r.hp, r.hpMax) }
+        : show.hp === "numbers" ? { hp: r.hp, max: r.hpMax, temp: 0, word: hpWord(r.hp, r.hpMax) }
+        : { word: hpWord(r.hp, r.hpMax) },
+      conditions: show.conditions ? r.conditions.map(c => c.name) : [],
+    })),
+  };
+}
+
+// The conditions the picker offers: 5e's own, with the four this campaign rewrote marked and
+// carrying their own rules text. Served rather than hard-coded in the page so the rewritten ones
+// come from `rules.CONDITIONS` — the file the sheet and the server already share.
+const INIT_CONDITIONS = [
+  "Blinded", "Charmed", "Deafened", "Frightened", "Grappled", "Incapacitated", "Invisible",
+  "Paralyzed", "Petrified", "Poisoned", "Prone", "Restrained", "Stunned", "Unconscious",
+].map(name => {
+  const own = Object.values(rules.CONDITIONS).find(c => c.name === name);
+  return { name, campaign: !!own, note: own?.note || "" };
+}).concat(Object.values(rules.CONDITIONS)
+  .filter(c => !/^(Stunned|Paralyzed)$/.test(c.name))
+  .map(c => ({ name: c.name, campaign: true, note: c.note || "" })));
+
+app.get("/api/initiative", requireUser, async (req, res) => {
+  const state = await loadInit();
+  // `?view=1` asks for the room's face. A player is given it whether they ask or not; the DM asks
+  // for it when they open the second screen, and is given THE SAME ONE — so the preview on their
+  // laptop is the television, not a drawing of it.
+  if (req.user.role !== "dm" || req.query.view === "1") {
+    const party = state.combatants.some(c => c.kind === "pc") ? await partyBoard() : [];
+    return res.json({ role: req.user.role === "dm" ? "dm" : "player", asRoom: true,
+                      view: initPlayerView(state, party) });
+  }
+  const party = await partyBoard();
+  const { rows: saved } = await db.query(
+    "SELECT id, name, updated_at FROM init_encounters ORDER BY lower(name)");
+  // The DM is sent the board and the party SEPARATELY and merges them in the page. The player view
+  // is sent one resolved list instead, because the merging is where the withholding happens and
+  // that must not be a thing a browser is trusted to do.
+  res.json({
+    role: "dm", state, party,
+    conditions: INIT_CONDITIONS,
+    encounters: saved.map(r => ({ id: r.id, name: r.name, updatedAt: r.updated_at })),
+  });
+});
+
+// The whole board, written whole. There is one writer, so there is no version to race: the DM's
+// screen is the truth and the player view only ever reads.
+app.put("/api/initiative", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const state = cleanInit(req.body?.state);
+  await saveInit(state);
+  res.json({ state });
+});
+
+// ── The table's clock ───────────────────────────────────────
+// Every sheet already counts its own rounds and expires its own timed things through
+// `rules.tickTimed` — a modifier that lasts three rounds, a borrowed resistance, an extra Bonus
+// Action somebody handed you. What it has never had is anybody telling it that a round went by, so
+// in practice the DM says "round three" out loud and seven players remember to press their own
+// button. This writes the round onto every sheet at the table instead; each sheet sees it arrive on
+// its own poll and runs its own expiry, which keeps the arithmetic where it already lives.
+app.post("/api/initiative/clock", requireUser, requireDm, async (req, res) => {
+  const round = iNum(req.body?.round, 0, 999, 1);
+  const inCombat = !!req.body?.inCombat;
+  const { rows } = await db.query(
+    "SELECT id, sheet FROM characters WHERE archived = false ORDER BY id");
+  const moved = [];
+  for (const row of rows) {
+    let sheet; try { sheet = JSON.parse(row.sheet || "{}"); } catch { sheet = {}; }
+    if (!sheet || typeof sheet !== "object") sheet = {};
+    if (sheet.round === round && !!sheet.inCombat === inCombat) continue;
+    sheet.round = round || 1;
+    sheet.inCombat = inCombat;
+    await db.query(
+      `UPDATE characters SET sheet = $1, version = version + 1, updated_at = now() WHERE id = $2`,
+      [JSON.stringify(sheet), row.id]);
+    moved.push(row.id);
+  }
+  res.json({ round, inCombat, moved: moved.length });
+});
+
+// ── Lineups kept for later ──────────────────────────────────
+// The NPC side only. The party is whoever is at the table that night, and a saved fight that
+// remembered last month's hit points would be a lie the DM has to spot.
+app.get("/api/initiative/encounters/:id", requireUser, requireDm, async (req, res) => {
+  const { rows } = await db.query("SELECT * FROM init_encounters WHERE id = $1",
+    [iNum(req.params.id, 1, 10 ** 9, 0)]);
+  if (!rows[0]) return res.status(404).json({ error: "No such encounter." });
+  let data = {}; try { data = JSON.parse(rows[0].data || "{}"); } catch { data = {}; }
+  res.json({ name: rows[0].name, combatants: (Array.isArray(data.combatants) ? data.combatants : [])
+    .slice(0, INIT_MAX).map(cleanCombatant).filter(c => c.kind === "npc") });
+});
+
+app.post("/api/initiative/encounters", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const name = iStr(req.body?.name, 80);
+  if (!name) return res.status(400).json({ error: "An encounter wants a name." });
+  const combatants = (Array.isArray(req.body?.combatants) ? req.body.combatants : [])
+    .slice(0, INIT_MAX).map(cleanCombatant).filter(c => c.kind === "npc");
+  if (!combatants.length) return res.status(400).json({ error: "Nothing to save." });
+  const { rows } = await db.query(
+    `INSERT INTO init_encounters (name, data, updated_at) VALUES ($1,$2,now())
+       ON CONFLICT (name) DO UPDATE SET data = EXCLUDED.data, updated_at = now()
+     RETURNING id, name, updated_at`, [name, JSON.stringify({ combatants })]);
+  res.json({ encounter: { id: rows[0].id, name: rows[0].name, updatedAt: rows[0].updated_at } });
+});
+
+app.delete("/api/initiative/encounters/:id", requireUser, requireDm, async (req, res) => {
+  await db.query("DELETE FROM init_encounters WHERE id = $1", [iNum(req.params.id, 1, 10 ** 9, 0)]);
+  res.json({ ok: true });
+});
+
 app.use("/api/admin", admin);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -2230,6 +2533,16 @@ app.use("/sheet", async (req, res, next) => {
   return (await currentUser(req)) ? next() : res.redirect("/");
 });
 app.use("/sheet", express.static(path.join(ROOT, "sheet")));
+
+// The initiative board. A session is enough to be handed the page, the same as /sheet and /map: the
+// page itself holds no fight, and what it is served when it asks is decided by /api/initiative —
+// the whole board for the DM, the running order and nothing else for everybody else. The player
+// view is the point of the tool, so a player must be able to open this URL; the ambush that is not
+// on it was never sent to them.
+app.use("/initiative", async (req, res, next) => {
+  return (await currentUser(req)) ? next() : res.redirect("/");
+});
+app.use("/initiative", express.static(path.join(ROOT, "initiative")));
 
 // "/" and "/index.html" are the same front page — an old bookmark or a hand-typed URL used to
 // get Express's bare "Cannot GET /index.html" instead of the hub.

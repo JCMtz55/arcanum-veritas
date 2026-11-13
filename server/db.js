@@ -367,6 +367,30 @@ const SCHEMA = [
   // being taken twice from one cast.
   `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS applied_at TIMESTAMPTZ`,
   `ALTER TABLE character_effects ADD COLUMN IF NOT EXISTS applied_note TEXT NOT NULL DEFAULT ''`,
+  // ── The fight on the table right now ─────────────────────────────────────
+  // ONE row, ever: `id = 1`, checked by the table itself. There is one table and one fight on it, and
+  // the player view has to find that fight without being told which one it is — a second row would
+  // mean a second screen showing the wrong initiative, which is the only thing this tool must never
+  // do. The whole board is one JSON blob rather than a row per combatant: it is written whole on
+  // every change by one writer (the DM), read whole by everyone else, and never queried by part.
+  //
+  // A PC in that blob holds almost nothing — their id, their initiative, and whether they are hidden.
+  // Hit points, AC, conditions and portrait are read live from `characters` at every poll, so the
+  // board cannot drift from the sheet the player is looking at.
+  `CREATE TABLE IF NOT EXISTS init_state (
+     id         SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+     data       TEXT NOT NULL DEFAULT '{}',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+  // A lineup kept for later — the NPCs of an encounter, by name, with their numbers and portraits.
+  // Only the NPC side is saved: the party is whoever is at the table that night, and a saved fight
+  // that remembered last month's hit points would be a lie the DM has to notice.
+  `CREATE TABLE IF NOT EXISTS init_encounters (
+     id         SERIAL PRIMARY KEY,
+     name       TEXT NOT NULL UNIQUE,
+     data       TEXT NOT NULL DEFAULT '{}',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
 ];
 
 export async function migrate(db) {

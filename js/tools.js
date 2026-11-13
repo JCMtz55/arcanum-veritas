@@ -11,7 +11,7 @@
 // own boot, so none of the five boot functions had to learn about it.
 //
 // Who sees what follows the front page exactly: everyone signed in gets Home, the composer, the
-// Companion and — since 2026-10-23 — the World Map; Admin is the DM's. That is a convenience,
+// Companion, the World Map (since 2026-10-23) and Initiative (since 2026-11-12); Admin is the DM's. That is a convenience,
 // not the boundary: every Admin call sits behind requireDm, and on the map the server decides
 // per place what an account may read. On a static host there is no api/ and no accounts, so the
 // menu shows what is public anyway.
@@ -33,6 +33,10 @@ const TOOLS = [
     title: "Character Sheet — your seven scores, the Fate Die, Wounds and both exhaustion tracks" },
   { key: "map", href: "map/", mark: "✶", label: "Map",
     title: "World Map — nations, settlements and the roads between them" },
+  // Everyone signed in: the DM gets the board, a player gets the running order. Which face the page
+  // wears is the server's answer to /api/initiative, not this row's.
+  { key: "initiative", href: "initiative/", mark: "⧗", label: "Initiative",
+    title: "Initiative — the fight on the table, and the second screen for the room" },
   { key: "library", href: "library/", mark: "▤", label: "Library",
     title: "The Library — the campaign's shared documents, published from the vault" },
   { key: "admin", href: "admin/", mark: "❖", label: "Admin", dm: true,

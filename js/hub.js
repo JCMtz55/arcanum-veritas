@@ -50,9 +50,25 @@ async function boot() {
     // The Character Sheet is a player's own. The DM reads the table from the Admin page instead,
     // where every character is on one board, so the card would only be a longer road to one sheet.
     document.getElementById("hubSheet").hidden = dm;
+    // Initiative is for everybody: the DM gets the board, a player gets the running order and
+    // nothing else, and which one you are handed is decided by the server. The card says the round
+    // while a fight is actually running, so the table can see from here that one is.
+    document.getElementById("hubInit").hidden = false;
+    fight();
     if (dm) reminders();
   }
   document.getElementById("hub").hidden = false;
+}
+
+// Is a fight running? The board holds one and says so to both faces, so this is the same question
+// whoever asks it.
+async function fight() {
+  try {
+    const d = await api("GET", "api/initiative");
+    const live = d.role === "dm" ? d.state : d.view;
+    if (live?.inCombat && live.round)
+      document.getElementById("hubInitName").textContent = `Initiative · Round ${live.round}`;
+  } catch (e) {}
 }
 
 // The DM's Admin card says how many players are waiting to have a Cognition enabled

@@ -1,0 +1,238 @@
+/* Ephemer — Initiative. Only what this tool adds; everything else is ../css/app.css, whose tokens
+   (--slate, --panel, --line, --bone, --brass …) are the ones used here.
+
+   Two faces live in this file. The DM's board is dense and built for a laptop beside the screen —
+   every number reachable without a scroll. The room's view is the opposite: a few big rows, legible
+   across a table, nothing that invites a click. They share the tokens and nothing else. */
+
+/* ═══ THE DM'S BOARD ═══════════════════════════════════════ */
+.ini-shell{max-width:1180px;margin:0 auto;padding:16px 18px 60px}
+
+/* ── The clock ─────────────────────────────────────────────── */
+.ini-clock{
+  position:sticky;top:51px;z-index:30;
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+  padding:10px 12px;margin-bottom:14px;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+}
+.ini-clock .sp{flex:1 1 8px}
+.ini-rd{display:flex;align-items:baseline;gap:7px;padding:0 6px;font-family:var(--sans)}
+.ini-rd b{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.ini-rd i{font-size:11px;color:var(--mute);font-style:normal;text-transform:uppercase;letter-spacing:.08em}
+.ini-rd.off b{color:var(--mute)}
+.ini-turn{font-family:var(--sans);font-size:12px;color:var(--bone2);max-width:260px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ini-turn b{color:var(--brass)}
+.ini-pill{margin-right:10px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;
+  background:var(--slate);font-family:var(--sans);font-size:11.5px;color:var(--bone2);white-space:nowrap}
+.ini-pill b{color:var(--brass)}
+
+/* The big one. "Next" is pressed more than every other control on this page put together. */
+.mini.next{padding:6px 16px;font-size:13px;border-color:var(--brass);color:var(--bone);
+  background:rgba(176,136,66,.18);font-weight:500}
+.mini.next:hover{border-color:#d2a558;background:rgba(176,136,66,.3)}
+.mini.warn:hover{border-color:var(--ember);color:#E8A090}
+
+/* ── The order ─────────────────────────────────────────────── */
+.ini-order{display:flex;flex-direction:column;gap:6px}
+.ini-row{
+  display:grid;gap:10px;align-items:center;
+  grid-template-columns:52px 40px minmax(110px,1.3fr) minmax(168px,1.5fr) 46px 46px minmax(104px,1fr) 58px;
+  padding:7px 10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid transparent;
+  border-radius:9px;
+}
+.ini-row.pc{background:#232B33}
+/* Whose turn it is. The only loud thing on the page. */
+.ini-row.on{border-left-color:var(--brass);background:#2C3340;box-shadow:inset 0 0 0 1px rgba(176,136,66,.25)}
+.ini-row.down{opacity:.5}
+.ini-row.off{opacity:.62;border-style:dashed}        /* not on the room's screen */
+.ini-row.gone{opacity:.45}
+
+.ini-init{width:100%;height:38px;padding:0;background:var(--slate);border:1px solid var(--line);
+  border-radius:7px;color:var(--bone);font-family:var(--sans);font-size:17px;font-weight:700;
+  text-align:center;cursor:pointer}
+.ini-init:hover{border-color:var(--mute)}
+.ini-init.none{color:var(--mute);font-size:13px;font-weight:400}
+.ini-init input{width:100%;height:100%;border:0;background:none;text-align:center;font:inherit;color:inherit}
+
+.ini-face{width:40px;height:40px;border-radius:7px;overflow:hidden;background:var(--slate);
+  border:1px solid var(--line);display:grid;place-items:center;cursor:pointer}
+.ini-face img{width:100%;height:100%;object-fit:cover;display:block}
+.ini-face span{font-size:15px;color:var(--mute)}
+
+.ini-id{min-width:0;font-family:var(--sans);line-height:1.25}
+.ini-id b{display:block;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ini-id span{display:block;font-size:11px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ini-id .hurt{color:#D98B7B}
+
+/* Hit points. The bar is read at a glance across the table; the box under it is where the damage
+   roll goes — "12" takes it off, "+12" puts it back, "t8" is temporary, "=40" sets it. */
+.ini-hp{min-width:0;font-family:var(--sans)}
+.ini-hp .hpbar{height:7px;border-radius:999px;background:#1A1E24;border:1px solid var(--line);overflow:hidden}
+.ini-hp .hpbar i{display:block;height:100%;background:var(--verdant);transition:width .2s}
+.ini-hp .hpbar.mid i{background:var(--brass)}
+.ini-hp .hpbar.low i{background:var(--ember)}
+.ini-hp .hpn{display:flex;align-items:baseline;gap:4px;margin-top:3px;font-size:12px}
+.ini-hp .hpn b{font-size:14px;font-weight:700}
+.ini-hp .hpn s{color:var(--mute);text-decoration:none}
+.ini-hp .hpn em{color:var(--steel);font-style:normal}
+.ini-hp .hpn .hit{margin-left:auto;width:62px;height:23px;padding:0 6px;background:var(--slate);
+  border:1px solid var(--line);border-radius:6px;color:var(--bone);font-size:12px;text-align:center}
+.ini-hp .hpn .hit::placeholder{color:var(--mute)}
+.ini-hp .hpn .hit:focus{border-color:var(--brass)}
+
+.ini-stat{height:38px;border-radius:7px;background:var(--slate);border:1px solid var(--line);
+  display:grid;place-content:center;text-align:center;font-family:var(--sans);cursor:pointer;line-height:1.1}
+.ini-stat:hover{border-color:var(--mute)}
+.ini-stat b{font-size:14px;font-weight:700}
+.ini-stat span{font-size:9px;color:var(--mute);letter-spacing:.06em}
+.ini-stat.none b{color:var(--mute);font-weight:400}
+/* A monster's AC and save DC are typed straight into the cell; a PC's are read from their sheet
+   and rendered as text, which is why both shapes have to look the same. */
+.ini-stat input{width:100%;border:0;background:none;text-align:center;font-family:var(--sans);
+  font-size:14px;font-weight:700;color:inherit;padding:0}
+.ini-stat input:focus{outline:none}
+.ini-stat:focus-within{border-color:var(--brass)}
+
+.ini-con{display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0}
+.ini-con .chip{margin:0;padding:2px 8px;font-family:var(--sans);font-size:10.5px;line-height:1.5;
+  border-radius:999px;cursor:pointer;background:var(--slate)}
+.ini-con .chip.camp{border-color:#8a6a2a;color:#E0B050}
+.ini-con .chip i{font-style:normal;color:var(--mute);margin-left:4px}
+.ini-con .add{color:var(--mute);border-style:dashed}
+.ini-con .add:hover{color:var(--bone);border-style:solid}
+
+.ini-tools{display:flex;gap:2px;justify-content:flex-end}
+.ini-tools button{width:26px;height:26px;padding:0;background:none;border:1px solid transparent;
+  border-radius:6px;color:var(--mute);cursor:pointer;font-size:13px;line-height:1}
+.ini-tools button:hover{color:var(--bone);border-color:var(--line);background:var(--slate)}
+.ini-tools button.on{color:var(--brass)}
+
+.ini-note{grid-column:3 / -1;margin-top:-4px;font-size:12px;color:var(--bone2);font-style:italic}
+.ini-empty{padding:34px 16px;text-align:center;color:var(--mute);font-style:italic;
+  border:1px dashed var(--line);border-radius:10px}
+
+/* ── Who else is coming: the drawer ────────────────────────── */
+/* Closed, it is off the right edge entirely — the order gets the whole page, which is what the DM
+   is actually reading. Open, it takes the margin beside the board rather than covering a row. */
+.ini-side{
+  position:fixed;top:51px;right:0;bottom:0;width:336px;z-index:40;
+  display:flex;flex-direction:column;
+  background:var(--panel);border-left:1px solid var(--line);
+  box-shadow:-16px 0 30px rgba(8,10,14,.45);
+  transform:translateX(100%);visibility:hidden;
+  transition:transform .18s ease, visibility 0s linear .18s;
+}
+body.add-open .ini-side{transform:none;visibility:visible;transition:transform .18s ease}
+.side-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.side-hd h2{flex:1;margin:0;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.1em}
+.side-hd .mini{padding:3px 10px}
+.ini-scrim{display:none;position:fixed;inset:0;z-index:35;background:rgba(10,12,16,.55)}
+
+.ini-add{flex:1;min-height:0;overflow:auto;padding:14px}
+.ini-add h2{margin:0 0 10px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.1em}
+/* One column instead of one long row: the fields are the same, the shape is the drawer's. */
+.ini-side .ini-f.w-name{flex:1 1 160px}
+.ini-side .ini-f.w-name input{width:100%}
+.ini-side .ini-form > .go{flex:1 1 100%;height:32px}
+.ini-form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.ini-f{display:flex;flex-direction:column;gap:3px}
+.ini-f label{font-family:var(--sans);font-size:10px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.ini-f input{height:30px;padding:0 9px;background:var(--slate);border:1px solid var(--line);
+  border-radius:7px;color:var(--bone);font-size:13px}
+.ini-f input:focus{border-color:var(--brass)}
+.ini-f.w-name input{width:208px}
+.ini-f.w-n input{width:58px;text-align:center}
+.ini-pic{width:46px;height:46px;border-radius:8px;border:1px dashed var(--line);background:var(--slate);
+  display:grid;place-items:center;cursor:pointer;color:var(--mute);font-size:17px;overflow:hidden;flex:none}
+.ini-pic:hover{border-color:var(--brass);color:var(--bone)}
+.ini-pic img{width:100%;height:100%;object-fit:cover}
+.ini-pic input{display:none}
+.ini-add .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;
+  padding-top:12px;border-top:1px solid var(--line)}
+
+/* ── The dialog: conditions, notes, lineups ────────────────── */
+.ini-dlg{width:min(520px,92vw);padding:0;background:var(--panel);color:var(--bone);
+  border:1px solid var(--line);border-radius:12px}
+.ini-dlg::backdrop{background:rgba(10,12,16,.68)}
+.ini-dlg header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ini-dlg header h2{flex:1;margin:0;font-family:var(--sans);font-size:14px;font-weight:500}
+.ini-dlg > div{padding:14px;max-height:66vh;overflow:auto}
+.ini-dlg .grid{display:flex;flex-wrap:wrap;gap:6px}
+.ini-dlg .chip{margin:0;font-family:var(--sans);font-size:12px}
+.ini-dlg .note{font-size:12.5px;color:var(--mute);font-style:italic;margin:10px 0 0}
+.ini-dlg textarea{width:100%;min-height:84px;padding:9px;background:var(--slate);border:1px solid var(--line);
+  border-radius:8px;color:var(--bone);font-family:var(--serif);font-size:14px;resize:vertical}
+.ini-dlg .line{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);
+  font-family:var(--sans);font-size:13px}
+.ini-dlg .line:last-child{border-bottom:0}
+.ini-dlg .line b{flex:1;font-weight:500}
+.ini-dlg .line span{font-size:11px;color:var(--mute)}
+
+/* ═══ THE SECOND SCREEN ════════════════════════════════════ */
+/* A television across the room, or a tablet in somebody's hand. Read at six feet: big type, one
+   column, no controls at all — nothing here is clickable, because it is not anybody's board. */
+.ini-room{max-width:860px;margin:0 auto;padding:26px 20px 70px}
+.room-hd{text-align:center;margin-bottom:22px}
+.room-hd h1{margin:0;font-family:var(--sans);font-size:34px;font-weight:700;letter-spacing:-.02em}
+.room-hd p{margin:4px 0 0;color:var(--mute);font-style:italic}
+.room-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.room-list li{
+  display:grid;gap:14px;align-items:center;
+  grid-template-columns:62px 58px 1fr auto;
+  padding:10px 14px;background:var(--panel);border:1px solid var(--line);
+  border-left:4px solid transparent;border-radius:12px;
+}
+.room-list li.on{border-left-color:var(--brass);background:#2E3542;transform:scale(1.012)}
+.room-list li.down{opacity:.46}
+.room-list .r-init{font-family:var(--sans);font-size:26px;font-weight:700;text-align:center;line-height:1}
+.room-list li.on .r-init{color:var(--brass)}
+.room-list .r-face{width:58px;height:58px;border-radius:10px;overflow:hidden;background:var(--slate);
+  border:1px solid var(--line);display:grid;place-items:center}
+.room-list .r-face img{width:100%;height:100%;object-fit:cover}
+.room-list .r-face span{color:var(--mute);font-size:20px}
+.room-list .r-id{min-width:0}
+.room-list .r-id b{display:block;font-family:var(--sans);font-size:21px;font-weight:500;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-list .r-id span{font-family:var(--sans);font-size:12px;color:var(--mute)}
+.room-list .r-id .cons{display:block;margin-top:3px;font-family:var(--sans);font-size:12px;color:#E0B050}
+.room-list .r-hp{text-align:right;font-family:var(--sans)}
+.room-list .r-hp b{display:block;font-size:15px;font-weight:500}
+.room-list .r-hp span{font-size:11px;color:var(--mute)}
+.room-list .r-hp .w-unhurt{color:var(--verdant)}
+.room-list .r-hp .w-grazed{color:#9CB89C}
+.room-list .r-hp .w-hurt{color:var(--brass)}
+.room-list .r-hp .w-bloodied{color:#D98B7B}
+.room-list .r-hp .w-reeling{color:var(--ember)}
+.room-list .r-hp .w-down{color:var(--mute)}
+.room-foot{margin-top:20px;text-align:center;color:var(--mute);font-size:12.5px;font-style:italic}
+/* The DM holding the second screen keeps the bar, so they can get back. On a television nobody is
+   signing in or switching tools, so the strip and the account menu are out of the way there. */
+body.as-room .bar:not(.room-bar) .tools,
+body.as-room .bar:not(.room-bar) .live{display:none}
+.ini-dlg .line .search{height:28px}
+
+/* ── Wide: the open drawer takes the margin, not a row ─────── */
+@media (min-width:901px){
+  /* The shell is centred and capped; both have to give, or a 1300px laptop would slide rows under
+     the drawer instead of beside it. */
+  body.add-open .ini-shell{margin-right:352px;max-width:min(1180px, calc(100vw - 408px))}
+}
+
+/* ── Narrow: the board stacks, the room does not need to ───── */
+@media (max-width:900px){
+  .ini-side{top:0;width:min(372px,94vw);z-index:60}
+  body.add-open .ini-scrim{display:block}
+  .ini-row{grid-template-columns:48px 36px 1fr 1fr;grid-template-areas:
+    "init face id id" "init face hp hp" ". . ac con" ". . dc tools"}
+  .ini-row > .ini-init{grid-area:init} .ini-row > .ini-face{grid-area:face}
+  .ini-row > .ini-id{grid-area:id} .ini-row > .ini-hp{grid-area:hp}
+  .ini-row > .ini-ac{grid-area:ac} .ini-row > .ini-dc{grid-area:dc}
+  .ini-row > .ini-con{grid-area:con} .ini-row > .ini-tools{grid-area:tools}
+  .ini-note{grid-column:1 / -1}
+  .room-list li{grid-template-columns:48px 46px 1fr}
+  .room-list .r-hp{grid-column:3;text-align:left}
+  .room-hd h1{font-size:27px}
+}
