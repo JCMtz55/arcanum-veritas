@@ -33,6 +33,7 @@
         <button class="tab" id="tabEmotion" onclick="setView('emotion')">Emotion</button>
       </div>
     </details>
+    <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
   </div>
   <div class="dials">
     <div class="dial" id="slotDial"><label for="slotDn">Slot</label>
@@ -49,12 +50,10 @@
     <span class="lv dc"><b id="dcOut">13</b><i>Verum DC</i></span>
     <span class="lv"><b id="capOut">1</b><i id="capLbl">cognition</i></span>
     <span class="status" id="statusEl">Loading…</span>
-    <!-- The account menu: everything that is yours rather than the builder's. Learning is a view
-         like the tabs, so it keeps its tab id — setView marks it when it is open. -->
+    <!-- The account menu: everything that is yours rather than the builder's. -->
     <details class="more" id="who" hidden>
       <summary class="mini" id="whoBtn" title="Your account"></summary>
       <div class="more-menu" onclick="this.parentNode.open = false">
-        <button class="tab" id="tabLearn" onclick="setView('learn')" hidden>Learning</button>
         <button onclick="openAccount()">Change password</button>
         <button onclick="signOut()">Sign out</button>
       </div>
