@@ -449,6 +449,33 @@ const SCHEMA = [
      updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
 
+  // ── The gallery ──────────────────────────────────────────────────────────
+  // Every picture the DM has uploaded, in one pool, so that assigning a character's portrait, their
+  // full painting, their splash and their bloodied splash is four choices out of one place rather
+  // than four uploads. Uploaded once, used anywhere, and used by more than one character if that is
+  // what the painting is for.
+  //
+  // The bytes live here as a data URL, the way `character_art` already keeps them, and are served
+  // from a route of their own so a browser caches them. They are NOT in the sheet JSON for the same
+  // reason as the splashes: that blob rides on every autosave.
+  //
+  // What a character STORES is a reference, never the image: `portrait` and `fullArt` hold this
+  // table's URL (`/api/gallery/7`) exactly as they already hold a plate's path, so nothing
+  // downstream has to learn a new shape. The two splashes are the exception and are COPIED into
+  // `character_art` when assigned — that route already exists, already caches, and already serves
+  // the room's television, and a copy means deleting a picture from the gallery can never blank
+  // somebody's splash in the middle of a fight.
+  `CREATE TABLE IF NOT EXISTS gallery_images (
+     id          SERIAL PRIMARY KEY,
+     name        TEXT NOT NULL DEFAULT '',
+     data        TEXT NOT NULL,
+     width       INTEGER NOT NULL DEFAULT 0,
+     height      INTEGER NOT NULL DEFAULT 0,
+     bytes       INTEGER NOT NULL DEFAULT 0,
+     uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+
   // ── What was actually drawn at the table ─────────────────────────────────
   // One row per press of "Drew it" on the seal card: the recipe AND the numbers it came to. The
   // composer can answer "what can this seal do"; nothing could answer "what did the party spend

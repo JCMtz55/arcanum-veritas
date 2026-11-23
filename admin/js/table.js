@@ -144,10 +144,12 @@ const urlAttr = u => escQ(encodeURI(String(u || "")).replace(/'/g, "%27"));
 // Opened by id rather than by passing the path through an inline handler: a number cannot carry a
 // quote, and the row already holds everything the lightbox needs. `portraitArt` is the full plate;
 // a portrait with no full version opens the crop itself rather than nothing.
+// `galSrc` rather than a bare `../sheet/` prefix: a picture assigned from the gallery is an
+// absolute path the API serves, and prefixing it would ask for `../sheet//api/gallery/7`.
 function partyArt(id) {
   const c = PARTY.cards.find(x => x.id === id);
-  if (!c?.portrait) return;
-  lightbox(`../sheet/${c.portraitArt || c.portrait}`, c.name);
+  if (!c?.portrait && !c?.portraitArt) return;
+  lightbox(galSrc(c.portraitArt || c.portrait), c.name);
 }
 
 const card = id => PARTY.cards.find(x => x.id === id);
@@ -177,7 +179,7 @@ function partyRowHtml(c) {
   return `<article class="ptr ${band}${open ? " open" : ""}${PARTY.busy === c.id ? " busy" : ""}">
     ${c.portrait
       ? `<button class="ptr-por" onclick="partyArt(${c.id})" title="See ${escQ(c.name)}'s plate whole"
-           style="background-image:url('../sheet/${urlAttr(c.portrait)}')"
+           style="background-image:url('${urlAttr(galSrc(c.portrait))}')"
            aria-label="See ${escQ(c.name)}'s plate whole"></button>`
       : `<span class="ptr-por none" aria-hidden="true">${esc(initials(c.name))}</span>`}
 

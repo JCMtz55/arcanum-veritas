@@ -27,13 +27,26 @@ export const PORTRAITS = [
 export const portraitUrl = f => `img/portraits/${f}`;
 export const fullArtUrl = f => `img/fullart/${f}`;
 
+// A stored picture is one of two things: a plate from the catalogue above, which is a path relative
+// to `sheet/` and has to be prefixed by whoever is reading it, or an image uploaded to the gallery,
+// which is an absolute path the API serves and must be left exactly alone. Everything that used to
+// write `../sheet/${url}` asks this first, or a gallery portrait turns into `../sheet//api/...`.
+export const needsSheetBase = u => !!u && !/^(data:|https?:|\/)/.test(u);
+export const underSheet = (u, base = "") => (needsSheetBase(u) ? base + u : u || "");
+
 // What a character is currently wearing, found back from the URL on the sheet — the stored value is
 // the portrait's URL, not an id, so that a plate retired from the list still resolves.
 export const portraitOf = ch => PORTRAITS.find(p => portraitUrl(p.file) === ch?.portrait) || null;
 
-// The picture to open for a character: the full plate where there is one, the crop where there is
-// not, and nothing at all for a character with no portrait — which the caller shows as initials.
+// The picture to open for a character: a full painting set outright if there is one, else the full
+// plate belonging to their portrait, else the crop itself, and nothing at all for a character with
+// no portrait — which the caller shows as initials.
+//
+// `fullArt` is what the gallery writes. It is checked FIRST and on its own, so a character can be
+// given a painting without being given a matching plate, and so a plate's own full version stays
+// the answer for everyone who never opens the gallery.
 export function artUrl(ch) {
+  if (ch?.fullArt) return ch.fullArt;
   if (!ch?.portrait) return "";
   const p = portraitOf(ch);
   return p?.art ? fullArtUrl(p.art) : ch.portrait;

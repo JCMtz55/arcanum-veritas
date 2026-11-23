@@ -266,7 +266,9 @@ const BRINGS_OWN_PARSER = req =>
   (req.method === "PUT" && req.path === "/api/initiative") ||
   (req.method === "POST" && req.path === "/api/initiative/encounters") ||
   // A character's splash art for the room's screen — one picture, not a thumbnail (ART_MAX).
-  (req.method === "PUT" && /^\/api\/characters\/\d+\/art$/.test(req.path));
+  (req.method === "PUT" && /^\/api\/characters\/\d+\/art$/.test(req.path)) ||
+  // One picture going into the gallery, by the same measure.
+  (req.method === "POST" && req.path === "/api/gallery");
 app.use((req, res, next) => (BRINGS_OWN_PARSER(req) ? next() : SMALL_JSON(req, res, next)));
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 
@@ -1337,9 +1339,17 @@ admin.post("/users", async (req, res) => {
   if ((await db.query("SELECT 1 FROM users WHERE username = $1", [username])).rows.length)
     return res.status(409).json({ error: "That username is taken." });
   const { rows } = await db.query(
-    "INSERT INTO users (username, display_name, password_hash) VALUES ($1, $2, $3) RETURNING id",
+    `INSERT INTO users (username, display_name, password_hash) VALUES ($1, $2, $3)
+     RETURNING id, username, display_name, role`,
     [username, displayName, password ? await hashPassword(password) : LOCKED]);
-  res.status(201).json({ id: rows[0].id });
+  const u = rows[0];
+  // `id` stays for anything already reading it; `user` is what the admin page wants — it needs the
+  // display name back to say who it just made, and the server is where the fallback to the username
+  // is decided, so asking the browser to work it out again would be two places to get it wrong.
+  res.status(201).json({
+    id: u.id,
+    user: { id: u.id, username: u.username, displayName: u.display_name, role: u.role },
+  });
 });
 
 admin.param("id", async (req, res, next, id) => {
@@ -1796,6 +1806,9 @@ function partyCard(row, displayName, granted = []) {
     // because this is the sheet's own catalogue and it is not the board's business where it sits.
     // Resolved here rather than on the board so the two can never disagree about which is which.
     portrait: ch.portrait || "", portraitArt: plates.artUrl(ch),
+    // What is SET, beside what is resolved: the admin page has to be able to tell a painting the
+    // DM chose from one inherited from the plate, or "Clear" would offer to clear nothing.
+    fullArt: ch.fullArt || "",
     // Whether this character has splash art waiting for their turn on the room's screen.
     art: { normal: !!row.has_art, hurt: !!row.has_hurt_art },
     pendingLevel: row.pending_level == null ? null : Number(row.pending_level),
@@ -1977,6 +1990,15 @@ app.put("/api/characters/:id", requireUser, SHEET_JSON, async (req, res) => {
   // same name inside the JSON is ignored rather than trusted, and never written back.
   const clean = { ...sheet };
   for (const k of ["level", "fate", "dream", "honor", "morality", "unspent"]) delete clean[k];
+
+  // `fullArt` is the DM's too, but it has no column — it lives in this very JSON, which this route
+  // REPLACES wholesale. So it is carried over from what is stored rather than taken from the body:
+  // without this, the first autosave after a painting is assigned from the gallery would drop it,
+  // and the sheet that dropped it would have no idea it ever existed. The portrait is NOT treated
+  // this way on purpose — a player changing their own face is theirs to change.
+  const held = parseSheet(row);
+  if (held.fullArt) clean.fullArt = held.fullArt;
+  else delete clean.fullArt;
 
   const { rows } = await db.query(
     `UPDATE characters SET sheet = $1, name = COALESCE($2, name), version = version + 1,
@@ -3250,6 +3272,152 @@ app.get("/api/characters/:id/art/:kind", requireUser, async (req, res) => {
   res.set("Cache-Control", "private, max-age=0, must-revalidate");
   res.set("ETag", tag);
   res.end(Buffer.from(m[2], "base64"));
+});
+
+// ── The gallery ─────────────────────────────────────────────
+// One pool of uploaded pictures, and four slots per character that point into it: the portrait, the
+// full painting behind it, the splash their turn raises on the room's screen, and the splash used
+// when they are nearly out. Uploading and assigning were the same act before this, once per slot,
+// which is why the same painting had to be sent four times and why none of it could be done unless
+// the character happened to be standing in a fight.
+//
+// The DM uploads and assigns; anybody signed in may FETCH, because a portrait assigned this way
+// hangs on the player's own sheet and on the television in the room.
+const GALLERY_MAX = 48;              // pictures kept in the pool
+
+app.get("/api/gallery", requireUser, requireDm, async (req, res) => {
+  // Never the data: this list is drawn beside seven characters and the pictures are hundreds of
+  // kilobytes each. The browser asks for the ones it is about to show, through the route below.
+  const { rows } = await db.query(
+    `SELECT id, name, width, height, bytes, created_at FROM gallery_images ORDER BY id DESC`);
+  res.json({ images: rows.map(r => ({
+    id: r.id, name: r.name, width: r.width, height: r.height, bytes: r.bytes,
+    url: `/api/gallery/${r.id}`, at: r.created_at,
+  })), max: GALLERY_MAX });
+});
+
+app.post("/api/gallery", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const data = String(req.body?.data || "");
+  if (data.length > ART_MAX || !ART_OK.test(data))
+    return res.status(400).json({ error: "That has to be a PNG, JPEG or WebP under 900kb." });
+
+  const { rows: count } = await db.query("SELECT count(*)::int AS n FROM gallery_images");
+  if ((count[0]?.n || 0) >= GALLERY_MAX)
+    return res.status(400).json({ error: `The gallery holds ${GALLERY_MAX} pictures. Delete one first.` });
+
+  const { rows } = await db.query(
+    `INSERT INTO gallery_images (name, data, width, height, bytes, uploaded_by)
+          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, width, height, bytes, created_at`,
+    [iStr(req.body?.name, 80), data,
+     iNum(req.body?.width, 0, 20000, 0), iNum(req.body?.height, 0, 20000, 0),
+     data.length, req.user.id]);
+  const r = rows[0];
+  res.json({ image: { id: r.id, name: r.name, width: r.width, height: r.height,
+                      bytes: r.bytes, url: `/api/gallery/${r.id}`, at: r.created_at } });
+});
+
+app.get("/api/gallery/:id", requireUser, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).end();
+  const { rows } = await db.query("SELECT data, created_at FROM gallery_images WHERE id = $1", [id]);
+  const m = ART_OK.exec(rows[0]?.data || "");
+  if (!m) return res.status(404).end();
+  // A row in this table is never rewritten, so its id and the moment it arrived are enough to tell
+  // one picture from another for as long as it exists.
+  const tag = `"g${id}-${new Date(rows[0].created_at).getTime()}"`;
+  if (req.headers["if-none-match"] === tag) return res.status(304).end();
+  res.set("Content-Type", `image/${m[1]}`);
+  res.set("Cache-Control", "private, max-age=0, must-revalidate");
+  res.set("ETag", tag);
+  res.end(Buffer.from(m[2], "base64"));
+});
+
+// Deleting a picture takes it out of the pool and nothing else. A splash was COPIED when it was
+// assigned, so the television keeps working; a portrait or a painting was a reference, so the
+// characters still wearing it are named back rather than quietly blanked.
+app.delete("/api/gallery/:id", requireUser, requireDm, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: "No such picture." });
+  const url = `/api/gallery/${id}`;
+  const { rows: wearing } = await db.query(
+    `SELECT name FROM characters WHERE archived = false
+       AND (sheet::text LIKE $1 OR sheet::text LIKE $2) ORDER BY name`,
+    [`%"portrait":"${url}"%`, `%"fullArt":"${url}"%`]);
+  const { rowCount } = await db.query("DELETE FROM gallery_images WHERE id = $1", [id]);
+  if (!rowCount) return res.status(404).json({ error: "No such picture." });
+  res.json({ deleted: id, wasWornBy: wearing.map(r => r.name) });
+});
+
+// ── The four slots ──────────────────────────────────────────
+// One call, so that setting a character's pictures is one act with one audit row rather than four
+// writes that can half-fail. Each slot takes a gallery URL, a plate path, or "" to clear it.
+//
+// `portrait` and `fullArt` are stored on the sheet as references. The two splashes are COPIED into
+// `character_art`, which is why this reaches for the picture's bytes rather than its id.
+const PICTURE_SLOTS = ["portrait", "fullArt", "splash", "hurt"];
+const PLATE_PATH = /^img\/(portraits|fullart)\/[A-Za-z0-9._-]+$/;
+const GALLERY_PATH = /^\/api\/gallery\/(\d+)$/;
+
+app.put("/api/characters/:id/pictures", requireUser, requireDm, SMALL_JSON, async (req, res) => {
+  const row = await loadCharacter(req.params.id, req.user);
+  if (!row) return res.status(404).json({ error: "No such character." });
+
+  const want = {};
+  for (const slot of PICTURE_SLOTS) {
+    const v = req.body?.[slot];
+    if (v === undefined) continue;                       // left alone
+    const s = String(v ?? "").trim();
+    if (s === "") { want[slot] = ""; continue; }         // cleared on purpose
+    if (!GALLERY_PATH.test(s) && !PLATE_PATH.test(s))
+      return res.status(400).json({ error: "A picture has to come from the gallery or the plates." });
+    want[slot] = s;
+  }
+  if (!Object.keys(want).length) return res.status(400).json({ error: "Nothing to set." });
+
+  // The splashes need the bytes themselves, so every gallery picture named here is read once.
+  const bytesFor = {};
+  for (const slot of ["splash", "hurt"]) {
+    const url = want[slot];
+    if (url === undefined || url === "") continue;
+    const m = GALLERY_PATH.exec(url);
+    if (!m) return res.status(400).json({ error: "A splash has to come from the gallery." });
+    const { rows } = await db.query("SELECT data FROM gallery_images WHERE id = $1", [Number(m[1])]);
+    if (!rows[0]) return res.status(404).json({ error: "That picture is no longer in the gallery." });
+    bytesFor[slot] = rows[0].data;
+  }
+
+  const sheet = parseSheet(row);
+  const before = { portrait: sheet.portrait ?? "", fullArt: sheet.fullArt ?? "" };
+  if (want.portrait !== undefined) sheet.portrait = want.portrait;
+  if (want.fullArt !== undefined) sheet.fullArt = want.fullArt;
+  if (want.portrait !== undefined || want.fullArt !== undefined)
+    await db.query(
+      `UPDATE characters SET sheet = $1, version = version + 1, updated_at = now() WHERE id = $2`,
+      [JSON.stringify(sheet), row.id]);
+
+  if (want.splash !== undefined || want.hurt !== undefined) {
+    const normal = want.splash === undefined ? null : (want.splash === "" ? "" : bytesFor.splash);
+    const hurt   = want.hurt   === undefined ? null : (want.hurt   === "" ? "" : bytesFor.hurt);
+    await db.query(
+      `INSERT INTO character_art (character_id, normal, hurt, updated_at)
+            VALUES ($1, COALESCE($2, ''), COALESCE($3, ''), now())
+       ON CONFLICT (character_id) DO UPDATE
+              SET normal = COALESCE($2, character_art.normal),
+                  hurt   = COALESCE($3, character_art.hurt),
+                  updated_at = now()`,
+      [row.id, normal, hurt]);
+  }
+
+  await logEvent(row.id, req.user.id, "pictures.set",
+    { before, after: Object.fromEntries(Object.entries(want)) }, req.body?.note);
+
+  const { rows: art } = await db.query(
+    "SELECT normal <> '' AS has_normal, hurt <> '' AS has_hurt FROM character_art WHERE character_id = $1",
+    [row.id]);
+  res.json({ pictures: {
+    portrait: sheet.portrait || "", fullArt: sheet.fullArt || "",
+    splash: !!art[0]?.has_normal, hurt: !!art[0]?.has_hurt,
+  } });
 });
 
 // ── Lineups kept for later ──────────────────────────────────

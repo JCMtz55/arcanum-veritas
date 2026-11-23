@@ -150,7 +150,8 @@ function tabCharacter(u, chars) {
     <p class="cdx-rings">The same row the board shows, and the same controls — open it to set anything
       on it. Every figure is computed by the server from the sheet's own rules, so this and their
       sheet cannot disagree.</p>
-    <div class="ptr-list">` + chars.map(partyRowHtml).join("") + `</div></div>`;
+    <div class="ptr-list">` + chars.map(partyRowHtml).join("") + `</div></div>`
+    + galPictures(chars);
 }
 
 // ── Cognitions ─────────────────────────────────────────────
@@ -503,14 +504,21 @@ async function adminToggle(userId, cogId, btn) {
 }
 function adminCreate(e) {
   e.preventDefault();
+  // Read out of the form BEFORE the request: the page redraws on the way back, and reaching for
+  // these inputs afterwards is reaching for elements that may already have been replaced.
+  const username = document.getElementById("admNewUser").value;
+  const displayName = document.getElementById("admNewName").value;
   api("POST", "api/admin/users", {
-    username: document.getElementById("admNewUser").value,
-    displayName: document.getElementById("admNewName").value,
+    username,
+    displayName,
     password: document.getElementById("admNewPass").value || undefined,
-  }).then(async ({ user }) => {
-    toast(`${user.displayName} created`);
+  // `id` is what the route answered with for a long time and `user` is what it answers with now;
+  // taking either means this keeps working against a server that has not been restarted yet.
+  }).then(async (res) => {
+    const made = res.user || { id: res.id, displayName: displayName || username };
+    toast(`${made.displayName} created`);
     await refresh();
-    go("players", user.id);
+    go("players", made.id);
   }).catch(err => toast(err.message));
   return false;
 }

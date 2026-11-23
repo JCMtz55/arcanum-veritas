@@ -316,3 +316,61 @@ button.ptr-por:hover{filter:brightness(1.12)}
   .a-sec .a-lbl{display:none}
   .a-sec.on .a-lbl{display:inline}
 }
+
+/* ═══ The gallery ═══════════════════════════════════════════
+   One pool of pictures and four slots per character, on the player's Character tab. Everything is
+   prefixed `gal-` on purpose: app.css is loaded by every page in this app and its generic class
+   names (.bar, .n, .card) will silently restyle anything that shares one. */
+
+.gal-char{margin:16px 0 4px}
+.gal-char h3{margin:0 0 8px; font:600 13px/1.2 var(--sans); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--mute)}
+
+.gal-slots{display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr))}
+
+.gal-slot{border:1px solid var(--line); border-radius:10px; padding:10px; background:var(--panel2);
+  display:flex; flex-direction:column; gap:4px}
+.gal-slot.on{border-color:var(--brass)}
+.gal-slot b{font:600 13px/1.3 var(--sans); color:var(--bone)}
+.gal-slot > span{font:400 11px/1.35 var(--sans); color:var(--mute)}
+
+/* 2:3, the shape every splash is painted at, so a picture is judged here the way the room sees it
+   rather than squeezed into a square that flatters everything equally. */
+.gal-shot{aspect-ratio:2 / 3; border-radius:8px; background:var(--slate) center top / cover no-repeat;
+  border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden}
+.gal-shot span{font:400 11px/1 var(--sans); color:var(--mute)}
+.gal-shot em{position:absolute; left:0; right:0; bottom:0; padding:3px 5px; font-style:normal;
+  font:400 10px/1.2 var(--sans); color:var(--bone2); background:rgba(10,12,16,.76)}
+.gal-slot.inherit .gal-shot{opacity:.55}
+
+.gal-acts{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px}
+
+.gal-grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(118px, 1fr));
+  margin:10px 0}
+.gal-im{margin:0; display:flex; flex-direction:column; gap:5px}
+.gal-im figcaption{font:400 11px/1.3 var(--sans); color:var(--bone2); word-break:break-word}
+.gal-im figcaption span{color:var(--mute)}
+
+.gal-pick{display:flex; flex-direction:column; gap:5px; padding:0; background:none; border:0;
+  cursor:pointer; text-align:left; font:inherit; color:inherit}
+.gal-pick .gal-shot{transition:border-color .12s ease, transform .12s ease}
+.gal-pick:hover .gal-shot, .gal-pick:focus-visible .gal-shot{border-color:var(--brass);
+  transform:translateY(-2px)}
+.gal-pick i{font-style:normal; font:400 11px/1.3 var(--sans); color:var(--bone2);
+  word-break:break-word}
+
+.gal-dlg{max-width:min(900px, 94vw)}
+.gal-dlg h3{margin:18px 0 0; font:600 13px/1.2 var(--sans); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--mute)}
+
+@media (max-width: 620px){
+  .gal-slots{grid-template-columns:repeat(2, minmax(0, 1fr))}
+  .gal-grid{grid-template-columns:repeat(auto-fill, minmax(96px, 1fr))}
+}
+
+/* app.css styles .mini but has no destructive variant, and .warn is defined on the initiative
+   page's own stylesheet rather than here - so a Clear or Delete button would read as an ordinary
+   one. Scoped to the gallery so it cannot reach anything else. */
+.gal-acts .mini.warn, .gal-im .mini.warn{color:var(--ember); border-color:var(--ember)}
+.gal-acts .mini.warn:hover, .gal-im .mini.warn:hover{background:var(--ember); color:var(--panel)}

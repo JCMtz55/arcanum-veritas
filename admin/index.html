@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
-<link rel="stylesheet" href="css/admin.css?v=2026-11-19a">
+<link rel="stylesheet" href="css/admin.css?v=2026-11-23a">
 <!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
 <script src="../js/tools.js"></script>
 </head>
@@ -101,6 +101,15 @@
 <!-- A character's plate, opened from the board. Click it or press Esc to close. -->
 <dialog class="lbox" id="lbox" onclick="this.close()"></dialog>
 
+<!-- Picking a picture for one of a character's four slots: the gallery first, then the plates. -->
+<dialog class="rem gal-dlg" id="galDlg">
+  <header class="rem-hd">
+    <h2 id="galTitle"></h2>
+    <button class="mini" onclick="galCloseDlg()">Close</button>
+  </header>
+  <div class="rem-body" id="galBody"></div>
+</dialog>
+
 <div class="toast" id="toast"></div>
 
 <!-- Only what the DM's work needs: the domain tables and Ranks, and the Grimm book. None of the
@@ -113,8 +122,9 @@
 <script src="../js/data.js?v=2026-11-12a"></script>
 <script src="../grimms/js/data.js?v=2026-11-12a"></script>
 <script src="js/core.js?v=2026-11-12a"></script>
-<script src="js/table.js?v=2026-11-18a"></script>
-<script src="js/players.js?v=2026-11-17a"></script>
+<script src="js/table.js?v=2026-11-23a"></script>
+<script src="js/gallery.js?v=2026-11-23a"></script>
+<script src="js/players.js?v=2026-11-23a"></script>
 <script src="js/grimms.js?v=2026-11-17a"></script>
 <script src="js/compendium.js?v=2026-11-12a"></script>
 <script src="js/metrics.js?v=2026-11-19a"></script>
