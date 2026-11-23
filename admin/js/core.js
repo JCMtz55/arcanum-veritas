@@ -8,10 +8,11 @@
 //
 // It is a section of its own now, like sheet/ and map/ and grimms/, and it is cut by TOPIC:
 //
-//   Table       the live board — the only one of the four you open while a session is running
+//   Table       the live board — the only one you open while a session is running
 //   Players     one page per player, tabbed: everything about that person in one place
 //   Grimms      the chains, the two reveals and the ability grids, Grimm by Grimm
 //   Compendium  what the Character Sheet offers when a player picks a class or a spell
+//   Metrics     what the party actually drew, night by night — the after-session evidence
 //
 // Reminders stopped being a row. It is a count in the bar that opens over whatever you are on,
 // because an inbox is not a place you go.
@@ -116,7 +117,7 @@ function signOut() { api("POST", "api/logout").finally(() => location.reload());
 //   enter(), leave()     for a section that has to start or stop something — only the board does
 //   reload()             re-read whatever this section polls for itself
 const SECTIONS = {};
-const SEC_ORDER = ["table", "players", "grimms", "compendium"];
+const SEC_ORDER = ["table", "players", "grimms", "compendium", "metrics"];
 function section(key, def) { SECTIONS[key] = def; }
 
 // Boot hands every section its slice of one payload. Registering a loader rather than letting each

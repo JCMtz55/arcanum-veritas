@@ -1,4 +1,4 @@
-// The character sheet's API, against a real server and a throwaway database.
+﻿// The character sheet's API, against a real server and a throwaway database.
 //
 // This suite is here for one reason: every rule about who may change what is enforced on the server,
 // and a hidden button is not a permission. So it tries the escalations directly — a player writing
@@ -445,18 +445,27 @@ test("the party board is DM-only and computes the DCs the Wounds push up", async
   assert.equal(card.ac, 20);                     // 18 + the named modifier
   assert.equal(card.initiative, 3);
   assert.equal(card.dream, 24);
-  assert.equal(card.dreamMod, 7);
   // Two Wounds and ONE unhealed Injury — the healed one must not count.
   assert.equal(card.wounds, 2);
   assert.equal(card.injuries, 2);
   assert.equal(card.unhealedInjuries, 1);
   assert.equal(card.deathSaveDC, 13);
   assert.equal(card.concentrationFloor, 13);
-  // Verum DC at level 5: 8 + PB 3 + highest-of-six (+4 Cha) + Dream +7
-  assert.equal(card.saveDc, 22);
-  assert.equal(card.dreamExhaustion, 7);
-  assert.equal(card.dreamExhaustionName, "Dream Echo State");
-  assert.equal(card.dreamPenalty, -5);           // still -5 at level 7
+
+  // MIGRATION, 2026-11-18: this sheet was saved with `dreamExhaustion: 7`, which the 0-6 ladder no
+  // longer has. It must come back as 6 rather than as a level the rules cannot describe.
+  assert.equal(card.dreamExhaustion, 6);
+  assert.equal(card.dreamExhaustionName, "Cognitive Collapse");
+  assert.equal(card.dreamPenalty, -6);
+  // ...and because 6 includes Identity Drift, the Dream modifier is denied — so a Dream score of 24
+  // contributes nothing, here or to the Verum DC. The SCORE is still reported.
+  assert.equal(card.dreamMod, 0);
+  assert.equal(card.saveDc, 15);                 // 8 + PB 3 + highest-of-six (+4 Cha) + Dream 0
+  // Level 6 carries the Hollowing, so the board gets what it needs to run it.
+  assert.equal(card.hollowing.dc, 22);
+  assert.equal(card.hollowing.toHollow, 3);
+  assert.equal(card.hollowing.fractures, 0);
+  assert.equal(card.hollowing.bonus, -2);        // +4 highest, no Dream modifier, -6
   assert.equal(card.activeModifiers, 1);
 });
 
@@ -877,4 +886,447 @@ test("bad input is refused rather than coerced", async () => {
   assert.equal((await api("dm", "PUT", `/api/characters/${character.id}/level`, { level: 0 })).status, 400);
   assert.equal((await api("dm", "PUT", `/api/characters/${character.id}/fate`, { fate: -1 })).status, 400);
   assert.equal((await api("tester", "GET", "/api/characters/999999")).status, 404);
+});
+
+// ── Which Grimm an account holds ────────────────────────────────────────
+// The link between a player and their Grimm used to be the account name matched against the Grimm's
+// `short` in grimms/js/data.js — a CHARACTER name hard-coded in a build script — so a rename took a
+// player's Grimm away in silence, and two of the eight shorts are Salomon and Solomon. It is now
+// users.grimm_id, assigned by the DM. Neither "tester" nor "other" spells a Grimm short, so any
+// Grimm they are seen to hold here came from an assignment and not from the old fallback.
+const idOf = async name =>
+  (await api("dm", "GET", "/api/admin/users")).users.find(u => u.username === name).id;
+
+test("an account holds no Grimm until the DM assigns one", async () => {
+  assert.equal((await api("tester", "GET", "/api/me")).user.grimmId, null);
+  assert.equal((await api("dm", "GET", "/api/admin/users")).users
+    .find(u => u.username === "tester").grimmId, null);
+});
+
+test("the DM assigns a Grimm and the player's own /api/me carries it", async () => {
+  const tester = await idOf("tester");
+  const r = await api("dm", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "thanatos" });
+  assert.equal(r.status, 200);
+  assert.equal(r.movedFrom, null);                // nobody held it before
+  assert.equal((await api("tester", "GET", "/api/me")).user.grimmId, "thanatos");
+});
+
+test("a Grimm has one holder: assigning a held one moves it, and says whose it was", async () => {
+  const other = await idOf("other");
+  const r = await api("dm", "PUT", `/api/admin/users/${other}/grimm`, { grimm: "thanatos" });
+  assert.equal(r.status, 200);
+  assert.equal(r.movedFrom, "Tester");            // the answer names the previous holder
+  assert.equal((await api("tester", "GET", "/api/me")).user.grimmId, null);
+  assert.equal((await api("dm", "GET", "/api/admin/users")).users
+    .filter(u => u.grimmId === "thanatos").length, 1);
+});
+
+test("a Grimm can be taken away again", async () => {
+  const other = await idOf("other");
+  assert.equal((await api("dm", "PUT", `/api/admin/users/${other}/grimm`, { grimm: null })).status, 200);
+  assert.equal((await api("other", "GET", "/api/me")).user.grimmId, null);
+});
+
+test("only a real Grimm can be assigned, and only by the DM", async () => {
+  const tester = await idOf("tester");
+  // A name no Grimm in the data answers to — including one shaped like a path
+  assert.equal((await api("dm", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "not-a-grimm" })).status, 404);
+  assert.equal((await api("dm", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "../../etc/passwd" })).status, 404);
+  // A hidden button is not a permission: a player must not reach the route at all.
+  assert.equal((await api("tester", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "thanatos" })).status, 403);
+  assert.equal((await api("other", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "thanatos" })).status, 403);
+  assert.equal((await api("tester", "GET", "/api/me")).user.grimmId, null);
+});
+
+// The seeded party is the fallback's whole reason to exist: "grizzly" spells White Rabbit's short,
+// so that account reads White Rabbit with nothing assigned. The trap is what happens when the Grimm
+// is then assigned to somebody else — before the guard, BOTH read White Rabbit.
+test("the name-match fallback goes quiet for a Grimm someone else is assigned", async () => {
+  const grizzly = (await api("dm", "GET", "/api/admin/users")).users.find(u => u.username === "grizzly");
+  await api("dm", "PATCH", `/api/admin/users/${grizzly.id}`, { password: PLAYER_PASSWORD });
+  await signIn("grizzly", "grizzly", PLAYER_PASSWORD);
+
+  // Nothing assigned, but the account name still spells it
+  let me = (await api("grizzly", "GET", "/api/me")).user;
+  assert.equal(me.grimmId, "white-rabbit");
+  assert.equal(me.grimmAssigned, false);        // and the sheet is told it is only a guess
+
+  // Give it to somebody else and the guess must stop being made
+  const tester = await idOf("tester");
+  await api("dm", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: "white-rabbit" });
+  assert.equal((await api("grizzly", "GET", "/api/me")).user.grimmId, null);
+  me = (await api("tester", "GET", "/api/me")).user;
+  assert.equal(me.grimmId, "white-rabbit");
+  assert.equal(me.grimmAssigned, true);
+
+  // Free it again and the fallback comes back
+  await api("dm", "PUT", `/api/admin/users/${tester}/grimm`, { grimm: null });
+  assert.equal((await api("grizzly", "GET", "/api/me")).user.grimmId, "white-rabbit");
+});
+
+test("the DM's own account is refused a Grimm — every one of them is already theirs to read", async () => {
+  const dm = (await api("dm", "GET", "/api/admin/users")).users.find(u => u.role === "dm");
+  assert.equal((await api("dm", "PUT", `/api/admin/users/${dm.id}/grimm`, { grimm: "makoa" })).status, 400);
+});
+
+// ── The Grimm Slots, shared by the Companion and the character sheet ────────────────────────────
+// They were a line in one browser's localStorage until 2026-11-17, which is why the sheet could show
+// what the DM keeps but never what the player was holding. ⭐ What these are really for: the SERVER
+// owns the arithmetic. The sheet asks for one slot and is told what is left, so it cannot hold a
+// stale copy of a rule the Companion has changed.
+const FULL = { stage: "awakened", used: 0, temp: 0, tempUsed: 0, familiar: false };
+
+test("a Grimm holds no slots until something says so, and the Companion's mirror writes them", async () => {
+  assert.equal(Object.keys((await api("tester", "GET", "/api/grimms/live")).grimms).length, 0);
+
+  const put = await api("tester", "PUT", "/api/grimms/live/white-rabbit",
+    { ...FULL, used: 2, temp: 1 });
+  assert.equal(put.status, 200);
+  assert.deepEqual(put.live,
+    { stage: "awakened", used: 2, temp: 1, tempUsed: 0, familiar: false, base: 6, total: 7, left: 5 });
+
+  const got = (await api("tester", "GET", "/api/grimms/live")).grimms["white-rabbit"];
+  assert.equal(got.left, 5);
+  assert.equal(got.base, 6);         // computed here, so the sheet never needs the table
+});
+
+test("the stage decides how many slots there are", async () => {
+  await api("tester", "PUT", "/api/grimms/live/makoa", { ...FULL, stage: "invoked" });
+  assert.equal((await api("tester", "GET", "/api/grimms/live")).grimms.makoa.base, 3);
+
+  await api("tester", "PUT", "/api/grimms/live/makoa", { ...FULL, stage: "dormant" });
+  const g = (await api("tester", "GET", "/api/grimms/live")).grimms.makoa;
+  assert.equal(g.base, 0);
+  assert.equal(g.left, 0);           // a Dormant Grimm has none
+});
+
+test("a base slot is spent before a forced one, and given back the other way round", async () => {
+  await api("tester", "PUT", "/api/grimms/live/thanatos", { ...FULL, used: 5, temp: 1 });
+
+  let r = await api("tester", "POST", "/api/grimms/live/thanatos/slots", { delta: 1 });
+  assert.equal(r.live.used, 6);                  // the last ordinary slot goes first
+  assert.equal(r.live.tempUsed, 0);
+  r = await api("tester", "POST", "/api/grimms/live/thanatos/slots", { delta: 1 });
+  assert.equal(r.live.tempUsed, 1);              // and only then the one bought with Exhaustion
+  assert.equal(r.live.left, 0);
+
+  // Back the other way: the ordinary slots are made whole first, so restoring never quietly turns
+  // a slot someone paid Exhaustion for into a free one.
+  r = await api("tester", "POST", "/api/grimms/live/thanatos/slots", { delta: -1 });
+  assert.equal(r.live.used, 5);
+  assert.equal(r.live.tempUsed, 1);
+});
+
+test("what is not there cannot be spent, and what is full cannot be restored", async () => {
+  await api("tester", "PUT", "/api/grimms/live/vidarr", { ...FULL, stage: "invoked", used: 3 });
+  const spent = await api("tester", "POST", "/api/grimms/live/vidarr/slots", { delta: 1 });
+  assert.equal(spent.status, 409);
+  assert.match(spent.error, /Force the Grimm/);
+  assert.equal((await api("tester", "GET", "/api/grimms/live")).grimms.vidarr.used, 3);   // unmoved
+
+  await api("tester", "PUT", "/api/grimms/live/vidarr", { ...FULL, stage: "invoked" });
+  assert.equal((await api("tester", "POST", "/api/grimms/live/vidarr/slots", { delta: -1 })).status, 409);
+});
+
+test("Familiar form is refused a slot from either screen", async () => {
+  await api("tester", "PUT", "/api/grimms/live/rage-of-the-tiger", { ...FULL, familiar: true });
+  const r = await api("tester", "POST", "/api/grimms/live/rage-of-the-tiger/slots", { delta: 1 });
+  assert.equal(r.status, 409);
+  assert.match(r.error, /Familiar form/);
+});
+
+test("only a real stage, a real Grimm and a single slot are accepted", async () => {
+  assert.equal((await api("tester", "PUT", "/api/grimms/live/makoa", { ...FULL, stage: "ascended" })).status, 400);
+  assert.equal((await api("tester", "POST", "/api/grimms/live/makoa/slots", { delta: 3 })).status, 400);
+  assert.equal((await api("tester", "POST", "/api/grimms/live/makoa/slots", { delta: 0 })).status, 400);
+  const bad = encodeURIComponent("../../etc/passwd");
+  assert.equal((await api("tester", "PUT", `/api/grimms/live/${bad}`, FULL)).status, 400);
+});
+
+// A Long Rest on the character sheet restores the Grimm Slots too (Juan, 2026-11-17). It restores
+// the half the two screens share and stamps when it happened; everything else a long rest does —
+// the effects, the round, each Grimm's own hook, the Servants' charges — stays the Companion's, and
+// the stamp is how it is told to finish its own half.
+test("a Long Rest gives back every slot, keeps the stage, and says when it happened", async () => {
+  await api("tester", "PUT", "/api/grimms/live/makoa",
+    { stage: "chained", used: 4, temp: 2, tempUsed: 1, familiar: true });
+
+  const r = await api("tester", "POST", "/api/grimms/live/makoa/rest");
+  assert.equal(r.status, 200);
+  assert.equal(r.live.used, 0);
+  assert.equal(r.live.temp, 0);          // the slots bought with Exhaustion go as well
+  assert.equal(r.live.tempUsed, 0);
+  assert.equal(r.live.stage, "chained"); // a rest does not change what the Grimm IS
+  assert.equal(r.live.familiar, true);   // nor what form it is in
+  assert.equal(r.live.left, 6);
+  assert.ok(Date.parse(r.live.restedAt) > 0);
+
+  const got = (await api("tester", "GET", "/api/grimms/live")).grimms.makoa;
+  assert.equal(got.used, 0);
+  assert.equal(got.restedAt, r.live.restedAt);
+
+  // Spending afterwards must not lose the stamp — only another rest moves it.
+  await api("tester", "POST", "/api/grimms/live/makoa/slots", { delta: 1 });
+  assert.equal((await api("tester", "GET", "/api/grimms/live")).grimms.makoa.restedAt, r.live.restedAt);
+});
+
+// A Short Rest gives back no Grimm Slots. Its whole effect is the Servant charges whose own rule
+// says a short rest refills them, which only the Companion knows — so the stamp IS the short rest,
+// as far as anything shared is concerned.
+test("a Short Rest stamps itself and touches nothing else", async () => {
+  await api("tester", "PUT", "/api/grimms/live/thanatos", { ...FULL, used: 4, temp: 1, tempUsed: 1 });
+  const long = await api("tester", "POST", "/api/grimms/live/thanatos/rest");   // long by default
+  assert.equal(long.kind, "long");
+  assert.equal(long.live.used, 0);
+
+  await api("tester", "PUT", "/api/grimms/live/thanatos", { ...FULL, used: 4, temp: 1, tempUsed: 1 });
+  const short = await api("tester", "POST", "/api/grimms/live/thanatos/rest", { kind: "short" });
+  assert.equal(short.kind, "short");
+  assert.equal(short.live.used, 4);             // the slots are untouched — that is the whole point
+  assert.equal(short.live.temp, 1);
+  assert.equal(short.live.tempUsed, 1);
+  assert.ok(Date.parse(short.live.shortRestedAt) > 0);
+  assert.equal(short.live.restedAt, long.live.restedAt);   // and the long stamp has not moved
+
+  const got = (await api("tester", "GET", "/api/grimms/live")).grimms.thanatos;
+  assert.equal(got.shortRestedAt, short.live.shortRestedAt);
+  assert.equal(got.used, 4);
+});
+
+test("resting a Grimm the Companion has never opened is an ordinary answer", async () => {
+  const r = await api("tester", "POST", "/api/grimms/live/peco-peco/rest");
+  assert.equal(r.status, 200);
+  assert.equal(r.live.used, 0);
+  assert.equal(r.live.stage, "awakened");     // the blank's own stage, not an error
+
+  assert.equal((await api("tester", "POST", "/api/grimms/live/not a grimm/rest")).status, 400);
+  assert.equal((await api(null, "POST", "/api/grimms/live/makoa/rest")).status, 401);
+});
+
+// ── Exhaustion: one pair of numbers, not two ────────────────────────────────────────────────────
+// The Companion kept its own Exhaustion and Dream Exhaustion and the character sheet kept its own,
+// and they were the same two numbers (Juan, 2026-11-17). The sheet is the home — it has the ladders,
+// the rest rules and the roll penalties — so the Companion writes the CHARACTER through this route,
+// and the ceilings are the sheet's, not whatever the Companion happened to add.
+test("the Companion writes exhaustion onto the character, and the ladders' tops hold", async () => {
+  const { character } = await makeCharacter("tester", "Exhausted");
+
+  const put = await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, exhaustion: 2, dreamExhaustion: 5 });
+  assert.equal(put.status, 200);
+  assert.equal(put.exhaustion, 2);
+  assert.equal(put.dreamExhaustion, 5);
+  assert.equal(put.character.id, character.id);
+
+  // It is the character's own sheet that moved, which is what makes it one number and not two.
+  const after = (await api("tester", "GET", `/api/characters/${character.id}`)).character;
+  assert.equal(after.sheet.exhaustion, 2);
+  assert.equal(after.sheet.dreamExhaustion, 5);
+  assert.ok(after.version > character.version);      // so an open sheet picks it up on its next tick
+
+  // A Shackle Break closing adds 2 and 3 without looking at a ceiling. The ceiling is here — and
+  // since the 2026-11-18 rework the Dream ladder's top is 6, so a 7 is refused where it used to pass.
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, exhaustion: 7 })).status, 400);
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, dreamExhaustion: 7 })).status, 400);
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, dreamExhaustion: 9 })).status, 400);
+  // 6 itself is legal — the ceiling, not past it.
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, dreamExhaustion: 6 })).status, 200);
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, dreamExhaustion: 5 })).status, 200);
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion",
+    { characterId: character.id, exhaustion: -1 })).status, 400);
+  assert.equal((await api("tester", "PUT", "/api/me/exhaustion", { characterId: character.id })).status, 400);
+
+  // Refused means unmoved, not half-written.
+  const still = (await api("tester", "GET", "/api/me/character?character=" + character.id));
+  assert.equal(still.exhaustion, 2);
+  assert.equal(still.dreamExhaustion, 5);
+});
+
+// The Companion asked the PLAYER for its level and its Dream mod, and both decide what the Grimm
+// can do — the proficiency bonus and so every DC, the roster Gate of Caelum may hold, Víðarr's
+// Blood threshold, the save that closes a Shackle Break (Juan, 2026-11-18). Neither is the player's
+// to set, so both are served from the character and the Companion only reads them.
+test("the character's level and Dream modifier are served, and are the DM's", async () => {
+  // One this account already has, rather than a new one: by here the suite has made plenty, and
+  // twenty-four is the cap.
+  const character = (await api("tester", "GET", "/api/characters")).characters[0];
+  await api("dm", "PUT", `/api/characters/${character.id}/level`, { level: 11 });
+  // Dream moves only when a campaign event is named — the route refuses it otherwise, which is the
+  // ruling and not a formality.
+  assert.equal((await api("dm", "PUT", `/api/characters/${character.id}/dream`, { dream: 18 })).status, 400);
+  await api("dm", "PUT", `/api/characters/${character.id}/dream`,
+    { dream: 18, note: "Drank from the Well of Reverie" });
+
+  const me = await api("tester", "GET", `/api/me/character?character=${character.id}`);
+  assert.equal(me.level, 11);
+  assert.equal(me.dreamMod, 4);          // a Dream score of 18, through the engine
+
+  // The level is the DM's column and has never been writable from a player's session. The point of
+  // reading it here is that the Companion can stop inventing one.
+  assert.equal((await api("tester", "PUT", `/api/characters/${character.id}/level`, { level: 20 })).status, 403);
+  assert.equal((await api("tester", "GET", `/api/me/character?character=${character.id}`)).level, 11);
+
+  // And it follows the DM, rather than being copied once.
+  await api("dm", "PUT", `/api/characters/${character.id}/level`, { level: 12 });
+  assert.equal((await api("tester", "GET", `/api/me/character?character=${character.id}`)).level, 12);
+});
+
+test("exhaustion is the account's own, and a stranger has none", async () => {
+  assert.equal((await api(null, "GET", "/api/me/character")).status, 401);
+  assert.equal((await api(null, "PUT", "/api/me/exhaustion", { exhaustion: 1 })).status, 401);
+
+  // `other` has characters of its own in this suite; whatever they hold, tester's writes are not
+  // theirs. The route only ever reaches the caller's own characters — there is no id to pass that
+  // would make it somebody else's.
+  const mine = await api("tester", "GET", "/api/me/character");
+  const theirs = await api("other", "GET", "/api/me/character");
+  if (mine.character && theirs.character) assert.notEqual(mine.character.id, theirs.character.id);
+  const tesserId = mine.character.id;
+  assert.ok(!theirs.characters.some(c => c.id === tesserId));
+});
+
+// The fight, as every tool now reads it. The board writes the round onto every sheet at the table
+// (POST /api/initiative/clock); this is where the strip at the top of each page and the Grimm
+// Companion both pick it up. ⚠️ It runs LAST in this file because the clock writes to every
+// character there is.
+test("the fight reaches the player's own answer, and only the DM may move it", async () => {
+  assert.equal((await api("tester", "POST", "/api/initiative/clock",
+    { round: 9, inCombat: true, fightId: "not-yours" })).status, 403);
+
+  let me = await api("tester", "GET", "/api/me/character");
+  assert.equal(me.inCombat, false);                 // nothing running
+
+  await api("dm", "POST", "/api/initiative/clock", { round: 1, inCombat: true, fightId: "fight-one" });
+  me = await api("tester", "GET", "/api/me/character");
+  assert.equal(me.inCombat, true);
+  assert.equal(me.round, 1);
+  assert.equal(me.fightId, "fight-one");
+
+  await api("dm", "POST", "/api/initiative/clock", { round: 4, inCombat: true, fightId: "fight-one" });
+  assert.equal((await api("tester", "GET", "/api/me/character")).round, 4);
+
+  // A new fight carries a new id — which is what lets a page tell one from a round going by.
+  await api("dm", "POST", "/api/initiative/clock", { round: 1, inCombat: true, fightId: "fight-two" });
+  me = await api("tester", "GET", "/api/me/character");
+  assert.equal(me.round, 1);
+  assert.equal(me.fightId, "fight-two");
+
+  await api("dm", "POST", "/api/initiative/clock", { round: 1, inCombat: false, fightId: "fight-two" });
+  assert.equal((await api("tester", "GET", "/api/me/character")).inCombat, false);
+});
+
+test("one player's slots are their own, and a stranger has none", async () => {
+  await api("tester", "PUT", "/api/grimms/live/white-rabbit", { ...FULL, used: 4 });
+  await api("other", "PUT", "/api/grimms/live/white-rabbit", { ...FULL, used: 1 });
+  assert.equal((await api("tester", "GET", "/api/grimms/live")).grimms["white-rabbit"].used, 4);
+  assert.equal((await api("other", "GET", "/api/grimms/live")).grimms["white-rabbit"].used, 1);
+
+  assert.equal((await api(null, "GET", "/api/grimms/live")).status, 401);
+  assert.equal((await api(null, "POST", "/api/grimms/live/white-rabbit/slots", { delta: 1 })).status, 401);
+});
+
+// ── The record: what was drawn at the table ─────────────────────────────
+// A draw is evidence, so what gets into the table matters more here than anywhere else: a row
+// nobody drew is worse than a missing one, because it is averaged in silently. These try the ways
+// a bad row could arrive — a Cognition that does not exist, a Ring that does not exist, a slot
+// outside the ladder, the DM's own test seal — and the one way the figures could leak, which is a
+// player reading the metrics that are the DM's.
+const DRAW = {
+  name: "Pyre", core: "fire", verum: "Fierce", ring: "offensive", subtype: "Direct Attack",
+  shape: "sphere", manner: "standard", slot: 5, charLevel: 11, tier: 2, verumMod: 5, dreamMod: 2,
+  dc: 20, attack: 9, damage: "8d8", damageKind: "infernal", absolute: true, save: "",
+  sigils: 2, sigilCap: 4, benefits: 0,
+  detail: { roll: "attack", sigils: [{ id: "water", effect: "Undertow" }] },
+};
+
+test("a player's draw is recorded whole, and comes back to the DM as the night's evidence", async () => {
+  const wrote = await api("tester", "POST", "/api/seal-draws", DRAW);
+  assert.equal(wrote.status, 201);
+  assert.match(wrote.night, /^\d{4}-\d{2}-\d{2}$/);
+
+  const m = await api("dm", "GET", "/api/admin/metrics");
+  assert.equal(m.status, 200);
+  assert.equal(m.night, wrote.night);               // no night named means the latest one
+  assert.equal(m.night, m.tonight);                 // which, having just written, is tonight
+  assert.ok(m.nights.some(n => n.night === wrote.night));
+
+  const row = m.rows.find(r => r.name === "Pyre");
+  assert.ok(row, "the draw is in the night's rows");
+  assert.equal(row.player, "Tester");
+  assert.equal(row.coreName, "Fire");               // named, not just its id
+  assert.equal(row.slot, 5);
+  assert.equal(row.dc, 20);
+  assert.equal(row.absolute, true);
+  assert.equal(row.expected, 36);                   // 8d8 — the dice mean, which is what averages
+  assert.deepEqual(row.sigilNames, ["Water"]);
+  assert.equal(m.summary.slots.find(s => s.slot === 5).n >= 1, true);
+  assert.ok(m.summary.cores.some(c => c.name === "Fire"));
+});
+
+test("a draw that cannot be trusted is refused rather than filed", async () => {
+  const no = async (body, why) => {
+    const r = await api("tester", "POST", "/api/seal-draws", { ...DRAW, ...body });
+    assert.equal(r.status, 400, why);
+  };
+  await no({ core: "nonesuch" }, "a Cognition that does not exist");
+  await no({ ring: "sideways" }, "a Ring that does not exist");
+  await no({ slot: 99 }, "a slot off the ladder — clamping would invent a 9th-slot seal");
+  await no({ charLevel: 0 }, "a level off the ladder");
+
+  // The soft numbers ARE clamped: the seal still went off, and the row is worth more than the
+  // number is wrong. A seal with no attack roll keeps an empty column rather than "+0".
+  const r = await api("tester", "POST", "/api/seal-draws",
+    { ...DRAW, name: "Clamped", attack: null, dc: 900, manner: "hacked" });
+  assert.equal(r.status, 201);
+  const row = (await api("dm", "GET", "/api/admin/metrics")).rows.find(x => x.name === "Clamped");
+  assert.equal(row.attack, null);
+  assert.equal(row.dc, 60);
+  assert.equal(row.manner, "standard");
+});
+
+test("the record is the players' — the DM cannot write it and a player cannot read it", async () => {
+  assert.equal((await api("dm", "POST", "/api/seal-draws", DRAW)).status, 403);
+  assert.equal((await api("tester", "GET", "/api/admin/metrics")).status, 403);
+  assert.equal((await api("tester", "GET", "/api/admin/metrics/export?format=csv")).status, 403);
+  assert.equal((await api(null, "POST", "/api/seal-draws", DRAW)).status, 401);
+  assert.equal((await api(null, "GET", "/api/admin/metrics")).status, 401);
+});
+
+// A Supportive seal cast at the party logs its own draw (Juan, 2026-11-19) — it unambiguously went
+// off, since the recipients' sheets are carrying what it handed them. The two ways in are one kind
+// of row and differ only by `via`, so the DM can see how much of a night wrote itself.
+test("a seal that logged itself on being cast says so, and is counted apart", async () => {
+  await api("tester", "POST", "/api/seal-draws",
+    { ...DRAW, name: "Handed over", ring: "supportive", subtype: "Ally", benefits: 2,
+      detail: { ...DRAW.detail, via: "cast" } });
+
+  const m = await api("dm", "GET", "/api/admin/metrics");
+  const cast = m.rows.find(r => r.name === "Handed over");
+  assert.equal(cast.via, "cast");
+  assert.equal(m.rows.find(r => r.name === "Pyre").via, "drew");   // no `via` reads as a press
+  assert.equal(m.summary.viaCast, m.rows.filter(r => r.via === "cast").length);
+  assert.ok(m.summary.viaCast >= 1 && m.summary.viaCast < m.summary.draws);
+});
+
+test("the export carries one row per draw, with its headers", async () => {
+  await api("tester", "POST", "/api/seal-draws", { ...DRAW, name: "Exported" });
+  const r = await raw("dm", "GET", "/api/admin/metrics/export?night=all&format=csv");
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get("content-type") || "", /text\/csv/);
+  assert.match(r.headers.get("content-disposition") || "", /arcanum-draws-all-nights\.csv/);
+  // `text()` decodes UTF-8 and eats the leading BOM, so the header reads bare here even though the
+  // bytes carry one — which is the point of sending it, for the spreadsheet that does not.
+  const lines = (await r.text()).split("\r\n");
+  assert.match(lines[0], /^night,at,player,character,seal,core,/);
+  assert.match(lines[0], /,logged$/);            // which of the two ways each row came in
+  assert.ok(lines.some(l => l.includes("Exported")));
+
+  const j = await api("dm", "GET", "/api/admin/metrics/export");
+  assert.equal(j.draws, j.rows.length);
+  assert.equal(j.summary.draws, j.rows.length);
 });

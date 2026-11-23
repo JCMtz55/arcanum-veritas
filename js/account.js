@@ -57,6 +57,7 @@ function showAccount() {
   document.getElementById("who").hidden = false;
   document.getElementById("tabLearn").hidden = ME.role === "dm";   // the DM has no character to track
   document.getElementById("saveBtn").hidden = document.getElementById("savedItem").hidden = false;
+  syncDrewBtn();                                                   // "Drew it" is a player's, not the DM's
   loadSaves().catch(() => {});                                     // fills the composer's opening screen
 }
 // ── The character's numbers — level, Verum mod, Dream mod — are remembered with the account.

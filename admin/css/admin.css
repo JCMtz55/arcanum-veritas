@@ -226,6 +226,59 @@ button.ptr-por:hover{filter:brightness(1.12)}
   .ptr-more{grid-template-columns:1fr}
 }
 
+/* ── METRICS: what the party actually drew ──────────────────
+ * Every class here is prefixed `met-`. app.css is shared with the composer and carries generic
+ * names of its own — .bar, .n, .card — and a page that reused one would be restyled by it without
+ * either file being wrong. The colours are all its tokens; nothing new is defined. */
+
+/* The figures that come before everything else. A strip of plates rather than a table: there are
+   seven of them, they share no column, and each is read on its own. */
+.met-figs{display:flex; flex-wrap:wrap; gap:8px}
+.met-fig{flex:1 1 128px; min-width:112px; padding:9px 11px 8px; background:var(--panel2);
+  border:1px solid var(--line); border-radius:4px}
+.met-fig b{display:block; font-family:var(--sans); font-size:21px; line-height:1.1; color:var(--bone)}
+.met-fig i{display:block; margin-top:2px; font-style:normal; font-family:var(--sans); font-size:9px;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--mute)}
+.met-fig u{display:block; margin-top:3px; text-decoration:none; font-size:10.5px; color:var(--steel)}
+
+/* The slot ladder. Nine rows, always all nine — a slot nobody spent is the finding. */
+.met-bars{display:flex; flex-direction:column; gap:3px}
+.met-bar{display:grid; grid-template-columns:34px 1fr 34px 42px; align-items:center; gap:9px;
+  font-family:var(--sans); font-size:11.5px; color:var(--bone2)}
+.met-bar.none{color:var(--mute)}
+.met-bl{color:var(--mute); text-align:right}
+.met-bn{text-align:right; color:var(--bone)}
+.met-bp{font-size:10px; color:var(--mute)}
+.met-bt{display:block; height:9px; background:var(--panel2); border:1px solid var(--line);
+  border-radius:2px; overflow:hidden}
+.met-bt i{display:block; height:100%; background:var(--brass); opacity:.8}
+
+/* The two tables. A grid rather than a <table> so the row keeps the sub-line under a cell —
+   the Sigils under the count, the Verum under the seal's name — which is how a row stays one line
+   high and still says everything. */
+.met-rows{margin-top:10px; border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.met-row{display:grid; grid-template-columns:1fr 1fr 58px 70px 80px 90px; gap:10px;
+  align-items:center; padding:7px 11px; font-size:12px; color:var(--bone2);
+  border-top:1px solid var(--line)}
+.met-row:first-child{border-top:0}
+.met-row.met-p{grid-template-columns:1fr 1fr 58px 68px 60px 78px 60px 1.2fr}
+.met-row.met-d{grid-template-columns:86px 1fr 1.4fr 1fr 58px 72px 1fr 1fr}
+.met-row:nth-child(even){background:rgba(255,255,255,.015)}
+.met-row em{display:block; font-style:normal; font-size:10px; color:var(--mute)}
+.met-h{font-family:var(--sans); font-size:9px; text-transform:uppercase; letter-spacing:.09em;
+  color:var(--mute); background:var(--panel2)}
+.met-h3{margin:14px 0 6px; font-family:var(--sans); font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.09em; color:var(--mute)}
+.met-h3:first-child{margin-top:0}
+.met-two{display:grid; grid-template-columns:1fr 1fr; gap:14px 22px}
+
+@media (max-width: 900px){
+  .met-two{grid-template-columns:1fr}
+  /* The wide tables stop being grids and read as blocks — eight columns in 360px is nothing. */
+  .met-row,.met-row.met-p,.met-row.met-d{grid-template-columns:1fr 1fr}
+  .met-row.met-h{display:none}
+}
+
 /* ── Odds and ends ──────────────────────────────────────────*/
 /* The board is a list across the window; the reading pages stay at their 920px. */
 .cdx.wide{max-width:none}

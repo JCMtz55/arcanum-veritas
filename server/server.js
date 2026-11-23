@@ -209,7 +209,7 @@ async function currentUser(req) {
   const m = new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`).exec(req.headers.cookie || "");
   if (!m) return null;
   const { rows } = await db.query(
-    `SELECT u.id, u.username, u.display_name, u.role, u.char_level, u.verum_mod, u.dream_mod, u.paragon
+    `SELECT u.id, u.username, u.display_name, u.role, u.char_level, u.verum_mod, u.dream_mod, u.paragon, u.grimm_id
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > now()`, [tokenHash(m[1])]);
   return rows[0] || null;
@@ -264,15 +264,39 @@ const BRINGS_OWN_PARSER = req =>
   // The initiative board carries a portrait per combatant (INIT_JSON, 4mb). Twelve of those is
   // well past 20kb, and a board that 413s mid-fight is a board nobody trusts again.
   (req.method === "PUT" && req.path === "/api/initiative") ||
-  (req.method === "POST" && req.path === "/api/initiative/encounters");
+  (req.method === "POST" && req.path === "/api/initiative/encounters") ||
+  // A character's splash art for the room's screen — one picture, not a thumbnail (ART_MAX).
+  (req.method === "PUT" && /^\/api\/characters\/\d+\/art$/.test(req.path));
 app.use((req, res, next) => (BRINGS_OWN_PARSER(req) ? next() : SMALL_JSON(req, res, next)));
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 
+// The Grimm an account effectively holds. The DM's assignment is the answer; for an account with
+// none, the old join stands in — the account name against the Grimm's `short` — so a party that
+// predates users.grimm_id reads correctly until the DM has been round it.
+//
+// ⚠️ The fallback never hands back a Grimm somebody else is ASSIGNED. Without that guard, moving a
+// Grimm to its real holder leaves the account whose NAME still spells it reading the same Grimm,
+// and two players hold one Grimm — which is exactly the confusion the column was added to end.
+// Resolved here and not in the browser, because only the server can see the other seven accounts.
+async function effectiveGrimmId(user) {
+  if (user.grimm_id) return user.grimm_id;
+  const name = String(user.username || "").toLowerCase();
+  const g = GRIMM_DATA.grimms.find(x => String(x.short || "").toLowerCase() === name);
+  if (!g) return null;
+  const held = await db.query("SELECT 1 FROM users WHERE grimm_id = $1 AND id <> $2", [g.id, user.id]);
+  return held.rows.length ? null : g.id;
+}
+
 // ── Signing in and out ─────────────────────────────────────
-app.get("/api/me", requireUser, (req, res) => res.json({ user: {
+app.get("/api/me", requireUser, async (req, res) => res.json({ user: {
   ...publicUser(req.user),
   // Whether the Paragon path is open to this account — the DM's to set, in the Admin tab
   paragon: !!req.user.paragon,
+  // Which Grimm this account holds — assigned by the DM, or the name match standing in for one
+  // that has not been assigned yet. The sheet reads this and matches nothing itself.
+  grimmId: await effectiveGrimmId(req.user),
+  // Whether that was the DM's decision or the fallback still talking.
+  grimmAssigned: !!req.user.grimm_id,
   sheet: { charLevel: req.user.char_level, verumMod: req.user.verum_mod, dreamMod: req.user.dream_mod },
 } }));
 
@@ -552,6 +576,112 @@ app.delete("/api/saves/:id", requireUser, async (req, res) => {
   res.json({ ok: true });
 });
 
+// ═══════════════════════════════════════════════════════════
+//  WHAT WAS DRAWN AT THE TABLE — the balance record
+// ═══════════════════════════════════════════════════════════
+// A player presses "Drew it" on the seal card and this is the row it leaves: the recipe and the
+// numbers it came to, frozen (see seal_draws in db.js). It is the only writing in the app a player
+// does that is nobody's rules and nobody's sheet — it is evidence, kept so that after a session the
+// DM can ask which slots were spent, which Rings carry the party, which Cognitions never come out,
+// and what a seal's DC and damage really were at that level rather than at today's.
+//
+// Nothing reads it back to the player, and nothing in the builder changes because a row exists.
+// That is deliberate: the moment a log gates something, people stop pressing the button honestly.
+
+// The game night. Sessions run past midnight, so the calendar date would split one session in two
+// and file the back half under tomorrow. The night is therefore the date in the TABLE's timezone
+// with a 6am boundary: everything drawn before 6am belongs to the night that began the evening
+// before. GAME_TZ overrides the zone for a table that doesn't play in Juan's.
+const GAME_TZ = process.env.GAME_TZ || "America/Mexico_City";
+const NIGHT_BOUNDARY_HOURS = 6;
+function gameNight(when = new Date()) {
+  const shifted = new Date(when.getTime() - NIGHT_BOUNDARY_HOURS * 3600 * 1000);
+  // en-CA gives YYYY-MM-DD, which is both what Postgres wants for a DATE and what sorts correctly.
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: GAME_TZ, year: "numeric", month: "2-digit", day: "2-digit" })
+      .format(shifted);
+  } catch (e) {
+    return shifted.toISOString().slice(0, 10);   // an unknown zone name must not lose the row
+  }
+}
+
+const DRAWS_PER_NIGHT = 400;        // a night's honest ceiling; past it something is pressing itself
+const DRAW_DETAIL_BYTES = 6000;
+const DRAW_RINGS = ["offensive", "supportive", "control", "creation", "utility"];
+const DRAW_MANNERS = ["standard", "coven", "rite", "inscribed"];
+
+// Everything that lands in a column is clamped or refused here; `detail` is taken as JSON and
+// capped. A row that cannot be trusted is worse than no row, because it is averaged in silently.
+function cleanDraw(body) {
+  const txt = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
+  const core = txt(body?.core, 40);
+  if (!core || !BY_ID.has(core)) return { error: "That isn't a Cognition." };
+  const ring = txt(body?.ring, 20).toLowerCase();
+  if (!DRAW_RINGS.includes(ring)) return { error: "That isn't a Ring." };
+  // `null` has to be answered before Number() sees it: Number(null) is 0, and a seal with no attack
+  // roll would be recorded as one that hits on +0 — a number in a column that should be empty.
+  const int = (v, lo, hi, dflt = null) => {
+    if (v == null || v === "") return dflt;
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.min(hi, Math.max(lo, Math.trunc(n))) : dflt;
+  };
+  // The slot and the level are REFUSED rather than clamped. Every figure on the metrics page is
+  // grouped or averaged by one of them, so a nonsense 99th slot quietly filed as a 9th would be a
+  // seal in the evidence that nobody ever drew. The soft numbers below are clamped instead: a DC
+  // out of range is still a seal that went off, and the row is worth more than the number is wrong.
+  const slot = Number(body?.slot), charLevel = Number(body?.charLevel);
+  if (!Number.isInteger(slot) || slot < 1 || slot > 9 ||
+      !Number.isInteger(charLevel) || charLevel < 1 || charLevel > 20)
+    return { error: "A draw needs its slot (1–9) and level (1–20)." };
+  let detail = "{}";
+  if (body?.detail && typeof body.detail === "object") {
+    const s = JSON.stringify(body.detail);
+    if (s.length <= DRAW_DETAIL_BYTES) detail = s;
+  }
+  const manner = txt(body?.manner, 20).toLowerCase();
+  return {
+    name: txt(body?.name, 60), core, verum: txt(body?.verum, 60), ring,
+    subtype: txt(body?.subtype, 40), shape: txt(body?.shape, 20),
+    manner: DRAW_MANNERS.includes(manner) ? manner : "standard",
+    slot, charLevel, tier: int(body?.tier, 0, 9, 0),
+    verumMod: int(body?.verumMod, -20, 20, 0), dreamMod: int(body?.dreamMod, -20, 20, 0),
+    dc: int(body?.dc, 0, 60), attack: int(body?.attack, -20, 60),
+    damage: txt(body?.damage, 60), damageKind: txt(body?.damageKind, 40),
+    absolute: !!body?.absolute, save: txt(body?.save, 20),
+    sigils: int(body?.sigils, 0, 12, 0), sigilCap: int(body?.sigilCap, 0, 12, 0),
+    benefits: int(body?.benefits, 0, 12, 0), detail,
+  };
+}
+
+app.post("/api/seal-draws", requireUser, async (req, res) => {
+  // The record is the players'. The DM's seals are test seals — the composer hides the button for
+  // them, and this is the same rule said once more where it cannot be clicked around: one DM draw
+  // averaged in beside eight real ones is a figure nobody can account for a week later.
+  if (req.user.role === "dm")
+    return res.status(403).json({ error: "The DM's draws aren't part of the record." });
+  const d = cleanDraw(req.body);
+  if (d.error) return res.status(400).json({ error: d.error });
+  const night = gameNight();
+  const mine = await db.query(
+    "SELECT count(*)::int AS n FROM seal_draws WHERE user_id = $1 AND night = $2", [req.user.id, night]);
+  const n = mine.rows[0]?.n || 0;
+  if (n >= DRAWS_PER_NIGHT)
+    return res.status(429).json({ error: "That's as many draws as one night records." });
+  // Whose character it was. The builder never asks — a player has one character at the table, and
+  // asking would put a question between them and a button they press mid-combat.
+  const chr = await db.query(
+    "SELECT id FROM characters WHERE user_id = $1 AND archived = false ORDER BY id LIMIT 1", [req.user.id]);
+  await db.query(
+    `INSERT INTO seal_draws (user_id, character_id, night, name, core, verum, ring, subtype, shape,
+       manner, slot, char_level, tier, verum_mod, dream_mod, dc, attack, damage, damage_kind,
+       absolute, save_ability, sigils, sigil_cap, benefits, detail)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`,
+    [req.user.id, chr.rows[0]?.id || null, night, d.name, d.core, d.verum, d.ring, d.subtype, d.shape,
+     d.manner, d.slot, d.charLevel, d.tier, d.verumMod, d.dreamMod, d.dc, d.attack, d.damage,
+     d.damageKind, d.absolute, d.save, d.sigils, d.sigilCap, d.benefits, d.detail]);
+  res.status(201).json({ ok: true, night, n: n + 1 });
+});
+
 // ── Custom Ignitions: written in ignitions/, enabled per player by the DM ───────
 // Two things have to agree, the same two a Devotion needs: a file was written for this player, and
 // the DM has switched it on. An Ignition the DM has not enabled never reaches the browser at all.
@@ -643,6 +773,226 @@ app.put("/api/grimms/souls/:grimm", requireUser, async (req, res) => {
   res.json({ ok: true, saved: keys.length });
 });
 
+// ── The Grimm Slots, live ───────────────────────────────────────────────
+// The Companion has always kept these in its own browser, which is why the character sheet could
+// show what the DM keeps but never what the player was holding. Juan asked for a tracker on the
+// sheet that syncs with the Companion (2026-11-17), so this is the first piece of that live state
+// to become a row. It is deliberately only this piece: the round tracker, the loadout and the
+// effects stay where they are, because two pages agreeing about five numbers is a much smaller
+// promise than two pages agreeing about a fight.
+//
+// Last write wins, exactly as the Servants do. These are numbers one player changes at their own
+// table from one screen or the other, not a document two people edit at once.
+const GRIMM_STAGES = ["dormant", "invoked", "chained", "awakened", "unveiled"];
+// Grimm Slots.md. The Companion keeps its own copy of this because it still has to work served from
+// a folder with no server at all; here it is so that the SHEET never needs one — every answer it
+// draws is computed below and handed to it, rather than worked out a third time in a third place.
+const GRIMM_SLOTS_BY_STAGE = { dormant: 0, invoked: 3, chained: 6, awakened: 6, unveiled: 6 };
+const BLANK_LIVE = { stage: "awakened", used: 0, temp: 0, tempUsed: 0, familiar: false };
+
+const liveDerived = r => {
+  const base = GRIMM_SLOTS_BY_STAGE[r.stage] ?? 0;
+  return { ...r, base, total: base + r.temp,
+    left: Math.max(0, base - r.used) + Math.max(0, r.temp - r.tempUsed) };
+};
+const liveRow = r => ({ ...liveDerived({ stage: r.stage, used: r.used, temp: r.temp,
+  tempUsed: r.temp_used, familiar: !!r.familiar }),
+  // When the last rest of each kind was taken, by whichever screen took it. The Companion reads
+  // these to finish its own half of a rest the sheet started — see the columns' notes in db.js.
+  restedAt: r.rested_at ? new Date(r.rested_at).toISOString() : null,
+  shortRestedAt: r.short_rested_at ? new Date(r.short_rested_at).toISOString() : null });
+
+async function grimmLiveOf(userId) {
+  const { rows } = await db.query(
+    `SELECT grimm_id, stage, used, temp, temp_used, familiar, rested_at, short_rested_at
+       FROM grimm_live WHERE user_id = $1`, [userId]);
+  return Object.fromEntries(rows.map(r => [r.grimm_id, liveRow(r)]));
+}
+async function putLive(userId, grimm, s) {
+  await db.query(
+    `INSERT INTO grimm_live (user_id, grimm_id, stage, used, temp, temp_used, familiar, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, now())
+     ON CONFLICT (user_id, grimm_id) DO UPDATE SET
+       stage = EXCLUDED.stage, used = EXCLUDED.used, temp = EXCLUDED.temp,
+       temp_used = EXCLUDED.temp_used, familiar = EXCLUDED.familiar, updated_at = now()`,
+    [userId, grimm, s.stage, s.used, s.temp, s.tempUsed, s.familiar]);
+}
+
+app.get("/api/grimms/live", requireUser, async (req, res) =>
+  res.json({ grimms: await grimmLiveOf(req.user.id) }));
+
+// The Companion mirroring what it holds. It sends the whole state, because it HAS the whole state
+// and a partial write from a page that knows everything would only invite the two to drift.
+app.put("/api/grimms/live/:grimm", requireUser, async (req, res) => {
+  const grimm = req.params.grimm;
+  if (!GRIMM_ID.test(grimm)) return res.status(400).json({ error: "Not a Grimm." });
+  const b = req.body || {};
+  if (!GRIMM_STAGES.includes(b.stage)) return res.status(400).json({ error: "Not a stage." });
+  // Clamped rather than refused: these arrive from a tracker being tapped at a table, and a number
+  // out of range is a bug at this end, not something to interrupt a fight over.
+  const n = (v, hi = 99) => Math.max(0, Math.min(hi, Math.trunc(Number(v) || 0)));
+  const s = { stage: b.stage, used: n(b.used), temp: n(b.temp), tempUsed: n(b.tempUsed),
+    familiar: !!b.familiar };
+  await putLive(req.user.id, grimm, s);
+  res.json({ ok: true, live: liveDerived(s) });
+});
+
+// The sheet's tracker. It asks for a slot to be spent or given back and is told what the row says
+// afterwards — it never computes a total of its own, so there is no third copy of the rule to go
+// stale. +1 spends one, -1 restores one.
+app.post("/api/grimms/live/:grimm/slots", requireUser, async (req, res) => {
+  const grimm = req.params.grimm;
+  if (!GRIMM_ID.test(grimm)) return res.status(400).json({ error: "Not a Grimm." });
+  const delta = Math.trunc(Number(req.body?.delta));
+  if (delta !== 1 && delta !== -1) return res.status(400).json({ error: "Spend one or restore one." });
+
+  const row = (await db.query(
+    "SELECT stage, used, temp, temp_used, familiar FROM grimm_live WHERE user_id = $1 AND grimm_id = $2",
+    [req.user.id, grimm])).rows[0];
+  // No row yet means the Companion has never been opened on this account, not that the Grimm has no
+  // slots. A full, rested Grimm is the right thing to start from.
+  const s = row ? liveRow(row) : liveDerived({ ...BLANK_LIVE });
+
+  if (delta === 1) {
+    if (s.familiar) return res.status(409).json({ error: "Your Grimm is in Familiar form — slot abilities are unavailable." });
+    if (s.left < 1) return res.status(409).json({ error: "No Grimm Slots left. Force the Grimm in the Companion." });
+    // The base slots go first and the temporary ones last, which is the Companion's own order:
+    // a slot bought with Exhaustion is the one you want still standing when the others are gone.
+    if (s.used < s.base) s.used++; else s.tempUsed++;
+  } else {
+    // And back the other way. A temporary slot is given back first only once the base ones are
+    // whole, so restoring never quietly turns a forced slot into an ordinary one.
+    if (s.tempUsed > 0 && s.used === 0) s.tempUsed--;
+    else if (s.used > 0) s.used--;
+    else return res.status(409).json({ error: "Your slots are already full." });
+  }
+  await putLive(req.user.id, grimm, s);
+  res.json({ ok: true, live: liveDerived(s) });
+});
+
+// A Long Rest, taken on the character sheet (Juan, 2026-11-17). It restores the slots — which are
+// shared, so this is the right place for them — and stamps when it happened.
+//
+// ⭐ What it deliberately does NOT do is the rest of a long rest. Clearing the effects, putting the
+// round back to 1, each Grimm's own hook and the Servants' charges are rules that live in the
+// Companion, and reimplementing any of them here would be a second copy to go wrong. The stamp is
+// how the Companion is told: it reads one that is newer than the last it acted on and finishes its
+// own half. The Companion stamps too when the rest is taken there, so there is one record of it
+// whichever screen the player used.
+// `kind` is "long" by default. A SHORT rest gives back no Grimm Slots at all — only the Servant
+// charges whose own rule says a short rest refills them, which is entirely the Companion's to do.
+// So a short rest writes nothing but its stamp.
+app.post("/api/grimms/live/:grimm/rest", requireUser, async (req, res) => {
+  const grimm = req.params.grimm;
+  if (!GRIMM_ID.test(grimm)) return res.status(400).json({ error: "Not a Grimm." });
+  const kind = req.body?.kind === "short" ? "short" : "long";
+
+  const row = (await db.query(
+    "SELECT stage, used, temp, temp_used, familiar FROM grimm_live WHERE user_id = $1 AND grimm_id = $2",
+    [req.user.id, grimm])).rows[0];
+  // The stage and Familiar form survive a rest; on a long one the slots do not. A player who has
+  // never opened the Companion gets a row at its defaults rather than nothing at all — a short rest
+  // needs one too, because there has to be something to stamp.
+  const held = row ? liveRow(row) : BLANK_LIVE;
+  await putLive(req.user.id, grimm,
+    kind === "long" ? { ...held, used: 0, temp: 0, tempUsed: 0 } : held);
+
+  const column = kind === "long" ? "rested_at" : "short_rested_at";
+  const { rows } = await db.query(
+    `UPDATE grimm_live SET ${column} = now() WHERE user_id = $1 AND grimm_id = $2
+     RETURNING stage, used, temp, temp_used, familiar, rested_at, short_rested_at`,
+    [req.user.id, grimm]);
+  res.json({ ok: true, kind, live: liveRow(rows[0]) });
+});
+
+// ── The exhaustion both pages show ──────────────────────────────────────
+// Juan, 2026-11-17: the Companion's **Exhaustion** and **Dream Exhaustion** and the character
+// sheet's **in physical / in dream** are the same two numbers. They were kept twice, in two places,
+// and only one of the two copies was wired to any rules at all — the sheet has the 0–6 ladder, the
+// 0–8 Dream ladder with its roll penalties, the rest rules and the level-8 save; the Companion had
+// a pair of steppers. So the character sheet is the home, and this is how the Companion reaches it.
+//
+// ⚠️ This writes the character's own JSON and bumps its version, exactly as the DM's board does
+// (PUT /api/characters/:id/vitals). rules.js warns against writing a sheet from elsewhere, and it
+// is right: a sheet open in another window is left holding a stale version and its next save is
+// refused. But that warning is about writes that land four at a time every time somebody casts
+// Bless. This one happens when a player forces their own Grimm or lets a Shackle Break close — a
+// few times an evening, deliberately, by the same person — and the sheet re-reads itself when its
+// window comes back, which closes the case that actually happens.
+async function myCharacters(user, wanted) {
+  const { rows } = await db.query(
+    `SELECT * FROM characters WHERE user_id = $1 AND archived = false
+      ORDER BY updated_at DESC, id`, [user.id]);
+  // Most recently saved first, so "the one being played" is the default without anybody having to
+  // say so — and the answer always names it, so a wrong guess is visible rather than silent.
+  const row = rows.find(r => r.id === (parseInt(wanted, 10) || 0)) || rows[0] || null;
+  return { rows, row };
+}
+// ⭐ `level` and `dreamMod` are here for the Grimm Companion, which has been asking the PLAYER for
+// both — a stepper and a text box in its bar, kept in that browser (Juan, 2026-11-18). They are not
+// cosmetic there: the level sets the proficiency bonus and so every DC the Grimm has, it is
+// substituted into the ability text wherever it says "Grimm User's Level", and it decides the size
+// of Gate of Caelum's roster, its Max CR and Víðarr's Blood threshold. The Dream modifier sets the
+// save that closes a Shackle Break and the Reality Shift's escape DC.
+//
+// Both already exist and neither is the player's to set: the level is the DM's column, written only
+// through `PUT /api/characters/:id/level`, and the Dream modifier is the character's own DRE score
+// through the engine, modifiers and all. So they are READ from here and never written back.
+function characterAnswer(rows, row) {
+  const s = row ? parseSheet(row) : {};
+  return {
+    character: row ? { id: row.id, name: row.name } : null,
+    characters: rows.map(r => ({ id: r.id, name: r.name })),
+    level: row ? row.level : null,
+    dreamMod: row ? rules.abilityModifier(forRules(row), "dream") : null,
+    exhaustion: Math.max(0, Math.trunc(Number(s.exhaustion) || 0)),
+    dreamExhaustion: rules.normalizeDreamExhaustion(s.dreamExhaustion),
+    dreamMax: rules.DREAM_EXHAUSTION_MAX,
+    // The fight, as the board left it on this character's own sheet (POST /api/initiative/clock
+    // writes these onto every sheet at the table). Two readers: the strip at the top of every tool,
+    // which says a fight is running and which round it is, and the Grimm Companion, which stopped
+    // counting its own rounds once this existed. `fightId` is what tells a new fight from a round
+    // going by — see the clock route.
+    round: Math.max(1, Math.trunc(Number(s.round) || 1)),
+    inCombat: !!s.inCombat,
+    fightId: typeof s.fightId === "string" ? s.fightId : "",
+  };
+}
+
+app.get("/api/me/character", requireUser, async (req, res) => {
+  const { rows, row } = await myCharacters(req.user, req.query.character);
+  res.json(characterAnswer(rows, row));
+});
+
+app.put("/api/me/exhaustion", requireUser, async (req, res) => {
+  const { rows, row } = await myCharacters(req.user, req.body?.characterId);
+  // No character yet is an ordinary answer, not an error: the Companion keeps its own numbers and
+  // says where they will go once there is a sheet to put them on.
+  if (!row) return res.status(404).json({ error: "You have no character yet." });
+
+  const b = req.body || {}, next = {}, sheet = parseSheet(row), before = {};
+  if (b.exhaustion !== undefined) {
+    if (!int(b.exhaustion, 0, 6)) return res.status(400).json({ error: "Exhaustion is 0 to 6." });
+    next.exhaustion = b.exhaustion;
+  }
+  if (b.dreamExhaustion !== undefined) {
+    if (!int(b.dreamExhaustion, 0, rules.DREAM_EXHAUSTION_MAX))
+      return res.status(400).json({ error: `Dream Exhaustion is 0 to ${rules.DREAM_EXHAUSTION_MAX}.` });
+    next.dreamExhaustion = b.dreamExhaustion;
+  }
+  if (!Object.keys(next).length) return res.status(400).json({ error: "Nothing to set." });
+  for (const k of Object.keys(next)) before[k] = sheet[k] ?? null;
+
+  const { rows: saved } = await db.query(
+    `UPDATE characters SET sheet = $1, version = version + 1, updated_at = now()
+      WHERE id = $2 RETURNING *`, [JSON.stringify({ ...sheet, ...next }), row.id]);
+  // Logged like any other change to the sheet, and named for where it came from: a player reading
+  // their own history should be able to see that the Grimm is what cost them this.
+  await logEvent(row.id, req.user.id, "exhaustion.grimm", { before, after: next },
+    String(b.note || "").slice(0, 200));
+  res.json(characterAnswer(rows, saved[0]));
+});
+
 // ── Admin: players and what each may read ──────────────────
 const admin = express.Router();
 admin.use(requireUser, requireDm);
@@ -709,7 +1059,7 @@ admin.put("/grimms/:grimm/toggles/:key", async (req, res) => {
 // to get wrong.
 async function adminUsers() {
   const users = (await db.query(
-    `SELECT id, username, display_name, role, paragon, password_hash <> '${LOCKED}' AS has_password
+    `SELECT id, username, display_name, role, paragon, grimm_id, password_hash <> '${LOCKED}' AS has_password
        FROM users ORDER BY role, display_name`)).rows;
   const grants = (await db.query("SELECT user_id, cognition_id FROM user_cognitions")).rows;
   const learning = (await db.query("SELECT user_id, key, name, depth FROM learning ORDER BY depth DESC, name")).rows;
@@ -720,6 +1070,9 @@ async function adminUsers() {
   const swornOf = id => { try { return JSON.parse(choices.find(c => c.user_id === id)?.sworn || "[]"); } catch (e) { return []; } };
   return users.map(u => ({
     ...publicUser(u), hasPassword: u.has_password, paragon: !!u.paragon,
+    // Which Grimm the DM assigned them, or null for unassigned — the Admin page falls back to the
+    // old name match when it is null, and says plainly which of the two it is looking at.
+    grimmId: u.grimm_id || null,
     // Which Devotions the DM has opened, which of those the player swore, and which one burns.
     // The Paragon Abilities live in the Devotion file, so the names of the sets come from there.
     devotions: opened.filter(d => d.user_id === u.id).map(d => d.cognition_id),
@@ -754,6 +1107,225 @@ admin.get("/overview", async (req, res) => {
                WHERE retired = false ORDER BY kind, name`).then(r => r.rows),
   ]);
   res.json({ cognitions: INDEX, users, party, grimms, compendium });
+});
+
+// ── Metrics: what the party actually drew, night by night ──
+// Read from seal_draws, which only the "Drew it" button writes. Everything here is arithmetic over
+// rows — no ruling, no verdict. The page says what was spent and what it came to; what that means
+// for balance is the DM's call, and a tool that offered an opinion would be guessing at the fiction
+// around the numbers it cannot see.
+//
+// Aggregated in JS rather than SQL on purpose: a night is a few hundred rows, every figure below is
+// one pass over them, and the alternative is a dozen GROUP BYs that have to be kept in step with
+// the same dozen in the export. One reading, two consumers.
+
+// What a damage or healing line is worth on average: "6d8 + 5" → 32. Dice mean plus the flat tail.
+// It is the only way a night's damage can be compared across different dice, and it is honest about
+// being an expectation — the page labels it as one.
+function diceMean(s) {
+  const str = String(s || "").trim();
+  if (!str) return null;
+  let total = 0, saw = false;
+  for (const m of str.matchAll(/(\d+)\s*d\s*(\d+)/gi)) { total += (+m[1]) * ((+m[2]) + 1) / 2; saw = true; }
+  // The flat part is whatever is left once the dice are out of the way, so "6d8" can't be read as +8.
+  for (const m of str.replace(/(\d+)\s*d\s*(\d+)/gi, "").matchAll(/([+-])\s*(\d+)/g)) {
+    total += (m[1] === "-" ? -1 : 1) * (+m[2]); saw = true;
+  }
+  if (!saw) { const n = Number(str); return Number.isFinite(n) ? n : null; }
+  return Math.round(total * 10) / 10;
+}
+
+// A night as it comes back out of a DATE column, which every read below asks for as `::text`.
+//
+// ⚠️ TWO TRAPS, both of which this has been through. It is NOT gameNight(): that one decides which
+// night a moment belongs to, and putting a stored night back through it subtracts the 6am boundary
+// a second time, so every night listed came out a day early and the latest one read as empty. And
+// it must not trust a driver's Date either — PGlite hands a DATE back as UTC midnight while node-pg
+// hands it back as LOCAL midnight, so the same row reads as two different nights depending on which
+// database is behind it. Asking Postgres for the text is the only answer that is the same on both;
+// the Date branch is a fallback for a query that forgot to.
+function nightOf(v) {
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  return String(v || "").slice(0, 10);
+}
+
+const round1 = n => Math.round(n * 10) / 10;
+const avgOf = xs => (xs.length ? round1(xs.reduce((a, b) => a + b, 0) / xs.length) : null);
+// Counting rows by something, commonest first. `null` keys are rows the question doesn't apply to
+// (a Ring with no save, a seal with no damage) and are left out rather than counted as a kind.
+function tally(rows, keyFn) {
+  const m = new Map();
+  for (const r of rows) {
+    const k = keyFn(r);
+    if (k == null || k === "") continue;
+    m.set(k, (m.get(k) || 0) + 1);
+  }
+  return [...m].map(([key, n]) => ({ key, n })).sort((a, b) => b.n - a.n || String(a.key).localeCompare(String(b.key)));
+}
+const spread = xs => (xs.length ? { avg: avgOf(xs), min: Math.min(...xs), max: Math.max(...xs) } : null);
+
+function drawOut(r) {
+  const detail = asJson(r.detail);
+  return {
+    id: r.id, night: nightOf(r.night_t || r.night), at: r.at,
+    userId: r.user_id, player: r.display_name || "—", character: r.character_name || null,
+    name: r.name, core: r.core, coreName: BY_ID.get(r.core)?.name || r.core, verum: r.verum,
+    ring: r.ring, subtype: r.subtype, shape: r.shape, manner: r.manner,
+    slot: r.slot, charLevel: r.char_level, tier: r.tier,
+    verumMod: r.verum_mod, dreamMod: r.dream_mod, dc: r.dc, attack: r.attack,
+    damage: r.damage, damageKind: r.damage_kind, absolute: r.absolute, save: r.save_ability,
+    sigils: r.sigils, sigilCap: r.sigil_cap, benefits: r.benefits,
+    sigilNames: (detail.sigils || []).map(s => BY_ID.get(s?.id)?.name || s?.id).filter(Boolean),
+    // How the row came in: the "Drew it" button, or a Supportive seal that logged itself when it
+    // was cast at the party. Rows from before that second way have no `via` and are presses.
+    via: detail.via === "cast" ? "cast" : "drew",
+    expected: diceMean(r.damage), detail,
+  };
+}
+
+function sealSummary(rows) {
+  const dmg = rows.map(r => r.expected).filter(n => n != null);
+  const dcs = rows.map(r => r.dc).filter(n => n != null);
+  const byPlayer = new Map();
+  for (const r of rows) {
+    const k = r.userId ?? `~${r.player}`;
+    if (!byPlayer.has(k)) byPlayer.set(k, { userId: r.userId, player: r.player, character: r.character, rows: [] });
+    byPlayer.get(k).rows.push(r);
+  }
+  // Which Cognitions came out as a Sigil, counted per draw — a Cognition riding two different
+  // seals in one night is two uses, which is the number "is this one ever worth taking" needs.
+  const sigilUse = new Map();
+  for (const r of rows) for (const s of (r.detail.sigils || [])) {
+    if (s?.id) sigilUse.set(s.id, (sigilUse.get(s.id) || 0) + 1);
+  }
+
+  return {
+    draws: rows.length,
+    clock: rows.length ? { first: rows[0].at, last: rows[rows.length - 1].at } : null,
+    slots: Array.from({ length: 9 }, (_, i) => ({
+      slot: i + 1, n: rows.filter(r => r.slot === i + 1).length })),
+    rings: tally(rows, r => r.ring),
+    subtypes: tally(rows, r => `${r.ring}·${r.subtype}`).map(x => {
+      const [ring, subtype] = String(x.key).split("·");
+      const mine = rows.filter(r => r.ring === ring && r.subtype === subtype);
+      return { ring, subtype, n: x.n,
+        avgDc: avgOf(mine.map(r => r.dc).filter(n => n != null)),
+        avgDamage: avgOf(mine.map(r => r.expected).filter(n => n != null)) };
+    }),
+    cores: tally(rows, r => r.core).map(x => ({ id: x.key, name: BY_ID.get(x.key)?.name || x.key, n: x.n })),
+    sigilsUsed: [...sigilUse].map(([id, n]) => ({ id, name: BY_ID.get(id)?.name || id, n }))
+      .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name)),
+    manners: tally(rows, r => r.manner),
+    shapes: tally(rows, r => r.shape),
+    saves: tally(rows, r => r.save),
+    damageKinds: tally(rows, r => r.damageKind),
+    // Sigil capacity: a slot carries slot − 1 Sigils, and Coven Drawing three more. How much of it
+    // the party actually fills is the clearest sign of whether Sigils are worth the trouble.
+    sigils: {
+      used: rows.reduce((n, r) => n + (r.sigils || 0), 0),
+      cap: rows.reduce((n, r) => n + (r.sigilCap || 0), 0),
+      pct: (() => {
+        const cap = rows.reduce((n, r) => n + (r.sigilCap || 0), 0);
+        return cap ? Math.round(rows.reduce((n, r) => n + (r.sigils || 0), 0) / cap * 100) : null;
+      })(),
+    },
+    numbers: {
+      slot: spread(rows.map(r => r.slot)),
+      level: spread(rows.map(r => r.charLevel)),
+      dc: spread(dcs),
+      attack: spread(rows.map(r => r.attack).filter(n => n != null)),
+      damage: spread(dmg),
+      verumMod: spread(rows.map(r => r.verumMod)),
+    },
+    absolute: rows.filter(r => r.absolute).length,
+    granting: rows.filter(r => (r.benefits || 0) > 0).length,
+    // How much of the night wrote itself. A night that is mostly presses is a table remembering to
+    // press; one that is mostly casts is Supportive play, and the figure is worth seeing before
+    // reading anything into how few seals a given player "drew".
+    viaCast: rows.filter(r => r.via === "cast").length,
+    players: [...byPlayer.values()].map(p => ({
+      userId: p.userId, player: p.player, character: p.character, draws: p.rows.length,
+      avgSlot: avgOf(p.rows.map(r => r.slot)),
+      avgDc: avgOf(p.rows.map(r => r.dc).filter(n => n != null)),
+      avgDamage: avgOf(p.rows.map(r => r.expected).filter(n => n != null)),
+      topRing: tally(p.rows, r => r.ring)[0]?.key || null,
+      topCore: tally(p.rows, r => r.core).map(x => BY_ID.get(x.key)?.name || x.key)[0] || null,
+      sigilsPerSeal: avgOf(p.rows.map(r => r.sigils || 0)),
+    })).sort((a, b) => b.draws - a.draws),
+  };
+}
+
+const NIGHT = /^\d{4}-\d{2}-\d{2}$/;
+// `night_t` is the night as Postgres spells it, under its own name rather than shadowing `night`:
+// two columns of one name in one SELECT leave which one survives up to the driver. See nightOf.
+const DRAW_COLS = `d.*, d.night::text AS night_t, u.display_name, c.name AS character_name`;
+const DRAW_FROM = `FROM seal_draws d
+  LEFT JOIN users u ON u.id = d.user_id
+  LEFT JOIN characters c ON c.id = d.character_id`;
+
+async function drawsOf(night) {
+  const { rows } = night
+    ? await db.query(`SELECT ${DRAW_COLS} ${DRAW_FROM} WHERE d.night = $1 ORDER BY d.id`, [night])
+    : await db.query(`SELECT ${DRAW_COLS} ${DRAW_FROM} ORDER BY d.id`);
+  return rows.map(drawOut);
+}
+async function nightsList() {
+  const { rows } = await db.query(
+    `SELECT night::text AS night, count(*)::int AS draws, count(DISTINCT user_id)::int AS players
+       FROM seal_draws GROUP BY night ORDER BY night DESC`);
+  return rows.map(r => ({ night: nightOf(r.night), draws: r.draws, players: r.players }));
+}
+
+// One call: the nights there are, and one night's rows and figures. `night=all` reads every night
+// at once, which is how a trend across sessions is looked at; no night named means the latest one.
+admin.get("/metrics", async (req, res) => {
+  const nights = await nightsList();
+  const asked = String(req.query.night || "");
+  const all = asked === "all";
+  const night = all ? null : (NIGHT.test(asked) ? asked : nights[0]?.night || gameNight());
+  const rows = await drawsOf(night);
+  res.json({ nights, night: all ? "all" : night, tonight: gameNight(), zone: GAME_TZ,
+             rows, summary: sealSummary(rows) });
+});
+
+// The same reading as a file. JSON carries the rows and the figures together; CSV is one row per
+// draw and nothing else, because a spreadsheet's own formulas are better than any summary this
+// could print into it.
+const CSV_COLS = [
+  ["night", r => r.night], ["at", r => new Date(r.at).toISOString()], ["player", r => r.player],
+  ["character", r => r.character || ""], ["seal", r => r.name], ["core", r => r.coreName],
+  ["verum", r => r.verum], ["ring", r => r.ring], ["subtype", r => r.subtype],
+  ["shape", r => r.shape], ["manner", r => r.manner], ["slot", r => r.slot],
+  ["level", r => r.charLevel], ["tier", r => r.tier], ["verum_mod", r => r.verumMod],
+  ["dream_mod", r => r.dreamMod], ["dc", r => r.dc ?? ""], ["attack", r => r.attack ?? ""],
+  ["damage", r => r.damage], ["expected", r => r.expected ?? ""], ["damage_type", r => r.damageKind],
+  ["absolute", r => (r.absolute ? "yes" : "")], ["save", r => r.save],
+  ["sigils", r => r.sigils], ["sigil_cap", r => r.sigilCap],
+  ["sigil_names", r => r.sigilNames.join("; ")], ["grants", r => r.benefits],
+  ["logged", r => r.via],
+];
+const csvCell = v => {
+  const s = String(v == null ? "" : v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+admin.get("/metrics/export", async (req, res) => {
+  const asked = String(req.query.night || "");
+  const all = asked === "all";
+  const night = all ? null : (NIGHT.test(asked) ? asked : (await nightsList())[0]?.night || gameNight());
+  const rows = await drawsOf(night);
+  const stamp = all ? "all-nights" : night;
+  if (String(req.query.format || "json") === "csv") {
+    const body = [CSV_COLS.map(c => c[0]).join(","),
+      ...rows.map(r => CSV_COLS.map(c => csvCell(c[1](r))).join(","))].join("\r\n");
+    res.type("text/csv; charset=utf-8");
+    res.set("Content-Disposition", `attachment; filename="arcanum-draws-${stamp}.csv"`);
+    return res.send("﻿" + body);   // the BOM is what makes Excel read it as UTF-8
+  }
+  res.set("Content-Disposition", `attachment; filename="arcanum-draws-${stamp}.json"`);
+  res.json({ tool: "Arcanum Veritas — seal draws", night: all ? "all" : night, zone: GAME_TZ,
+             exported: new Date().toISOString(), draws: rows.length,
+             summary: sealSummary(rows), rows });
 });
 
 admin.post("/users", async (req, res) => {
@@ -815,6 +1387,26 @@ admin.delete("/users/:id/cognitions/:cog", async (req, res) => {
   await db.query("DELETE FROM paragon_devotions WHERE user_id = $1 AND cognition_id = $2", [req.target.id, req.params.cog]);
   await unswear(req.target.id, req.params.cog);
   res.json({ ok: true });
+});
+
+// ── Admin: which Grimm an account holds.
+// Send { grimm: "<id>" } to assign, or { grimm: null } to clear it. A Grimm is held by one player
+// at a time, so assigning one that is already held MOVES it and says whose it was — the alternative
+// was refusing until the DM went and cleared the other end, which is two trips for one decision.
+// The DM's own account holds no Grimm through this page: the DM reads all eight in Grimms.
+admin.put("/users/:id/grimm", async (req, res) => {
+  const grimm = req.body?.grimm == null ? null : String(req.body.grimm);
+  if (grimm !== null && (!GRIMM_ID.test(grimm) || !GRIMM_DATA.grimms.some(g => g.id === grimm)))
+    return res.status(404).json({ error: "No such Grimm." });
+  if (grimm !== null && req.target.role === "dm")
+    return res.status(400).json({ error: "The DM holds no Grimm — every one of them is already theirs to read." });
+
+  // Who had it before, so the answer can say so rather than quietly moving it
+  const previous = grimm === null ? null : (await db.query(
+    "SELECT display_name FROM users WHERE grimm_id = $1 AND id <> $2", [grimm, req.target.id])).rows[0];
+  if (grimm !== null) await db.query("UPDATE users SET grimm_id = NULL WHERE grimm_id = $1", [grimm]);
+  await db.query("UPDATE users SET grimm_id = $1 WHERE id = $2", [grimm, req.target.id]);
+  res.json({ ok: true, movedFrom: previous?.display_name || null });
 });
 
 // ── Admin: the Paragon path — who walks it, and which Devotions are open to them.
@@ -1139,7 +1731,22 @@ async function logEvent(characterId, actorId, action, detail = {}, note = "") {
     [characterId, actorId, action, JSON.stringify(detail), String(note || "").slice(0, 2000)]);
 }
 
-const parseSheet = row => { try { return JSON.parse(row.sheet || "{}"); } catch { return {}; } };
+// MIGRATION, 2026-11-18: Dream Exhaustion went from a 0-8 ladder to 0-6, so a sheet saved under the
+// old rules can hold a 7 or an 8. Clamping on READ rather than with a one-off SQL pass means every
+// consumer — the sheet, the party board, the Companion, the admin table — agrees immediately, and
+// the 6 is persisted the next time that character is saved. Levels past 6 are lost, not banked.
+const parseSheet = row => {
+  let s;
+  try { s = JSON.parse(row.sheet || "{}"); } catch { return {}; }
+  if (s && typeof s === "object") {
+    if (s.dreamExhaustion !== undefined)
+      s.dreamExhaustion = rules.normalizeDreamExhaustion(s.dreamExhaustion);
+    if (s.hollowingFractures !== undefined)
+      s.hollowingFractures = Math.max(0,
+        Math.min(rules.HOLLOWING_FRACTURES_TO_HOLLOW, Math.trunc(Number(s.hollowingFractures) || 0)));
+  }
+  return s;
+};
 
 // What the client gets: the DM's columns flattened into the shape rules.js expects, with the
 // player's JSON underneath. `sheet` stays nested so a save can send it back untouched.
@@ -1189,6 +1796,8 @@ function partyCard(row, displayName, granted = []) {
     // because this is the sheet's own catalogue and it is not the board's business where it sits.
     // Resolved here rather than on the board so the two can never disagree about which is which.
     portrait: ch.portrait || "", portraitArt: plates.artUrl(ch),
+    // Whether this character has splash art waiting for their turn on the room's screen.
+    art: { normal: !!row.has_art, hurt: !!row.has_hurt_art },
     pendingLevel: row.pending_level == null ? null : Number(row.pending_level),
     openUnlocks: Number(row.open_unlocks) || 0,
     classes: (Array.isArray(ch.classes) ? ch.classes : []).filter(x => x && x.name)
@@ -1200,6 +1809,15 @@ function partyCard(row, displayName, granted = []) {
     passivePerception: rules.passiveScore(ch, "perception"),
     exhaustion: ch.exhaustion,
     dreamExhaustion: de.level, dreamExhaustionName: de.name, dreamPenalty: de.penalty,
+    // Level 6 only: what the DM needs to see without opening the sheet — how close this character is
+    // to being Hollowed, and that the save comes round again every time they go down.
+    hollowing: de.hollowingSave
+      ? { fractures: Math.max(0, Math.min(rules.HOLLOWING_FRACTURES_TO_HOLLOW,
+            Math.trunc(Number(ch.hollowingFractures) || 0))),
+          toHollow: rules.HOLLOWING_FRACTURES_TO_HOLLOW,
+          dc: rules.HOLLOWING_SAVE_DC,
+          bonus: rules.hollowingSave(ch).bonus }
+      : null,
     wounds: ch.wounds, injuries, unhealedInjuries: unhealed,
     deathSaveDC: rules.deathSaveDC(ch.wounds, unhealed),
     concentrationFloor: rules.concentrationDC(0, ch.wounds, unhealed),
@@ -1219,6 +1837,13 @@ function partyCard(row, displayName, granted = []) {
       proficient: rules.saveProficient(ch, id),
     }])),
     hitDice: (({ pool, total, used, left }) => ({ pool, total, used, left }))(rules.hitDiceState(ch)),
+    // Spell slots, level by level — `{ "1": { max, used } }`, only the levels they actually have.
+    // The room's screen draws these as pips beside whoever's turn it is, and the DM's board has
+    // wanted them since the first fight.
+    spellSlots: Object.fromEntries(Object.entries(ch.spells?.slots || {})
+      .filter(([, s]) => Number(s?.max) > 0)
+      .map(([l, s]) => [l, { max: Number(s.max) || 0, used: Number(s.used) || 0 }])),
+    slotsReset: String(ch.spells?.slotsReset || "l").toLowerCase() === "s" ? "short" : "long",
     // The four sub-scores, their sums and the modifier each side of each axis is worth. A board that
     // showed Order 4 / Chaos 6 and left the DM to work out the +2 would be showing bookkeeping.
     honor: { order: row.honor_order, chaos: row.honor_chaos,
@@ -1288,7 +1913,11 @@ async function partyBoard() {
             (SELECT max(k.target_level) FROM character_unlocks k
               WHERE k.character_id = c.id AND k.kind = 'level' AND k.consumed_at IS NULL) AS pending_level,
             (SELECT count(*)::int FROM character_unlocks k
-              WHERE k.character_id = c.id AND k.consumed_at IS NULL) AS open_unlocks
+              WHERE k.character_id = c.id AND k.consumed_at IS NULL) AS open_unlocks,
+            -- Whether there is a splash for the room's screen, never the picture itself: this
+            -- query runs on every poll of the board and the pictures are hundreds of kilobytes.
+            (SELECT a.normal <> '' FROM character_art a WHERE a.character_id = c.id) AS has_art,
+            (SELECT a.hurt   <> '' FROM character_art a WHERE a.character_id = c.id) AS has_hurt_art
        FROM characters c JOIN users u ON u.id = c.user_id
       WHERE c.archived = false ORDER BY u.display_name, c.id`);
 
@@ -1558,8 +2187,8 @@ const cleanInspiration = list => (Array.isArray(list) ? list : []).map(d => {
 // new round up here, on the poll it was already making, and runs its own expiry. The sheet's own
 // button still works and is still the player's — this is a second hand on the same clock, not a
 // replacement for it.
-const VITAL_KEYS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
-                    "conditions", "injuries", "inspiration", "round", "inCombat"];
+const VITAL_KEYS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion", "hollowingFractures",
+                    "conditions", "injuries", "inspiration", "round", "inCombat", "fightId"];
 
 app.get("/api/characters/:id/vitals", requireUser, async (req, res) => {
   const row = await loadCharacter(req.params.id, req.user);
@@ -1603,6 +2232,13 @@ app.put("/api/characters/:id/vitals", requireUser, requireDm, async (req, res) =
         if (!int(value, 0, rules.DREAM_EXHAUSTION_MAX))
           return res.status(400).json({ error: `Dream Exhaustion is 0 to ${rules.DREAM_EXHAUSTION_MAX}.` });
         next.dreamExhaustion = value; break;
+      // The Hollowing's Fracture count. The DM owns it — the third Fracture is a permanent character
+      // change, so nothing else in the stack is allowed to write it.
+      case "hollowingFractures":
+        if (!int(value, 0, rules.HOLLOWING_FRACTURES_TO_HOLLOW))
+          return res.status(400).json({
+            error: `Hollowing Fractures is 0 to ${rules.HOLLOWING_FRACTURES_TO_HOLLOW}.` });
+        next.hollowingFractures = value; break;
       case "conditions":
         if (!Array.isArray(value)) return res.status(400).json({ error: "Conditions are a list." });
         next.conditions = cleanConditions(value); break;
@@ -2174,14 +2810,15 @@ const INIT_IMG_OK = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/;
 const INIT_JSON = express.json({ limit: "4mb" });
 
 const initBlank = () => ({
-  round: 0, turnId: "", inCombat: false,
+  round: 0, turnId: "", inCombat: false, fightId: "",
   // Whether this board is the table's clock. On by default — that is the point of it — and a
   // switch rather than a rule, because a DM running a fight on paper should be able to stop it
   // writing to seven character sheets.
   clock: true,
   // What the room is allowed to see. Hit points as WORDS is the default because a number on the wall
   // tells the table exactly how many rounds are left in the boss.
-  show: { portraits: true, ac: true, dc: false, hp: "words", conditions: true },
+  show: { portraits: true, ac: true, dc: false, hp: "words", conditions: true,
+          splash: true, stats: true },
   combatants: [],
 });
 
@@ -2212,6 +2849,65 @@ function cleanInitConditions(list) {
   })).filter(c => c.name);
 }
 
+// A counter is a number the DM keeps on a monster and WHAT IT MEANS beside it — legendary
+// resistances left, charges on a relic, how many cultists are still chanting. Free-form on purpose:
+// the thing a fight needs counted is different every fight, and a fixed list would be wrong by the
+// second session. `max` is optional and only decides whether it draws as pips or a number.
+function cleanCounters(list) {
+  return (Array.isArray(list) ? list : []).slice(0, 10).map(c => ({
+    id: iId(c?.id),
+    name: iStr(c?.name, 28),
+    n: iNum(c?.n, 0, 999, 0),
+    max: c?.max == null || c?.max === "" ? null : iNum(c.max, 1, 99, 1),
+    why: iStr(c?.why, 160),
+  })).filter(c => c.name);
+}
+
+// The two switches a monster can have thrown. Both are OPTIONAL and both are null for almost every
+// row on the board — a Glassling is five boxes and stays five boxes.
+//
+// A boss is the creature the fight is about: resistances it burns to refuse a save, phases it
+// passes through, and turns — because a thing that acts twice a round is the whole shape of that
+// fight and writing it in as two monsters loses that they share one pool of hit points.
+function cleanBoss(b) {
+  if (!b || typeof b !== "object") return null;
+  const turns = iNum(b.turns, 1, 4, 1);
+  return {
+    legendary: iNum(b.legendary, 0, 9, 0),          // left
+    legendaryMax: iNum(b.legendaryMax, 0, 9, 0),
+    phases: iNum(b.phases, 1, 9, 1),
+    phase: Math.min(iNum(b.phase, 1, 9, 1), iNum(b.phases, 1, 9, 1)),
+    turns,
+    // One initiative per EXTRA turn. The first turn is the combatant's own `init`.
+    inits: Array.from({ length: turns - 1 }, (_, i) => {
+      const v = Array.isArray(b.inits) ? b.inits[i] : null;
+      return v == null || v === "" ? null : iNum(v, -20, 999, 0);
+    }),
+  };
+}
+
+// A Nightmare is a Denizen corrupted by Vile Emotions (Worldbuilding/Races/Nightmares.md). What the
+// board tracks is what the table plays against: which emotions it is made of, and how many roots
+// are still in the ground.
+const VILE_EMOTIONS = [
+  "Absurdity", "Anxiety", "Apathy", "Deceit", "Despair", "Desperation", "Doubt", "Evasion",
+  "Greed", "Hate", "Hypocrisy", "Inferiority", "Jealousy", "Loneliness", "Obsession", "Prejudice",
+  "Rashness", "Regret", "Revenge", "Scorn", "Shame", "Slander", "Vanity", "Zealotry",
+];
+const NIGHTMARE_GRADES = ["Demi-Nightmare", "Nightling", "Recurring Nightmare", "Primordial Nightmare"];
+
+function cleanNightmare(n) {
+  if (!n || typeof n !== "object") return null;
+  const roots = iNum(n.roots, 0, 12, 0);
+  return {
+    grade: NIGHTMARE_GRADES.includes(n.grade) ? n.grade : "",
+    emotions: (Array.isArray(n.emotions) ? n.emotions : [])
+      .filter(e => VILE_EMOTIONS.includes(e)).slice(0, 6),
+    roots,
+    rootsMax: Math.max(roots, iNum(n.rootsMax, 0, 12, roots)),
+  };
+}
+
 function cleanCombatant(c) {
   const kind = c?.kind === "pc" ? "pc" : "npc";
   const base = {
@@ -2238,6 +2934,9 @@ function cleanCombatant(c) {
     ac: c?.ac == null || c?.ac === "" ? null : iNum(c.ac, 0, 99, 10),
     dc: c?.dc == null || c?.dc === "" ? null : iNum(c.dc, 0, 99, 10),
     conditions: cleanInitConditions(c?.conditions),
+    counters: cleanCounters(c?.counters),
+    boss: cleanBoss(c?.boss),
+    nightmare: cleanNightmare(c?.nightmare),
     // Not "deleted": a monster that went down is part of the fight's history until the fight ends,
     // and it may well stand back up.
     down: !!c?.down,
@@ -2250,8 +2949,11 @@ function cleanInit(body) {
   const seen = new Set();
   return {
     round: iNum(s.round, 0, 999, 0),
-    turnId: iStr(s.turnId, 40),
+    turnId: iStr(s.turnId, 48),
     inCombat: !!s.inCombat,
+    // Which fight this is. Every "start the fight" mints a new one, and a sheet that sees an id it
+    // has not seen before knows the counter it is holding belongs to a fight that is over.
+    fightId: iStr(s.fightId, 24),
     clock: s.clock !== false,
     show: {
       portraits: show.portraits !== false,
@@ -2259,6 +2961,8 @@ function cleanInit(body) {
       dc: !!show.dc,
       hp: ["words", "numbers", "none"].includes(show.hp) ? show.hp : "words",
       conditions: show.conditions !== false,
+      splash: show.splash !== false,
+      stats: show.stats !== false,
     },
     combatants: (Array.isArray(s.combatants) ? s.combatants : []).slice(0, INIT_MAX)
       .map(cleanCombatant)
@@ -2296,7 +3000,10 @@ function initRows(state, party) {
     return {
       ...c,
       name: p.name, player: p.player, level: p.level,
-      img: p.portraitArt || p.portrait || "",
+      // The CROP on the row — it is forty pixels square, and a whole painting shrunk into that is
+      // a smudge. The uncropped one is what the splash uses when there is no art uploaded.
+      img: p.portrait || p.portraitArt || "",
+      artFull: p.portraitArt || p.portrait || "",
       hp: p.hp, hpMax: p.maxHp, tempHp: p.tempHp,
       ac: p.ac, dc: p.saveDc, initMod: p.initiative,
       conditions: (p.conditions || []).map(x => ({ name: typeof x === "string" ? x : iStr(x?.name, 40),
@@ -2307,13 +3014,39 @@ function initRows(state, party) {
       exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
       dreamExhaustionName: p.dreamExhaustionName,
       fate: p.fate, speed: p.speed, round: p.round, inCombat: p.inCombat,
+      art: p.art || { normal: false, hurt: false },
+      // What the splash is framed with on the room's screen: their scores, what they can still
+      // cast, and the two numbers the table asks for out loud every round.
+      abilities: p.abilities, prof: p.prof, passivePerception: p.passivePerception,
+      spellSlots: p.spellSlots, slotsReset: p.slotsReset,
+      inspiration: (p.inspiration || []).length,
     };
   });
   // Highest first; nobody who has not rolled yet is above somebody who has; ties keep the order the
   // DM put them in, which is how a tie is settled at a table — by the DM saying so.
-  return rows.sort((a, b) =>
+  return initTurns(rows).sort((a, b) =>
     (a.init == null) - (b.init == null) || (b.init ?? 0) - (a.init ?? 0) ||
-    (b.initMod ?? 0) - (a.initMod ?? 0) || String(a.name).localeCompare(String(b.name)));
+    (b.initMod ?? 0) - (a.initMod ?? 0) || String(a.name).localeCompare(String(b.name)) ||
+    a.slot - b.slot);
+}
+
+// A boss that acts more than once a round sits in the order more than once. The extra places are
+// SLOTS of the same creature, not copies of it: `id#1`, carrying the same hit points, the same
+// conditions and the same counters, with an initiative of their own. Damage typed on any of them
+// lands on the one monster — which is the whole reason this is not just two rows the DM adds by
+// hand and then has to keep level with each other.
+function initTurns(rows) {
+  const out = [];
+  for (const r of rows) {
+    const turns = r.kind === "pc" ? 1 : Math.max(1, r.boss?.turns || 1);
+    out.push({ ...r, baseId: r.id, slot: 0, slots: turns });
+    for (let i = 1; i < turns; i++)
+      out.push({ ...r, id: `${r.id}#${i}`, baseId: r.id, slot: i, slots: turns,
+                 init: r.boss.inits[i - 1] ?? null,
+                 // The row that acts; the row that IS the creature keeps the state.
+                 conditions: [], counters: [] });
+  }
+  return out;
 }
 
 // What the room sees. Built by LEAVING THINGS OUT of the resolved board, so a thing the DM has not
@@ -2323,11 +3056,46 @@ function initPlayerView(state, party) {
   const show = state.show;
   return {
     round: state.round, inCombat: state.inCombat, turnId: state.turnId,
-    show: { portraits: show.portraits, ac: show.ac, conditions: show.conditions, hp: show.hp },
+    show: { portraits: show.portraits, ac: show.ac, conditions: show.conditions, hp: show.hp,
+            splash: show.splash !== false, stats: show.stats !== false },
     order: rows.map(r => ({
       id: r.id, kind: r.kind, name: r.name, player: r.kind === "pc" ? r.player : "",
       init: r.init, down: r.down,
       img: show.portraits ? r.img : "",
+      // Which of its turns this is, for a boss that acts more than once. The room is told, because
+      // a creature that comes round twice looks like a mistake on the screen otherwise.
+      slot: r.slot || 0, slots: r.slots || 1,
+      // The splash for the moment their turn comes up: a character id the room's screen can ask for
+      // a picture by, never the picture itself. The room asks for one image per turn instead of
+      // carrying eight of them in every four-second poll.
+      splash: r.kind === "pc" && show.splash !== false && (r.art?.normal || r.art?.hurt)
+        ? { id: r.charId, hurt: !!r.art.hurt, normal: !!r.art.normal,
+            // The point it changes picture. Juan's number: under a tenth of their maximum.
+            bloodied: r.hpMax ? r.hp <= r.hpMax * 0.1 : false }
+        : null,
+      // With nothing uploaded, the full painting behind their plate stands in, so a party that has
+      // plates has this working before anybody paints anything.
+      full: r.kind === "pc" && show.splash !== false ? (r.artFull || "") : "",
+      // The plate under the splash. A PC's own numbers, which are on their sheet anyway — this is
+      // the same information the table reads out loud, put where the room can see it.
+      stats: r.kind === "pc" && show.stats !== false ? {
+        level: r.level, speed: r.speed, pp: r.passivePerception, prof: r.prof,
+        dc: r.dc, ac: r.ac,
+        abilities: Object.fromEntries(Object.entries(r.abilities || {})
+          .map(([k, a]) => [k, { score: a.score, mod: a.mod }])),
+        slots: r.spellSlots || {}, slotsReset: r.slotsReset || "long",
+        inspiration: r.inspiration || 0,
+        exhaustion: r.exhaustion || 0,
+        dreamExhaustion: r.dreamExhaustion || 0, dreamExhaustionName: r.dreamExhaustionName || "",
+      } : null,
+      // A PC's Wounds are theirs and already on their sheet, so the room may as well carry them.
+      wounds: r.kind === "pc" ? (r.wounds || 0) : 0,
+      // Whether a monster's splash is shown in blood. From HALF its hit points down, which is the
+      // same point its row starts saying "Bloodied" — and NOT sent at all when the DM has turned
+      // monster hit points off, or the colour of a picture would answer the question the words
+      // are refusing to.
+      bloodied: r.kind === "npc" && show.hp !== "none" && r.hpMax
+        ? r.hp <= r.hpMax * 0.5 : false,
       ac: show.ac ? r.ac : null,
       // A PC's own hit points are their business and already on their sheet, so the party is shown
       // in numbers; a monster is shown in a word, or not at all.
@@ -2372,6 +3140,10 @@ app.get("/api/initiative", requireUser, async (req, res) => {
   res.json({
     role: "dm", state, party,
     conditions: INIT_CONDITIONS,
+    // The campaign's own lists, served rather than typed into the page: the Vile Emotions are
+    // Vileness.md's twenty-four and the grades are Nightmares.md's, and a second copy in a browser
+    // would be wrong the first time either note changes.
+    emotions: VILE_EMOTIONS, grades: NIGHTMARE_GRADES,
     encounters: saved.map(r => ({ id: r.id, name: r.name, updatedAt: r.updated_at })),
   });
 });
@@ -2391,24 +3163,93 @@ app.put("/api/initiative", requireUser, requireDm, INIT_JSON, async (req, res) =
 // in practice the DM says "round three" out loud and seven players remember to press their own
 // button. This writes the round onto every sheet at the table instead; each sheet sees it arrive on
 // its own poll and runs its own expiry, which keeps the arithmetic where it already lives.
+//
+// `fightId` is what stops a new fight from quietly setting everybody back. Pressing "start the
+// fight" mints one; a sheet that sees an id it has not seen before knows the round it is holding
+// belongs to a fight that is finished, ends that one properly — clearing what the last fight left
+// running — and starts counting again from one. Without it, the board wrote `round: 1` underneath
+// seven sheets that still said round five, and the players only found out when they reloaded.
 app.post("/api/initiative/clock", requireUser, requireDm, async (req, res) => {
   const round = iNum(req.body?.round, 0, 999, 1);
   const inCombat = !!req.body?.inCombat;
+  const fightId = iStr(req.body?.fightId, 24);
   const { rows } = await db.query(
     "SELECT id, sheet FROM characters WHERE archived = false ORDER BY id");
   const moved = [];
   for (const row of rows) {
     let sheet; try { sheet = JSON.parse(row.sheet || "{}"); } catch { sheet = {}; }
     if (!sheet || typeof sheet !== "object") sheet = {};
-    if (sheet.round === round && !!sheet.inCombat === inCombat) continue;
+    if (sheet.round === round && !!sheet.inCombat === inCombat &&
+        (!fightId || sheet.fightId === fightId)) continue;
     sheet.round = round || 1;
     sheet.inCombat = inCombat;
+    if (fightId) sheet.fightId = fightId;
     await db.query(
       `UPDATE characters SET sheet = $1, version = version + 1, updated_at = now() WHERE id = $2`,
       [JSON.stringify(sheet), row.id]);
     moved.push(row.id);
   }
-  res.json({ round, inCombat, moved: moved.length });
+  res.json({ round, inCombat, fightId, moved: moved.length });
+});
+
+// ── Splash art ──────────────────────────────────────────────
+// The picture that comes up on the room's screen when somebody's turn arrives, and the one used
+// when they are nearly out. Kept out of the sheet JSON (see `character_art` in db.js) and served as
+// BYTES from a route of its own, so the room screen asks for one image per turn and the browser
+// caches it — rather than eight data URLs riding in every four-second poll.
+const ART_MAX = 900_000;             // one splash, downscaled in the browser before it is sent
+const ART_OK = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/;
+
+app.put("/api/characters/:id/art", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "No such character." });
+  const { rows } = await db.query("SELECT id FROM characters WHERE id = $1", [id]);
+  if (!rows[0]) return res.status(404).json({ error: "No such character." });
+
+  const read = key => {
+    const v = req.body?.[key];
+    if (v === null || v === "") return "";                 // cleared on purpose
+    if (v === undefined) return undefined;                 // left alone
+    const s = String(v);
+    if (s.length > ART_MAX || !ART_OK.test(s)) return null; // refused
+    return s;
+  };
+  const normal = read("normal"), hurt = read("hurt");
+  if (normal === null || hurt === null)
+    return res.status(400).json({ error: "That has to be a PNG, JPEG or WebP under 900kb." });
+  if (normal === undefined && hurt === undefined)
+    return res.status(400).json({ error: "Nothing to set." });
+
+  await db.query(
+    // The empty strings matter: a first upload sets ONE of the two, and the column it does not set
+    // is NOT NULL — so the insert writes "" there and the update leaves whatever is already in it.
+    `INSERT INTO character_art (character_id, normal, hurt, updated_at)
+          VALUES ($1, COALESCE($2, ''), COALESCE($3, ''), now())
+     ON CONFLICT (character_id) DO UPDATE
+            SET normal = COALESCE($2, character_art.normal),
+                hurt   = COALESCE($3, character_art.hurt),
+                updated_at = now()`,
+    [id, normal === undefined ? null : normal, hurt === undefined ? null : hurt]);
+  const { rows: got } = await db.query(
+    "SELECT normal <> '' AS has_normal, hurt <> '' AS has_hurt FROM character_art WHERE character_id = $1", [id]);
+  res.json({ art: { normal: !!got[0]?.has_normal, hurt: !!got[0]?.has_hurt } });
+});
+
+// Anybody signed in may fetch it: it is on the television in the room, and the room is the point.
+app.get("/api/characters/:id/art/:kind", requireUser, async (req, res) => {
+  const id = Number(req.params.id);
+  const kind = req.params.kind === "hurt" ? "hurt" : "normal";
+  if (!Number.isInteger(id)) return res.status(404).end();
+  const { rows } = await db.query(
+    `SELECT ${kind} AS art, updated_at FROM character_art WHERE character_id = $1`, [id]);
+  const m = ART_OK.exec(rows[0]?.art || "");
+  if (!m) return res.status(404).end();
+  const tag = `"${id}-${kind}-${new Date(rows[0].updated_at).getTime()}"`;
+  if (req.headers["if-none-match"] === tag) return res.status(304).end();
+  res.set("Content-Type", `image/${m[1]}`);
+  res.set("Cache-Control", "private, max-age=0, must-revalidate");
+  res.set("ETag", tag);
+  res.end(Buffer.from(m[2], "base64"));
 });
 
 // ── Lineups kept for later ──────────────────────────────────

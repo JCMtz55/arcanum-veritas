@@ -213,8 +213,21 @@ export const turnSpent = ch =>
 export function abilityScore(ch, id) {
   return num(ch.abilities?.[id]) + modifierTotal(activeModifiers(ch), `ability:${id}`);
 }
-export function abilityModifier(ch, id) {
+// The modifier a score would give, before Dream Exhaustion has its say.
+export function rawAbilityModifier(ch, id) {
   return abilityMod(abilityScore(ch, id));
+}
+// Dream Exhaustion 5 (Identity Drift) says the Dream Score Modifier "cannot be added to anything",
+// and this is the one place everything goes through — the four Dream skills, your own Dream DC, the
+// Verum DC, the Cognitive Saving Throw, and every ability priced off the modifier. Denying it here
+// rather than at each call site is what makes "to anything" actually true.
+//
+// The SCORE is untouched on purpose: the character keeps their Dream Ability Score, so anything
+// reading the score (Cognitive Sense uses, Star Force eligibility, ability prerequisites) is
+// unaffected. They have not become worse at dreaming; they cannot bring it to bear.
+export function abilityModifier(ch, id) {
+  if (id === "dream" && dreamExhaustion(ch?.dreamExhaustion).noDreamModifier) return 0;
+  return rawAbilityModifier(ch, id);
 }
 
 // The two blankets on the other side of the sheet from `save:all`, and the distinction between them
@@ -666,21 +679,30 @@ export function woundsFromTriggers(triggers, { dmOverride = false } = {}) {
 export const woundsRemovedBySpell = spellLevel => Math.max(0, num(spellLevel) - 3);
 
 // ── Exhaustion: two separate tracks ─────────────────────────────────────
-// Physical 5e Exhaustion is unchanged. Dream Exhaustion is its own 0-8 ladder with its own recovery
-// (HB-008, DE-01..04, RES-11). The DM has confirmed the effects are CUMULATIVE: the dream d20 penalty
-// stops deepening at -5 but persists through levels 6, 7 and 8 alongside everything below it.
+// Physical 5e Exhaustion is unchanged. Dream Exhaustion is its own 0-6 ladder with its own, GATED
+// recovery (HB-008, DE-01..DE-05, RES-11).
+//
+// REWORKED 2026-11-18 (Juan's own ladder). Three things changed from the old eight-level version:
+//   1. The track is 0-6 and the penalty deepens all the way to -6.
+//   2. The penalty applies to EVERY d20 test, awake as well as dreaming. There is no `inDream` gate
+//      any more — the old location-conditional behaviour is retired (DE-03).
+//   3. Level 6 is no longer a one-shot Hollowborn save. It is a RECURRING Cognitive Saving Throw on
+//      each loss of consciousness, accruing Fractures; the third Hollows the character (DE-05).
+//
+// Effects are CUMULATIVE, and that is load-bearing at level 6: such a character is also at Identity
+// Drift, so the save against being Hollowed is made WITHOUT the Dream modifier and UNDER the -6.
 export const DREAM_EXHAUSTION = [
-  { level: 0, name: "None",             penalty: 0 },
-  { level: 1, name: "Flicker",          penalty: -1 },
-  { level: 2, name: "Fracture",         penalty: -2 },
-  { level: 3, name: "Duality",          penalty: -3 },
-  { level: 4, name: "Dissonance",       penalty: -4, concentrationDisadvantage: true },
-  { level: 5, name: "Loop Entrapment",  penalty: -5, sessionLoop: true },
-  { level: 6, name: "Identity Drift",   penalty: -5, concentrationDisadvantage: true, dreamScar: true, noInspirationInDream: true },
-  { level: 7, name: "Dream Echo State", penalty: -5, concentrationDisadvantage: true, shadowOverride: true, visibleToNightmares: true },
-  { level: 8, name: "Cognitive Collapse", penalty: -5, concentrationDisadvantage: true, collapseSave: true },
+  { level: 0, name: "None",               penalty: 0 },
+  { level: 1, name: "Flicker",            penalty: -1 },
+  { level: 2, name: "Fracture",           penalty: -2 },
+  { level: 3, name: "Duality",            penalty: -3, noInspiration: true },
+  { level: 4, name: "Dissonance",         penalty: -4, dreamSaveDisadvantage: true },
+  { level: 5, name: "Identity Drift",     penalty: -5, noDreamModifier: true },
+  { level: 6, name: "Cognitive Collapse", penalty: -6, hollowingSave: true },
 ];
-export const DREAM_EXHAUSTION_MAX = 8;
+export const DREAM_EXHAUSTION_MAX = 6;
+const DREAM_EXHAUSTION_FLAGS =
+  ["noInspiration", "dreamSaveDisadvantage", "noDreamModifier", "hollowingSave"];
 
 // Everything true at this level, with the lower levels' effects folded in.
 export function dreamExhaustion(level) {
@@ -688,32 +710,75 @@ export function dreamExhaustion(level) {
   const out = { level: lv, name: DREAM_EXHAUSTION[lv].name, penalty: 0, effects: [] };
   for (let i = 1; i <= lv; i++) {
     const row = DREAM_EXHAUSTION[i];
-    out.penalty = row.penalty;                       // deepens to -5, then holds
-    for (const k of ["concentrationDisadvantage", "sessionLoop", "dreamScar",
-                     "noInspirationInDream", "shadowOverride", "visibleToNightmares", "collapseSave"])
-      if (row[k]) out[k] = true;
+    out.penalty = row.penalty;                       // deepens every level, to -6
+    for (const k of DREAM_EXHAUSTION_FLAGS) if (row[k]) out[k] = true;
     out.effects.push({ level: i, name: row.name });
   }
   return out;
 }
-// The penalty applies to d20 rolls made IN a dream, not in the waking world — so the caller passes
-// where the character is standing rather than the engine assuming.
-export const dreamRollPenalty = (level, inDream) => (inDream ? dreamExhaustion(level).penalty : 0);
 
-// Surviving the level-8 save: awaken at once, four PHYSICAL exhaustion levels, 1d3 long-term memories
-// lost, and Dream Exhaustion STAYS at 8 (DM-09). Which memories go is the DM's call, so the engine
-// reports how many to ask about and never writes any.
-export function cognitiveCollapseSurvived(ch) {
+// Unconditional now: ability checks, attack rolls and saving throws, dreaming or awake (DE-03).
+// `inDream` is still accepted and deliberately ignored, so an old call site that still passes
+// `false` gets the real penalty instead of the 0 it used to get.
+export const dreamRollPenalty = (level, _inDream) => dreamExhaustion(level).penalty;
+
+// Levels past 6 are LOST, not banked (DE-01), which is also the migration for characters stored on
+// the old ladder: a saved 7 or 8 loads as 6.
+export const normalizeDreamExhaustion = level => clamp(level, 0, DREAM_EXHAUSTION_MAX);
+export const dreamExhaustionWasMigrated = level => num(level) > DREAM_EXHAUSTION_MAX;
+
+// ── Level 6: the Hollowing ──────────────────────────────────────────────
+// Each time the character falls unconscious, a Cognitive Saving Throw vs DC 22 (Supreme — a
+// soul-deep rewrite). A failure is one Fracture, with Hollowing Insomnia as the named overwriting
+// source; the third is Shattered and the character is Hollowed. That transformation is the DM's to
+// confirm, so the engine computes the save and counts Fractures and never Hollows anybody itself.
+//
+// The bonus is deliberately NOT cognitiveSavingThrowBonus(ch): at 6 the character is also at
+// Identity Drift, so the Dream modifier is denied and the -6 applies (DE-04).
+export const HOLLOWING_SAVE_DC = 22;
+export const HOLLOWING_FRACTURES_TO_HOLLOW = 3;
+
+export function hollowingSave(ch) {
+  const de = dreamExhaustion(ch && ch.dreamExhaustion);
+  if (!de.hollowingSave) return null;
+  const best = Math.max(...STANDARD_ABILITIES.map(id => abilityModifier(ch, id)));
+  // abilityModifier already denies it at level 5, so this is 0 either way — spelled out because the
+  // card has to SAY which rule took it, not just show a smaller number.
+  const dreamMod = de.noDreamModifier ? 0 : abilityModifier(ch, "dream");
+  const fractures = clamp(num(ch.hollowingFractures), 0, HOLLOWING_FRACTURES_TO_HOLLOW);
   return {
-    dreamExhaustion: 8,
-    exhaustion: clamp(num(ch.exhaustion) + 4, 0, 6),
-    memoriesLost: "1d3",
-    awakenImmediately: true,
+    dc: HOLLOWING_SAVE_DC,
+    bonus: best + dreamMod + de.penalty,
+    parts: { highestAbility: best, dreamModifier: dreamMod, dreamExhaustionPenalty: de.penalty },
+    dreamModifierDenied: !!de.noDreamModifier,
+    trigger: "Each time you fall unconscious",
+    fractures,
+    fracturesToHollow: HOLLOWING_FRACTURES_TO_HOLLOW,
+    hollowed: fractures >= HOLLOWING_FRACTURES_TO_HOLLOW,
     dmResolutionRequired: true,
+  };
+}
+// A failed save. Returns a PREVIEW like the rests do — nothing is written until it is confirmed,
+// because the third Fracture is a permanent character change.
+export function hollowingSaveFailed(ch) {
+  const now = clamp(num(ch && ch.hollowingFractures), 0, HOLLOWING_FRACTURES_TO_HOLLOW);
+  const next = Math.min(HOLLOWING_FRACTURES_TO_HOLLOW, now + 1);
+  const STAGE = ["", "Hairline", "Fractured", "Shattered"];
+  return {
+    hollowingFractures: next,
+    stage: STAGE[next],
+    hollowed: next >= HOLLOWING_FRACTURES_TO_HOLLOW,
+    // Rest, hit dice and healing magic do nothing here — see the Cognitive Fractures healing table.
+    clearedByRest: false,
+    dmResolutionRequired: next >= HOLLOWING_FRACTURES_TO_HOLLOW,
   };
 }
 
 // ── Rests ───────────────────────────────────────────────────────────────
+// A clean long rest clears one level of Dream Exhaustion, but only DOWN TO this floor. Levels above
+// it do not come off with rest at all (DE-02).
+export const DREAM_EXHAUSTION_REST_FLOOR = 4;
+//
 // Three kinds, because the campaign has three. A long rest only reduces Dream Exhaustion if the
 // character did NOT Dream Walk (DE-02), and two consecutive uninterrupted Safe Haven long rests are
 // the only mundane way to clear Wounds and the Exhaustion that forcing a Grimm leaves behind.
@@ -804,6 +869,17 @@ export function restPreview(ch, { kind = "long", dreamWalked = false, safeHaven 
     if (dreamWalked) {
       changes.push({
         label: "Dream Exhaustion", detail: "No change — this rest included Dream Walking",
+        from: num(ch.dreamExhaustion), to: num(ch.dreamExhaustion),
+      });
+    } else if (num(ch.dreamExhaustion) > DREAM_EXHAUSTION_REST_FLOOR) {
+      // DE-02: sleep no longer reaches levels 5 and 6. Getting out of them takes a Sefirot Stasis,
+      // Hypnos's Meditation Chamber, the Dream Axis pool, or an ability that removes Dream
+      // Exhaustion by name. None of those are a rest, so the preview says so and changes nothing.
+      changes.push({
+        label: "Dream Exhaustion",
+        detail: `No change — level ${num(ch.dreamExhaustion)} does not come off with rest. `
+              + "It needs a Sefirot Stasis, Hypnos's Meditation Chamber, the Dream Axis pool, or an "
+              + "ability that removes Dream Exhaustion by name.",
         from: num(ch.dreamExhaustion), to: num(ch.dreamExhaustion),
       });
     } else if (num(ch.dreamExhaustion) > 0) {
@@ -2019,10 +2095,19 @@ export const INSPIRATION_DICE = ["d4", "d6", "d8", "d10", "d12", "d20"];
 export const inspirationHeld = ch => (ch?.inspiration || []).filter(d => d && d.active !== false && d.die);
 export const inspirationOf = (ch, die) => inspirationHeld(ch).filter(d => d.die === die);
 
+// Dream Exhaustion 3 (Duality) bars ANY kind of inspiration — the 2014 token, Bardic Inspiration,
+// and every die handed over under that name. The rule is "you may still hold it, you cannot spend
+// it", so the dice stay on the sheet and `inspirationHeld` keeps listing them; this is the gate the
+// spend path asks (DE-01, level 3).
+export const inspirationBarred = ch => !!dreamExhaustion(ch?.dreamExhaustion).noInspiration;
+export const inspirationSpendable = (ch, die) =>
+  inspirationBarred(ch) ? [] : (die ? inspirationOf(ch, die) : inspirationHeld(ch));
+
 // Which one to spend: the one about to run out. A die with rounds on it is worth less than one that
 // waits, so the perishable goes first and "until used" is kept for later — and among timed ones the
 // shortest fuse goes first.
 export function inspirationNext(ch, die) {
+  if (inspirationBarred(ch)) return null;          // Duality: nothing is spendable
   const soonest = (a, b) => (a.rounds == null ? Infinity : num(a.rounds)) - (b.rounds == null ? Infinity : num(b.rounds));
   return [...inspirationOf(ch, die)].sort(soonest)[0] || null;
 }
@@ -2692,7 +2777,8 @@ export function blankCharacter() {
     saves: {}, savesFromClass: [], skills: {}, skillAbility: {},
     hp: 1, maxHp: 1, tempHp: 0, ac: 10, speed: 30, hitDice: "", hitDiceUsed: {},
     deathSaveSuccesses: 0, deathSaveFailures: 0,
-    exhaustion: 0, dreamExhaustion: 0, wounds: 0, injuries: [], safeHavenRests: 0,
+    exhaustion: 0, dreamExhaustion: 0, hollowingFractures: 0,
+    wounds: 0, injuries: [], safeHavenRests: 0,
     honor: { order: 0, chaos: 0 }, morality: { good: 0, evil: 0 },
     // What the world's harm is worth against this character, and what they can see with. Defences
     // are records with their own fuses — see the Damage types section.

@@ -41,6 +41,16 @@ a{color:var(--brass)}
   background-repeat:no-repeat;background-position:right 10px center}
 .pick option{background:var(--panel)}
 .pick.who{border-color:var(--hue);color:var(--hue);font-weight:500}
+/* The bar used to carry a switcher through all eight Grimms. Where the DM has assigned one it
+   carries the player's own name instead — same shape as the control it replaces, no arrow, because
+   there is nothing left to open. */
+/* A bar number the character owns — the level, the Dream mod. Shaped like the stepper it replaces
+   so the bar does not jump, but plainly not a control: no border, no box to click into. */
+.dial .fixed{font-family:var(--sans);font-weight:500;font-size:13px;color:var(--bone);
+  min-width:30px;text-align:center;padding:0 2px;cursor:default}
+.who-mine{display:flex;align-items:center;height:30px;padding:0 11px;max-width:100%;
+  background:var(--slate);border:1px solid var(--hue);border-radius:7px;color:var(--hue);
+  font-family:var(--sans);font-size:12.5px;font-weight:500}
 .live{display:flex;margin-left:auto;align-items:center;flex-wrap:wrap;gap:6px}
 .lv{display:flex;align-items:baseline;gap:6px;padding:5px 11px;border-radius:7px;background:var(--slate);border:1px solid var(--line)}
 .lv b{font-family:var(--sans);font-weight:700;font-size:17px;letter-spacing:-.02em}

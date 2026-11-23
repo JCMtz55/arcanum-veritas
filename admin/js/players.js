@@ -71,7 +71,8 @@ function renderPlayer() {
         <span class="t">${dm ? "Dungeon Master" : "player"}</span>
         ${dm ? "" : `<span class="t">${u.cognitions.length} of ${INDEX.length} Cognitions</span>`}
         ${u.paragon ? `<span class="t">Paragon — ${(u.sworn || []).length} of 3 sworn</span>` : ""}
-        ${g ? `<span class="t" style="color:${g.hue}">${esc(g.name)} · ${grimmChains(g.id)}/3 chains</span>` : ""}
+        ${g ? `<span class="t" style="color:${g.hue}">${esc(g.name)} · ${grimmChains(g.id)}/3 chains${
+          grimmAssumed(u) ? " · matched by name" : ""}</span>` : ""}
         ${chars.map(c => `<span class="t">${esc(c.name)} · Lv ${c.level}</span>`).join("")}
         ${u.hasPassword ? "" : `<span class="t hot">no password yet — can't sign in</span>`}
       </div></div></div>`;
@@ -381,8 +382,29 @@ const soulName = key => key.startsWith("vault:")
   : "their own";
 // Which Grimm an account holds. The Companion's party list carries a `short` name per Grimm and the
 // accounts are named the same way (salomon → Salomon), which is the only link between the two.
-const grimmFor = u => (GRIMMS.grimms || []).find(g =>
-  String(g.short || "").toLowerCase() === String(u && u.username || "").toLowerCase());
+// Which Grimm this account holds, and the only place the question is answered. The DM's assignment
+// is the answer where there is one; where there is not, the old join stands in — the account name
+// against the Grimm's `short`, which is what this was before the grimm_id column — so a party that
+// predates the column reads correctly until the DM has been round it.
+//
+// An assigned account never falls through to the name match. If its id names no Grimm in the data
+// (one renamed in build-data.mjs, say) it reads as unassigned, because quietly handing the player
+// whichever Grimm their username happens to spell is the failure this column exists to end.
+// ⚠️ And the fallback never returns a Grimm somebody else is ASSIGNED — the same guard the server
+// applies on /api/me. Without it, moving a Grimm to its real holder leaves the account whose NAME
+// still spells it reading the same Grimm, and two players hold one.
+const grimmFor = u => {
+  if (!u) return null;
+  const all = GRIMMS.grimms || [];
+  if (u.grimmId) return all.find(g => g.id === u.grimmId) || null;
+  const g = all.find(x =>
+    String(x.short || "").toLowerCase() === String(u.username || "").toLowerCase());
+  if (!g) return null;
+  return (ADMIN.users || []).some(x => x.grimmId === g.id && x.id !== u.id) ? null : g;
+};
+// True when the Grimm above is a guess from the account name rather than something the DM has said.
+// The page says so wherever it shows one, so an inherited match is never mistaken for a decision.
+const grimmAssumed = u => !!(u && !u.grimmId && grimmFor(u));
 const vaultKeyOf = name => "vault:" + String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // The vault's Servants are the baseline, listed whether or not the player has touched them — a row

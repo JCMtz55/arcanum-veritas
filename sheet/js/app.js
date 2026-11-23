@@ -116,8 +116,23 @@ function showTab(id) {
   if (!id) return;
   state.view = id;
   if (id === "arts" || id === "grimm") ephemer.ensure().catch(() => {});
+  if (id === "grimm") ephemer.refreshLive();      // spent in the Companion while this tab sat open
   renderAll();
 }
+
+// The Grimm Slots are one tracker kept in two places, so coming back to this window re-reads them.
+// ⚠️ Two events: `visibilitychange` catches a tab switched away from and back, and `focus` catches
+// the Companion and this sheet open SIDE BY SIDE in two windows — where neither page is ever
+// hidden and visibilitychange never fires. Both fire on a tab switch, hence the guard.
+let lastLiveRefresh = 0;
+function refreshLiveSoon() {
+  const now = Date.now();
+  if (now - lastLiveRefresh < 900) return;
+  lastLiveRefresh = now;
+  ephemer.refreshLive();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshLiveSoon(); });
+window.addEventListener("focus", refreshLiveSoon);
 
 // ── small helpers ───────────────────────────────────────────────────────
 function setField(id, value) {
@@ -192,7 +207,22 @@ const breakdownFor = (parts) => parts.filter(p => p && p.amount);
 // It only ever moves FORWARD. A board that is behind this sheet — a DM who stepped back a round to
 // correct themselves — must not un-expire anything, so it is ignored; the number catches up on the
 // next round. The player's own button is untouched and still works.
-store.onClock((round, inCombat) => {
+//
+// A NEW FIGHT is not a round going by. The board mints a `fightId` when the DM starts one, and a
+// sheet that sees an id it has not seen before ends the fight it was holding — which clears what
+// that one left running — and starts again at one. Before this, "start the fight" wrote round 1
+// underneath a sheet that still said round five and the player found out when they next reloaded.
+store.onClock((round, inCombat, fightId) => {
+  const held = ch().fightId || "";
+  if (fightId && fightId !== held) {
+    const was = Number(ch().round) || 1;
+    ACTS["end-combat"]();                                  // the last fight's leftovers go with it
+    mutate(s => { s.fightId = fightId; s.round = Math.max(1, round || 1); s.inCombat = !!inCombat; });
+    renderAll();
+    toast(inCombat ? (was > 1 ? `A new fight — back to round 1.` : "The fight begins.")
+                   : "The fight ended.");
+    return;
+  }
   if (inCombat === false && ch().inCombat) {
     ACTS["end-combat"]();
     toast("The fight ended.");
@@ -299,9 +329,27 @@ const ACTS = {
   },
   "roll-cogst": () => {
     const c = ch(), src = rules.cognitiveSavingThrowSources(c);
+    const de = rules.dreamExhaustion(c.dreamExhaustion);
     showRoll("Cognitive Saving Throw", rules.cognitiveSavingThrowBonus(c),
-      breakdownFor([{ reason: "Dream modifier", amount: rules.abilityModifier(c, "dream") },
+      breakdownFor([
+        // At Identity Drift the Dream modifier is denied, and a 0 with no reason beside it looks like
+        // a bug. Name the rule that took it.
+        { reason: de.noDreamModifier ? "Dream modifier — denied by Identity Drift" : "Dream modifier",
+          amount: rules.abilityModifier(c, "dream") },
         { reason: `Highest of the six (${src.tied.map(t => rules.ABILITY_NAME[t]).join(" or ")})`, amount: src.best }]));
+  },
+  // Level 6 only. The save against being Hollowed: DC 22, and the DM decides what a failure does —
+  // so this rolls and reports, and never touches the Fracture count on its own.
+  "roll-hollowing": () => {
+    const c = ch(), h = rules.hollowingSave(c);
+    if (!h) return;
+    showRoll(`The Hollowing · DC ${h.dc}`, h.bonus,
+      breakdownFor([
+        { reason: "Highest of the six", amount: h.parts.highestAbility },
+        { reason: h.dreamModifierDenied ? "Dream modifier — denied by Identity Drift" : "Dream modifier",
+          amount: h.parts.dreamModifier },
+        { reason: `Dream Exhaustion ${rules.DREAM_EXHAUSTION_MAX} — Cognitive Collapse`,
+          amount: h.parts.dreamExhaustionPenalty }]));
   },
   "roll-axis": el => {
     const side = el.dataset.id, c = ch();
@@ -684,6 +732,10 @@ const ACTS = {
   },
   "insp-spend": el => {
     const die = el.dataset.id;
+    // Duality (Dream Exhaustion 3) bars every kind of inspiration. The die is still held and still
+    // listed — it just cannot be spent, so say which rule stopped it rather than "no d6 to spend".
+    if (rules.inspirationBarred(ch()))
+      return toast("Duality — at Dream Exhaustion 3 you cannot benefit from any kind of inspiration.");
     const one = el.dataset.k
       ? rules.inspirationHeld(ch()).find(d => d.id === el.dataset.k)
       : rules.inspirationNext(ch(), die);
@@ -802,6 +854,7 @@ const ACTS = {
   exh: el => bump("exhaustion", +el.dataset.d, 0, 6),
   dexh: el => bump("dreamExhaustion", +el.dataset.d, 0, rules.DREAM_EXHAUSTION_MAX),
   de: el => mutate(s => { s.dreamExhaustion = Math.min(rules.DREAM_EXHAUSTION_MAX, +el.dataset.id || 0); }),
+  hfrac: el => bump("hollowingFractures", +el.dataset.d, 0, rules.HOLLOWING_FRACTURES_TO_HOLLOW),
 
   "injury-add": () => {
     const name = prompt("Which Injury? (the table and its healing rule are in the campaign notes)");
@@ -1228,6 +1281,16 @@ const ACTS = {
       if (vile) vile.onchange = keepVile;
     };
     draw();
+  },
+
+  // A Grimm Slot spent or given back. The dispatcher above catches what a handler THROWS, which an
+  // async one never does — so the refusals the server sends (no slots left, Familiar form) are
+  // caught here or they would be lost as an unhandled rejection and the pip would simply not move.
+  "grimm-slot": async el => {
+    const g = ephemer.myGrimm();
+    if (!g) return;
+    try { await ephemer.slotDelta(g.id, +el.dataset.delta); }
+    catch (err) { toast(err.message || "That did not work."); }
   },
 
   "feat-open": el => el.parentNode.classList.toggle("open"),
@@ -2701,9 +2764,20 @@ function restDialog(kind) {
         if (rolled.length) Object.assign(s, rules.applyRecharge(ch(), rolled));
         s.used = {};
       });
-      toast(rolled.length
+      const said = rolled.length
         ? `Rested. ${rolled.map(r => `${r.name} ${r.regain} → ${r.by}`).join(", ")}.`
-        : now.changes.length ? "Rested." : "Rested — nothing automatic to change.");
+        : now.changes.length ? "Rested." : "Rested — nothing automatic to change.";
+      // A rest here reaches the Grimm too. A long one restores the Grimm Slots, which are the same
+      // slots the Companion spends; a short one changes nothing shared — it only tells the
+      // Companion to refill the Servant charges that a short rest refills, which is its own rule.
+      // Either way the Companion finishes its half when it next reads the stamp this leaves.
+      toast(said);
+      ephemer.grimmRest(real).then(done => {
+        if (!done) return;
+        toast(done.kind === "long"
+          ? `${done.name} — Grimm Slots restored, ${done.live.left}/${done.live.total}.`
+          : `${done.name} — the Companion will refill what a short rest refills.`);
+      });
     };
   };
   draw();

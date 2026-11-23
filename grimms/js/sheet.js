@@ -84,6 +84,12 @@ function slotsCard(g, sh, v) {
       <span class="pair"><span class="lbl">Exhaustion</span><div class="step"><button onclick="bump('exhaustion',-1)">–</button><span>${sh.exhaustion}</span><button onclick="bump('exhaustion',1)">+</button></div></span>
       <span class="pair"><span class="lbl">Dream exh.</span><div class="step"><button onclick="bump('dreamExhaustion',-1)">–</button><span>${sh.dreamExhaustion}</span><button onclick="bump('dreamExhaustion',1)">+</button></div></span>
     </div>
+    ${CHAR ? `<p class="hint">These are <b>${esc(CHAR.name)}</b>'s own two tracks, the ones on
+      <a href="../sheet/">the character sheet</a> — one pair of numbers, not a second copy. The rest
+      rules, the Dream ladder's penalties and the level-8 save all live over there, along with the
+      <b>level</b> and the <b>Dream mod</b> in the bar above.</p>`
+      : `<p class="hint">Kept on this device. Make a <a href="../sheet/">character sheet</a> and these
+      become its own two tracks, with the rest rules and the Dream ladder behind them.</p>`}
     </div>
     <p class="hint">Exhaustion from forcing the Grimm or an Exhausting Exchange <b>can't be removed by magic</b> like <i>Greater Restoration</i> — only by resting in a Safe Haven or divine intervention. Slots come back only after a Long Rest in which you <b>dream</b>.</p>
   </section>`;
@@ -157,23 +163,36 @@ function restoreSlot() {
   save(); render();
 }
 function longRest() {
-  const sh = sheet();
-  sh.used = 0; sh.temp = 0; sh.tempUsed = 0; sh.effects = []; sh.round = 1; sh.inCombat = false;
-  if (LONG_REST[S.current]) LONG_REST[S.current](sh);
-  // Servant charge trackers refill by their own rule; a long rest covers the short-rest ones too.
-  const n = typeof trRefill === 'function' ? trRefill('long') : 0;
+  const sh = sheet(), g = grimmById(S.current);
+  sh.used = 0; sh.temp = 0; sh.tempUsed = 0;
+  // Everything else a long rest does lives in longRestTail (core.js), which is also what runs when
+  // the rest was taken on the character sheet — one list, so the two cannot drift apart.
+  const n = longRestTail(g);
   save(); render();
   toast(`Long rest — Grimm Slots restored${n ? `, ${n} Servant charge${n > 1 ? 's' : ''} refilled` : ''}. Recompose your abilities if you wish.`);
+  stampRest(S.current);   // so the character sheet's tracker shows them full too
 }
 // Servants spend charges between long rests, so the short rest needs a button of its own.
 function shortRest() {
   const n = typeof trRefill === 'function' ? trRefill('short') : 0;
   save(); render();
   toast(n ? `Short rest — ${n} Servant charge${n > 1 ? 's' : ''} refilled.` : 'Short rest — nothing of the Grimm\'s refills on one.');
+  stampRest(S.current, 'short');   // so a short rest taken here is not taken again on the sheet
 }
-function bump(k, n) { const sh = sheet(); sh[k] = Math.max(0, (+sh[k] || 0) + n); save(); render(); }
+// Both exhaustion tracks have a top, and this page never knew it — it would happily show 9 levels of
+// Exhaustion, which no rule in the campaign has. They are the character sheet's numbers now, and
+// these are its ceilings.
+const BUMP_MAX = { exhaustion: EXH_MAX, dreamExhaustion: DREAM_EXH_MAX };
+function bump(k, n) {
+  const sh = sheet();
+  sh[k] = Math.max(0, Math.min(BUMP_MAX[k] ?? 9999, (+sh[k] || 0) + n));
+  save(); render();
+}
 function toggle(k) { const sh = sheet(); sh[k] = !sh[k]; save(); render(); }
-function setNum(k, val) { const sh = sheet(); sh[k] = +val || 0; save(); render(); }
+function setNum(k, val) {
+  if (CHAR && (k === 'level' || k === 'dreamMod')) return render();   // the character's, not this page's
+  const sh = sheet(); sh[k] = +val || 0; save(); render();
+}
 function setStr(k, val) { const sh = sheet(); sh[k] = val; save(); }
 
 // ── Chains ──────────────────────────────────────────────────────────────
@@ -548,13 +567,29 @@ function shiftEnd() {
   const g = grimmById(S.current), sh = sheet(), s = g.shift, rs = rsState(sh);
   rs.on = false; rs.crits = 0; rs.lair = 0; rs.acclaim = 0; rs.labors = {}; rs.traps = []; rs.placed = {};
   if (SHIFT_END[g.id]) SHIFT_END[g.id](sh, rs);
-  sh.exhaustion += 3; sh.dreamExhaustion += 5;
+  // The Dream ladder tops out at 6 since the 2026-11-18 rework, so +5 can land on the ceiling and
+  // the rest is LOST, not banked. Clamp here rather than at save time, and then say what actually
+  // went on — a dialog that claims "+5 applied" when 2 of it fell off the top is a lie the player
+  // would only catch by doing the arithmetic themselves.
+  const deWas = sh.dreamExhaustion, exhWas = sh.exhaustion;
+  sh.exhaustion = Math.min(EXH_MAX, exhWas + 3);
+  sh.dreamExhaustion = Math.min(DREAM_EXH_MAX, deWas + 5);
+  const deGot = sh.dreamExhaustion - deWas, exhGot = sh.exhaustion - exhWas;
   sh.effects = sh.effects.filter(e => e.name !== s.name);
   save(); render();
   const col = (s.parts || []).find(p => p.key === 'collapse');
+  const said = (got, asked, what, top) => got === asked
+    ? `<b>+${asked} ${what}</b>`
+    : `<b>+${got} ${what}</b> <i>(+${asked} asked for — you were already at ${top - got} of ${top})</i>`;
   openDialog(`${s.name} collapses`, (col
     ? col.entries.map(e => `<div class="stagehead">${esc(e.name)}</div>${prose(e.text, sh)}`).join('')
-    : '') + `<div class="prose"><p><b>+3 Exhaustion</b> and <b>+5 Dream Exhaustion</b> applied. You can't call it again for <b>30 days</b>.</p></div>`);
+    : '') + `<div class="prose"><p>${said(exhGot, 3, 'Exhaustion', EXH_MAX)} and
+      ${said(deGot, 5, 'Dream Exhaustion', DREAM_EXH_MAX)} applied — you are at
+      <b>${sh.exhaustion}/${EXH_MAX}</b> and <b>${sh.dreamExhaustion}/${DREAM_EXH_MAX}</b>.
+      ${sh.dreamExhaustion >= DREAM_EXH_MAX
+        ? `<b class="bad">Cognitive Collapse — every loss of consciousness is now a DC 22 Cognitive
+           Saving Throw against being Hollowed. Tell your DM.</b>` : ''}
+      You can't call it again for <b>30 days</b>.</p></div>`);
 }
 function shiftCrit(n) { const rs = rsState(sheet()); rs.crits = Math.max(0, rs.crits + n); save(); render(); }
 function shiftLair() { const sh = sheet(), rs = rsState(sh); rs.lair = rs.lair === sh.round ? 0 : sh.round; save(); render(); }

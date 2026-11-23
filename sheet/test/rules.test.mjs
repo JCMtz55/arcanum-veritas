@@ -1099,44 +1099,149 @@ test("fixture 11 — Dream 18 is eligibility only, never the transition", () => 
 });
 
 // ── Dream Exhaustion acceptance tests ───────────────────────────────────
-// "(a) level 3 dreaming roll receives -3 and real-world roll does not; (c) level 7 dream d20 roll
-//  still suffers -5; (d) dream-free long rest changes 3->2, dream-walking rest does not;
-//  (e) a level-8 successful save leaves Dream Exhaustion at 8 and applies four physical Exhaustion."
-test("Dream Exhaustion is cumulative, holds at -5, and only recovers without Dream Walking", () => {
-  // (a) the penalty applies in a dream, not in the waking world
+// Reworked 2026-11-18 to Juan's own ladder. The spec's nine cases, §C2:
+//  (a) -3 on a WAKING roll as well as a dream roll; (b) level 3 cannot spend inspiration;
+//  (c) level 4 Dream Saving Throws roll with disadvantage; (d) level 5 Alter check and CogST omit
+//  the Dream modifier; (e) a dream-free long rest drops 3->2, a dream-walking one does not, and
+//  5->4 does NOT happen on rest alone; (f) +2 at level 5 lands on 6, not 7; (g) unconscious at 6
+//  prompts `d20 - 6 + highest ability` vs DC 22 and a failure adds one Fracture; (h) the third
+//  Fracture needs DM resolution; (i) a stored 8 loads as 6.
+test("Dream Exhaustion: 0-6, unconditional penalty, gated recovery", () => {
+  // (a) the penalty is no longer location-gated — it applies awake too (DE-03)
   assert.equal(R.dreamRollPenalty(3, true), -3);
-  assert.equal(R.dreamRollPenalty(3, false), 0);
+  assert.equal(R.dreamRollPenalty(3, false), -3, "awake is not a discount any more");
 
-  // (b) level 4 brings the campaign's Concentration disadvantage
-  assert.equal(R.dreamExhaustion(4).concentrationDisadvantage, true);
-  assert.equal(R.dreamExhaustion(3).concentrationDisadvantage, undefined);
+  // the penalty deepens every level, all the way to -6
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6].map(lv => R.dreamExhaustion(lv).penalty),
+    [0, -1, -2, -3, -4, -5, -6]);
 
-  // (c) the -5 persists at 6, 7 and 8 — the ruling the source table stops short of stating
-  for (const lv of [5, 6, 7, 8]) assert.equal(R.dreamExhaustion(lv).penalty, -5);
-  // and the lower levels' effects persist alongside it
-  const seven = R.dreamExhaustion(7);
-  assert.equal(seven.concentrationDisadvantage, true);
-  assert.equal(seven.dreamScar, true);
-  assert.equal(seven.shadowOverride, true);
-  assert.equal(seven.effects.length, 7);
+  // (b) level 3 bars inspiration; level 2 does not
+  assert.equal(R.dreamExhaustion(3).noInspiration, true);
+  assert.equal(R.dreamExhaustion(2).noInspiration, undefined);
 
-  // (d) a long rest WITHOUT Dream Walking drops 3 -> 2; one that included it changes nothing
+  // (c) level 4 brings disadvantage on Dream Saving Throws
+  assert.equal(R.dreamExhaustion(4).dreamSaveDisadvantage, true);
+  assert.equal(R.dreamExhaustion(3).dreamSaveDisadvantage, undefined);
+
+  // cumulative: at 6 everything below is still true
+  const six = R.dreamExhaustion(6);
+  assert.equal(six.noInspiration, true);
+  assert.equal(six.dreamSaveDisadvantage, true);
+  assert.equal(six.noDreamModifier, true);
+  assert.equal(six.hollowingSave, true);
+  assert.equal(six.effects.length, 6);
+
+  // (e) a long rest WITHOUT Dream Walking drops 3 -> 2; one that included it changes nothing
   const ch = pc({ dreamExhaustion: 3, hp: 1, maxHp: 40 });
   assert.equal(R.restPreview(ch, { kind: "long", dreamWalked: false }).next.dreamExhaustion, 2);
   assert.equal(R.restPreview(ch, { kind: "long", dreamWalked: true }).next.dreamExhaustion, undefined);
   // a short rest never touches this track
   assert.equal(R.restPreview(ch, { kind: "short" }).next.dreamExhaustion, undefined);
 
-  // (e) surviving Collapse keeps Dream Exhaustion at 8 and adds four PHYSICAL levels
-  const collapsing = pc({ dreamExhaustion: 8, exhaustion: 1 });
-  const out = R.cognitiveCollapseSurvived(collapsing);
-  assert.equal(out.dreamExhaustion, 8);
-  assert.equal(out.exhaustion, 5);
-  assert.equal(out.memoriesLost, "1d3");
-  assert.equal(out.dmResolutionRequired, true);
+  // ...and rest reaches no further than the floor: 5 and 6 do not come off by sleeping (DE-02)
+  for (const lv of [5, 6]) {
+    const stuck = pc({ dreamExhaustion: lv, hp: 1, maxHp: 40 });
+    const p = R.restPreview(stuck, { kind: "long", dreamWalked: false });
+    assert.equal(p.next.dreamExhaustion, undefined, `level ${lv} must not come off with rest`);
+    const said = p.changes.find(c => c.label === "Dream Exhaustion");
+    assert.ok(/does not come off with rest/.test(said.detail),
+      "the preview has to say why nothing happened");
+  }
+  // 4 is the last one sleep reaches
+  assert.equal(R.restPreview(pc({ dreamExhaustion: 4, hp: 1, maxHp: 40 }),
+    { kind: "long", dreamWalked: false }).next.dreamExhaustion, 3);
 
+  // (f) and (i) the track caps at 6 — extra levels are lost, and a stored 7 or 8 clamps
   assert.equal(R.dreamExhaustion(0).penalty, 0);
-  assert.equal(R.dreamExhaustion(99).level, 8);                 // clamped, never past the ladder
+  assert.equal(R.dreamExhaustion(99).level, 6);
+  assert.equal(R.DREAM_EXHAUSTION_MAX, 6);
+  assert.equal(R.normalizeDreamExhaustion(8), 6);
+  assert.equal(R.normalizeDreamExhaustion(7), 6);
+  assert.equal(R.normalizeDreamExhaustion(2), 2);
+  assert.equal(R.normalizeDreamExhaustion(-3), 0);
+  assert.equal(R.dreamExhaustionWasMigrated(8), true);
+  assert.equal(R.dreamExhaustionWasMigrated(6), false);
+});
+
+test("Duality (3) holds inspiration but cannot spend it", () => {
+  const dice = [{ id: "a", die: "d6", rounds: null, active: true },
+                { id: "b", die: "d8", rounds: 2, active: true }];
+  const ok = pc({ dreamExhaustion: 2, inspiration: dice });
+  const barred = pc({ dreamExhaustion: 3, inspiration: dice });
+
+  assert.equal(R.inspirationBarred(ok), false);
+  assert.equal(R.inspirationBarred(barred), true);
+  // still HELD — the dice stay on the sheet, which is what the rule says
+  assert.equal(R.inspirationHeld(barred).length, 2);
+  // but nothing is spendable, and nothing is next
+  assert.equal(R.inspirationSpendable(barred).length, 0);
+  assert.equal(R.inspirationNext(barred, "d6"), null);
+  assert.equal(R.inspirationNext(ok, "d6").id, "a");
+});
+
+test("Identity Drift (5) denies the Dream modifier everywhere it was added", () => {
+  const abilities = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 18, dream: 18 };
+  const clear = pc({ dreamExhaustion: 4, abilities, level: 5 });
+  const drift = pc({ dreamExhaustion: 5, abilities, level: 5 });
+
+  // the SCORE survives — they have not become worse at dreaming
+  assert.equal(R.abilityScore(drift, "dream"), 18);
+  assert.equal(R.rawAbilityModifier(drift, "dream"), 4);
+  // the MODIFIER is denied
+  assert.equal(R.abilityModifier(clear, "dream"), 4);
+  assert.equal(R.abilityModifier(drift, "dream"), 0);
+
+  // and so everything priced off it drops by exactly that much (DE-06)
+  assert.equal(R.ownDreamDC(clear) - R.ownDreamDC(drift), 4);
+  assert.equal(R.cognitiveSavingThrowBonus(clear) - R.cognitiveSavingThrowBonus(drift), 4);
+  // the Verum DC folds Dream in, so every Arcanum Veritas seal DC drops too. Juan confirmed this
+  // inclusion on 2026-11-18 — it is the largest knock-on in the rework, so it is pinned here.
+  assert.equal(R.verumDC(clear) - R.verumDC(drift), 4);
+  // a CogST at Identity Drift is the highest ability alone
+  assert.equal(R.cognitiveSavingThrowBonus(drift), 4);
+
+  // ...and the things that must NOT move, because they read the SCORE and not the modifier
+  assert.equal(R.cognitiveSenseUses(drift), 2, "Dream 18 still grants two uses");
+  assert.equal(R.cognitiveSenseUses(clear), 2);
+  // the seal ATTACK never included Dream — Proficiency plus the Verum Modifier, both untouched
+  assert.equal(R.sealAttackBonus(drift), R.sealAttackBonus(clear));
+});
+
+test("The Hollowing: DC 22, every unconsciousness, three Fractures", () => {
+  const abilities = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 20, dream: 18 };
+  assert.equal(R.hollowingSave(pc({ dreamExhaustion: 5, abilities })), null, "level 6 only");
+
+  // (g) d20 - 6 + highest ability vs DC 22 — the Dream modifier is gone, the -6 is not
+  const h = R.hollowingSave(pc({ dreamExhaustion: 6, abilities }));
+  assert.equal(h.dc, 22);
+  assert.equal(h.parts.highestAbility, 5);
+  assert.equal(h.parts.dreamModifier, 0);
+  assert.equal(h.dreamModifierDenied, true);
+  assert.equal(h.parts.dreamExhaustionPenalty, -6);
+  assert.equal(h.bonus, -1, "+5 highest, no Dream modifier, -6 from Cognitive Collapse");
+  assert.equal(h.fractures, 0);
+  assert.equal(h.hollowed, false);
+
+  // a failure is one Fracture, and the stages are named
+  const one = R.hollowingSaveFailed(pc({ dreamExhaustion: 6, abilities, hollowingFractures: 0 }));
+  assert.equal(one.hollowingFractures, 1);
+  assert.equal(one.stage, "Hairline");
+  assert.equal(one.hollowed, false);
+  assert.equal(R.hollowingSaveFailed({ hollowingFractures: 1 }).stage, "Fractured");
+
+  // (h) the third is Shattered and needs the DM
+  const third = R.hollowingSaveFailed({ hollowingFractures: 2 });
+  assert.equal(third.hollowingFractures, 3);
+  assert.equal(third.stage, "Shattered");
+  assert.equal(third.hollowed, true);
+  assert.equal(third.dmResolutionRequired, true);
+  // and it never runs past three
+  assert.equal(R.hollowingSaveFailed({ hollowingFractures: 3 }).hollowingFractures, 3);
+  // rest does nothing to them
+  assert.equal(third.clearedByRest, false);
+
+  // a character already Shattered reports it
+  assert.equal(R.hollowingSave(pc({ dreamExhaustion: 6, abilities, hollowingFractures: 3 })).hollowed, true);
 });
 
 // ── Rests ───────────────────────────────────────────────────────────────

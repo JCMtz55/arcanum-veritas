@@ -5,6 +5,8 @@ A sibling of the seal composer: open `grimms/index.html` (or `/grimms/` on GitHu
 
 No install and no build step to use it. Unlike the composer it doesn't `fetch()` anything, so it also works when you double-click the file.
 
+If `js/data.js` does not arrive — a connection that dropped, a session that ran out — the page says **"The Grimm book did not load"** and offers to try again, rather than going blank. Nothing tracked is lost: it is in this browser and, for the shared parts, on the server.
+
 ## Views
 
 | View | What it does |
@@ -31,6 +33,60 @@ Each Grimm's sheet also has its own tracker:
 When a Shackle Break's 3 rounds run out, the sheet applies its Exhaustion and rolls the Dream save.
 
 Everything a player tracks lives in their own browser (`localStorage`). **Export backup** / **Import** on the Sheet move it between devices.
+
+## Whose sheet it is
+
+The DM says who holds which Grimm, in **Admin › Players › Grimm**, and the Companion asks the server (`/api/me`) rather than the browser. A player the DM has assigned opens on their own Grimm and has no switcher: the bar carries its name, the eight-card chooser never appears, and `pickGrimm()` refuses anything else. The same answer drives the character sheet's Grimm card, so the two can no longer disagree.
+
+Two cases keep the old chooser, because the server has not actually been told anything:
+
+- **The DM**, who holds no Grimm and may be running any of them at the table.
+- **A player with no assignment.** The server falls back to matching the account name against the Grimm's `short` and hands that down as a *guess* (`grimmAssigned: false`) — the page opens there but still lets them move, so a guess cannot lock anyone out of their own Grimm before the DM has been round the party. A Grimm already assigned to someone else is never guessed for a second account.
+
+The remembered choice now travels with the account that made it, so a shared laptop no longer opens on whoever used it last. A saved state from before this existed is adopted once rather than thrown away.
+
+Served from a folder instead of the Ephemer server, nothing is fetched and the chooser behaves exactly as it always did.
+
+This is about clarity at the table, not secrecy: a player's Servants have always been stored per account, and the book itself (minus unrevealed Shifts and Breaks) is served to everyone. What it ends is a player opening someone else's sheet and spending their slots.
+
+The **character sheet** reads the same answer and now lists the Grimm's **abilities** on its own Grimm panel — the pool, grouped and with the DM's denials and the Shackle Break reveal obeyed, using this app's `js/md.js` to render the text.
+
+## The Grimm Slots are shared
+
+The slots are **one tracker on two screens**. The stage, the slots spent, the temporary ones bought by forcing the Grimm and Familiar form are kept in a row (`grimm_live`, one per player per Grimm); everything else this page holds — the round tracker, the loadout, the effects, the Servants' charges — is still only here.
+
+A slot spent on either screen is spent on the other. Each page re-reads the row when you come back to it, on **both** `visibilitychange` and `focus` — the second because the arrangement this is for is the two pages open side by side, where neither is ever hidden and `visibilitychange` never fires. Last write wins, which is the right promise for numbers one player changes from one screen or the other.
+
+The sheet has the pips and nothing else: **Force the Grimm** and the round are here. Served from a folder with no server behind it, none of this is fetched and the slots are this browser's alone, exactly as they always were.
+
+**Both rests work from either screen.** A **Long Rest** taken on the character sheet gives back every slot — the forced ones too — and stamps the row with when it happened; everything else a long rest does is this page's own rules, so the Companion reads that stamp when it next syncs and finishes its half: the effects, the round, the Grimm's own hook and the Servants' charges, with a line saying where the rest came from. A **Short Rest** gives back no slots at all, so its stamp *is* the whole of it — the Companion reads it and refills the charges whose rule says a short rest refills them. Taken here, each does the same and stamps the row itself, so the sheet knows the rest has been had.
+
+A stamp is acted on **once** and only while it is fresh, so a browser opening a Grimm it has not seen for a week does not replay a rest over a fight in progress.
+
+## The round is the table's
+
+While the table is in combat, a strip across the top of **every** tool says so and says which round — it comes with `js/tools.js`, so the front page, the composer, this page, the sheet, the map, the Library, Initiative and Admin all carry it.
+
+This page no longer counts its own rounds. The DM's board writes the round onto every character sheet at the table, and the Companion **replays** the rounds that went by: one `nextRound()` each, so durations tick down and a **Shackle Break ends on the round it should** rather than on the round somebody remembered to press a button. A new fight ends the one this page was holding and starts again at one — except on a browser's very first sight of any fight, where what it is holding is real and is left alone.
+
+**Next round** is still here. A DM who forgets theirs should not leave seven people unable to count.
+
+## The level and the Dream mod are the character's
+
+The bar's **Level** and **Dream mod** used to be a stepper and a text box, kept in whichever browser the player was holding. They are read from the character now and cannot be typed here, because neither is the player's to set and both decide what the Grimm can do:
+
+- the **level** sets the proficiency bonus, and so every DC the Grimm has; it is substituted into the ability text wherever it reads *"Grimm User's Level"*; and it fixes **Gate of Caelum's** roster size and Max CR and **Víðarr's** Blood threshold
+- the **Dream mod** sets the save that closes a **Shackle Break** and a **Reality Shift's** escape DC
+
+The level is the DM's own column, written only through the Admin page; the Dream mod is the character's **DRE** score through the sheet's engine, modifiers included. Change either and the Companion follows when you come back to it. With no character on the account — or served from a folder — the dials come back and work as they always did.
+
+## Exhaustion belongs to the character
+
+**Exhaustion** and **Dream Exhaustion** are not this page's numbers. They are the two tracks on the player's **character sheet** — the same pair, kept once. The sheet is the home because it is where the rules are: the 0–6 ladder, the 0–8 Dream ladder with its roll penalties, the rest rules and the level-8 save. This page had two steppers and no rules at all.
+
+So forcing the Grimm, an Exhausting Exchange and a Shackle Break closing write the **character's** sheet, and the card names whose it is. The ceilings are the sheet's: a Break that adds 2 and 3 past the top is clamped there and the answer comes back, so the number shown is always the number the character actually carries. Recovery is the sheet's too — a Long Rest here restores the **slots** and nothing else.
+
+With no character on the account yet, or served from a folder, the steppers keep working on this browser's own numbers and the card says so.
 
 ## Updating from the vault
 

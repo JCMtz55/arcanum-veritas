@@ -96,7 +96,67 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 .t-pop .tm{width:14px;text-align:center;font-size:12px;color:var(--mute)}
 .t-pop a:hover .tm,.t-pop a[aria-current] .tm{color:inherit}
 @media print{ .tools{display:none} }
+
+/* ── The fight, across every tool ─────────────────────────────────────────
+   Juan, 2026-11-18: while the table is in combat, every tool says so and says which round. It
+   rides with the strip for the same reason the strip does — one file, and every page already
+   loads it.
+   NOTE: the three sections all give .bar position:sticky with top:0, so a banner above it has to
+   move it down or the two share the same line. Everything here is under body.in-fight, which is
+   set only while a fight is actually running, so the ordinary page is untouched. The Companion's
+   two inner sticky columns are offset from the bar's own height and move with it.
+   (No backticks in this block: it lives inside a template literal.) */
+body.in-fight{--fight-h:30px}
+.fight-strip{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  gap:10px;height:30px;padding:0 14px;background:#6d2f2a;color:#FFE9DF;
+  font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid #8d3c35}
+.fight-strip b{font-weight:700;letter-spacing:.02em;font-size:13px;text-transform:none}
+.fight-strip .fs-dot{width:7px;height:7px;border-radius:50%;background:#FF6B5B;flex:none;
+  animation:fs-beat 1.8s ease-in-out infinite}
+@keyframes fs-beat{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){ .fight-strip .fs-dot{animation:none} }
+body.in-fight .bar{top:var(--fight-h)}
+body.in-fight .rounds,body.in-fight .side{top:calc(70px + var(--fight-h))}
+@media print{ .fight-strip{display:none} }
 </style>`);
+
+// ── Is the table fighting? ───────────────────────────────────────────────
+// `/api/me/character` answers for the account's own character, and the board writes the round onto
+// every sheet at the table (POST /api/initiative/clock), so this is the same answer the character
+// sheet and the Companion are reading. A page with no session, or a static host, simply never
+// shows it.
+//
+// The banner is the FIRST child of <body> and sticky, so it sits above each page's own bar rather
+// than over it; `body.in-fight` moves the bar down by its height and nothing shifts when no fight
+// is running.
+let fightStrip = null, fightSeen = null;
+
+function drawFight(d) {
+  const on = !!(d && d.inCombat);
+  const key = on ? `${d.fightId}|${d.round}` : "";
+  if (key === fightSeen) return;                 // no churn while the round sits still
+  fightSeen = key;
+  document.body.classList.toggle("in-fight", on);
+  if (!on) { fightStrip?.remove(); fightStrip = null; return; }
+  if (!fightStrip) {
+    fightStrip = document.createElement("div");
+    fightStrip.className = "fight-strip";
+    fightStrip.setAttribute("role", "status");
+    document.body.prepend(fightStrip);
+  }
+  fightStrip.innerHTML = `<span class="fs-dot" aria-hidden="true"></span>` +
+    `<span>In combat</span><b>Round ${Number(d.round) || 1}</b>`;
+}
+
+async function readFight() {
+  if (document.hidden) return;
+  try {
+    const r = await fetch(TOOL_BASE + "api/me/character");
+    if (!r.ok) return;
+    drawFight(await r.json());
+  } catch (e) { /* offline, or a host with no API — leave whatever is on screen */ }
+}
 
 // Asked at parse time so it is in flight while the page parses, and the answer is usually there
 // by the time the bar is drawn. Two renders rather than one: the strip appears with the tools
@@ -107,6 +167,15 @@ const TOOL_ROLE = fetch(TOOL_BASE + "api/me")
   .then(d => d?.user?.role || null)
   .catch(() => null);                       // static host, or no server — show what is public
 
-function bootTools() { renderTools(null); TOOL_ROLE.then(renderTools); }
+function bootTools() {
+  renderTools(null);
+  TOOL_ROLE.then(renderTools);
+  // Ten seconds is the round the table is on, not the turn — nobody needs it sooner, and this runs
+  // on every page of the app. Paused while the tab is hidden, and read at once on the way back.
+  readFight();
+  setInterval(readFight, 10_000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) readFight(); });
+  window.addEventListener("focus", readFight);
+}
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootTools);
 else bootTools();

@@ -129,8 +129,10 @@ function renderGrimm(id) {
   const g = grimmById(id);
   if (!g) return `<div class="empty">No such Grimm.</div>`;
   const n = grimmChains(id), sh = shiftOn(id), sb = shackleOn(id);
-  // Which account holds it, so the Grimms section can hand you back to the person
-  const holder = (ADMIN.users || []).find(u => String(u.username || "").toLowerCase() === String(g.short || "").toLowerCase());
+  // Which account holds it, so the Grimms section can hand you back to the person. Read through
+  // grimmFor(), so this agrees with the player's own page whether the holder was assigned by the
+  // DM or is still the inherited name match.
+  const holder = (ADMIN.users || []).find(u => grimmFor(u)?.id === g.id);
 
   return `<div class="cdx"><div class="cdx-hd"><div>
       <h1 style="color:${g.hue}">${esc(g.name)}</h1>
@@ -163,18 +165,61 @@ function renderGrimm(id) {
 // running. Not the ability grid: forty buttons belong to the Grimm, not to the person, and a
 // second copy of them is a second place to get it wrong.
 function grimmMini(u) {
-  const g = (GRIMMS.grimms || []).find(x =>
-    String(x.short || "").toLowerCase() === String(u && u.username || "").toLowerCase());
-  if (!g) return `<div class="cdx-sec"><h2>Grimm</h2>
-    <div class="cdx-note"><p>No Grimm on this page matches <code>${esc(u.username)}</code>. The link
-      between the two is the account name and the Grimm's short name, and nothing else.</p></div></div>`;
-
-  return `<div class="cdx-sec">
+  const g = grimmFor(u);
+  return grimmPick(u) + (g ? `<div class="cdx-sec">
       <h2>${esc(g.name)}</h2>
       <p class="cdx-rings" style="color:${g.hue}">${esc(g.user)} · ${g.abilities.length} abilities ·
         <button class="as-link" onclick="go('grimms','${escAttr(g.id)}')">open the full page for its abilities &rarr;</button></p>
     </div>
     ${chainBlock(g.id)}
     ${shiftBlock(g)}
-    ${shackleBlock(g)}`;
+    ${shackleBlock(g)}` : "");
+}
+
+// ── Who holds which Grimm ──────────────────────────────────
+// The assignment itself. It used to be no decision at all: the account name was matched against the
+// Grimm's `short` — a CHARACTER name hard-coded in grimms/tools/build-data.mjs — so a player's login
+// had to be their character's name for ever, and renaming an account took their Grimm away without
+// saying so. Two of the eight shorts are Salomon and Solomon.
+//
+// One holder per Grimm, so picking one already held moves it; the server answers with whose it was
+// and the toast says so, rather than letting it happen quietly.
+function grimmPick(u) {
+  const g = grimmFor(u), assumed = grimmAssumed(u);
+  const holderOf = {};
+  for (const x of (ADMIN.users || [])) if (x.grimmId && x.id !== u.id) holderOf[x.grimmId] = x.displayName;
+
+  return `<div class="cdx-sec"><h2>Whose Grimm</h2>
+    <p class="cdx-rings">${assumed
+      ? `Nothing is assigned, so this is still the old guess from the account name — <code>${esc(u.username)}</code>
+         spells <b>${esc(g.short || "")}</b>. Click it to make it the DM's answer instead.`
+      : g ? `Assigned by you. Their sheet and the Companion read this, not the account name.`
+          : `No Grimm yet. Until one is picked their sheet shows no Grimm card.`}</p>
+    <div class="chips">${(GRIMMS.grimms || []).map(x => {
+      const on = g && g.id === x.id, held = holderOf[x.id];
+      return `<button class="chip ${on ? "on" : ""}" onclick="setGrimmHolder(${u.id},'${escAttr(x.id)}')"
+        title="${escQ(x.user)}${held ? ` — held by ${escQ(held)}; picking it moves it` : ""}"
+        >${esc(x.name)}${held ? " ·" : ""}</button>`;
+    }).join("")}</div>
+    <div class="adm-line" style="gap:10px;margin-top:9px">
+      <button class="mini ${g ? "" : "on"}" onclick="setGrimmHolder(${u.id},null)">No Grimm</button>
+      ${Object.keys(holderOf).length
+        ? `<span class="hint" style="margin:0">A Grimm marked · is held by someone else.</span>` : ""}
+    </div></div>`;
+}
+
+async function setGrimmHolder(userId, grimm) {
+  const u = userById(userId);
+  if (!u) return;
+  try {
+    const r = await api("PUT", `api/admin/users/${userId}/grimm`, { grimm });
+    // One holder per Grimm here too, so the page agrees with the server without a refetch
+    if (grimm) for (const x of (ADMIN.users || [])) if (x.grimmId === grimm) x.grimmId = null;
+    u.grimmId = grimm || null;
+    const name = grimm ? (grimmById(grimm)?.name || grimm) : null;
+    toast(!grimm ? `${u.displayName} holds no Grimm`
+      : r?.movedFrom ? `${name} moves from ${r.movedFrom} to ${u.displayName}`
+      : `${u.displayName} holds ${name}`);
+    draw();                         // the header tags and the Grimms rail both read the holder
+  } catch (err) { toast(err.message); }
 }

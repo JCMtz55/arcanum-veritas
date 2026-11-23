@@ -8,11 +8,24 @@ function renderBar() {
   $('#tabs').innerHTML = Object.entries(VIEWS).map(([k, n]) => `<button class="tab ${S.view === k ? 'on' : ''}" onclick="setView('${k}')">${n}</button>`).join('');
   if (!g) { $('#dials').innerHTML = ''; $('#live').innerHTML = ''; return; }
   const sh = sheet(), v = derived(sh);
-  $('#dials').innerHTML = `
-    <select class="pick who" aria-label="Your Grimm" onchange="pickGrimm(this.value)">${D.grimms.map(x => `<option value="${x.id}" ${x.id === g.id ? 'selected' : ''}>${esc(x.name)} · ${esc(x.short)}</option>`).join('')}</select>
-    <div class="dial"><label>Level</label><div class="step"><button onclick="bumpLevel(-1)" aria-label="Lower level">–</button><span>${sh.level}</span><button onclick="bumpLevel(1)" aria-label="Raise level">+</button></div></div>
+  // A player the DM has assigned gets their Grimm's name here, not a list of everyone's. See
+  // bindToMine() in core.js for the other two cases, both of which keep the switcher.
+  // The name alone, never `g.short`: that is the character the Grimm was written for, so a sheet the
+  // DM has handed to someone else would greet its new holder with the old one's name.
+  const who = LOCKED
+    ? `<span class="who-mine" title="Your DM assigned you this Grimm">${esc(g.name)}</span>`
+    : `<select class="pick who" aria-label="Your Grimm" onchange="pickGrimm(this.value)">${D.grimms.map(x => `<option value="${x.id}" ${x.id === g.id ? 'selected' : ''}>${esc(x.name)} · ${esc(x.short)}</option>`).join('')}</select>`;
+  $('#dials').innerHTML = `${who}
+    ${CHAR
+      // Read from the character, never typed here: the level is the DM's to set and the Dream mod
+      // is the character's own DRE score. Both decide this Grimm's numbers, so a box the player
+      // could type into was a box that could make the Grimm the wrong size.
+      ? `<div class="dial"><label>Level</label><span class="fixed" title="${attr(CHAR.name)}'s level — your DM sets it">${sh.level}</span></div>`
+      : `<div class="dial"><label>Level</label><div class="step"><button onclick="bumpLevel(-1)" aria-label="Lower level">–</button><span>${sh.level}</span><button onclick="bumpLevel(1)" aria-label="Raise level">+</button></div></div>`}
     <div class="dial"><label for="stageSel">Stage</label><select class="pick" id="stageSel" onchange="setStage(this.value)">${STAGES.map(s => `<option value="${s}" ${s === sh.stage ? 'selected' : ''}>${STAGE_NAME[s]}</option>`).join('')}</select></div>
-    <div class="dial"><label for="dmIn">Dream mod</label><input class="num" id="dmIn" type="number" value="${sh.dreamMod}" onchange="setNum('dreamMod',this.value)"></div>`;
+    ${CHAR
+      ? `<div class="dial"><label>Dream mod</label><span class="fixed" title="${attr(CHAR.name)}'s Dream modifier, from their DRE score">${sign(sh.dreamMod)}</span></div>`
+      : `<div class="dial"><label for="dmIn">Dream mod</label><input class="num" id="dmIn" type="number" value="${sh.dreamMod}" onchange="setNum('dreamMod',this.value)"></div>`}`;
   $('#live').innerHTML = `
     <span class="lv pb"><b>+${v.pb}</b><i>prof</i></span>
     <span class="lv sl"><b>${v.left}/${v.total}</b><i>slots</i></span>
@@ -20,6 +33,10 @@ function renderBar() {
 }
 
 function render() {
+  // No book, no page. Everything below this line assumes there is at least one Grimm to show — the
+  // Compendium reaches for `D.grimms[0].id`, the sheet builds a blank from a Grimm it was handed —
+  // so this is where it stops, with a reason on screen rather than a blank page and a console error.
+  if (NO_BOOK) return renderNoBook();
   // The DM's controls live in admin/ now; a sheet saved while they were a tab here comes back to its own.
   if (!VIEWS[S.view]) S.view = 'sheet';
   // While the chains are off or a domain is up, the page keeps a low edge — red or pink — so the
@@ -44,14 +61,53 @@ function render() {
   else renderRules();
 }
 function setView(v) { S.view = v; save(); render(); window.scrollTo(0, 0); }
-function pickGrimm(id) { S.current = id; S.view = 'sheet'; pairFocus = null; sheet(); save(); render(); }
-function bumpLevel(n) { const sh = sheet(); sh.level = Math.max(1, Math.min(20, sh.level + n)); save(); render(); }
+// The switcher and the chooser are both gone once a Grimm has been assigned, so the only way here
+// is a stale tab painted before /api/me came back — or the console. Either way the answer is no.
+function pickGrimm(id) {
+  if (LOCKED && id !== MINE) return render();
+  S.current = id; S.view = 'sheet'; pairFocus = null; sheet(); save(); render();
+}
+// Both of these are the character's once there is one, so the dials are gone and these are only
+// reachable from a stale tab or the console. The answer either way is no.
+function bumpLevel(n) {
+  if (CHAR) return;
+  const sh = sheet(); sh.level = Math.max(1, Math.min(20, sh.level + n)); save(); render();
+}
 function setStage(st) { const sh = sheet(); sh.stage = st; fitLoadout(grimmById(S.current), sh); save(); render(); }
 
+// `js/data.js` did not arrive, or arrived empty. The empty one is what the server hands anybody
+// without a session — the Admin page asks for this file too, so it has to parse as JavaScript
+// rather than redirect — and the usual cause of the other is the server going away under a tab
+// that is already open. Both end here, and the honest answer to both is the same: reload.
+function renderNoBook() {
+  $('#tabs').innerHTML = ''; $('#dials').innerHTML = ''; $('#live').innerHTML = '';
+  $('#view').innerHTML = `
+    <div class="hero"><div><h1 style="color:var(--bone)">The Grimm book did not load</h1>
+    <div class="sub">This page reads the Grimms from <code>js/data.js</code>, and it has not arrived —
+      usually a connection that dropped, or a sign-in that has run out.
+      <b>Nothing you have tracked is lost</b>: it is kept in this browser and on the server, and it
+      comes back with the book.</div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn pri" onclick="location.reload()">Try again</button>
+      <a class="btn" href="../">Ephemer home</a>
+    </div></div></div>`;
+}
+
+// Only ever reached by someone with no Grimm of their own: the DM, an account nothing matches, or a
+// static host. A player the DM has assigned lands on their sheet and never sees this page.
 function renderChooser() {
+  // /api/me is still in flight. Say so for the half-second rather than offering a choice that is
+  // about to be made for them — the eight cards flashing up and vanishing reads as a bug.
+  if (ME_PENDING) return $('#view').innerHTML =
+    `<div class="hero"><div><h1 style="color:var(--bone)">Finding your Grimm…</h1></div></div>`;
+  const sub = !ME
+    ? 'Pick yours — the sheet remembers it on this device. You can switch any time from the bar.'
+    : ME.role === 'dm'
+      ? 'You hold none of them, so pick whichever you are running — every Grimm is yours to read.'
+      : 'Your DM has not assigned you one yet. Pick one to work with meanwhile; once they do, this page opens on it and stays there.';
   $('#view').innerHTML = `
     <div class="hero"><div><h1 style="color:var(--bone)">Whose Grimm is this?</h1>
-    <div class="sub">Pick yours — the sheet remembers it on this device. You can switch any time from the bar.</div></div></div>
+    <div class="sub">${sub}</div></div></div>
     <div class="grid">${D.grimms.map(g => `
       <button class="card span4" style="text-align:left;cursor:pointer;border-color:${g.hue};display:flex;gap:14px;align-items:center" onclick="pickGrimm('${g.id}')">
         <span class="hero" style="margin:0"><span class="portrait" style="border-color:${g.hue};background-image:url('${attr(g.images.awakened || g.images.invoked)}')"></span></span>
@@ -200,7 +256,12 @@ function shackleClose(name) {
 }
 function shackleEnd() {
   const sh = sheet(), v = derived(sh);
-  sh.exhaustion += 2; sh.dreamExhaustion += 3; save();
+  // Clamped to the ladders' tops (Dream is 0-6 since the 2026-11-18 rework), so a Break taken while
+  // already worn down lands on the ceiling instead of writing a level the rules cannot describe.
+  const deWas = sh.dreamExhaustion;
+  sh.exhaustion = Math.min(EXH_MAX, sh.exhaustion + 2);
+  sh.dreamExhaustion = Math.min(DREAM_EXH_MAX, deWas + 3);
+  save();
   const r = d(20), tot = r + sh.dreamMod, failed = tot < v.dreamDC;
   // Some Breaks cost more than the bond on a failure — White Rabbit's hands Grizzly something of
   // Silk's that he did not ask for. The Grimm registers that in SHACKLE_FAIL (see panels.js).
@@ -214,9 +275,24 @@ function shackleEnd() {
 // Companion kept the old set until someone reloaded — which at the table reads as "the toggle does
 // nothing", because the Admin page updates its own copy immediately and looks like it worked.
 // Re-read them whenever this page comes back to the foreground. No-ops on a static host.
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) syncGrimms().then(render);
-});
+// ⭐ This is also how the sheet's Grimm Slots tracker reaches this page: a slot spent over there is
+// a row, and coming back to this page reads it. The two screens are never live at the same instant,
+// but they are never more than a glance apart.
+//
+// ⚠️ TWO events, because `visibilitychange` alone is not enough. It fires when a tab is switched
+// away from and back — but the arrangement this is actually for is the Companion and the character
+// sheet open SIDE BY SIDE in two windows, where neither page is ever hidden and visibilitychange
+// never fires at all. `focus` is what catches that one. Both fire on an ordinary tab switch, hence
+// the guard.
+let lastRefresh = 0;
+function refreshFromServer() {
+  const now = Date.now();
+  if (now - lastRefresh < 900) return;
+  lastRefresh = now;
+  syncGrimms().then(syncLive).then(syncChar).then(render);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshFromServer(); });
+window.addEventListener('focus', refreshFromServer);
 
 document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -225,8 +301,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'n' && S.view === 'sheet' && S.current) nextRound();
 });
 
-$('#built').textContent = D.built;
+$('#built').textContent = D.built || '—';     // no book, no build date
 render();
 // The chains and the DM's toggles, then the player's own Servants — both no-op on a static host.
 // Souls come second so the roster lands on a sheet whose level and stage are already right.
-syncGrimms().then(syncSouls).then(render);
+// Souls, the live slots and everything the character already knows all wait on syncGrimms, which is
+// what settles whose Grimm this is.
+syncGrimms().then(syncLive).then(syncChar).then(syncSouls).then(render);

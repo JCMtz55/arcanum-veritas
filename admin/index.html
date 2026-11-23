@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
-<link rel="stylesheet" href="css/admin.css?v=2026-11-12a">
+<link rel="stylesheet" href="css/admin.css?v=2026-11-19a">
 <!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
 <script src="../js/tools.js"></script>
 </head>
@@ -33,11 +33,11 @@
 </div>
 
 <div class="a-shell" id="board" hidden>
-  <!-- Four topics, each minding its own business. Filled by core.js from the registered sections. -->
+  <!-- The topics, each minding its own business. Filled by core.js from the registered sections. -->
   <nav class="a-secs" id="secs" aria-label="Admin sections"></nav>
   <div class="board a-board">
-    <!-- Only the sections with a list of their own raise the rail: Players and Grimms. The board
-         and the Compendium hide it and take the width. -->
+    <!-- Only the sections with a list of their own raise the rail: Players, Grimms and Metrics
+         (its list is the nights). The board and the Compendium hide it and take the width. -->
     <aside class="rail" id="rail" hidden>
       <div class="cogs" id="railList"></div>
       <div class="rail-foot" id="railFoot" hidden></div>
@@ -113,9 +113,10 @@
 <script src="../js/data.js?v=2026-11-12a"></script>
 <script src="../grimms/js/data.js?v=2026-11-12a"></script>
 <script src="js/core.js?v=2026-11-12a"></script>
-<script src="js/table.js?v=2026-11-12a"></script>
-<script src="js/players.js?v=2026-11-12a"></script>
-<script src="js/grimms.js?v=2026-11-12a"></script>
+<script src="js/table.js?v=2026-11-18a"></script>
+<script src="js/players.js?v=2026-11-17a"></script>
+<script src="js/grimms.js?v=2026-11-17a"></script>
 <script src="js/compendium.js?v=2026-11-12a"></script>
+<script src="js/metrics.js?v=2026-11-19a"></script>
 </body>
 </html>

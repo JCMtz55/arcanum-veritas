@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
-<link rel="stylesheet" href="css/init.css?v=2026-11-12b">
+<link rel="stylesheet" href="css/init.css?v=2026-11-13n">
 <!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
 <script src="../js/tools.js"></script>
 </head>
@@ -42,6 +42,12 @@
   <!-- Who else is coming. The party, a monster typed in, a lineup kept from last time.
        A drawer, not a panel under the order: a fight is read far more often than it is added to,
        so the order keeps the page and this slides in over the margin when somebody walks in. -->
+  <!-- The way back in. Pinned to the edge whatever else is on the screen, because a drawer you can
+       shut and not reopen is a drawer that has eaten the Add form. -->
+  <button class="ini-handle" id="handle" onclick="toggleAdd()" title="Add to the fight — A">
+    <span>＋ ADD</span>
+  </button>
+
   <aside class="ini-side" id="side" aria-label="Add to the fight">
     <header class="side-hd">
       <h2>Add to the fight</h2>
@@ -64,6 +70,9 @@
   </header>
   <ol class="room-list" id="roomList"></ol>
   <p class="room-foot" id="roomFoot"></p>
+  <!-- Whose turn it is, bottom left: their own painting, and the bloodied one when they are nearly
+       out. Empty until somebody's turn comes up. -->
+  <div class="room-splash" id="splash"></div>
 </main>
 
 <div class="gate" id="gate" hidden>
@@ -112,6 +121,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/init.js?v=2026-11-12b"></script>
+<script src="js/init.js?v=2026-11-23b"></script>
 </body>
 </html>

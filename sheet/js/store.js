@@ -268,7 +268,7 @@ const keyOf = () => state.effects.map(e => `${e.id}:${e.amount}`).join(",") + "|
 // what they typed, and the ordinary optimistic-concurrency path takes it from there — their save is
 // refused against the newer version and they are offered the server's copy, which is exactly what
 // that mechanism is for (CS-004). This poll is the quiet case, which is almost every case.
-const DM_VITALS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion",
+const DM_VITALS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion", "hollowingFractures",
                    "conditions", "injuries", "inspiration"];
 
 // ── the table's clock ───────────────────────────────────────────────────
@@ -302,7 +302,11 @@ export async function loadVitals() {
   // the ordinary path from there.
   const round = Number.isInteger(got.vitals?.round) ? got.vitals.round : null;
   const inCombat = typeof got.vitals?.inCombat === "boolean" ? got.vitals.inCombat : null;
-  if (CLOCK && (round !== null || inCombat !== null)) CLOCK(round, inCombat);
+  // Which fight the board is running. A different one from the last we saw means a NEW fight —
+  // not a round going by — and the handler ends the old one rather than counting towards a number
+  // that is smaller than the one this sheet is holding.
+  const fightId = typeof got.vitals?.fightId === "string" ? got.vitals.fightId : "";
+  if (CLOCK && (round !== null || inCombat !== null)) CLOCK(round, inCombat, fightId);
   return true;
 }
 

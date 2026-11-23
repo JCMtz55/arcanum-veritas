@@ -184,6 +184,12 @@ async function doCast() {
     });
     document.getElementById("castDlg").close();
     toast(`${label} — ${out.targets.join(", ")}`);
+    // A cast seal went off — there is no doubt about it, the party's sheets are carrying what it
+    // handed them — so it writes its own line in the record rather than waiting for "Drew it"
+    // (Juan, 2026-11-19). Quiet, and after the toast above: the player's answer is who it landed
+    // on, and the record is the DM's business. It dedupes against the button, so pressing both
+    // is still one draw. See js/metrics.js.
+    logDraw({ via: "cast", quiet: true });
   } catch (err) {
     toast(err.message);
   } finally {

@@ -112,6 +112,51 @@ const SCHEMA = [
      adopted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
      PRIMARY KEY (user_id, grimm_id)
    )`,
+  // The Grimm Slots as they stand right now (Juan, 2026-11-17: a tracker on the character sheet
+  // that syncs with the Companion). This is the FIRST piece of the Companion's live state to leave
+  // that browser. Everything else it holds — the round tracker, the loadout, the effects — is still
+  // only there, and this row deliberately does not reach for it: the two pages have to agree about
+  // these five numbers and nothing more.
+  //
+  // `stage` is here because it is what decides how many slots there ARE (SLOTS_BY_STAGE), so a
+  // tracker without it would draw the wrong number of pips. `temp`/`temp_used` are the slots bought
+  // by forcing the Grimm, which are spent only once the base ones are gone. `familiar` is here so
+  // the sheet can refuse to spend when the Companion says the Grimm is in Familiar form, rather
+  // than showing six live pips for a form that cannot use any of them.
+  //
+  // One row per player per Grimm, like grimm_souls — the Grimm belongs to the account, so the DM
+  // driving one at the table keeps their own row and never writes over a player's.
+  `CREATE TABLE IF NOT EXISTS grimm_live (
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     grimm_id   TEXT NOT NULL,
+     stage      TEXT NOT NULL DEFAULT 'awakened',
+     used       SMALLINT NOT NULL DEFAULT 0 CHECK (used >= 0),
+     temp       SMALLINT NOT NULL DEFAULT 0 CHECK (temp >= 0),
+     temp_used  SMALLINT NOT NULL DEFAULT 0 CHECK (temp_used >= 0),
+     familiar   BOOLEAN NOT NULL DEFAULT false,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+     PRIMARY KEY (user_id, grimm_id)
+   )`,
+  // When the last Long Rest was taken, whichever screen took it (Juan, 2026-11-17: a Long Rest on
+  // the character sheet should restore the Grimm Slots too). The slots themselves are restored by
+  // the same call — this stamp is for everything a long rest does that is NOT shared: the effects,
+  // the round, and each Grimm's own hooks and Servant charges, which only the Companion knows how
+  // to clear. It reads the stamp when it next syncs and finishes its own half. ⭐ That way no rule
+  // of the Companion's had to be rewritten on the server or on the sheet to make this work.
+  `ALTER TABLE grimm_live ADD COLUMN IF NOT EXISTS rested_at TIMESTAMPTZ`,
+  // And the same for a Short Rest, which is a different thing and has to be remembered separately:
+  // it gives back no Grimm Slots at all, only the Servant charges whose rule says a short rest
+  // refills them. Nothing of a short rest is shared, so this column is the WHOLE of what travels —
+  // the sheet stamps it, and the Companion refills the charges when it reads it.
+  `ALTER TABLE grimm_live ADD COLUMN IF NOT EXISTS short_rested_at TIMESTAMPTZ`,
+  // Which Grimm this account holds. Before this column the join was the account name against the
+  // Grimm's `short` in grimms/js/data.js — a CHARACTER name hard-coded in a build script — worked
+  // out independently in the Admin page, the Admin Grimms section and the sheet. It demanded that
+  // a player's login be their character's name for ever, and two of the eight shorts are Salomon
+  // and Solomon, one letter apart. Now the DM says who holds what, once, and the three read it.
+  // NULL means unassigned, and the readers fall back to the old name match so nothing goes dark
+  // before the DM has been round the party.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS grimm_id TEXT`,
   // Who walks the Paragon path. The DM turns it on per player — the path is a choice of identity
   // made with them, not something a player switches on for themselves.
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS paragon BOOLEAN NOT NULL DEFAULT false`,
@@ -391,6 +436,73 @@ const SCHEMA = [
      data       TEXT NOT NULL DEFAULT '{}',
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
+
+  // The splash a character gets when their turn comes up on the room's screen — the ordinary one
+  // and the one used when they are nearly out. A table of its own rather than two more fields in
+  // the sheet JSON: that blob is sent whole on every autosave a player makes, and two pictures
+  // riding along with every keystroke would be paid for all session for something shown once a
+  // round. Served as bytes from its own route, so the browser caches it like any other image.
+  `CREATE TABLE IF NOT EXISTS character_art (
+     character_id INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+     normal       TEXT NOT NULL DEFAULT '',
+     hurt         TEXT NOT NULL DEFAULT '',
+     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
+
+  // ── What was actually drawn at the table ─────────────────────────────────
+  // One row per press of "Drew it" on the seal card: the recipe AND the numbers it came to. The
+  // composer can answer "what can this seal do"; nothing could answer "what did the party spend
+  // their slots on last session", which is the question balance is argued from.
+  //
+  // It is a RECORD, not a recipe. `saves` keeps builds that grow with the character — level and
+  // modifiers stay whatever the bar says — and that is exactly what makes a save useless as
+  // evidence: the DC it shows today is not the DC it rolled against in Session 77. So every number
+  // is frozen here as it stood when the seal went off: dc, attack, damage, the tier, both
+  // modifiers. Nothing updates or deletes a row, the way nothing updates character_events.
+  //
+  // `night` is the game night, not the calendar day: sessions run past midnight, so the night is
+  // stamped in the table's own timezone with a 6am boundary (gameNight() in server.js). A seal drawn
+  // at 01:40 belongs to the night that started the evening before, which is what the DM means by
+  // "last session".
+  //
+  // `user_id` rather than character_id alone, because the builder is signed in per account and the
+  // character is only looked up beside it — a player with no sheet yet still produces usable rows.
+  // Both are ON DELETE SET NULL: a retired character must not take the session's evidence with it.
+  //
+  // `detail` holds what is read whole rather than grouped by — the Sigils by name, the Ring's
+  // targets/range/duration cells, Sigil dice, the condition tags, and the card's own lines. Columns
+  // are only the things the metrics page groups or averages on.
+  `CREATE TABLE IF NOT EXISTS seal_draws (
+     id           SERIAL PRIMARY KEY,
+     user_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+     character_id INTEGER REFERENCES characters(id) ON DELETE SET NULL,
+     night        DATE NOT NULL,
+     at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+     name         TEXT NOT NULL DEFAULT '',
+     core         TEXT NOT NULL,
+     verum        TEXT NOT NULL DEFAULT '',
+     ring         TEXT NOT NULL,
+     subtype      TEXT NOT NULL DEFAULT '',
+     shape        TEXT NOT NULL DEFAULT '',
+     manner       TEXT NOT NULL DEFAULT 'standard',
+     slot         SMALLINT NOT NULL CHECK (slot BETWEEN 1 AND 9),
+     char_level   SMALLINT NOT NULL CHECK (char_level BETWEEN 1 AND 20),
+     tier         SMALLINT NOT NULL DEFAULT 0,
+     verum_mod    SMALLINT NOT NULL DEFAULT 0,
+     dream_mod    SMALLINT NOT NULL DEFAULT 0,
+     dc           SMALLINT,
+     attack       SMALLINT,
+     damage       TEXT NOT NULL DEFAULT '',
+     damage_kind  TEXT NOT NULL DEFAULT '',
+     absolute     BOOLEAN NOT NULL DEFAULT false,
+     save_ability TEXT NOT NULL DEFAULT '',
+     sigils       SMALLINT NOT NULL DEFAULT 0,
+     sigil_cap    SMALLINT NOT NULL DEFAULT 0,
+     benefits     SMALLINT NOT NULL DEFAULT 0,
+     detail       TEXT NOT NULL DEFAULT '{}'
+   )`,
+  // The two readings: a night's rows, and the list of nights there are.
+  `CREATE INDEX IF NOT EXISTS seal_draws_night ON seal_draws (night DESC, id)`,
 ];
 
 export async function migrate(db) {

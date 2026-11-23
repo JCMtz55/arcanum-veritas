@@ -252,14 +252,20 @@ function partyTags(c) {
       c.wounds >= 6 ? `<u>Injury due</u>` : ""),
     t("Injuries", c.unhealedInjuries, c.unhealedInjuries, `${c.injuries} recorded, ${c.unhealedInjuries} unhealed`),
     t("Exh", `${c.exhaustion}<em>/6</em>`, c.exhaustion, "Standard physical Exhaustion"),
-    t("Dream exh", `${c.dreamExhaustion}<em>/8</em>`, c.dreamExhaustion,
-      `${c.dreamExhaustionName} — ${c.dreamPenalty} to d20 rolls in a dream`,
+    t("Dream exh", `${c.dreamExhaustion}<em>/6</em>`, c.dreamExhaustion,
+      `${c.dreamExhaustionName} — ${c.dreamPenalty} to every d20 test, awake or dreaming`,
       c.dreamPenalty ? `<u>${c.dreamPenalty}</u>` : ""),
     t("Fate", c.fate, false, "Fate charges in hand — the player spends these themselves"),
     t("Dream", c.dream, false, `Dream score — modifier ${sign(c.dreamMod)}`),
   ];
   if (c.inCombat) bits.push(t("Round", c.round, true, "The player's own round tracker"));
   if (c.activeModifiers) bits.push(t("Effects", c.activeModifiers, false, "Named modifiers currently running on this sheet"));
+  // Level 6 only, and it earns its place on the closed row: this is the one number on the board that
+  // can end a character, and the save comes round again every time they go unconscious.
+  if (c.hollowing) bits.push(t("Hollowing", `${c.hollowing.fractures}<em>/${c.hollowing.toHollow}</em>`,
+    c.hollowing.fractures,
+    `Cognitive Collapse — DC ${c.hollowing.dc} Cognitive Saving Throw at ${sign(c.hollowing.bonus)} on every loss of consciousness. The third Fracture Hollows them.`,
+    c.hollowing.fractures >= c.hollowing.toHollow ? `<u>Shattered</u>` : ""));
 
   const chips = (c.conditions || []).map(x =>
     `<span class="chip on">${esc(typeof x === "string" ? x : x.name || "")}</span>`).join("");
@@ -349,7 +355,10 @@ function panelTracks(c) {
     <div class="ptr-ctl">
       ${step("Wounds", "wounds", c.wounds, 0, 20, "Each one adds +1 to the death save DC and the concentration floor. Six is an Injury due.")}
       ${step("Exhaustion", "exhaustion", c.exhaustion, 0, 6, "Standard physical Exhaustion")}
-      ${step("Dream exh", "dreamExhaustion", c.dreamExhaustion, 0, 8, c.dreamExhaustionName)}
+      ${step("Dream exh", "dreamExhaustion", c.dreamExhaustion, 0, 6, c.dreamExhaustionName)}
+      ${c.hollowing ? step("Hollowing", "hollowingFractures", c.hollowing.fractures, 0,
+        c.hollowing.toHollow,
+        `Fractures toward being Hollowed. Not cleared by rest, hit dice or healing magic.`) : ""}
     </div>
     ${pTitle("Injuries", `${c.unhealedInjuries} of ${c.injuries} unhealed`)}
     ${list ? `<ul class="ptr-injs">${list}</ul>` : `<p class="ptr-none">None recorded.</p>`}
@@ -576,11 +585,13 @@ async function partySet(id, field, value) {
 // One route, one whitelist, one event per change: see server.js. Everything below funnels into it,
 // so there is exactly one place a hit point can be written from this page.
 const VITAL_LIMITS = {
-  hp: [0, null], tempHp: [0, 999], wounds: [0, 20], exhaustion: [0, 6], dreamExhaustion: [0, 8],
+  hp: [0, null], tempHp: [0, 999], wounds: [0, 20], exhaustion: [0, 6], dreamExhaustion: [0, 6],
+  hollowingFractures: [0, 3],
 };
 const VITAL_FIELD = {
   hp: "Hit points", tempHp: "Temporary hit points", wounds: "Wounds",
   exhaustion: "Exhaustion", dreamExhaustion: "Dream Exhaustion",
+  hollowingFractures: "Hollowing Fractures",
 };
 // Only two of them are typed into; the rest are steppers with no box to put a number back into.
 // Looked up through this rather than by building an id, because `""+id` would be getElementById("3")

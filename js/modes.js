@@ -150,5 +150,6 @@ function applyMode() {
   const slot = document.getElementById("slotDial");
   if (slot) slot.hidden = !M.slotDial;
   document.title = M.docTitle;
+  syncDrewBtn();   // only Arcanum Veritas keeps a record of what was drawn
   syncBar();
 }

@@ -324,6 +324,14 @@ code{font-family:var(--sans);font-size:11px;background:var(--panel);padding:1px 
 .de-now{margin:0 0 8px;font-size:13px;color:#e4927f}
 .de-now b{font-family:var(--sans)}
 
+/* The Hollowing — Dream Exhaustion 6 only. Prefixed `hol-` on purpose: app.css is loaded on every
+   page and its generic names (.bar, .n, .card, .ladder, .rung) would restyle anything sharing one. */
+.hol-card{border-color:#6d4036}
+.hol-track{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.hol-pip{width:13px;height:13px;border-radius:50%;background:var(--panel2);
+  border:1px solid #6d4036;display:inline-block}
+.hol-pip.on{background:#c0553f;border-color:#f0b3a3}
+
 .abl{display:flex;flex-direction:column;gap:4px}
 .ab3{background:var(--panel2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .ab3-h{display:flex;align-items:center;gap:7px;padding:6px 9px;cursor:pointer}
@@ -1074,6 +1082,42 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .rev b{font-family:var(--sans);font-size:12px;font-weight:500;white-space:nowrap}
 .rev.on b{color:var(--gh)}
 .rev .hint{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The Grimm Slots, shared with the Companion. The pips are its pips — same circle, same dashed
+   ember ring for a slot bought by forcing the Grimm — because they are the same slots, and a
+   player glancing between the two screens should not have to work that out. Smaller here: this is
+   a card on a page about a character, not the Companion's own front and centre. */
+.gsl{margin:8px 0}
+.gsl-pips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.gsl-pip{width:22px;height:22px;padding:0;border-radius:50%;cursor:pointer;
+  border:2px solid var(--gh);background:var(--gh);box-shadow:inset 0 0 0 2px var(--panel);
+  transition:background .12s,opacity .12s}
+.gsl-pip:hover{opacity:.8}
+.gsl-pip.used{background:transparent;box-shadow:none;opacity:.5}
+.gsl-pip.temp{border-style:dashed;border-color:var(--ember);background:var(--ember)}
+.gsl-pip.temp.used{background:transparent}
+
+/* The Grimm's abilities, reusing the sheet's own .abl/.ab3 rows so a Grimm ability and a class
+   feature read the same way. Only the body differs: a feature's text is typed by the player and
+   shown pre-wrapped, while these come from the vault as markdown and arrive already rendered —
+   `pre-wrap` on that turns every newline between the tags into a hole. */
+.gab{margin-top:10px}
+.gab-grp + .gab-grp{margin-top:8px}
+.gab .zone-h.sm{margin-bottom:4px}
+.ab3-b.md{white-space:normal}
+.ab3-b.md > :first-child{margin-top:0}
+.ab3-b.md > :last-child{margin-bottom:0}
+.ab3-b.md p{margin:6px 0}
+.ab3-b.md ul,.ab3-b.md ol{margin:6px 0;padding-left:18px}
+.ab3-b.md li{margin:2px 0}
+.ab3-b.md h1,.ab3-b.md h2,.ab3-b.md h3,.ab3-b.md h4{font-family:var(--sans);font-size:11px;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin:9px 0 4px}
+.ab3-b.md blockquote{margin:6px 0;padding-left:9px;border-left:2px solid var(--line);color:var(--mute)}
+.ab3-b.md table{border-collapse:collapse;margin:6px 0;font-size:12px}
+.ab3-b.md th,.ab3-b.md td{border:1px solid var(--line);padding:3px 7px;text-align:left}
+.ab3-b.md hr{border:0;border-top:1px solid var(--line);margin:8px 0}
+.ab3-b.md code{font-size:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:0 4px}
 
 /* ── Ephemer's own systems ───────────────────────────────────────────────
    A Cognition is a chip with its own Font Awesome glyph and its Tier, tinted by category the way

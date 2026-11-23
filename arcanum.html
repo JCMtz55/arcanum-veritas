@@ -80,6 +80,10 @@
       <button class="mini" id="mFull" onclick="setSumMode('full')">Full</button>
       <button class="mini" onclick="rollSeal()" title="Roll the seal's dice — every damage and healing number, added up (R)">Roll</button>
       <button class="mini" onclick="rollSeal(true)" title="Roll it as a critical hit — double dice (shift+R, or shift-click a chip)">Crit</button>
+      <!-- The one thing the composer writes down: this seal went off at the table. Players only —
+           the DM's test seals are not evidence of anything. js/metrics.js, read in Admin → Metrics. -->
+      <button class="mini" id="drewBtn" onclick="logDraw()" hidden
+        title="Log this seal as drawn at the table — it goes into the DM's after-session metrics">Drew it</button>
       <button class="mini" id="saveBtn" onclick="saveBuild()" title="Keep this build on your account — it appears in the rail" hidden>Save</button>
       <details class="more">
         <summary class="mini" title="Copy, image, print" aria-label="More actions">⋯</summary>
@@ -207,6 +211,7 @@
 <script src="js/composer.js"></script>
 <script src="js/card.js"></script>
 <script src="js/cast.js"></script>
+<script src="js/metrics.js"></script>
 <script src="js/codex.js"></script>
 <script src="js/rings.js"></script>
 <script src="js/damage.js"></script>

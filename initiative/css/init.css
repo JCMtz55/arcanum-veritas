@@ -94,6 +94,14 @@
 .ini-stat input:focus{outline:none}
 .ini-stat:focus-within{border-color:var(--brass)}
 
+/* The boss's second place in the order: the same creature, so the row is quieter — it carries the
+   turn, and the state stays on the row that IS the monster. */
+.ini-row.slot{opacity:.86;border-left-style:dotted}
+.ini-row.slot.on{opacity:1}
+.ini-turnof{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;
+  background:var(--slate);border:1px solid var(--line);color:var(--mute);
+  font-size:9.5px;font-style:normal;font-weight:400;letter-spacing:.05em;vertical-align:1px}
+
 .ini-con{display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0}
 .ini-con .chip{margin:0;padding:2px 8px;font-family:var(--sans);font-size:10.5px;line-height:1.5;
   border-radius:999px;cursor:pointer;background:var(--slate)}
@@ -101,6 +109,15 @@
 .ini-con .chip i{font-style:normal;color:var(--mute);margin-left:4px}
 .ini-con .add{color:var(--mute);border-style:dashed}
 .ini-con .add:hover{color:var(--bone);border-style:solid}
+/* What a row counts. One shape for all of them — a word and a number — in three colours, so the
+   eye can tell a resistance from a root from a condition without reading any of them. */
+.ini-con .wnd{border-color:#7a4a44;color:#C88A80}
+.ini-con .wnd:not(.on){border-color:var(--line);color:var(--mute)}
+.ini-con .boss{border-color:#8a6a2a;color:#E0B050;letter-spacing:.04em}
+.ini-con .nm{border-color:#5d4a7a;color:#B9A4DE}
+.ini-con .ctr{border-color:#3f5b63;color:#9CC4CE}
+.ini-con .flat{cursor:default;opacity:.85}
+.ctr-n{min-width:46px;text-align:center;font-family:var(--sans);font-size:13px}
 
 .ini-tools{display:flex;gap:2px;justify-content:flex-end}
 .ini-tools button{width:26px;height:26px;padding:0;background:none;border:1px solid transparent;
@@ -129,6 +146,46 @@ body.add-open .ini-side{transform:none;visibility:visible;transition:transform .
   text-transform:uppercase;letter-spacing:.1em}
 .side-hd .mini{padding:3px 10px}
 .ini-scrim{display:none;position:fixed;inset:0;z-index:35;background:rgba(10,12,16,.55)}
+
+/* The handle on the edge. Always there when the drawer is shut, and out of the way when it is not:
+   one place that always opens it, whatever else is on the screen. */
+.ini-handle{
+  position:fixed;right:0;top:52%;z-index:38;transform:translateY(-50%);
+  padding:14px 7px;background:var(--panel);border:1px solid var(--line);border-right:0;
+  border-radius:9px 0 0 9px;color:var(--mute);cursor:pointer;
+  font-family:var(--sans);font-size:11px;letter-spacing:.1em;
+  box-shadow:-6px 0 16px rgba(8,10,14,.3);transition:color .15s, border-color .15s, opacity .18s;
+}
+.ini-handle span{writing-mode:vertical-rl;display:block}
+.ini-handle:hover{color:var(--bone);border-color:var(--brass)}
+body.add-open .ini-handle{opacity:0;pointer-events:none}
+
+/* The two optional switches, in the drawer and in the row's dialog. */
+.ini-opt{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.ini-opt .opt-hd{display:flex;align-items:center;gap:7px;width:100%;padding:3px 0;background:none;
+  border:0;color:var(--bone2);cursor:pointer;font-family:var(--sans);font-size:12px;
+  letter-spacing:.06em;text-transform:uppercase;text-align:left}
+.ini-opt .opt-hd:hover{color:var(--bone)}
+.ini-opt .opt-hd i{font-style:normal;color:var(--mute);width:10px}
+.ini-opt .opt-hd span{margin-left:auto;font-size:10.5px;color:var(--mute);text-transform:none;letter-spacing:0}
+.ini-opt.open .opt-hd{color:var(--brass)}
+.ini-opt .ini-form{margin-top:8px}
+.ini-opt .hint{margin:4px 0 0;font-size:11px}
+.opt-sel{height:30px;padding:0 8px;background:var(--slate);border:1px solid var(--line);
+  border-radius:7px;color:var(--bone);font-size:12.5px}
+.opt-emo{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px;max-height:156px;overflow:auto}
+.opt-emo .chip{margin:0;padding:2px 8px;font-family:var(--sans);font-size:10.5px;cursor:pointer}
+.opt-emo .chip.on{border-color:#5d4a7a;color:#B9A4DE;background:rgba(93,74,122,.2)}
+
+/* The splash pair in the dialog. */
+.spl-pair{display:flex;gap:12px;flex-wrap:wrap}
+.spl{flex:1 1 180px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.spl b{font-family:var(--sans);font-size:11px;font-weight:500;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.08em}
+.spl-box{width:100%;height:150px;border:1px dashed var(--line);border-radius:9px;background:var(--slate);
+  display:grid;place-items:center;overflow:hidden}
+.spl-box img{width:100%;height:100%;object-fit:contain}
+.spl-box span{color:var(--mute);font-style:italic;font-size:12px}
 
 .ini-add{flex:1;min-height:0;overflow:auto;padding:14px}
 .ini-add h2{margin:0 0 10px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--mute);
@@ -187,6 +244,58 @@ body.add-open .ini-side{transform:none;visibility:visible;transition:transform .
 }
 .room-list li.on{border-left-color:var(--brass);background:#2E3542;transform:scale(1.012)}
 .room-list li.down{opacity:.46}
+/* Already acted — they are in the queue under the line, waiting for the next round. Quieter than
+   the ones still to come, so the eye stops at the line without being told to. */
+.room-list li.later{opacity:.72;background:rgba(32,38,46,.55)}
+.room-list li.later.down{opacity:.36}
+
+/* The line the round turns on. */
+.room-break{display:flex;align-items:center;gap:clamp(10px,1vw,18px);
+  padding:clamp(6px,.7vw,12px) clamp(4px,.5vw,10px);list-style:none}
+.room-break::before,.room-break::after{content:"";flex:1;height:1px;
+  background:linear-gradient(to right, rgba(176,136,66,0), rgba(176,136,66,.55), rgba(176,136,66,0))}
+.room-break span{font-family:var(--sans);font-size:clamp(11px,.95vw,17px);color:var(--brass);
+  text-transform:uppercase;letter-spacing:.18em;white-space:nowrap}
+
+/* A long fight, tightened until it ends above the bottom edge. Three steps, each taking the rows
+   AND the space around them — a screen full of rows is not the place for a forty-pixel margin. */
+body.rm-dense .room-list{gap:6px}
+body.rm-denser .room-list{gap:5px}
+body.rm-tiny .room-list{gap:4px}
+body.rm-dense .room-hd{margin-bottom:14px}
+body.rm-denser .room-hd{margin-bottom:10px}
+body.rm-tiny .room-hd{margin-bottom:7px}
+body.rm-denser .room-foot,body.rm-tiny .room-foot{display:none}
+body.rm-denser.as-room .ini-room{padding-top:16px;padding-bottom:64px}
+body.rm-tiny.as-room .ini-room{padding-top:10px;padding-bottom:48px}
+body.rm-tiny .room-break{padding:2px 4px}
+@media (min-width:901px){
+  body.rm-dense.as-room .room-hd h1{font-size:clamp(28px,2.4vw,44px)}
+  body.rm-dense.as-room .room-list li{padding:clamp(6px,.6vw,11px) clamp(12px,1vw,18px);
+    grid-template-columns:clamp(52px,4vw,72px) clamp(44px,3.4vw,62px) 1fr auto}
+  body.rm-dense.as-room .room-list .r-face{width:clamp(44px,3.4vw,62px);height:clamp(44px,3.4vw,62px)}
+  body.rm-dense.as-room .room-list .r-init{font-size:clamp(21px,1.8vw,32px)}
+  body.rm-dense.as-room .room-list .r-id b{font-size:clamp(18px,1.4vw,26px)}
+
+  body.rm-denser.as-room .room-hd h1{font-size:clamp(24px,2vw,38px)}
+  body.rm-denser.as-room .room-list li{padding:clamp(4px,.45vw,8px) clamp(10px,.9vw,16px);
+    grid-template-columns:clamp(44px,3.2vw,58px) clamp(34px,2.6vw,48px) 1fr auto}
+  body.rm-denser.as-room .room-list .r-face{width:clamp(34px,2.6vw,48px);height:clamp(34px,2.6vw,48px)}
+  body.rm-denser.as-room .room-list .r-init{font-size:clamp(18px,1.5vw,26px)}
+  body.rm-denser.as-room .room-list .r-id b{font-size:clamp(16px,1.2vw,22px)}
+  body.rm-denser.as-room .room-list .r-id span{font-size:clamp(10px,.8vw,14px)}
+
+  body.rm-tiny.as-room .room-hd h1{font-size:clamp(20px,1.7vw,32px)}
+  body.rm-tiny.as-room .room-hd p{display:none}
+  body.rm-tiny.as-room .room-list li{padding:3px clamp(9px,.8vw,14px);
+    grid-template-columns:clamp(38px,2.8vw,50px) clamp(26px,2vw,38px) 1fr auto}
+  body.rm-tiny.as-room .room-list .r-face{width:clamp(26px,2vw,38px);height:clamp(26px,2vw,38px)}
+  body.rm-tiny.as-room .room-list .r-init{font-size:clamp(16px,1.3vw,22px)}
+  body.rm-tiny.as-room .room-list .r-id b{font-size:clamp(14px,1.05vw,19px)}
+  body.rm-tiny.as-room .room-list .r-id span,
+  body.rm-tiny.as-room .room-list .r-id .cons{font-size:clamp(9px,.72vw,12px)}
+  body.rm-tiny.as-room .room-list .r-hp b{font-size:clamp(13px,1vw,18px)}
+}
 .room-list .r-init{font-family:var(--sans);font-size:26px;font-weight:700;text-align:center;line-height:1}
 .room-list li.on .r-init{color:var(--brass)}
 .room-list .r-face{width:58px;height:58px;border-radius:10px;overflow:hidden;background:var(--slate);
@@ -208,6 +317,168 @@ body.add-open .ini-side{transform:none;visibility:visible;transition:transform .
 .room-list .r-hp .w-reeling{color:var(--ember)}
 .room-list .r-hp .w-down{color:var(--mute)}
 .room-foot{margin-top:20px;text-align:center;color:var(--mute);font-size:12.5px;font-style:italic}
+
+/* ── Whose turn it is ──────────────────────────────────────
+   Bottom left of the room's screen, the size of a person rather than an icon: the table looks up
+   at the character whose turn it is. It slides in from the edge when the turn changes, and the
+   order sits over on the RIGHT so the two never fight for the middle of the television. */
+/* The column runs from under the bar to the floor and the picture TAKES WHAT IS LEFT of it once
+   the plate has its rows. Capping the picture's height instead left it narrower than its own
+   column — a figure with a stripe of empty screen beside it, which is the one thing a splash must
+   not be. `contain` still never crops somebody's art; it simply gets the whole column to fill. */
+/* The art FILLS its column — a character panel, not a cut-out standing in a gap. `contain` left a
+   tall painting drawn narrower than the space beside it, and shrinking the column to match only
+   squeezed the plate into wrapping, so the picture covers the column instead and the name and the
+   numbers are laid over its foot. Anchored at the TOP, because what gets cropped from a painting
+   of a person should be their boots, never their face. */
+body.as-room{--spl-reserve:min(36vw,560px)}
+.room-splash{position:fixed;left:0;top:51px;bottom:0;z-index:20;pointer-events:none;
+  width:var(--spl-reserve);overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  transform:translateX(-28px);opacity:0;transition:transform .34s ease, opacity .34s ease}
+.room-splash.in{transform:none;opacity:1}
+/* The light they stand in. A warm pool behind the figure and a darker one under it, so a painting
+   with a hard edge is not a rectangle pasted onto the wall — on a television across a lit room
+   that edge is the first thing anybody notices. */
+.room-splash::before{
+  content:"";position:absolute;inset:auto 0 0 0;height:94%;z-index:-1;
+  background:
+    radial-gradient(58% 52% at 34% 64%, rgba(176,136,66,.16), rgba(10,12,16,0) 72%),
+    linear-gradient(to top, rgba(6,8,12,.96) 8%, rgba(6,8,12,.74) 34%, rgba(6,8,12,0) 62%);
+}
+.room-splash.hurt::before{
+  background:
+    radial-gradient(62% 56% at 38% 58%, rgba(196,62,48,.26), rgba(10,12,16,0) 74%),
+    linear-gradient(to top, rgba(12,5,6,.96) 8%, rgba(12,5,6,.76) 34%, rgba(12,5,6,0) 62%);
+}
+/* Two shadows, not one: a tight dark one that lifts the figure off the wall, and a wide soft one
+   that is the glow around it. */
+.room-splash > img{position:absolute;inset:0;z-index:0;width:100%;height:100%;
+  object-fit:cover;object-position:center top;display:block;
+  /* The right edge is feathered rather than cut, so the panel ends in the page instead of against
+     a line — the hard rectangle is the thing that reads as "pasted on" across a room. */
+  -webkit-mask-image:linear-gradient(to right, #000 68%, rgba(0,0,0,0) 100%);
+          mask-image:linear-gradient(to right, #000 68%, rgba(0,0,0,0) 100%)}
+.room-splash.hurt > img{filter:saturate(.92) brightness(.96)}
+/* Over the art: the pool of light, then the words. */
+.room-splash::before{z-index:1}
+.room-splash .spl-name,.room-splash .spl-stats{position:relative;z-index:2}
+.room-splash .spl-name{padding:10px clamp(14px,1.6vw,26px) clamp(16px,2vw,30px);font-family:var(--sans)}
+.room-splash .spl-name b{display:block;font-size:clamp(23px,2.1vw,38px);font-weight:700;
+  letter-spacing:-.015em;line-height:1.1;text-shadow:0 2px 14px rgba(4,6,10,.95)}
+.room-splash .spl-name span{font-size:clamp(13px,1.05vw,18px);color:var(--bone2);
+  text-shadow:0 2px 10px rgba(4,6,10,.9)}
+.room-splash.hurt .spl-name b{color:#E8A090}
+
+/* ── A monster's turn ──────────────────────────────────────
+   It has the picture it was added with — a 192px square — so it is framed as a BUST rather than
+   blown up into a figure it was never going to fill. Bloodied, from half its hit points down, the
+   picture is shown in blood; with no picture it is a mark in the same frame, which reddens too. */
+/* The bust keeps the same column the party's art gets — centred in it rather than blown up to
+   fill it, because a 192px picture stretched to five hundred is a wall of blur. Centred BOTH ways:
+   a small square pinned to the floor of a tall column reads as something that fell down there,
+   while the middle of the panel reads as a frame hung on the wall. */
+.room-splash.mon{width:var(--spl-reserve);justify-content:center}
+.room-splash.mon .mon-frame{margin-left:auto;margin-right:auto}
+.room-splash.mon .spl-name{padding-bottom:0;text-align:center}
+.room-splash.mon .spl-stats{text-align:center}
+/* The pool of light moves up with it. */
+.room-splash.mon::before{background:
+  radial-gradient(60% 46% at 50% 46%, rgba(176,136,66,.17), rgba(10,12,16,0) 72%),
+  radial-gradient(74% 54% at 50% 56%, rgba(6,8,12,.86), rgba(10,12,16,0) 76%)}
+.room-splash.mon.hurt::before{background:
+  radial-gradient(60% 46% at 50% 46%, rgba(196,62,48,.24), rgba(10,12,16,0) 72%),
+  radial-gradient(74% 54% at 50% 56%, rgba(10,6,8,.88), rgba(10,12,16,0) 76%)}
+/* A bust is small enough that the figure's pool of light would read as a dark PANEL behind it —
+   so for a monster it is radial on every side, with no straight edge anywhere. (Its gradients are
+   set below, where the bust is centred.) */
+.room-splash.mon::before{height:100%}
+.mon-frame{
+  width:clamp(190px,17vw,340px);height:clamp(190px,17vw,340px);flex:0 0 auto;
+  margin:0 clamp(14px,1.6vw,26px);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--slate);
+  display:grid;place-items:center;
+  box-shadow:0 14px 34px rgba(4,6,10,.8), 0 0 28px rgba(176,136,66,.16);
+}
+.mon-frame img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s}
+.mon-frame span{font-size:clamp(54px,5vw,92px);color:var(--bone2);line-height:1;transition:color .3s}
+/* Shown in blood: everything pushed towards red rather than merely darkened, so it reads as a
+   state across the room and not as a badly lit picture. */
+.room-splash.mon.hurt .mon-frame{border-color:#8a3a30;
+  box-shadow:0 14px 34px rgba(4,6,10,.8), 0 0 34px rgba(196,62,48,.4)}
+.room-splash.mon.hurt .mon-frame img{filter:sepia(.6) hue-rotate(-28deg) saturate(2.4) brightness(.86)}
+.room-splash.mon.hurt .mon-frame span{color:var(--ember)}
+.room-splash.mon .spl-name span{text-transform:uppercase;letter-spacing:.1em;
+  font-size:clamp(11px,.95vw,16px)}
+
+/* Their numbers, under the name. Notation rather than sentences: six feet away nobody reads a
+   label, they read a bar, a pip and a sign. */
+.room-splash .spl-stats{padding:0 clamp(14px,1.6vw,26px) clamp(18px,2vw,34px);
+  font-family:var(--sans);display:flex;flex-direction:column;gap:clamp(6px,.6vw,10px)}
+.spl-hp{display:flex;flex-direction:column;gap:3px}
+.spl-bar{height:clamp(7px,.55vw,11px);border-radius:999px;background:rgba(8,10,14,.75);
+  border:1px solid var(--line);overflow:hidden}
+.spl-bar i{display:block;height:100%;background:var(--verdant);transition:width .3s}
+.spl-bar.mid i{background:var(--brass)}
+.spl-bar.low i{background:var(--ember)}
+.spl-hpn{display:flex;align-items:baseline;gap:5px;text-shadow:0 2px 8px rgba(4,6,10,.9)}
+.spl-hpn b{font-size:clamp(17px,1.5vw,27px);font-weight:700}
+.spl-hpn s{color:var(--bone2);text-decoration:none;font-size:clamp(12px,1vw,18px)}
+.spl-hpn em{color:var(--steel);font-style:normal;font-size:clamp(12px,1vw,18px)}
+
+.spl-line{display:flex;flex-wrap:wrap;gap:clamp(8px,.9vw,16px);text-shadow:0 2px 8px rgba(4,6,10,.9)}
+.spl-line span{display:flex;align-items:baseline;gap:3px;color:var(--mute);
+  font-size:clamp(9.5px,.75vw,13px);letter-spacing:.08em}
+.spl-line b{color:var(--bone);font-size:clamp(15px,1.25vw,22px);font-weight:700;letter-spacing:0}
+
+.spl-abil{display:flex;flex-wrap:wrap;gap:clamp(5px,.5vw,9px)}
+.spl-abil div{flex:1 1 0;min-width:clamp(38px,3vw,54px);padding:clamp(3px,.35vw,6px) 2px;
+  text-align:center;background:rgba(14,17,22,.72);border:1px solid var(--line);border-radius:7px}
+.spl-abil i{display:block;font-style:normal;font-size:clamp(8px,.62vw,11px);color:var(--mute);letter-spacing:.1em}
+.spl-abil b{display:block;font-size:clamp(14px,1.15vw,20px);font-weight:700;line-height:1.15}
+.spl-abil s{display:block;text-decoration:none;font-size:clamp(9px,.7vw,13px);color:var(--bone2)}
+
+.spl-slots{display:flex;flex-wrap:wrap;gap:clamp(6px,.7vw,12px);
+  padding-top:clamp(4px,.4vw,7px);border-top:1px solid rgba(255,255,255,.07)}
+.spl-slots div{display:flex;align-items:center;gap:4px}
+.spl-slots i{font-style:normal;font-size:clamp(9px,.7vw,13px);color:var(--mute);letter-spacing:.06em}
+.spl-slots u{text-decoration:none;color:var(--brass);font-size:clamp(11px,.95vw,17px);letter-spacing:1px}
+.spl-slots b{color:var(--brass);font-size:clamp(12px,1vw,18px)}
+
+.spl-tag{align-self:flex-start;padding:2px 9px;border:1px solid var(--line);border-radius:999px;
+  background:rgba(14,17,22,.8);color:#D98B7B;font-size:clamp(10px,.8vw,14px)}
+.r-turnof{font-size:clamp(12px,.9vw,16px);font-style:normal;color:var(--mute);letter-spacing:.04em}
+/* The order gets out of the splash's way rather than sitting on top of it. */
+body.as-room .ini-room{padding-bottom:110px}
+@media (min-width:901px){
+  /* The order begins WHERE THE SPLASH ENDS. The panel owns the left, the rows take everything
+     after it, and there is no band of empty screen between the two — the art's own right edge is
+     feathered to nothing by that line, so the one runs into the other. `spl-on` is set while a
+     splash is up, which in a fight is always: out of combat the order simply centres. */
+  body.as-room .ini-room{
+    max-width:min(1180px, calc(100vw - 5vw));
+    margin-left:auto;margin-right:auto;
+  }
+  body.as-room.spl-on .ini-room{
+    margin-left:var(--spl-reserve);margin-right:max(2vw,20px);
+    max-width:none;padding-left:0;
+    /* The splash is BESIDE the order here, not under it, so none of the bottom needs reserving —
+       that space is rows instead. Narrow screens, where it does overlay, keep their clearance. */
+    padding-bottom:clamp(18px,2vh,30px);
+  }
+  /* A television is read from the sofa, so everything on it grows with the screen. */
+  body.as-room .room-hd h1{font-size:clamp(34px,3vw,54px)}
+  body.as-room .room-hd p{font-size:clamp(14px,1.1vw,20px)}
+  body.as-room .room-list li{grid-template-columns:clamp(62px,5vw,88px) clamp(58px,4.6vw,82px) 1fr auto;
+    gap:clamp(14px,1.2vw,22px);padding:clamp(10px,1vw,16px) clamp(14px,1.2vw,22px)}
+  body.as-room .room-list .r-init{font-size:clamp(26px,2.2vw,40px)}
+  body.as-room .room-list .r-face{width:clamp(58px,4.6vw,82px);height:clamp(58px,4.6vw,82px)}
+  body.as-room .room-list .r-id b{font-size:clamp(21px,1.7vw,31px)}
+  body.as-room .room-list .r-id span,
+  body.as-room .room-list .r-id .cons{font-size:clamp(12px,1vw,17px)}
+  body.as-room .room-list .r-hp b{font-size:clamp(15px,1.3vw,23px)}
+  body.as-room .room-list .r-hp span{font-size:clamp(11px,.9vw,16px)}
+}
 /* The DM holding the second screen keeps the bar, so they can get back. On a television nobody is
    signing in or switching tools, so the strip and the account menu are out of the way there. */
 body.as-room .bar:not(.room-bar) .tools,
@@ -225,6 +496,10 @@ body.as-room .bar:not(.room-bar) .live{display:none}
 @media (max-width:900px){
   .ini-side{top:0;width:min(372px,94vw);z-index:60}
   body.add-open .ini-scrim{display:block}
+  /* Here the splash lies OVER the order rather than beside it, so it takes the bottom corner and
+     nothing more — a full-height figure would be a figure across the whole list. */
+  .room-splash{top:auto;height:58vh}
+  .mon-frame{width:clamp(120px,30vw,190px);height:clamp(120px,30vw,190px)}
   .ini-row{grid-template-columns:48px 36px 1fr 1fr;grid-template-areas:
     "init face id id" "init face hp hp" ". . ac con" ". . dc tools"}
   .ini-row > .ini-init{grid-area:init} .ini-row > .ini-face{grid-area:face}

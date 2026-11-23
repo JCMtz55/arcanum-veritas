@@ -942,21 +942,60 @@ function dreamPanel(ch) {
       <h3>Cognitive Saving Throw</h3>
       <button class="btn pri" data-act="roll-cogst">Roll · ${sign(rules.cognitiveSavingThrowBonus(ch))}</button>
       <p class="hint">Your Dream modifier plus the highest of your six standard ability modifiers.
-        Proficiency is not added — a Cognitive Saving Throw is not a check.</p>
+        Proficiency is not added — a Cognitive Saving Throw is not a check.
+        ${de.noDreamModifier ? `<b class="hot">Identity Drift — your Dream modifier is denied, so this
+          save is the highest ability alone.</b>` : ""}</p>
     </section>
 
     <section class="card">
-      <h3>Dream Exhaustion · ${de.level}/8 — ${esc(de.name)}</h3>
-      ${de.level ? `<p class="de-now"><b>${de.penalty}</b> to every d20 roll you make <b>in a dream</b>.
-        ${de.concentrationDisadvantage ? " Disadvantage on Concentration checks." : ""}
-        ${de.noInspirationInDream ? " No Inspiration while in a dream." : ""}</p>` : ""}
+      <h3>Dream Exhaustion · ${de.level}/${rules.DREAM_EXHAUSTION_MAX} — ${esc(de.name)}</h3>
+      ${de.level ? `<p class="de-now"><b>${de.penalty}</b> to every d20 test you make —
+        <b>awake as well as dreaming</b>.
+        ${de.noInspiration ? " No inspiration of any kind may be spent." : ""}
+        ${de.dreamSaveDisadvantage ? " Disadvantage on Dream Saving Throws." : ""}
+        ${de.noDreamModifier ? " Your Dream Score Modifier cannot be added to anything." : ""}</p>` : ""}
       <div class="ladder">${rules.DREAM_EXHAUSTION.slice(1).map(r => `
         <button class="rung ${r.level <= de.level ? "on" : ""}" data-act="de" data-id="${r.level}"
           title="${esc(r.name)}">${r.level}</button>`).join("")}
         <button class="btn sm" data-act="de" data-id="0">Clear</button></div>
-      <p class="hint">Effects are cumulative, and the −5 holds at 6, 7 and 8.
-        A long rest <b>without Dream Walking</b> removes one level; one that included it removes none.
-        ${de.collapseSave ? `<b class="hot">At 8 a Cognitive Collapse Dream Save is due — your DM calls it.</b>` : ""}</p>
+      <p class="hint">Effects are cumulative, and the penalty deepens every level to −6.
+        A long rest <b>without Dream Walking</b> removes one level — but only down to
+        <b>${rules.DREAM_EXHAUSTION_REST_FLOOR}</b>. Levels above that do not come off with rest at all:
+        they need a Sefirot Stasis, Hypnos's Meditation Chamber, the Dream Axis pool, or an ability
+        that removes Dream Exhaustion by name.</p>
+    </section>
+    ${hollowingCard(ch)}`;
+}
+
+// Level 6 only. Every loss of consciousness is a Cognitive Saving Throw against being Hollowed, and
+// the third Fracture is permanent — so this card counts them and says plainly that the DM confirms
+// the last one. Nothing here Hollows the character on its own.
+function hollowingCard(ch) {
+  const h = rules.hollowingSave(ch);
+  if (!h) return "";
+  const pips = Array.from({ length: h.fracturesToHollow }, (_, i) =>
+    `<span class="hol-pip ${i < h.fractures ? "on" : ""}"></span>`).join("");
+  return `
+    <section class="card hol-card">
+      <h3>The Hollowing</h3>
+      <p class="de-now"><b>${esc(h.trigger)}</b>, make a Cognitive Saving Throw against
+        <b>DC ${h.dc}</b>. A failure is one Fracture. The third means you are Hollowed.</p>
+      <button class="btn pri" data-act="roll-hollowing">Roll · ${sign(h.bonus)}</button>
+      <p class="hint">${sign(h.parts.highestAbility)} highest ability
+        ${h.dreamModifierDenied
+          ? `· <b>no Dream modifier</b> (Identity Drift)`
+          : `· ${sign(h.parts.dreamModifier)} Dream modifier`}
+        · <b>${h.parts.dreamExhaustionPenalty}</b> Dream Exhaustion.</p>
+      <div class="hol-track">${pips}
+        <button class="btn sm" data-act="hfrac" data-d="-1">−</button>
+        <button class="btn sm" data-act="hfrac" data-d="1">+</button>
+        <span class="hint">${h.fractures} of ${h.fracturesToHollow} Fractures</span></div>
+      ${h.hollowed
+        ? `<p class="de-now"><b class="hot">Shattered — three Fractures. Your DM confirms the
+            Hollowing; the sheet will not do it for you.</b></p>`
+        : `<p class="hint">Fractures are <b>not</b> cleared by rest, hit dice or healing magic. They
+            need a Dream Ability of 7th level or higher, a Dreamlike or Lucidlike item that mends, a
+            Dream Lord inside your Node, or a god whose Authority the fiction violated.</p>`}
     </section>`;
 }
 
@@ -1068,9 +1107,9 @@ function grimmCard() {
     // The DM, or an account no Grimm is written for. The Admin page is where the DM reads all eight.
     return state.grimmData ? `<section class="card">
       <h3>${icon("grimm")} Grimm</h3>
-      <p class="hint">No Grimm is written for <b>${esc(state.me?.username || "this account")}</b>.
-        A Grimm is matched to the player by name, the same way the Admin page matches it —
-        the DM reads all of them in <a href="../admin/#/grimms">Admin › Grimms</a>.</p>
+      <p class="hint">No Grimm is assigned to <b>${esc(state.me?.username || "this account")}</b>.
+        Your DM assigns one on your own page in <a href="../admin/#/players">Admin › Players</a>,
+        and it appears here as soon as they have.</p>
     </section>` : "";
   }
 
@@ -1090,6 +1129,8 @@ function grimmCard() {
         g.forms?.invoked ? ` · Invoked as <b>${esc(g.forms.invoked)}</b>` : ""}${
         g.forms?.awakened ? ` · Awakened as <b>${esc(g.forms.awakened)}</b>` : ""}</p>
 
+      ${grimmSlots(g)}
+
       <div class="chainrow" title="The Three Chains — your DM keeps them">
         <span class="chainrow-k">The Three Chains</span>
         <span class="chainpips">${[1, 2, 3].map(i =>
@@ -1107,10 +1148,106 @@ function grimmCard() {
 
       ${souls ? `<p class="hint">${souls} soul${souls === 1 ? "" : "s"} on your roster.
         Preparing them, and everything they carry, is in the Companion.</p>` : ""}
+
+      ${grimmAbilities(g, toggles)}
+
       <p class="hint">Your slots, your stage and your loadout live in the
-        <a href="../grimms/">Companion</a>, which is where they are spent — this is the part your DM
-        keeps, so you can read it without leaving your character.</p>
+        <a href="../grimms/">Companion</a>, which is where they are spent — what is here is what your
+        Grimm can do and what your DM keeps, so you can read it without leaving your character.</p>
     </section>`;
+}
+
+// The Grimm Slots as they stand, shared with the Companion through a row rather than guessed at
+// (Juan, 2026-11-17: "a Grimm Slots tracker that syncs with their companion page"). ⭐ Every number
+// here was computed by the server — how many slots the stage has, how many are left, which order
+// the temporary ones go in. This page holds none of those rules, so it cannot drift from the
+// Companion by holding a stale version of one.
+//
+// What is NOT here is Force the Grimm, and the reason is honest rather than lazy: it buys a slot
+// with a point of Exhaustion, and the Grimm's Exhaustion is still the Companion's own. A button
+// here would take the slot and quietly drop the cost.
+function grimmSlots(g) {
+  const live = ephemer.myLive(g.id);
+  if (!live) return `<div class="gsl"><span class="chainrow-k">Grimm Slots</span>
+    <span class="hint">Open the <a href="../grimms/">Companion</a> once and they appear here.</span></div>`;
+
+  const pip = (i, used, temp) => `<button class="gsl-pip${temp ? " temp" : ""}${i < used ? " used" : ""}"
+    data-act="grimm-slot" data-delta="${i < used ? -1 : 1}"
+    title="${i < used ? "Spent — click to give it back" : "Click to spend it"}${temp ? " · temporary, bought by forcing the Grimm" : ""}"></button>`;
+
+  const pips = [
+    ...Array.from({ length: live.base }, (_, i) => pip(i, live.used, false)),
+    ...Array.from({ length: live.temp }, (_, i) => pip(i, live.tempUsed, true)),
+  ].join("");
+
+  return `<div class="gsl">
+    <div class="chainrow"><span class="chainrow-k">Grimm Slots</span>
+      <b>${live.left}/${live.total}</b>
+      <span class="hint">${esc(AB_STAGE[live.stage] || live.stage)}${
+        live.familiar ? " · Familiar form — slot abilities are unavailable" : ""}</span></div>
+    <div class="gsl-pips">${pips || `<span class="hint">A Dormant Grimm has no slots.</span>`}</div>
+    <p class="hint">Spend and give back here or in the <a href="../grimms/">Companion</a> — it is one
+      tracker. Forcing the Grimm, a Long Rest and the round are the Companion's, which is where the
+      Exhaustion they cost is kept.</p>
+  </div>`;
+}
+
+// What this Grimm can do, grouped the way the Companion groups it (Juan, 2026-11-17: "Add
+// abilities"). ⭐ What is deliberately NOT here is the LOADOUT — which of these is socketed right
+// now, what a slot has left, which stage the Grimm is standing in. That is live state the Companion
+// owns in its own browser, and a stale second copy of it at the table is worse than none. So this
+// is the pool: what the abilities say and at which stage each one opens, which is the part a player
+// was leaving their character to go and read.
+const AB_KINDS = [["core", "Core"], ["passive", "Passive"], ["active", "Active"],
+  ["super", "Special"], ["other", "Other"], ["shackle", "Shackle Break"]];
+const AB_STAGE = { dormant: "Dormant", invoked: "Invoked", chained: "Chained",
+  awakened: "Awakened", unveiled: "Unveiled", additional: "Additional" };
+const AB_ORDER = ["dormant", "invoked", "chained", "awakened", "unveiled", "additional"];
+
+function grimmAbilities(g, toggles) {
+  // Exactly the Companion's rule (`abilitiesOf` in grimms/js/core.js): open unless the DM has
+  // switched this one off, and a Shackle Break only once it is revealed. A player's copy of the data
+  // has an unrevealed Break cut out of it before it is served — this check is what keeps the DM's
+  // own copy honest, since the DM is served every one.
+  const all = (g.abilities || []).filter(a =>
+    toggles["a:" + a.id] !== false && (a.kind !== "shackle" || toggles.shackle === true));
+  // The Break is a field of its own in the data. The Companion merges it into the ability list on
+  // load; this page never runs that, so it does the same here.
+  if (g.shackle && toggles.shackle === true && !all.some(a => a.kind === "shackle"))
+    all.push(g.shackle);
+  if (!all.length) return "";
+
+  const groups = AB_KINDS
+    .map(([k, label]) => [label, all.filter(a => (a.kind || "other") === k)])
+    .filter(([, list]) => list.length);
+  // Anything the data calls by a kind this page has never heard of still belongs to the player.
+  const known = new Set(AB_KINDS.map(([k]) => k));
+  const rest = all.filter(a => !known.has(a.kind || "other"));
+  if (rest.length) groups.push(["Other", rest]);
+
+  const n = all.length;
+  return `<div class="gab">
+    <div class="chainrow"><span class="chainrow-k">Abilities</span>
+      <b>${n}</b><span class="hint">open to you — the DM keeps the rest</span></div>
+    ${groups.map(([label, list]) => `<div class="gab-grp">
+      <div class="zone-h sm"><h4>${esc(label)}</h4></div>
+      <div class="abl">${list
+        .slice().sort((a, b) => AB_ORDER.indexOf(a.stage) - AB_ORDER.indexOf(b.stage))
+        .map(abilityRow).join("")}</div></div>`).join("")}
+  </div>`;
+}
+
+// `feat-open` is the sheet's own one-line toggle — it opens the row it was clicked in and does
+// nothing else — so this borrows it rather than adding a second handler that would say the same.
+function abilityRow(a) {
+  const stage = a.stage === "shackle" ? "" : AB_STAGE[a.stage] || a.stage || "";
+  return `<div class="ab3"><div class="ab3-h" data-act="feat-open">
+      <span class="nm">${esc(a.name)}</span>
+      ${a.action ? `<span class="tag">${esc(a.action)}</span>` : ""}
+      ${a.cost ? `<span class="tag" title="${a.cost} Grimm Slot${a.cost > 1 ? "s" : ""}">${a.cost} slot${a.cost > 1 ? "s" : ""}</span>` : ""}
+      ${stage ? `<span class="tag">${esc(stage)}</span>` : ""}
+    </div>
+    <div class="ab3-b md">${ephemer.grimmProse(a.text)}</div></div>`;
 }
 
 function cognitionsCard() {
@@ -1906,10 +2043,15 @@ function renderRight() {
       <h3>${icon("exhaustion")} Exhaustion</h3>
       <div class="trks">
         ${step("exh", "exhaustion", "Physical", ch.exhaustion, 6, "Standard 5e Exhaustion")}
-        ${step("dexh", "dreamExhaustion", "Dream", de.level, 8, de.name)}
+        ${step("dexh", "dreamExhaustion", "Dream", de.level, rules.DREAM_EXHAUSTION_MAX, de.name)}
       </div>
-      ${de.level ? `<p class="hint dreamy"><b>${esc(de.name)}</b> · ${de.penalty} to d20 rolls
-        <b>in a dream</b>${de.concentrationDisadvantage ? " · disadvantage on Concentration" : ""}</p>` : ""}
+      ${de.level ? `<p class="hint dreamy"><b>${esc(de.name)}</b> · ${de.penalty} to <b>every d20 test,
+        awake or dreaming</b>${de.noInspiration ? " · no inspiration" : ""}${
+        de.dreamSaveDisadvantage ? " · disadvantage on Dream saves" : ""}${
+        de.noDreamModifier ? " · no Dream modifier" : ""}</p>` : ""}
+      ${de.hollowingSave ? `<p class="hint hot">Cognitive Collapse — every loss of consciousness is a
+        DC ${rules.HOLLOWING_SAVE_DC} Cognitive Saving Throw against being Hollowed.
+        ${ch.hollowingFractures || 0} of ${rules.HOLLOWING_FRACTURES_TO_HOLLOW} Fractures.</p>` : ""}
       ${ch.exhaustion >= 6 ? `<p class="hint hot">Six levels of physical Exhaustion.</p>` : ""}
     </section>
 
