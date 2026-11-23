@@ -360,7 +360,11 @@ button.ptr-por:hover{filter:brightness(1.12)}
 .gal-pick i{font-style:normal; font:400 11px/1.3 var(--sans); color:var(--bone2);
   word-break:break-word}
 
-.gal-dlg{max-width:min(900px, 94vw)}
+/* `.rem` sets a WIDTH, so a max-width here would never have won - the picker stayed at the inbox's
+   680px however many pictures were in it. */
+.gal-dlg{width:min(980px, 94vw)}
+/* The picker's own grid. It must not be called `.pick`: app.css styles that as a 30px select. */
+.gal-choose{grid-template-columns:repeat(auto-fill, minmax(128px, 1fr))}
 .gal-dlg h3{margin:18px 0 0; font:600 13px/1.2 var(--sans); letter-spacing:.08em;
   text-transform:uppercase; color:var(--mute)}
 

@@ -41,6 +41,12 @@ const GAL_SLOTS = [
   { key: "hurt",     label: "Bloodied",  hint: "from a tenth of their hit points down" },
 ];
 
+// ⚠️ Every class name in this file is prefixed `gal-`, and that is not tidiness. `app.css` is
+// loaded by every page in this app, and the picker spent its first hour showing one squashed strip
+// instead of the pictures because the grid was marked `class="gal-grid pick"` — and app.css styles
+// a bare `.pick` as a 30px-tall select, which clamped the grid to 30px and left the buttons
+// overflowing on top of each other.
+
 // A plate's path is relative to `sheet/`; a gallery picture is an absolute path the API serves.
 // Prefixing the second would make `../sheet//api/gallery/7`, which is why this asks first.
 const galSrc = u => (!u ? "" : /^(data:|https?:|\/)/.test(u) ? u : `../sheet/${u}`);
@@ -152,7 +158,7 @@ function galOpen(charId, slot) {
     `${c ? c.name : "Character"} — ${s ? s.label.toLowerCase() : slot}`;
   document.getElementById("galBody").innerHTML = `
     <p class="cdx-rings">${esc(s?.hint || "")}</p>
-    <div class="gal-grid pick">
+    <div class="gal-grid gal-choose">
       ${GAL.images.map(im => `<button class="gal-pick" onclick="galPick('${im.url}')"
           title="${escQ(im.name || "untitled")}">
         <span class="gal-shot" style="background-image:url('${galUrlAttr(im.url)}')"></span>
@@ -162,7 +168,7 @@ function galOpen(charId, slot) {
     ${splashOnly ? `<div class="cdx-note"><p>A splash has to come from the gallery — the plates are
       crops, and a crop blown up to fill a television is a smudge.</p></div>`
     : `<h3>Plates</h3>
-    <div class="gal-grid pick">
+    <div class="gal-grid gal-choose">
       ${GAL_PLATES.map(p => {
         const url = slot === "fullArt" ? `img/fullart/${p.file}` : `img/portraits/${p.file}`;
         return `<button class="gal-pick" onclick="galPick('${escQ(url)}')" title="${escQ(p.name)}">
