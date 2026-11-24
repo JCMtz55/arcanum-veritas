@@ -37,7 +37,9 @@
 .ini-order{display:flex;flex-direction:column;gap:6px}
 .ini-row{
   display:grid;gap:10px;align-items:center;
-  grid-template-columns:52px 40px minmax(110px,1.3fr) minmax(168px,1.5fr) 46px 46px minmax(104px,1fr) 58px;
+  /* The last column is the row's tools, and it holds three buttons now — the eye, the menu, and
+     the ✕ that takes it off the board. */
+  grid-template-columns:52px 40px minmax(110px,1.3fr) minmax(168px,1.5fr) 46px 46px minmax(104px,1fr) 86px;
   padding:7px 10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid transparent;
   border-radius:9px;
 }
@@ -238,6 +240,21 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
 .ini-add .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;
   padding-top:12px;border-top:1px solid var(--line)}
 
+/* The label under a monster's AC or DC is the switch that reveals it to the room. Brass and
+   underlined when the room can see it, and the same quiet grey as any other label when it cannot —
+   so a glance down the board says which numbers the table has been given. */
+.stat-rev{display:block;width:100%;padding:0;background:none;border:0;cursor:pointer;
+  font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mute);transition:color .13s}
+.stat-rev:hover{color:var(--bone2)}
+.stat-rev.on{color:var(--brass);text-decoration:underline;text-underline-offset:2px}
+
+/* One click off the board, beside the ⋯. Quiet until the row is hovered, and red when reached for:
+   it is the only button on a row that cannot be undone. */
+.ini-tools .row-x{opacity:.35;transition:opacity .13s, color .13s}
+.ini-row:hover .ini-tools .row-x{opacity:1}
+.ini-tools .row-x:hover{color:#F0A08A}
+
 /* ── Events ────────────────────────────────────────────────── */
 /* A place in the order that is not a creature. Its own colour — a cold jade that is nowhere else on
    this page — because the one thing it must never do is read as another monster at a glance.
@@ -245,7 +262,7 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
    match would be pretending it has them. */
 :root{--ev:#6FC2A6;--ev-line:#2f6453;--ev-bg:rgba(111,194,166,.07)}
 .ini-row.ev{
-  grid-template-columns:52px 26px 1fr auto;
+  grid-template-columns:52px 26px 1fr 86px;
   background:var(--ev-bg);border-color:var(--ev-line);border-left-color:transparent
 }
 .ini-row.ev.on{border-left-color:var(--ev);background:rgba(111,194,166,.15);
@@ -459,7 +476,12 @@ body.rm-tiny .room-break{padding:2px 4px}
 .room-list .r-id .cons{display:block;margin-top:3px;font-family:var(--sans);font-size:12px;color:#E0B050}
 .room-list .r-hp{text-align:right;font-family:var(--sans)}
 .room-list .r-hp b{display:block;font-size:15px;font-weight:500}
+/* AC and a save DC can both be revealed on one creature now, so they need to be told apart —
+   a middot between them rather than two numbers running into each other. */
 .room-list .r-hp span{font-size:11px;color:var(--mute)}
+/* Direct children only: a PC's "/ 1" and "+5" are spans too, but they live inside the <b>, and a
+   middot between their hit points and their temporary ones would be nonsense. */
+.room-list .r-hp > span + span::before{content:" · ";color:var(--line)}
 .room-list .r-hp .w-unhurt{color:var(--verdant)}
 .room-list .r-hp .w-grazed{color:#9CB89C}
 .room-list .r-hp .w-hurt{color:var(--brass)}

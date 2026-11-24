@@ -2872,7 +2872,7 @@ const initBlank = () => ({
   clock: true,
   // What the room is allowed to see. Hit points as WORDS is the default because a number on the wall
   // tells the table exactly how many rounds are left in the boss.
-  show: { portraits: true, ac: true, dc: false, hp: "words", conditions: true,
+  show: { portraits: true, ac: true, hp: "words", conditions: true,
           splash: true, splashNpc: true, stats: true },
   combatants: [],
 });
@@ -3048,6 +3048,15 @@ function cleanCombatant(c) {
     nightmare: cleanNightmare(c?.nightmare),
     reverian: cleanReverian(c?.reverian),
     grimm: cleanMonsterGrimm(c?.grimm),
+    // Whether THIS creature's AC and save DC are shown to the room — the moment the table has
+    // worked a number out and the DM confirms it, rather than a setting that answers for every
+    // monster in the fight at once.
+    //
+    // AC starts revealed because that is what the board has always done when `show.ac` is on, and
+    // a switch that silently hid every monster's AC would be a change nobody asked for. A DC starts
+    // hidden: the room has never been shown one, and it is the more useful thing to make them earn.
+    showAc: c?.showAc !== false,
+    showDc: !!c?.showDc,
     // Which library creature this row IS a copy of, when it came from there. Only the id: the
     // entry's splash art is fetched by it, so the pictures never ride in the board's own save.
     // 0 for a monster typed in by hand, which has no entry and so no art to find.
@@ -3073,7 +3082,9 @@ function cleanInit(body) {
     show: {
       portraits: show.portraits !== false,
       ac: show.ac !== false,
-      dc: !!show.dc,
+      // `show.dc` was stored here and read by NOTHING — the room could never show a save DC at all.
+      // Retired rather than left looking like a switch: a DC is now revealed per creature, on the
+      // row, by the same click that reveals its AC.
       hp: ["words", "numbers", "none"].includes(show.hp) ? show.hp : "words",
       conditions: show.conditions !== false,
       splash: show.splash !== false,
@@ -3238,7 +3249,12 @@ function initPlayerView(state, party, libArt = new Map()) {
       // are refusing to.
       bloodied: r.kind === "npc" && show.hp !== "none" && r.hpMax
         ? r.hp <= r.hpMax * 0.5 : false,
-      ac: show.ac ? r.ac : null,
+      // A PC's own numbers are theirs and already on their sheet, so the global switch is the whole
+      // of it. A MONSTER's are shown only once this one has been revealed — the switch in Room ▾
+      // stays the master, so turning it off still hides every one of them at a stroke.
+      ac: r.kind === "pc" ? (show.ac ? r.ac : null)
+        : (show.ac && r.showAc ? r.ac : null),
+      dc: r.kind === "pc" ? null : (r.showDc ? r.dc : null),
       // A PC's own hit points are their business and already on their sheet, so the party is shown
       // in numbers; a monster is shown in a word, or not at all.
       hp: show.hp === "none" ? null

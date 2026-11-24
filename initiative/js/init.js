@@ -283,13 +283,22 @@ function drawOrder() {
     const pc = r.kind === "pc";
     const pct = r.hpMax ? Math.max(0, Math.min(100, Math.round((r.hp / r.hpMax) * 100))) : 0;
     // A PC's own numbers are read from their sheet and are not typed here; a monster's are.
+    // The LABEL under a monster's number is the reveal. There is nowhere else to put it that does
+    // not cost a column, it is already sitting under the thing it governs, and it means revealing
+    // an AC the table has just worked out is one click on the AC itself. Brass and underlined when
+    // the room can see it. A PC's numbers are theirs and are not revealed by anybody.
+    const revealed = what => (what === "ac" ? r.showAc !== false : !!r.showDc);
     const stat = (v, label, what) => pc || r.gone
       ? `<div class="ini-stat ${v == null ? "none" : ""}" title="${escQ(label)} — from their sheet">
            <b>${v == null ? "—" : v}</b><span>${label}</span></div>`
       : `<div class="ini-stat ${v == null ? "none" : ""}">
            <input value="${v == null ? "" : v}" inputmode="numeric" placeholder="—"
              aria-label="${escQ(label)}" onchange="setNum('${r.id}','${what}',this.value)">
-           <span>${label}</span></div>`;
+           <button class="stat-rev ${revealed(what) ? "on" : ""}"
+             onclick="toggleReveal('${r.id}','${what}')" aria-pressed="${revealed(what)}"
+             title="${escQ(revealed(what)
+               ? `The room can see this ${label}. Click to take it back.`
+               : `Hidden from the room. Click to reveal this ${label}.`)}">${label}</button></div>`;
     return `
     <div class="ini-row ${pc ? "pc" : ""} ${r.id === S.turnId && S.inCombat ? "on" : ""}
                 ${r.down ? "down" : ""} ${r.hidden ? "off" : ""} ${r.gone ? "gone" : ""}
@@ -334,6 +343,8 @@ function drawOrder() {
         <button class="${r.hidden ? "" : "on"}" onclick="toggleHidden('${r.id}')"
           title="${r.hidden ? "Not on the room's screen" : "On the room's screen"}">${r.hidden ? "⊘" : "👁"}</button>
         <button onclick="rowMenu('${r.id}')" title="More">⋯</button>
+        <button class="row-x" onclick="quickRemove('${r.id}')"
+          title="Take ${escQ(r.name)} off the board">✕</button>
       </div>
       ${r.note ? `<div class="ini-note">${esc(r.note)}</div>` : ""}
     </div>`;
@@ -1181,6 +1192,35 @@ function duplicate(id) {
                       conditions: [], init: c.init, down: false, note: "" });
   push(); draw(); closeDlg();
 }
+// Whether the room may see this one's AC or its save DC. Per creature, because the moment worth
+// having is the one where the table has worked a number out and the DM confirms it — not a setting
+// that answers for every monster in the fight at once.
+function toggleReveal(id, what) {
+  const c = find(id); if (!c || c.kind !== "npc") return;
+  const key = what === "ac" ? "showAc" : "showDc";
+  const now = key === "showAc" ? c.showAc !== false : !!c.showDc;
+  c[key] = !now;
+  push(); draw();
+  toast(`${c.name} — ${what.toUpperCase()} ${c[key] ? "shown to the room" : "hidden again"}.`);
+}
+
+// One click off the board. It asks first only when there is something to lose: a row that has been
+// damaged, or is carrying conditions or counters. There is no undo on this page, and a half-fought
+// boss removed by a stray click is not recoverable — but making every click confirm would make the
+// button pointless, which is the thing it is for.
+function quickRemove(id) {
+  const c = find(id);
+  const r = resolve().find(x => x.id === id);
+  if (!c || !r) return;
+  const touched = c.kind === "npc" &&
+    ((c.hpMax && c.hp < c.hpMax) || (c.conditions || []).length || (c.counters || []).length);
+  if (touched && !confirm(`Take ${r.name} off the board? It is at ${c.hp} of ${c.hpMax}`
+      + `${(c.conditions || []).length ? `, carrying ${(c.conditions || []).map(x => x.name).join(", ")}` : ""}`
+      + `. This cannot be undone.`)) return;
+  removeRow(id);
+  toast(`${r.name} is off the board.`);
+}
+
 function removeRow(id) {
   const base = baseOf(id);
   if (baseOf(S.turnId) === base) nextTurn();
@@ -1470,7 +1510,7 @@ function openRoomSettings() {
     <button class="mini ${sh[key] ? "on" : ""}" onclick="toggleShow('${key}')">${sh[key] ? "Shown" : "Hidden"}</button></div>`;
   openDlg("The room's screen", `
     ${flag("portraits", "Faces", "a picture per row")}
-    ${flag("ac", "Armour Class", "they work it out anyway")}
+    ${flag("ac", "Armour Class", "the master switch — monsters are revealed one at a time")}
     ${flag("conditions", "Conditions", "who is frightened, who is prone")}
     ${flag("splash", "Splash art", "whose turn it is, in the corner")}
     ${flag("splashNpc", "Monster splash art", "enemies get theirs too")}
@@ -1481,6 +1521,9 @@ function openRoomSettings() {
     <p class="note">In words is Unhurt · Grazed · Hurt · Bloodied · Reeling · Down. A number on the
       wall tells the table how many rounds are left in the boss, which is yours to say, not the
       tool's to leak. The party is always shown their own numbers — those are on their sheets.</p>
+    <p class="note">A monster's <b>AC</b> and <b>save DC</b> are revealed one creature at a time:
+      click the little AC or DC label under the number on its row. AC starts revealed, a DC starts
+      hidden. Turning Armour Class off above hides every monster's at once whatever their rows say.</p>
     <div class="line" style="margin-top:12px"><b>Drive the table's clock</b>
       <span>write the round onto every sheet</span>
       <button class="mini ${S.clock !== false ? "on" : ""}" onclick="toggleClock()">
@@ -1898,7 +1941,10 @@ function drawRoom() {
             ? `<b>${r.hp.hp}<span> / ${r.hp.max}</span>${r.hp.temp ? `<span> +${r.hp.temp}</span>` : ""}</b>`
             : `<b class="w-${String(r.hp.word).toLowerCase()}">${esc(r.hp.word)}</b>`)
           : ""}
-        ${v.show.ac !== false && r.ac != null ? `<span>AC ${r.ac}</span>` : ""}
+        ${// The server has already decided these: a monster's are null until it has been revealed
+          // on the row, so nothing is withheld by a browser.
+          [r.ac != null ? `AC ${r.ac}` : "", r.dc != null ? `DC ${r.dc}` : ""]
+            .filter(Boolean).map(t => `<span>${t}</span>`).join("")}
       </div>
     </li>`}`).join("");
   el("roomFoot").textContent = v.order.length
