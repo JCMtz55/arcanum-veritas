@@ -100,6 +100,8 @@ let CONDS = [];          // the conditions the picker offers
 let EMOTIONS = [];       // the campaign's Vile Emotions, from Vileness.md by way of the server
 let GRADES = [];         // Demi-Nightmare · Nightling · Recurring · Primordial
 let RENOWN = [];         // Remembered · Storied · Legendary · Mythic — a Reverian's scaling dial
+let GRIMM_STAGES = ["dormant", "invoked", "chained", "awakened", "unveiled"];
+let GRIMM_SLOTS = { dormant: 0, invoked: 3, chained: 6, awakened: 6, unveiled: 6 };
 let SAVED = [];          // lineups kept for later
 let ROOM = null;         // the player's view, when this page is wearing that face
 let ASROOM = false;      // #player — the DM looking at what the room sees
@@ -150,7 +152,7 @@ function resolve() {
       conditions: (p.conditions || []).map(x => ({ name: typeof x === "string" ? x : x?.name, rounds: null }))
         .filter(x => x.name),
       down: p.hp <= 0,
-      wounds: p.wounds, deathSaveDC: p.deathSaveDC, fate: p.fate,
+      wounds: p.wounds, deathSaveDC: p.deathSaveDC, fate: p.fate, grimm: p.grimm,
       exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
       dreamExhaustionName: p.dreamExhaustionName,
       round: p.round, art: p.art || {},
@@ -258,6 +260,26 @@ function drawOrder() {
     return;
   }
   paint("order", rows.map(r => {
+    // An EVENT is not a combatant. It is a place in the order with a line of text in it — the lair
+    // acting, a fuse burning down, the gate opening on 20. Both its parts are edited where they
+    // are: there is nothing else to it, so a dialog to change four words would be the long way
+    // round. Its own colour, because at a glance it must not read as another monster.
+    if (r.kind === "event") return `
+      <div class="ini-row ev ${r.id === S.turnId && S.inCombat ? "on" : ""} ${r.hidden ? "off" : ""}"
+           data-id="${r.id}">
+        <input class="ini-init ${r.init == null ? "none" : ""}" value="${r.init == null ? "" : r.init}"
+          inputmode="numeric" placeholder="on" aria-label="When ${escQ(r.name)} happens"
+          onchange="setInit('${r.id}', this.value)">
+        <div class="ev-mark" title="An event, not a creature">◆</div>
+        <input class="ev-text" value="${escQ(r.name)}" aria-label="What happens"
+          placeholder="What happens on this count"
+          onchange="setEventText('${r.id}', this.value)">
+        <div class="ini-tools">
+          <button class="${r.hidden ? "" : "on"}" onclick="toggleHidden('${r.id}')"
+            title="${r.hidden ? "Not on the room's screen" : "On the room's screen"}">${r.hidden ? "⊘" : "👁"}</button>
+          <button onclick="removeRow('${r.id}')" title="Take it off the order">✕</button>
+        </div>
+      </div>`;
     const pc = r.kind === "pc";
     const pct = r.hpMax ? Math.max(0, Math.min(100, Math.round((r.hp / r.hpMax) * 100))) : 0;
     // A PC's own numbers are read from their sheet and are not typed here; a monster's are.
@@ -301,7 +323,7 @@ function drawOrder() {
       ${stat(r.ac, "AC", "ac")}
       ${stat(r.dc, "DC", "dc")}
       <div class="ini-con">
-        ${pc ? woundChip(r) : ""}
+        ${pc ? woundChip(r) + grimmChip(r) : ""}
         ${r.slot ? "" : trackChips(r)}
         ${(r.conditions || []).map(c => `<button class="chip ${isCampaign(c.name) ? "camp" : ""}"
             onclick="dropCondition('${r.id}','${escQ(c.name)}')" title="Click to clear">
@@ -328,6 +350,22 @@ function woundChip(r) {
   const n = r.wounds || 0;
   return `<button class="chip wnd ${n ? "on" : ""}" onclick="bumpWound('${r.id}', event)"
     title="Wounds — ${n} of 20, from their sheet. Click to add one, shift-click to heal one.">W·${n}</button>`;
+}
+
+// Their Grimm Slots, read from the shared row the Companion and their sheet both write to. NOT a
+// button: a slot is the player's to spend, from either of their own screens, and a third writer
+// would be a third thing to race. It is here so the DM can see what the party can still afford
+// before deciding whether the boss pushes them.
+function grimmChip(r) {
+  const g = r.grimm;
+  if (!g || !g.total) return "";
+  const forced = g.total - (g.base ?? g.total);
+  return `<span class="chip grm flat ${g.left ? "" : "spent"}" title="${escQ(
+    `${g.name || "Grimm"} — ${g.left} of ${g.total} Grimm Slot${g.total === 1 ? "" : "s"} left`
+    + `${g.stage ? `, ${g.stage[0].toUpperCase()}${g.stage.slice(1)}` : ""}`
+    + `${forced > 0 ? `, ${forced} of them forced` : ""}`
+    + `${g.familiar ? ", in Familiar form" : ""}. Theirs to spend — this is a readout.`)}">
+    G·${g.left}/${g.total}</span>`;
 }
 
 function trackChips(r) {
@@ -373,6 +411,17 @@ function trackChips(r) {
         title="Subtraction — it has dropped below ${due === "half" ? "half" : "a quarter"} of its Detail and permanently loses one trait, action, reaction or maneuver of your choice, gone from the memory for good. Click once you have taken it off.">
         ⚠ Subtract</button>`);
   }
+  // A monster's own Grimm. Unlike the party's, this one IS a button — it is the DM's to spend.
+  // ⚠️ `kind` matters: a PC row carries `grimm` too, and theirs is a READOUT of the row their own
+  // two screens write to. Without this guard the party's pool drew here as well, as something the
+  // DM could spend out from under them.
+  const gr = r.kind === "npc" ? r.grimm : null;
+  if (gr && gr.total)
+    out.push(`<button class="chip grm" onclick="spendGrimmSlot('${r.id}', event)"
+      title="${escQ(`${gr.name || "Grimm"} — ${gr.left} of ${gr.total} Grimm Slot${gr.total === 1 ? "" : "s"} left`
+        + `${gr.stage ? `, ${gr.stage[0].toUpperCase()}${gr.stage.slice(1)}` : ""}`
+        + `. Click to spend one, shift-click to give one back.`)}">
+      G ${pips(gr.left, gr.total)}</button>`);
   for (const c of r.counters || [])
     out.push(`<button class="chip ctr" onclick="bumpCounter('${r.id}','${escQ(c.id)}', event)"
       title="${escQ(`${c.name}${c.why ? ` — ${c.why}` : ""}. Click to take one off, shift-click to put one back.`)}">
@@ -424,7 +473,7 @@ function setTab(t) {
   // Straight into the box this tab exists for. A tab that needs a second click before you can type
   // is a tab that has not actually saved anybody a step.
   if (t === "lib") setTimeout(() => el("libQ")?.focus(), 20);
-  if (t === "new") setTimeout(() => el("aName")?.focus(), 20);
+  if (t === "new") setTimeout(() => el(NEWMODE === "event" ? "evInit" : "aName")?.focus(), 20);
 }
 
 // Who is not on the board yet. Read once per draw and handed down, because three of the four panes
@@ -479,11 +528,47 @@ function drawParty(away) {
       }).join("")}</div>`);
 }
 
+// Two things get typed in rather than picked: a monster, and an event — a place in the order that
+// is not a creature at all. Same tab, because both answer "there is something else in this fight".
+let NEWMODE = "monster";
+try { NEWMODE = localStorage.getItem("ini.newmode") || "monster"; } catch (e) {}
+if (NEWMODE !== "event") NEWMODE = "monster";
+
+function setNewMode(m) {
+  NEWMODE = m;
+  try { localStorage.setItem("ini.newmode", m); } catch (e) {}
+  drawAdd();
+  setTimeout(() => el(m === "event" ? "evInit" : "aName")?.focus(), 20);
+}
+
 function drawAdd() {
   // What is already typed is rendered back in, because this panel is also redrawn when a picture is
   // chosen — half a monster typed in must not vanish because the DM picked its face second.
   const keep = id => { const n = el(id); return n ? escQ(n.value) : ""; };
-  paint("add", `
+  const modes = `<div class="new-modes">${[["monster", "Monster"], ["event", "Event"]]
+    .map(([m, l]) => `<button class="new-mode ${NEWMODE === m ? "on" : ""}"
+      onclick="setNewMode('${m}')">${l}</button>`).join("")}</div>`;
+
+  if (NEWMODE === "event") {
+    paint("add", `${modes}
+      <div class="ini-form">
+        <div class="ini-f w-n"><label for="evInit">On</label>
+          <input id="evInit" value="${keep("evInit")}" inputmode="numeric" placeholder="20"
+            onkeydown="if(event.key==='Enter')document.getElementById('evText').focus()"></div>
+        <div class="ini-f w-name"><label for="evText">What happens</label>
+          <input id="evText" value="${keep("evText")}"
+            placeholder="The lair acts — vines take the floor"
+            onkeydown="if(event.key==='Enter')addEvent()"></div>
+        <button class="mini go" onclick="addEvent()">Add</button>
+      </div>
+      <p class="hint side-hint">A place in the order that is <b>not a creature</b> — the lair
+        acting, a fuse burning down, the tide coming in, the gate opening on 20. Nothing rolls for
+        it and nothing can hit it. Leave the number empty and it waits at the bottom until you give
+        it one. The 👁 on its row keeps one off the room's screen until you want it seen.</p>`);
+    return;
+  }
+
+  paint("add", `${modes}
     <div class="ini-form">
       <label class="ini-pic" title="A face for the room's screen">
         ${PIC ? `<img src="${escQ(PIC)}" alt="">` : "✛"}
@@ -524,10 +609,10 @@ function drawAdd() {
 //
 // Three sets of them: the add form's (`a`), a row's own dialog (`e`), and a library entry's (`l`),
 // which is the same monster before it has walked in.
-const OPT_FIELDS = ["Lr", "Ph", "Tn", "Gr", "Rt", "Rn"];
+const OPT_FIELDS = ["Lr", "Ph", "Tn", "Gr", "Rt", "Rn", "Gs", "Gn", "Gm"];
 const newOpt = () => ({
-  open: { boss: false, nm: false, rev: false },
-  on:   { boss: false, nm: false, rev: false },
+  open: { boss: false, nm: false, rev: false, grimm: false },
+  on:   { boss: false, nm: false, rev: false, grimm: false },
   emo: new Set(),
   shadow: false,
   // What is in the boxes, held here as well as in the DOM. A block that is ON but folded shut has no
@@ -586,7 +671,33 @@ function optionBlocks(p) {
         good — the row will ask you, unless it is a Shadow.</p>
       ${o.on.nm && o.on.rev ? `<p class="hint hint-warn">⚠️ In canon a Reverian is neither a Denizen
         nor a Nightmare, and anything keyed to those does nothing to it. Both are kept if you leave
-        them on.</p>` : ""}`);
+        them on.</p>` : ""}`)
+  // A monster that BEARS A GRIMM. The slots follow the campaign's own rule by stage, and stay
+  // editable because an enemy's Grimm need not be built the way a player's is. The name is typed:
+  // what an enemy bears is not necessarily one of the party's eight.
+  + block("grimm", "Grimm", "stage · slots · name", `
+      <div class="ini-form">
+        <div class="ini-f"><label for="${p}Gs">Stage</label>
+          <select id="${p}Gs" class="opt-sel" onchange="grimmStagePick('${p}')">${GRIMM_STAGES.map(s =>
+            `<option value="${escQ(s)}" ${(OPTV(p, "Gs") || "awakened") === s ? "selected" : ""}>${
+              s[0].toUpperCase()}${s.slice(1)} — ${GRIMM_SLOTS[s] ?? 0}</option>`).join("")}</select></div>
+        ${num("Gn", "Slots", OPTV(p, "Gn"), String(GRIMM_SLOTS[OPTV(p, "Gs") || "awakened"] ?? 6))}
+      </div>
+      <div class="ini-form" style="margin-top:8px">
+        <div class="ini-f w-name"><label for="${p}Gm">Which Grimm</label>
+          <input id="${p}Gm" value="${escQ(OPTV(p, "Gm"))}" placeholder="Vidarr, or one of its own"></div>
+      </div>
+      <p class="hint">Picking a stage fills the slots in — Dormant 0, Invoked 3, everything above 6.
+        Change the number if this one is not built that way. On the row it is a chip you spend.</p>`);
+}
+
+// Choosing a stage fills the slot box, because that is the rule — but only when the DM has not
+// already typed a number of their own over it.
+function grimmStagePick(p) {
+  stash(p);
+  const stage = OPTV(p, "Gs") || "awakened";
+  const n = el(`${p}Gn`);
+  if (n) { n.value = GRIMM_SLOTS[stage] ?? 0; OPT[p].vals.Gn = n.value; }
 }
 
 // What is in one of those fields — the page first, and what was stashed when the block was folded
@@ -633,15 +744,21 @@ function readOptions(p) {
                         turns: Math.max(1, Math.min(4, n("Tn") || 1)), inits: [] } : null,
     nightmare: o.on.nm ? { grade: OPTV(p, "Gr") || "", emotions: [...o.emo], roots, rootsMax: roots } : null,
     reverian: o.on.rev ? { renown, renownMax: renown, shadow: !!o.shadow, subtracted: [] } : null,
+    grimm: o.on.grimm ? (() => {
+      const stage = OPTV(p, "Gs") || "awakened";
+      const raw = OPTV(p, "Gn");
+      const total = raw === "" ? (GRIMM_SLOTS[stage] ?? 0) : Math.max(0, Math.min(20, n("Gn")));
+      return { name: OPTV(p, "Gm").trim(), stage, total, left: total };
+    })() : null,
   };
 }
 
 // Load one of the three sets from a monster that already exists — a row, or a library entry.
 function loadOptions(p, c) {
   const o = OPT[p];
-  const b = c?.boss, nm = c?.nightmare, rv = c?.reverian;
-  o.on = { boss: !!b, nm: !!nm, rev: !!rv };
-  o.open = { boss: !!b, nm: !!nm, rev: !!rv };
+  const b = c?.boss, nm = c?.nightmare, rv = c?.reverian, gm = c?.grimm;
+  o.on = { boss: !!b, nm: !!nm, rev: !!rv, grimm: !!gm };
+  o.open = { boss: !!b, nm: !!nm, rev: !!rv, grimm: !!gm };
   o.emo = new Set(nm?.emotions || []);
   o.shadow = !!rv?.shadow;
   o.vals = {
@@ -649,6 +766,7 @@ function loadOptions(p, c) {
     Tn: b ? String(b.turns || 1) : "",
     Gr: nm?.grade || "", Rt: nm ? String(nm.rootsMax || 0) : "",
     Rn: String(rv?.renownMax || 1),
+    Gs: gm?.stage || "awakened", Gn: gm ? String(gm.total || 0) : "", Gm: gm?.name || "",
   };
 }
 
@@ -696,6 +814,7 @@ function addNpc() {
       boss: opt.boss ? { ...opt.boss, inits: [] } : null,
       nightmare: opt.nightmare ? { ...opt.nightmare, emotions: [...opt.nightmare.emotions] } : null,
       reverian: opt.reverian ? { ...opt.reverian, subtracted: [] } : null,
+      grimm: opt.grimm ? { ...opt.grimm } : null,
       counters: [],
       // Four Glasslings are "Glassling 1" through "Glassling 4": the DM has to be able to say which
       // one is bleeding, and a board of four identical rows cannot answer that.
@@ -709,6 +828,29 @@ function addNpc() {
   push(); draw();
   el("aName")?.focus();
   toast(n > 1 ? `${n} × ${name} added` : `${name} added`);
+}
+
+// A place in the order that is not a creature. No roll, no hit points, nothing to hit — the number
+// is typed because an event happens when the DM decided it happens.
+function addEvent() {
+  const text = el("evText").value.trim();
+  if (!text) return toast("Say what happens.");
+  const raw = el("evInit").value.trim();
+  if (S.combatants.length + 1 > 60) return toast("That is as many as one board holds.");
+  S.combatants.push({
+    id: newId(), kind: "event", name: text.slice(0, 160),
+    init: raw === "" ? null : parseInt(raw, 10) || 0, initMod: 0,
+    hidden: false, note: "",
+  });
+  el("evText").value = ""; el("evInit").value = "";
+  push(); draw();
+  el("evInit")?.focus();
+  toast(`“${text.slice(0, 40)}” is in the order.`);
+}
+function setEventText(id, v) {
+  const c = find(id); if (!c) return;
+  c.name = String(v).trim().slice(0, 160) || "Event";
+  push(); draw();
 }
 
 function addPc(charId) {
@@ -816,6 +958,16 @@ function paySubtraction(id, which) {
   toast("Subtraction — take one trait, action, reaction or maneuver off it for good. It does not get weaker in numbers; it gets simpler.");
 }
 
+function spendGrimmSlot(id, ev) {
+  const c = find(id); if (!c?.grimm) return;
+  const back = ev?.shiftKey;
+  c.grimm.left = Math.max(0, Math.min(c.grimm.total, c.grimm.left + (back ? 1 : -1)));
+  push(); draw();
+  if (!back) toast(c.grimm.left
+    ? `${c.name} spends a Grimm Slot — ${c.grimm.left} left.`
+    : `${c.name} has no Grimm Slots left.`);
+}
+
 function cutRoot(id, ev) {
   const c = find(id); if (!c?.nightmare) return;
   const back = ev?.shiftKey;
@@ -864,7 +1016,9 @@ function rollAll() {
   // monsters, and six separate numbers for them is six turns the DM has to remember instead of one.
   const rolled = new Map();
   for (const c of S.combatants) {
-    if (c.kind === "pc") continue;
+    // Monsters only. A PC rolls their own, and an EVENT happens on the count the DM chose for it —
+    // rolling a d20 for the gate opening is not a thing anybody wants.
+    if (c.kind !== "npc") continue;
     const row = resolve().find(r => r.id === c.id);
     if (c.init == null) {
       const key = `${String(c.name).replace(/\s+\d+$/, "")}|${row?.initMod || 0}`;
@@ -967,10 +1121,11 @@ function rowMenu(id) {
     ${r.kind === "npc" ? `<div class="line"><b>Counters</b>
       <span>${(c.counters || []).length ? (c.counters || []).map(x => x.name).join(" · ") : "none yet"}</span>
       <button class="mini" onclick="openCounters('${id}')">Keep count…</button></div>
-    <div class="line"><b>Boss · Nightmare · Reverian</b>
+    <div class="line"><b>Boss · Nightmare · Reverian · Grimm</b>
       <span>${[c.boss && "boss", c.nightmare && (c.nightmare.grade || "nightmare"),
-                c.reverian && `${c.reverian.shadow ? "shadow " : ""}reverian R·${c.reverian.renown}`]
-        .filter(Boolean).join(" · ") || "none of the three — an ordinary monster"}</span>
+                c.reverian && `${c.reverian.shadow ? "shadow " : ""}reverian R·${c.reverian.renown}`,
+                c.grimm && `${c.grimm.name || "grimm"} ${c.grimm.left}/${c.grimm.total}`]
+        .filter(Boolean).join(" · ") || "none of the four — an ordinary monster"}</span>
       <button class="mini" onclick="openOptions('${id}')">Switches…</button></div>
     <div class="line"><b>Initiative modifier</b>
       <input class="search" style="width:70px" value="${c.initMod || 0}" inputmode="numeric"
@@ -1010,7 +1165,7 @@ function rowPicture(id, input) {
   setTimeout(() => clearInterval(t), 8000);
 }
 function duplicate(id) {
-  const c = find(id); if (!c || c.kind === "pc") return;
+  const c = find(id); if (!c || c.kind !== "npc") return;
   const base = String(c.name).replace(/\s+\d+$/, "");
   const n = Math.max(1, ...S.combatants.filter(x => String(x.name || "").replace(/\s+\d+$/, "") === base)
     .map(x => parseInt(String(x.name).match(/\s+(\d+)$/)?.[1] || "1", 10)));
@@ -1020,6 +1175,7 @@ function duplicate(id) {
   if (copy.boss) { copy.boss.legendary = copy.boss.legendaryMax; copy.boss.phase = 1; copy.boss.inits = []; }
   if (copy.nightmare) copy.nightmare.roots = copy.nightmare.rootsMax;
   if (copy.reverian) { copy.reverian.renown = copy.reverian.renownMax; copy.reverian.subtracted = []; }
+  if (copy.grimm) copy.grimm.left = copy.grimm.total;
   for (const k of copy.counters || []) { k.id = newId(); if (k.max != null) k.n = k.max; }
   S.combatants.push({ ...copy, id: newId(), name: `${base} ${n + 1}`, hp: c.hpMax, tempHp: 0,
                       conditions: [], init: c.init, down: false, note: "" });
@@ -1105,17 +1261,15 @@ let OPT_FOR = "";
 function openOptions(id) {
   OPT_FOR = id;
   const c = find(id); if (!c) return;
-  OPT.e.boss = !!c.boss;
-  OPT.e.nm = !!c.nightmare;
   loadOptions("e", c);
-  openDlg(`${c.name} — the three switches`, "");
+  openDlg(`${c.name} — the four switches`, "");
   drawOptEditor(true);
 }
 // Drawn separately from the dialog's frame so flipping a switch repaints only the body — and so
 // the fields keep what is typed into them, the same way the add form does.
 function drawOptEditor() {
   const c = find(OPT_FOR); if (!c) return;
-  const o = OPT.e, any = o.on.boss || o.on.nm || o.on.rev;
+  const o = OPT.e, any = o.on.boss || o.on.nm || o.on.rev || o.on.grimm;
   el("dlgBody").innerHTML = `
     ${optionBlocks("e")}
     <div class="line" style="margin-top:12px">
@@ -1129,7 +1283,7 @@ function drawOptEditor() {
 }
 function saveOptions() {
   const c = find(OPT_FOR); if (!c) return;
-  const had = { boss: c.boss, nm: c.nightmare, rv: c.reverian };
+  const had = { boss: c.boss, nm: c.nightmare, rv: c.reverian, gm: c.grimm };
   const next = readOptions("e");
   if (next.boss && had.boss) {
     // What is already spent stays spent: a resistance burned this round does not come back because
@@ -1144,12 +1298,16 @@ function saveOptions() {
     next.reverian.renown = Math.min(had.rv.renown, next.reverian.renownMax);
     next.reverian.subtracted = [...(had.rv.subtracted || [])];
   }
+  // Slots already burned stay burned, the same as resistances and roots.
+  if (next.grimm && had.gm) next.grimm.left = Math.min(had.gm.left, next.grimm.total);
   c.boss = next.boss;
   c.nightmare = next.nightmare;
   c.reverian = next.reverian;
+  c.grimm = next.grimm;
   push(); draw(); closeDlg();
-  toast(`${c.name} — ${[next.boss && "boss", next.nightmare && "nightmare", next.reverian && "reverian"]
-    .filter(Boolean).join(" · ") || "an ordinary monster again"}.`);
+  toast(`${c.name} — ${[next.boss && "boss", next.nightmare && "nightmare",
+                        next.reverian && "reverian", next.grimm && "grimm"]
+    .filter(Boolean).join(" · ") || "none of the four — an ordinary monster again"}.`);
 }
 
 // ── Splash art ─────────────────────────────────────────────
@@ -1315,6 +1473,7 @@ function openRoomSettings() {
     ${flag("ac", "Armour Class", "they work it out anyway")}
     ${flag("conditions", "Conditions", "who is frightened, who is prone")}
     ${flag("splash", "Splash art", "whose turn it is, in the corner")}
+    ${flag("splashNpc", "Monster splash art", "enemies get theirs too")}
     ${flag("stats", "Their numbers", "scores, hit points and slots beside the splash")}
     <div class="line"><b>Monster hit points</b>
       ${["words", "numbers", "none"].map(v => `<button class="mini ${sh.hp === v ? "on" : ""}"
@@ -1444,13 +1603,17 @@ function drawLib() {
         // The same line the board's own rows carry under a name, in the same order: what it is,
         // then its Challenge, then the set it belongs to, then what it is rooted in.
         const sub = [m.reverian ? `${m.reverian.shadow ? "Shadow " : ""}Reverian R·${m.reverian.renownMax}` : "",
+                     m.grimm ? `${m.grimm.name || "Grimm"} ${m.grimm.total}` : "",
                      m.nightmare?.grade || (m.boss ? "boss" : ""), e.cr && `CR ${e.cr}`, e.tag,
                      ...(m.nightmare?.emotions || [])].filter(Boolean).join(" · ");
         return `<div class="lib-row">
           <button class="lib-pick" onclick="libAdd(${e.id})"
             title="Add ${escQ(e.name)} to the fight — the × box says how many">
             <span class="lib-face">${m.img
-              ? `<img src="${escQ(imgSrc(m.img))}" alt="">` : "<i>✦</i>"}</span>
+              ? `<img src="${escQ(imgSrc(m.img))}" alt="">` : "<i>✦</i>"}${
+              // A corner mark when it has a painting for the room, so the ones still to do are
+              // findable at a glance across sixty entries.
+              e.art?.normal || e.art?.hurt ? `<b class="lib-art" title="Has splash art"></b>` : ""}</span>
             <span class="lib-txt">
               <b>${esc(e.name)}</b>
               <i>${m.hpMax || "—"} hp · ${m.ac ?? "—"} ac · ${m.dc ?? "—"} dc · ${sign(m.initMod || 0)}</i>
@@ -1491,6 +1654,9 @@ function libAdd(id) {
     const copy = JSON.parse(JSON.stringify(e.mon));
     S.combatants.push({
       ...copy, id: newId(),
+      // Which library creature this is a copy of — how the room finds its splash art. All four
+      // Glasslings point at the one entry, so the painting is uploaded once.
+      libId: e.id,
       name: n > 1 || used.length ? `${base} ${from + i + 1}` : base,
       hp: copy.hpMax, tempHp: 0, init: null, conditions: [], down: false, hidden: false,
     });
@@ -1546,6 +1712,29 @@ function drawLibEditor(first) {
         <input id="lTag" value="${v("lTag", e?.tag)}" placeholder="Roses Nightmare"></div>
     </div>
     ${optionBlocks("l")}
+    ${LIB_FOR ? `
+    <div class="ini-opt open live" style="border-left:0;padding-left:0;margin-left:0">
+      <div class="opt-hd" style="cursor:default"><i>▾</i> Splash art</div>
+      <div class="opt-body">
+        <div class="spl-pair">
+          ${["normal", "hurt"].map(k => `<div class="spl">
+            <b>${k === "normal" ? "Its turn" : "Bloodied"}</b>
+            <div class="spl-box">${e?.art?.[k]
+              ? `<img src="${API_BASE}api/initiative/library/${LIB_FOR}/art/${k}?t=${LIBART_BUST}" alt="">`
+              : `<span>nothing yet</span>`}</div>
+            <label class="mini" style="cursor:pointer">Choose…
+              <input type="file" accept="image/*" hidden onchange="uploadLibArt('${k}', this)"></label>
+            ${e?.art?.[k] ? `<button class="mini warn" onclick="clearLibArt('${k}')">Clear</button>` : ""}
+          </div>`).join("")}
+        </div>
+        <p class="note">What the room's screen raises when this creature's turn comes up — uploaded
+          once here, used by every copy of it in every fight. The second is used from half its hit
+          points down, the same point its row starts saying Bloodied. With neither uploaded the room
+          frames its small portrait as a bust instead, which is what it did before.</p>
+      </div>
+    </div>`
+    : `<p class="note" style="margin-top:14px">Splash art can be added once this one is saved —
+       it hangs on the entry, and the entry does not exist yet.</p>`}
     <div class="line" style="margin-top:14px">
       <b>${LIB_FOR ? "Keep the changes" : "Add it to the library"}</b>
       <button class="mini go" onclick="saveLibEntry()">Save</button>
@@ -1558,8 +1747,39 @@ function drawLibEditor(first) {
   if (first) el("lName")?.focus();
 }
 
-// The picture takes the same road as the add form's and the row's — downscaled to a square 192px
-// data URL before it is ever sent, because this blob rides to a television in the room.
+// ── A library creature's splash art ────────────────────────
+// The same road a character's takes: downscaled in the browser to ART_SIDE, sent once, stored in a
+// table of its own and served back as bytes by id — so the board's own save never carries it.
+// Against the ENTRY, so all four Glasslings in tonight's fight raise the same painting.
+let LIBART_BUST = 0;             // cache-buster, so a replaced picture is actually shown again
+
+async function uploadLibArt(kind, input) {
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file || !LIB_FOR) return;
+  toast("Reading the picture…");
+  let data;
+  try { data = await shrink(file, ART_SIDE); }
+  catch { return toast("That file is not a picture this browser can read."); }
+  try { await api("PUT", `api/initiative/library/${LIB_FOR}/art`, { [kind]: data }); }
+  catch (err) { return toast(err.message); }
+  LIBART_BUST = Date.now();
+  await pullLib();
+  drawLibEditor();
+  toast(kind === "normal" ? "Saved — it comes up when its turn does." : "Saved — it takes over once it is bloodied.");
+}
+
+async function clearLibArt(kind) {
+  if (!LIB_FOR) return;
+  try { await api("PUT", `api/initiative/library/${LIB_FOR}/art`, { [kind]: "" }); }
+  catch (err) { return toast(err.message); }
+  LIBART_BUST = Date.now();
+  await pullLib();
+  drawLibEditor();
+}
+
+// The portrait is a different picture doing a different job: 192px square, for the 40px face on the
+// row. Downscaled to a square before it is ever sent, as the add form's and the row's are.
 function libPicture(input) {
   const keep = PIC;
   takePicture(input);
@@ -1594,7 +1814,7 @@ async function saveLibEntry() {
       // Counters and the note are the entry's own and are not on this form — a counter is written
       // where it is used, on the board, and brought back here by "Save to the library".
       counters: e?.mon.counters || [], note: e?.mon.note || "",
-      boss: opt.boss, nightmare: opt.nightmare, reverian: opt.reverian,
+      boss: opt.boss, nightmare: opt.nightmare, reverian: opt.reverian, grimm: opt.grimm,
     },
   };
   if (LIB_FOR) body.id = LIB_FOR;
@@ -1626,7 +1846,7 @@ async function importLib() {
 // The way back: a monster the DM typed in during the fight, kept for next time. The board's "3" is
 // taken off the name — what goes in is the creature, not the third copy of it.
 async function saveRowToLib(id) {
-  const c = find(id); if (!c || c.kind === "pc") return;
+  const c = find(id); if (!c || c.kind !== "npc") return;
   const name = String(c.name).replace(/\s+\d+$/, "");
   const had = LIB.find(x => x.name.toLowerCase() === name.toLowerCase());
   if (had && !confirm(`“${name}” is already in the library. Replace its numbers with these?`)) return;
@@ -1657,6 +1877,12 @@ function drawRoom() {
   const breakAt = idx >= 0 ? v.order.length - idx : -1;
   el("roomList").innerHTML = queue.map((r, i) => `
     ${i === breakAt ? roundBreak(v.round + 1) : ""}
+    ${r.kind === "event" ? `
+    <li class="ev ${r.id === v.turnId && v.inCombat ? "on" : ""}
+               ${breakAt >= 0 && i >= breakAt ? "later" : ""}">
+      <div class="r-init">${r.init == null ? "—" : r.init}</div>
+      <div class="r-ev"><i>◆</i><b>${esc(r.name)}</b></div>
+    </li>` : `
     <li class="${r.id === v.turnId && v.inCombat ? "on" : ""} ${r.down ? "down" : ""}
                ${breakAt >= 0 && i >= breakAt ? "later" : ""}">
       <div class="r-init">${r.init == null ? "—" : r.init}</div>
@@ -1674,7 +1900,7 @@ function drawRoom() {
           : ""}
         ${v.show.ac !== false && r.ac != null ? `<span>AC ${r.ac}</span>` : ""}
       </div>
-    </li>`).join("");
+    </li>`}`).join("");
   el("roomFoot").textContent = v.order.length
     ? "Once Upon a Star ★ — this screen follows the DM's board."
     : "";
@@ -1714,17 +1940,27 @@ let SPLASH_NOW = "";
 function drawSplash(v, turn) {
   const box = el("splash"); if (!box) return;
   const on = v.inCombat && v.show?.splash !== false;
-  const monster = on && turn?.kind === "npc";
-  const sp = on && !monster ? turn?.splash : null;
+  // A monster with a painting on its library entry is a splash like anybody else's. Only one with
+  // NOTHING uploaded — or with the monster switch off, in which case the server sent no splash at
+  // all — falls back to the bust. `turn.splash.lib` is what tells the two apart.
+  const monster = on && turn?.kind === "npc" && !turn?.splash?.lib;
+  // An event's turn raises the event itself. Not for decoration: with nothing here the panel would
+  // collapse and the whole order would jump sideways every time the lair acted — and the room may
+  // as well be told what is happening, since the DM is about to read it out anyway.
+  const event = on && turn?.kind === "event";
+  const sp = on && !monster && !event ? turn?.splash : null;
   // A character with no uploaded splash falls back to the full painting behind their plate, so a
   // party that has plates has this working before anybody paints anything. A MONSTER has only the
   // picture it was added with, which is a 192px square — so it is framed as a bust rather than
   // stretched into a figure it was never going to fill, and when it is bloodied the frame is shown
   // in blood. With no picture at all it is a mark in the same frame, which reddens the same way.
-  const want = monster
+  const want = event
+    ? `ev:${turn.id}:${turn.name}`
+    : monster
     ? `mon:${turn.id}:${turn.img ? "pic" : "mark"}:${turn.bloodied ? "hurt" : "whole"}`
     : !sp ? (on && turn?.full ? `plate:${turn.full}` : "")
-    : `${sp.id}:${sp.bloodied && sp.hurt ? "hurt" : sp.normal ? "normal" : sp.hurt ? "hurt" : ""}`;
+    : `${sp.lib ? `lib${sp.lib}` : sp.id}:${
+        sp.bloodied && sp.hurt ? "hurt" : sp.normal ? "normal" : sp.hurt ? "hurt" : ""}`;
   // The picture is only rebuilt when it actually changes — rewriting the <img> every four seconds
   // would restart the fade and flicker on the wall. The numbers under it are redrawn whenever they
   // move, which is the whole point of having them there.
@@ -1733,8 +1969,9 @@ function drawSplash(v, turn) {
     const html = splashStats(turn);
     if (plate && plate.outerHTML !== html) plate.outerHTML = html;
     // A monster carries its word instead of a plate, and that word moves without the picture doing.
+    // Any monster, bust or painting — both put the word in the same place.
     const word = box.querySelector(".spl-name span");
-    if (monster && word && turn.hp?.word && word.textContent !== turn.hp.word)
+    if (turn?.kind === "npc" && word && turn.hp?.word && word.textContent !== turn.hp.word)
       word.textContent = turn.hp.word;
     return;
   }
@@ -1747,6 +1984,11 @@ function drawSplash(v, turn) {
   // `API_BASE` because this page is served from `initiative/`: a bare "api/…" would ask the server
   // for `initiative/api/…`, which is nothing at all.
   const hurt = want.endsWith(":hurt") || want.endsWith("hurt");
+  if (want.startsWith("ev:")) {
+    box.className = "room-splash in ev";
+    box.innerHTML = `<div class="ev-splash"><i>◆</i><b>${esc(turn.name)}</b></div>`;
+    return;
+  }
   if (want.startsWith("mon:")) {
     box.className = `room-splash in mon${turn.bloodied ? " hurt" : ""}`;
     box.innerHTML = `
@@ -1759,12 +2001,18 @@ function drawSplash(v, turn) {
   }
   // `API_BASE` because this page is served from `initiative/`: a bare "api/…" would ask the server
   // for `initiative/api/…`, which is nothing at all.
+  const [who, kind] = want.split(":");
   const src = want.startsWith("plate:")
     ? imgSrc(want.slice(6))
-    : `${API_BASE}api/characters/${want.split(":")[0]}/art/${want.split(":")[1]}`;
+    // A monster's hangs on its library entry, a character's on the character.
+    : who.startsWith("lib")
+    ? `${API_BASE}api/initiative/library/${who.slice(3)}/art/${kind}`
+    : `${API_BASE}api/characters/${who}/art/${kind}`;
   box.className = "room-splash in" + (hurt ? " hurt" : "");
   box.innerHTML = `<img src="${escQ(src)}" alt="">
-    <div class="spl-name"><b>${esc(turn.name)}</b>${turn.player ? `<span>${esc(turn.player)}</span>` : ""}</div>
+    <div class="spl-name"><b>${esc(turn.name)}</b>${
+      turn.player ? `<span>${esc(turn.player)}</span>`
+      : turn.kind === "npc" && turn.hp?.word ? `<span>${esc(turn.hp.word)}</span>` : ""}</div>
     ${splashStats(turn)}`;
 }
 
@@ -1794,11 +2042,14 @@ function splashStats(turn) {
     </div>
     <div class="spl-abil">${SCORE_ORDER.filter(k => s.abilities?.[k]).map(k => `
       <div><i>${k.toUpperCase()}</i><b>${sign(s.abilities[k].mod)}</b><s>${s.abilities[k].score}</s></div>`).join("")}</div>
-    ${slots.length ? `<div class="spl-slots">
+    ${slots.length || s.grimm?.total ? `<div class="spl-slots">
       ${slots.map(([lv, k]) => `<div><i>${roman[lv] || lv}</i>${
         // Pips while they can be counted at six feet; a fraction once there are too many.
         k.max > 6 ? `<b>${k.max - k.used}/${k.max}</b>`
           : `<u>${"●".repeat(Math.max(0, k.max - k.used))}${"○".repeat(Math.min(k.max, k.used))}</u>`}</div>`).join("")}
+      ${s.grimm?.total ? `<div class="spl-grimm" title="${escQ(s.grimm.name || "Grimm")}">
+        <i>G</i><u>${"●".repeat(Math.max(0, s.grimm.left))}${
+          "○".repeat(Math.max(0, s.grimm.total - s.grimm.left))}</u></div>` : ""}
     </div>` : ""}
     ${[s.inspiration ? `${s.inspiration} Inspiration` : "",
        turn.wounds ? `${turn.wounds} Wound${turn.wounds > 1 ? "s" : ""}` : "",
@@ -1830,6 +2081,8 @@ async function pull() {
   if (d.emotions?.length) EMOTIONS = d.emotions;
   if (d.grades?.length) GRADES = d.grades;
   if (d.renown?.length) RENOWN = d.renown;
+  if (d.grimmStages?.length) GRIMM_STAGES = d.grimmStages;
+  if (d.grimmSlots) GRIMM_SLOTS = d.grimmSlots;
   SAVED = d.encounters || [];
   if (!DIRTY && !PUSHING) S = { ...S, ...d.state };
   draw(true);
@@ -1881,6 +2134,8 @@ async function boot() {
   if (d.role === "dm" && !ASROOM) {
     S = d.state; PARTY = d.party || []; CONDS = d.conditions || []; SAVED = d.encounters || [];
     EMOTIONS = d.emotions || []; GRADES = d.grades || []; RENOWN = d.renown || [];
+    if (d.grimmStages?.length) GRIMM_STAGES = d.grimmStages;
+    if (d.grimmSlots) GRIMM_SLOTS = d.grimmSlots;
     el("board").hidden = false;
     document.body.classList.toggle("add-open", ADDOPEN);
     // An empty board is a board somebody is about to fill: the drawer opens itself once.

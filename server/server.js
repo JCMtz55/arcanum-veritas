@@ -265,8 +265,10 @@ const BRINGS_OWN_PARSER = req =>
   // well past 20kb, and a board that 413s mid-fight is a board nobody trusts again.
   (req.method === "PUT" && req.path === "/api/initiative") ||
   (req.method === "POST" && req.path === "/api/initiative/encounters") ||
-  // A library entry carries the same portrait a board row does, by the same measure.
+  // A library entry carries the same portrait a board row does, by the same measure — and its
+  // splash art is a whole picture, like a character's (ART_MAX).
   (req.method === "POST" && /^\/api\/initiative\/library(\/\d+)?$/.test(req.path)) ||
+  (req.method === "PUT" && /^\/api\/initiative\/library\/\d+\/art$/.test(req.path)) ||
   // A character's splash art for the room's screen — one picture, not a thumbnail (ART_MAX).
   (req.method === "PUT" && /^\/api\/characters\/\d+\/art$/.test(req.path)) ||
   // One picture going into the gallery, by the same measure.
@@ -1924,7 +1926,7 @@ async function partyBoard() {
   // The open tokens ride along, so the board can say that a level has been allowed and is still
   // waiting to be taken — the difference between "they are level 12" and "they may become 13".
   const { rows } = await db.query(
-    `SELECT c.*, u.display_name,
+    `SELECT c.*, u.display_name, u.username, u.grimm_id AS user_grimm_id,
             (SELECT max(k.target_level) FROM character_unlocks k
               WHERE k.character_id = c.id AND k.kind = 'level' AND k.consumed_at IS NULL) AS pending_level,
             (SELECT count(*)::int FROM character_unlocks k
@@ -1961,7 +1963,36 @@ async function partyBoard() {
       concentrationGroup: r.concentration_group,
     });
   }
-  return rows.map(r => partyCard(r, r.display_name, byCharacter.get(r.id) || []));
+  // Their Grimm Slots. Shared state already — `grimm_live` is one row per player per Grimm and both
+  // the Companion and the character sheet write to it — so the DM's board only has to READ it. One
+  // query for the whole table, which is eight rows, rather than one per card.
+  //
+  // Read-only here on purpose: a slot is the player's to spend, on either of their own screens, and
+  // a third writer would be a third thing to race.
+  const { rows: live } = await db.query(
+    "SELECT user_id, grimm_id, stage, used, temp, temp_used, familiar FROM grimm_live");
+  const liveBy = new Map(live.map(r => [`${r.user_id}|${r.grimm_id}`, r]));
+
+  const cards = [];
+  for (const r of rows) {
+    const card = partyCard(r, r.display_name, byCharacter.get(r.id) || []);
+    // Which Grimm this account holds — the DM's assignment, or the old name match standing in for
+    // one not assigned yet. The same answer /api/me gives, worked out in the one place.
+    const gid = await effectiveGrimmId({ id: r.user_id, grimm_id: r.user_grimm_id, username: r.username });
+    const book = gid ? GRIMM_DATA.grimms.find(g => g.id === gid) : null;
+    const row = gid ? liveBy.get(`${r.user_id}|${gid}`) : null;
+    // A player who has never opened the Companion has no row, which is not the same as having no
+    // Grimm: a full, rested one is the right thing to show, exactly as the spend route assumes.
+    const l = gid
+      ? liveDerived(row
+          ? { stage: row.stage, used: row.used, temp: row.temp, tempUsed: row.temp_used, familiar: !!row.familiar }
+          : { ...BLANK_LIVE })
+      : null;
+    card.grimm = l && { id: gid, name: book?.name || "", stage: l.stage, familiar: l.familiar,
+                        left: l.left, total: l.total, base: l.base, temp: l.temp };
+    cards.push(card);
+  }
+  return cards;
 }
 // Registered BEFORE "/api/characters/:id", or ":id" would swallow "party" and answer 404 for the DM.
 app.get("/api/characters/party", requireUser, requireDm, async (req, res) =>
@@ -2842,7 +2873,7 @@ const initBlank = () => ({
   // What the room is allowed to see. Hit points as WORDS is the default because a number on the wall
   // tells the table exactly how many rounds are left in the boss.
   show: { portraits: true, ac: true, dc: false, hp: "words", conditions: true,
-          splash: true, stats: true },
+          splash: true, splashNpc: true, stats: true },
   combatants: [],
 });
 
@@ -2960,8 +2991,27 @@ function cleanReverian(r) {
   };
 }
 
+// A Grimm on a MONSTER. Enemies bearing one is established — Hollowing seals "their Grimm Slots"
+// and Night gives "any Grimm it bears" a slot back — and what the table needs tracked is the same
+// thing a player's screen tracks: how many of its Slots are left.
+//
+// The slot count follows the campaign's own rule by stage (Grimm Slots.md, and GRIMM_SLOTS_BY_STAGE
+// above, which the Companion and the sheet already share), and stays editable because an enemy
+// Grimm need not be built the way a player's is. The name is typed rather than picked: a Grimm an
+// enemy bears is not necessarily one of the party's eight.
+function cleanMonsterGrimm(g) {
+  if (!g || typeof g !== "object") return null;
+  const stage = GRIMM_STAGES.includes(g.stage) ? g.stage : "awakened";
+  const total = iNum(g.total, 0, 20, GRIMM_SLOTS_BY_STAGE[stage] ?? 0);
+  return {
+    name: iStr(g.name, 40),
+    stage, total,
+    left: Math.min(total, iNum(g.left, 0, 20, total)),
+  };
+}
+
 function cleanCombatant(c) {
-  const kind = c?.kind === "pc" ? "pc" : "npc";
+  const kind = c?.kind === "pc" ? "pc" : c?.kind === "event" ? "event" : "npc";
   const base = {
     id: iId(c?.id), kind,
     // The initiative itself. `null` is "has not rolled yet" and sorts to the bottom, which is what
@@ -2973,6 +3023,13 @@ function cleanCombatant(c) {
   };
   // A PC is a POINTER. Nothing about their sheet is copied in, so nothing about it can go stale.
   if (kind === "pc") return { ...base, charId: iNum(c?.charId, 1, 10 ** 9, 0) };
+
+  // An EVENT is a place in the order that is not a creature: the lair acting, a fuse burning down,
+  // the tide coming in, the gate opening on 20. A number and a line of text, and nothing else —
+  // no hit points to take, nothing to roll for it, nothing to hit. It takes its turn like anybody
+  // and the DM reads it out. `hidden` still works, so one the table should not see yet is kept off
+  // the room's screen the same way a monster is.
+  if (kind === "event") return { ...base, name: iStr(c?.name, 160) || "Event", initMod: 0 };
 
   const img = String(c?.img || "");
   return {
@@ -2990,6 +3047,11 @@ function cleanCombatant(c) {
     boss: cleanBoss(c?.boss),
     nightmare: cleanNightmare(c?.nightmare),
     reverian: cleanReverian(c?.reverian),
+    grimm: cleanMonsterGrimm(c?.grimm),
+    // Which library creature this row IS a copy of, when it came from there. Only the id: the
+    // entry's splash art is fetched by it, so the pictures never ride in the board's own save.
+    // 0 for a monster typed in by hand, which has no entry and so no art to find.
+    libId: iNum(c?.libId, 0, 10 ** 9, 0),
     // Not "deleted": a monster that went down is part of the fight's history until the fight ends,
     // and it may well stand back up.
     down: !!c?.down,
@@ -3015,6 +3077,9 @@ function cleanInit(body) {
       hp: ["words", "numbers", "none"].includes(show.hp) ? show.hp : "words",
       conditions: show.conditions !== false,
       splash: show.splash !== false,
+      // A switch of its own, because the party's paintings and the monsters' are not the same
+      // decision: a DM may want the party raised on the wall and the monster left a silhouette.
+      splashNpc: show.splashNpc !== false,
       stats: show.stats !== false,
     },
     combatants: (Array.isArray(s.combatants) ? s.combatants : []).slice(0, INIT_MAX)
@@ -3063,7 +3128,7 @@ function initRows(state, party) {
                                                    rounds: null })).filter(x => x.name),
       down: p.hp <= 0,
       // What only a PC has, and what the DM wants on the row rather than in another tab.
-      wounds: p.wounds, deathSaveDC: p.deathSaveDC,
+      wounds: p.wounds, deathSaveDC: p.deathSaveDC, grimm: p.grimm || null,
       exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
       dreamExhaustionName: p.dreamExhaustionName,
       fate: p.fate, speed: p.speed, round: p.round, inCombat: p.inCombat,
@@ -3104,14 +3169,23 @@ function initTurns(rows) {
 
 // What the room sees. Built by LEAVING THINGS OUT of the resolved board, so a thing the DM has not
 // revealed was never in the response at all.
-function initPlayerView(state, party) {
+function initPlayerView(state, party, libArt = new Map()) {
   const rows = initRows(state, party).filter(r => !r.hidden);
   const show = state.show;
   return {
     round: state.round, inCombat: state.inCombat, turnId: state.turnId,
     show: { portraits: show.portraits, ac: show.ac, conditions: show.conditions, hp: show.hp,
-            splash: show.splash !== false, stats: show.stats !== false },
-    order: rows.map(r => ({
+            splash: show.splash !== false, splashNpc: show.splashNpc !== false,
+            stats: show.stats !== false },
+    // An event is a place in the order, not a creature: a number and a line of text. Everything the
+    // other rows carry — a face, hit points, AC, conditions — is absent rather than empty, so the
+    // room can draw it as the rule it is instead of a combatant with nothing in it.
+    order: rows.map(r => r.kind === "event" ? {
+      id: r.id, kind: "event", name: r.name, player: "",
+      init: r.init, down: false, img: "", slot: 0, slots: 1,
+      splash: null, full: "", stats: null, wounds: 0, bloodied: false,
+      ac: null, hp: null, conditions: [],
+    } : ({
       id: r.id, kind: r.kind, name: r.name, player: r.kind === "pc" ? r.player : "",
       init: r.init, down: r.down,
       img: show.portraits ? r.img : "",
@@ -3125,6 +3199,17 @@ function initPlayerView(state, party) {
         ? { id: r.charId, hurt: !!r.art.hurt, normal: !!r.art.normal,
             // The point it changes picture. Juan's number: under a tenth of their maximum.
             bloodied: r.hpMax ? r.hp <= r.hpMax * 0.1 : false }
+        // A monster's painting hangs on its LIBRARY entry, so what the room is given is that
+        // entry's id. One image fetched per turn, cached by the browser, and nothing of the picture
+        // in this four-second poll. With no art — or the monster switch off — this stays null and
+        // the room falls back to framing its row portrait as a bust, which is what it did before.
+        : r.kind === "npc" && show.splash !== false && show.splashNpc !== false
+          && r.libId && libArt.has(r.libId)
+        ? { lib: r.libId, normal: !!libArt.get(r.libId).normal, hurt: !!libArt.get(r.libId).hurt,
+            // The same half-hit-points line its row calls Bloodied — and, like `bloodied` below,
+            // not acted on when monster hit points are hidden, or the colour of a picture would
+            // answer the question the words are refusing to.
+            bloodied: show.hp !== "none" && r.hpMax ? r.hp <= r.hpMax * 0.5 : false }
         : null,
       // With nothing uploaded, the full painting behind their plate stands in, so a party that has
       // plates has this working before anybody paints anything.
@@ -3137,6 +3222,10 @@ function initPlayerView(state, party) {
         abilities: Object.fromEntries(Object.entries(r.abilities || {})
           .map(([k, a]) => [k, { score: a.score, mod: a.mod }])),
         slots: r.spellSlots || {}, slotsReset: r.slotsReset || "long",
+        // Their Grimm pool, beside the spell slots it sits beside on their own sheet. Read-only
+        // here as everywhere else on this board — the player spends it on their own screens.
+        grimm: r.grimm ? { name: r.grimm.name, stage: r.grimm.stage,
+                           left: r.grimm.left, total: r.grimm.total } : null,
         inspiration: r.inspiration || 0,
         exhaustion: r.exhaustion || 0,
         dreamExhaustion: r.dreamExhaustion || 0, dreamExhaustionName: r.dreamExhaustionName || "",
@@ -3182,7 +3271,7 @@ app.get("/api/initiative", requireUser, async (req, res) => {
   if (req.user.role !== "dm" || req.query.view === "1") {
     const party = state.combatants.some(c => c.kind === "pc") ? await partyBoard() : [];
     return res.json({ role: req.user.role === "dm" ? "dm" : "player", asRoom: true,
-                      view: initPlayerView(state, party) });
+                      view: initPlayerView(state, party, await libArtFor(state)) });
   }
   const party = await partyBoard();
   const { rows: saved } = await db.query(
@@ -3197,6 +3286,8 @@ app.get("/api/initiative", requireUser, async (req, res) => {
     // Vileness.md's twenty-four and the grades are Nightmares.md's, and a second copy in a browser
     // would be wrong the first time either note changes.
     emotions: VILE_EMOTIONS, grades: NIGHTMARE_GRADES, renown: REVERIAN_RENOWN,
+    // The Grimm stages and what each is worth in Slots, so the page never keeps a fourth copy.
+    grimmStages: GRIMM_STAGES, grimmSlots: GRIMM_SLOTS_BY_STAGE,
     encounters: saved.map(r => ({ id: r.id, name: r.name, updatedAt: r.updated_at })),
   });
 });
@@ -3494,12 +3585,18 @@ const LIB_MAX = 400;
 const libRow = r => {
   let data = {}; try { data = JSON.parse(r.data || "{}"); } catch { data = {}; }
   return { id: r.id, name: r.name, tag: r.tag || "", cr: r.cr || "",
+           // Whether it HAS splash art, never the art itself — the editor only needs to know which
+           // of the two boxes to draw filled, and the room fetches the bytes by id when it needs one.
+           art: { normal: !!r.has_normal, hurt: !!r.has_hurt },
            mon: cleanCombatant({ ...(data.mon || {}), kind: "npc", name: r.name }) };
 };
+const LIB_SELECT = `SELECT l.id, l.name, l.tag, l.cr, l.data,
+                           a.normal <> '' AS has_normal, a.hurt <> '' AS has_hurt
+                      FROM init_library l
+                 LEFT JOIN init_library_art a ON a.entry_id = l.id`;
 
 app.get("/api/initiative/library", requireUser, requireDm, async (req, res) => {
-  const { rows } = await db.query(
-    "SELECT id, name, tag, cr, data FROM init_library ORDER BY lower(name)");
+  const { rows } = await db.query(`${LIB_SELECT} ORDER BY lower(l.name)`);
   res.json({ library: rows.map(libRow), seed: await seedSize() });
 });
 
@@ -3520,16 +3617,24 @@ app.post("/api/initiative/library", requireUser, requireDm, INIT_JSON, async (re
   if (fresh.nightmare) fresh.nightmare.roots = fresh.nightmare.rootsMax;
   // Argued-down Renown and paid Subtractions belong to the fight it was in, not to the creature.
   if (fresh.reverian) { fresh.reverian.renown = fresh.reverian.renownMax; fresh.reverian.subtracted = []; }
+  if (fresh.grimm) fresh.grimm.left = fresh.grimm.total;        // rested, like everything else here
   for (const k of fresh.counters) if (k.max != null) k.n = k.max;
 
   const id = iNum(req.body?.id, 1, 10 ** 9, 0);
   const payload = JSON.stringify({ mon: fresh });
+  // Read back through LIB_SELECT rather than trusting the RETURNING row: the art flags come from a
+  // join, and an entry saved without them would tell the editor its paintings had gone.
+  const libOne = async entryId => {
+    const { rows } = await db.query(`${LIB_SELECT} WHERE l.id = $1`, [entryId]);
+    return rows[0] ? libRow(rows[0]) : null;
+  };
+
   if (id) {
     const { rows } = await db.query(
       `UPDATE init_library SET name = $2, tag = $3, cr = $4, data = $5, updated_at = now()
-         WHERE id = $1 RETURNING id, name, tag, cr, data`, [id, name, tag, cr, payload]);
+         WHERE id = $1 RETURNING id`, [id, name, tag, cr, payload]);
     if (!rows[0]) return res.status(404).json({ error: "No such library entry." });
-    return res.json({ entry: libRow(rows[0]) });
+    return res.json({ entry: await libOne(id) });
   }
   const { rows: count } = await db.query("SELECT count(*)::int AS n FROM init_library");
   if (count[0].n >= LIB_MAX) return res.status(400).json({ error: "The library is full." });
@@ -3537,14 +3642,83 @@ app.post("/api/initiative/library", requireUser, requireDm, INIT_JSON, async (re
     `INSERT INTO init_library (name, tag, cr, data, updated_at) VALUES ($1,$2,$3,$4,now())
        ON CONFLICT (name) DO UPDATE
               SET tag = EXCLUDED.tag, cr = EXCLUDED.cr, data = EXCLUDED.data, updated_at = now()
-     RETURNING id, name, tag, cr, data`, [name, tag, cr, payload]);
-  res.json({ entry: libRow(rows[0]) });
+     RETURNING id`, [name, tag, cr, payload]);
+  res.json({ entry: await libOne(rows[0].id) });
 });
 
 app.delete("/api/initiative/library/:id", requireUser, requireDm, async (req, res) => {
+  // Its art goes with it — init_library_art cascades on this delete.
   await db.query("DELETE FROM init_library WHERE id = $1", [iNum(req.params.id, 1, 10 ** 9, 0)]);
   res.json({ ok: true });
 });
+
+// ── A library creature's splash art ─────────────────────────
+// The same arrangement as a character's, for the same reason: whole pictures served as BYTES from a
+// route of its own, so the room asks for one image per turn and the browser caches it, instead of
+// them riding inside a board that crosses to the television every four seconds.
+//
+// Against the ENTRY, so it is uploaded once and all four Glasslings in tonight's fight have it.
+app.put("/api/initiative/library/:id/art", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const id = iNum(req.params.id, 1, 10 ** 9, 0);
+  const { rows } = await db.query("SELECT id FROM init_library WHERE id = $1", [id]);
+  if (!rows[0]) return res.status(404).json({ error: "No such library entry." });
+
+  const read = key => {
+    const v = req.body?.[key];
+    if (v === null || v === "") return "";                 // cleared on purpose
+    if (v === undefined) return undefined;                 // left alone
+    const s = String(v);
+    if (s.length > ART_MAX || !ART_OK.test(s)) return null; // refused
+    return s;
+  };
+  const normal = read("normal"), hurt = read("hurt");
+  if (normal === null || hurt === null)
+    return res.status(400).json({ error: "That has to be a PNG, JPEG or WebP under 900kb." });
+  if (normal === undefined && hurt === undefined)
+    return res.status(400).json({ error: "Nothing to set." });
+
+  await db.query(
+    // The empty strings matter: a first upload sets ONE of the two, and the column it does not set
+    // is NOT NULL — so the insert writes "" there and the update leaves whatever is already in it.
+    `INSERT INTO init_library_art (entry_id, normal, hurt, updated_at)
+          VALUES ($1, COALESCE($2, ''), COALESCE($3, ''), now())
+     ON CONFLICT (entry_id) DO UPDATE
+            SET normal = COALESCE($2, init_library_art.normal),
+                hurt   = COALESCE($3, init_library_art.hurt),
+                updated_at = now()`,
+    [id, normal === undefined ? null : normal, hurt === undefined ? null : hurt]);
+  const { rows: got } = await db.query(
+    "SELECT normal <> '' AS has_normal, hurt <> '' AS has_hurt FROM init_library_art WHERE entry_id = $1", [id]);
+  res.json({ art: { normal: !!got[0]?.has_normal, hurt: !!got[0]?.has_hurt } });
+});
+
+// Anybody signed in may fetch it: it is on the television in the room, and the room is the point.
+app.get("/api/initiative/library/:id/art/:kind", requireUser, async (req, res) => {
+  const id = iNum(req.params.id, 1, 10 ** 9, 0);
+  const kind = req.params.kind === "hurt" ? "hurt" : "normal";
+  const { rows } = await db.query(
+    `SELECT ${kind} AS art, updated_at FROM init_library_art WHERE entry_id = $1`, [id]);
+  const m = ART_OK.exec(rows[0]?.art || "");
+  if (!m) return res.status(404).end();
+  const tag = `"lib${id}-${kind}-${new Date(rows[0].updated_at).getTime()}"`;
+  if (req.headers["if-none-match"] === tag) return res.status(304).end();
+  res.set("Content-Type", `image/${m[1]}`);
+  res.set("Cache-Control", "private, max-age=0, must-revalidate");
+  res.set("ETag", tag);
+  res.end(Buffer.from(m[2], "base64"));
+});
+
+// Which library creatures behind the monsters on this board have art. One small query of flags
+// rather than the pictures: the room is handed ids and asks for the one image it needs.
+async function libArtFor(state) {
+  const ids = [...new Set(state.combatants
+    .filter(c => c.kind === "npc" && c.libId).map(c => c.libId))];
+  if (!ids.length) return new Map();
+  const { rows } = await db.query(
+    `SELECT entry_id, normal <> '' AS has_normal, hurt <> '' AS has_hurt
+       FROM init_library_art WHERE entry_id = ANY($1::int[])`, [ids]);
+  return new Map(rows.map(r => [Number(r.entry_id), { normal: !!r.has_normal, hurt: !!r.has_hurt }]));
+}
 
 // ── Importing from the vault ────────────────────────────────
 // `stat blocks/*.md` is on the DM's own drive and never reaches this server, so the parsing happened
@@ -3587,8 +3761,7 @@ async function importBestiary() {
 
 app.post("/api/initiative/library/import", requireUser, requireDm, async (req, res) => {
   const got = await importBestiary();
-  const { rows } = await db.query(
-    "SELECT id, name, tag, cr, data FROM init_library ORDER BY lower(name)");
+  const { rows } = await db.query(`${LIB_SELECT} ORDER BY lower(l.name)`);
   res.json({ ...got, library: rows.map(libRow) });
 });
 

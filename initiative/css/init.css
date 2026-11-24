@@ -122,6 +122,11 @@
    crossed a threshold and goes away once the DM has taken a trait off it. Loud on purpose. */
 .ini-con .sub{border-color:#9a4a3a;color:#F0A08A;background:rgba(154,74,58,.18);letter-spacing:.04em}
 .ini-con .sub:hover{border-color:#C85A44;color:#FFBBA6}
+/* A Grimm's Slots. The party's chip is a READOUT of the row the Companion and their sheet share —
+   flat, not a button — while a monster's is the DM's to spend, so it is. One colour for both,
+   because at the table they are the same resource. */
+.ini-con .grm{border-color:#6a5a2e;color:#D8C070;letter-spacing:.04em}
+.ini-con .grm.spent{opacity:.5}
 .ini-con .flat{cursor:default;opacity:.85}
 .ctr-n{min-width:46px;text-align:center;font-family:var(--sans);font-size:13px}
 
@@ -233,6 +238,52 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
 .ini-add .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;
   padding-top:12px;border-top:1px solid var(--line)}
 
+/* ── Events ────────────────────────────────────────────────── */
+/* A place in the order that is not a creature. Its own colour — a cold jade that is nowhere else on
+   this page — because the one thing it must never do is read as another monster at a glance.
+   Shorter than a combatant row too: there is no face, no bar and no numbers, and padding it out to
+   match would be pretending it has them. */
+:root{--ev:#6FC2A6;--ev-line:#2f6453;--ev-bg:rgba(111,194,166,.07)}
+.ini-row.ev{
+  grid-template-columns:52px 26px 1fr auto;
+  background:var(--ev-bg);border-color:var(--ev-line);border-left-color:transparent
+}
+.ini-row.ev.on{border-left-color:var(--ev);background:rgba(111,194,166,.15);
+  box-shadow:inset 0 0 0 1px rgba(111,194,166,.25)}
+.ev-mark{color:var(--ev);font-size:13px;text-align:center}
+.ev-text{
+  min-width:0;height:30px;padding:0 10px;background:transparent;border:1px solid transparent;
+  border-radius:7px;color:var(--ev);font-family:var(--sans);font-size:13.5px;letter-spacing:.01em
+}
+.ev-text:hover{border-color:var(--ev-line)}
+.ev-text:focus{background:var(--slate);border-color:var(--ev);color:var(--bone)}
+.ini-row.ev .ini-init{color:var(--ev)}
+
+/* The room's own event row, and the panel its turn raises. */
+.room-list li.ev{background:var(--ev-bg);border-color:var(--ev-line)}
+.room-list li.ev.on{border-left-color:var(--ev);background:rgba(111,194,166,.15)}
+.room-list li.ev .r-init{color:var(--ev)}
+/* SPANS the rest of the row rather than redefining the grid. The four density steps fitRoom walks
+   through each set their own `grid-template-columns` at a specificity there is no point racing —
+   and landing in the portrait column wrapped the text one word per line. `2 / -1` is right at
+   every step and stays right if a fifth is ever added. */
+.r-ev{grid-column:2 / -1;min-width:0;display:flex;align-items:center;gap:12px;color:var(--ev)}
+.r-ev i{font-style:normal;opacity:.75}
+.r-ev b{font-weight:600;letter-spacing:.01em}
+.room-splash.ev{display:grid;place-items:center;padding:0 7%}
+.ev-splash{text-align:center;color:var(--ev)}
+.ev-splash i{display:block;font-style:normal;font-size:30px;opacity:.6;margin-bottom:18px}
+.ev-splash b{font-family:var(--sans);font-size:30px;font-weight:600;line-height:1.3;
+  letter-spacing:.01em;text-wrap:balance}
+
+/* Monster or Event — the two things that are typed in rather than picked. */
+.new-modes{display:flex;gap:6px;margin:0 0 12px}
+.new-mode{flex:1;padding:6px 4px;background:var(--slate);border:1px solid var(--line);
+  border-radius:7px;color:var(--mute);cursor:pointer;
+  font-family:var(--sans);font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.new-mode:hover{color:var(--bone)}
+.new-mode.on{border-color:var(--brass);color:var(--brass);background:rgba(176,141,87,.14)}
+
 /* ── The drawer's four tabs ────────────────────────────────── */
 /* One row of four, and one pane under them. The count on a tab is the whole reason a DM can pick
    without opening anything: "Party 3" says three are still off the board. */
@@ -282,7 +333,11 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
   background:none;border:1px solid transparent;border-radius:8px;cursor:pointer;text-align:left}
 .lib-pick:hover{background:var(--slate);border-color:var(--line)}
 .lib-face{width:30px;height:30px;flex:none;border-radius:6px;background:var(--slate);
-  border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--mute)}
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--mute);position:relative}
+.lib-face > img{border-radius:5px}
+/* A brass pip in the corner: this one has a painting for the room. */
+.lib-art{position:absolute;right:-2px;bottom:-2px;width:7px;height:7px;border-radius:50%;
+  background:var(--brass);border:1px solid var(--panel)}
 .lib-face img{width:100%;height:100%;object-fit:cover}
 .lib-face i{font-style:normal;font-size:13px}
 .lib-txt{min-width:0;display:flex;flex-direction:column;gap:1px}
@@ -539,6 +594,11 @@ body.as-room{--spl-reserve:min(36vw,560px)}
 .spl-slots i{font-style:normal;font-size:clamp(9px,.7vw,13px);color:var(--mute);letter-spacing:.06em}
 .spl-slots u{text-decoration:none;color:var(--brass);font-size:clamp(11px,.95vw,17px);letter-spacing:1px}
 .spl-slots b{color:var(--brass);font-size:clamp(12px,1vw,18px)}
+/* The Grimm pool sits with the spell slots because that is where it sits on their own sheet — its
+   own colour so nobody reads a Grimm Slot as a 1st-level slot across the room. */
+.spl-grimm{margin-left:auto}
+.spl-grimm i{color:#D8C070 !important}
+.spl-grimm u{color:#D8C070 !important}
 
 .spl-tag{align-self:flex-start;padding:2px 9px;border:1px solid var(--line);border-radius:999px;
   background:rgba(14,17,22,.8);color:#D98B7B;font-size:clamp(10px,.8vw,14px)}

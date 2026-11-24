@@ -455,6 +455,20 @@ const SCHEMA = [
      data       TEXT NOT NULL DEFAULT '{}',
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
+  // The splash a library creature raises on the room's screen when its turn comes up, and the one
+  // used instead once it is bloodied. A table of its own for the same reason `character_art` is one:
+  // these are whole pictures, and the board's own save crosses to the television every four seconds.
+  // Kept against the LIBRARY entry rather than a board row, so it is uploaded once and every copy of
+  // that creature in every fight has it. The row only carries the entry's id.
+  //
+  // The cascade matters: delete the creature and its paintings go with it, rather than sitting in
+  // the database forever keyed to a number nothing points at any more.
+  `CREATE TABLE IF NOT EXISTS init_library_art (
+     entry_id   INTEGER PRIMARY KEY REFERENCES init_library(id) ON DELETE CASCADE,
+     normal     TEXT NOT NULL DEFAULT '',
+     hurt       TEXT NOT NULL DEFAULT '',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
 
   // The splash a character gets when their turn comes up on the room's screen — the ordinary one
   // and the one used when they are nearly out. A table of its own rather than two more fields in
