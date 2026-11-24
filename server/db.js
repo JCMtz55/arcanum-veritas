@@ -436,6 +436,25 @@ const SCHEMA = [
      data       TEXT NOT NULL DEFAULT '{}',
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
+  // The Enemy Library — ONE creature per row, kept to be used again, which is the thing a lineup
+  // above is not: a lineup is a whole fight as the board held it, and this is the Glassling itself,
+  // ready to be dropped into any fight four at a time.
+  //
+  // What a row holds is only what a row on the BOARD holds — hit points, AC, a save DC, an
+  // initiative modifier, a portrait and the two switches. Not the stat block: that stays in the
+  // vault, where it is written, and a copy of it here would be the copy that goes stale.
+  //
+  // `tag` is the folder the creature was imported from (Prima Nocta, Roses Nightmare) and `cr` is
+  // its Challenge. Both are the library CARD's, for finding the thing; neither is copied onto the
+  // board, where a round in progress has no use for either.
+  `CREATE TABLE IF NOT EXISTS init_library (
+     id         SERIAL PRIMARY KEY,
+     name       TEXT NOT NULL UNIQUE,
+     tag        TEXT NOT NULL DEFAULT '',
+     cr         TEXT NOT NULL DEFAULT '',
+     data       TEXT NOT NULL DEFAULT '{}',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
 
   // The splash a character gets when their turn comes up on the room's screen — the ordinary one
   // and the one used when they are nearly out. A table of its own rather than two more fields in

@@ -116,6 +116,12 @@
 .ini-con .boss{border-color:#8a6a2a;color:#E0B050;letter-spacing:.04em}
 .ini-con .nm{border-color:#5d4a7a;color:#B9A4DE}
 .ini-con .ctr{border-color:#3f5b63;color:#9CC4CE}
+/* A Reverian is made of record, not of dream — a colder, paler chip than the Nightmare purple. */
+.ini-con .rev{border-color:#4a5f7a;color:#A8C2DE;letter-spacing:.04em}
+/* Subtraction is the one chip that is a PROMPT rather than a tally: it appears when the thing has
+   crossed a threshold and goes away once the DM has taken a trait off it. Loud on purpose. */
+.ini-con .sub{border-color:#9a4a3a;color:#F0A08A;background:rgba(154,74,58,.18);letter-spacing:.04em}
+.ini-con .sub:hover{border-color:#C85A44;color:#FFBBA6}
 .ini-con .flat{cursor:default;opacity:.85}
 .ctr-n{min-width:46px;text-align:center;font-family:var(--sans);font-size:13px}
 
@@ -133,7 +139,9 @@
 /* Closed, it is off the right edge entirely — the order gets the whole page, which is what the DM
    is actually reading. Open, it takes the margin beside the board rather than covering a row. */
 .ini-side{
-  position:fixed;top:51px;right:0;bottom:0;width:336px;z-index:40;
+  /* 380, not 336: at the narrower width a library row's second line was cutting off mid-word
+     ("CR 18 · Roses Nightma…") on exactly the entries that need it most. */
+  position:fixed;top:51px;right:0;bottom:0;width:380px;z-index:40;
   display:flex;flex-direction:column;
   background:var(--panel);border-left:1px solid var(--line);
   box-shadow:-16px 0 30px rgba(8,10,14,.45);
@@ -160,15 +168,30 @@ body.add-open .ini-side{transform:none;visibility:visible;transition:transform .
 .ini-handle:hover{color:var(--bone);border-color:var(--brass)}
 body.add-open .ini-handle{opacity:0;pointer-events:none}
 
-/* The two optional switches, in the drawer and in the row's dialog. */
-.ini-opt{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
-.ini-opt .opt-hd{display:flex;align-items:center;gap:7px;width:100%;padding:3px 0;background:none;
-  border:0;color:var(--bone2);cursor:pointer;font-family:var(--sans);font-size:12px;
+/* The three optional switches, in the drawer and in the row's dialog.
+   UNFOLDING ONE IS NOT TURNING IT ON — the header opens it, the Off/On pill applies it. They used
+   to be the same flag, so opening Boss to look at what it offered quietly made the monster a boss. */
+.ini-opt{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.ini-opt .opt-hd{display:flex;align-items:center;gap:7px;flex:1;min-width:0;padding:3px 0;
+  background:none;border:0;color:var(--bone2);cursor:pointer;font-family:var(--sans);font-size:12px;
   letter-spacing:.06em;text-transform:uppercase;text-align:left}
+.opt-sw{flex:none;min-width:40px;padding:3px 9px;border-radius:999px;cursor:pointer;
+  background:var(--slate);border:1px solid var(--line);color:var(--mute);
+  font-family:var(--sans);font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+.opt-sw:hover{color:var(--bone);border-color:var(--bone2)}
+.opt-sw.on{background:rgba(176,141,87,.2);border-color:var(--brass);color:var(--brass)}
+.opt-body{flex-basis:100%}
+/* Live, not merely unfolded: a thin brass edge so a switch that is ON is visible while folded. */
+.ini-opt.live{border-left:2px solid var(--brass);padding-left:8px;margin-left:-10px}
+.ini-opt.live .opt-hd{color:var(--bone)}
+.hint-warn{color:#C8A24A}
 .ini-opt .opt-hd:hover{color:var(--bone)}
 .ini-opt .opt-hd i{font-style:normal;color:var(--mute);width:10px}
 .ini-opt .opt-hd span{margin-left:auto;font-size:10.5px;color:var(--mute);text-transform:none;letter-spacing:0}
-.ini-opt.open .opt-hd{color:var(--brass)}
+/* Unfolded is not applied, so only `live` gets the brass. */
+.ini-opt.open .opt-hd{color:var(--bone2)}
+.ini-opt.live .opt-hd{color:var(--brass)}
 .ini-opt .ini-form{margin-top:8px}
 .ini-opt .hint{margin:4px 0 0;font-size:11px}
 .opt-sel{height:30px;padding:0 8px;background:var(--slate);border:1px solid var(--line);
@@ -209,6 +232,78 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
 .ini-pic input{display:none}
 .ini-add .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;
   padding-top:12px;border-top:1px solid var(--line)}
+
+/* ── The drawer's four tabs ────────────────────────────────── */
+/* One row of four, and one pane under them. The count on a tab is the whole reason a DM can pick
+   without opening anything: "Party 3" says three are still off the board. */
+.side-tabs{display:flex;gap:2px;padding:8px 10px 0;border-bottom:1px solid var(--line);flex:none}
+.side-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:7px 4px;background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;
+  color:var(--mute);font-family:var(--sans);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;transition:color .13s, border-color .13s}
+.side-tab:hover{color:var(--bone2)}
+.side-tab.on{color:var(--brass);border-bottom-color:var(--brass)}
+.side-tab i{font-style:normal;font-size:9.5px;padding:1px 5px;border-radius:7px;
+  background:var(--slate);color:var(--bone2);letter-spacing:0}
+.side-tab.on i{background:rgba(176,141,87,.18);color:var(--brass)}
+
+.side-pane{flex:1;min-height:0;display:flex;flex-direction:column}
+.side-pane[hidden]{display:none}
+
+/* True of the board whichever tab is open — and the one destructive button, kept down here so it is
+   never sitting beside an Add. */
+.side-ft{display:flex;align-items:center;gap:8px;padding:9px 14px 11px;
+  border-top:1px solid var(--line);flex:none}
+.side-ct{flex:1;font-family:var(--sans);font-size:10.5px;color:var(--mute);letter-spacing:.04em}
+.side-none{margin:12px 14px;font-size:12.5px;color:var(--mute);font-style:italic;line-height:1.55}
+.side-list{flex:1;min-height:0;overflow:auto;padding:8px 10px 4px}
+.side-all{margin:12px 14px 2px;height:30px}
+.side-hint{margin:12px 0 0}
+/* Already in the fight: shown, not hidden, so the pane answers "who is missing" at a glance. */
+.lib-pick.used{opacity:.4;cursor:default}
+.lib-pick.used:hover{background:none;border-color:transparent}
+.side-on{flex:none;font-family:var(--sans);font-size:9.5px;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.09em}
+
+/* ── The Enemy Library, in the drawer ──────────────────────── */
+/* A row is read far more often than it is edited, so the whole row is the Add button and the pencil
+   is a quiet 26px beside it. Everything is one click from the search box: type, click, it is in the
+   fight. */
+.lib-top{display:flex;align-items:center;gap:7px;padding:11px 14px 0;flex:none}
+.lib-q{flex:1;min-width:0}
+.lib-n{display:flex;align-items:center;gap:4px;color:var(--mute);font-size:12px;flex:none}
+.lib-n input{width:38px;height:30px;padding:0 4px;text-align:center;background:var(--slate);
+  border:1px solid var(--line);border-radius:6px;color:var(--bone);font-size:12.5px}
+.lib-n input:focus{border-color:var(--brass)}
+
+.lib-list{flex:1;min-height:0;overflow:auto;padding:8px 10px 4px}
+.lib-row{display:flex;align-items:stretch;gap:4px}
+.lib-pick{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding:5px 7px;
+  background:none;border:1px solid transparent;border-radius:8px;cursor:pointer;text-align:left}
+.lib-pick:hover{background:var(--slate);border-color:var(--line)}
+.lib-face{width:30px;height:30px;flex:none;border-radius:6px;background:var(--slate);
+  border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--mute)}
+.lib-face img{width:100%;height:100%;object-fit:cover}
+.lib-face i{font-style:normal;font-size:13px}
+.lib-txt{min-width:0;display:flex;flex-direction:column;gap:1px}
+.lib-txt b{font-size:13px;font-weight:600;color:var(--bone);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The numbers, in the board's own order and its own shorthand — hp, ac, dc, initiative. */
+.lib-txt i{font-style:normal;font-family:var(--sans);font-size:10.5px;color:var(--bone2);
+  letter-spacing:.02em}
+.lib-txt s{text-decoration:none;font-size:10.5px;color:var(--mute);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-ed{flex:none;width:26px;padding:0;align-self:center;opacity:.45}
+.lib-row:hover .lib-ed{opacity:1}
+.lib-none{margin:6px 6px 10px;font-size:12px;color:var(--mute);font-style:italic;line-height:1.5}
+
+.lib-ft{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:9px 14px 11px;
+  border-top:1px solid var(--line);flex:none}
+.lib-ft .lib-count{margin-left:auto;font-family:var(--sans);font-size:10.5px;color:var(--mute)}
+/* The editor is the add form's fields in a dialog twice its width, so the seven boxes sit in two
+   rows instead of five. */
+.ini-dlg .lib-form .ini-f.w-name{flex:1 1 170px}
+.ini-dlg .lib-form .ini-f.w-name input{width:100%}
 
 /* ── The dialog: conditions, notes, lineups ────────────────── */
 .ini-dlg{width:min(520px,92vw);padding:0;background:var(--panel);color:var(--bone);

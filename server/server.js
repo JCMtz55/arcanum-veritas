@@ -265,6 +265,8 @@ const BRINGS_OWN_PARSER = req =>
   // well past 20kb, and a board that 413s mid-fight is a board nobody trusts again.
   (req.method === "PUT" && req.path === "/api/initiative") ||
   (req.method === "POST" && req.path === "/api/initiative/encounters") ||
+  // A library entry carries the same portrait a board row does, by the same measure.
+  (req.method === "POST" && /^\/api\/initiative\/library(\/\d+)?$/.test(req.path)) ||
   // A character's splash art for the room's screen — one picture, not a thumbnail (ART_MAX).
   (req.method === "PUT" && /^\/api\/characters\/\d+\/art$/.test(req.path)) ||
   // One picture going into the gallery, by the same measure.
@@ -2930,6 +2932,34 @@ function cleanNightmare(n) {
   };
 }
 
+// A Reverian is not a creature but an OVERLAY — `stat blocks/Reverian Templates.md`: you never build
+// one, you take something that existed and apply what remembering it did to it. Two of its numbers
+// belong on a board, and the rest belong on the stat block:
+//
+//   RENOWN, because it is not fixed. Renown is a belief, so it answers to a better-held one, and a
+//   party that asserts the truer, smaller memory and makes it land knocks it down by one on the
+//   spot. That is a thing that happens mid-fight, which is the definition of something the board
+//   tracks. `renownMax` is where it started, so the row can show how far it has been argued down.
+//
+//   SUBTRACTION, because it is the easiest thing in the system to miss: the first time it drops
+//   below half its Detail, and again below a quarter, it permanently loses a trait. `subtracted`
+//   holds which of those two the DM has already paid, so the row can stop asking once it has.
+//   A Shadow has nothing left to take and never pays either.
+const REVERIAN_RENOWN = ["Remembered", "Storied", "Legendary", "Mythic"];
+
+function cleanReverian(r) {
+  if (!r || typeof r !== "object") return null;
+  const renown = iNum(r.renown, 1, 4, 1);
+  return {
+    renown,
+    renownMax: Math.max(renown, iNum(r.renownMax, 1, 4, renown)),
+    shadow: !!r.shadow,
+    subtracted: (Array.isArray(r.subtracted) ? r.subtracted : [])
+      .filter(x => x === "half" || x === "quarter")
+      .filter((x, i, a) => a.indexOf(x) === i).slice(0, 2),
+  };
+}
+
 function cleanCombatant(c) {
   const kind = c?.kind === "pc" ? "pc" : "npc";
   const base = {
@@ -2959,6 +2989,7 @@ function cleanCombatant(c) {
     counters: cleanCounters(c?.counters),
     boss: cleanBoss(c?.boss),
     nightmare: cleanNightmare(c?.nightmare),
+    reverian: cleanReverian(c?.reverian),
     // Not "deleted": a monster that went down is part of the fight's history until the fight ends,
     // and it may well stand back up.
     down: !!c?.down,
@@ -3165,7 +3196,7 @@ app.get("/api/initiative", requireUser, async (req, res) => {
     // The campaign's own lists, served rather than typed into the page: the Vile Emotions are
     // Vileness.md's twenty-four and the grades are Nightmares.md's, and a second copy in a browser
     // would be wrong the first time either note changes.
-    emotions: VILE_EMOTIONS, grades: NIGHTMARE_GRADES,
+    emotions: VILE_EMOTIONS, grades: NIGHTMARE_GRADES, renown: REVERIAN_RENOWN,
     encounters: saved.map(r => ({ id: r.id, name: r.name, updatedAt: r.updated_at })),
   });
 });
@@ -3450,6 +3481,117 @@ app.delete("/api/initiative/encounters/:id", requireUser, requireDm, async (req,
   res.json({ ok: true });
 });
 
+// ── The Enemy Library ───────────────────────────────────────
+// One creature per row, kept to be used again. A lineup above is a whole fight as the board held it;
+// this is the Glassling itself, and the DM drops four of them into any fight from the add drawer.
+//
+// It is NOT served with GET /api/initiative, which the board polls every four seconds. Sixty-three
+// creatures with a portrait each is a megabyte, and a megabyte down the wire fifteen times a minute
+// for a list that changes once a month is how you make a board that stutters mid-fight. The page
+// fetches it once when it opens and again after it has changed something, which is the whole of it.
+const LIB_MAX = 400;
+
+const libRow = r => {
+  let data = {}; try { data = JSON.parse(r.data || "{}"); } catch { data = {}; }
+  return { id: r.id, name: r.name, tag: r.tag || "", cr: r.cr || "",
+           mon: cleanCombatant({ ...(data.mon || {}), kind: "npc", name: r.name }) };
+};
+
+app.get("/api/initiative/library", requireUser, requireDm, async (req, res) => {
+  const { rows } = await db.query(
+    "SELECT id, name, tag, cr, data FROM init_library ORDER BY lower(name)");
+  res.json({ library: rows.map(libRow), seed: await seedSize() });
+});
+
+// Create or overwrite. With an `id` this is an edit, and the name may change with it; without one it
+// is an upsert by name, which is what "save this monster to the library" off a board row means.
+app.post("/api/initiative/library", requireUser, requireDm, INIT_JSON, async (req, res) => {
+  const name = iStr(req.body?.name, 60);
+  if (!name) return res.status(400).json({ error: "A library entry wants a name." });
+  const tag = iStr(req.body?.tag, 40);
+  const cr = iStr(req.body?.cr, 12);
+  // Stored at FULL hit points with nothing on it: a library entry is the creature as it walks in,
+  // never as it was left — conditions, counters spent and a rolled initiative all belong to the
+  // fight it was in, not to the thing itself.
+  const mon = cleanCombatant({ ...req.body?.mon, kind: "npc", name });
+  const fresh = { ...mon, hp: mon.hpMax, tempHp: 0, init: null, conditions: [], down: false,
+                  hidden: false, note: iStr(req.body?.mon?.note, 400) };
+  if (fresh.boss) { fresh.boss.legendary = fresh.boss.legendaryMax; fresh.boss.phase = 1; fresh.boss.inits = []; }
+  if (fresh.nightmare) fresh.nightmare.roots = fresh.nightmare.rootsMax;
+  // Argued-down Renown and paid Subtractions belong to the fight it was in, not to the creature.
+  if (fresh.reverian) { fresh.reverian.renown = fresh.reverian.renownMax; fresh.reverian.subtracted = []; }
+  for (const k of fresh.counters) if (k.max != null) k.n = k.max;
+
+  const id = iNum(req.body?.id, 1, 10 ** 9, 0);
+  const payload = JSON.stringify({ mon: fresh });
+  if (id) {
+    const { rows } = await db.query(
+      `UPDATE init_library SET name = $2, tag = $3, cr = $4, data = $5, updated_at = now()
+         WHERE id = $1 RETURNING id, name, tag, cr, data`, [id, name, tag, cr, payload]);
+    if (!rows[0]) return res.status(404).json({ error: "No such library entry." });
+    return res.json({ entry: libRow(rows[0]) });
+  }
+  const { rows: count } = await db.query("SELECT count(*)::int AS n FROM init_library");
+  if (count[0].n >= LIB_MAX) return res.status(400).json({ error: "The library is full." });
+  const { rows } = await db.query(
+    `INSERT INTO init_library (name, tag, cr, data, updated_at) VALUES ($1,$2,$3,$4,now())
+       ON CONFLICT (name) DO UPDATE
+              SET tag = EXCLUDED.tag, cr = EXCLUDED.cr, data = EXCLUDED.data, updated_at = now()
+     RETURNING id, name, tag, cr, data`, [name, tag, cr, payload]);
+  res.json({ entry: libRow(rows[0]) });
+});
+
+app.delete("/api/initiative/library/:id", requireUser, requireDm, async (req, res) => {
+  await db.query("DELETE FROM init_library WHERE id = $1", [iNum(req.params.id, 1, 10 ** 9, 0)]);
+  res.json({ ok: true });
+});
+
+// ── Importing from the vault ────────────────────────────────
+// `stat blocks/*.md` is on the DM's own drive and never reaches this server, so the parsing happened
+// on his machine: tools/build-bestiary.mjs reads the folder and writes server/bestiary.json, which
+// is what ships. Re-running it after writing a new stat block and redeploying puts that creature
+// here, and pressing Import brings it in.
+//
+// Import only ADDS. A name already in the library is left exactly as it is, because by then it is
+// whatever the DM edited it into — and the whole point of an editable library is that his number
+// wins over the one a regex read out of a markdown file.
+let BESTIARY = null;
+async function bestiary() {
+  if (BESTIARY) return BESTIARY;
+  try {
+    const raw = JSON.parse(await readFile(path.join(ROOT, "server", "bestiary.json"), "utf8"));
+    BESTIARY = { builtAt: String(raw.builtAt || ""), entries: (raw.entries || []).slice(0, LIB_MAX) };
+  } catch { BESTIARY = { builtAt: "", entries: [] }; }
+  return BESTIARY;
+}
+const seedSize = async () => { const b = await bestiary(); return { count: b.entries.length, builtAt: b.builtAt }; };
+
+async function importBestiary() {
+  const b = await bestiary();
+  let added = 0;
+  for (const e of b.entries) {
+    const name = iStr(e?.name, 60);
+    if (!name) continue;
+    const mon = cleanCombatant({ ...e.mon, kind: "npc", name });
+    // RETURNING rather than rowCount: the embedded database the server falls back to locally does
+    // not report one, so counting on it gave a NaN that read as "nothing was imported".
+    const { rows } = await db.query(
+      `INSERT INTO init_library (name, tag, cr, data, updated_at) VALUES ($1,$2,$3,$4,now())
+         ON CONFLICT (name) DO NOTHING
+       RETURNING id`,
+      [name, iStr(e?.tag, 40), iStr(e?.cr, 12), JSON.stringify({ mon })]);
+    added += rows.length;
+  }
+  return { added, already: b.entries.length - added };
+}
+
+app.post("/api/initiative/library/import", requireUser, requireDm, async (req, res) => {
+  const got = await importBestiary();
+  const { rows } = await db.query(
+    "SELECT id, name, tag, cr, data FROM init_library ORDER BY lower(name)");
+  res.json({ ...got, library: rows.map(libRow) });
+});
+
 app.use("/api/admin", admin);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -3576,5 +3718,27 @@ app.use((err, req, res, next) => {
   if (!err.status || err.status >= 500) console.error(err);
   res.status(err.status || 500).json({ error: err.status ? "Bad request." : "Server error." });
 });
+
+// The library arrives filled, once. Here rather than inside seed() at the top of the file because
+// seed() runs on a top-level await before this module body has reached `BESTIARY` — reaching down
+// to it from up there is a ReferenceError, not a forward reference.
+//
+// The meta flag is what stops the sixty-three coming BACK: a DM who deleted a creature on purpose
+// is not told again next deploy that it should be there. Topping up afterwards is the Import button,
+// which he presses when he means it.
+if (!(await db.query("SELECT 1 FROM meta WHERE key = 'init_library_seeded'")).rows.length) {
+  const { added } = await importBestiary();
+  const { count } = await seedSize();
+  // ⚠️ Only close the door if there was something behind it. A deploy where server/bestiary.json
+  // did not ship would otherwise burn the one-shot seed on an empty file and leave the library
+  // empty for good — the flag says it has been done, so it never runs again.
+  if (count) {
+    await db.query("INSERT INTO meta (key, value) VALUES ('init_library_seeded', '1')");
+    console.log(`Enemy Library seeded with ${added} of ${count} creatures from server/bestiary.json.`);
+  } else {
+    console.warn("Enemy Library NOT seeded — server/bestiary.json is missing or empty. "
+      + "Run `node tools/build-bestiary.mjs`, commit the file, and redeploy.");
+  }
+}
 
 app.listen(PORT, () => console.log(`Arcanum Veritas listening on :${PORT} — ${process.env.DATABASE_URL ? "Postgres" : "embedded database (.data/)"}`));

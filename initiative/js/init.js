@@ -99,6 +99,7 @@ let PARTY = [];          // the live party cards — never written into S
 let CONDS = [];          // the conditions the picker offers
 let EMOTIONS = [];       // the campaign's Vile Emotions, from Vileness.md by way of the server
 let GRADES = [];         // Demi-Nightmare · Nightling · Recurring · Primordial
+let RENOWN = [];         // Remembered · Storied · Legendary · Mythic — a Reverian's scaling dial
 let SAVED = [];          // lineups kept for later
 let ROOM = null;         // the player's view, when this page is wearing that face
 let ASROOM = false;      // #player — the DM looking at what the room sees
@@ -195,7 +196,9 @@ const newId = () => Math.random().toString(36).slice(2, 10);
 // on Add that had to wait for the cursor to leave the form would look like a board that ignores you.
 const typing = () => {
   const a = document.activeElement;
-  return !!a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && !!a.closest?.(".ini-order, .ini-add");
+  // The whole drawer, not just the add form: the library's search box and a lineup's name are
+  // typed into too, and a poll that repainted either under the cursor would eat what was typed.
+  return !!a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && !!a.closest?.(".ini-order, .ini-side");
 };
 document.addEventListener("focusout", () => setTimeout(() => {
   if (REDRAW && !typing()) { REDRAW = false; draw(); }
@@ -206,7 +209,7 @@ document.addEventListener("focusout", () => setTimeout(() => {
 function draw(soft) {
   if (ASROOM) return;
   if (soft && typing()) { REDRAW = true; return; }
-  drawClock(); drawOrder(); drawAdd();
+  drawClock(); drawOrder(); drawSide();
 }
 
 // Painting a panel only when its markup actually changed. The poll redraws every four seconds, and
@@ -346,6 +349,30 @@ function trackChips(r) {
   if (nm && nm.emotions?.length)
     out.push(`<span class="chip nm flat" title="${escQ(`Root Vile Emotion${nm.emotions.length > 1 ? "s" : ""}: ${nm.emotions.join(", ")}`)}">
       ${esc(nm.emotions[0])}${nm.emotions.length > 1 ? ` +${nm.emotions.length - 1}` : ""}</span>`);
+  const rv = r.reverian;
+  if (rv) {
+    // Renown is a belief, so it answers to a better-held one: the party asserts the truer, smaller
+    // memory and it drops a step on the spot. That is the template's own counterplay, and it is the
+    // one number on a Reverian that moves without anybody rolling damage.
+    out.push(`<button class="chip rev" onclick="bumpRenown('${r.id}', event)"
+      title="Renown ${rv.renown} of ${rv.renownMax}${RENOWN[rv.renown - 1] ? ` — ${RENOWN[rv.renown - 1]}` : ""}${
+        rv.renown < rv.renownMax ? ". It has been argued down." : ""}. Click to argue it down a step, shift-click to put it back.">
+      R·${rv.renown}${rv.renown < rv.renownMax ? `/${rv.renownMax}` : ""}</button>`);
+    if (rv.shadow)
+      out.push(`<span class="chip rev flat" title="Shadow Reverian — worn down to silhouette and function. Subtraction costs it nothing.">Shadow</span>`);
+    // Subtraction. The first time below half its Detail and again below a quarter it permanently
+    // loses a trait — the easiest thing in the whole template to miss while a fight is running, so
+    // the row asks rather than waiting to be remembered. A Shadow is never asked: it has nothing
+    // particular left to take.
+    const due = !rv.shadow && r.hpMax
+      ? (r.hp < r.hpMax / 2 && !rv.subtracted.includes("half") ? "half"
+       : r.hp < r.hpMax / 4 && !rv.subtracted.includes("quarter") ? "quarter" : "")
+      : "";
+    if (due)
+      out.push(`<button class="chip sub" onclick="paySubtraction('${r.id}','${due}')"
+        title="Subtraction — it has dropped below ${due === "half" ? "half" : "a quarter"} of its Detail and permanently loses one trait, action, reaction or maneuver of your choice, gone from the memory for good. Click once you have taken it off.">
+        ⚠ Subtract</button>`);
+  }
   for (const c of r.counters || [])
     out.push(`<button class="chip ctr" onclick="bumpCounter('${r.id}','${escQ(c.id)}', event)"
       title="${escQ(`${c.name}${c.why ? ` — ${c.why}` : ""}. Click to take one off, shift-click to put one back.`)}">
@@ -376,9 +403,83 @@ function toggleAdd(want) {
   if (ADDOPEN) setTimeout(() => el("aName")?.focus(), 190);
 }
 
+// ── The drawer's four tabs ─────────────────────────────────
+// There are four ways somebody joins a fight, and a DM reaches for exactly one of them at a time:
+// the party, a creature out of the library, one typed in by hand, or a whole lineup brought back.
+// Stacking all four down one scrolling column is what made this drawer a pile — so it shows one.
+const TABS = [
+  { id: "party",   label: "Party",   pane: "paneParty" },
+  { id: "lib",     label: "Library", pane: "paneLib" },
+  { id: "new",     label: "New",     pane: "add" },
+  { id: "lineups", label: "Lineups", pane: "paneLineups" },
+];
+let SIDETAB = "party";
+try { SIDETAB = localStorage.getItem("ini.tab") || "party"; } catch (e) {}
+if (!TABS.some(t => t.id === SIDETAB)) SIDETAB = "party";
+
+function setTab(t) {
+  SIDETAB = t;
+  try { localStorage.setItem("ini.tab", t); } catch (e) {}
+  drawSide();
+  // Straight into the box this tab exists for. A tab that needs a second click before you can type
+  // is a tab that has not actually saved anybody a step.
+  if (t === "lib") setTimeout(() => el("libQ")?.focus(), 20);
+  if (t === "new") setTimeout(() => el("aName")?.focus(), 20);
+}
+
+// Who is not on the board yet. Read once per draw and handed down, because three of the four panes
+// want it and recomputing it in each is three chances for them to disagree.
+const partyAway = () => {
+  const on = new Set(S.combatants.filter(c => c.kind === "pc").map(c => c.charId));
+  return PARTY.filter(p => !on.has(p.id));
+};
+
+function drawSide() {
+  const away = partyAway();
+  const n = { party: away.length, lib: LIB.length, new: 0, lineups: SAVED.length };
+  paint("sideTabs", TABS.map(t => `<button class="side-tab ${t.id === SIDETAB ? "on" : ""}"
+      role="tab" aria-selected="${t.id === SIDETAB}" onclick="setTab('${t.id}')">
+      ${t.label}${n[t.id] ? `<i>${n[t.id]}</i>` : ""}</button>`).join(""));
+  for (const t of TABS) el(t.pane).hidden = t.id !== SIDETAB;
+
+  // Only the pane on the screen is drawn. The others are repainted the moment they are opened, so
+  // nothing is stale and three quarters of this work never happens.
+  if (SIDETAB === "party") drawParty(away);
+  else if (SIDETAB === "lib") drawLib();
+  else if (SIDETAB === "new") drawAdd();
+  else drawLineupsPane();
+
+  paint("sideFt", `<span class="side-ct">${S.combatants.length
+      ? `${S.combatants.length} in the fight` : "Nobody in the fight yet"}</span>
+    ${S.combatants.length ? `<button class="mini warn" onclick="clearBoard()">Clear the board</button>` : ""}`);
+}
+
+// ── The party ──────────────────────────────────────────────
+// Everyone at the table, whether they are on the board or not: the ones already in are shown greyed
+// rather than hidden, so the pane answers "who is missing" at a glance instead of only "who is left".
+function drawParty(away) {
+  const off = new Set(away.map(p => p.id));
+  paint("paneParty", !PARTY.length
+    ? `<p class="side-none">Nobody is at the table yet. Characters appear here as soon as their
+       sheets exist.</p>`
+    : `${away.length
+        ? `<button class="mini go side-all" onclick="addParty()">+ ${away.length === PARTY.length
+            ? "The whole party" : `The ${away.length} not on yet`}</button>`
+        : `<p class="side-none">The whole party is on the board.</p>`}
+      <div class="side-list">${PARTY.map(p => {
+        const on = !off.has(p.id);
+        return `<button class="lib-pick ${on ? "used" : ""}" ${on ? "disabled" : ""}
+            onclick="addPc(${p.id})"
+            title="${on ? `${escQ(p.name)} is already on the board` : `Add ${escQ(p.name)}`}">
+            <span class="lib-face">${p.portrait
+              ? `<img src="${escQ(imgSrc(p.portrait))}" alt="">` : "<i>◉</i>"}</span>
+            <span class="lib-txt"><b>${esc(p.name)}</b>
+              <i>${esc(p.player || "")}${p.level ? ` · Lv ${p.level}` : ""}</i></span>
+            ${on ? `<span class="side-on">on</span>` : ""}</button>`;
+      }).join("")}</div>`);
+}
+
 function drawAdd() {
-  const onBoard = new Set(S.combatants.filter(c => c.kind === "pc").map(c => c.charId));
-  const away = PARTY.filter(p => !onBoard.has(p.id));
   // What is already typed is rendered back in, because this panel is also redrawn when a picture is
   // chosen — half a monster typed in must not vanish because the DM picked its face second.
   const keep = id => { const n = el(id); return n ? escQ(n.value) : ""; };
@@ -404,16 +505,8 @@ function drawAdd() {
       <button class="mini go" onclick="addNpc()">Add</button>
     </div>
     ${optionBlocks("a")}
-    <div class="row2">
-      ${away.length
-        ? `<button class="mini" onclick="addParty()">+ The party${away.length < PARTY.length ? ` (${away.length} left)` : ""}</button>`
-        : `<span class="hint" style="margin:0">The whole party is on the board.</span>`}
-      ${away.map(p => `<button class="chip" onclick="addPc(${p.id})" title="Add ${escQ(p.name)}">
-         ${esc(p.name)}</button>`).join("")}
-      <div class="sp" style="flex:1"></div>
-      <button class="mini" onclick="openLineups()">Lineups…</button>
-      ${S.combatants.length ? `<button class="mini warn" onclick="clearBoard()">Clear the board</button>` : ""}
-    </div>`);
+    <p class="hint side-hint">Anything typed here can be kept afterwards — the row's ⋯ menu has
+      <b>Save to the library</b>.</p>`);
 }
 
 // ── The two switches ───────────────────────────────────────
@@ -424,56 +517,138 @@ function drawAdd() {
 // The same block is the add form's and the row menu's, with a prefix so the two sets of fields can
 // be on the page at once. Their open/shut state is held here rather than in the DOM, because this
 // panel is repainted whenever the poll comes back and a <details> would spring shut under the DM.
-const OPT = { a: { boss: false, nm: false, emo: new Set() }, e: { boss: false, nm: false, emo: new Set() } };
+// UNFOLDING A BLOCK IS NOT TURNING IT ON. They used to be one flag, so opening Boss to look at what
+// it offered quietly made the monster a boss, and there was no way to keep a block open while it was
+// off. Each block now has two states: `open` is whether you can see its fields, `on` is whether they
+// are applied to the monster at all. Nothing in a block that is Off reaches the board.
+//
+// Three sets of them: the add form's (`a`), a row's own dialog (`e`), and a library entry's (`l`),
+// which is the same monster before it has walked in.
+const OPT_FIELDS = ["Lr", "Ph", "Tn", "Gr", "Rt", "Rn"];
+const newOpt = () => ({
+  open: { boss: false, nm: false, rev: false },
+  on:   { boss: false, nm: false, rev: false },
+  emo: new Set(),
+  shadow: false,
+  // What is in the boxes, held here as well as in the DOM. A block that is ON but folded shut has no
+  // fields on the page to read back, and folding one away must never quietly zero it.
+  vals: {},
+});
+const OPT = { a: newOpt(), e: newOpt(), l: newOpt() };
 
 function optionBlocks(p) {
   const o = OPT[p];
   const num = (id, label, val, ph) => `<div class="ini-f w-n"><label for="${p}${id}">${label}</label>
     <input id="${p}${id}" value="${val == null ? "" : val}" inputmode="numeric" placeholder="${ph}"></div>`;
-  return `
-  <div class="ini-opt ${o.boss ? "open" : ""}">
-    <button class="opt-hd" onclick="flipOpt('${p}','boss')">
-      <i>${o.boss ? "▾" : "▸"}</i> Boss${o.boss ? "" : `<span>legendary resistances · phases · turns</span>`}</button>
-    ${o.boss ? `<div class="ini-form">
-      ${num("Lr", "Resist.", OPTV(p, "Lr"), "3")}
-      ${num("Ph", "Phases", OPTV(p, "Ph"), "2")}
-      ${num("Tn", "Turns", OPTV(p, "Tn"), "1")}
-      <p class="hint">Two turns puts it in the order twice, sharing one pool of hit points.</p>
-    </div>` : ""}
-  </div>
-  <div class="ini-opt ${o.nm ? "open" : ""}">
-    <button class="opt-hd" onclick="flipOpt('${p}','nm')">
-      <i>${o.nm ? "▾" : "▸"}</i> Nightmare${o.nm ? "" : `<span>grade · vile emotions · roots</span>`}</button>
-    ${o.nm ? `<div class="ini-form">
-      <div class="ini-f"><label for="${p}Gr">Grade</label>
-        <select id="${p}Gr" class="opt-sel">${["", ...GRADES].map(g =>
-          `<option value="${escQ(g)}" ${OPTV(p, "Gr") === g ? "selected" : ""}>${g || "—"}</option>`).join("")}</select></div>
-      ${num("Rt", "Roots", OPTV(p, "Rt"), "3")}
-    </div>
-    <div class="opt-emo">${EMOTIONS.map(e => `<button class="chip ${o.emo.has(e) ? "on" : ""}"
-        onclick="flipEmotion('${p}','${escQ(e)}')">${esc(e)}</button>`).join("")}</div>
-    <p class="hint">Its Root Vile Emotions — what it is made of, and what purifying it has to answer.</p>` : ""}
-  </div>`;
+
+  const block = (key, title, hint, body) => `
+    <div class="ini-opt ${o.open[key] ? "open" : ""} ${o.on[key] ? "live" : ""}">
+      <button class="opt-hd" onclick="flipOpen('${p}','${key}')">
+        <i>${o.open[key] ? "▾" : "▸"}</i> ${title}${o.open[key] ? "" : `<span>${hint}</span>`}</button>
+      <button class="opt-sw ${o.on[key] ? "on" : ""}" aria-pressed="${o.on[key]}"
+        onclick="flipOn('${p}','${key}')"
+        title="${o.on[key] ? `${title} is on this monster — click to take it off`
+                           : `Off. Nothing in here is applied until this says On.`}"
+        >${o.on[key] ? "On" : "Off"}</button>
+      ${o.open[key] ? `<div class="opt-body">${body}</div>` : ""}
+    </div>`;
+
+  return block("boss", "Boss", "legendary resistances · phases · turns", `
+      <div class="ini-form">
+        ${num("Lr", "Resist.", OPTV(p, "Lr"), "3")}
+        ${num("Ph", "Phases", OPTV(p, "Ph"), "2")}
+        ${num("Tn", "Turns", OPTV(p, "Tn"), "1")}
+      </div>
+      <p class="hint">Two turns puts it in the order twice, sharing one pool of hit points.</p>`)
+  + block("nm", "Nightmare", "grade · vile emotions · roots", `
+      <div class="ini-form">
+        <div class="ini-f"><label for="${p}Gr">Grade</label>
+          <select id="${p}Gr" class="opt-sel">${["", ...GRADES].map(g =>
+            `<option value="${escQ(g)}" ${OPTV(p, "Gr") === g ? "selected" : ""}>${g || "—"}</option>`).join("")}</select></div>
+        ${num("Rt", "Roots", OPTV(p, "Rt"), "3")}
+      </div>
+      <div class="opt-emo">${EMOTIONS.map(e => `<button class="chip ${o.emo.has(e) ? "on" : ""}"
+          onclick="flipEmotion('${p}','${escQ(e)}')">${esc(e)}</button>`).join("")}</div>
+      <p class="hint">Its Root Vile Emotions — what it is made of, and what purifying it has to answer.</p>`)
+  // A Reverian is an OVERLAY, not a creature — you take something that existed and apply what
+  // remembering it did to it. Only the two numbers that MOVE during a fight are here; the rest of
+  // the template is on the stat block, where it is written.
+  + block("rev", "Reverian", "renown · shadow", `
+      <div class="ini-form">
+        <div class="ini-f"><label for="${p}Rn">Renown</label>
+          <select id="${p}Rn" class="opt-sel">${RENOWN.map((r, i) => `<option value="${i + 1}"
+            ${String(OPTV(p, "Rn") || "1") === String(i + 1) ? "selected" : ""}>${i + 1} — ${esc(r)}</option>`).join("")}</select></div>
+        <button class="chip ${o.shadow ? "on" : ""}" onclick="flipShadow('${p}')"
+          title="A Shadow Reverian is one worn down to silhouette and function. Subtraction costs it nothing — it has already lost everything particular.">Shadow</button>
+      </div>
+      <p class="hint">Renown is a belief, so it answers to a better-held one: on the row you can
+        argue it down a step. Below half its Detail and again below a quarter it loses a trait for
+        good — the row will ask you, unless it is a Shadow.</p>
+      ${o.on.nm && o.on.rev ? `<p class="hint hint-warn">⚠️ In canon a Reverian is neither a Denizen
+        nor a Nightmare, and anything keyed to those does nothing to it. Both are kept if you leave
+        them on.</p>` : ""}`);
 }
-// What is already typed into one of those fields, so a repaint does not empty it.
-const OPTV = (p, id) => { const n = el(`${p}${id}`); return n ? n.value : ""; };
-function flipOpt(p, which) {
-  OPT[p][which] = !OPT[p][which];
-  if (p === "a") drawAdd(); else drawOptEditor();
+
+// What is in one of those fields — the page first, and what was stashed when the block was folded
+// away second, so an Off-screen field still answers with the number the DM chose.
+const OPTV = (p, id) => { const n = el(`${p}${id}`); return n ? n.value : (OPT[p].vals[id] ?? ""); };
+function stash(p) {
+  for (const id of OPT_FIELDS) { const n = el(`${p}${id}`); if (n) OPT[p].vals[id] = n.value; }
+}
+const redrawOpt = p => p === "a" ? drawAdd() : p === "l" ? drawLibEditor() : drawOptEditor();
+
+function flipOpen(p, key) {
+  stash(p);
+  OPT[p].open[key] = !OPT[p].open[key];
+  redrawOpt(p);
+}
+function flipOn(p, key) {
+  stash(p);
+  OPT[p].on[key] = !OPT[p].on[key];
+  // Turning one on shows you what you just turned on. Turning it off leaves it open, so you can see
+  // what is no longer being applied rather than having it vanish under you.
+  if (OPT[p].on[key]) OPT[p].open[key] = true;
+  redrawOpt(p);
 }
 function flipEmotion(p, e) {
+  stash(p);
   OPT[p].emo.has(e) ? OPT[p].emo.delete(e) : OPT[p].emo.add(e);
-  if (p === "a") drawAdd(); else drawOptEditor();
+  redrawOpt(p);
 }
-// Read the two blocks back out — null when the switch was never thrown, which is almost every row.
+function flipShadow(p) {
+  stash(p);
+  OPT[p].shadow = !OPT[p].shadow;
+  redrawOpt(p);
+}
+
+// Read the three blocks back out — null for any whose switch says Off, which is almost every row.
 function readOptions(p) {
   const o = OPT[p];
+  stash(p);
   const n = id => { const v = parseInt(OPTV(p, id), 10); return Number.isFinite(v) ? v : 0; };
   const lr = n("Lr"), roots = n("Rt");
+  const renown = Math.max(1, Math.min(4, n("Rn") || 1));
   return {
-    boss: o.boss ? { legendary: lr, legendaryMax: lr, phases: Math.max(1, n("Ph") || 1), phase: 1,
-                     turns: Math.max(1, Math.min(4, n("Tn") || 1)), inits: [] } : null,
-    nightmare: o.nm ? { grade: OPTV(p, "Gr") || "", emotions: [...o.emo], roots, rootsMax: roots } : null,
+    boss: o.on.boss ? { legendary: lr, legendaryMax: lr, phases: Math.max(1, n("Ph") || 1), phase: 1,
+                        turns: Math.max(1, Math.min(4, n("Tn") || 1)), inits: [] } : null,
+    nightmare: o.on.nm ? { grade: OPTV(p, "Gr") || "", emotions: [...o.emo], roots, rootsMax: roots } : null,
+    reverian: o.on.rev ? { renown, renownMax: renown, shadow: !!o.shadow, subtracted: [] } : null,
+  };
+}
+
+// Load one of the three sets from a monster that already exists — a row, or a library entry.
+function loadOptions(p, c) {
+  const o = OPT[p];
+  const b = c?.boss, nm = c?.nightmare, rv = c?.reverian;
+  o.on = { boss: !!b, nm: !!nm, rev: !!rv };
+  o.open = { boss: !!b, nm: !!nm, rev: !!rv };
+  o.emo = new Set(nm?.emotions || []);
+  o.shadow = !!rv?.shadow;
+  o.vals = {
+    Lr: b ? String(b.legendaryMax || 0) : "", Ph: b ? String(b.phases || 1) : "",
+    Tn: b ? String(b.turns || 1) : "",
+    Gr: nm?.grade || "", Rt: nm ? String(nm.rootsMax || 0) : "",
+    Rn: String(rv?.renownMax || 1),
   };
 }
 
@@ -520,6 +695,7 @@ function addNpc() {
       // counter they shared would be a counter that is wrong for three of them.
       boss: opt.boss ? { ...opt.boss, inits: [] } : null,
       nightmare: opt.nightmare ? { ...opt.nightmare, emotions: [...opt.nightmare.emotions] } : null,
+      reverian: opt.reverian ? { ...opt.reverian, subtracted: [] } : null,
       counters: [],
       // Four Glasslings are "Glassling 1" through "Glassling 4": the DM has to be able to say which
       // one is bleeding, and a board of four identical rows cannot answer that.
@@ -620,6 +796,26 @@ function nextPhase(id, ev) {
   push(); draw();
   toast(`${c.name} — phase ${c.boss.phase} of ${c.boss.phases}.`);
 }
+// Argued down a step, or given back. It never goes above where it started: `renownMax` is what the
+// masses held when the fight began, and nothing in the fight makes a memory bigger.
+function bumpRenown(id, ev) {
+  const c = find(id); if (!c?.reverian) return;
+  const rv = c.reverian;
+  rv.renown = ev?.shiftKey ? Math.min(rv.renownMax, rv.renown + 1) : Math.max(1, rv.renown - 1);
+  push(); draw();
+  if (!ev?.shiftKey) toast(`${c.name} — argued down to Renown ${rv.renown}${
+    RENOWN[rv.renown - 1] ? `, ${RENOWN[rv.renown - 1]}` : ""}. It loses that row's granted trait and floors on the spot.`);
+}
+
+// Paid once and never asked again, because a trait taken off the memory is gone for good.
+function paySubtraction(id, which) {
+  const c = find(id); if (!c?.reverian) return;
+  const rv = c.reverian;
+  rv.subtracted = [...new Set([...(rv.subtracted || []), which])];
+  push(); draw();
+  toast("Subtraction — take one trait, action, reaction or maneuver off it for good. It does not get weaker in numbers; it gets simpler.");
+}
+
 function cutRoot(id, ev) {
   const c = find(id); if (!c?.nightmare) return;
   const back = ev?.shiftKey;
@@ -771,15 +967,19 @@ function rowMenu(id) {
     ${r.kind === "npc" ? `<div class="line"><b>Counters</b>
       <span>${(c.counters || []).length ? (c.counters || []).map(x => x.name).join(" · ") : "none yet"}</span>
       <button class="mini" onclick="openCounters('${id}')">Keep count…</button></div>
-    <div class="line"><b>Boss and Nightmare</b>
-      <span>${c.boss ? "boss" : ""}${c.boss && c.nightmare ? " · " : ""}${c.nightmare ? (c.nightmare.grade || "nightmare") : ""}${
-        !c.boss && !c.nightmare ? "neither — an ordinary monster" : ""}</span>
+    <div class="line"><b>Boss · Nightmare · Reverian</b>
+      <span>${[c.boss && "boss", c.nightmare && (c.nightmare.grade || "nightmare"),
+                c.reverian && `${c.reverian.shadow ? "shadow " : ""}reverian R·${c.reverian.renown}`]
+        .filter(Boolean).join(" · ") || "none of the three — an ordinary monster"}</span>
       <button class="mini" onclick="openOptions('${id}')">Switches…</button></div>
     <div class="line"><b>Initiative modifier</b>
       <input class="search" style="width:70px" value="${c.initMod || 0}" inputmode="numeric"
         onchange="setNum('${id}','initMod',this.value)"></div>
     <div class="line"><b>Duplicate</b>
       <button class="mini" onclick="duplicate('${id}')">One more</button></div>
+    <div class="line"><b>Keep it for next time</b>
+      <span>into the Enemy Library, at full hit points</span>
+      <button class="mini" onclick="saveRowToLib('${id}')">Save to the library</button></div>
     <div class="line"><b>Maximum hit points</b>
       <input class="search" style="width:80px" value="${c.hpMax || 0}" inputmode="numeric"
         onchange="setNum('${id}','hpMax',this.value)"></div>
@@ -819,6 +1019,7 @@ function duplicate(id) {
   const copy = JSON.parse(JSON.stringify(c));
   if (copy.boss) { copy.boss.legendary = copy.boss.legendaryMax; copy.boss.phase = 1; copy.boss.inits = []; }
   if (copy.nightmare) copy.nightmare.roots = copy.nightmare.rootsMax;
+  if (copy.reverian) { copy.reverian.renown = copy.reverian.renownMax; copy.reverian.subtracted = []; }
   for (const k of copy.counters || []) { k.id = newId(); if (k.max != null) k.n = k.max; }
   S.combatants.push({ ...copy, id: newId(), name: `${base} ${n + 1}`, hp: c.hpMax, tempHp: 0,
                       conditions: [], init: c.init, down: false, note: "" });
@@ -906,32 +1107,29 @@ function openOptions(id) {
   const c = find(id); if (!c) return;
   OPT.e.boss = !!c.boss;
   OPT.e.nm = !!c.nightmare;
-  OPT.e.emo = new Set(c.nightmare?.emotions || []);
-  openDlg(`${c.name} — boss and nightmare`, "");
+  loadOptions("e", c);
+  openDlg(`${c.name} — the three switches`, "");
   drawOptEditor(true);
 }
 // Drawn separately from the dialog's frame so flipping a switch repaints only the body — and so
 // the fields keep what is typed into them, the same way the add form does.
-function drawOptEditor(first) {
+function drawOptEditor() {
   const c = find(OPT_FOR); if (!c) return;
-  const b = c.boss, nm = c.nightmare;
+  const o = OPT.e, any = o.on.boss || o.on.nm || o.on.rev;
   el("dlgBody").innerHTML = `
     ${optionBlocks("e")}
     <div class="line" style="margin-top:12px">
-      <b>${b || nm ? "Keep it" : "Save"}</b>
-      <span>${b?.turns > 1 ? `it will sit in the order ${b.turns} times` : ""}</span>
+      <b>${any ? "Keep it" : "Save"}</b>
+      <span>${o.on.boss && Number(OPTV("e", "Tn")) > 1
+        ? `it will sit in the order ${OPTV("e", "Tn")} times` : ""}</span>
       <button class="mini go" onclick="saveOptions()">Apply</button></div>
-    <p class="note">Turning a switch off and applying takes that side off the monster. Resistances
-      and roots already spent are kept unless you change their number.</p>`;
-  // Only on the way in: afterwards these are whatever the DM has typed.
-  if (first) {
-    if (b) { el("eLr").value = b.legendaryMax || 0; el("ePh").value = b.phases || 1; el("eTn").value = b.turns || 1; }
-    if (nm) { el("eRt").value = nm.rootsMax || 0; if (el("eGr")) el("eGr").value = nm.grade || ""; }
-  }
+    <p class="note">A switch that says Off is not applied — applying with it off takes that side
+      back off the monster. Resistances, roots and an argued-down Renown already spent are kept
+      unless you change their number.</p>`;
 }
 function saveOptions() {
   const c = find(OPT_FOR); if (!c) return;
-  const had = { boss: c.boss, nm: c.nightmare };
+  const had = { boss: c.boss, nm: c.nightmare, rv: c.reverian };
   const next = readOptions("e");
   if (next.boss && had.boss) {
     // What is already spent stays spent: a resistance burned this round does not come back because
@@ -941,11 +1139,17 @@ function saveOptions() {
     next.boss.inits = (had.boss.inits || []).slice(0, Math.max(0, next.boss.turns - 1));
   }
   if (next.nightmare && had.nm) next.nightmare.roots = Math.min(had.nm.roots, next.nightmare.rootsMax);
+  // Renown argued down at the table, and Subtractions already paid, survive a trip through here.
+  if (next.reverian && had.rv) {
+    next.reverian.renown = Math.min(had.rv.renown, next.reverian.renownMax);
+    next.reverian.subtracted = [...(had.rv.subtracted || [])];
+  }
   c.boss = next.boss;
   c.nightmare = next.nightmare;
+  c.reverian = next.reverian;
   push(); draw(); closeDlg();
-  toast(`${c.name} — ${[next.boss ? "boss" : "", next.nightmare ? "nightmare" : ""].filter(Boolean).join(" and ")
-    || "an ordinary monster again"}.`);
+  toast(`${c.name} — ${[next.boss && "boss", next.nightmare && "nightmare", next.reverian && "reverian"]
+    .filter(Boolean).join(" · ") || "an ordinary monster again"}.`);
 }
 
 // ── Splash art ─────────────────────────────────────────────
@@ -1131,16 +1335,31 @@ function setShowHp(v) { S.show.hp = v; push(); openRoomSettings(); }
 function toggleClock() { S.clock = S.clock === false; push(); openRoomSettings(); }
 
 // ── Lineups kept for later ─────────────────────────────────
-function openLineups() {
-  openDlg("Lineups", `
-    <div class="line"><b>Save the monsters on the board</b>
-      <input class="search" id="lineName" style="width:150px" placeholder="The Gate ambush">
-      <button class="mini go" onclick="saveLineup()">Save</button></div>
-    ${SAVED.length ? SAVED.map(e => `<div class="line"><b>${esc(e.name)}</b>
-        <button class="mini" onclick="loadLineup(${e.id})">Add to the board</button>
-        <button class="mini warn" onclick="deleteLineup(${e.id})">Delete</button></div>`).join("")
-      : `<p class="note">Nothing saved yet. Only the monsters are kept — the party is whoever is at
-         the table that night.</p>`}`);
+// A pane now rather than a dialog: it is one of the four ways a fight gets filled, so it sits
+// beside the other three instead of behind a button inside one of them.
+function openLineups() { setTab("lineups"); }
+
+function drawLineupsPane() {
+  const monsters = S.combatants.filter(c => c.kind === "npc").length;
+  paint("paneLineups", `
+    <div class="side-list">${SAVED.length
+      ? SAVED.map(e => `<div class="lib-row">
+          <button class="lib-pick" onclick="loadLineup(${e.id})"
+            title="Put ${escQ(e.name)} on the board, at full hit points">
+            <span class="lib-face"><i>⚔</i></span>
+            <span class="lib-txt"><b>${esc(e.name)}</b><i>a saved fight</i></span>
+          </button>
+          <button class="mini lib-ed warn" onclick="deleteLineup(${e.id})"
+            title="Delete ${escQ(e.name)}">✕</button>
+        </div>`).join("")
+      : `<p class="side-none">Nothing saved yet. A lineup is a whole fight kept for later — the
+         monsters only, because the party is whoever is at the table that night.</p>`}</div>
+    <footer class="lib-ft">
+      <input class="search" id="lineName" placeholder="The Gate ambush" style="flex:1;min-width:0">
+      <button class="mini go" onclick="saveLineup()" ${monsters ? "" : "disabled"}
+        title="${monsters ? `Keep the ${monsters} monster${monsters > 1 ? "s" : ""} on the board as a lineup`
+                          : "There are no monsters on the board to keep"}">Save the board</button>
+    </footer>`);
 }
 async function saveLineup() {
   const name = el("lineName").value.trim();
@@ -1150,18 +1369,271 @@ async function saveLineup() {
   if (!combatants.length) return toast("There are no monsters on the board.");
   try { await api("POST", "api/initiative/encounters", { name, combatants }); }
   catch (err) { return toast(err.message); }
-  await pull(); openLineups(); toast(`Saved as “${name}”.`);
+  await pull(); drawSide(); toast(`Saved as “${name}”.`);
 }
 async function loadLineup(id) {
   let got;
   try { got = await api("GET", `api/initiative/encounters/${id}`); } catch (err) { return toast(err.message); }
   for (const c of got.combatants) S.combatants.push({ ...c, id: newId(), hp: c.hpMax, init: null });
-  push(); draw(); closeDlg();
+  push(); draw();
   toast(`${got.name} — ${got.combatants.length} added.`);
 }
 async function deleteLineup(id) {
+  const e = SAVED.find(x => x.id === id);
+  if (!confirm(`Delete the lineup “${e?.name || "this one"}”? The board is not touched.`)) return;
   try { await api("DELETE", `api/initiative/encounters/${id}`); } catch (err) { return toast(err.message); }
-  await pull(); openLineups();
+  await pull(); drawSide();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  THE ENEMY LIBRARY
+// ═══════════════════════════════════════════════════════════
+// One creature per entry, kept to be used again. A lineup above is a whole fight as the board held
+// it; this is the Glassling itself, and four of them walk into any fight from the drawer.
+//
+// It is fetched ONCE when the page opens, and again after it has changed — never on the poll. Sixty
+// creatures with a portrait each is about a megabyte, and a megabyte down the wire fifteen times a
+// minute, for a list that changes once a month, is how a board starts stuttering mid-fight.
+//
+// What an entry holds is what a row on the board holds. Not the stat block: that stays in the vault
+// where it is written, and a copy of it in here would be the copy that goes stale.
+let LIB = [];                      // the whole library, as the server holds it
+let LIBSEED = { count: 0, builtAt: "" };   // what is waiting in the vault's own stat blocks
+let LIBQ = "";                     // the search box
+let LIB_FOR = 0;                   // the entry open in the editor — 0 is a new one
+let LIBPIC = null;                 // a picture chosen in the editor; null means "leave it alone"
+
+async function pullLib() {
+  try {
+    const d = await api("GET", "api/initiative/library");
+    LIB = d.library || [];
+    LIBSEED = d.seed || LIBSEED;
+  } catch (err) { return toast(err.message); }
+  drawSide();                       // the list, and the count on its tab
+}
+
+// ── Finding one ────────────────────────────────────────────
+// Everything about an entry is searched as one piece of text, so the one box answers every way a DM
+// reaches for a monster: by name, by the set it came from ("roses"), by what it is ("boss",
+// "nightling"), by what it is made of ("vanity"), or by its Challenge ("cr 13"). Every word has to
+// hit, which is what makes "roses 13" narrow rather than widen.
+const libHay = e => [
+  e.name, e.tag, e.cr && `cr ${e.cr}`,
+  e.mon.nightmare?.grade, ...(e.mon.nightmare?.emotions || []),
+  e.mon.nightmare ? "nightmare" : "", e.mon.boss ? "boss legendary" : "",
+].filter(Boolean).join(" ").toLowerCase();
+
+function libHits() {
+  const words = LIBQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return LIB;
+  return LIB.filter(e => { const h = libHay(e); return words.every(w => h.includes(w)); });
+}
+
+function libSearch(v) { LIBQ = v; drawLib(); }
+
+function drawLib() {
+  const hits = libHits();
+  paint("libList", !LIB.length
+    ? `<p class="lib-none">Nothing in the library yet.${LIBSEED.count
+        ? ` ${LIBSEED.count} creatures are waiting in the vault's own stat blocks — bring them in below.`
+        : ""}</p>`
+    : !hits.length
+    ? `<p class="lib-none">Nothing matches “${esc(LIBQ)}”.</p>`
+    : hits.map(e => {
+        const m = e.mon;
+        // The same line the board's own rows carry under a name, in the same order: what it is,
+        // then its Challenge, then the set it belongs to, then what it is rooted in.
+        const sub = [m.reverian ? `${m.reverian.shadow ? "Shadow " : ""}Reverian R·${m.reverian.renownMax}` : "",
+                     m.nightmare?.grade || (m.boss ? "boss" : ""), e.cr && `CR ${e.cr}`, e.tag,
+                     ...(m.nightmare?.emotions || [])].filter(Boolean).join(" · ");
+        return `<div class="lib-row">
+          <button class="lib-pick" onclick="libAdd(${e.id})"
+            title="Add ${escQ(e.name)} to the fight — the × box says how many">
+            <span class="lib-face">${m.img
+              ? `<img src="${escQ(imgSrc(m.img))}" alt="">` : "<i>✦</i>"}</span>
+            <span class="lib-txt">
+              <b>${esc(e.name)}</b>
+              <i>${m.hpMax || "—"} hp · ${m.ac ?? "—"} ac · ${m.dc ?? "—"} dc · ${sign(m.initMod || 0)}</i>
+              ${sub ? `<s>${esc(sub)}</s>` : ""}
+            </span>
+          </button>
+          <button class="mini lib-ed" onclick="openLibEditor(${e.id})"
+            title="Edit ${escQ(e.name)}">✎</button>
+        </div>`;
+      }).join(""));
+
+  paint("libFt", `
+    <button class="mini" onclick="openLibEditor(0)">+ New</button>
+    ${LIBSEED.count ? `<button class="mini" onclick="importLib()"
+        title="Bring in any creature from the vault's stat blocks that is not here yet — ${LIBSEED.count
+          } were read${LIBSEED.builtAt ? ` on ${LIBSEED.builtAt}` : ""}. Nothing already here is touched.">
+        Import from the vault</button>` : ""}
+    <span class="lib-count">${LIB.length
+      ? (hits.length === LIB.length ? `${LIB.length} kept` : `${hits.length} of ${LIB.length}`)
+      : ""}</span>`);
+}
+
+// ── Putting one on the board ───────────────────────────────
+function libAdd(id) {
+  const e = LIB.find(x => x.id === id); if (!e) return;
+  const n = Math.max(1, Math.min(24, parseInt(el("libN")?.value, 10) || 1));
+  if (S.combatants.length + n > 60) return toast("That is as many as one board holds.");
+  // Numbered on from whatever is already there: a second pair of Glasslings is 3 and 4, not another
+  // 1 and 2 the DM then cannot tell apart when one of them starts bleeding.
+  const base = e.name;
+  const used = S.combatants.filter(c => String(c.name || "").replace(/\s+\d+$/, "") === base);
+  const from = used.length
+    ? Math.max(...used.map(c => parseInt(String(c.name).match(/\s+(\d+)$/)?.[1] || "1", 10)))
+    : 0;
+  for (let i = 0; i < n; i++) {
+    // A deep copy per creature, or four of them would share one pool of resistances and one set of
+    // counters — the second Glassling losing a root because the first one did.
+    const copy = JSON.parse(JSON.stringify(e.mon));
+    S.combatants.push({
+      ...copy, id: newId(),
+      name: n > 1 || used.length ? `${base} ${from + i + 1}` : base,
+      hp: copy.hpMax, tempHp: 0, init: null, conditions: [], down: false, hidden: false,
+    });
+  }
+  push(); draw();
+  toast(n > 1 ? `${n} × ${base} added` : `${base} added`);
+}
+
+// ── Editing one ────────────────────────────────────────────
+// The same five boxes and the same two switches as the add form, because an entry IS a monster — it
+// just has not walked in yet. Plus the two the library needs to find it again: the set it belongs to
+// and its Challenge, neither of which is ever copied onto the board.
+function openLibEditor(id) {
+  LIB_FOR = id;
+  LIBPIC = null;
+  const e = id ? LIB.find(x => x.id === id) : null;
+  if (id && !e) return;
+  loadOptions("l", e?.mon);
+  openDlg(e ? `${e.name} — library entry` : "New enemy", "");
+  drawLibEditor(true);
+}
+
+function drawLibEditor(first) {
+  const e = LIB_FOR ? LIB.find(x => x.id === LIB_FOR) : null;
+  const m = e?.mon || {};
+  // What is in the box wins over what is in the entry: flipping a switch repaints this body, and a
+  // half-edited hit point total must not snap back to what the library still says.
+  const v = (id, fallback) => {
+    const n = el(id);
+    return escQ(n ? n.value : (fallback == null ? "" : fallback));
+  };
+  const pic = LIBPIC === null ? (m.img || "") : LIBPIC;
+  el("dlgBody").innerHTML = `
+    <div class="ini-form lib-form">
+      <label class="ini-pic" title="A face for the room's screen">
+        ${pic ? `<img src="${escQ(imgSrc(pic))}" alt="">` : "✛"}
+        <input type="file" accept="image/*" onchange="libPicture(this)">
+      </label>
+      <div class="ini-f w-name"><label for="lName">Name</label>
+        <input id="lName" value="${v("lName", e?.name)}" placeholder="Glassling"></div>
+      <div class="ini-f w-n"><label for="lHp">HP</label>
+        <input id="lHp" value="${v("lHp", m.hpMax)}" inputmode="numeric" placeholder="132"></div>
+      <div class="ini-f w-n"><label for="lAc">AC</label>
+        <input id="lAc" value="${v("lAc", m.ac)}" inputmode="numeric" placeholder="19"></div>
+      <div class="ini-f w-n"><label for="lDc">DC</label>
+        <input id="lDc" value="${v("lDc", m.dc)}" inputmode="numeric" placeholder="16"></div>
+      <div class="ini-f w-n"><label for="lMod">Init</label>
+        <input id="lMod" value="${v("lMod", m.initMod == null ? "" : sign(m.initMod))}"
+          inputmode="numeric" placeholder="+5"></div>
+      <div class="ini-f w-n"><label for="lCr">CR</label>
+        <input id="lCr" value="${v("lCr", e?.cr)}" placeholder="9"></div>
+      <div class="ini-f w-name"><label for="lTag">Set it belongs to</label>
+        <input id="lTag" value="${v("lTag", e?.tag)}" placeholder="Roses Nightmare"></div>
+    </div>
+    ${optionBlocks("l")}
+    <div class="line" style="margin-top:14px">
+      <b>${LIB_FOR ? "Keep the changes" : "Add it to the library"}</b>
+      <button class="mini go" onclick="saveLibEntry()">Save</button>
+      ${LIB_FOR ? `<button class="mini warn" onclick="deleteLibEntry(${LIB_FOR})">Delete</button>` : ""}
+    </div>
+    <p class="note">Kept at full hit points with nothing on it — conditions, a rolled initiative and
+      a spent resistance belong to the fight it was in, not to the creature. The stat block itself
+      stays in the vault: traits, actions and auras are read there, not here.</p>`;
+  // The switches' own fields come from OPT.l, which openLibEditor filled — they need no help here.
+  if (first) el("lName")?.focus();
+}
+
+// The picture takes the same road as the add form's and the row's — downscaled to a square 192px
+// data URL before it is ever sent, because this blob rides to a television in the room.
+function libPicture(input) {
+  const keep = PIC;
+  takePicture(input);
+  const t = setInterval(() => {
+    if (PIC === keep) return;
+    clearInterval(t);
+    LIBPIC = PIC; PIC = keep;
+    drawAdd(); drawLibEditor();
+  }, 80);
+  setTimeout(() => clearInterval(t), 8000);
+}
+
+async function saveLibEntry() {
+  const name = el("lName").value.trim();
+  if (!name) return toast("Give the enemy a name.");
+  const numOr = (id, dflt) => {
+    const s = el(id).value.trim();
+    if (s === "") return dflt;
+    const n = parseInt(s, 10);
+    return Number.isFinite(n) ? n : dflt;
+  };
+  const e = LIB_FOR ? LIB.find(x => x.id === LIB_FOR) : null;
+  const hp = numOr("lHp", 0);
+  const opt = readOptions("l");
+  const body = {
+    name, tag: el("lTag").value.trim(), cr: el("lCr").value.trim(),
+    mon: {
+      kind: "npc", name,
+      img: LIBPIC === null ? (e?.mon.img || "") : LIBPIC,
+      hpMax: hp, hp,
+      ac: numOr("lAc", null), dc: numOr("lDc", null), initMod: numOr("lMod", 0),
+      // Counters and the note are the entry's own and are not on this form — a counter is written
+      // where it is used, on the board, and brought back here by "Save to the library".
+      counters: e?.mon.counters || [], note: e?.mon.note || "",
+      boss: opt.boss, nightmare: opt.nightmare, reverian: opt.reverian,
+    },
+  };
+  if (LIB_FOR) body.id = LIB_FOR;
+  try { await api("POST", "api/initiative/library", body); } catch (err) { return toast(err.message); }
+  await pullLib(); closeDlg();
+  toast(`“${name}” saved to the library.`);
+}
+
+async function deleteLibEntry(id) {
+  const e = LIB.find(x => x.id === id);
+  if (!confirm(`Take “${e?.name || "this one"}” out of the library? Anything already on the board stays where it is.`)) return;
+  try { await api("DELETE", `api/initiative/library/${id}`); } catch (err) { return toast(err.message); }
+  await pullLib(); closeDlg();
+}
+
+// Only ADDS. A name already here is left exactly as it is, because by then it is whatever the DM
+// edited it into — and the point of an editable library is that his number beats the one a regex
+// read out of a markdown file.
+async function importLib() {
+  let d;
+  try { d = await api("POST", "api/initiative/library/import"); } catch (err) { return toast(err.message); }
+  LIB = d.library || LIB;
+  drawSide();
+  toast(d.added
+    ? `${d.added} brought in${d.already ? `, ${d.already} already here` : ""}.`
+    : "Everything in the vault's stat blocks is already here.");
+}
+
+// The way back: a monster the DM typed in during the fight, kept for next time. The board's "3" is
+// taken off the name — what goes in is the creature, not the third copy of it.
+async function saveRowToLib(id) {
+  const c = find(id); if (!c || c.kind === "pc") return;
+  const name = String(c.name).replace(/\s+\d+$/, "");
+  const had = LIB.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (had && !confirm(`“${name}” is already in the library. Replace its numbers with these?`)) return;
+  try { await api("POST", "api/initiative/library", { name, mon: { ...c, name } }); }
+  catch (err) { return toast(err.message); }
+  await pullLib(); closeDlg();
+  toast(`“${name}” ${had ? "updated in" : "saved to"} the library.`);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1357,6 +1829,7 @@ async function pull() {
   if (d.conditions?.length) CONDS = d.conditions;
   if (d.emotions?.length) EMOTIONS = d.emotions;
   if (d.grades?.length) GRADES = d.grades;
+  if (d.renown?.length) RENOWN = d.renown;
   SAVED = d.encounters || [];
   if (!DIRTY && !PUSHING) S = { ...S, ...d.state };
   draw(true);
@@ -1407,12 +1880,15 @@ async function boot() {
 
   if (d.role === "dm" && !ASROOM) {
     S = d.state; PARTY = d.party || []; CONDS = d.conditions || []; SAVED = d.encounters || [];
-    EMOTIONS = d.emotions || []; GRADES = d.grades || [];
+    EMOTIONS = d.emotions || []; GRADES = d.grades || []; RENOWN = d.renown || [];
     el("board").hidden = false;
     document.body.classList.toggle("add-open", ADDOPEN);
     // An empty board is a board somebody is about to fill: the drawer opens itself once.
     if (!S.combatants.length && !ADDOPEN) toggleAdd(true);
     draw();
+    // Once, and off the critical path: the board is on the screen before the library lands, because
+    // the fight is what the DM opened this page for.
+    pullLib();
   } else {
     // A player — or the DM holding the second screen. Either way, no board.
     document.body.classList.add("as-room");

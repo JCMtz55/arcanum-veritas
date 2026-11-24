@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
-<link rel="stylesheet" href="css/init.css?v=2026-11-13n">
+<link rel="stylesheet" href="css/init.css?v=2026-11-24c">
 <!-- The tool strip. In <head> so its styling lands before the bar is first painted. -->
 <script src="../js/tools.js"></script>
 </head>
@@ -53,7 +53,41 @@
       <h2>Add to the fight</h2>
       <button class="mini" onclick="toggleAdd(false)" title="Close — A or Esc">✕</button>
     </header>
-    <section class="ini-add" id="add"></section>
+    <!-- FOUR WAYS SOMEBODY JOINS A FIGHT, and only one of them on the screen at a time.
+         They were stacked down one scrolling column once the library arrived, which made the
+         drawer a pile: the party chips, a monster form, two collapsible switches, a search box and
+         sixty rows, with no way to tell which part you were in. They are the same four things, but
+         a DM reaches for exactly ONE of them at a time, so the drawer shows exactly one. -->
+    <nav class="side-tabs" id="sideTabs" role="tablist" aria-label="Who is joining"></nav>
+
+    <!-- The party. -->
+    <section class="side-pane" id="paneParty" role="tabpanel" hidden></section>
+
+    <!-- The Enemy Library: single creatures kept to be used again — which is the thing a lineup is
+         not. A lineup is a whole fight as the board held it; this is the Glassling itself.
+         The search box and the count live in the HTML rather than being drawn, because the list
+         under them is repainted on every keystroke and a field repainted under the cursor is a
+         field that loses what you are typing into it. -->
+    <section class="side-pane" id="paneLib" role="tabpanel" hidden>
+      <div class="lib-top">
+        <input class="search lib-q" id="libQ" oninput="libSearch(this.value)" autocomplete="off"
+               spellcheck="false" placeholder="Search — glass, roses, boss, cr 13">
+        <label class="lib-n" title="How many of the one you pick">&times;
+          <input id="libN" value="1" inputmode="numeric" aria-label="How many to add"></label>
+      </div>
+      <div class="lib-list" id="libList"></div>
+      <footer class="lib-ft" id="libFt"></footer>
+    </section>
+
+    <!-- One typed in by hand, with the two switches that only belong to a monster being built. -->
+    <section class="side-pane ini-add" id="add" role="tabpanel" hidden></section>
+
+    <!-- A whole fight, saved and brought back. -->
+    <section class="side-pane" id="paneLineups" role="tabpanel" hidden></section>
+
+    <!-- What is true of the board whichever tab is open, and the one destructive button, kept
+         together at the bottom so it is never beside an Add. -->
+    <footer class="side-ft" id="sideFt"></footer>
   </aside>
   <!-- On a narrow screen the drawer covers the board, so a tap outside it closes it again. -->
   <div class="ini-scrim" id="scrim" onclick="toggleAdd(false)"></div>
@@ -121,6 +155,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/init.js?v=2026-11-23b"></script>
+<script src="js/init.js?v=2026-11-24c"></script>
 </body>
 </html>

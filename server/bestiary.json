@@ -1,0 +1,1776 @@
+{
+ "builtAt": "2026-11-24",
+ "from": "stat blocks/",
+ "entries": [
+  {
+   "name": "Arch Golden Inquisitor",
+   "tag": "",
+   "cr": "24",
+   "mon": {
+    "kind": "npc",
+    "name": "Arch Golden Inquisitor",
+    "img": "",
+    "hpMax": 475,
+    "hp": 475,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 21,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Asha, the First Nightmare",
+   "tag": "Prima Nocta",
+   "cr": "28",
+   "mon": {
+    "kind": "npc",
+    "name": "Asha, the First Nightmare",
+    "img": "",
+    "hpMax": 1000,
+    "hp": 1000,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 22,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 2,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": {
+     "grade": "Primordial Nightmare",
+     "emotions": [
+      "Despair",
+      "Loneliness",
+      "Regret",
+      "Revenge",
+      "Shame"
+     ],
+     "roots": 5,
+     "rootsMax": 5
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Beast Tamer Liquidator",
+   "tag": "",
+   "cr": "8",
+   "mon": {
+    "kind": "npc",
+    "name": "Beast Tamer Liquidator",
+    "img": "",
+    "hpMax": 300,
+    "hp": 300,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 15,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Black Rose Vanguard",
+   "tag": "Roses Nightmare",
+   "cr": "13",
+   "mon": {
+    "kind": "npc",
+    "name": "Black Rose Vanguard",
+    "img": "",
+    "hpMax": 730,
+    "hp": 730,
+    "tempHp": 0,
+    "ac": 26,
+    "dc": 18,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "",
+     "emotions": [
+      "Despair"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Bouquet Hydra",
+   "tag": "Roses Nightmare",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Bouquet Hydra",
+    "img": "",
+    "hpMax": 367,
+    "hp": 367,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 18,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Carol",
+   "tag": "",
+   "cr": "15",
+   "mon": {
+    "kind": "npc",
+    "name": "Carol",
+    "img": "",
+    "hpMax": 255,
+    "hp": 255,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 18,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Carter Slade",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Carter Slade",
+    "img": "",
+    "hpMax": 220,
+    "hp": 220,
+    "tempHp": 0,
+    "ac": 23,
+    "dc": 23,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Cognitive Custodian",
+   "tag": "",
+   "cr": "10",
+   "mon": {
+    "kind": "npc",
+    "name": "Cognitive Custodian",
+    "img": "",
+    "hpMax": 168,
+    "hp": 168,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 16,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Corvane, the Corvine Galahad",
+   "tag": "Briar Realm",
+   "cr": "24",
+   "mon": {
+    "kind": "npc",
+    "name": "Corvane, the Corvine Galahad",
+    "img": "",
+    "hpMax": 1400,
+    "hp": 1400,
+    "tempHp": 0,
+    "ac": 24,
+    "dc": 27,
+    "init": null,
+    "initMod": 8,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Crimson Splitjaw",
+   "tag": "Second Descent",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Crimson Splitjaw",
+    "img": "",
+    "hpMax": 420,
+    "hp": 420,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": 18,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 1,
+     "legendaryMax": 1,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Demise - Arsenal",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Demise - Arsenal",
+    "img": "",
+    "hpMax": 80,
+    "hp": 80,
+    "tempHp": 0,
+    "ac": 14,
+    "dc": 15,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Dorthana Enforcer",
+   "tag": "",
+   "cr": "11",
+   "mon": {
+    "kind": "npc",
+    "name": "Dorthana Enforcer",
+    "img": "",
+    "hpMax": 85,
+    "hp": 85,
+    "tempHp": 0,
+    "ac": 16,
+    "dc": 17,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Dr Silas",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Dr Silas",
+    "img": "",
+    "hpMax": 225,
+    "hp": 225,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 18,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Echoing Shade",
+   "tag": "",
+   "cr": "6",
+   "mon": {
+    "kind": "npc",
+    "name": "Echoing Shade",
+    "img": "",
+    "hpMax": 72,
+    "hp": 72,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": 15,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Demi-Nightmare",
+     "emotions": [
+      "Jealousy"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Fangbark",
+   "tag": "",
+   "cr": "8",
+   "mon": {
+    "kind": "npc",
+    "name": "Fangbark",
+    "img": "",
+    "hpMax": 153,
+    "hp": 153,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 16,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [
+      "Hate"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Glass Mask",
+   "tag": "",
+   "cr": "1/4",
+   "mon": {
+    "kind": "npc",
+    "name": "Glass Mask",
+    "img": "",
+    "hpMax": 27,
+    "hp": 27,
+    "tempHp": 0,
+    "ac": 13,
+    "dc": 14,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Glassling",
+   "tag": "",
+   "cr": "9",
+   "mon": {
+    "kind": "npc",
+    "name": "Glassling",
+    "img": "",
+    "hpMax": 132,
+    "hp": 132,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 16,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [
+      "Vanity"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Golden Liquidator",
+   "tag": "",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Golden Liquidator",
+    "img": "",
+    "hpMax": 500,
+    "hp": 500,
+    "tempHp": 0,
+    "ac": 23,
+    "dc": 16,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Golden Mage",
+   "tag": "",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Golden Mage",
+    "img": "",
+    "hpMax": 210,
+    "hp": 210,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 21,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Golden Mimic",
+   "tag": "",
+   "cr": "9",
+   "mon": {
+    "kind": "npc",
+    "name": "Golden Mimic",
+    "img": "",
+    "hpMax": 147,
+    "hp": 147,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 17,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Grand Penitence",
+   "tag": "",
+   "cr": "7",
+   "mon": {
+    "kind": "npc",
+    "name": "Grand Penitence",
+    "img": "",
+    "hpMax": 735,
+    "hp": 735,
+    "tempHp": 0,
+    "ac": 26,
+    "dc": 17,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Hilda, the Hag-Queen",
+   "tag": "",
+   "cr": "26",
+   "mon": {
+    "kind": "npc",
+    "name": "Hilda, the Hag-Queen",
+    "img": "",
+    "hpMax": 450,
+    "hp": 450,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 24,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 4,
+     "legendaryMax": 4,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": {
+     "grade": "",
+     "emotions": [
+      "Vanity"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Hollow-Handed Grasper",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Hollow-Handed Grasper",
+    "img": "",
+    "hpMax": 112,
+    "hp": 112,
+    "tempHp": 0,
+    "ac": 16,
+    "dc": 16,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Infernal Armor",
+   "tag": "",
+   "cr": "9",
+   "mon": {
+    "kind": "npc",
+    "name": "Infernal Armor",
+    "img": "",
+    "hpMax": 95,
+    "hp": 95,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 22,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Infernal Armor +2",
+   "tag": "",
+   "cr": "9",
+   "mon": {
+    "kind": "npc",
+    "name": "Infernal Armor +2",
+    "img": "",
+    "hpMax": 200,
+    "hp": 200,
+    "tempHp": 0,
+    "ac": 23,
+    "dc": 22,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Judicator Seraph",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Judicator Seraph",
+    "img": "",
+    "hpMax": 410,
+    "hp": 410,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 20,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 1,
+     "legendaryMax": 1,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Juliet",
+   "tag": "",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Juliet",
+    "img": "",
+    "hpMax": 295,
+    "hp": 295,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 18,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "King Ivar Valentine",
+   "tag": "",
+   "cr": "16",
+   "mon": {
+    "kind": "npc",
+    "name": "King Ivar Valentine",
+    "img": "",
+    "hpMax": 225,
+    "hp": 225,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 23,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Krieger",
+   "tag": "",
+   "cr": "13",
+   "mon": {
+    "kind": "npc",
+    "name": "Krieger",
+    "img": "",
+    "hpMax": 168,
+    "hp": 168,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": 17,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [
+      "Shame"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Laternenhalter",
+   "tag": "",
+   "cr": "11",
+   "mon": {
+    "kind": "npc",
+    "name": "Laternenhalter",
+    "img": "",
+    "hpMax": 135,
+    "hp": 135,
+    "tempHp": 0,
+    "ac": 16,
+    "dc": 15,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Lucian Vaux",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Lucian Vaux",
+    "img": "",
+    "hpMax": 64,
+    "hp": 64,
+    "tempHp": 0,
+    "ac": 15,
+    "dc": null,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Messianic Scourge",
+   "tag": "",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Messianic Scourge",
+    "img": "",
+    "hpMax": 330,
+    "hp": 330,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 18,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Mirror of Eden Golem",
+   "tag": "",
+   "cr": "14",
+   "mon": {
+    "kind": "npc",
+    "name": "Mirror of Eden Golem",
+    "img": "",
+    "hpMax": 228,
+    "hp": 228,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 18,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Mockerel",
+   "tag": "",
+   "cr": "11",
+   "mon": {
+    "kind": "npc",
+    "name": "Mockerel",
+    "img": "",
+    "hpMax": 140,
+    "hp": 140,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 18,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [
+      "Slander"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Muskel",
+   "tag": "",
+   "cr": "18",
+   "mon": {
+    "kind": "npc",
+    "name": "Muskel",
+    "img": "",
+    "hpMax": 240,
+    "hp": 240,
+    "tempHp": 0,
+    "ac": 18,
+    "dc": 18,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Nightling",
+     "emotions": [
+      "Zealotry"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Red Rose Duelist",
+   "tag": "Roses Nightmare",
+   "cr": "13",
+   "mon": {
+    "kind": "npc",
+    "name": "Red Rose Duelist",
+    "img": "",
+    "hpMax": 555,
+    "hp": 555,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 17,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "",
+     "emotions": [
+      "Hate"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Reno Hightower (Mk III)",
+   "tag": "",
+   "cr": "17",
+   "mon": {
+    "kind": "npc",
+    "name": "Reno Hightower (Mk III)",
+    "img": "",
+    "hpMax": 305,
+    "hp": 305,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 18,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Shadow Dragon",
+   "tag": "",
+   "cr": "20",
+   "mon": {
+    "kind": "npc",
+    "name": "Shadow Dragon",
+    "img": "",
+    "hpMax": 330,
+    "hp": 330,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 23,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 2,
+     "legendaryMax": 2,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Shadow Lion",
+   "tag": "",
+   "cr": "14",
+   "mon": {
+    "kind": "npc",
+    "name": "Shadow Lion",
+    "img": "",
+    "hpMax": 250,
+    "hp": 250,
+    "tempHp": 0,
+    "ac": 12,
+    "dc": 20,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Shadow Mage",
+   "tag": "",
+   "cr": "13",
+   "mon": {
+    "kind": "npc",
+    "name": "Shadow Mage",
+    "img": "",
+    "hpMax": 250,
+    "hp": 250,
+    "tempHp": 0,
+    "ac": 12,
+    "dc": 20,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Sinbad Commerci",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "Sinbad Commerci",
+    "img": "",
+    "hpMax": 310,
+    "hp": 310,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 20,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Steeldoor Enforcer",
+   "tag": "",
+   "cr": "10",
+   "mon": {
+    "kind": "npc",
+    "name": "Steeldoor Enforcer",
+    "img": "",
+    "hpMax": 150,
+    "hp": 150,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 17,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Stumpling",
+   "tag": "Malus Gala",
+   "cr": "5",
+   "mon": {
+    "kind": "npc",
+    "name": "Stumpling",
+    "img": "",
+    "hpMax": 52,
+    "hp": 52,
+    "tempHp": 0,
+    "ac": 14,
+    "dc": 15,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Demi-Nightmare",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Sylas",
+   "tag": "",
+   "cr": "21",
+   "mon": {
+    "kind": "npc",
+    "name": "Sylas",
+    "img": "",
+    "hpMax": 287,
+    "hp": 287,
+    "tempHp": 0,
+    "ac": 25,
+    "dc": 20,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Beast",
+   "tag": "",
+   "cr": "20",
+   "mon": {
+    "kind": "npc",
+    "name": "The Beast",
+    "img": "",
+    "hpMax": 8000,
+    "hp": 8000,
+    "tempHp": 0,
+    "ac": 23,
+    "dc": 28,
+    "init": null,
+    "initMod": 5,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 4,
+     "legendaryMax": 4,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Drowned",
+   "tag": "",
+   "cr": "6",
+   "mon": {
+    "kind": "npc",
+    "name": "The Drowned",
+    "img": "",
+    "hpMax": 80,
+    "hp": 80,
+    "tempHp": 0,
+    "ac": 15,
+    "dc": 14,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Guardian of the Black Sea",
+   "tag": "Prima Nocta",
+   "cr": "26",
+   "mon": {
+    "kind": "npc",
+    "name": "The Guardian of the Black Sea",
+    "img": "",
+    "hpMax": 850,
+    "hp": 850,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 24,
+    "init": null,
+    "initMod": -1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 0,
+     "legendaryMax": 0,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": {
+     "grade": "Primordial Nightmare",
+     "emotions": [
+      "Absurdity"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Hollow Cantor",
+   "tag": "",
+   "cr": "16",
+   "mon": {
+    "kind": "npc",
+    "name": "The Hollow Cantor",
+    "img": "",
+    "hpMax": 240,
+    "hp": 240,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 18,
+    "init": null,
+    "initMod": 6,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Hollowed Warden",
+   "tag": "",
+   "cr": "15",
+   "mon": {
+    "kind": "npc",
+    "name": "The Hollowed Warden",
+    "img": "",
+    "hpMax": 285,
+    "hp": 285,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 18,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Inked Vitrine",
+   "tag": "",
+   "cr": "3",
+   "mon": {
+    "kind": "npc",
+    "name": "The Inked Vitrine",
+    "img": "",
+    "hpMax": 39,
+    "hp": 39,
+    "tempHp": 0,
+    "ac": 13,
+    "dc": 25,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "Demi-Nightmare",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Last Suitor",
+   "tag": "Briar Realm",
+   "cr": "23",
+   "mon": {
+    "kind": "npc",
+    "name": "The Last Suitor",
+    "img": "",
+    "hpMax": 1600,
+    "hp": 1600,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 25,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "",
+     "emotions": [],
+     "roots": 0,
+     "rootsMax": 0
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Reaching Hand of Vuitheus",
+   "tag": "",
+   "cr": "",
+   "mon": {
+    "kind": "npc",
+    "name": "The Reaching Hand of Vuitheus",
+    "img": "",
+    "hpMax": 120,
+    "hp": 120,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": 18,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Soured Lode",
+   "tag": "Malus Gala",
+   "cr": "24",
+   "mon": {
+    "kind": "npc",
+    "name": "The Soured Lode",
+    "img": "",
+    "hpMax": 1682,
+    "hp": 1682,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": 26,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": {
+     "grade": "",
+     "emotions": [
+      "Apathy"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Tuner",
+   "tag": "Prima Nocta",
+   "cr": "24",
+   "mon": {
+    "kind": "npc",
+    "name": "The Tuner",
+    "img": "",
+    "hpMax": 600,
+    "hp": 600,
+    "tempHp": 0,
+    "ac": 22,
+    "dc": 22,
+    "init": null,
+    "initMod": 7,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 0,
+     "legendaryMax": 0,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": {
+     "grade": "Recurring Nightmare",
+     "emotions": [
+      "Obsession"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Vivitect",
+   "tag": "",
+   "cr": "23",
+   "mon": {
+    "kind": "npc",
+    "name": "The Vivitect",
+    "img": "",
+    "hpMax": 390,
+    "hp": 390,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 20,
+    "init": null,
+    "initMod": 0,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 2,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Wicked Glassmother",
+   "tag": "",
+   "cr": "17",
+   "mon": {
+    "kind": "npc",
+    "name": "The Wicked Glassmother",
+    "img": "",
+    "hpMax": 391,
+    "hp": 391,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 19,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 3,
+     "legendaryMax": 3,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": {
+     "grade": "Primordial Nightmare",
+     "emotions": [
+      "Vanity"
+     ],
+     "roots": 1,
+     "rootsMax": 1
+    },
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "The Withered Herald",
+   "tag": "",
+   "cr": "9",
+   "mon": {
+    "kind": "npc",
+    "name": "The Withered Herald",
+    "img": "",
+    "hpMax": 138,
+    "hp": 138,
+    "tempHp": 0,
+    "ac": 16,
+    "dc": 16,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Thorned Vicar",
+   "tag": "",
+   "cr": "13",
+   "mon": {
+    "kind": "npc",
+    "name": "Thorned Vicar",
+    "img": "",
+    "hpMax": 210,
+    "hp": 210,
+    "tempHp": 0,
+    "ac": 19,
+    "dc": 17,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Valentian Guard",
+   "tag": "",
+   "cr": "10",
+   "mon": {
+    "kind": "npc",
+    "name": "Valentian Guard",
+    "img": "",
+    "hpMax": 210,
+    "hp": 210,
+    "tempHp": 0,
+    "ac": 20,
+    "dc": 15,
+    "init": null,
+    "initMod": 1,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 1,
+     "legendaryMax": 1,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Velumian Enforcer",
+   "tag": "",
+   "cr": "6",
+   "mon": {
+    "kind": "npc",
+    "name": "Velumian Enforcer",
+    "img": "",
+    "hpMax": 76,
+    "hp": 76,
+    "tempHp": 0,
+    "ac": 16,
+    "dc": 20,
+    "init": null,
+    "initMod": 4,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Vorpidae",
+   "tag": "",
+   "cr": "1/4",
+   "mon": {
+    "kind": "npc",
+    "name": "Vorpidae",
+    "img": "",
+    "hpMax": 10,
+    "hp": 10,
+    "tempHp": 0,
+    "ac": 13,
+    "dc": 18,
+    "init": null,
+    "initMod": 2,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "White Rose Support",
+   "tag": "Roses Nightmare",
+   "cr": "11",
+   "mon": {
+    "kind": "npc",
+    "name": "White Rose Support",
+    "img": "",
+    "hpMax": 170,
+    "hp": 170,
+    "tempHp": 0,
+    "ac": 17,
+    "dc": null,
+    "init": null,
+    "initMod": 3,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": null,
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  },
+  {
+   "name": "Witch-Dipped Redcap",
+   "tag": "Redcaps",
+   "cr": "16",
+   "mon": {
+    "kind": "npc",
+    "name": "Witch-Dipped Redcap",
+    "img": "",
+    "hpMax": 320,
+    "hp": 320,
+    "tempHp": 0,
+    "ac": 21,
+    "dc": 20,
+    "init": null,
+    "initMod": 6,
+    "conditions": [],
+    "counters": [],
+    "note": "",
+    "boss": {
+     "legendary": 2,
+     "legendaryMax": 2,
+     "phases": 1,
+     "phase": 1,
+     "turns": 1,
+     "inits": []
+    },
+    "nightmare": null,
+    "hidden": false,
+    "down": false
+   }
+  }
+ ]
+}
