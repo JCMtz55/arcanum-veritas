@@ -168,13 +168,28 @@ function askNumber(el, { title, value, min = 0, max = 999, hint = "", onSet }) {
 // ALREADY MADE WITH IT, and the dialog says whose seal. The alternative is a buff that only works
 // when the player remembers they have it, which is the same as not having it.
 function showRoll(label, modifier, breakdown, { critOn = 20, scopes = [] } = {}) {
-  const given = rules.advantageOn(ch(), scopes);
-  const draw = opts => {
+  const up = rules.advantageOn(ch(), scopes);
+  // The other half of the same sentence: a CONDITION the DM applied points at the same targets a
+  // seal does, with the sign flipped, so Poisoned reaches this roll exactly as Bless does.
+  const down = rules.disadvantageOn(ch(), scopes);
+  // Any number of each CANCEL to one straight roll. It is the rule this table's own conditions
+  // reference states twice because it is the most-missed interaction at any table — so a Poisoned
+  // character under somebody's Bless rolls a single die, and the dialog says why.
+  const cancels = up.length > 0 && down.length > 0;
+  const given = cancels ? [] : up.length ? up : down;
+  const gave = cancels ? "" : up.length ? "Advantage" : down.length ? "Disadvantage" : "";
+  const first = gave === "Advantage" ? { advantage: true, given: true }
+              : gave === "Disadvantage" ? { disadvantage: true, given: true } : {};
+  const draw = (opts, firstPass = false) => {
     const r = rollCheck(modifier, { ...opts, critOn });
-    // Said only when the advantage was GIVEN rather than asked for, because a player who just
-    // pressed the Advantage button does not need telling why they have it.
-    const why = opts.advantage && opts.given
-      ? `<p class="hint">Advantage from <b>${esc(given.map(a => a.why).join(", "))}</b>.</p>` : "";
+    // Said only when it was GIVEN rather than asked for, because a player who just pressed the
+    // Advantage button does not need telling why they have it.
+    const why = opts.given && gave
+      ? `<p class="hint">${gave} from <b>${esc(given.map(a => a.why).join(", "))}</b>.</p>`
+      : firstPass && cancels
+      ? `<p class="hint">Advantage from <b>${esc(up.map(a => a.why).join(", "))}</b> and disadvantage
+           from <b>${esc(down.map(a => a.why).join(", "))}</b> — they cancel, so this is a straight roll.</p>`
+      : "";
     const d = dialog(label, rollHtml(r, { label, breakdown }) + why, {
       footer: `<button class="btn sm" data-reroll="adv">Advantage</button>
         <button class="btn sm" data-reroll="dis">Disadvantage</button>
@@ -186,13 +201,14 @@ function showRoll(label, modifier, breakdown, { critOn = 20, scopes = [] } = {})
       const k = b.dataset.reroll;
       draw(k === "adv" ? { advantage: true }
         : k === "dis" ? { disadvantage: true }
-        // "Roll again" keeps whatever the seal gave you; "Roll flat" is how you decline it for one
-        // roll, which is a thing a table does and should not need the effect dropped to do.
-        : k === "keep" && given.length ? { advantage: true, given: true }
+        // "Roll again" keeps whatever you were given — a seal's advantage or a condition's
+        // disadvantage; "Roll flat" is how you decline it for one roll, which is a thing a table
+        // does and should not need the effect dropped to do.
+        : k === "keep" && given.length ? first
         : {});
     });
   };
-  draw(given.length ? { advantage: true, given: true } : {});
+  draw(first, true);
 }
 
 const breakdownFor = (parts) => parts.filter(p => p && p.amount);

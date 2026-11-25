@@ -96,7 +96,7 @@ function signOut() { api("POST", "api/logout").finally(() => location.reload());
 // ═══════════════════════════════════════════════════════════
 let S = null;            // the fight, as the server holds it
 let PARTY = [];          // the live party cards — never written into S
-let CONDS = [];          // the conditions the picker offers
+let CONDS = [];          // the Condition Library — fetched on its own, never on the poll
 let EMOTIONS = [];       // the campaign's Vile Emotions, from Vileness.md by way of the server
 let GRADES = [];         // Demi-Nightmare · Nightling · Recurring · Primordial
 let RENOWN = [];         // Remembered · Storied · Legendary · Mythic — a Reverian's scaling dial
@@ -134,10 +134,43 @@ function pushClock() {
 // sorts for the room: highest first, nobody who has not rolled above somebody who has, ties in the
 // order the DM put them in. The player's view is resolved server-side instead, because that is
 // where things are left out and a browser must not be trusted with that.
+// ── What a turn is made of ─────────────────────────────────
+// Action · Bonus Action · Movement · Reaction. MOVEMENT IS THE BOARD'S OWN for everybody — the
+// character sheet's tracker counts what you SPEND and a speed is a distance, so the boot is a mark
+// the DM makes and it never reaches anybody's sheet. The other three on a player's row are read
+// live from theirs, and spent through the same field their own tracker writes.
+//
+// The same merge the server does in `econOf` for the room's screen, done again here for the DM's
+// board — the same arrangement as `resolve` and `initRows` themselves, and for the same reason: the
+// room's half is where the withholding happens and a browser is not trusted with it.
+const TURN_SLOTS = ["action", "bonus", "move", "reaction"];
+const MON_ALLOW = { action: 1, bonus: 1, move: 1, reaction: 1 };
+// How many of each THIS creature gets. One of each unless the DM has said otherwise — a hasted
+// ogre, something written with two Reactions, an ooze with none at all. A PC's three are their
+// sheet's and are not settable here; their movement is one, like everybody's.
+const turnMaxOf = c => Object.fromEntries(TURN_SLOTS.map(k =>
+  [k, Math.max(0, Math.min(4, Number(c?.turnMax?.[k] ?? MON_ALLOW[k])))]));
+
+function econOf(c, card) {
+  if (c.kind === "event") return null;
+  const move = c.turn?.move || 0;
+  if (c.kind !== "pc") {
+    const allow = turnMaxOf(c);
+    const used = Object.fromEntries(TURN_SLOTS.map(k =>
+      [k, Math.min(allow[k], Math.max(0, c.turn?.[k] || 0))]));
+    return { allow, used };
+  }
+  const a = card?.turn?.allow || {}, u = card?.turn?.used || {};
+  return {
+    allow: { action: a.action ?? 1, bonus: a.bonus ?? 1, move: 1, reaction: a.reaction ?? 1 },
+    used: { action: u.action || 0, bonus: u.bonus || 0, move, reaction: u.reaction || 0 },
+  };
+}
+
 function resolve() {
   const byId = new Map(PARTY.map(p => [p.id, p]));
   const rows = S.combatants.map(c => {
-    if (c.kind !== "pc") return { ...c, player: "" };
+    if (c.kind !== "pc") return { ...c, player: "", econ: econOf(c) };
     const p = byId.get(c.charId);
     if (!p) return { ...c, name: "(gone)", gone: true, hp: 0, hpMax: 0, tempHp: 0, ac: null, dc: null,
                      conditions: [], down: false, player: "" };
@@ -152,6 +185,7 @@ function resolve() {
       conditions: (p.conditions || []).map(x => ({ name: typeof x === "string" ? x : x?.name, rounds: null }))
         .filter(x => x.name),
       down: p.hp <= 0,
+      econ: econOf(c, p),
       wounds: p.wounds, deathSaveDC: p.deathSaveDC, fate: p.fate, grimm: p.grimm,
       exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
       dreamExhaustionName: p.dreamExhaustionName,
@@ -220,9 +254,16 @@ function draw(soft) {
 // disappear because four seconds went by.
 const PAINTED = {};
 function paint(id, html) {
-  if (PAINTED[id] === html) return;
+  const node = el(id);
+  if (!node) return;
+  // The cache is keyed on the ID, but the NODE can be replaced under it: the dialog rebuilds its
+  // whole body every time it opens, and a panel inside it would then be skipped as "unchanged" and
+  // left empty — which is what happened to the strip of conditions already on a creature. The flag
+  // is on the node, so a node that has just been built is always painted.
+  if (PAINTED[id] === html && node.dataset.pnt) return;
   PAINTED[id] = html;
-  el(id).innerHTML = html;
+  node.innerHTML = html;
+  node.dataset.pnt = "1";
 }
 
 function drawClock() {
@@ -288,17 +329,26 @@ function drawOrder() {
     // an AC the table has just worked out is one click on the AC itself. Brass and underlined when
     // the room can see it. A PC's numbers are theirs and are not revealed by anybody.
     const revealed = what => (what === "ac" ? r.showAc !== false : !!r.showDc);
-    const stat = (v, label, what) => pc || r.gone
+    // The box keeps the creature's OWN number, because that is the one the DM typed and the one he
+    // corrects. What a condition is doing to it rides on the label — "AC −2" — and the room is sent
+    // the sum. A PC's is not touched here: a condition on them landed on their sheet as a real
+    // effect, so the number arriving from it has already moved and adding the same −2 again would
+    // charge them twice.
+    const stat = (v, label, what) => {
+      const d = pc || r.gone ? 0 : condMod(r, what === "ac" ? "ac" : "saveDc");
+      return pc || r.gone
       ? `<div class="ini-stat ${v == null ? "none" : ""}" title="${escQ(label)} — from their sheet">
            <b>${v == null ? "—" : v}</b><span>${label}</span></div>`
-      : `<div class="ini-stat ${v == null ? "none" : ""}">
+      : `<div class="ini-stat ${v == null ? "none" : ""} ${d ? "mod" : ""}">
            <input value="${v == null ? "" : v}" inputmode="numeric" placeholder="—"
              aria-label="${escQ(label)}" onchange="setNum('${r.id}','${what}',this.value)">
            <button class="stat-rev ${revealed(what) ? "on" : ""}"
              onclick="toggleReveal('${r.id}','${what}')" aria-pressed="${revealed(what)}"
-             title="${escQ(revealed(what)
-               ? `The room can see this ${label}. Click to take it back.`
-               : `Hidden from the room. Click to reveal this ${label}.`)}">${label}</button></div>`;
+             title="${escQ([d && v != null ? `${v} by its own sheet, ${Math.max(0, v + d)} right now.` : "",
+               revealed(what) ? `The room can see this ${label}. Click to take it back.`
+                 : `Hidden from the room. Click to reveal this ${label}.`].filter(Boolean).join(" "))}">${
+             label}${d ? `<i>${sign(d)}</i>` : ""}</button></div>`;
+    };
     return `
     <div class="ini-row ${pc ? "pc" : ""} ${r.id === S.turnId && S.inCombat ? "on" : ""}
                 ${r.down ? "down" : ""} ${r.hidden ? "off" : ""} ${r.gone ? "gone" : ""}
@@ -324,9 +374,11 @@ function drawOrder() {
         <div class="hpn">
           <b>${r.hp ?? 0}</b><s>/${r.hpMax || "—"}</s>
           ${r.tempHp ? `<em>+${r.tempHp}</em>` : ""}
-          ${r.gone ? "" : `<input class="hit" placeholder="hit" aria-label="Damage or healing for ${escQ(r.name)}"
-            title="12 takes it off · +12 puts it back · t8 temporary · =40 sets it"
-            onkeydown="if(event.key==='Enter'){hit('${r.id}',this.value);this.value=''}">`}
+          ${r.gone ? "" : `<label class="hit-box">
+            <input class="hit" placeholder="±hp" aria-label="Damage, healing or temporary hit points for ${escQ(r.name)}"
+              title="12 takes it off · +12 heals · t8 temporary · =40 sets it"
+              onkeydown="if(event.key==='Enter'){hit('${r.id}',this.value);this.value=''}">
+            <i class="hit-key">12 hurt · +12 heal · t8 temp · =40 set</i></label>`}
         </div>
       </div>
       ${stat(r.ac, "AC", "ac")}
@@ -334,11 +386,10 @@ function drawOrder() {
       <div class="ini-con">
         ${pc ? woundChip(r) + grimmChip(r) : ""}
         ${r.slot ? "" : trackChips(r)}
-        ${(r.conditions || []).map(c => `<button class="chip ${isCampaign(c.name) ? "camp" : ""}"
-            onclick="dropCondition('${r.id}','${escQ(c.name)}')" title="Click to clear">
-            ${esc(c.name)}${c.rounds ? `<i>${c.rounds}</i>` : ""}</button>`).join("")}
+        ${(r.conditions || []).map(c => condChip(r.id, c)).join("")}
         ${r.slot ? "" : `<button class="chip add" onclick="openConditions('${r.id}')" title="Add a condition">+</button>`}
       </div>
+      ${econPips(r)}
       <div class="ini-tools">
         <button class="${r.hidden ? "" : "on"}" onclick="toggleHidden('${r.id}')"
           title="${r.hidden ? "Not on the room's screen" : "On the room's screen"}">${r.hidden ? "⊘" : "👁"}</button>
@@ -351,7 +402,85 @@ function drawOrder() {
   }).join(""));
 }
 
-const isCampaign = name => CONDS.some(c => c.name === name && c.campaign);
+// ── The turn's four ────────────────────────────────────────
+// Drawn rather than lettered, because this is read at a glance in the middle of a round and at six
+// feet on the room's screen: two swords is the Action, one is the Bonus Action, a boot is the
+// movement, a bolt is the Reaction. Inline rather than from the sheet's icon set — that one is Font
+// Awesome, loaded by the builder, and pulling a webfont onto a television for four glyphs is a
+// webfont on a television.
+const TURN_ICON = {
+  action: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 9 15"/><path d="m5.5 14.5 4 4"/>
+      <path d="M4 4l11 11"/><path d="m18.5 14.5-4 4"/></svg>`,
+  bonus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"><path d="M19 4 9 14"/><path d="m5.5 13.5 5 5"/>
+      <path d="M7 17 4 20"/></svg>`,
+  // The boot took four tries. A short foot and a square corner read as a CHAIR at any size — what
+  // makes it a boot is a narrow shaft, a foot three times as long as the shaft is wide, and the
+  // sole drawn as its own bar underneath.
+  move: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.4 2.8h4.4v8.8c0 .7.4 1.3 1 1.6
+      l6.2 2.9c1.4.6 2.3 2 2.3 3.5v.4H7.4z"/><path d="M6.4 18.9h16v2.3h-16z"/></svg>`,
+  reaction: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.6 2 4 13.4h5.4L8.4 22 20 9.6h-6z"/></svg>`,
+};
+const TURN_NAME = { action: "Action", bonus: "Bonus Action", move: "Movement", reaction: "Reaction" };
+
+// One row's four. A pip per slot the creature is ALLOWED — which is not always one, since Haste
+// grants an Action and a Grimm may grant a second Reaction, and a player's allowance is whatever
+// their own sheet says it is. Click spends, shift-click gives it back: the same gesture as every
+// other chip on this row, because mid-fight a second menu is a thing nobody opens.
+function econPips(r) {
+  const e = r.econ;
+  if (!e) return "";
+  const pc = r.kind === "pc";
+  return `<div class="ini-econ">${TURN_SLOTS.map(k => {
+    const allow = Math.max(0, e.allow[k] || 0), used = Math.max(0, e.used[k] || 0);
+    if (!allow) return "";
+    const left = Math.max(0, allow - used);
+    const where = k === "move" ? "on the board" : pc ? "on their sheet" : "on the board";
+    return `<button class="ep ${left ? "" : "spent"} ${allow > 1 ? "many" : ""}"
+      onclick="spendTurn('${r.id}','${k}',event)"
+      title="${escQ(`${TURN_NAME[k]} — ${left} of ${allow} left, ${where}. Click to spend one, shift-click to give one back.`)}"
+      aria-label="${escQ(`${TURN_NAME[k]}, ${left} of ${allow} left`)}">${TURN_ICON[k]}${
+      allow > 1 ? `<i>${left}</i>` : ""}</button>`;
+  }).join("")}</div>`;
+}
+
+// Spending one. A monster's four and ANYBODY's movement live on the board; a player's other three
+// are their sheet's, written through the same vitals route the hit box writes hit points with — so
+// the number the DM clicks is the number on the player's own screen, not a second opinion about it.
+async function spendTurn(id, kind, ev) {
+  const c = find(id);
+  const r = resolve().find(x => x.id === id);
+  if (!c || !r?.econ) return;
+  const back = ev?.shiftKey;
+  const allow = r.econ.allow[kind] || 0;
+  const now = r.econ.used[kind] || 0;
+  const next = Math.max(0, Math.min(allow, now + (back ? -1 : 1)));
+  if (next === now) return toast(back ? `${r.name} has not spent that.` : `${r.name} has no ${TURN_NAME[kind]} left.`);
+
+  if (c.kind === "pc" && kind !== "move") {
+    // The whole of `used`, because the sheet holds it as one object and sending a single key would
+    // be read as "and nothing else is spent".
+    const used = { ...r.econ.used, [kind]: next };
+    delete used.move;                        // never theirs — the boot is the board's mark
+    try { await api("PUT", `api/characters/${c.charId}/vitals`, { vitals: { used }, note: "initiative board" }); }
+    catch (err) { return toast(err.message); }
+    await pull(); draw();
+    return;
+  }
+  c.turn = { ...(c.turn || {}), [kind]: next };
+  push(); draw();
+}
+
+// A fresh turn when it comes round again. Only what the BOARD holds — a player's own three are
+// handed back by their sheet when the round it is on moves forward, which this board already
+// drives, and reaching into their sheet to do it again here would be two hands on one tracker.
+function freshTurn(id) {
+  const c = find(id ? String(id).split("#")[0] : "");
+  if (!c || c.kind === "event") return;
+  c.turn = c.kind === "pc" ? { ...(c.turn || {}), move: 0 }
+                           : { action: 0, bonus: 0, move: 0, reaction: 0 };
+}
 
 // ── What a row counts ──────────────────────────────────────
 // Everything here is the same chip: a word and a number, click to spend one, shift-click to put one
@@ -1062,6 +1191,8 @@ function startFight() {
   // was still running. The sheet ends the old fight properly when it sees an id it does not know.
   S.fightId = newId();
   S.turnId = rows[0].id;
+  // Everybody walks in with a whole turn in hand, whatever last fight left on them.
+  for (const c of S.combatants) freshTurn(c.id);
   push(); pushClock(); draw();
 }
 function endFight() {
@@ -1080,9 +1211,13 @@ function nextTurn() {
   if (!rows.length) return;
   if (!S.inCombat) return startFight();
   const i = rows.findIndex(r => r.id === S.turnId);
-  if (i < 0) { S.turnId = rows[0].id; push(); return draw(); }
-  if (i === rows.length - 1) { S.turnId = rows[0].id; newRound(S.round + 1); return; }
+  // A turn ARRIVING hands its creature a fresh economy — that is what "at the start of its turn"
+  // means for a Reaction, and it is why nothing has to be reset by hand. Only going FORWARD: a DM
+  // stepping back to correct himself must not wipe what was spent on the turn he is stepping into.
+  if (i < 0) { S.turnId = rows[0].id; freshTurn(S.turnId); push(); return draw(); }
+  if (i === rows.length - 1) { S.turnId = rows[0].id; freshTurn(S.turnId); newRound(S.round + 1); return; }
   S.turnId = rows[i + 1].id;
+  freshTurn(S.turnId);
   push(); draw();
 }
 function prevTurn() {
@@ -1115,7 +1250,10 @@ function closeDlg() { el("dlg").close(); }
 function openDlg(title, html) {
   el("dlgTitle").textContent = title;
   el("dlgBody").innerHTML = html;
-  el("dlg").showModal();
+  // `showModal()` on a dialog that is already open throws, and one screen inside this dialog now
+  // opens another — the conditions picker opens the editor and the editor goes back. Both are the
+  // same dialog with a different body, which is what this is for.
+  if (!el("dlg").open) el("dlg").showModal();
 }
 
 function rowMenu(id) {
@@ -1129,7 +1267,21 @@ function rowMenu(id) {
     ${r.kind === "pc" ? `<div class="line"><b>Splash art</b>
       <span>their turn, on the room's screen</span>
       <button class="mini" onclick="openSplash(${c.charId})">Pictures…</button></div>` : ""}
-    ${r.kind === "npc" ? `<div class="line"><b>Counters</b>
+    ${r.kind === "npc" ? `<div class="line"><b>How much of a turn</b>
+      <span>${TURN_SLOTS.map(k => `${TURN_NAME[k]} ${turnMaxOf(c)[k]}`).join(" · ")}</span></div>
+    <div class="line turnmax">${TURN_SLOTS.map(k => `
+      <span class="tmg" title="${escQ(TURN_NAME[k])}">
+        <button class="mini" onclick="setTurnMax('${id}','${k}',-1)"
+          aria-label="One fewer ${escQ(TURN_NAME[k])}">−</button>
+        <span class="tm ${turnMaxOf(c)[k] ? "" : "none"}">${TURN_ICON[k]}<i>${turnMaxOf(c)[k]}</i></span>
+        <button class="mini" onclick="setTurnMax('${id}','${k}',1)"
+          aria-label="One more ${escQ(TURN_NAME[k])}">+</button>
+      </span>`).join("")}</div>
+    <p class="note">One of each is an ordinary creature. Raise one for something hasted or written
+      with two of them; take one to <b>zero</b> and it leaves the row altogether — an ooze with no
+      Reaction, something rooted to the floor with no Movement. It travels with the creature into
+      the library.</p>
+    <div class="line"><b>Counters</b>
       <span>${(c.counters || []).length ? (c.counters || []).map(x => x.name).join(" · ") : "none yet"}</span>
       <button class="mini" onclick="openCounters('${id}')">Keep count…</button></div>
     <div class="line"><b>Boss · Nightmare · Reverian · Grimm</b>
@@ -1160,6 +1312,21 @@ function rowMenu(id) {
     <div class="line" style="margin-top:12px"><b>Take off the board</b>
       <button class="mini warn" onclick="removeRow('${id}')">Remove</button></div>`);
 }
+// How many of a kind this creature gets. Kept beside the creature rather than on the fight, so a
+// monster written with two Reactions keeps them when it is saved to the library and brought back.
+function setTurnMax(id, kind, delta) {
+  const c = find(id);
+  if (!c || c.kind !== "npc") return;
+  const now = turnMaxOf(c);
+  const next = Math.max(0, Math.min(4, now[kind] + delta));
+  if (next === now[kind]) return;
+  c.turnMax = { ...now, [kind]: next };
+  // What is spent cannot outrun what is allowed — taking an allowance down to zero takes whatever
+  // was spent of it with it, or the pip would come back next turn already gone.
+  c.turn = { ...(c.turn || {}), [kind]: Math.min(c.turn?.[kind] || 0, next) };
+  push(); draw(); rowMenu(id);
+}
+
 function menuRoll(id) { rollOne(id); push(); draw(); closeDlg(); }
 function setNote(id, v) { const c = find(id); if (!c) return; c.note = String(v).slice(0, 400); push(); draw(); }
 function setRowImg(id, v) { const c = find(id); if (!c) return; c.img = v; push(); draw(); closeDlg(); }
@@ -1461,46 +1628,418 @@ function shrink(file, side) {
   });
 }
 
-// ── Conditions ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  CONDITIONS
+// ═══════════════════════════════════════════════════════════
+// The picker was eighteen names. A condition DOES something, though, and what it does is the thing
+// a fight forgets — that a Restrained monster's Dexterity saves are at disadvantage, that the one
+// that is Ablaze takes damage at the top of its turn, that Banished gets a save at the end of each.
+// So a condition carries its TEETH, in the character sheet's own effect vocabulary, and comes out of
+// a library the same way a monster does: eighty-five of them seeded from the campaign's own
+// catalogue, editable, searchable, and added to with one the DM writes for tonight.
+//
+// The vocabulary is the engine's (`rules.MOD_TARGET_IDS`, served at /api/mod-targets) and not a
+// second list typed in here, because that is what lets a condition applied to a PLAYER become real
+// rows on their sheet rather than a word the DM has to remember to enforce.
+let CONDSEED = 0;                  // how many the campaign's own catalogue holds
+let CONDQ = "";                    // the search box in the dialog
+let COND_ON = "";                  // which row the dialog is open for
+let CED = null;                    // the entry being written; null means the picker is showing
+let MODT = [];                     // every target an effect may point at — the engine's own list
+let DTYPES = [];                   // and every damage type, for a tick
+
+async function pullConds() {
+  try {
+    const d = await api("GET", "api/initiative/conditions");
+    CONDS = d.conditions || [];
+    CONDSEED = d.seed || CONDSEED;
+  } catch (err) { return toast(err.message); }
+  // The order is redrawn too, not just the dialog: a PC's conditions arrive from their sheet as
+  // names, so the chip reads its teeth off the library — and until the library lands those chips
+  // say nothing at all. This is the moment they can.
+  if (S) draw();
+  if (el("cndList")) drawCondList();
+}
+
+// Fetched once, beside the library: the one list an effect can be APPLIED from has to be the one
+// list it can be OFFERED from, or the board writes a target the sheet has no row for.
+async function pullTargets() {
+  try {
+    const d = await api("GET", "api/mod-targets");
+    MODT = d.targets || [];
+    DTYPES = d.damageTypes || [];
+  } catch { /* the editor falls back to a plain box */ }
+}
+
+const condByName = name => CONDS.find(c => c.name === name);
+
+// What the conditions on a row are doing to one of the two numbers the board holds — AC, and the
+// save DC. The server works out the same sum for the room's screen; this is the DM's own view of it.
+// Only a MONSTER's: see the note where it is called.
+const condMod = (r, target) => (r.conditions || []).reduce((n, c) => {
+  const src = (c.effects || []).length ? c : (condByName(c.name) || c);
+  return n + (src.effects || []).reduce((s, e) =>
+    s + (e.kind === "modifier" && e.target === target ? e.amount : 0), 0);
+}, 0);
+
+// ── Saying what one does, in as little room as possible ────
+// A chip in the conditions column is about eleven characters wide, so the teeth are notation and the
+// prose is on the tooltip: "−2 AC · dis DEX save", never a sentence.
+const TSHORT_FIXED = { ac: "AC", speed: "Speed", initiative: "Init", maxHp: "Max HP",
+                       attack: "ATK", damage: "DMG", spellAttack: "Spell ATK",
+                       spellDamage: "Spell DMG", saveDc: "Save DC", crit: "Crit" };
+function tShort(v) {
+  const [kind, id] = String(v || "").split(":");
+  if (kind === "ability") return (id || "").toUpperCase();
+  if (kind === "save") return id === "all" ? "saves" : `${(id || "").toUpperCase()} save`;
+  if (kind === "check") return "checks";
+  if (kind === "skill") return id === "all" ? "skills"
+    : (MODT.find(t => t.value === v)?.label || id);
+  return TSHORT_FIXED[kind] || kind;
+}
+const WHEN_SHORT = { start: "start of turn", end: "end of turn",
+                     startOfTurn: "start of turn", endOfTurn: "end of turn" };
+
+function condSays(c) {
+  const bits = (c.effects || []).map(e => e.kind === "modifier"
+    ? `${sign(e.amount)} ${tShort(e.target)}`
+    : `${e.kind === "advantage" ? "adv" : "dis"} ${tShort(e.target)}`);
+  if (c.tick) bits.push(`${[c.tick.dice, c.tick.dtype].filter(Boolean).join(" ") || "damage"} at the ${WHEN_SHORT[c.tick.when] || "start of turn"}`);
+  if (c.save) bits.push(`${[c.save.ability && c.save.ability.toUpperCase(), c.save.dc || ""].filter(Boolean).join(" ") || "a"} save at the ${WHEN_SHORT[c.save.when] || "end of turn"}`);
+  return bits.join(" · ");
+}
+
+// ── The chip on the row ────────────────────────────────────
+// `<i>` is the rounds it has left; `<u>` is a tick's dice, because "burns for 2d6" is the one thing
+// about a condition a DM must not have to hover to find out. The left edge is lit when it carries
+// anything at all, so a glance down the column separates the states that bite from the ones that
+// are only true.
+function condChip(rowId, c) {
+  const def = condByName(c.name);
+  // A PC's conditions arrive from their SHEET, which keeps names and nothing else — so the teeth
+  // are read off the library entry for them. A monster's are on the row, copied when it was
+  // applied, and those are the ones that count: an edited library entry must not change a fight.
+  const own = (c.effects || []).length || c.tick || c.save;
+  const src = own ? c : (def || c);
+  const teeth = condSays(src);
+  const title = [c.name, teeth,
+                 c.rounds ? `${c.rounds} round${c.rounds > 1 ? "s" : ""} left`
+                   : (def?.dur ? `lasts ${def.dur}` : ""),
+                 def?.text || "", "Click to clear it."].filter(Boolean).join(" · ");
+  return `<button class="chip ${def && def.kind !== "std" ? "camp" : ""} ${teeth ? "teeth" : ""}"
+    onclick="liftCondition('${rowId}','${escQ(c.name)}')" title="${escQ(title)}">
+    ${esc(c.name)}${c.rounds ? `<i>${c.rounds}</i>` : ""}${
+      src.tick?.dice ? `<u>${esc(src.tick.dice)}</u>` : ""}</button>`;
+}
+
+// ── The dialog ─────────────────────────────────────────────
+// The search box and the rounds box are built ONCE, when the dialog opens, and the list under them
+// is repainted on every keystroke — a field redrawn under the cursor is a field that loses what is
+// being typed into it, which is the same lesson the Enemy Library's search box taught.
 function openConditions(id) {
   const r = resolve().find(x => x.id === id); if (!r) return;
-  const has = new Set((r.conditions || []).map(c => c.name));
+  COND_ON = id; CED = null; CONDQ = "";
   openDlg(`${r.name} — conditions`, `
-    <div class="grid">${CONDS.map(c => `
-      <button class="chip ${has.has(c.name) ? "on" : ""} ${c.campaign ? "camp" : ""}"
-        title="${escQ(c.note || "")}" onclick="toggleCondition('${id}','${escQ(c.name)}')">
-        ${esc(c.name)}${c.campaign ? " ★" : ""}</button>`).join("")}</div>
-    <p class="note">★ is a condition this campaign rewrote — the chip's tooltip carries the ruling.
-      ${r.kind === "npc" ? "A number beside one on the row is the round it ends on." : ""}</p>
-    ${r.kind === "npc" ? `<div class="line" style="margin-top:10px"><b>Ends after</b>
-      <input class="search" id="conRounds" style="width:70px" inputmode="numeric" placeholder="rounds">
-      <span>set this first, then pick one</span></div>` : ""}`);
+    <div class="cnd-top">
+      <input class="search cnd-q" id="cndQ" oninput="condSearch(this.value)" autocomplete="off"
+             spellcheck="false" placeholder="Search — prone, ablaze, fire, save">
+      ${r.kind === "npc" ? `<label class="cnd-r" title="Rounds, instead of the condition's own">
+        <input id="cndRounds" inputmode="numeric" placeholder="rds" aria-label="How many rounds"></label>` : ""}
+    </div>
+    <div id="cndNow"></div>
+    <div class="cnd-list" id="cndList"></div>
+    <footer class="cnd-ft" id="cndFt"></footer>`);
+  drawCondList();
+  if (!CONDS.length) pullConds();
+  if (!MODT.length) pullTargets();
 }
-async function toggleCondition(id, name) {
-  const c = find(id);
-  const r = resolve().find(x => x.id === id);
+function condSearch(v) { CONDQ = v; drawCondList(); }
+
+// Everything about an entry is one piece of text, so the box answers every way a DM reaches for a
+// state: by name, by what it does ("dis", "fire"), by how long it runs. Every word has to hit.
+const condHay = c => [c.name, c.kind === "std" ? "standard 5e" : "homebrew cognition",
+                      c.dur, condSays(c), c.text].filter(Boolean).join(" ").toLowerCase();
+function condHits() {
+  const words = CONDQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return CONDS;
+  return CONDS.filter(c => { const h = condHay(c); return words.every(w => h.includes(w)); });
+}
+
+function drawCondList() {
+  if (!el("cndList")) return;
+  const r = resolve().find(x => x.id === COND_ON);
+  if (!r) return;
+  const on = r.conditions || [];
+  const has = new Set(on.map(c => c.name));
+
+  paint("cndNow", on.length
+    ? `<div class="cnd-on">${on.map(c => condChip(r.id, c)).join("")}</div>`
+    : `<p class="note cnd-none">Nothing on ${esc(r.name)} yet.</p>`);
+
+  const hits = condHits();
+  paint("cndList", !CONDS.length
+    ? `<p class="lib-none">The condition library is empty.${CONDSEED
+        ? ` ${CONDSEED} states are waiting in the campaign's own catalogue — bring them in below.` : ""}</p>`
+    : !hits.length
+    ? `<p class="lib-none">Nothing matches “${esc(CONDQ)}”.</p>`
+    : hits.map(c => {
+        const teeth = condSays(c);
+        return `<div class="cnd-row ${has.has(c.name) ? "ison" : ""}">
+          <button class="cnd-pick" onclick="applyCondition('${r.id}',${c.id})"
+            title="${escQ(c.text || c.name)}">
+            <span class="cnd-txt">
+              <b>${esc(c.name)}${c.kind !== "std" ? `<em class="cnd-k">${c.kind === "named" ? "cognition" : "own"}</em>` : ""}</b>
+              ${teeth ? `<i>${esc(teeth)}</i>` : ""}
+              ${c.dur || c.rounds ? `<s>${esc(c.dur || `${c.rounds} rounds`)}</s>` : ""}
+            </span>
+          </button>
+          <button class="mini cnd-ed" onclick="openCondEditor(${c.id})" title="Edit ${escQ(c.name)}">✎</button>
+        </div>`;
+      }).join(""));
+
+  paint("cndFt", `
+    <button class="mini" onclick="openCondEditor(0)">+ Write one</button>
+    ${CONDS.length < CONDSEED ? `<button class="mini" onclick="importConds()"
+        title="Put back any of the campaign's own ${CONDSEED} states that are missing. Nothing already here is touched.">
+        Restore the catalogue</button>` : ""}
+    <span class="lib-count">${CONDS.length
+      ? (hits.length === CONDS.length ? `${CONDS.length} states` : `${hits.length} of ${CONDS.length}`)
+      : ""}</span>
+    ${r.kind === "pc" ? `<p class="note">A condition on a player writes its name to their sheet, and
+      anything it does to a number lands there as a real effect — their own AC and saves move on
+      their screen, with the condition named in the breakdown. The tick damage and the save to shake
+      it off stay yours to call.</p>` : ""}`);
+}
+
+// ── Putting one on ─────────────────────────────────────────
+function condFromDef(def, roundsOverride) {
+  const over = parseInt(roundsOverride, 10);
+  return {
+    name: def.name,
+    rounds: Number.isFinite(over) && over > 0 ? over : (def.rounds ?? null),
+    defId: def.id || 0,
+    // COPIED, not pointed at: the fight has to go on meaning what it meant after the library entry
+    // is edited, exactly as a library creature's numbers are copied onto its row.
+    effects: (def.effects || []).map(e => ({ ...e })),
+    tick: def.tick ? { ...def.tick } : null,
+    save: def.save ? { ...def.save } : null,
+  };
+}
+
+async function applyCondition(rowId, defId) {
+  const def = CONDS.find(x => x.id === defId); if (!def) return;
+  applyCond(rowId, condFromDef(def, el("cndRounds")?.value));
+}
+
+async function applyCond(rowId, cond) {
+  const c = find(rowId);
+  const r = resolve().find(x => x.id === rowId);
   if (!c || !r) return;
-  const had = (r.conditions || []).some(x => x.name === name);
 
   if (c.kind === "pc") {
-    // A PC's conditions live on their sheet, so this is a write to the sheet, in the shape the
-    // sheet's own cleaner expects — and it arrives on their screen on the next poll.
-    const list = (r.conditions || []).filter(x => x.name !== name).map(x => ({ name: x.name }));
-    if (!had) list.push({ name });
-    try { await api("PUT", `api/characters/${c.charId}/vitals`, { vitals: { conditions: list } }); }
-    catch (err) { return toast(err.message); }
-    await pull(); openConditions(id); return;
+    // A player's conditions live on their SHEET — the name through the vitals route the board
+    // already writes with, and the teeth as effect rows down the same rail another player's seal
+    // grants. Two requests, because each owns its own half and the second is skipped when the
+    // condition does nothing to a number.
+    const list = (r.conditions || []).filter(x => x.name !== cond.name).map(x => ({ name: x.name }));
+    list.push({ name: cond.name });
+    const teeth = (cond.effects || []).length;
+    try {
+      await api("PUT", `api/characters/${c.charId}/vitals`, { vitals: { conditions: list } });
+      if (teeth) await api("POST", "api/initiative/conditions/apply", { charId: c.charId, cond });
+    } catch (err) { return toast(err.message); }
+    await pull(); drawCondList();
+    return toast(teeth
+      ? `${cond.name} is on ${r.name} — ${teeth} effect${teeth > 1 ? "s" : ""} landed on their sheet.`
+      : `${cond.name} is on ${r.name}.`);
   }
-  const rounds = parseInt(el("conRounds")?.value, 10);
-  c.conditions = (c.conditions || []).filter(x => x.name !== name);
-  if (!had) c.conditions.push({ name, rounds: Number.isFinite(rounds) && rounds > 0 ? rounds : null });
-  push(); draw(); openConditions(id);
+
+  // Applied twice is applied once: a condition does not stack with itself, so a second Prone only
+  // replaces the first one's duration.
+  const again = (c.conditions || []).some(x => x.name === cond.name);
+  c.conditions = (c.conditions || []).filter(x => x.name !== cond.name);
+  if (c.conditions.length >= 12) return toast("That is as many conditions as one row holds.");
+  c.conditions.push(cond);
+  push(); draw(); drawCondList();
+  toast(`${cond.name} on ${r.name}${cond.rounds ? ` for ${cond.rounds} round${cond.rounds > 1 ? "s" : ""}` : ""}${
+    again ? " — its clock starts again" : ""}.`);
 }
-function dropCondition(id, name) {
-  const c = find(id); if (!c) return;
-  if (c.kind === "pc") return toggleCondition(id, name);
+
+async function liftCondition(rowId, name) {
+  const c = find(rowId);
+  const r = resolve().find(x => x.id === rowId);
+  if (!c || !r) return;
+  if (c.kind === "pc") {
+    const list = (r.conditions || []).filter(x => x.name !== name).map(x => ({ name: x.name }));
+    try {
+      await api("PUT", `api/characters/${c.charId}/vitals`, { vitals: { conditions: list } });
+      // Always, even when the board does not think it granted anything: the rows are found by a
+      // group derived from the name, so this is also how a condition applied before a reload lifts.
+      await api("POST", "api/initiative/conditions/lift", { charId: c.charId, name });
+    } catch (err) { return toast(err.message); }
+    await pull(); drawCondList();
+    return;
+  }
   c.conditions = (c.conditions || []).filter(x => x.name !== name);
-  push(); draw();
+  push(); draw(); drawCondList();
+}
+
+// ── Writing one ────────────────────────────────────────────
+// The same shape the library stores, with one row per effect. The draft lives in `CED` rather than
+// in the DOM, so adding a sixth effect does not throw away the five already typed — the fields are
+// read back into it before every redraw, which is how the add form's own switches work.
+function openCondEditor(id) {
+  const c = id ? CONDS.find(x => x.id === id) : null;
+  if (id && !c) return;
+  CED = c
+    ? { id: c.id, name: c.name, kind: c.kind, text: c.text || "", dur: c.dur || "",
+        rounds: c.rounds, effects: (c.effects || []).map(e => ({ ...e })),
+        tick: c.tick ? { ...c.tick } : null, save: c.save ? { ...c.save } : null }
+    : { id: 0, name: "", kind: "custom", text: "", dur: "", rounds: null,
+        effects: [], tick: null, save: null };
+  if (!MODT.length) pullTargets().then(drawCondEditor);
+  drawCondEditor();
+}
+
+function cedRead() {
+  if (!CED || !el("cedName")) return;
+  CED.name = el("cedName").value;
+  CED.text = el("cedText").value;
+  CED.dur = el("cedDur").value;
+  const r = parseInt(el("cedRounds").value, 10);
+  CED.rounds = Number.isFinite(r) && r > 0 ? r : null;
+  CED.effects = CED.effects.map((e, i) => ({
+    kind: el(`cedK${i}`)?.value || e.kind,
+    target: el(`cedT${i}`)?.value || e.target,
+    amount: parseInt(el(`cedA${i}`)?.value, 10) || 0,
+  }));
+  if (CED.tick) CED.tick = { dice: el("cedTickD")?.value || "", dtype: el("cedTickT")?.value || "",
+                             when: el("cedTickW")?.value || "start" };
+  if (CED.save) CED.save = { ability: el("cedSaveA")?.value || "",
+                             dc: parseInt(el("cedSaveC")?.value, 10) || 0,
+                             when: el("cedSaveW")?.value || "endOfTurn" };
+}
+const cedDraw = () => { cedRead(); drawCondEditor(); };
+function cedAddEffect() { cedRead(); CED.effects.push({ kind: "disadvantage", target: "attack", amount: 0 }); drawCondEditor(); }
+function cedDropEffect(i) { cedRead(); CED.effects.splice(i, 1); drawCondEditor(); }
+function cedFlip(what) {
+  cedRead();
+  CED[what] = CED[what] ? null
+    : what === "tick" ? { dice: "", dtype: "fire", when: "start" }
+    : { ability: "", dc: 0, when: "endOfTurn" };
+  drawCondEditor();
+}
+
+const ABIL = [["", "whichever it is"], ["str", "STR"], ["dex", "DEX"], ["con", "CON"],
+              ["int", "INT"], ["wis", "WIS"], ["cha", "CHA"], ["dream", "Dream"]];
+
+function drawCondEditor() {
+  if (!CED) return;
+  const row = resolve().find(x => x.id === COND_ON);
+  const pick = (id, list, now, attrs = "") =>
+    `<select class="search" id="${id}" ${attrs}>${list.map(([v, l]) =>
+      `<option value="${escQ(v)}" ${v === now ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+  const targetPick = (id, now) => pick(id,
+    (MODT.length ? MODT : [{ value: "attack", label: "Attack rolls" }]).map(t => [t.value, t.label]), now);
+
+  openDlg(CED.id ? `${CED.name} — the rule` : "Write a condition", `
+    <div class="ced">
+      <div class="line"><b>Name</b>
+        <input class="search" id="cedName" value="${escQ(CED.name)}" placeholder="Ablaze"></div>
+      <div class="line"><b>What it does</b>
+        <textarea class="search ced-txt" id="cedText" rows="3"
+          placeholder="The rules, in words. This is what the chip's tooltip says.">${esc(CED.text)}</textarea></div>
+      <div class="line"><b>Lasts</b>
+        <input class="search" id="cedDur" value="${escQ(CED.dur)}" placeholder="1 minute" style="flex:1">
+        <input class="search" id="cedRounds" value="${CED.rounds ?? ""}" inputmode="numeric"
+               placeholder="rds" style="width:70px" aria-label="Rounds">
+        <span>the words are read at the table; the number is what the board counts down</span></div>
+
+      <div class="ced-h">What it does to a number
+        <button class="mini" onclick="cedAddEffect()">+ Add</button></div>
+      ${CED.effects.length ? CED.effects.map((e, i) => `
+        <div class="ced-eff">
+          ${pick(`cedK${i}`, [["disadvantage", "disadvantage on"], ["advantage", "advantage on"],
+                              ["modifier", "a bonus to"]], e.kind, `onchange="cedDraw()"`)}
+          ${targetPick(`cedT${i}`, e.target)}
+          <input class="search ced-amt" id="cedA${i}" value="${e.kind === "modifier" ? (e.amount ?? "") : ""}"
+            inputmode="numeric" placeholder="±" aria-label="How much"
+            ${e.kind === "modifier" ? "" : "disabled title=\"Advantage has no amount — the second d20 is the amount.\""}>
+          <button class="mini" onclick="cedDropEffect(${i})" title="Take this one out">✕</button>
+        </div>`).join("")
+        : `<p class="note">Nothing — which is most of them. Prone is a word and a tooltip, and that is
+             the whole of it. Add a row only for what moves a number: <b>−2 AC</b>, <b>disadvantage on
+             Dexterity saves</b>. A player's sheet applies these for real.</p>`}
+
+      <div class="ced-h">Damage each turn
+        <button class="mini ${CED.tick ? "on" : ""}" onclick="cedFlip('tick')">${CED.tick ? "On" : "Off"}</button></div>
+      ${CED.tick ? `<div class="ced-eff">
+        <input class="search ced-amt" id="cedTickD" value="${escQ(CED.tick.dice)}" placeholder="1d6"
+          aria-label="Dice" title="Leave it empty when the effect that applied it says how much">
+        ${pick("cedTickT", [["", "damage"], ...DTYPES.map(d => [d.id, d.name])], CED.tick.dtype)}
+        ${pick("cedTickW", [["start", "at the start of its turn"], ["end", "at the end of its turn"]], CED.tick.when)}
+      </div>` : ""}
+
+      <div class="ced-h">A save to shake it off
+        <button class="mini ${CED.save ? "on" : ""}" onclick="cedFlip('save')">${CED.save ? "On" : "Off"}</button></div>
+      ${CED.save ? `<div class="ced-eff">
+        ${pick("cedSaveA", ABIL, CED.save.ability)}
+        <input class="search ced-amt" id="cedSaveC" value="${CED.save.dc || ""}" inputmode="numeric"
+          placeholder="DC" aria-label="DC" title="Leave it empty for the Cognition's own DC">
+        ${pick("cedSaveW", [["endOfTurn", "at the end of its turn"], ["startOfTurn", "at the start of its turn"]], CED.save.when)}
+      </div>` : ""}
+
+      <div class="ced-ft">
+        <button class="mini on" onclick="saveCondEntry()">${CED.id ? "Save" : "Keep it in the library"}</button>
+        ${row ? `<button class="mini" onclick="saveCondEntry(true)"
+          title="Put it on ${escQ(row.name)} without keeping it">Just use it once</button>` : ""}
+        <span class="sp"></span>
+        ${CED.id ? `<button class="mini" onclick="deleteCondEntry()">Delete</button>` : ""}
+        <button class="mini" onclick="openConditions('${COND_ON}')">Back</button>
+      </div>
+    </div>`);
+}
+
+async function saveCondEntry(onceOnly) {
+  cedRead();
+  const name = (CED.name || "").trim();
+  if (!name) return toast("It wants a name.");
+  if (onceOnly) {
+    // Never written to the library: a state invented for one monster in one fight, which is a thing
+    // that happens far more often than a state worth keeping.
+    const cond = condFromDef({ ...CED, id: 0, name }, el("cndRounds")?.value);
+    const rowId = COND_ON;
+    openConditions(rowId);
+    return applyCond(rowId, cond);
+  }
+  try {
+    await api("POST", "api/initiative/conditions", { ...CED, name });
+  } catch (err) { return toast(err.message); }
+  await pullConds();
+  openConditions(COND_ON);
+  toast(`${name} is in the library.`);
+}
+
+async function deleteCondEntry() {
+  if (!CED?.id) return;
+  const was = CED.name;
+  // Conditions already on the board keep working: the row carries its own copy of what it does, so
+  // deleting the entry takes it out of the picker and changes nothing about tonight's fight.
+  if (!confirm(`Take ${was} out of the library? Anything carrying it keeps it.`)) return;
+  try { await api("DELETE", `api/initiative/conditions/${CED.id}`); }
+  catch (err) { return toast(err.message); }
+  await pullConds();
+  openConditions(COND_ON);
+  toast(`${was} is out of the library.`);
+}
+
+async function importConds() {
+  try {
+    const d = await api("POST", "api/initiative/conditions/import");
+    CONDS = d.conditions || CONDS;
+    toast(d.added ? `${d.added} put back.` : "Nothing was missing.");
+  } catch (err) { return toast(err.message); }
+  drawCondList();
 }
 
 // ── What the room's screen shows ───────────────────────────
@@ -1566,7 +2105,8 @@ function drawLineupsPane() {
 async function saveLineup() {
   const name = el("lineName").value.trim();
   const combatants = S.combatants.filter(c => c.kind === "npc")
-    .map(c => ({ ...c, hp: c.hpMax, conditions: [], init: null, down: false }));
+    .map(c => ({ ...c, hp: c.hpMax, conditions: [], init: null, down: false,
+                 turn: { action: 0, bonus: 0, move: 0, reaction: 0 } }));
   if (!name) return toast("Give the lineup a name.");
   if (!combatants.length) return toast("There are no monsters on the board.");
   try { await api("POST", "api/initiative/encounters", { name, combatants }); }
@@ -1702,6 +2242,7 @@ function libAdd(id) {
       libId: e.id,
       name: n > 1 || used.length ? `${base} ${from + i + 1}` : base,
       hp: copy.hpMax, tempHp: 0, init: null, conditions: [], down: false, hidden: false,
+      turn: { action: 0, bonus: 0, move: 0, reaction: 0 },
     });
   }
   push(); draw();
@@ -1902,9 +2443,36 @@ async function saveRowToLib(id) {
 // ═══════════════════════════════════════════════════════════
 //  THE SECOND SCREEN
 // ═══════════════════════════════════════════════════════════
+// The room is rebuilt WHOLE every four seconds, whether anything moved or not. So nothing here can
+// animate because an element is new — it would fire fifteen times a minute at a table that is
+// arguing about where to stand. Everything below asks one question first: has the turn actually
+// changed since the last time this screen drew? These two are the whole of that memory.
+let ROOM_TURN = "";
+let ROOM_ROUND = 0;
+
+// Play an animation again on an element that is still the same element. Removing the class and
+// adding it back in one breath does nothing at all — the browser coalesces both into one state and
+// sees no change — so the layout has to be read in between to force it to settle the first one.
+// A row that was just rebuilt by innerHTML needs none of this: it is a new element, and a new
+// element's animations always run.
+function beat(node, cls = "beat") {
+  if (!node) return;
+  node.classList.remove(cls);
+  void node.offsetWidth;
+  node.classList.add(cls);
+}
+
 function drawRoom() {
   const v = ROOM || { order: [], round: 0, inCombat: false };
+  const moved = v.inCombat && v.turnId !== ROOM_TURN;
+  const turned = v.inCombat && v.round !== ROOM_ROUND;
+  ROOM_TURN = v.inCombat ? v.turnId : "";
+  ROOM_ROUND = v.inCombat ? v.round : 0;
+
   el("roomRound").textContent = v.inCombat ? `Round ${v.round}` : "Initiative";
+  // The round landing. The number is not replaced, only its text, so the animation has to be taken
+  // off and put back with a reflow between — a class that is already there animates nothing.
+  if (turned) beat(el("roomRound"));
   const turn = v.order.find(r => r.id === v.turnId);
   el("roomSub").textContent = !v.order.length ? "Nothing is running."
     : v.inCombat ? (turn ? `${turn.name}${turn.player ? ` — ${turn.player}` : ""} is up` : "")
@@ -1921,12 +2489,12 @@ function drawRoom() {
   el("roomList").innerHTML = queue.map((r, i) => `
     ${i === breakAt ? roundBreak(v.round + 1) : ""}
     ${r.kind === "event" ? `
-    <li class="ev ${r.id === v.turnId && v.inCombat ? "on" : ""}
+    <li class="ev ${r.id === v.turnId && v.inCombat ? `on${moved ? " lands" : ""}` : ""}
                ${breakAt >= 0 && i >= breakAt ? "later" : ""}">
       <div class="r-init">${r.init == null ? "—" : r.init}</div>
       <div class="r-ev"><i>◆</i><b>${esc(r.name)}</b></div>
     </li>` : `
-    <li class="${r.id === v.turnId && v.inCombat ? "on" : ""} ${r.down ? "down" : ""}
+    <li class="${r.id === v.turnId && v.inCombat ? `on${moved ? " lands" : ""}` : ""} ${r.down ? "down" : ""}
                ${breakAt >= 0 && i >= breakAt ? "later" : ""}">
       <div class="r-init">${r.init == null ? "—" : r.init}</div>
       ${v.show.portraits !== false ? `<div class="r-face">${r.img
@@ -1935,6 +2503,7 @@ function drawRoom() {
         <b>${esc(r.name)}${r.slots > 1 ? ` <i class="r-turnof">turn ${r.slot + 1} of ${r.slots}</i>` : ""}</b>
         ${r.player ? `<span>${esc(r.player)}${r.wounds ? ` · ${r.wounds} Wound${r.wounds > 1 ? "s" : ""}` : ""}</span>` : ""}
         ${r.conditions?.length ? `<span class="cons">${r.conditions.map(esc).join(" · ")}</span>` : ""}
+        ${roomEcon(r)}
       </div>
       <div class="r-hp">
         ${r.hp ? (r.hp.max != null && r.hp.hp != null
@@ -1952,6 +2521,26 @@ function drawRoom() {
     : "";
   drawSplash(v, turn);
   fitRoom();
+}
+
+// What is left of a creature's turn, on the room's own screen. Nothing here is clickable — it is
+// not anybody's board — so a spent one is simply dark and the ones still in hand are lit. It sits
+// inside the name's cell rather than in a column of its own: the row's grid is redefined by each of
+// `fitRoom`'s four density steps, and a fifth column would be four more places to keep in step.
+//
+// It is drawn even when the whole turn is still in hand, because the question the table asks is
+// "has it used its reaction" — and four dark icons on the row that has already gone answers it
+// just as plainly as four lit ones on the row that has not.
+function roomEcon(r) {
+  const e = r.econ;
+  if (!e) return "";
+  return `<span class="r-econ">${TURN_SLOTS.map(k => {
+    const allow = Math.max(0, e.allow[k] || 0);
+    if (!allow) return "";
+    const left = Math.max(0, allow - (e.used[k] || 0));
+    return `<i class="${left ? "" : "spent"}" title="${escQ(TURN_NAME[k])}">${TURN_ICON[k]}${
+      allow > 1 ? `<b>${left}</b>` : ""}</i>`;
+  }).join("")}</span>`;
 }
 
 // Nobody walks over to scroll a television, so the order is MEASURED against the screen rather
@@ -2027,22 +2616,35 @@ function drawSplash(v, turn) {
   // fight starts and stops, never between turns.
   document.body.classList.toggle("spl-on", !!want);
   if (!want) { box.className = "room-splash"; box.innerHTML = ""; return; }
+
+  // ── The slide that never played ──────────────────────────
+  // `.room-splash` sits at `translateX(-28px)` and no opacity, and `.in` brings it home over a
+  // third of a second. It was written that way from the start and it only ever ran ONCE, on the
+  // first picture of the fight: every turn after that the class was already there, so the browser
+  // was handed the same state twice and transitioned nothing. The picture simply swapped.
+  //
+  // So the box is put back to the state the slide comes FROM, filled, and only then brought in —
+  // with the layout read in between, or the two assignments collapse into one and nothing moves.
+  const show = (cls, html) => {
+    box.className = cls;
+    box.innerHTML = html;
+    void box.offsetWidth;
+    box.classList.add("in");
+  };
   // `API_BASE` because this page is served from `initiative/`: a bare "api/…" would ask the server
   // for `initiative/api/…`, which is nothing at all.
   const hurt = want.endsWith(":hurt") || want.endsWith("hurt");
   if (want.startsWith("ev:")) {
-    box.className = "room-splash in ev";
-    box.innerHTML = `<div class="ev-splash"><i>◆</i><b>${esc(turn.name)}</b></div>`;
+    show("room-splash ev", `<div class="ev-splash"><i>◆</i><b>${esc(turn.name)}</b></div>`);
     return;
   }
   if (want.startsWith("mon:")) {
-    box.className = `room-splash in mon${turn.bloodied ? " hurt" : ""}`;
-    box.innerHTML = `
+    show(`room-splash mon${turn.bloodied ? " hurt" : ""}`, `
       <div class="mon-frame ${turn.img ? "" : "mark"}">
         ${turn.img ? `<img src="${escQ(imgSrc(turn.img))}" alt="">` : `<span>✦</span>`}
       </div>
       <div class="spl-name"><b>${esc(turn.name)}</b>${
-        turn.hp?.word ? `<span>${esc(turn.hp.word)}</span>` : ""}</div>`;
+        turn.hp?.word ? `<span>${esc(turn.hp.word)}</span>` : ""}</div>`);
     return;
   }
   // `API_BASE` because this page is served from `initiative/`: a bare "api/…" would ask the server
@@ -2054,12 +2656,11 @@ function drawSplash(v, turn) {
     : who.startsWith("lib")
     ? `${API_BASE}api/initiative/library/${who.slice(3)}/art/${kind}`
     : `${API_BASE}api/characters/${who}/art/${kind}`;
-  box.className = "room-splash in" + (hurt ? " hurt" : "");
-  box.innerHTML = `<img src="${escQ(src)}" alt="">
+  show("room-splash" + (hurt ? " hurt" : ""), `<img src="${escQ(src)}" alt="">
     <div class="spl-name"><b>${esc(turn.name)}</b>${
       turn.player ? `<span>${esc(turn.player)}</span>`
       : turn.kind === "npc" && turn.hp?.word ? `<span>${esc(turn.hp.word)}</span>` : ""}</div>
-    ${splashStats(turn)}`;
+    ${splashStats(turn)}`);
 }
 
 // ── The plate under the splash ─────────────────────────────
@@ -2123,7 +2724,6 @@ async function pull() {
     return;
   }
   PARTY = d.party || [];
-  if (d.conditions?.length) CONDS = d.conditions;
   if (d.emotions?.length) EMOTIONS = d.emotions;
   if (d.grades?.length) GRADES = d.grades;
   if (d.renown?.length) RENOWN = d.renown;
@@ -2178,7 +2778,7 @@ async function boot() {
   catch (err) { return showLocked(err.message); }
 
   if (d.role === "dm" && !ASROOM) {
-    S = d.state; PARTY = d.party || []; CONDS = d.conditions || []; SAVED = d.encounters || [];
+    S = d.state; PARTY = d.party || []; SAVED = d.encounters || [];
     EMOTIONS = d.emotions || []; GRADES = d.grades || []; RENOWN = d.renown || [];
     if (d.grimmStages?.length) GRIMM_STAGES = d.grimmStages;
     if (d.grimmSlots) GRIMM_SLOTS = d.grimmSlots;
@@ -2187,9 +2787,11 @@ async function boot() {
     // An empty board is a board somebody is about to fill: the drawer opens itself once.
     if (!S.combatants.length && !ADDOPEN) toggleAdd(true);
     draw();
-    // Once, and off the critical path: the board is on the screen before the library lands, because
-    // the fight is what the DM opened this page for.
-    pullLib();
+    // Once, and off the critical path: the board is on the screen before the libraries land, because
+    // the fight is what the DM opened this page for. None of the three is on the poll — sixty
+    // creatures, eighty-five conditions and the engine's target list change about once a month, and
+    // a megabyte down the wire fifteen times a minute is how a board starts stuttering mid-fight.
+    pullLib(); pullConds(); pullTargets();
   } else {
     // A player — or the DM holding the second screen. Either way, no board.
     document.body.classList.add("as-room");

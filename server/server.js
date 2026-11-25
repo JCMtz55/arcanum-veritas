@@ -19,6 +19,7 @@ import * as plates from "../sheet/js/plates.js";
 // this exact reason: the Arcanum builder is plain <script> files that cannot import a module, so it
 // asks for the list over the wire and the server is what answers.
 import * as targets from "../sheet/js/targets.js";
+import * as conditionBook from "../sheet/js/conditions.js";
 // Reading a Fight Club compendium XML. The same module sheet/tools/build-srd.mjs uses offline, so a
 // class the DM imports tonight is shaped exactly like the SRD classes that shipped with the repo.
 import { convert as convertCompendium, KINDS as COMPENDIUM_KINDS } from "../sheet/js/fc5e.mjs";
@@ -1883,6 +1884,14 @@ function partyCard(row, displayName, granted = []) {
       id: g.id ?? null, label: g.label, player: g.player || "", rounds: g.rounds ?? null,
       says: targets.benefitSays(g), fromDm: !g.player })),
     round: ch.round, inCombat: !!ch.inCombat,
+    // Their turn, as their own sheet counts it: what they are allowed — which is not always one of
+    // each, since Haste grants an Action and a Grimm may grant a second Reaction — and what they
+    // have spent. The DM's board draws the same pips the player is looking at, and spends them
+    // through the same `used` the sheet writes.
+    turn: {
+      allow: rules.turnAllowance(ch),
+      used: Object.fromEntries(rules.TURN_KINDS.map(k => [k, rules.turnUsed(ch, k)])),
+    },
     activeModifiers: (ch.modifiers || []).filter(m => m && m.active !== false).length,
     // What another player's seal is doing to them. Counted separately from their own modifiers
     // because the DM asking "why is their AC 21" wants to know it came from somebody else — and
@@ -2243,7 +2252,7 @@ const cleanInspiration = list => (Array.isArray(list) ? list : []).map(d => {
 // button still works and is still the player's — this is a second hand on the same clock, not a
 // replacement for it.
 const VITAL_KEYS = ["hp", "tempHp", "wounds", "exhaustion", "dreamExhaustion", "hollowingFractures",
-                    "conditions", "injuries", "inspiration", "round", "inCombat", "fightId"];
+                    "conditions", "injuries", "inspiration", "used", "round", "inCombat", "fightId"];
 
 app.get("/api/characters/:id/vitals", requireUser, async (req, res) => {
   const row = await loadCharacter(req.params.id, req.user);
@@ -2303,6 +2312,19 @@ app.put("/api/characters/:id/vitals", requireUser, requireDm, async (req, res) =
       case "inspiration":
         if (!Array.isArray(value)) return res.status(400).json({ error: "Inspiration is a list of dice." });
         next.inspiration = cleanInspiration(value); break;
+      // What they have spent of this turn. The DM's initiative board draws the same pips the player
+      // is looking at and spends through the same field the sheet writes, so there is one answer to
+      // "has she used her Reaction" wherever it is asked. Unbounded against the ALLOWANCE on
+      // purpose: the allowance is the engine's, it moves with a grant, and a board clamping it here
+      // would be a second opinion about what Haste is worth. The sheet's own tracker is the
+      // referee, and both ends only ever write a count.
+      case "used":
+        if (!value || typeof value !== "object" || Array.isArray(value))
+          return res.status(400).json({ error: "A turn's spending is an object." });
+        next.used = Object.fromEntries(rules.TURN_KINDS
+          .filter(k => value[k] != null)
+          .map(k => [k, Math.max(0, Math.min(9, Math.trunc(Number(value[k]) || 0)))]));
+        break;
       default:
         return res.status(400).json({ error: `The board does not set "${vitalStr(key, 40)}".` });
     }
@@ -2548,6 +2570,20 @@ app.get("/api/mod-targets", requireUser, (req, res) => res.json({
   // the board writes those as free text, exactly as the sheet's own "+ condition" does.
   conditions: Object.values(rules.CONDITIONS).map(c => ({ id: c.id, name: c.name, note: c.note || "" })),
   inspirationDice: rules.INSPIRATION_DICE,
+}));
+
+// ── The condition catalogue ─────────────────────────────────
+// 5e's fourteen as this table plays them, and the states the Cognitions name, written out. Served
+// for the same reason `/api/mod-targets` is: the Builder's Conditions tab is a plain script that
+// cannot import a module, and the one list a condition can be APPLIED from (the DM's library, seeded
+// from this) had better be the one list it is EXPLAINED from. It was typed into the Builder until
+// the initiative board needed it too; `sheet/js/conditions.js` owns it now.
+//
+// Reference data, so every signed-in account may read it — a player looking up Hollowed is the
+// whole point of the tab.
+app.get("/api/conditions", requireUser, (req, res) => res.json({
+  standard: conditionBook.STANDARD,
+  named: conditionBook.NAMED,
 }));
 
 // Who may be granted to. The player's answer to the DM's party board, and deliberately much
@@ -2895,13 +2931,134 @@ const iNum = (v, lo, hi, dflt = 0) =>
 const iStr = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 const iId = v => iStr(v, 40).replace(/[^\w.:-]/g, "") || randomBytes(6).toString("hex");
 
-// A condition on an NPC, with the round it dies on. `rounds: null` is "until somebody says
-// otherwise", which is most of them — a fuse is a thing the DM sets deliberately.
+// ── What a condition IS ─────────────────────────────────────
+// It began as a name and the round it dies on, which is all a chip needs to say "Prone". But a
+// condition does something, and what it does is the thing a fight forgets: Restrained is
+// disadvantage on its attacks and its Dexterity saves, Ablaze is damage at the start of every turn,
+// Banished is a save at the end of each one. So a condition carries its TEETH, in the character
+// sheet's own effect vocabulary — which is what lets one applied to a player become real rows on
+// their sheet rather than a word the DM has to remember to enforce.
+//
+// `rounds: null` is still "until somebody says otherwise", which is most of them: nothing in 5e's
+// text says how long Blinded lasts, because the effect that applied it does.
+const COND_EFFECT_KINDS = ["modifier", "advantage", "disadvantage"];
+const MOD_TARGET_SET = new Set(rules.MOD_TARGET_IDS);
+const COND_TICK_WHEN = ["start", "end"];
+const COND_SAVE_WHEN = ["startOfTurn", "endOfTurn"];
+const COND_EFFECTS_MAX = 6;
+
+// One typed effect. Pointed at the engine's own target list, because a condition that granted a row
+// the sheet does not have could never land on a player — and the only defence is that there is one
+// list (see the note at `rules.MOD_TARGET_IDS`).
+function cleanCondEffects(list) {
+  return (Array.isArray(list) ? list : []).slice(0, COND_EFFECTS_MAX).map(e => {
+    const kind = COND_EFFECT_KINDS.includes(e?.kind) ? e.kind : "modifier";
+    const target = iStr(e?.target, 40);
+    if (!MOD_TARGET_SET.has(target)) return null;
+    // Advantage has no amount — the second d20 is the amount.
+    if (kind !== "modifier") return { kind, target };
+    const amount = iNum(e?.amount, -30, 30, 0);
+    return amount ? { kind, target, amount } : null;
+  }).filter(Boolean);
+}
+
+// Damage at the start or the end of its turns. `dice` empty is deliberate and common: Ablaze burns
+// for whatever lit it, so the catalogue says fire-at-the-start and the board asks for the number
+// when it is applied rather than inventing one.
+function cleanCondTick(t) {
+  if (!t || typeof t !== "object") return null;
+  const dice = targets.cleanDice(t.dice) || "";
+  const dtype = iStr(t.dtype, 20).toLowerCase();
+  return { dice, dtype: rules.DAMAGE_BY_ID[dtype] ? dtype : "",
+           when: COND_TICK_WHEN.includes(t.when) ? t.when : "start" };
+}
+
+// The throw to shake it off. Which throw and against what DC belong to the Cognition that threw it,
+// not to the condition, so both may be blank — and a blank one still earns its keep: the board
+// reminds the DM to call for a save it cannot name.
+function cleanCondSave(s) {
+  if (!s || typeof s !== "object") return null;
+  const ability = iStr(s.ability, 8).toLowerCase();
+  return { ability: rules.ABILITIES.includes(ability) ? ability : "",
+           dc: iNum(s.dc, 0, 40, 0),
+           when: COND_SAVE_WHEN.includes(s.when) ? s.when : "endOfTurn" };
+}
+
+// A condition as it sits on a row. The teeth are COPIED here from the library entry rather than
+// looked up by id, the same way a library creature's numbers are copied onto the board: the fight
+// has to go on meaning what it meant after the entry is edited, and a condition typed in for one
+// monster never had an entry to point at.
 function cleanInitConditions(list) {
   return (Array.isArray(list) ? list : []).slice(0, 12).map(c => ({
     name: iStr(c?.name, 40),
     rounds: c?.rounds == null ? null : iNum(c.rounds, 1, 99, 1),
+    // Which library entry it came from, for the dialog's rules text — 0 for one typed in by hand.
+    defId: iNum(c?.defId, 0, 10 ** 9, 0),
+    effects: cleanCondEffects(c?.effects),
+    tick: cleanCondTick(c?.tick),
+    save: cleanCondSave(c?.save),
   })).filter(c => c.name);
+}
+
+// What the conditions on a row do to a number the board actually HOLDS. That is AC and the save DC
+// and nothing else: `speed` and `maxHp` are in the vocabulary because a character sheet has them,
+// and a monster on this board does not.
+//
+// A PC's row is not touched by this. Their AC comes from their own sheet, where the condition landed
+// as a real effect row — applying it again here would charge them twice for the same Restrained.
+const condModifier = (conds, target) => (conds || []).reduce((n, c) =>
+  n + (c.effects || []).reduce((s, e) =>
+    s + (e.kind === "modifier" && e.target === target ? e.amount : 0), 0), 0);
+
+// The two the board holds, as they stand right now. Never below zero: a monster carrying four
+// stacks of something is not easier to hit than one that cannot be missed.
+const condAcNow = r => (r.ac == null ? null : Math.max(0, r.ac + condModifier(r.conditions, "ac")));
+const condDcNow = r => (r.dc == null ? null : Math.max(0, r.dc + condModifier(r.conditions, "saveDc")));
+
+// ── What a turn is made of ──────────────────────────────────
+// Action · Bonus Action · Movement · Reaction, in that order, which is the order a turn is spent in
+// and the order the icons sit in on the row.
+//
+// MOVEMENT IS THE BOARD'S OWN, for everybody. The character sheet's turn tracker counts an Action, a
+// Bonus Action, a Reaction and whatever has been granted on top — `rules.TURN_KINDS` — and moving
+// was never one of them, because the sheet tracks what you SPEND and a speed is a distance. So the
+// boot is a mark the DM makes, it lives on the board beside the creature, and it never reaches
+// anybody's sheet. The other three on a player's row ARE their sheet's; see `partyCard`.
+const TURN_SLOTS = ["action", "bonus", "move", "reaction"];
+const cleanTurn = t => Object.fromEntries(TURN_SLOTS.map(k => [k, iNum(t?.[k], 0, 9, 0)]));
+
+// A monster has one of each — until it hasn't. This was a constant at first, on the grounds that a
+// creature acting twice a round is a boss with two TURNS, which this board already models: it sits
+// in the order twice and gets a fresh economy at each of them. That is true of a dragon and it is
+// NOT true of a monster the enemy caster has just hasted, or of one written with two Reactions. So
+// the allowance belongs to the creature, like its AC.
+//
+// Zero is allowed and is worth having: an ooze with no Reaction, a thing rooted to the floor with
+// no Movement. A slot at zero is not drawn at all, so those rows carry three icons rather than a
+// dead one. A PC's three are their sheet's and are not settable from here.
+const MON_ALLOW = { action: 1, bonus: 1, move: 1, reaction: 1 };
+const cleanTurnMax = t => Object.fromEntries(
+  TURN_SLOTS.map(k => [k, iNum(t?.[k], 0, 4, MON_ALLOW[k])]));
+
+// The economy of one resolved row, wherever its halves came from. A PC's three are their sheet's
+// and their movement is the board's; a monster's four are all the board's.
+function econOf(r) {
+  if (r.kind === "event") return null;
+  const move = r.turn?.move || 0;
+  if (r.kind !== "pc") {
+    const allow = cleanTurnMax(r.turnMax);
+    const used = cleanTurn(r.turn);
+    // Lowering an allowance below what has already been spent would leave a pip reading "2 of 1",
+    // so what is spent is capped by what is allowed wherever the two are read together.
+    for (const k of TURN_SLOTS) used[k] = Math.min(used[k], allow[k]);
+    return { allow, used };
+  }
+  const t = r.sheetTurn || {};
+  const a = t.allow || {}, u = t.used || {};
+  return {
+    allow: { action: a.action ?? 1, bonus: a.bonus ?? 1, move: 1, reaction: a.reaction ?? 1 },
+    used: { action: u.action || 0, bonus: u.bonus || 0, move, reaction: u.reaction || 0 },
+  };
 }
 
 // A counter is a number the DM keeps on a monster and WHAT IT MEANS beside it — legendary
@@ -3022,7 +3179,9 @@ function cleanCombatant(c) {
     note: iStr(c?.note, 400),
   };
   // A PC is a POINTER. Nothing about their sheet is copied in, so nothing about it can go stale.
-  if (kind === "pc") return { ...base, charId: iNum(c?.charId, 1, 10 ** 9, 0) };
+  // `turn` is the exception that proves it: only the MOVEMENT in it is the board's, and the three
+  // beside it on the row are read live from the sheet every poll.
+  if (kind === "pc") return { ...base, charId: iNum(c?.charId, 1, 10 ** 9, 0), turn: cleanTurn(c?.turn) };
 
   // An EVENT is a place in the order that is not a creature: the lair acting, a fuse burning down,
   // the tide coming in, the gate opening on 20. A number and a line of text, and nothing else —
@@ -3043,6 +3202,12 @@ function cleanCombatant(c) {
     ac: c?.ac == null || c?.ac === "" ? null : iNum(c.ac, 0, 99, 10),
     dc: c?.dc == null || c?.dc === "" ? null : iNum(c.dc, 0, 99, 10),
     conditions: cleanInitConditions(c?.conditions),
+    // All four of a monster's are the board's own — it has no sheet to keep them on — and so is
+    // how many of each it gets. `turnMax` travels with the creature into the library and out of a
+    // lineup, because two Reactions is a fact about the monster; `turn` is what it has spent in
+    // THIS fight, and that is reset wherever one is brought in fresh.
+    turn: cleanTurn(c?.turn),
+    turnMax: cleanTurnMax(c?.turnMax),
     counters: cleanCounters(c?.counters),
     boss: cleanBoss(c?.boss),
     nightmare: cleanNightmare(c?.nightmare),
@@ -3119,7 +3284,7 @@ function hpWord(hp, max) {
 function initRows(state, party) {
   const byId = new Map((party || []).map(p => [p.id, p]));
   const rows = state.combatants.map(c => {
-    if (c.kind !== "pc") return { ...c, player: "" };
+    if (c.kind !== "pc") return { ...c, player: "", econ: econOf(c) };
     const p = byId.get(c.charId);
     // A character that was archived, or a player who left, leaves a row with nothing behind it.
     // It is shown as a stub rather than dropped: silently losing somebody from the order mid-fight
@@ -3138,6 +3303,8 @@ function initRows(state, party) {
       conditions: (p.conditions || []).map(x => ({ name: typeof x === "string" ? x : iStr(x?.name, 40),
                                                    rounds: null })).filter(x => x.name),
       down: p.hp <= 0,
+      // Three of the four from their sheet, the movement from the board's own row.
+      econ: econOf({ ...c, kind: "pc", sheetTurn: p.turn }),
       // What only a PC has, and what the DM wants on the row rather than in another tab.
       wounds: p.wounds, deathSaveDC: p.deathSaveDC, grimm: p.grimm || null,
       exhaustion: p.exhaustion, dreamExhaustion: p.dreamExhaustion,
@@ -3252,9 +3419,12 @@ function initPlayerView(state, party, libArt = new Map()) {
       // A PC's own numbers are theirs and already on their sheet, so the global switch is the whole
       // of it. A MONSTER's are shown only once this one has been revealed — the switch in Room ▾
       // stays the master, so turning it off still hides every one of them at a stroke.
+      // A monster's numbers are sent AS A CONDITION HAS LEFT THEM: a creature carrying −2 AC is
+      // AC 15 on the wall if it was 17, because the room is being told what to beat. A PC's come
+      // from their own sheet, where the condition landed as a real effect, so they are already true.
       ac: r.kind === "pc" ? (show.ac ? r.ac : null)
-        : (show.ac && r.showAc ? r.ac : null),
-      dc: r.kind === "pc" ? null : (r.showDc ? r.dc : null),
+        : (show.ac && r.showAc ? condAcNow(r) : null),
+      dc: r.kind === "pc" ? null : (r.showDc ? condDcNow(r) : null),
       // A PC's own hit points are their business and already on their sheet, so the party is shown
       // in numbers; a monster is shown in a word, or not at all.
       hp: show.hp === "none" ? null
@@ -3262,22 +3432,19 @@ function initPlayerView(state, party, libArt = new Map()) {
         : show.hp === "numbers" ? { hp: r.hp, max: r.hpMax, temp: 0, word: hpWord(r.hp, r.hpMax) }
         : { word: hpWord(r.hp, r.hpMax) },
       conditions: show.conditions ? r.conditions.map(c => c.name) : [],
+      // What is left of its turn. On every row, because the question the table asks out loud is
+      // "has it used its reaction yet" about the thing in front of them, not about whoever happens
+      // to be acting — and a creature the room cannot see is not in this list at all.
+      econ: r.econ || null,
     })),
   };
 }
 
-// The conditions the picker offers: 5e's own, with the four this campaign rewrote marked and
-// carrying their own rules text. Served rather than hard-coded in the page so the rewritten ones
-// come from `rules.CONDITIONS` — the file the sheet and the server already share.
-const INIT_CONDITIONS = [
-  "Blinded", "Charmed", "Deafened", "Frightened", "Grappled", "Incapacitated", "Invisible",
-  "Paralyzed", "Petrified", "Poisoned", "Prone", "Restrained", "Stunned", "Unconscious",
-].map(name => {
-  const own = Object.values(rules.CONDITIONS).find(c => c.name === name);
-  return { name, campaign: !!own, note: own?.note || "" };
-}).concat(Object.values(rules.CONDITIONS)
-  .filter(c => !/^(Stunned|Paralyzed)$/.test(c.name))
-  .map(c => ({ name: c.name, campaign: true, note: c.note || "" })));
+// The picker used to be served from here: eighteen names built out of `rules.CONDITIONS`, with no
+// duration and nothing about what any of them did. It is the CONDITION LIBRARY now — eighty-five
+// states with their rules text, their usual duration and their teeth, editable, and asked for on
+// its own route rather than riding in a payload the board polls every four seconds.
+// See `/api/initiative/conditions`.
 
 app.get("/api/initiative", requireUser, async (req, res) => {
   const state = await loadInit();
@@ -3297,7 +3464,6 @@ app.get("/api/initiative", requireUser, async (req, res) => {
   // that must not be a thing a browser is trusted to do.
   res.json({
     role: "dm", state, party,
-    conditions: INIT_CONDITIONS,
     // The campaign's own lists, served rather than typed into the page: the Vile Emotions are
     // Vileness.md's twenty-four and the grades are Nightmares.md's, and a second copy in a browser
     // would be wrong the first time either note changes.
@@ -3628,7 +3794,9 @@ app.post("/api/initiative/library", requireUser, requireDm, INIT_JSON, async (re
   // fight it was in, not to the thing itself.
   const mon = cleanCombatant({ ...req.body?.mon, kind: "npc", name });
   const fresh = { ...mon, hp: mon.hpMax, tempHp: 0, init: null, conditions: [], down: false,
-                  hidden: false, note: iStr(req.body?.mon?.note, 400) };
+                  hidden: false, note: iStr(req.body?.mon?.note, 400),
+                  // A whole turn in hand: what it had spent belongs to the fight it was in.
+                  turn: { action: 0, bonus: 0, move: 0, reaction: 0 } };
   if (fresh.boss) { fresh.boss.legendary = fresh.boss.legendaryMax; fresh.boss.phase = 1; fresh.boss.inits = []; }
   if (fresh.nightmare) fresh.nightmare.roots = fresh.nightmare.rootsMax;
   // Argued-down Renown and paid Subtractions belong to the fight it was in, not to the creature.
@@ -3781,6 +3949,165 @@ app.post("/api/initiative/library/import", requireUser, requireDm, async (req, r
   res.json({ ...got, library: rows.map(libRow) });
 });
 
+// ══ THE CONDITION LIBRARY ═══════════════════════════════════
+// The Enemy Library's twin, and built the same way: one state per row, editable, seeded once from
+// the campaign's own catalogue. The picker that used to live here was eighteen hard-coded names
+// with no duration and nothing about what any of them DID — which meant the board could say a
+// monster was Restrained and could not say that its Dexterity saves were at disadvantage.
+//
+// Its own route rather than part of the board's payload: the board is polled every four seconds and
+// eighty-five conditions with their rules text is forty kilobytes that has not changed since the
+// page opened.
+const CONDS_MAX = 400;
+
+const condRow = r => {
+  let d = {}; try { d = JSON.parse(r.data || "{}"); } catch { d = {}; }
+  return {
+    id: r.id, name: r.name, kind: r.kind || "custom",
+    text: iStr(d.text, 900), dur: iStr(d.dur, 60),
+    rounds: d.rounds == null ? null : iNum(d.rounds, 1, 99, 1),
+    effects: cleanCondEffects(d.effects),
+    tick: cleanCondTick(d.tick), save: cleanCondSave(d.save),
+  };
+};
+const CONDS_SELECT = "SELECT id, name, kind, data FROM init_conditions";
+
+app.get("/api/initiative/conditions", requireUser, requireDm, async (req, res) => {
+  const { rows } = await db.query(`${CONDS_SELECT} ORDER BY lower(name)`);
+  res.json({ conditions: rows.map(condRow), seed: conditionBook.seedConditions().length });
+});
+
+// Create, or overwrite with an `id`. A DM editing 5e's Prone is editing it for good and on purpose
+// — the `kind` is kept so the list can still say where it came from, but nothing here defends the
+// catalogue's version of a rule against the DM's. That is what an editable library is for.
+app.post("/api/initiative/conditions", requireUser, requireDm, async (req, res) => {
+  const name = iStr(req.body?.name, 40);
+  if (!name) return res.status(400).json({ error: "A condition wants a name." });
+  const id = iNum(req.body?.id, 1, 10 ** 9, 0);
+  const kind = ["std", "named", "custom"].includes(req.body?.kind) ? req.body.kind : "custom";
+  const payload = JSON.stringify({
+    text: iStr(req.body?.text, 900),
+    dur: iStr(req.body?.dur, 60),
+    rounds: req.body?.rounds == null || req.body?.rounds === "" ? null : iNum(req.body.rounds, 1, 99, 1),
+    effects: cleanCondEffects(req.body?.effects),
+    tick: req.body?.tick ? cleanCondTick(req.body.tick) : null,
+    save: req.body?.save ? cleanCondSave(req.body.save) : null,
+  });
+
+  const one = async rowId => {
+    const { rows } = await db.query(`${CONDS_SELECT} WHERE id = $1`, [rowId]);
+    return rows[0] ? condRow(rows[0]) : null;
+  };
+  if (id) {
+    const { rows } = await db.query(
+      `UPDATE init_conditions SET name = $2, kind = $3, data = $4, updated_at = now()
+         WHERE id = $1 RETURNING id`, [id, name, kind, payload]);
+    if (!rows[0]) return res.status(404).json({ error: "No such condition." });
+    return res.json({ entry: await one(id) });
+  }
+  const { rows: count } = await db.query("SELECT count(*)::int AS n FROM init_conditions");
+  if (count[0].n >= CONDS_MAX) return res.status(400).json({ error: "The condition library is full." });
+  const { rows } = await db.query(
+    `INSERT INTO init_conditions (name, kind, data, updated_at) VALUES ($1,$2,$3,now())
+       ON CONFLICT (name) DO UPDATE SET kind = EXCLUDED.kind, data = EXCLUDED.data, updated_at = now()
+     RETURNING id`, [name, kind, payload]);
+  res.json({ entry: await one(rows[0].id) });
+});
+
+app.delete("/api/initiative/conditions/:id", requireUser, requireDm, async (req, res) => {
+  await db.query("DELETE FROM init_conditions WHERE id = $1", [iNum(req.params.id, 1, 10 ** 9, 0)]);
+  res.json({ ok: true });
+});
+
+// Put back whatever is missing from the campaign's own catalogue. Only ADDS, exactly like the
+// bestiary's Import: a condition the DM has edited is whatever he edited it into, and his wording
+// wins over `sheet/js/conditions.js` every time.
+async function importConditions() {
+  let added = 0;
+  for (const c of conditionBook.seedConditions()) {
+    const { rows } = await db.query(
+      `INSERT INTO init_conditions (name, kind, data, updated_at) VALUES ($1,$2,$3,now())
+         ON CONFLICT (name) DO NOTHING RETURNING id`,
+      [iStr(c.name, 40), c.kind, JSON.stringify({
+        text: iStr(c.text, 900), dur: iStr(c.dur, 60), rounds: c.rounds,
+        effects: cleanCondEffects(c.effects), tick: c.tick, save: c.save })]);
+    added += rows.length;
+  }
+  return added;
+}
+
+app.post("/api/initiative/conditions/import", requireUser, requireDm, async (req, res) => {
+  const added = await importConditions();
+  const { rows } = await db.query(`${CONDS_SELECT} ORDER BY lower(name)`);
+  res.json({ added, conditions: rows.map(condRow) });
+});
+
+// ── A condition landing on a PLAYER ─────────────────────────
+// A monster's conditions are the board's own; a player's are their SHEET's, and their sheet has an
+// engine. So a condition with teeth applied to a PC becomes real `character_effects` rows — the
+// same rail another player's seal grants down — and their own AC, saves and attack rolls move on
+// their own screen, with the condition's name in the breakdown. A word on the DM's board that the
+// player has to remember to apply is the same as no condition at all.
+//
+// WHAT CANNOT LAND. Only what the engine can read: a flat modifier, advantage, disadvantage. The
+// tick damage and the save to shake it off are the DM's to call — there is nothing on a sheet that
+// rolls a creature's own recurring damage, and inventing one here would be inventing a rule.
+//
+// The group is DERIVED from the character and the name rather than stored, so lifting the condition
+// a week later finds its rows without the board having had to remember a number.
+const condGroup = (charId, name) =>
+  `cond:${charId}:${String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30)}`;
+
+app.post("/api/initiative/conditions/apply", requireUser, requireDm, async (req, res) => {
+  const charId = iNum(req.body?.charId, 1, 10 ** 9, 0);
+  const name = iStr(req.body?.cond?.name, 40);
+  if (!charId || !name) return res.status(400).json({ error: "Which condition, on whom?" });
+  const { rows: who } = await db.query("SELECT id, name FROM characters WHERE id = $1", [charId]);
+  if (!who[0]) return res.status(404).json({ error: "No such character." });
+
+  const effects = cleanCondEffects(req.body?.cond?.effects)
+    .filter(e => e.kind !== "modifier" || e.amount);
+  const rounds = req.body?.cond?.rounds == null ? null : iNum(req.body.cond.rounds, 1, 99, 1);
+  const group = condGroup(charId, name);
+
+  // Applied twice is applied once — a condition does not stack with itself (the table's own rule),
+  // and two Restraineds would be two disadvantages the player has to dismiss one at a time.
+  await db.query(
+    `UPDATE character_effects SET ended_at = now()
+      WHERE concentration_group = $1 AND ended_at IS NULL`, [group]);
+
+  const made = [];
+  for (const e of effects) {
+    const { rows } = await db.query(
+      `INSERT INTO character_effects
+         (character_id, from_character_id, from_user_id, label, formula, note,
+          kind, payload, target, amount, rounds, concentration_group)
+       VALUES ($1, NULL, $2, $3, '', '', $4, '{}', $5, $6, $7, $8) RETURNING id`,
+      [charId, req.user.id, name, e.kind, e.target, e.kind === "modifier" ? e.amount : 0,
+       rounds, group]);
+    made.push(rows[0].id);
+  }
+  // On the recipient's own log, because it is their sheet that changed — and theirs is the question
+  // asked six weeks later about where a −2 came from.
+  if (made.length)
+    await logEvent(charId, req.user.id, "condition.applied",
+      { condition: name, rows: made.length, rounds, group });
+  res.json({ granted: made.length });
+});
+
+app.post("/api/initiative/conditions/lift", requireUser, requireDm, async (req, res) => {
+  const charId = iNum(req.body?.charId, 1, 10 ** 9, 0);
+  const name = iStr(req.body?.name, 40);
+  if (!charId || !name) return res.status(400).json({ error: "Which condition, on whom?" });
+  const group = condGroup(charId, name);
+  const { rows } = await db.query(
+    `UPDATE character_effects SET ended_at = now()
+      WHERE concentration_group = $1 AND ended_at IS NULL RETURNING id`, [group]);
+  if (rows.length)
+    await logEvent(charId, req.user.id, "condition.lifted", { condition: name, rows: rows.length, group });
+  res.json({ ended: rows.length });
+});
+
 app.use("/api/admin", admin);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
@@ -3927,6 +4254,21 @@ if (!(await db.query("SELECT 1 FROM meta WHERE key = 'init_library_seeded'")).ro
   } else {
     console.warn("Enemy Library NOT seeded — server/bestiary.json is missing or empty. "
       + "Run `node tools/build-bestiary.mjs`, commit the file, and redeploy.");
+  }
+}
+
+// And the conditions, the same way and for the same reason: the flag is what stops eighty-five
+// states coming BACK after the DM has thinned them down to the ones this campaign actually uses.
+// `sheet/js/conditions.js` ships with the code rather than being a file that might not deploy, so
+// there is no empty-file case to guard here — if the import found nothing, the catalogue is broken
+// and the warning says so instead of quietly closing the door.
+if (!(await db.query("SELECT 1 FROM meta WHERE key = 'init_conditions_seeded'")).rows.length) {
+  const added = await importConditions();
+  if (added) {
+    await db.query("INSERT INTO meta (key, value) VALUES ('init_conditions_seeded', '1')");
+    console.log(`Condition Library seeded with ${added} states from sheet/js/conditions.js.`);
+  } else {
+    console.warn("Condition Library NOT seeded — sheet/js/conditions.js produced no states.");
   }
 }
 

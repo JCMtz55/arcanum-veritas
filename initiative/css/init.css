@@ -39,7 +39,7 @@
   display:grid;gap:10px;align-items:center;
   /* The last column is the row's tools, and it holds three buttons now — the eye, the menu, and
      the ✕ that takes it off the board. */
-  grid-template-columns:52px 40px minmax(110px,1.3fr) minmax(168px,1.5fr) 46px 46px minmax(104px,1fr) 86px;
+  grid-template-columns:52px 40px minmax(110px,1.3fr) minmax(168px,1.5fr) 46px 46px minmax(104px,1fr) 88px 86px;
   padding:7px 10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid transparent;
   border-radius:9px;
 }
@@ -78,10 +78,21 @@
 .ini-hp .hpn b{font-size:14px;font-weight:700}
 .ini-hp .hpn s{color:var(--mute);text-decoration:none}
 .ini-hp .hpn em{color:var(--steel);font-style:normal}
-.ini-hp .hpn .hit{margin-left:auto;width:62px;height:23px;padding:0 6px;background:var(--slate);
+.ini-hp .hpn .hit-box{margin-left:auto;position:relative;display:block;flex:none}
+.ini-hp .hpn .hit{width:62px;height:23px;padding:0 6px;background:var(--slate);
   border:1px solid var(--line);border-radius:6px;color:var(--bone);font-size:12px;text-align:center}
 .ini-hp .hpn .hit::placeholder{color:var(--mute)}
 .ini-hp .hpn .hit:focus{border-color:var(--brass)}
+/* The box does four things and said so only in a tooltip, which is the same as not saying it: a DM
+   who does not already know that `t8` is temporary hit points has no way to find out. The four
+   forms appear under the box the moment the cursor is in it, and nowhere else — a legend printed on
+   every row of a twenty-row board would be read once and then be clutter for the rest of the year. */
+.hit-key{position:absolute;top:calc(100% + 5px);right:0;z-index:6;white-space:nowrap;
+  padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--bone2);font-style:normal;font-size:9.5px;letter-spacing:.02em;
+  box-shadow:0 6px 16px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:opacity .12s}
+.hit-box:focus-within .hit-key{opacity:1}
 
 .ini-stat{height:38px;border-radius:7px;background:var(--slate);border:1px solid var(--line);
   display:grid;place-content:center;text-align:center;font-family:var(--sans);cursor:pointer;line-height:1.1}
@@ -109,6 +120,13 @@
   border-radius:999px;cursor:pointer;background:var(--slate)}
 .ini-con .chip.camp{border-color:#8a6a2a;color:#E0B050}
 .ini-con .chip i{font-style:normal;color:var(--mute);margin-left:4px}
+/* A condition that BITES — one carrying a bonus, an advantage, a tick or a save — against one that
+   is only true of the creature. Prone is a word; Restrained is two disadvantages. The left edge is
+   the whole signal, and the notation is on the tooltip, because this chip is eleven characters wide. */
+.ini-con .chip.teeth{border-left:3px solid var(--ember)}
+/* Its tick, the one thing about a condition nobody should have to hover to find: "Ablaze 2d6". */
+.ini-con .chip u{text-decoration:none;margin-left:4px;padding-left:4px;
+  border-left:1px solid var(--line);color:#D08A6A;font-size:9.5px}
 .ini-con .add{color:var(--mute);border-style:dashed}
 .ini-con .add:hover{color:var(--bone);border-style:solid}
 /* What a row counts. One shape for all of them — a word and a number — in three colours, so the
@@ -248,6 +266,34 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
   color:var(--mute);transition:color .13s}
 .stat-rev:hover{color:var(--bone2)}
 .stat-rev.on{color:var(--brass);text-decoration:underline;text-underline-offset:2px}
+/* And what a condition is doing to that number, on the same label: AC −2. The box keeps the number
+   the DM typed, because that is the one he corrects; the room is sent the sum. */
+.stat-rev i{font-style:normal;margin-left:3px;letter-spacing:0;color:var(--ember)}
+.ini-stat.mod{border-color:#6a4030}
+
+/* ── The turn's four ──────────────────────────────────────────────────────
+   Two swords, one sword, a boot, a bolt: Action, Bonus Action, Movement, Reaction, in the order a
+   turn is spent in. Drawn rather than lettered because it is read in the middle of a round and,
+   on the other screen, from six feet away.
+
+   SPENT IS DARK AND WHAT IS LEFT IS LIT, not the other way round — the question at the table is
+   always "what has it still got", so the ones still in hand are the ones that carry the ink. */
+.ini-econ{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+.ini-econ .ep{position:relative;width:20px;height:24px;padding:0;background:none;border:0;
+  color:var(--bone2);cursor:pointer;line-height:0;transition:color .13s, opacity .13s}
+.ini-econ .ep svg{width:17px;height:17px;display:block;margin:0 auto}
+.ini-econ .ep:hover{color:var(--brass)}
+/* Gone for this turn. Still drawn, and deliberately: an empty space says nothing, and four dark
+   icons on a creature that has acted is the whole answer at a glance — which only holds while they
+   can still be SEEN. `--line` was the first choice and it is the colour of the lit row's own
+   background, so a spent icon disappeared completely on the one row anybody is looking at. */
+.ini-econ .ep.spent{color:var(--mute);opacity:.5}
+.ini-econ .ep.spent:hover{color:var(--mute);opacity:1}
+/* More than one — Haste's second Action, a Grimm's second Reaction. The count rides in the corner
+   rather than becoming a second icon, because two swords twice is not two Actions, it is a mess. */
+.ini-econ .ep i{position:absolute;right:-1px;bottom:0;font-style:normal;font-family:var(--sans);
+  font-size:9px;font-weight:700;color:var(--brass);line-height:1}
+.ini-econ .ep.spent i{color:var(--mute)}
 
 /* One click off the board, beside the ⋯. Quiet until the row is hovered, and red when reached for:
    it is the only button on a row that cannot be undone. */
@@ -394,6 +440,96 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
 .ini-dlg .line:last-child{border-bottom:0}
 .ini-dlg .line b{flex:1;font-weight:500}
 .ini-dlg .line span{font-size:11px;color:var(--mute)}
+/* How many of each this creature gets: four clusters of −, the icon with its number, +. The row
+   has no label of its own — the line above it names them in words, and the icons are the ones on
+   the row itself, so a second set of words here would be the dialog repeating itself. */
+.ini-dlg .line.turnmax{flex-wrap:wrap;gap:6px;justify-content:space-between;border-bottom:0;padding-top:0}
+.ini-dlg .turnmax .tmg{display:inline-flex;align-items:center;gap:3px;font-size:inherit}
+.ini-dlg .turnmax .mini{width:24px;min-width:0;padding:0;line-height:1}
+.ini-dlg .turnmax .tm{display:inline-flex;align-items:center;gap:3px;color:var(--bone2);line-height:0}
+.ini-dlg .turnmax .tm svg{width:17px;height:17px;display:block}
+.ini-dlg .turnmax .tm i{font-style:normal;font-family:var(--sans);font-size:12.5px;font-weight:700;
+  color:var(--brass);min-width:9px;text-align:center;line-height:1}
+/* Nothing at all of that kind. The pip is not drawn on the row either, so the whole cluster goes
+   quiet rather than showing a confident brass zero for something that is not there. */
+.ini-dlg .turnmax .tm.none{opacity:.4}
+.ini-dlg .turnmax .tm.none i{color:var(--mute)}
+
+/* ── The conditions on a row ───────────────────────────────────────────────
+   Built like the Enemy Library's drawer, because it is the same job: a search box that stays put, a
+   list repainted under it, and one click to apply. What is already on the creature sits above the
+   list rather than being marked inside it — "what is on this thing" is a different question from
+   "what could I put on it", and the first one is asked mid-fight. */
+.cnd-top{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.cnd-q{flex:1;min-width:0}
+.cnd-r input{width:48px;height:30px;padding:0 4px;text-align:center;background:var(--slate);
+  border:1px solid var(--line);border-radius:6px;color:var(--bone);font-family:var(--sans);font-size:12px}
+.cnd-r input:focus{border-color:var(--brass);outline:none}
+.cnd-on{display:flex;flex-wrap:wrap;gap:5px;padding:9px 10px;margin-bottom:10px;
+  background:var(--slate);border:1px solid var(--line);border-radius:9px}
+.cnd-on .chip{margin:0;padding:3px 9px;font-family:var(--sans);font-size:11.5px;line-height:1.5;
+  border-radius:999px;cursor:pointer;background:var(--panel)}
+.cnd-on .chip.camp{border-color:#8a6a2a;color:#E0B050}
+.cnd-on .chip.teeth{border-left:3px solid var(--ember)}
+.cnd-on .chip i{font-style:normal;color:var(--mute);margin-left:4px}
+.cnd-on .chip u{text-decoration:none;margin-left:4px;color:#D08A6A;font-size:10px}
+.ini-dlg .cnd-none{margin:0 0 10px}
+
+.cnd-list{max-height:40vh;overflow:auto;margin:0 -4px}
+.cnd-row{display:flex;align-items:stretch;gap:4px}
+.cnd-pick{flex:1;min-width:0;display:flex;align-items:center;padding:5px 7px;
+  background:none;border:1px solid transparent;border-radius:8px;cursor:pointer;text-align:left}
+.cnd-pick:hover{background:var(--slate);border-color:var(--line)}
+/* Already on the creature. Not hidden and not disabled — clicking it again is how a duration is
+   restarted, which is a thing a DM does constantly. */
+.cnd-row.ison .cnd-pick{opacity:.55}
+.cnd-row.ison .cnd-pick:hover{opacity:1}
+.cnd-txt{min-width:0;display:flex;flex-direction:column;gap:1px}
+.cnd-txt b{font-size:13px;font-weight:600;color:var(--bone);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnd-k{margin-left:6px;padding:1px 5px;border-radius:999px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--mute);font-style:normal;font-size:9px;
+  letter-spacing:.05em;vertical-align:1px;font-weight:400}
+.cnd-txt i{font-style:normal;font-family:var(--sans);font-size:10.5px;color:#D08A6A;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnd-txt s{text-decoration:none;font-size:10.5px;color:var(--mute);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnd-ed{flex:none;width:26px;padding:0;align-self:center;opacity:.45}
+.cnd-row:hover .cnd-ed{opacity:1}
+.cnd-ft{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:11px;padding-top:10px;
+  border-top:1px solid var(--line)}
+.cnd-ft .lib-count{margin-left:auto;font-family:var(--sans);font-size:10.5px;color:var(--mute)}
+.cnd-ft .note{flex:1 0 100%;margin:2px 0 0}
+
+/* ── Writing one ─────────────────────────────────────────────────────────── */
+/* The dialog's own `.line` gives the LABEL the room and lets the control be whatever width it
+   wants, which is right for a row ending in a switch and wrong for one that is mostly a field. Here
+   the field is the row, so the label is pinned and everything else grows. */
+.ced .line{flex-wrap:wrap}
+.ced .line b{flex:0 0 74px}
+.ced .line input,.ced .line textarea{flex:1;min-width:0;width:auto}
+.ced .line #cedRounds{flex:0 0 56px}
+/* The hint wraps to its own line under the field it explains. The width is worked out rather than
+   100% because a flex item at 100% plus a margin is 100% PLUS the margin, which is a dialog with a
+   horizontal scrollbar. */
+.ced .line span{flex:0 0 auto;width:calc(100% - 74px);margin-left:74px}
+.ced .ced-txt{min-height:58px;font-family:var(--sans);font-size:12.5px}
+.ced-h{display:flex;align-items:center;gap:9px;margin:14px 0 7px;padding-top:11px;
+  border-top:1px solid var(--line);font-family:var(--sans);font-size:11px;color:var(--mute);
+  letter-spacing:.07em;text-transform:uppercase}
+.ced-h .mini{margin-left:auto}
+/* One effect, one line: what it does, what it points at, how much. The amount is dead for an
+   advantage, because the second d20 is the amount. */
+.ced-eff{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+/* `.search` is the shared input skin and a <select> does not inherit its colour from the body the
+   way an <input> does — without this the options are black on slate. Same fix as `.ben .search`. */
+.ced-eff select{flex:1;min-width:0;height:30px;color:var(--bone)}
+.ced-eff .ced-amt{width:56px;flex:none;text-align:center}
+.ced-eff .ced-amt:disabled{opacity:.35}
+.ced-eff .mini{flex:none;width:28px;padding:0}
+.ced-ft{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:16px;padding-top:11px;
+  border-top:1px solid var(--line)}
+.ced-ft .sp{flex:1}
 
 /* ═══ THE SECOND SCREEN ════════════════════════════════════ */
 /* A television across the room, or a tablet in somebody's hand. Read at six feet: big type, one
@@ -411,6 +547,44 @@ body.add-open .ini-handle{opacity:0;pointer-events:none}
 }
 .room-list li.on{border-left-color:var(--brass);background:#2E3542;transform:scale(1.012)}
 .room-list li.down{opacity:.46}
+
+/* ── Whose turn it just became ───────────────────────────────────────────
+   The queue ROTATES when a turn ends: whoever is up jumps to the top and the one who just went
+   drops to the bottom. Across a room that is a list quietly rearranging itself, and the eye has to
+   find the lit row again from scratch. So the row that has just arrived at the top takes one pass
+   of brass light — long enough to be followed, short enough that nobody at the table is waiting on
+   it. It is only ever drawn when the turn ACTUALLY changed; the screen itself is rebuilt every four
+   seconds, and a sweep on every rebuild would be a strobe. */
+.room-list li{position:relative;overflow:hidden}
+.room-list li.on.lands{animation:roomLit .45s ease-out}
+.room-list li.on.lands::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,
+    transparent 28%, rgba(176,136,66,.26) 47%, rgba(176,136,66,.05) 58%, transparent 72%);
+  animation:roomSweep .62s cubic-bezier(.3,.7,.3,1) forwards;
+}
+@keyframes roomSweep{from{transform:translateX(-100%)}to{transform:translateX(100%);opacity:0}}
+@keyframes roomLit{
+  from{transform:scale(1.012);border-left-color:rgba(176,136,66,.25)}
+  28%{transform:scale(1.026);border-left-color:#E8C27A}
+  to{transform:scale(1.012);border-left-color:var(--brass)}
+}
+
+/* The round turning over. The one moment on this screen that is about the FIGHT rather than about
+   a creature, so it is the one thing that moves without anybody's turn having changed hands — a
+   table that has lost count is told, without the DM having to say it. */
+@keyframes roundBeat{
+  0%{transform:scale(1);color:var(--bone)}
+  30%{transform:scale(1.11);color:var(--brass)}
+  100%{transform:scale(1);color:var(--bone)}
+}
+.room-hd h1.beat{animation:roundBeat .62s cubic-bezier(.2,.8,.3,1.1)}
+
+/* Somebody watching this on a tablet may have asked their device for less of all that. */
+@media (prefers-reduced-motion: reduce){
+  .room-list li.on.lands,.room-list li.on.lands::after,.room-hd h1.beat{animation:none}
+  .room-splash{transition:none}
+}
 /* Already acted — they are in the queue under the line, waiting for the next round. Quieter than
    the ones still to come, so the eye stops at the line without being told to. */
 .room-list li.later{opacity:.72;background:rgba(32,38,46,.55)}
@@ -474,6 +648,22 @@ body.rm-tiny .room-break{padding:2px 4px}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .room-list .r-id span{font-family:var(--sans);font-size:12px;color:var(--mute)}
 .room-list .r-id .cons{display:block;margin-top:3px;font-family:var(--sans);font-size:12px;color:#E0B050}
+/* What is left of its turn, on the wall. Inside the name's cell rather than a column of its own —
+   `fitRoom` redefines this row's grid four times over, and a fifth column would be four more
+   places to keep in step. Sized off the row's own type so it tightens with everything else. */
+.room-list .r-econ{display:flex;align-items:center;gap:7px;margin-top:5px}
+.room-list .r-econ i{position:relative;display:block;line-height:0;color:var(--bone2)}
+.room-list .r-econ svg{width:clamp(14px,1.15vw,20px);height:clamp(14px,1.15vw,20px);display:block}
+/* Spent, and still legible across a room: dark against the row it is on, never the same colour as
+   it. The lit row's background is a shade lighter than everyone else's, so it gets a little more. */
+.room-list .r-econ i.spent{color:var(--mute);opacity:.45}
+.room-list li.on .r-econ i.spent{opacity:.6}
+.room-list .r-econ b{position:absolute;right:-5px;bottom:-2px;font-family:var(--sans);
+  font-size:clamp(8px,.6vw,11px);font-weight:700;color:var(--brass);line-height:1}
+.room-list .r-econ i.spent b{color:var(--mute)}
+/* Whoever is up is the one being read, so theirs carry the brass the rest of their row does. */
+.room-list li.on .r-econ i:not(.spent){color:var(--brass)}
+body.rm-tiny .room-list .r-econ{margin-top:2px;gap:5px}
 .room-list .r-hp{text-align:right;font-family:var(--sans)}
 .room-list .r-hp b{display:block;font-size:15px;font-weight:500}
 /* AC and a save DC can both be revealed on one creature now, so they need to be told apart —

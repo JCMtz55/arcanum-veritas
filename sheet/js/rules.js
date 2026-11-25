@@ -1652,6 +1652,30 @@ export function advantageOn(ch, ...scopes) {
   const want = new Set(scopes.flat().filter(Boolean));
   return grantedAdvantage(ch).filter(a => want.has(a.target));
 }
+
+// ── And the other way ───────────────────────────────────────────────────
+// A CONDITION is the mirror of a seal: Poisoned is "disadvantage on attack rolls and ability
+// checks", which is the same sentence as a seal's "advantage on Perception" with the sign flipped.
+// So it rides the same rail — a MOD_TARGET_ID and nothing else — and the DM's initiative board
+// grants it the way a seal grants the other, by writing a row (see /api/initiative/conditions).
+//
+// It is NOT in `BENEFIT_KINDS`, and deliberately: a benefit is something a player's seal hands an
+// ally, and nobody builds a seal to make a friend worse at saving throws. The builder's menu never
+// offers it, and `cleanBenefit` refuses it — only a DM applying a condition writes one.
+export function grantedDisadvantage(ch) {
+  const ok = new Set(MOD_TARGET_IDS);
+  return (ch?.granted || [])
+    .filter(g => g && g.kind === "disadvantage" && ok.has(g.target))
+    .map(g => ({
+      id: `grdis:${g.id}`, target: g.target,
+      why: [g.label, g.player].filter(Boolean).join(" — "),
+      rounds: g.rounds ?? null, active: true, source: "granted", grantedId: g.id,
+    }));
+}
+export function disadvantageOn(ch, ...scopes) {
+  const want = new Set(scopes.flat().filter(Boolean));
+  return grantedDisadvantage(ch).filter(a => want.has(a.target));
+}
 // The scopes each kind of d20 roll answers to, written once so the roll dialog and anything that
 // later asks "would this have advantage" cannot disagree. Mirrors `skillContributions`.
 export const ADVANTAGE_SCOPES = {

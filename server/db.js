@@ -469,6 +469,27 @@ const SCHEMA = [
      hurt       TEXT NOT NULL DEFAULT '',
      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
+  // The Condition Library — one STATE per row, the same way `init_library` is one creature per row.
+  //
+  // Seeded on first boot from `sheet/js/conditions.js`: 5e's fourteen as this table plays them, and
+  // the states the Cognitions name, each with its rules text, the duration its effects agree on, and
+  // what it DOES in the character sheet's own effect vocabulary. So the first fight already has
+  // Ablaze and Hollowed in it, and a condition the DM writes is kept beside them rather than retyped
+  // every session.
+  //
+  // `kind` is only where it came from — "std", "named", or "custom" for one the DM wrote. The board
+  // treats all three alike, which is the point of a library.
+  //
+  // `data` holds the shape in sheet/js/conditions.js's own `boardShape`: text, dur, rounds, effects,
+  // tick, save. A column per field would be a migration every time a condition learns a new trick,
+  // and the server cleans the whole blob on the way in either way.
+  `CREATE TABLE IF NOT EXISTS init_conditions (
+     id         SERIAL PRIMARY KEY,
+     name       TEXT NOT NULL UNIQUE,
+     kind       TEXT NOT NULL DEFAULT 'custom',
+     data       TEXT NOT NULL DEFAULT '{}',
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   )`,
 
   // The splash a character gets when their turn comes up on the room's screen — the ordinary one
   // and the one used when they are nearly out. A table of its own rather than two more fields in

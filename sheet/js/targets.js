@@ -192,6 +192,11 @@ export const benefitIsEmpty = r => (r.kind || "modifier") === "modifier" && r.am
 export function benefitSays(b) {
   const k = b.kind || "modifier";
   if (k === "advantage") return `advantage on ${targetLabel(b.target)}`;
+  // Not a benefit and not buildable as one — `BENEFIT_KINDS` does not offer it and `cleanBenefit`
+  // refuses it, because nobody builds a seal to make an ally worse at saving throws. It exists
+  // because a CONDITION says it, and the DM's board grants those down the same rail. Said here so
+  // that the one line describing a granted row reads right wherever it is printed.
+  if (k === "disadvantage") return `disadvantage on ${targetLabel(b.target)}`;
   if (k === "heal") return `heals ${b.payload?.dice || b.dice || ""}`;
   if (k === "tempHp") return `${b.payload?.dice || b.dice || ""} temporary HP`;
   if (k === "defence") {

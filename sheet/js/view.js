@@ -1971,12 +1971,16 @@ function renderRight() {
         // Advantage is not a number, so it is in none of the modifier lists — and a buff nobody can
         // see is a buff nobody trusts. It gets its own rows, which say what they are pointed at and
         // carry the same × as everything else granted.
-        const adv = rules.grantedAdvantage(ch);
+        // Disadvantage is the same row with the sign flipped: it is what a CONDITION the DM applied
+        // from the initiative board puts on you, and it is pointed at the same targets. One block,
+        // because at the table you are asking one question — what is on my dice.
+        const adv = [...rules.grantedAdvantage(ch).map(a => ({ ...a, up: true })),
+                     ...rules.grantedDisadvantage(ch).map(a => ({ ...a, up: false }))];
         if (!adv.length) return "";
-        return `<div class="zone-h sm"><h4>${icon("dice")} Advantage</h4></div>
+        return `<div class="zone-h sm"><h4>${icon("dice")} On your dice</h4></div>
           <div class="mods">${adv.map(a => `
-            <div class="mod granted">
-              <span class="mod-n">adv</span>
+            <div class="mod granted${a.up ? "" : " bad"}">
+              <span class="mod-n">${a.up ? "adv" : "dis"}</span>
               <span class="mod-w" title="${esc(a.why)}">${esc(targetLabel(a.target))} — ${esc(a.why)}</span>
               ${a.rounds == null ? `<span class="mod-r">${icon("lasting")}</span>`
                 : `<span class="mod-r">${icon("timed")}${a.rounds}r</span>`}

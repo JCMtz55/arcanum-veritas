@@ -819,6 +819,11 @@ dialog.lbox::backdrop{background:rgba(4,5,8,.93)}
 .mod.granted{border-left:2px solid var(--iris,var(--brass))}
 .mod.granted .mod-n{color:var(--iris,var(--brass))}
 .mod.granted .mod-w{color:var(--bone2)}
+/* The same row, done TO you: a condition the DM applied from the initiative board. Iris is the
+   colour of something another player gave you, and a disadvantage is not a gift — so it is the one
+   granted row that reads in the warning colour, and the "dis" beside it says which way it points. */
+.mod.granted.bad{border-left-color:var(--ember)}
+.mod.granted.bad .mod-n{color:var(--ember)}
 /* A cast of your own, still standing on other people. It has no amount of its own — it is a handle
    for ending the whole thing at once — so the name takes the space the number would have had. */
 .mod.out .mod-n{color:var(--bone);flex:none}
